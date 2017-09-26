@@ -443,6 +443,20 @@ public final class PowerManager {
     public static final String SHUTDOWN_USER_REQUESTED = "userrequested";
 
     /**
+     * The value to pass as the 'reason' argument to android_reboot() when battery temperature
+     * is too high.
+     * @hide
+     */
+    public static final String SHUTDOWN_BATTERY_THERMAL_STATE = "thermal,battery";
+
+    /**
+     * The value to pass as the 'reason' argument to android_reboot() when device is running
+     * critically low on battery.
+     * @hide
+     */
+    public static final String SHUTDOWN_LOW_BATTERY = "battery";
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -451,7 +465,9 @@ public final class PowerManager {
             SHUTDOWN_REASON_SHUTDOWN,
             SHUTDOWN_REASON_REBOOT,
             SHUTDOWN_REASON_USER_REQUESTED,
-            SHUTDOWN_REASON_THERMAL_SHUTDOWN
+            SHUTDOWN_REASON_THERMAL_SHUTDOWN,
+            SHUTDOWN_REASON_LOW_BATTERY,
+            SHUTDOWN_REASON_BATTERY_THERMAL
     })
     public @interface ShutdownReason {}
 
@@ -484,6 +500,18 @@ public final class PowerManager {
      * @hide
      */
     public static final int SHUTDOWN_REASON_THERMAL_SHUTDOWN = 4;
+
+    /**
+     * constant for shutdown reason being low battery.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_LOW_BATTERY = 5;
+
+    /**
+     * constant for shutdown reason being critical battery thermal state.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_BATTERY_THERMAL = 6;
 
     final Context mContext;
     final IPowerManager mService;

@@ -31,18 +31,17 @@ namespace statsd {
 DropboxWriter::DropboxWriter(const string& tag) : mTag(tag), mLogReport(), mBufferSize(0) {
 }
 
-void DropboxWriter::addStatsLogReport(const StatsLogReport& log) {
-    mLogReport = log;
-    flushIfNecessary(log);
-    mBufferSize += log.ByteSize();
+void DropboxWriter::addEventMetricData(const EventMetricData& eventMetricData) {
+    flushIfNecessary(eventMetricData);
+    EventMetricData* newEntry = mLogReport.mutable_event_metrics()->add_data();
+    newEntry->CopyFrom(eventMetricData);
+    mBufferSize += eventMetricData.ByteSize();
 }
 
-void DropboxWriter::flushIfNecessary(const StatsLogReport& log) {
-    // TODO: Decide to flush depending on the serialized size of the StatsLogReport.
-    // if (entry.ByteSize() + mBufferSize > kMaxSerializedBytes) {
-    //     flush();
-    // }
-    flush();
+void DropboxWriter::flushIfNecessary(const EventMetricData& eventMetricData) {
+    if (eventMetricData.ByteSize() + mBufferSize > kMaxSerializedBytes) {
+        flush();
+    }
 }
 
 void DropboxWriter::flush() {

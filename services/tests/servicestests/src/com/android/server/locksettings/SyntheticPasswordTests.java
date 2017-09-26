@@ -58,7 +58,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final int USER_ID = 10;
         final String PASSWORD = "user-password";
         final String BADPASSWORD = "bad-password";
-        MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mStorage,
+        MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mContext, mStorage,
                 mGateKeeperService, mUserManager);
         AuthenticationToken authToken = manager.newSyntheticPasswordAndSid(mGateKeeperService, null,
                 null, USER_ID);

@@ -106,7 +106,8 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
                 return mService;
             }
         };
-        mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService, mUserManager);
+        mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
+                mUserManager);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager);

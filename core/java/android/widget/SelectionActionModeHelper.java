@@ -58,6 +58,8 @@ import java.util.regex.Pattern;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public final class SelectionActionModeHelper {
 
+    private static final String LOG_TAG = "SelectActionModeHelper";
+
     /**
      * Maximum time (in milliseconds) to wait for a result before timing out.
      */
@@ -382,6 +384,7 @@ public final class SelectionActionModeHelper {
         private int mSelectionStart;
         private int mSelectionEnd;
         private boolean mAllowReset;
+        private final LogAbandonRunnable mDelayedLogAbandon = new LogAbandonRunnable();
 
         SelectionTracker(TextView textView) {
             mTextView = Preconditions.checkNotNull(textView);
@@ -393,6 +396,10 @@ public final class SelectionActionModeHelper {
          */
         public void onOriginalSelection(
                 CharSequence text, int selectionStart, int selectionEnd, boolean editableText) {
+            // If we abandoned a selection and created a new one very shortly after, we may still
+            // have a pending request to log ABANDON, which we flush here.
+            mDelayedLogAbandon.flush();
+
             mOriginalStart = mSelectionStart = selectionStart;
             mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
@@ -433,12 +440,7 @@ public final class SelectionActionModeHelper {
         public void onSelectionDestroyed() {
             mAllowReset = false;
             // Wait a few ms to see if the selection was destroyed because of a text change event.
-            mTextView.postDelayed(() -> {
-                mLogger.logSelectionAction(
-                        mSelectionStart, mSelectionEnd,
-                        SelectionEvent.ActionType.ABANDON, null /* classification */);
-                mSelectionStart = mSelectionEnd = -1;
-            }, 100 /* ms */);
+            mDelayedLogAbandon.schedule(100 /* ms */);
         }
 
         /**
@@ -494,6 +496,38 @@ public final class SelectionActionModeHelper {
 
         private boolean isSelectionStarted() {
             return mSelectionStart >= 0 && mSelectionEnd >= 0 && mSelectionStart != mSelectionEnd;
+        }
+
+        /** A helper for keeping track of pending abandon logging requests. */
+        private final class LogAbandonRunnable implements Runnable {
+            private boolean mIsPending;
+
+            /** Schedules an abandon to be logged with the given delay. Flush if necessary. */
+            void schedule(int delayMillis) {
+                if (mIsPending) {
+                    Log.e(LOG_TAG, "Force flushing abandon due to new scheduling request");
+                    flush();
+                }
+                mIsPending = true;
+                mTextView.postDelayed(this, delayMillis);
+            }
+
+            /** If there is a pending log request, execute it now. */
+            void flush() {
+                mTextView.removeCallbacks(this);
+                run();
+            }
+
+            @Override
+            public void run() {
+                if (mIsPending) {
+                    mLogger.logSelectionAction(
+                            mSelectionStart, mSelectionEnd,
+                            SelectionEvent.ActionType.ABANDON, null /* classification */);
+                    mSelectionStart = mSelectionEnd = -1;
+                    mIsPending = false;
+                }
+            }
         }
     }
 

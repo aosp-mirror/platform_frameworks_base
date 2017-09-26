@@ -440,4 +440,57 @@ public class Gravity
         }
         return result;
     }
+
+    /**
+     * @hide
+     */
+    public static String toString(int gravity) {
+        final StringBuilder result = new StringBuilder();
+        if ((gravity & FILL) != 0) {
+            result.append("FILL").append(' ');
+        } else {
+            if ((gravity & FILL_VERTICAL) != 0) {
+                result.append("FILL_VERTICAL").append(' ');
+            } else {
+                if ((gravity & TOP) != 0) {
+                    result.append("TOP").append(' ');
+                }
+                if ((gravity & BOTTOM) != 0) {
+                    result.append("BOTTOM").append(' ');
+                }
+            }
+            if ((gravity & FILL_HORIZONTAL) != 0) {
+                result.append("FILL_HORIZONTAL").append(' ');
+            } else {
+                if ((gravity & START) != 0) {
+                    result.append("START").append(' ');
+                } else if ((gravity & LEFT) != 0) {
+                    result.append("LEFT").append(' ');
+                }
+                if ((gravity & END) != 0) {
+                    result.append("END").append(' ');
+                } else if ((gravity & RIGHT) != 0) {
+                    result.append("RIGHT").append(' ');
+                }
+            }
+        }
+        if ((gravity & CENTER) != 0) {
+            result.append("CENTER").append(' ');
+        } else {
+            if ((gravity & CENTER_VERTICAL) != 0) {
+                result.append("CENTER_VERTICAL").append(' ');
+            }
+            if ((gravity & CENTER_HORIZONTAL) != 0) {
+                result.append("CENTER_HORIZONTAL").append(' ');
+            }
+        }
+        if ((gravity & DISPLAY_CLIP_VERTICAL) != 0) {
+            result.append("DISPLAY_CLIP_VERTICAL").append(' ');
+        }
+        if ((gravity & DISPLAY_CLIP_VERTICAL) != 0) {
+            result.append("DISPLAY_CLIP_VERTICAL").append(' ');
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
 }

@@ -257,7 +257,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * We'll send configuration to client only if it is different from the last applied one and
      * client won't perform unnecessary updates.
      */
-    private final Configuration mLastReportedConfiguration = new Configuration();
+    private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
     /**
      * Actual position of the surface shown on-screen (may be modified by animation). These are
@@ -1244,7 +1244,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         //                   this is not necessarily what the client has processed yet. Find a
         //                   better indicator consistent with the client.
         return (mOrientationChanging || (isVisible()
-                && getConfiguration().orientation != mLastReportedConfiguration.orientation))
+                && getConfiguration().orientation != getLastReportedConfiguration().orientation))
                 && !mSeamlesslyRotated
                 && !mOrientationChangeTimedOut;
     }
@@ -1758,7 +1758,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** Returns true if last applied config was not yet requested by client. */
     boolean isConfigChanged() {
-        return !mLastReportedConfiguration.equals(getConfiguration());
+        return !getLastReportedConfiguration().equals(getConfiguration());
     }
 
     void onWindowReplacementTimeout() {
@@ -2312,8 +2312,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outConfiguration.setConfiguration(globalConfig, overrideConfig);
     }
 
-    void setReportedConfiguration(MergedConfiguration config) {
-        mLastReportedConfiguration.setTo(config.getMergedConfiguration());
+    void setLastReportedMergedConfiguration(MergedConfiguration config) {
+        mLastReportedConfiguration.setTo(config);
+    }
+
+    void getLastReportedMergedConfiguration(MergedConfiguration config) {
+        config.setTo(mLastReportedConfiguration);
+    }
+
+    private Configuration getLastReportedConfiguration() {
+        return mLastReportedConfiguration.getMergedConfiguration();
     }
 
     void adjustStartingWindowFlags() {
@@ -2853,7 +2861,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     new MergedConfiguration(mService.mRoot.getConfiguration(),
                     getMergedOverrideConfiguration());
 
-            setReportedConfiguration(mergedConfiguration);
+            setLastReportedMergedConfiguration(mergedConfiguration);
 
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
@@ -3173,7 +3181,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 pw.print(" mShowToOwnerOnly="); pw.print(mShowToOwnerOnly);
                 pw.print(" package="); pw.print(mAttrs.packageName);
                 pw.print(" appop="); pw.println(AppOpsManager.opToName(mAppOp));
-        pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
+        pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs.toString(prefix));
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
@@ -3254,7 +3262,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             pw.print(prefix); pw.print("mFullConfiguration="); pw.println(getConfiguration());
             pw.print(prefix); pw.print("mLastReportedConfiguration=");
-                    pw.println(mLastReportedConfiguration);
+                    pw.println(getLastReportedConfiguration());
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
@@ -3314,7 +3322,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
                     pw.print(" configOrientationChanging=");
-                    pw.print(mLastReportedConfiguration.orientation
+                    pw.print(getLastReportedConfiguration().orientation
                             != getConfiguration().orientation);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
                     pw.print(" mTurnOnScreen="); pw.print(mTurnOnScreen);

@@ -2136,7 +2136,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         try {
             // Protect against recursion.
             mStackSupervisor.inResumeTopActivity = true;
-            result = resumeTopActivityInnerLocked(prev, options);
+            // The contained logic must be synchronized, since we are both changing the visibility
+            // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
+            // ultimately cause the client code to schedule a layout. Since layouts retrieve the
+            // current {@link Configuration}, we must ensure that the below code updates it before
+            // the layout can occur.
+            synchronized (mWindowManager.getWindowManagerLock()) {
+                result = resumeTopActivityInnerLocked(prev, options);
+            }
         } finally {
             mStackSupervisor.inResumeTopActivity = false;
         }

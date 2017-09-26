@@ -22,6 +22,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -94,9 +95,14 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (mRegistered) {
-            mLastSensorValue = (int) event.values[0];
-            updateBrightnessAndReady();
+        Trace.beginSection("DozeScreenBrightness.onSensorChanged" + event.values[0]);
+        try {
+            if (mRegistered) {
+                mLastSensorValue = (int) event.values[0];
+                updateBrightnessAndReady();
+            }
+        } finally {
+            Trace.endSection();
         }
     }
 

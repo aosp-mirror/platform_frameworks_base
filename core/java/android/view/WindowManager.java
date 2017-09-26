@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+
 import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -268,93 +270,93 @@ public interface WindowManager extends ViewManager {
          */
         @ViewDebug.ExportedProperty(mapping = {
                 @ViewDebug.IntToString(from = TYPE_BASE_APPLICATION,
-                        to = "TYPE_BASE_APPLICATION"),
+                        to = "BASE_APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION,
-                        to = "TYPE_APPLICATION"),
+                        to = "APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_STARTING,
-                        to = "TYPE_APPLICATION_STARTING"),
+                        to = "APPLICATION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DRAWN_APPLICATION,
-                        to = "TYPE_DRAWN_APPLICATION"),
+                        to = "DRAWN_APPLICATION"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_PANEL,
-                        to = "TYPE_APPLICATION_PANEL"),
+                        to = "APPLICATION_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA,
-                        to = "TYPE_APPLICATION_MEDIA"),
+                        to = "APPLICATION_MEDIA"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_SUB_PANEL,
-                        to = "TYPE_APPLICATION_SUB_PANEL"),
+                        to = "APPLICATION_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_ABOVE_SUB_PANEL,
-                        to = "TYPE_APPLICATION_ABOVE_SUB_PANEL"),
+                        to = "APPLICATION_ABOVE_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_ATTACHED_DIALOG,
-                        to = "TYPE_APPLICATION_ATTACHED_DIALOG"),
+                        to = "APPLICATION_ATTACHED_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA_OVERLAY,
-                        to = "TYPE_APPLICATION_MEDIA_OVERLAY"),
+                        to = "APPLICATION_MEDIA_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR,
-                        to = "TYPE_STATUS_BAR"),
+                        to = "STATUS_BAR"),
                 @ViewDebug.IntToString(from = TYPE_SEARCH_BAR,
-                        to = "TYPE_SEARCH_BAR"),
+                        to = "SEARCH_BAR"),
                 @ViewDebug.IntToString(from = TYPE_PHONE,
-                        to = "TYPE_PHONE"),
+                        to = "PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT,
-                        to = "TYPE_SYSTEM_ALERT"),
+                        to = "SYSTEM_ALERT"),
                 @ViewDebug.IntToString(from = TYPE_TOAST,
-                        to = "TYPE_TOAST"),
+                        to = "TOAST"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY,
-                        to = "TYPE_SYSTEM_OVERLAY"),
+                        to = "SYSTEM_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_PRIORITY_PHONE,
-                        to = "TYPE_PRIORITY_PHONE"),
+                        to = "PRIORITY_PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_DIALOG,
-                        to = "TYPE_SYSTEM_DIALOG"),
+                        to = "SYSTEM_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_KEYGUARD_DIALOG,
-                        to = "TYPE_KEYGUARD_DIALOG"),
+                        to = "KEYGUARD_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ERROR,
-                        to = "TYPE_SYSTEM_ERROR"),
+                        to = "SYSTEM_ERROR"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_METHOD,
-                        to = "TYPE_INPUT_METHOD"),
+                        to = "INPUT_METHOD"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_METHOD_DIALOG,
-                        to = "TYPE_INPUT_METHOD_DIALOG"),
+                        to = "INPUT_METHOD_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_WALLPAPER,
-                        to = "TYPE_WALLPAPER"),
+                        to = "WALLPAPER"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR_PANEL,
-                        to = "TYPE_STATUS_BAR_PANEL"),
+                        to = "STATUS_BAR_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_SECURE_SYSTEM_OVERLAY,
-                        to = "TYPE_SECURE_SYSTEM_OVERLAY"),
+                        to = "SECURE_SYSTEM_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_DRAG,
-                        to = "TYPE_DRAG"),
+                        to = "DRAG"),
                 @ViewDebug.IntToString(from = TYPE_STATUS_BAR_SUB_PANEL,
-                        to = "TYPE_STATUS_BAR_SUB_PANEL"),
+                        to = "STATUS_BAR_SUB_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_POINTER,
-                        to = "TYPE_POINTER"),
+                        to = "POINTER"),
                 @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR,
-                        to = "TYPE_NAVIGATION_BAR"),
+                        to = "NAVIGATION_BAR"),
                 @ViewDebug.IntToString(from = TYPE_VOLUME_OVERLAY,
-                        to = "TYPE_VOLUME_OVERLAY"),
+                        to = "VOLUME_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_BOOT_PROGRESS,
-                        to = "TYPE_BOOT_PROGRESS"),
+                        to = "BOOT_PROGRESS"),
                 @ViewDebug.IntToString(from = TYPE_INPUT_CONSUMER,
-                        to = "TYPE_INPUT_CONSUMER"),
+                        to = "INPUT_CONSUMER"),
                 @ViewDebug.IntToString(from = TYPE_DREAM,
-                        to = "TYPE_DREAM"),
+                        to = "DREAM"),
                 @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL,
-                        to = "TYPE_NAVIGATION_BAR_PANEL"),
+                        to = "NAVIGATION_BAR_PANEL"),
                 @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY,
-                        to = "TYPE_DISPLAY_OVERLAY"),
+                        to = "DISPLAY_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY,
-                        to = "TYPE_MAGNIFICATION_OVERLAY"),
+                        to = "MAGNIFICATION_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_PRESENTATION,
-                        to = "TYPE_PRESENTATION"),
+                        to = "PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION,
-                        to = "TYPE_PRIVATE_PRESENTATION"),
+                        to = "PRIVATE_PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION,
-                        to = "TYPE_VOICE_INTERACTION"),
+                        to = "VOICE_INTERACTION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING,
-                        to = "TYPE_VOICE_INTERACTION_STARTING"),
+                        to = "VOICE_INTERACTION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER,
-                        to = "TYPE_DOCK_DIVIDER"),
+                        to = "DOCK_DIVIDER"),
                 @ViewDebug.IntToString(from = TYPE_QS_DIALOG,
-                        to = "TYPE_QS_DIALOG"),
+                        to = "QS_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
-                        to = "TYPE_SCREENSHOT"),
+                        to = "SCREENSHOT"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
-                        to = "TYPE_APPLICATION_OVERLAY")
+                        to = "APPLICATION_OVERLAY")
         })
         public int type;
 
@@ -1198,63 +1200,69 @@ public interface WindowManager extends ViewManager {
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
-                    name = "FLAG_ALLOW_LOCK_WHILE_SCREEN_ON"),
+                    name = "ALLOW_LOCK_WHILE_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_DIM_BEHIND, equals = FLAG_DIM_BEHIND,
-                    name = "FLAG_DIM_BEHIND"),
+                    name = "DIM_BEHIND"),
             @ViewDebug.FlagToString(mask = FLAG_BLUR_BEHIND, equals = FLAG_BLUR_BEHIND,
-                    name = "FLAG_BLUR_BEHIND"),
+                    name = "BLUR_BEHIND"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_FOCUSABLE, equals = FLAG_NOT_FOCUSABLE,
-                    name = "FLAG_NOT_FOCUSABLE"),
+                    name = "NOT_FOCUSABLE"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCHABLE, equals = FLAG_NOT_TOUCHABLE,
-                    name = "FLAG_NOT_TOUCHABLE"),
+                    name = "NOT_TOUCHABLE"),
             @ViewDebug.FlagToString(mask = FLAG_NOT_TOUCH_MODAL, equals = FLAG_NOT_TOUCH_MODAL,
-                    name = "FLAG_NOT_TOUCH_MODAL"),
+                    name = "NOT_TOUCH_MODAL"),
             @ViewDebug.FlagToString(mask = FLAG_TOUCHABLE_WHEN_WAKING, equals = FLAG_TOUCHABLE_WHEN_WAKING,
-                    name = "FLAG_TOUCHABLE_WHEN_WAKING"),
+                    name = "TOUCHABLE_WHEN_WAKING"),
             @ViewDebug.FlagToString(mask = FLAG_KEEP_SCREEN_ON, equals = FLAG_KEEP_SCREEN_ON,
-                    name = "FLAG_KEEP_SCREEN_ON"),
+                    name = "KEEP_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_SCREEN, equals = FLAG_LAYOUT_IN_SCREEN,
-                    name = "FLAG_LAYOUT_IN_SCREEN"),
+                    name = "LAYOUT_IN_SCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_NO_LIMITS, equals = FLAG_LAYOUT_NO_LIMITS,
-                    name = "FLAG_LAYOUT_NO_LIMITS"),
+                    name = "LAYOUT_NO_LIMITS"),
             @ViewDebug.FlagToString(mask = FLAG_FULLSCREEN, equals = FLAG_FULLSCREEN,
-                    name = "FLAG_FULLSCREEN"),
+                    name = "FULLSCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_FORCE_NOT_FULLSCREEN, equals = FLAG_FORCE_NOT_FULLSCREEN,
-                    name = "FLAG_FORCE_NOT_FULLSCREEN"),
+                    name = "FORCE_NOT_FULLSCREEN"),
             @ViewDebug.FlagToString(mask = FLAG_DITHER, equals = FLAG_DITHER,
-                    name = "FLAG_DITHER"),
+                    name = "DITHER"),
             @ViewDebug.FlagToString(mask = FLAG_SECURE, equals = FLAG_SECURE,
-                    name = "FLAG_SECURE"),
+                    name = "SECURE"),
             @ViewDebug.FlagToString(mask = FLAG_SCALED, equals = FLAG_SCALED,
-                    name = "FLAG_SCALED"),
+                    name = "SCALED"),
             @ViewDebug.FlagToString(mask = FLAG_IGNORE_CHEEK_PRESSES, equals = FLAG_IGNORE_CHEEK_PRESSES,
-                    name = "FLAG_IGNORE_CHEEK_PRESSES"),
+                    name = "IGNORE_CHEEK_PRESSES"),
             @ViewDebug.FlagToString(mask = FLAG_LAYOUT_INSET_DECOR, equals = FLAG_LAYOUT_INSET_DECOR,
-                    name = "FLAG_LAYOUT_INSET_DECOR"),
+                    name = "LAYOUT_INSET_DECOR"),
             @ViewDebug.FlagToString(mask = FLAG_ALT_FOCUSABLE_IM, equals = FLAG_ALT_FOCUSABLE_IM,
-                    name = "FLAG_ALT_FOCUSABLE_IM"),
+                    name = "ALT_FOCUSABLE_IM"),
             @ViewDebug.FlagToString(mask = FLAG_WATCH_OUTSIDE_TOUCH, equals = FLAG_WATCH_OUTSIDE_TOUCH,
-                    name = "FLAG_WATCH_OUTSIDE_TOUCH"),
+                    name = "WATCH_OUTSIDE_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_SHOW_WHEN_LOCKED, equals = FLAG_SHOW_WHEN_LOCKED,
-                    name = "FLAG_SHOW_WHEN_LOCKED"),
+                    name = "SHOW_WHEN_LOCKED"),
             @ViewDebug.FlagToString(mask = FLAG_SHOW_WALLPAPER, equals = FLAG_SHOW_WALLPAPER,
-                    name = "FLAG_SHOW_WALLPAPER"),
+                    name = "SHOW_WALLPAPER"),
             @ViewDebug.FlagToString(mask = FLAG_TURN_SCREEN_ON, equals = FLAG_TURN_SCREEN_ON,
-                    name = "FLAG_TURN_SCREEN_ON"),
+                    name = "TURN_SCREEN_ON"),
             @ViewDebug.FlagToString(mask = FLAG_DISMISS_KEYGUARD, equals = FLAG_DISMISS_KEYGUARD,
-                    name = "FLAG_DISMISS_KEYGUARD"),
+                    name = "DISMISS_KEYGUARD"),
             @ViewDebug.FlagToString(mask = FLAG_SPLIT_TOUCH, equals = FLAG_SPLIT_TOUCH,
-                    name = "FLAG_SPLIT_TOUCH"),
+                    name = "SPLIT_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
-                    name = "FLAG_HARDWARE_ACCELERATED"),
-            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
-                    name = "FLAG_LOCAL_FOCUS_MODE"),
+                    name = "HARDWARE_ACCELERATED"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_IN_OVERSCAN, equals = FLAG_LAYOUT_IN_OVERSCAN,
+                    name = "LOCAL_FOCUS_MODE"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_STATUS, equals = FLAG_TRANSLUCENT_STATUS,
-                    name = "FLAG_TRANSLUCENT_STATUS"),
+                    name = "TRANSLUCENT_STATUS"),
             @ViewDebug.FlagToString(mask = FLAG_TRANSLUCENT_NAVIGATION, equals = FLAG_TRANSLUCENT_NAVIGATION,
-                    name = "FLAG_TRANSLUCENT_NAVIGATION"),
+                    name = "TRANSLUCENT_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
+                    name = "LOCAL_FOCUS_MODE"),
+            @ViewDebug.FlagToString(mask = FLAG_SLIPPERY, equals = FLAG_SLIPPERY,
+                    name = "FLAG_SLIPPERY"),
+            @ViewDebug.FlagToString(mask = FLAG_LAYOUT_ATTACHED_IN_DECOR, equals = FLAG_LAYOUT_ATTACHED_IN_DECOR,
+                    name = "FLAG_LAYOUT_ATTACHED_IN_DECOR"),
             @ViewDebug.FlagToString(mask = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, equals = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-                    name = "FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS")
+                    name = "DRAWS_SYSTEM_BAR_BACKGROUNDS")
         }, formatToHexString = true)
         public int flags;
 
@@ -1438,6 +1446,88 @@ public interface WindowManager extends ViewManager {
          * Control flags that are private to the platform.
          * @hide
          */
+        @ViewDebug.ExportedProperty(flagMapping = {
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
+                        equals = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,
+                        name = "FAKE_HARDWARE_ACCELERATED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                        equals = PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
+                        name = "FORCE_HARDWARE_ACCELERATED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                        equals = PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
+                        name = "WANTS_OFFSET_NOTIFICATIONS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                        equals = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                        name = "SHOW_FOR_ALL_USERS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                        equals = PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                        name = "NO_MOVE_ANIMATION"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                        equals = PRIVATE_FLAG_COMPATIBLE_WINDOW,
+                        name = "COMPATIBLE_WINDOW"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SYSTEM_ERROR,
+                        equals = PRIVATE_FLAG_SYSTEM_ERROR,
+                        name = "SYSTEM_ERROR"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
+                        equals = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
+                        name = "INHERIT_TRANSLUCENT_DECOR"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_KEYGUARD,
+                        equals = PRIVATE_FLAG_KEYGUARD,
+                        name = "KEYGUARD"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                        equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                        name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
+                        equals = PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT,
+                        name = "FORCE_STATUS_BAR_VISIBLE_TRANSPARENT"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
+                        equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
+                        name = "PRESERVE_GEOMETRY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                        equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
+                        name = "FORCE_DECOR_VIEW_VISIBILITY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                        equals = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
+                        name = "WILL_NOT_REPLACE_ON_RELAUNCH"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                        equals = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
+                        name = "LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
+                        equals = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND,
+                        name = "FORCE_DRAW_STATUS_BAR_BACKGROUND"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                        equals = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                        name = "SUSTAINED_PERFORMANCE_MODE"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        equals = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        name = "HIDE_NON_SYSTEM_OVERLAY_WINDOWS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                        equals = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                        name = "IS_ROUNDED_CORNERS_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
+                        equals = PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN,
+                        name = "ACQUIRES_SLEEP_TOKEN")
+        })
         @TestApi
         public int privateFlags;
 
@@ -1977,7 +2067,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @ActivityInfo.ColorMode
-        private int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        private int mColorMode = COLOR_MODE_DEFAULT;
 
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -2442,9 +2532,15 @@ public interface WindowManager extends ViewManager {
 
         @Override
         public String toString() {
+            return toString("");
+        }
+
+        /**
+         * @hide
+         */
+        public String toString(String prefix) {
             StringBuilder sb = new StringBuilder(256);
-            sb.append("WM.LayoutParams{");
-            sb.append("(");
+            sb.append("{(");
             sb.append(x);
             sb.append(',');
             sb.append(y);
@@ -2464,26 +2560,19 @@ public interface WindowManager extends ViewManager {
                 sb.append(verticalMargin);
             }
             if (gravity != 0) {
-                sb.append(" gr=#");
-                sb.append(Integer.toHexString(gravity));
+                sb.append(" gr=");
+                sb.append(Gravity.toString(gravity));
             }
             if (softInputMode != 0) {
-                sb.append(" sim=#");
-                sb.append(Integer.toHexString(softInputMode));
+                sb.append(" sim={");
+                sb.append(softInputModeToString(softInputMode));
+                sb.append('}');
             }
             sb.append(" ty=");
-            sb.append(type);
-            sb.append(" fl=#");
-            sb.append(Integer.toHexString(flags));
-            if (privateFlags != 0) {
-                if ((privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
-                    sb.append(" compatible=true");
-                }
-                sb.append(" pfl=0x").append(Integer.toHexString(privateFlags));
-            }
+            sb.append(ViewDebug.intToString(LayoutParams.class, "type", type));
             if (format != PixelFormat.OPAQUE) {
                 sb.append(" fmt=");
-                sb.append(format);
+                sb.append(PixelFormat.formatToString(format));
             }
             if (windowAnimations != 0) {
                 sb.append(" wanim=0x");
@@ -2491,7 +2580,7 @@ public interface WindowManager extends ViewManager {
             }
             if (screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
                 sb.append(" or=");
-                sb.append(screenOrientation);
+                sb.append(ActivityInfo.screenOrientationToString(screenOrientation));
             }
             if (alpha != 1.0f) {
                 sb.append(" alpha=");
@@ -2507,7 +2596,7 @@ public interface WindowManager extends ViewManager {
             }
             if (rotationAnimation != ROTATION_ANIMATION_ROTATE) {
                 sb.append(" rotAnim=");
-                sb.append(rotationAnimation);
+                sb.append(rotationAnimationToString(rotationAnimation));
             }
             if (preferredRefreshRate != 0) {
                 sb.append(" preferredRefreshRate=");
@@ -2517,20 +2606,12 @@ public interface WindowManager extends ViewManager {
                 sb.append(" preferredDisplayMode=");
                 sb.append(preferredDisplayModeId);
             }
-            if (systemUiVisibility != 0) {
-                sb.append(" sysui=0x");
-                sb.append(Integer.toHexString(systemUiVisibility));
-            }
-            if (subtreeSystemUiVisibility != 0) {
-                sb.append(" vsysui=0x");
-                sb.append(Integer.toHexString(subtreeSystemUiVisibility));
-            }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");
                 sb.append(hasSystemUiListeners);
             }
             if (inputFeatures != 0) {
-                sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
+                sb.append(" if=").append(inputFeatureToString(inputFeatures));
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
@@ -2546,11 +2627,30 @@ public interface WindowManager extends ViewManager {
                     sb.append(" (!preservePreviousSurfaceInsets)");
                 }
             }
-            if (needsMenuKey != NEEDS_MENU_UNSET) {
-                sb.append(" needsMenuKey=");
-                sb.append(needsMenuKey);
+            if (needsMenuKey == NEEDS_MENU_SET_TRUE) {
+                sb.append(" needsMenuKey");
             }
-            sb.append(" colorMode=").append(mColorMode);
+            if (mColorMode != COLOR_MODE_DEFAULT) {
+                sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
+            }
+            sb.append(System.lineSeparator());
+            sb.append(prefix).append("  fl=").append(
+                    ViewDebug.flagsToString(LayoutParams.class, "flags", flags));
+            if (privateFlags != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  pfl=").append(ViewDebug.flagsToString(
+                        LayoutParams.class, "privateFlags", privateFlags));
+            }
+            if (systemUiVisibility != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  sysui=").append(ViewDebug.flagsToString(
+                        View.class, "mSystemUiVisibility", systemUiVisibility));
+            }
+            if (subtreeSystemUiVisibility != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  vsysui=").append(ViewDebug.flagsToString(
+                        View.class, "mSystemUiVisibility", subtreeSystemUiVisibility));
+            }
             sb.append('}');
             return sb.toString();
         }
@@ -2633,6 +2733,89 @@ public interface WindowManager extends ViewManager {
             return x == 0 && y == 0
                     && width == WindowManager.LayoutParams.MATCH_PARENT
                     && height == WindowManager.LayoutParams.MATCH_PARENT;
+        }
+
+        private static String softInputModeToString(@SoftInputModeFlags int softInputMode) {
+            final StringBuilder result = new StringBuilder();
+            final int state = softInputMode & SOFT_INPUT_MASK_STATE;
+            if (state != 0) {
+                result.append("state=");
+                switch (state) {
+                    case SOFT_INPUT_STATE_UNCHANGED:
+                        result.append("unchanged");
+                        break;
+                    case SOFT_INPUT_STATE_HIDDEN:
+                        result.append("hidden");
+                        break;
+                    case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                        result.append("always_hidden");
+                        break;
+                    case SOFT_INPUT_STATE_VISIBLE:
+                        result.append("visible");
+                        break;
+                    case SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                        result.append("always_visible");
+                        break;
+                    default:
+                        result.append(state);
+                        break;
+                }
+                result.append(' ');
+            }
+            final int adjust = softInputMode & SOFT_INPUT_MASK_ADJUST;
+            if (adjust != 0) {
+                result.append("adjust=");
+                switch (adjust) {
+                    case SOFT_INPUT_ADJUST_RESIZE:
+                        result.append("resize");
+                        break;
+                    case SOFT_INPUT_ADJUST_PAN:
+                        result.append("pan");
+                        break;
+                    case SOFT_INPUT_ADJUST_NOTHING:
+                        result.append("nothing");
+                        break;
+                    default:
+                        result.append(adjust);
+                        break;
+                }
+                result.append(' ');
+            }
+            if ((softInputMode & SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                result.append("forwardNavigation").append(' ');
+            }
+            result.deleteCharAt(result.length() - 1);
+            return result.toString();
+        }
+
+        private static String rotationAnimationToString(int rotationAnimation) {
+            switch (rotationAnimation) {
+                case ROTATION_ANIMATION_UNSPECIFIED:
+                    return "UNSPECIFIED";
+                case ROTATION_ANIMATION_ROTATE:
+                    return "ROTATE";
+                case ROTATION_ANIMATION_CROSSFADE:
+                    return "CROSSFADE";
+                case ROTATION_ANIMATION_JUMPCUT:
+                    return "JUMPCUT";
+                case ROTATION_ANIMATION_SEAMLESS:
+                    return "SEAMLESS";
+                default:
+                    return Integer.toString(rotationAnimation);
+            }
+        }
+
+        private static String inputFeatureToString(int inputFeature) {
+            switch (inputFeature) {
+                case INPUT_FEATURE_DISABLE_POINTER_GESTURES:
+                    return "DISABLE_POINTER_GESTURES";
+                case INPUT_FEATURE_NO_INPUT_CHANNEL:
+                    return "NO_INPUT_CHANNEL";
+                case INPUT_FEATURE_DISABLE_USER_ACTIVITY:
+                    return "DISABLE_USER_ACTIVITY";
+                default:
+                    return Integer.toString(inputFeature);
+            }
         }
     }
 }
