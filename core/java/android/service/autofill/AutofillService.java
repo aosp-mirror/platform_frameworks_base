@@ -305,7 +305,7 @@ import com.android.internal.os.SomeArgs;
  *   <li>Use the {@link android.app.assist.AssistStructure.ViewNode#getWebDomain()} to get the
  *       source of the document.
  *   <li>Get the canonical domain using the
- *       <a href="https://publicsuffix.org/>Public Suffix List</a> (see example below).
+ *       <a href="https://publicsuffix.org/">Public Suffix List</a> (see example below).
  *   <li>Use <a href="https://developers.google.com/digital-asset-links/">Digital Asset Links</a>
  *       to obtain the package name and certificate fingerprint of the package corresponding to
  *       the canonical domain.
