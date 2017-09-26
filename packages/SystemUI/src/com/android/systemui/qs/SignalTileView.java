@@ -63,11 +63,15 @@ public class SignalTileView extends QSIconViewImpl {
     @Override
     protected View createIcon() {
         mIconFrame = new FrameLayout(mContext);
-        mSignal = new SlashImageView(mContext);
+        mSignal = createSlashImageView(mContext);
         mIconFrame.addView(mSignal);
         mOverlay = new ImageView(mContext);
         mIconFrame.addView(mOverlay, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         return mIconFrame;
+    }
+
+    protected SlashImageView createSlashImageView(Context context) {
+        return new SlashImageView(context);
     }
 
     @Override
