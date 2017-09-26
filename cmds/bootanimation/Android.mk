@@ -24,6 +24,11 @@ LOCAL_SRC_FILES:= \
     BootAnimationUtil.cpp \
 
 ifeq ($(PRODUCT_IOT),true)
+
+LOCAL_SHARED_LIBRARIES += libchrome
+
+LOCAL_C_INCLUDES += external/libchrome
+
 LOCAL_SRC_FILES += \
     iot/iotbootanimation_main.cpp \
     iot/BootAction.cpp
@@ -83,6 +88,12 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libtinyalsa \
     libbase
+
+ifeq ($(PRODUCT_IOT),true)
+
+LOCAL_INIT_RC := iot/bootanim_iot.rc
+
+endif # PRODUCT_IOT
 
 ifdef TARGET_32_BIT_SURFACEFLINGER
 LOCAL_32_BIT_ONLY := true

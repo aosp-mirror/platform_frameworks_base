@@ -80,6 +80,10 @@ private:
 int main() {
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_DISPLAY);
 
+    // TODO(b/65462981): Should we set brightness/volume here in case the boot
+    // animation is disabled?
+    BootAction::swapBootConfigs();
+
     if (bootAnimationDisabled()) {
         ALOGI("boot animation disabled");
         return 0;
