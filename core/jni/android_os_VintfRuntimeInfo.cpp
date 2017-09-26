@@ -29,28 +29,33 @@ namespace android {
 using vintf::RuntimeInfo;
 using vintf::VintfObject;
 
-#define MAP_STRING_METHOD(javaMethod, cppString)                                       \
+#define MAP_STRING_METHOD(javaMethod, cppString, flags)                                \
     static jstring android_os_VintfRuntimeInfo_##javaMethod(JNIEnv* env, jclass clazz) \
     {                                                                                  \
-        std::shared_ptr<const RuntimeInfo> info = VintfObject::GetRuntimeInfo();       \
+        std::shared_ptr<const RuntimeInfo> info = VintfObject::GetRuntimeInfo(         \
+                false /* skipCache */, flags);                                         \
         if (info == nullptr) return nullptr;                                           \
         return env->NewStringUTF((cppString).c_str());                                 \
     }                                                                                  \
 
-MAP_STRING_METHOD(getCpuInfo, info->cpuInfo());
-MAP_STRING_METHOD(getOsName, info->osName());
-MAP_STRING_METHOD(getNodeName, info->nodeName());
-MAP_STRING_METHOD(getOsRelease, info->osRelease());
-MAP_STRING_METHOD(getOsVersion, info->osVersion());
-MAP_STRING_METHOD(getHardwareId, info->hardwareId());
-MAP_STRING_METHOD(getKernelVersion, vintf::to_string(info->kernelVersion()));
-MAP_STRING_METHOD(getBootAvbVersion, vintf::to_string(info->bootAvbVersion()));
-MAP_STRING_METHOD(getBootVbmetaAvbVersion, vintf::to_string(info->bootVbmetaAvbVersion()));
+MAP_STRING_METHOD(getCpuInfo, info->cpuInfo(), RuntimeInfo::FetchFlag::CPU_INFO);
+MAP_STRING_METHOD(getOsName, info->osName(), RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getNodeName, info->nodeName(), RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getOsRelease, info->osRelease(), RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getOsVersion, info->osVersion(), RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getHardwareId, info->hardwareId(), RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getKernelVersion, vintf::to_string(info->kernelVersion()),
+                  RuntimeInfo::FetchFlag::CPU_VERSION);
+MAP_STRING_METHOD(getBootAvbVersion, vintf::to_string(info->bootAvbVersion()),
+                  RuntimeInfo::FetchFlag::AVB);
+MAP_STRING_METHOD(getBootVbmetaAvbVersion, vintf::to_string(info->bootVbmetaAvbVersion()),
+                  RuntimeInfo::FetchFlag::AVB);
 
 
 static jlong android_os_VintfRuntimeInfo_getKernelSepolicyVersion(JNIEnv *env, jclass clazz)
 {
-    std::shared_ptr<const RuntimeInfo> info = VintfObject::GetRuntimeInfo();
+    std::shared_ptr<const RuntimeInfo> info = VintfObject::GetRuntimeInfo(
+        false /* skipCache */, RuntimeInfo::FetchFlag::POLICYVERS);
     if (info == nullptr) return 0;
     return static_cast<jlong>(info->kernelSepolicyVersion());
 }
