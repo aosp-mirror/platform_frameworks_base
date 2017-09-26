@@ -200,7 +200,7 @@ public class SensorAdditionalInfo {
     public static final int TYPE_DEBUG_INFO  = 0x40000000;
 
     SensorAdditionalInfo(
-            Sensor aSensor, int aType, int aSerial, int [] aIntValues, float [] aFloatValues) {
+            Sensor aSensor, int aType, int aSerial, int[] aIntValues, float[] aFloatValues) {
         sensor = aSensor;
         type = aType;
         serial = aSerial;
@@ -222,10 +222,10 @@ public class SensorAdditionalInfo {
                 null, new float[] { strength, declination, inclination});
     }
     /** @hide */
-    public static SensorAdditionalInfo createCustomInfo(Sensor aSensor, int type, float [] data) {
+    public static SensorAdditionalInfo createCustomInfo(Sensor aSensor, int type, float[] data) {
         if (type < TYPE_CUSTOM_INFO || type >= TYPE_DEBUG_INFO || aSensor == null) {
-            throw new IllegalArgumentException("invalid parameter(s): type: " + type +
-                    "; sensor: " + aSensor);
+            throw new IllegalArgumentException(
+                    "invalid parameter(s): type: " + type + "; sensor: " + aSensor);
         }
 
         return new SensorAdditionalInfo(aSensor, type, 0, null, data);
