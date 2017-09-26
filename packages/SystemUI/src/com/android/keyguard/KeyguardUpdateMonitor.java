@@ -452,6 +452,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
+        updateFingerprintListeningState();
     }
 
     /**
