@@ -2846,6 +2846,8 @@
         <public name="showWhenLocked"/>
         <public name="turnScreenOn"/>
         <public name="classLoader" />
+        <public name="windowLightNavigationBar" />
+        <public name="navigationBarDividerColor" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2874,10 +2876,6 @@
          the id value of 0x01010531.
          =============================================================== -->
     <eat-comment />
-
-    <public-group type="attr" first-id="0x0101056c">
-      <public name="windowLightNavigationBar" />
-    </public-group>
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

@@ -2056,11 +2056,11 @@
              Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
         <attr name="navigationBarColor" format="color" />
 
-        <!-- @hide
-             Shows 1dp line of the specified color between the navigation bar and the app content.
+        <!-- Shows a thin line of the specified color between the navigation bar and the app
+             content.
              <p>For this to take effect, the window must be drawing the system bar backgrounds with
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
-               have been requested to be translucent with
+             have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}. -->
         <attr name="navigationBarDividerColor" format="color" />
 
