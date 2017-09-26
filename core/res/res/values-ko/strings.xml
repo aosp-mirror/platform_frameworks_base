@@ -358,11 +358,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 앱을 지나치게 사용하면 태블릿에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"앱이 브로드캐스트가 끝난 후에도 흥미로운 브로드캐스트를 보낼 수 있도록 허용합니다. 이 기능을 과도하게 사용하면 메모리 사용량이 많아져 TV 속도가 저하되거나 성능이 불안정해질 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 앱을 지나치게 사용하면 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
-    <string name="permlab_readContacts" msgid="8348481131899886131">"주소록 읽기"</string>
+    <string name="permlab_readContacts" msgid="8348481131899886131">"연락처 읽기"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"앱이 특정 연락처와 통화를 하거나 이메일을 주고받거나 다른 방법으로 연락한 횟수를 포함하여 TV에 저장된 연락처 관련 데이터를 읽을 수 있도록 허용합니다. 이 경우 앱이 연락처 데이터를 저장할 수 있으며 악성 앱이 사용자 몰래 연락처 데이터에 공유할 수도 있습니다."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"주소록 수정"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"연락처 수정"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"앱이 특정 연락처와 통화를 하거나 이메일을 주고받거나 다른 수단으로 연락한 횟수를 포함하여 TV에 저장된 연락처 관련 데이터를 수정할 수 있도록 허용합니다. 이 경우 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
@@ -1421,11 +1421,9 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"휴대전화"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"도크 스피커"</string>
-    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"헤드폰"</string>
-    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
-    <skip />
+    <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"시스템"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"블루투스 오디오"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"무선 디스플레이"</string>

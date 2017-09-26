@@ -1130,7 +1130,7 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Sallitaanko yhteys?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Sovellus %1$s yrittää yhdistää Wi-Fi-verkkoon %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Sovellus"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora Wi-Fi-yhteys"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora Wi-Fi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran Wi-Fi-yhteyden käynnistäminen epäonnistui."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct on käytössä"</string>
@@ -1421,11 +1421,9 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televisio"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Puhelin"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Telineen kaiuttimet"</string>
-    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kuulokkeet"</string>
-    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
-    <skip />
+    <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Järjestelmä"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ääni"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Langaton näyttö"</string>
