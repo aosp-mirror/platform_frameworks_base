@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -383,6 +384,7 @@ public class WebChromeClient {
      * @return Bitmap The image to use as a default poster, or {@code null} if no such image is
      * available.
      */
+    @Nullable
     public Bitmap getDefaultVideoPoster() {
         return null;
     }
@@ -394,6 +396,7 @@ public class WebChromeClient {
      *
      * @return View The View to be displayed whilst the video is loading.
      */
+    @Nullable
     public View getVideoLoadingProgressView() {
         return null;
     }
@@ -452,6 +455,7 @@ public class WebChromeClient {
          * @return the Uris of selected file(s) or {@code null} if the resultCode indicates
          *         activity canceled or any other error.
          */
+        @Nullable
         public static Uri[] parseResult(int resultCode, Intent data) {
             return WebViewFactory.getProvider().getStatics().parseFileChooserResult(resultCode, data);
         }
@@ -477,14 +481,16 @@ public class WebChromeClient {
         public abstract boolean isCaptureEnabled();
 
         /**
-         * Returns the title to use for this file selector, or null. If {@code null} a default
-         * title should be used.
+         * Returns the title to use for this file selector. If {@code null} a default title should
+         * be used.
          */
+        @Nullable
         public abstract CharSequence getTitle();
 
         /**
          * The file name of a default selection if specified, or {@code null}.
          */
+        @Nullable
         public abstract String getFilenameHint();
 
         /**

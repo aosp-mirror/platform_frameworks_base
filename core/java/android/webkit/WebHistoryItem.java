@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Bitmap;
 
@@ -70,6 +71,7 @@ public abstract class WebHistoryItem implements Cloneable {
      * Note: The VM ensures 32-bit atomic read/write operations so we don't have
      * to synchronize this method.
      */
+    @Nullable
     public abstract Bitmap getFavicon();
 
     /**

@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
@@ -167,6 +168,7 @@ public class WebViewClient {
      *             shouldInterceptRequest(WebView, WebResourceRequest)} instead.
      */
     @Deprecated
+    @Nullable
     public WebResourceResponse shouldInterceptRequest(WebView view,
             String url) {
         return null;
@@ -191,6 +193,7 @@ public class WebViewClient {
      *         response information or {@code null} if the WebView should load the
      *         resource itself.
      */
+    @Nullable
     public WebResourceResponse shouldInterceptRequest(WebView view,
             WebResourceRequest request) {
         return shouldInterceptRequest(view, request.getUrl().toString());
@@ -496,7 +499,7 @@ public class WebViewClient {
      * @param args Authenticator specific arguments used to log in the user.
      */
     public void onReceivedLoginRequest(WebView view, String realm,
-            String account, String args) {
+            @Nullable String account, String args) {
     }
 
     /**

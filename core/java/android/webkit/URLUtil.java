@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.net.ParseException;
 import android.net.Uri;
 import android.net.WebAddress;
@@ -300,8 +301,8 @@ public final class URLUtil {
      */
     public static final String guessFileName(
             String url,
-            String contentDisposition,
-            String mimeType) {
+            @Nullable String contentDisposition,
+            @Nullable String mimeType) {
         String filename = null;
         String extension = null;
 

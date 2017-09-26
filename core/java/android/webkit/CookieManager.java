@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.WebAddress;
 
@@ -116,7 +117,8 @@ public abstract class CookieManager {
      *              HTTP response header
      * @param callback a callback to be executed when the cookie has been set
      */
-    public abstract void setCookie(String url, String value, ValueCallback<Boolean> callback);
+    public abstract void setCookie(String url, String value, @Nullable ValueCallback<Boolean>
+            callback);
 
     /**
      * Gets the cookies for the given URL.
@@ -175,7 +177,7 @@ public abstract class CookieManager {
      * method from a thread without a Looper.
      * @param callback a callback which is executed when the session cookies have been removed
      */
-    public abstract void removeSessionCookies(ValueCallback<Boolean> callback);
+    public abstract void removeSessionCookies(@Nullable ValueCallback<Boolean> callback);
 
     /**
      * Removes all cookies.
@@ -197,7 +199,7 @@ public abstract class CookieManager {
      * method from a thread without a Looper.
      * @param callback a callback which is executed when the cookies have been removed
      */
-    public abstract void removeAllCookies(ValueCallback<Boolean> callback);
+    public abstract void removeAllCookies(@Nullable ValueCallback<Boolean> callback);
 
     /**
      * Gets whether there are stored cookies.

@@ -438,7 +438,7 @@ public class WebView extends AbsoluteLayout
          * @deprecated Deprecated due to internal changes.
          */
         @Deprecated
-        public void onNewPicture(WebView view, Picture picture);
+        void onNewPicture(WebView view, @Nullable Picture picture);
     }
 
     public static class HitTestResult {
@@ -529,6 +529,7 @@ public class WebView extends AbsoluteLayout
          *
          * @return additional type-dependant information about the result
          */
+        @Nullable
         public String getExtra() {
             return mExtra;
         }
@@ -717,6 +718,7 @@ public class WebView extends AbsoluteLayout
      *
      * @return the SSL certificate for the main top-level page
      */
+    @Nullable
     public SslCertificate getCertificate() {
         checkThread();
         return mProvider.getCertificate();
@@ -785,6 +787,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated Use {@link WebViewDatabase#getHttpAuthUsernamePassword} instead
      */
     @Deprecated
+    @Nullable
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
         checkThread();
         return mProvider.getHttpAuthUsernamePassword(host, realm);
@@ -853,9 +856,10 @@ public class WebView extends AbsoluteLayout
      * called.
      *
      * @param outState the Bundle to store this WebView's state
-     * @return the same copy of the back/forward list used to save the state. If
-     *         saveState fails, the returned list will be {@code null}.
+     * @return the same copy of the back/forward list used to save the state, {@code null} if the
+     *         method fails.
      */
+    @Nullable
     public WebBackForwardList saveState(Bundle outState) {
         checkThread();
         return mProvider.saveState(outState);
@@ -906,6 +910,7 @@ public class WebView extends AbsoluteLayout
      * @param inState the incoming Bundle of state
      * @return the restored back/forward list or {@code null} if restoreState failed
      */
+    @Nullable
     public WebBackForwardList restoreState(Bundle inState) {
         checkThread();
         return mProvider.restoreState(inState);
@@ -985,10 +990,11 @@ public class WebView extends AbsoluteLayout
      * always overrides that specified in the HTML or XML document itself.
      *
      * @param data a String of data in the given encoding
-     * @param mimeType the MIME type of the data, e.g. 'text/html'
+     * @param mimeType the MIMEType of the data, e.g. 'text/html'. If {@code null},
+     *                 defaults to 'text/html'.
      * @param encoding the encoding of the data
      */
-    public void loadData(String data, String mimeType, String encoding) {
+    public void loadData(String data, @Nullable String mimeType, @Nullable String encoding) {
         checkThread();
         mProvider.loadData(data, mimeType, encoding);
     }
@@ -1022,8 +1028,8 @@ public class WebView extends AbsoluteLayout
      * @param historyUrl the URL to use as the history entry. If {@code null} defaults
      *                   to 'about:blank'. If non-null, this must be a valid URL.
      */
-    public void loadDataWithBaseURL(String baseUrl, String data,
-            String mimeType, String encoding, String historyUrl) {
+    public void loadDataWithBaseURL(@Nullable String baseUrl, String data,
+            @Nullable String mimeType, @Nullable String encoding, @Nullable String historyUrl) {
         checkThread();
         mProvider.loadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
     }
@@ -1045,7 +1051,7 @@ public class WebView extends AbsoluteLayout
      *                       completes with the result of the execution (if any).
      *                       May be {@code null} if no notification of the result is required.
      */
-    public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
+    public void evaluateJavascript(String script, @Nullable ValueCallback<String> resultCallback) {
         checkThread();
         mProvider.evaluateJavaScript(script, resultCallback);
     }
@@ -1072,7 +1078,8 @@ public class WebView extends AbsoluteLayout
      *                 under which the file was saved, or {@code null} if saving the
      *                 file failed.
      */
-    public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
+    public void saveWebArchive(String basename, boolean autoname, @Nullable ValueCallback<String>
+            callback) {
         checkThread();
         mProvider.saveWebArchive(basename, autoname, callback);
     }
@@ -1395,7 +1402,7 @@ public class WebView extends AbsoluteLayout
      *                returns the anchor's href attribute. "title" returns the
      *                anchor's text. "src" returns the image's src attribute.
      */
-    public void requestFocusNodeHref(Message hrefMsg) {
+    public void requestFocusNodeHref(@Nullable Message hrefMsg) {
         checkThread();
         mProvider.requestFocusNodeHref(hrefMsg);
     }
@@ -1615,10 +1622,9 @@ public class WebView extends AbsoluteLayout
      * shared by all the WebViews that are created by the embedder application.
      *
      * @param onCleared  A runnable to be invoked when client certs are cleared.
-     *                   The embedder can pass {@code null} if not interested in the
-     *                   callback. The runnable will be called in UI thread.
+     *                   The runnable will be called in UI thread.
      */
-    public static void clearClientCertPreferences(Runnable onCleared) {
+    public static void clearClientCertPreferences(@Nullable Runnable onCleared) {
         getFactory().getStatics().clearClientCertPreferences(onCleared);
     }
 
@@ -1640,7 +1646,8 @@ public class WebView extends AbsoluteLayout
      * @param callback will be called on the UI thread with {@code true} if initialization is
      * successful, {@code false} otherwise.
      */
-    public static void startSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+    public static void startSafeBrowsing(Context context,
+            @Nullable ValueCallback<Boolean> callback) {
         getFactory().getStatics().initSafeBrowsing(context, callback);
     }
 
@@ -1764,7 +1771,7 @@ public class WebView extends AbsoluteLayout
      *             provides a more robust solution.
      */
     @Deprecated
-    public boolean showFindDialog(String text, boolean showIme) {
+    public boolean showFindDialog(@Nullable String text, boolean showIme) {
         checkThread();
         return mProvider.showFindDialog(text, showIme);
     }
@@ -1791,6 +1798,7 @@ public class WebView extends AbsoluteLayout
      * @param addr the string to search for addresses
      * @return the address, or if no address is found, {@code null}
      */
+    @Nullable
     public static String findAddress(String addr) {
         // TODO: Rewrite this in Java so it is not needed to start up chromium
         // Could also be deprecated
@@ -1891,6 +1899,7 @@ public class WebView extends AbsoluteLayout
      * @return the WebChromeClient, or {@code null} if not yet set
      * @see #setWebChromeClient
      */
+    @Nullable
     public WebChromeClient getWebChromeClient() {
         checkThread();
         return mProvider.getWebChromeClient();
@@ -1973,7 +1982,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param name the name used to expose the object in JavaScript
      */
-    public void removeJavascriptInterface(String name) {
+    public void removeJavascriptInterface(@NonNull String name) {
         checkThread();
         mProvider.removeJavascriptInterface(name);
     }
@@ -2956,6 +2965,7 @@ public class WebView extends AbsoluteLayout
      * next time the app starts and loads WebView it will use the new WebView package instead.
      * @return the current WebView package, or {@code null} if there is none.
      */
+    @Nullable
     public static PackageInfo getCurrentWebViewPackage() {
         PackageInfo webviewPackage = WebViewFactory.getLoadedPackageInfo();
         if (webviewPackage != null) {
