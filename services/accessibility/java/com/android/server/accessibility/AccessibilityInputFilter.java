@@ -366,6 +366,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     @Override
+    public EventStreamTransformation getNext() {
+        return null;
+    }
+
+    @Override
     public void clearEvents(int inputSource) {
         /* do nothing */
     }

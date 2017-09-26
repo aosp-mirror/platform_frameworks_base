@@ -16,7 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.util.ExceptionUtils.propagate;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
@@ -105,8 +104,8 @@ public class MagnificationGestureHandlerTest {
         MagnificationGestureHandler h = new MagnificationGestureHandler(
                 mContext, mMagnificationController,
                 detectTripleTap, detectShortcutTrigger);
-        mHandler = new TestHandler(h.mDetectingStateHandler, mClock);
-        h.mDetectingStateHandler.mHandler = mHandler;
+        mHandler = new TestHandler(h.mDetectingState, mClock);
+        h.mDetectingState.mHandler = mHandler;
         h.setNext(strictMock(EventStreamTransformation.class));
         return h;
     }
@@ -229,7 +228,7 @@ public class MagnificationGestureHandlerTest {
         allowEventDelegation();
         tap();
         // no fast forward
-        verify(mMgh.mNext, times(2)).onMotionEvent(any(), any(), anyInt());
+        verify(mMgh.getNext(), times(2)).onMotionEvent(any(), any(), anyInt());
     }
 
     private void assertTransition(int fromState, Runnable transitionAction, int toState) {
@@ -250,7 +249,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     private void allowEventDelegation() {
-        doNothing().when(mMgh.mNext).onMotionEvent(any(), any(), anyInt());
+        doNothing().when(mMgh.getNext()).onMotionEvent(any(), any(), anyInt());
     }
 
     private void fastForward1sec() {
@@ -272,7 +271,7 @@ public class MagnificationGestureHandlerTest {
 
             case STATE_IDLE: {
                 check(tapCount() < 2, state);
-                check(!mMgh.mShortcutTriggered, state);
+                check(!mMgh.mDetectingState.mShortcutTriggered, state);
                 check(!isZoomed(), state);
             } break;
             case STATE_ZOOMED: {
@@ -288,28 +287,28 @@ public class MagnificationGestureHandlerTest {
                 check(tapCount() == 2, state);
             } break;
             case STATE_DRAGGING: {
-                check(mMgh.mCurrentState == MagnificationGestureHandler.STATE_VIEWPORT_DRAGGING,
+                check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
-                check(mMgh.mViewportDraggingStateHandler.mZoomedInBeforeDrag, state);
+                check(mMgh.mViewportDraggingState.mZoomedInBeforeDrag, state);
             } break;
             case STATE_DRAGGING_TMP: {
-                check(mMgh.mCurrentState == MagnificationGestureHandler.STATE_VIEWPORT_DRAGGING,
+                check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
-                check(!mMgh.mViewportDraggingStateHandler.mZoomedInBeforeDrag, state);
+                check(!mMgh.mViewportDraggingState.mZoomedInBeforeDrag, state);
             } break;
             case STATE_SHORTCUT_TRIGGERED: {
-                check(mMgh.mShortcutTriggered, state);
+                check(mMgh.mDetectingState.mShortcutTriggered, state);
                 check(!isZoomed(), state);
             } break;
             case STATE_PANNING: {
-                check(mMgh.mCurrentState == MagnificationGestureHandler.STATE_PANNING_SCALING,
+                check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
-                check(!mMgh.mPanningScalingStateHandler.mScaling, state);
+                check(!mMgh.mPanningScalingState.mScaling, state);
             } break;
             case STATE_SCALING_AND_PANNING: {
-                check(mMgh.mCurrentState == MagnificationGestureHandler.STATE_PANNING_SCALING,
+                check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
-                check(mMgh.mPanningScalingStateHandler.mScaling, state);
+                check(mMgh.mPanningScalingState.mScaling, state);
             } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }
@@ -432,7 +431,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     private int tapCount() {
-        return mMgh.mDetectingStateHandler.tapCount();
+        return mMgh.mDetectingState.tapCount();
     }
 
     private static String stateToString(int state) {
@@ -492,7 +491,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     private long defaultDownTime() {
-        MotionEvent lastDown = mMgh.mDetectingStateHandler.mLastDown;
+        MotionEvent lastDown = mMgh.mDetectingState.mLastDown;
         return lastDown == null ? mClock.now() - 1 : lastDown.getDownTime();
     }
 
