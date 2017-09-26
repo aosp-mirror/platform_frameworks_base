@@ -40,6 +40,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
+        "org.lineageos.platform.internal",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

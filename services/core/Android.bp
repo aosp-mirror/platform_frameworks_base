@@ -29,6 +29,7 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.power-V1.0-java",
         "android.hardware.tv.cec-V1.0-java",
+        "org.lineageos.platform.internal",
     ],
 
     required: [
