@@ -567,7 +567,7 @@ public class ZenModeHelper {
                     proto.write(ZenModeProto.ENABLED_ACTIVE_CONDITIONS, rule.toString());
                 }
             }
-            proto.write(ZenModeProto.POLICY, mConfig.toNotificationPolicy().toString());
+            mConfig.toNotificationPolicy().toProto(proto, ZenModeProto.POLICY);
             proto.write(ZenModeProto.SUPPRESSED_EFFECTS, mSuppressedEffects);
         }
     }
