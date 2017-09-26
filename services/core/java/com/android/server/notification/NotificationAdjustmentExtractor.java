@@ -22,7 +22,7 @@ import android.util.Slog;
  * Applies adjustments from the group helper and notification assistant
  */
 public class NotificationAdjustmentExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "BadgeExtractor";
+    private static final String TAG = "AdjustmentExtractor";
     private static final boolean DBG = false;
 
 

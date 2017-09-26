@@ -23,7 +23,7 @@ import android.util.Slog;
  * Determines if the given notification can bypass Do Not Disturb.
  */
 public class PriorityExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "ImportantTopicExtractor";
+    private static final String TAG = "PriorityExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
