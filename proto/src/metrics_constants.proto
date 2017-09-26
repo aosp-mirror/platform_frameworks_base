@@ -4626,6 +4626,11 @@ message MetricsEvent {
     // OS: P
     DIALOG_ENABLE_OEM_UNLOCKING = 1159;
 
+    // OPEN: Settings > Security > Nexus Imprint > [Fingerprint]
+    // CATEGORY: SETTINGS
+    // OS: P
+    FINGERPRINT_AUTHENTICATE_SIDECAR = 1160;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
