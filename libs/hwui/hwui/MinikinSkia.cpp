@@ -104,14 +104,14 @@ const std::vector<minikin::FontVariation>& MinikinFontSkia::GetAxes() const {
 
 std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
         const std::vector<minikin::FontVariation>& variations) const {
-    SkFontMgr::FontParameters params;
+    SkFontArguments params;
 
     int ttcIndex;
-    SkStreamAsset* stream = mTypeface->openStream(&ttcIndex);
+    std::unique_ptr<SkStreamAsset> stream(mTypeface->openStream(&ttcIndex));
     LOG_ALWAYS_FATAL_IF(stream == nullptr, "openStream failed");
 
     params.setCollectionIndex(ttcIndex);
-    std::vector<SkFontMgr::FontParameters::Axis> skAxes;
+    std::vector<SkFontArguments::Axis> skAxes;
     skAxes.resize(variations.size());
     for (size_t i = 0; i < variations.size(); i++) {
         skAxes[i].fTag = variations[i].axisTag;
@@ -119,7 +119,7 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
     }
     params.setAxes(skAxes.data(), skAxes.size());
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->createFromStream(stream, params));
+    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(stream), params));
 
     return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, ttcIndex,
             variations);
