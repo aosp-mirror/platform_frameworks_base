@@ -1450,11 +1450,16 @@ public class ChooserActivity extends ResolverActivity {
                         getFirstRowPosition(rowPosition + 1));
                 int serviceSpacing = holder.row.getContext().getResources()
                         .getDimensionPixelSize(R.dimen.chooser_service_spacing);
-                int top = rowPosition == 0 ? serviceSpacing : 0;
-                if (nextStartType != ChooserListAdapter.TARGET_SERVICE) {
-                    setVertPadding(holder, top, serviceSpacing);
+                if (rowPosition == 0 && nextStartType != ChooserListAdapter.TARGET_SERVICE) {
+                    // if the row is the only row for target service
+                    setVertPadding(holder, 0, 0);
                 } else {
-                    setVertPadding(holder, top, 0);
+                    int top = rowPosition == 0 ? serviceSpacing : 0;
+                    if (nextStartType != ChooserListAdapter.TARGET_SERVICE) {
+                        setVertPadding(holder, top, serviceSpacing);
+                    } else {
+                        setVertPadding(holder, top, 0);
+                    }
                 }
             } else {
                 holder.row.setBackgroundColor(Color.TRANSPARENT);
