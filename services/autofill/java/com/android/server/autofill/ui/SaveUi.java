@@ -271,6 +271,10 @@ final class SaveUi {
         mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
 
+        // Dialog can be dismissed when touched outside, but the negative listener should not be
+        // notified (hence the null argument).
+        mDialog.setOnDismissListener((d) -> mListener.onCancel(null));
+
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
