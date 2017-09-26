@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已拍攝螢幕擷取畫面。"</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"輕觸即可查看螢幕擷圖。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"無法拍攝螢幕擷取畫面。"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"儲存螢幕擷圖時發生問題。"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"儲存螢幕擷取畫面時發生問題。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"由於儲存空間有限，因此無法儲存螢幕擷取畫面。"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"這個應用程式或貴機構不允許擷取螢幕畫面"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
