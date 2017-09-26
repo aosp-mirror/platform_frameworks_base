@@ -62,6 +62,13 @@ public final class IpSecConfig implements Parcelable {
                     .append("}")
                     .toString();
         }
+
+        static boolean equals(IpSecConfig.Flow lhs, IpSecConfig.Flow rhs) {
+            if (lhs == null || rhs == null) return (lhs == rhs);
+            return (lhs.mSpiResourceId == rhs.mSpiResourceId
+                    && IpSecAlgorithm.equals(lhs.mEncryption, rhs.mEncryption)
+                    && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication));
+        }
     }
 
     private final Flow[] mFlow = new Flow[] {new Flow(), new Flow()};
@@ -198,6 +205,7 @@ public final class IpSecConfig implements Parcelable {
         out.writeInt(mEncapType);
         out.writeInt(mEncapSocketResourceId);
         out.writeInt(mEncapRemotePort);
+        out.writeInt(mNattKeepaliveInterval);
     }
 
     @VisibleForTesting
@@ -221,6 +229,7 @@ public final class IpSecConfig implements Parcelable {
         mEncapType = in.readInt();
         mEncapSocketResourceId = in.readInt();
         mEncapRemotePort = in.readInt();
+        mNattKeepaliveInterval = in.readInt();
     }
 
     @Override
@@ -262,4 +271,22 @@ public final class IpSecConfig implements Parcelable {
                     return new IpSecConfig[size];
                 }
             };
+
+    @VisibleForTesting
+    public static boolean equals(IpSecConfig lhs, IpSecConfig rhs) {
+        if (lhs == null || rhs == null) return (lhs == rhs);
+        return (lhs.mMode == rhs.mMode
+                && lhs.mLocalAddress.equals(rhs.mLocalAddress)
+                && lhs.mRemoteAddress.equals(rhs.mRemoteAddress)
+                && ((lhs.mNetwork != null && lhs.mNetwork.equals(rhs.mNetwork))
+                        || (lhs.mNetwork == rhs.mNetwork))
+                && lhs.mEncapType == rhs.mEncapType
+                && lhs.mEncapSocketResourceId == rhs.mEncapSocketResourceId
+                && lhs.mEncapRemotePort == rhs.mEncapRemotePort
+                && lhs.mNattKeepaliveInterval == rhs.mNattKeepaliveInterval
+                && IpSecConfig.Flow.equals(lhs.mFlow[IpSecTransform.DIRECTION_OUT],
+                        rhs.mFlow[IpSecTransform.DIRECTION_OUT])
+                && IpSecConfig.Flow.equals(lhs.mFlow[IpSecTransform.DIRECTION_IN],
+                        rhs.mFlow[IpSecTransform.DIRECTION_IN]));
+    }
 }
