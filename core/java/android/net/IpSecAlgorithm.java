@@ -19,15 +19,15 @@ import android.annotation.StringDef;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.HexDump;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * IpSecAlgorithm specifies a single algorithm that can be applied to an IpSec Transform. Refer to
  * RFC 4301.
- *
- * @hide
  */
 public final class IpSecAlgorithm implements Parcelable {
 

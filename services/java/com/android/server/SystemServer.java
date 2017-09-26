@@ -660,6 +660,7 @@ public final class SystemServer {
         VibratorService vibrator = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
+        IpSecService ipSecService = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
@@ -1008,6 +1009,15 @@ public final class SystemServer {
                     ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkManagement Service", e);
+                }
+                traceEnd();
+
+                traceBeginAndSlog("StartIpSecService");
+                try {
+                    ipSecService = IpSecService.create(context);
+                    ServiceManager.addService(Context.IPSEC_SERVICE, ipSecService);
+                } catch (Throwable e) {
+                    reportWtf("starting IpSec Service", e);
                 }
                 traceEnd();
             }
@@ -1618,6 +1628,7 @@ public final class SystemServer {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
+        final IpSecService ipSecServiceF = ipSecService;
         final WindowManagerService windowManagerF = wm;
 
         // We now tell the activity manager it is okay to run third party
@@ -1680,6 +1691,13 @@ public final class SystemServer {
             if (networkPolicyF != null) {
                 networkPolicyInitReadySignal = networkPolicyF
                         .networkScoreAndNetworkManagementServiceReady();
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeIpSecServiceReady");
+            try {
+                if (ipSecServiceF != null) ipSecServiceF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making IpSec Service ready", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeNetworkStatsServiceReady");
