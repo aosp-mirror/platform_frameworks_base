@@ -2846,6 +2846,8 @@
         <public name="showWhenLocked"/>
         <public name="turnScreenOn"/>
         <public name="classLoader" />
+        <public name="windowLightNavigationBar" />
+        <public name="navigationBarDividerColor" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
