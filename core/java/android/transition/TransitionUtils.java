@@ -159,11 +159,14 @@ public class TransitionUtils {
      * @return A bitmap of the given view or null if bounds has no width or height.
      */
     public static Bitmap createViewBitmap(View view, Matrix matrix, RectF bounds) {
+        if (!view.isAttachedToWindow()) {
+            return null;
+        }
         Bitmap bitmap = null;
         int bitmapWidth = Math.round(bounds.width());
         int bitmapHeight = Math.round(bounds.height());
         if (bitmapWidth > 0 && bitmapHeight > 0) {
-            float scale = Math.min(1f, ((float)MAX_IMAGE_SIZE) / (bitmapWidth * bitmapHeight));
+            float scale = Math.min(1f, ((float) MAX_IMAGE_SIZE) / (bitmapWidth * bitmapHeight));
             bitmapWidth *= scale;
             bitmapHeight *= scale;
             matrix.postTranslate(-bounds.left, -bounds.top);

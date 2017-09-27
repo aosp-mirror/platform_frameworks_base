@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
+
 /**
  * Base class for clients to capture Service Worker related callbacks,
  * see {@link ServiceWorkerController} for usage example.
@@ -37,6 +39,7 @@ public class ServiceWorkerClient {
      *         resource itself.
      * @see WebViewClient#shouldInterceptRequest(WebView, WebResourceRequest)
      */
+    @Nullable
     public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
         return null;
     }

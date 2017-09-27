@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.webkit.CacheManager.CacheResult;
 import android.webkit.PluginData;
 
@@ -35,14 +36,15 @@ public interface UrlInterceptHandler {
      * not interested.
      *
      * @param url URL string.
-     * @param headers The headers associated with the request. May be {@code null}.
+     * @param headers The headers associated with the request.
      * @return The CacheResult containing the surrogate response.
      *
      * @hide
      * @deprecated Do not use, this interface is deprecated.
      */
     @Deprecated
-    public CacheResult service(String url, Map<String, String> headers);
+    @Nullable
+    CacheResult service(String url, @Nullable Map<String, String> headers);
 
     /**
      * Given an URL, returns the PluginData which contains the
@@ -50,12 +52,13 @@ public interface UrlInterceptHandler {
      * not interested.
      *
      * @param url URL string.
-     * @param headers The headers associated with the request. May be {@code null}.
+     * @param headers The headers associated with the request.
      * @return The PluginData containing the surrogate response.
      *
      * @hide
      * @deprecated Do not use, this interface is deprecated.
      */
     @Deprecated
-    public PluginData getPluginData(String url, Map<String, String> headers);
+    @Nullable
+    PluginData getPluginData(String url, @Nullable Map<String, String> headers);
 }

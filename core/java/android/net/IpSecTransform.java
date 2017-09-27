@@ -26,9 +26,12 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+
 import dalvik.system.CloseGuard;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,8 +46,6 @@ import java.net.InetAddress;
  *
  * <p>An IpSecTransform may either represent a tunnel mode transform that operates on a wide array
  * of traffic or may represent a transport mode transform operating on a Socket or Sockets.
- *
- * @hide
  */
 public final class IpSecTransform implements AutoCloseable {
     private static final String TAG = "IpSecTransform";

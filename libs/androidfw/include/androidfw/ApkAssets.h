@@ -21,7 +21,6 @@
 #include <string>
 
 #include "android-base/macros.h"
-#include "ziparchive/zip_archive.h"
 
 #include "androidfw/Asset.h"
 #include "androidfw/LoadedArsc.h"
@@ -52,14 +51,9 @@ class ApkAssets {
   static std::unique_ptr<const ApkAssets> LoadImpl(const std::string& path, bool system,
                                                    bool load_as_shared_library);
 
-  ApkAssets() = default;
+  ApkAssets();
 
-  struct ZipArchivePtrCloser {
-    void operator()(::ZipArchiveHandle handle) { ::CloseArchive(handle); }
-  };
-
-  using ZipArchivePtr =
-      std::unique_ptr<typename std::remove_pointer<::ZipArchiveHandle>::type, ZipArchivePtrCloser>;
+  using ZipArchivePtr = std::unique_ptr<void, void(*)(void*)>;
 
   ZipArchivePtr zip_handle_;
   std::string path_;

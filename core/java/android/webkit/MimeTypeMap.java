@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.text.TextUtils;
 
 import libcore.net.MimeUtils;
@@ -86,6 +87,7 @@ public class MimeTypeMap {
      * @param extension A file extension without the leading '.'
      * @return The MIME type for the given extension or {@code null} iff there is none.
      */
+    @Nullable
     public String getMimeTypeFromExtension(String extension) {
         return MimeUtils.guessMimeTypeFromExtension(extension);
     }
@@ -111,6 +113,7 @@ public class MimeTypeMap {
      * @param mimeType A MIME type (i.e. text/plain)
      * @return The extension for the given MIME type or {@code null} iff there is none.
      */
+    @Nullable
     public String getExtensionFromMimeType(String mimeType) {
         return MimeUtils.guessExtensionFromMimeType(mimeType);
     }
@@ -125,7 +128,7 @@ public class MimeTypeMap {
      * @param contentDisposition Content-disposition header given by the server.
      * @return The MIME type that should be used for this data.
      */
-    /* package */ String remapGenericMimeType(String mimeType, String url,
+    /* package */ String remapGenericMimeType(@Nullable String mimeType, String url,
             String contentDisposition) {
         // If we have one of "generic" MIME types, try to deduce
         // the right MIME type from the file extension (if any):

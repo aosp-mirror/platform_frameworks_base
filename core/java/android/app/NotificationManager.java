@@ -41,6 +41,7 @@ import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1059,6 +1060,27 @@ public class NotificationManager {
                     + ",suppressedVisualEffects="
                     + suppressedEffectsToString(suppressedVisualEffects)
                     + "]";
+        }
+
+        /** @hide */
+        public void toProto(ProtoOutputStream proto, long fieldId) {
+            final long pToken = proto.start(fieldId);
+
+            bitwiseToProtoEnum(proto, PolicyProto.PRIORITY_CATEGORIES, priorityCategories);
+            proto.write(PolicyProto.PRIORITY_CALL_SENDER, priorityCallSenders);
+            proto.write(PolicyProto.PRIORITY_MESSAGE_SENDER, priorityMessageSenders);
+            bitwiseToProtoEnum(
+                    proto, PolicyProto.SUPPRESSED_VISUAL_EFFECTS, suppressedVisualEffects);
+
+            proto.end(pToken);
+        }
+
+        private static void bitwiseToProtoEnum(ProtoOutputStream proto, long fieldId, int data) {
+            for (int i = 1; data > 0; ++i, data >>>= 1) {
+                if ((data & 1) == 1) {
+                    proto.write(fieldId, i);
+                }
+            }
         }
 
         public static String suppressedEffectsToString(int effects) {

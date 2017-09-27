@@ -179,15 +179,11 @@ class PbSerializerVisitor : public RawValueVisitor {
   template <typename T>
   void SerializeItemCommonToPb(const Item& item, T* pb_item) {
     SerializeSourceToPb(item.GetSource(), source_pool_, pb_item->mutable_source());
-    if (!item.GetComment().empty()) {
-      pb_item->set_comment(item.GetComment());
-    }
+    pb_item->set_comment(item.GetComment());
   }
 
   void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) {
-    if (ref.id) {
-      pb_ref->set_id(ref.id.value().id);
-    }
+    pb_ref->set_id(ref.id.value_or_default(ResourceId(0x0)).id);
 
     if (ref.name) {
       pb_ref->set_name(ref.name.value().ToString());
@@ -221,21 +217,21 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
   for (auto& package : table->packages) {
     pb::Package* pb_package = pb_table->add_package();
     if (package->id) {
-      pb_package->set_package_id(package->id.value());
+      pb_package->mutable_package_id()->set_id(package->id.value());
     }
     pb_package->set_package_name(package->name);
 
     for (auto& type : package->types) {
       pb::Type* pb_type = pb_package->add_type();
       if (type->id) {
-        pb_type->set_id(type->id.value());
+        pb_type->mutable_type_id()->set_id(type->id.value());
       }
       pb_type->set_name(ToString(type->type).to_string());
 
       for (auto& entry : type->entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
         if (entry->id) {
-          pb_entry->set_id(entry->id.value());
+          pb_entry->mutable_entry_id()->set_id(entry->id.value());
         }
         pb_entry->set_name(entry->name);
 
@@ -249,20 +245,13 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
         for (auto& config_value : entry->values) {
           pb::ConfigValue* pb_config_value = pb_entry->add_config_value();
           SerializeConfig(config_value->config, pb_config_value->mutable_config());
-          if (!config_value->product.empty()) {
-            pb_config_value->mutable_config()->set_product(config_value->product);
-          }
+          pb_config_value->mutable_config()->set_product(config_value->product);
 
           pb::Value* pb_value = pb_config_value->mutable_value();
           SerializeSourceToPb(config_value->value->GetSource(), &source_pool,
                               pb_value->mutable_source());
-          if (!config_value->value->GetComment().empty()) {
-            pb_value->set_comment(config_value->value->GetComment());
-          }
-
-          if (config_value->value->IsWeak()) {
-            pb_value->set_weak(true);
-          }
+          pb_value->set_comment(config_value->value->GetComment());
+          pb_value->set_weak(config_value->value->IsWeak());
 
           PbSerializerVisitor visitor(&source_pool, pb_value);
           config_value->value->Accept(&visitor);

@@ -22,7 +22,7 @@ import android.util.Slog;
  * Determines the importance of the given notification.
  */
 public class ImportanceExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "ImportantTopicExtractor";
+    private static final String TAG = "ImportanceExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;

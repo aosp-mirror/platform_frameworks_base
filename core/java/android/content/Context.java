@@ -3034,6 +3034,9 @@ public abstract class Context {
      *  <dt> {@link #CONNECTIVITY_SERVICE} ("connection")
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
+     *  <dt> {@link #IPSEC_SERVICE} ("ipsec")
+     *  <dd> A {@link android.net.IpSecManager IpSecManager} for managing IPSec on
+     *  sockets and networks.
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
      *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of Wi-Fi
      *  connectivity.  On releases before NYC, it should only be obtained from an application
@@ -3378,7 +3381,6 @@ public abstract class Context {
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
      *
-     * @hide
      * @see #getSystemService
      */
     public static final String IPSEC_SERVICE = "ipsec";

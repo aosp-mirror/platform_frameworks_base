@@ -16,12 +16,13 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
-
 
 /**
  * Manages the HTTP cache used by an application's {@link WebView} instances.
@@ -233,6 +234,7 @@ public final class CacheManager {
      * @deprecated This method no longer has any effect and always returns {@code null}.
      */
     @Deprecated
+    @Nullable
     public static File getCacheFileBaseDir() {
         return null;
     }
@@ -287,6 +289,7 @@ public final class CacheManager {
      * @deprecated This method no longer has any effect and always returns {@code null}.
      */
     @Deprecated
+    @Nullable
     public static CacheResult getCacheFile(String url,
             Map<String, String> headers) {
         return null;

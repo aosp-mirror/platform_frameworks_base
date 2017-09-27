@@ -17,7 +17,7 @@
 #define LOG_TAG "HardwareBuffer"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "android_os_Parcel.h"
 #include "android/graphics/GraphicsJNI.h"

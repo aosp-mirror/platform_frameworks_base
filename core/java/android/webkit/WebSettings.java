@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 
@@ -1238,7 +1239,7 @@ public abstract class WebSettings {
      *
      * @param ua new user-agent string
      */
-    public abstract void setUserAgentString(String ua);
+    public abstract void setUserAgentString(@Nullable String ua);
 
     /**
      * Gets the WebView's user-agent string.

@@ -14,10 +14,10 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.ColorInt;
+import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
+import static android.app.StatusBarManager.DISABLE_NONE;
+
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -29,11 +29,11 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.util.Utils.DisableStateTracker;
 
 public interface StatusBarIconController {
 
@@ -149,6 +149,14 @@ public interface StatusBarIconController {
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
+
+            DisableStateTracker tracker =
+                    new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS);
+            mGroup.addOnAttachStateChangeListener(tracker);
+            if (mGroup.isAttachedToWindow()) {
+                // In case we miss the first onAttachedToWindow event
+                tracker.onViewAttachedToWindow(mGroup);
+            }
         }
 
         protected void onIconAdded(int index, String slot, boolean blocked,

@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.content.Context;
 
 /**
@@ -135,6 +136,7 @@ public abstract class WebViewDatabase {
      * @see #hasHttpAuthUsernamePassword
      * @see #clearHttpAuthUsernamePassword
      */
+    @Nullable
     public abstract String[] getHttpAuthUsernamePassword(String host, String realm);
 
     /**

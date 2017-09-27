@@ -2340,7 +2340,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         if (src.mActions != null) {
             Parcel p = Parcel.obtain();
-            writeActionsToParcel(p);
+            src.writeActionsToParcel(p);
             p.setDataPosition(0);
             // Since src is already in memory, we do not care about stack overflow as it has
             // already been read once.

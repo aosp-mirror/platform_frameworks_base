@@ -253,7 +253,7 @@
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> applications sollicitent la pile"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Mode sans échec"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Passer au profil professionnel"</string>
@@ -1421,11 +1421,9 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Télévision"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Téléphone"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Haut-parleurs de la station d\'accueil"</string>
-    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Oreillettes"</string>
-    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
-    <skip />
+    <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Affichage sans fil"</string>

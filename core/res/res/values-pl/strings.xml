@@ -257,7 +257,7 @@
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacje zużywające baterię"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i transmisji danych"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
     <string name="android_system_label" msgid="6577375335728551336">"System Android"</string>
@@ -347,7 +347,7 @@
     <string name="permlab_runInBackground" msgid="7365290743781858803">"działanie w tle"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"Ta aplikacja może działać w tle. Bateria może się szybciej rozładowywać."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"transmisja danych w tle"</string>
-    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Ta aplikacja może przesyłać i odbierać dane w tle. Transmisja danych może się zwiększyć."</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"Ta aplikacja może przesyłać i odbierać dane w tle. Użycie danych może się zwiększyć."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sprawianie, że aplikacja jest cały czas uruchomiona"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pozwala aplikacji na trwałe zapisywanie swoich fragmentów w pamięci. Może to zmniejszyć ilość pamięci dostępnej dla innych aplikacji i spowolnić działanie tabletu."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Pozwala aplikacji zapewnić nieusuwalność swoich fragmentów z pamięci. Może to ograniczyć ilość pamięci dostępną dla innych aplikacji i spowalniać działanie telewizora."</string>
@@ -1426,7 +1426,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Dysk USB (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Nośnik USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edytuj"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alert transmisji danych"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alert użycia danych"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Kliknij, by wyświetlić użycie i ustawienia."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Osiągnięto limit danych 2G/3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Osiągnięto limit danych 4G"</string>
@@ -1467,11 +1467,9 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Telewizor"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Głośniki stacji dokującej"</string>
-    <!-- no translation found for default_audio_route_name_hdmi (1486254205617081251) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Słuchawki"</string>
-    <!-- no translation found for default_audio_route_name_usb (1234984851352637769) -->
-    <skip />
+    <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Dźwięk Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wyświetlacz bezprzewodowy"</string>
