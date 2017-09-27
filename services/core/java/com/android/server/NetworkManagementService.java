@@ -1140,17 +1140,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setInterfaceIpv6NdOffload(String iface, boolean enable) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute(
-                    "interface", "ipv6ndoffload", iface, (enable ? "enable" : "disable"));
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void addRoute(int netId, RouteInfo route) {
         modifyRoute("add", "" + netId, route);
     }
