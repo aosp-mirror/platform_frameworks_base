@@ -1,0 +1,69 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package android.os;
+
+message BatteryStatsProto {
+  int32 report_version = 1;
+  int64 parcel_version = 2;
+  string start_platform_version = 3;
+  string end_platform_version = 4;
+  BatteryHistoryProto history = 5;
+  repeated UidProto uids = 6;
+  SystemProto system = 7;
+}
+
+message BatteryHistoryProto {
+}
+
+message ControllerActivityProto {
+  // Time (milliseconds) spent in the idle state.
+  int64 idle_duration_ms = 1;
+  // Time (milliseconds) spent in the receive state.
+  int64 rx_duration_ms = 2;
+  // Total power (mAh) consumed by the controller in all states. The value may
+  // always be 0 if the device doesn't support power calculations.
+  int64 power_mah = 3;
+
+  // Represents a transmit level, where each level may draw a different amount
+  // of power. The levels themselves are controller-specific (and may possibly
+  // be device specific...yet to be confirmed).
+  message TxLevel {
+    // Transmit level. Higher levels draw more power.
+    int32 level = 1;
+    // Time spent in this specific transmit level state.
+    int64 duration_ms = 2;
+  }
+  repeated TxLevel tx = 4;
+}
+
+message SystemProto {
+}
+
+message TimerProto {
+  int64 duration_ms = 1;
+  int64 count = 2;
+}
+
+message UidProto {
+  // Combination of app ID and user ID.
+  int32 uid = 1;
+  repeated string package_names = 2;
+}

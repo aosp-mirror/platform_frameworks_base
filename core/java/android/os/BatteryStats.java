@@ -19,6 +19,7 @@ package android.os;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.service.batterystats.BatteryStatsServiceDumpProto;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -29,11 +30,13 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -190,7 +193,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final int STATS_SINCE_UNPLUGGED = 2;
 
     // NOTE: Update this list if you add/change any stats above.
-    // These characters are supposed to represent "total", "last", "current", 
+    // These characters are supposed to represent "total", "last", "current",
     // and "unplugged". They were shortened for efficiency sake.
     private static final String[] STAT_NAMES = { "l", "c", "u" };
 
@@ -220,7 +223,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 27:
      *   - Always On Display (screen doze mode) time and power
      */
-    static final String CHECKIN_VERSION = "27";
+    static final int CHECKIN_VERSION = 27;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -2988,6 +2991,31 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Dump a given timer stat to the proto stream.
+     *
+     * @param proto the ProtoOutputStream to log to
+     * @param fieldId type of data, the field to save to (e.g. AggregatedBatteryStats.WAKELOCK)
+     * @param timer a {@link Timer} to dump stats for
+     * @param rawRealtimeUs the current elapsed realtime of the system in microseconds
+     * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
+     */
+    private static void dumpTimer(ProtoOutputStream proto, long fieldId,
+                                        Timer timer, long rawRealtime, int which) {
+        if (timer == null) {
+            return;
+        }
+        // Convert from microseconds to milliseconds with rounding
+        final long totalTimeMs = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+        final int count = timer.getCountLocked(which);
+        if (totalTimeMs != 0 || count != 0) {
+            final long token = proto.start(fieldId);
+            proto.write(TimerProto.DURATION_MS, totalTimeMs);
+            proto.write(TimerProto.COUNT, count);
+            proto.end(token);
+        }
+    }
+
+    /**
      * Checks if the ControllerActivityCounter has any data worth dumping.
      */
     private static boolean controllerActivityHasData(ControllerActivityCounter counter, int which) {
@@ -3037,6 +3065,38 @@ public abstract class BatteryStats implements Parcelable {
             pw.print(c.getCountLocked(which));
         }
         pw.println();
+    }
+
+    /**
+     * Dumps the ControllerActivityCounter if it has any data worth dumping.
+     */
+    private static void dumpControllerActivityProto(ProtoOutputStream proto, long fieldId,
+                                                    ControllerActivityCounter counter,
+                                                    int which) {
+        if (!controllerActivityHasData(counter, which)) {
+            return;
+        }
+
+        final long cToken = proto.start(fieldId);
+
+        proto.write(ControllerActivityProto.IDLE_DURATION_MS,
+                counter.getIdleTimeCounter().getCountLocked(which));
+        proto.write(ControllerActivityProto.RX_DURATION_MS,
+                counter.getRxTimeCounter().getCountLocked(which));
+        proto.write(ControllerActivityProto.POWER_MAH,
+                counter.getPowerCounter().getCountLocked(which) / (1000 * 60 * 60));
+
+        long tToken;
+        LongCounter[] txCounters = counter.getTxTimeCounters();
+        for (int i = 0; i < txCounters.length; ++i) {
+            LongCounter c = txCounters[i];
+            tToken = proto.start(ControllerActivityProto.TX);
+            proto.write(ControllerActivityProto.TxLevel.LEVEL, i);
+            proto.write(ControllerActivityProto.TxLevel.DURATION_MS, c.getCountLocked(which));
+            proto.end(tToken);
+        }
+
+        proto.end(cToken);
     }
 
     private final void printControllerActivityIfInteresting(PrintWriter pw, StringBuilder sb,
@@ -5491,6 +5551,7 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     public void prepareForDumpLocked() {
+        // We don't need to require subclasses implement this.
     }
 
     public static class HistoryPrinter {
@@ -6312,6 +6373,7 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    // This is called from BatteryStatsService.
     @SuppressWarnings("unused")
     public void dumpCheckinLocked(Context context, PrintWriter pw,
             List<ApplicationInfo> apps, int flags, long histStart) {
@@ -6323,10 +6385,7 @@ public abstract class BatteryStats implements Parcelable {
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
-        final boolean filtering = (flags &
-                (DUMP_HISTORY_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0;
-
-        if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
+        if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
             if (startIteratingHistoryLocked()) {
                 try {
                     for (int i=0; i<getHistoryStringPoolSize(); i++) {
@@ -6350,7 +6409,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        if (filtering && (flags&(DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) == 0) {
+        if ((flags & DUMP_HISTORY_ONLY) != 0) {
             return;
         }
 
@@ -6383,7 +6442,7 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
         }
-        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
+        if ((flags & DUMP_DAILY_ONLY) == 0) {
             dumpDurationSteps(pw, "", DISCHARGE_STEP_DATA, getDischargeLevelStepTracker(), true);
             String[] lineArgs = new String[1];
             long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime() * 1000);
@@ -6402,5 +6461,34 @@ public abstract class BatteryStats implements Parcelable {
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1,
                     (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
         }
+    }
+
+    /** Dump batterystats data to a proto. @hide */
+    public void dumpProtoLocked(Context context, FileDescriptor fd, List<ApplicationInfo> apps,
+            int flags, long historyStart) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final long bToken = proto.start(BatteryStatsServiceDumpProto.BATTERYSTATS);
+        prepareForDumpLocked();
+
+        proto.write(BatteryStatsProto.REPORT_VERSION, CHECKIN_VERSION);
+        proto.write(BatteryStatsProto.PARCEL_VERSION, getParcelVersion());
+        proto.write(BatteryStatsProto.START_PLATFORM_VERSION, getStartPlatformVersion());
+        proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
+
+        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+
+        if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
+            if (startIteratingHistoryLocked()) {
+                // TODO: implement dumpProtoHistoryLocked(proto);
+            }
+        }
+
+        if ((flags & (DUMP_HISTORY_ONLY | DUMP_DAILY_ONLY)) == 0) {
+            // TODO: implement dumpProtoAppsLocked(proto, apps);
+            // TODO: implement dumpProtoSystemLocked(proto);
+        }
+
+        proto.end(bToken);
+        proto.flush();
     }
 }
