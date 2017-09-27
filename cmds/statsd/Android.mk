@@ -54,6 +54,7 @@ LOCAL_SRC_FILES := \
     src/statsd_config.proto \
     src/stats_constants.proto \
     src/DropboxReader.cpp \
+    src/matchers/LogEntryMatcherManager.cpp \
 
 
 LOCAL_CFLAGS += \
@@ -107,6 +108,9 @@ LOCAL_MODULE := statsd_test
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
+	STATSD_PROTO_INCLUDES
+
 LOCAL_CFLAGS += \
     -Wall \
     -Werror \
@@ -115,21 +119,24 @@ LOCAL_CFLAGS += \
     -Wno-unused-function \
     -Wno-unused-parameter
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
-	STATSD_PROTO_INCLUDES
-
 LOCAL_SRC_FILES := \
+    src/stats_log.proto \
+    src/statsd_config.proto \
+    src/stats_constants.proto \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
     tests/indexed_priority_queue_test.cpp \
+    src/parse_util.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
+    src/matchers/LogEntryMatcherManager.cpp \
     tests/LogReader_test.cpp \
+    tests/LogEntryMatcher_test.cpp \
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock \
-    statsd_proto
+    statsd_proto \
 
 LOCAL_SHARED_LIBRARIES := \
     libbase \
