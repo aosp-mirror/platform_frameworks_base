@@ -152,7 +152,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * turn ND offload off if on WiFi.
      */
     private void enterRunningState() {
-        maybeSetIpv6NdOffload(mBaseIface, false);
         mState = State.RUNNING;
     }
 
@@ -160,10 +159,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * Stop clatd, and turn ND offload on if it had been turned off.
      */
     private void enterStoppingState() {
-        if (isRunning()) {
-            maybeSetIpv6NdOffload(mBaseIface, true);
-        }
-
         try {
             mNMService.stopClatd(mBaseIface);
         } catch(RemoteException|IllegalStateException e) {
@@ -276,19 +271,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
         } catch(RemoteException|IllegalStateException e) {
             Slog.e(TAG, "Error getting link properties: " + e);
             return null;
-        }
-    }
-
-    private void maybeSetIpv6NdOffload(String iface, boolean on) {
-        // TODO: migrate to NetworkCapabilities.TRANSPORT_*.
-        if (mNetwork.networkInfo.getType() != ConnectivityManager.TYPE_WIFI) {
-            return;
-        }
-        try {
-            Slog.d(TAG, (on ? "En" : "Dis") + "abling ND offload on " + iface);
-            mNMService.setInterfaceIpv6NdOffload(iface, on);
-        } catch(RemoteException|IllegalStateException e) {
-            Slog.w(TAG, "Changing IPv6 ND offload on " + iface + "failed: " + e);
         }
     }
 
