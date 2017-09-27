@@ -318,16 +318,19 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return null;
     }
 
+    @Override
     public String toString() {
         return "PermissionInfo{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + name + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(protectionLevel);
@@ -338,11 +341,25 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
     }
 
+    /** @hide */
+    public int calculateFootprint() {
+        int size = name.length();
+        if (nonLocalizedLabel != null) {
+            size += nonLocalizedLabel.length();
+        }
+        if (nonLocalizedDescription != null) {
+            size += nonLocalizedDescription.length();
+        }
+        return size;
+    }
+
     public static final Creator<PermissionInfo> CREATOR =
         new Creator<PermissionInfo>() {
+        @Override
         public PermissionInfo createFromParcel(Parcel source) {
             return new PermissionInfo(source);
         }
+        @Override
         public PermissionInfo[] newArray(int size) {
             return new PermissionInfo[size];
         }

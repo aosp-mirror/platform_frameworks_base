@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -64,7 +63,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -87,10 +85,9 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
-import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.PackageManagerService.DumpState;
 import com.android.server.pm.PermissionsState.PermissionState;
+import com.android.server.pm.permission.BasePermission;
 
 import libcore.io.IoUtils;
 
@@ -127,7 +124,7 @@ import java.util.Set;
 /**
  * Holds information about dynamic settings.
  */
-final class Settings {
+public final class Settings {
     private static final String TAG = "PackageSettings";
 
     /**
@@ -176,7 +173,7 @@ final class Settings {
     private static final String TAG_READ_EXTERNAL_STORAGE = "read-external-storage";
     private static final String ATTR_ENFORCEMENT = "enforcement";
 
-    private static final String TAG_ITEM = "item";
+    public static final String TAG_ITEM = "item";
     private static final String TAG_DISABLED_COMPONENTS = "disabled-components";
     private static final String TAG_ENABLED_COMPONENTS = "enabled-components";
     private static final String TAG_PACKAGE_RESTRICTIONS = "package-restrictions";
@@ -201,7 +198,8 @@ final class Settings {
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
 
-    private static final String ATTR_NAME = "name";
+    public static final String ATTR_NAME = "name";
+    public static final String ATTR_PACKAGE = "package";
     private static final String ATTR_USER = "user";
     private static final String ATTR_CODE = "code";
     private static final String ATTR_GRANTED = "granted";
@@ -233,7 +231,6 @@ final class Settings {
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
-    private static final String ATTR_DONE = "done";
 
     // Bookkeeping for restored permission grants
     private static final String TAG_RESTORED_RUNTIME_PERMISSIONS = "restored-perms";
@@ -665,26 +662,13 @@ final class Settings {
     }
 
     // Transfer ownership of permissions from one package to another.
-    void transferPermissionsLPw(String origPkg, String newPkg) {
+    void transferPermissionsLPw(String origPackageName, String newPackageName) {
         // Transfer ownership of permissions to the new package.
         for (int i=0; i<2; i++) {
             ArrayMap<String, BasePermission> permissions =
                     i == 0 ? mPermissionTrees : mPermissions;
             for (BasePermission bp : permissions.values()) {
-                if (origPkg.equals(bp.sourcePackage)) {
-                    if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG,
-                            "Moving permission " + bp.name
-                            + " from pkg " + bp.sourcePackage
-                            + " to " + newPkg);
-                    bp.sourcePackage = newPkg;
-                    bp.packageSetting = null;
-                    bp.perm = null;
-                    if (bp.pendingInfo != null) {
-                        bp.pendingInfo.packageName = newPkg;
-                    }
-                    bp.uid = 0;
-                    bp.setGids(null, false);
-                }
+                bp.transfer(origPackageName, newPackageName);
             }
         }
     }
@@ -2022,8 +2006,7 @@ final class Settings {
 
     // Specifically for backup/restore
     public void processRestoredPermissionGrantLPr(String pkgName, String permission,
-            boolean isGranted, int restoredFlagSet, int userId)
-            throws IOException, XmlPullParserException {
+            boolean isGranted, int restoredFlagSet, int userId) {
         mRuntimePermissionsPersistence.rememberRestoredUserGrantLPr(
                 pkgName, permission, isGranted, restoredFlagSet, userId);
     }
@@ -2605,9 +2588,6 @@ final class Settings {
             writeAllRuntimePermissionsLPr();
             return;
 
-        } catch(XmlPullParserException e) {
-            Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
-                    + "current changes will be lost at reboot", e);
         } catch(java.io.IOException e) {
             Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
                     + "current changes will be lost at reboot", e);
@@ -2951,7 +2931,6 @@ final class Settings {
 
     void writeUpgradeKeySetsLPr(XmlSerializer serializer,
             PackageKeySetData data) throws IOException {
-        long properSigning = data.getProperSigningKeySet();
         if (data.isUsingUpgradeKeySets()) {
             for (long id : data.getUpgradeKeySets()) {
                 serializer.startTag(null, "upgrade-keyset");
@@ -2971,32 +2950,8 @@ final class Settings {
         }
     }
 
-    void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
-            throws XmlPullParserException, java.io.IOException {
-        if (bp.sourcePackage != null) {
-            serializer.startTag(null, TAG_ITEM);
-            serializer.attribute(null, ATTR_NAME, bp.name);
-            serializer.attribute(null, "package", bp.sourcePackage);
-            if (bp.protectionLevel != PermissionInfo.PROTECTION_NORMAL) {
-                serializer.attribute(null, "protection", Integer.toString(bp.protectionLevel));
-            }
-            if (PackageManagerService.DEBUG_SETTINGS)
-                Log.v(PackageManagerService.TAG, "Writing perm: name=" + bp.name + " type="
-                        + bp.type);
-            if (bp.type == BasePermission.TYPE_DYNAMIC) {
-                final PermissionInfo pi = bp.perm != null ? bp.perm.info : bp.pendingInfo;
-                if (pi != null) {
-                    serializer.attribute(null, "type", "dynamic");
-                    if (pi.icon != 0) {
-                        serializer.attribute(null, "icon", Integer.toString(pi.icon));
-                    }
-                    if (pi.nonLocalizedLabel != null) {
-                        serializer.attribute(null, "label", pi.nonLocalizedLabel.toString());
-                    }
-                }
-            }
-            serializer.endTag(null, TAG_ITEM);
-        }
+    void writePermissionLPr(XmlSerializer serializer, BasePermission bp) throws IOException {
+        bp.writeLPr(serializer);
     }
 
     ArrayList<PackageSetting> getListOfIncompleteInstallPackagesLPr() {
@@ -3169,7 +3124,8 @@ final class Settings {
                     }
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
-                    mReadExternalStorageEnforced = "1".equals(enforcement);
+                    mReadExternalStorageEnforced =
+                            "1".equals(enforcement) ? Boolean.TRUE : Boolean.FALSE;
                 } else if (tagName.equals("keyset-settings")) {
                     mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs);
                 } else if (TAG_VERSION.equals(tagName)) {
@@ -3593,22 +3549,6 @@ final class Settings {
         }
     }
 
-    private int readInt(XmlPullParser parser, String ns, String name, int defValue) {
-        String v = parser.getAttributeValue(ns, name);
-        try {
-            if (v == null) {
-                return defValue;
-            }
-            return Integer.parseInt(v);
-        } catch (NumberFormatException e) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: attribute " + name
-                            + " has bad integer value " + v + " at "
-                            + parser.getPositionDescription());
-        }
-        return defValue;
-    }
-
     private void readPermissionsLPw(ArrayMap<String, BasePermission> out, XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
@@ -3619,38 +3559,7 @@ final class Settings {
                 continue;
             }
 
-            final String tagName = parser.getName();
-            if (tagName.equals(TAG_ITEM)) {
-                final String name = parser.getAttributeValue(null, ATTR_NAME);
-                final String sourcePackage = parser.getAttributeValue(null, "package");
-                final String ptype = parser.getAttributeValue(null, "type");
-                if (name != null && sourcePackage != null) {
-                    final boolean dynamic = "dynamic".equals(ptype);
-                    BasePermission bp = out.get(name);
-                    // If the permission is builtin, do not clobber it.
-                    if (bp == null || bp.type != BasePermission.TYPE_BUILTIN) {
-                        bp = new BasePermission(name.intern(), sourcePackage,
-                                dynamic ? BasePermission.TYPE_DYNAMIC : BasePermission.TYPE_NORMAL);
-                    }
-                    bp.protectionLevel = readInt(parser, null, "protection",
-                            PermissionInfo.PROTECTION_NORMAL);
-                    bp.protectionLevel = PermissionInfo.fixProtectionLevel(bp.protectionLevel);
-                    if (dynamic) {
-                        PermissionInfo pi = new PermissionInfo();
-                        pi.packageName = sourcePackage.intern();
-                        pi.name = name.intern();
-                        pi.icon = readInt(parser, null, "icon", 0);
-                        pi.nonLocalizedLabel = parser.getAttributeValue(null, "label");
-                        pi.protectionLevel = bp.protectionLevel;
-                        bp.pendingInfo = pi;
-                    }
-                    out.put(bp.name, bp);
-                } else {
-                    PackageManagerService.reportSettingsProblem(Log.WARN,
-                            "Error in package manager settings: permissions has" + " no name at "
-                                    + parser.getPositionDescription());
-                }
-            } else {
+            if (!BasePermission.readLPw(out, parser)) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element reading permissions: " + parser.getName() + " at "
                                 + parser.getPositionDescription());
@@ -4385,10 +4294,6 @@ final class Settings {
         return ps;
     }
 
-    private String compToString(ArraySet<String> cmp) {
-        return cmp != null ? Arrays.toString(cmp.toArray()) : "[]";
-    }
-
     boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
         final PackageSetting ps = mPackages.get(componentInfo.packageName);
         if (ps == null) return false;
@@ -5002,43 +4907,9 @@ final class Settings {
     void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
         boolean printedSomething = false;
-        for (BasePermission p : mPermissions.values()) {
-            if (packageName != null && !packageName.equals(p.sourcePackage)) {
-                continue;
-            }
-            if (permissionNames != null && !permissionNames.contains(p.name)) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted())
-                    pw.println();
-                pw.println("Permissions:");
-                printedSomething = true;
-            }
-            pw.print("  Permission ["); pw.print(p.name); pw.print("] (");
-                    pw.print(Integer.toHexString(System.identityHashCode(p)));
-                    pw.println("):");
-            pw.print("    sourcePackage="); pw.println(p.sourcePackage);
-            pw.print("    uid="); pw.print(p.uid);
-                    pw.print(" gids="); pw.print(Arrays.toString(
-                            p.computeGids(UserHandle.USER_SYSTEM)));
-                    pw.print(" type="); pw.print(p.type);
-                    pw.print(" prot=");
-                    pw.println(PermissionInfo.protectionToString(p.protectionLevel));
-            if (p.perm != null) {
-                pw.print("    perm="); pw.println(p.perm);
-                if ((p.perm.info.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                        || (p.perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0) {
-                    pw.print("    flags=0x"); pw.println(Integer.toHexString(p.perm.info.flags));
-                }
-            }
-            if (p.packageSetting != null) {
-                pw.print("    packageSetting="); pw.println(p.packageSetting);
-            }
-            if (READ_EXTERNAL_STORAGE.equals(p.name)) {
-                pw.print("    enforced=");
-                pw.println(mReadExternalStorageEnforced);
-            }
+        for (BasePermission bp : mPermissions.values()) {
+            printedSomething = bp.dumpPermissionsLPr(pw, packageName, permissionNames,
+                    mReadExternalStorageEnforced == Boolean.TRUE, printedSomething, dumpState);
         }
     }
 
@@ -5248,7 +5119,7 @@ final class Settings {
 
         private final Handler mHandler = new MyHandler();
 
-        private final Object mLock;
+        private final Object mPersistenceLock;
 
         @GuardedBy("mLock")
         private final SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
@@ -5265,8 +5136,8 @@ final class Settings {
         // The mapping keys are user ids.
         private final SparseBooleanArray mDefaultPermissionsGranted = new SparseBooleanArray();
 
-        public RuntimePermissionPersistence(Object lock) {
-            mLock = lock;
+        public RuntimePermissionPersistence(Object persistenceLock) {
+            mPersistenceLock = persistenceLock;
         }
 
         public boolean areDefaultRuntimPermissionsGrantedLPr(int userId) {
@@ -5321,7 +5192,7 @@ final class Settings {
             ArrayMap<String, List<PermissionState>> permissionsForPackage = new ArrayMap<>();
             ArrayMap<String, List<PermissionState>> permissionsForSharedUser = new ArrayMap<>();
 
-            synchronized (mLock) {
+            synchronized (mPersistenceLock) {
                 mWriteScheduled.delete(userId);
 
                 final int packageCount = mPackages.size();
