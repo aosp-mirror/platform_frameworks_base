@@ -60,12 +60,6 @@ public final class SelectionActionModeHelper {
 
     private static final String LOG_TAG = "SelectActionModeHelper";
 
-    /**
-     * Maximum time (in milliseconds) to wait for a result before timing out.
-     */
-    // TODO: Consider making this a ViewConfiguration.
-    private static final int TIMEOUT_DURATION = 200;
-
     private static final boolean SMART_SELECT_ANIMATION_ENABLED = true;
 
     private final Editor mEditor;
@@ -110,7 +104,7 @@ public final class SelectionActionModeHelper {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
-                    TIMEOUT_DURATION,
+                    mTextClassificationHelper.getTimeoutDuration(),
                     adjustSelection
                             ? mTextClassificationHelper::suggestSelection
                             : mTextClassificationHelper::classifyText,
@@ -129,7 +123,7 @@ public final class SelectionActionModeHelper {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
-                    TIMEOUT_DURATION,
+                    mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
                     this::invalidateActionMode)
                     .execute();
@@ -257,6 +251,7 @@ public final class SelectionActionModeHelper {
         return result;
     }
 
+    // TODO: Move public pure functions out of this class and make it package-private.
     /**
      * Merges a {@link RectF} into an existing list of rectangles. While merging, this method
      * makes sure that:
@@ -786,6 +781,9 @@ public final class SelectionActionModeHelper {
         private LocaleList mLastClassificationLocales;
         private SelectionResult mLastClassificationResult;
 
+        /** Whether the TextClassifier has been initialized. */
+        private boolean mHot;
+
         TextClassificationHelper(TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             reset(textClassifier, text, selectionStart, selectionEnd, locales);
@@ -805,17 +803,35 @@ public final class SelectionActionModeHelper {
 
         @WorkerThread
         public SelectionResult classifyText() {
+            mHot = true;
             return performClassification(null /* selection */);
         }
 
         @WorkerThread
         public SelectionResult suggestSelection() {
+            mHot = true;
             trimText();
             final TextSelection selection = mTextClassifier.suggestSelection(
                     mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
             mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
             mSelectionEnd = Math.min(mText.length(), selection.getSelectionEndIndex() + mTrimStart);
             return performClassification(selection);
+        }
+
+        /**
+         * Maximum time (in milliseconds) to wait for a textclassifier result before timing out.
+         */
+        // TODO: Consider making this a ViewConfiguration.
+        public int getTimeoutDuration() {
+            if (mHot) {
+                return 200;
+            } else {
+                // Return a slightly larger number than usual when the TextClassifier is first
+                // initialized. Initialization would usually take longer than subsequent calls to
+                // the TextClassifier. The impact of this on the UI is that we do not show the
+                // selection handles or toolbar until after this timeout.
+                return 500;
+            }
         }
 
         private SelectionResult performClassification(@Nullable TextSelection selection) {
