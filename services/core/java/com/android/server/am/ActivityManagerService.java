@@ -24537,7 +24537,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
-                                .getApplicationInfo(packageName, 0 /*flags*/, app.userId);
+                                .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
                         if (ai != null) {
                             app.thread.scheduleApplicationInfoChanged(ai);
                         }
