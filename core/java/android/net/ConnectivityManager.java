@@ -2078,16 +2078,30 @@ public class ConnectivityManager {
      * {@code ro.tether.denied} system property, Settings.TETHER_SUPPORTED or
      * due to device configuration.
      *
+     * <p>If this app does not have permission to use this API, it will always
+     * return false rather than throw an exception.</p>
+     *
+     * <p>If the device has a hotspot provisioning app, the caller is required to hold the
+     * {@link android.Manifest.permission.TETHER_PRIVILEGED} permission.</p>
+     *
+     * <p>Otherwise, this method requires the caller to hold the ability to modify system
+     * settings as determined by {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @return a boolean - {@code true} indicating Tethering is supported.
      *
      * {@hide}
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    @RequiresPermission(anyOf = {android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS})
     public boolean isTetheringSupported() {
+        String pkgName = mContext.getOpPackageName();
         try {
-            String pkgName = mContext.getOpPackageName();
             return mService.isTetheringSupported(pkgName);
+        } catch (SecurityException e) {
+            // This API is not available to this caller, but for backward-compatibility
+            // this will just return false instead of throwing.
+            return false;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
