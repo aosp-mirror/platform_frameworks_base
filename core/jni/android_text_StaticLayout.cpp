@@ -187,24 +187,9 @@ static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset,
     return reinterpret_cast<jlong>(hyphenator);
 }
 
-static void nSetLocales(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleNames,
-        jlongArray nativeHyphenators) {
-    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
-
-    ScopedUtfChars localeNames(env, javaLocaleNames);
-    ScopedLongArrayRO hyphArr(env, nativeHyphenators);
-    const size_t numLocales = hyphArr.size();
-    std::vector<minikin::Hyphenator*> hyphVec;
-    hyphVec.reserve(numLocales);
-    for (size_t i = 0; i < numLocales; i++) {
-        hyphVec.push_back(reinterpret_cast<minikin::Hyphenator*>(hyphArr[i]));
-    }
-    b->setLocales(localeNames.c_str(), hyphVec);
-}
-
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePaint, jint start,
-        jint end, jboolean isRtl) {
+        jint end, jboolean isRtl, jstring langTags, jlongArray hyphenators) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
     const Typeface* typeface = paint->getAndroidTypeface();
@@ -212,8 +197,26 @@ static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePai
     const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
             typeface);
-    return b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start, end,
-            isRtl);
+
+    std::vector<minikin::Hyphenator*> hyphVec;
+    const char* langTagStr;
+    if (langTags == nullptr) {
+        langTagStr = nullptr;  // nullptr languageTag means keeping current locale
+    } else {
+        ScopedLongArrayRO hyphArr(env, hyphenators);
+        const size_t numLocales = hyphArr.size();
+        hyphVec.reserve(numLocales);
+        for (size_t i = 0; i < numLocales; i++) {
+          hyphVec.push_back(reinterpret_cast<minikin::Hyphenator*>(hyphArr[i]));
+        }
+        langTagStr = env->GetStringUTFChars(langTags, nullptr);
+    }
+    float result = b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start,
+            end, isRtl, langTagStr, hyphVec);
+    if (langTagStr != nullptr)  {
+        env->ReleaseStringUTFChars(langTags, langTagStr);
+    }
+    return result;
 }
 
 // Accept width measurements for the run, passed in from Java
@@ -221,7 +224,8 @@ static void nAddMeasuredRun(JNIEnv* env, jclass, jlong nativePtr,
         jint start, jint end, jfloatArray widths) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     env->GetFloatArrayRegion(widths, start, end - start, b->charWidths() + start);
-    b->addStyleRun(nullptr, nullptr, minikin::FontStyle{}, start, end, false);
+    b->addStyleRun(nullptr, nullptr, minikin::FontStyle{}, start, end, false,
+            nullptr /* keep current locale */, std::vector<minikin::Hyphenator*>());
 }
 
 static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
@@ -241,9 +245,8 @@ static const JNINativeMethod gMethods[] = {
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
-    {"nSetLocales", "(JLjava/lang/String;[J)V", (void*) nSetLocales},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ[II)V", (void*) nSetupParagraph},
-    {"nAddStyleRun", "(JJIIZ)F", (void*) nAddStyleRun},
+    {"nAddStyleRun", "(JJIIZLjava/lang/String;[J)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
     {"nGetWidths", "(J[F)V", (void*) nGetWidths},
