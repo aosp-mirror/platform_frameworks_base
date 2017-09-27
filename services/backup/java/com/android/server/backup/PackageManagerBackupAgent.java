@@ -30,6 +30,8 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.server.backup.utils.AppBackupUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -140,7 +142,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         int N = pkgs.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
-            if (!BackupManagerService.appIsEligibleForBackup(pkg.applicationInfo, pm)) {
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, pm)) {
                 pkgs.remove(a);
             }
         }

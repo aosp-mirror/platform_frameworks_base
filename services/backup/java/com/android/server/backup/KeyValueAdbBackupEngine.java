@@ -4,8 +4,8 @@ import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_BACKUP_INTERVAL;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -18,6 +18,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Slog;
+
+import com.android.server.backup.utils.FullBackupUtils;
 
 import libcore.io.IoUtils;
 
@@ -78,7 +80,7 @@ public class KeyValueAdbBackupEngine {
         mNewStateName = new File(mStateDir,
                 pkg + BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX);
 
-        mManifestFile = new File(mDataDir, BackupManagerService.BACKUP_MANIFEST_FILENAME);
+        mManifestFile = new File(mDataDir, RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME);
     }
 
     public void backupOnePackage() throws IOException {
@@ -188,7 +190,7 @@ public class KeyValueAdbBackupEngine {
                 if (DEBUG) {
                     Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
                 }
-                BackupManagerService.writeAppManifest(
+                FullBackupUtils.writeAppManifest(
                         mPackage, mPackageManager, mManifestFile, false, false);
                 FullBackup.backupToTar(mPackage.packageName, FullBackup.KEY_VALUE_DATA_TOKEN, null,
                         mDataDir.getAbsolutePath(),
@@ -251,7 +253,7 @@ public class KeyValueAdbBackupEngine {
             t.start();
 
             // Now pull data from the app and stuff it into the output
-            BackupManagerService.routeSocketDataToOutput(pipes[0], mOutput);
+            FullBackupUtils.routeSocketDataToOutput(pipes[0], mOutput);
 
             if (!mBackupManagerService.waitUntilOperationComplete(token)) {
                 Slog.e(TAG, "Full backup failed on package " + mCurrentPackage.packageName);
