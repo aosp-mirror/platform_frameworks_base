@@ -804,6 +804,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 } else {
                     mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
                 }
+                String ssid = args.getString("ssid");
+                if (ssid != null) {
+                    mDemoWifiState.ssid = ssid;
+                }
                 mDemoWifiState.enabled = show;
                 mWifiSignalController.notifyListeners();
             }
