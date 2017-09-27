@@ -126,7 +126,6 @@ public class Nat464XlatTest {
         mLooper.dispatchNext();
 
         verify(mNms).getInterfaceConfig(eq(STACKED_IFACE));
-        verify(mNms).setInterfaceIpv6NdOffload(eq(BASE_IFACE), eq(false));
         verify(mConnectivity).handleUpdateLinkProperties(eq(mNai), c.capture());
         assertFalse(c.getValue().getStackedLinks().isEmpty());
         assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
@@ -136,7 +135,6 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNms).stopClatd(eq(BASE_IFACE));
-        verify(mNms).setInterfaceIpv6NdOffload(eq(BASE_IFACE), eq(true));
 
         // Stacked interface removed notification arrives.
         nat.interfaceRemoved(STACKED_IFACE);
@@ -167,7 +165,6 @@ public class Nat464XlatTest {
         mLooper.dispatchNext();
 
         verify(mNms).getInterfaceConfig(eq(STACKED_IFACE));
-        verify(mNms).setInterfaceIpv6NdOffload(eq(BASE_IFACE), eq(false));
         verify(mConnectivity, times(1)).handleUpdateLinkProperties(eq(mNai), c.capture());
         assertFalse(c.getValue().getStackedLinks().isEmpty());
         assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
@@ -179,7 +176,6 @@ public class Nat464XlatTest {
 
         verify(mNms).unregisterObserver(eq(nat));
         verify(mNms).stopClatd(eq(BASE_IFACE));
-        verify(mNms).setInterfaceIpv6NdOffload(eq(BASE_IFACE), eq(true));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));

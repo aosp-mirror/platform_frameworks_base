@@ -104,11 +104,6 @@ interface INetworkManagementService
     void setIPv6AddrGenMode(String iface, int mode);
 
     /**
-     * Enables or enables IPv6 ND offload.
-     */
-    void setInterfaceIpv6NdOffload(String iface, boolean enable);
-
-    /**
      * Add the specified route to the interface.
      */
     void addRoute(int netId, in RouteInfo route);
