@@ -36,22 +36,18 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer) {
     // transform the matrix based on the layer
-    int saveCount = -1;
-    if (!layer->getTransform().isIdentity()) {
-        saveCount = canvas->save();
-        SkMatrix transform;
-        layer->getTransform().copyTo(transform);
-        canvas->concat(transform);
-    }
-
+    SkMatrix layerTransform;
+    layer->getTransform().copyTo(layerTransform);
     sk_sp<SkImage> layerImage;
+    int layerWidth = layer->getWidth();
+    int layerHeight = layer->getHeight();
     if (layer->getApi() == Layer::Api::OpenGL) {
         GlLayer* glLayer = static_cast<GlLayer*>(layer);
         GrGLTextureInfo externalTexture;
         externalTexture.fTarget = glLayer->getRenderTarget();
         externalTexture.fID = glLayer->getTextureId();
-        GrBackendTexture backendTexture(glLayer->getWidth(), glLayer->getHeight(),
-                kRGBA_8888_GrPixelConfig, externalTexture);
+        GrBackendTexture backendTexture(layerWidth, layerHeight, kRGBA_8888_GrPixelConfig,
+                externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
                 kPremul_SkAlphaType, nullptr);
     } else {
@@ -62,15 +58,29 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     }
 
     if (layerImage) {
+        SkMatrix textureMatrix;
+        layer->getTexTransform().copyTo(textureMatrix);
+        //TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
+        // use bottom left origin and remove flipV and invert transformations.
+        SkMatrix flipV;
+        flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
+        textureMatrix.preConcat(flipV);
+        textureMatrix.preScale(1.0f/layerWidth, 1.0f/layerHeight);
+        textureMatrix.postScale(layerWidth, layerHeight);
+        SkMatrix textureMatrixInv;
+        if (!textureMatrix.invert(&textureMatrixInv)) {
+            textureMatrixInv = textureMatrix;
+        }
+
+        SkMatrix matrix = SkMatrix::Concat(textureMatrixInv, layerTransform);
+
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(sk_ref_sp(layer->getColorFilter()));
-        canvas->drawImage(layerImage, 0, 0, &paint);
-    }
-    // restore the original matrix
-    if (saveCount >= 0) {
-        canvas->restoreToCount(saveCount);
+        // draw image with a shader to avoid save/restore of the matrix
+        paint.setShader(layerImage->makeShader(&matrix));
+        canvas->drawRect(SkRect::MakeWH(layerWidth, layerHeight), paint);
     }
 
     return layerImage;
