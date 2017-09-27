@@ -115,7 +115,7 @@ public class TransitionUtils {
     /**
      * Get a copy of bitmap of given drawable, return null if intrinsic size is zero
      */
-    public static Bitmap createDrawableBitmap(Drawable drawable) {
+    public static Bitmap createDrawableBitmap(Drawable drawable, View hostView) {
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         if (width <= 0 || height <= 0) {
@@ -128,7 +128,7 @@ public class TransitionUtils {
         }
         int bitmapWidth = (int) (width * scale);
         int bitmapHeight = (int) (height * scale);
-        final RenderNode node = RenderNode.create("TransitionUtils", null);
+        final RenderNode node = RenderNode.create("TransitionUtils", hostView);
         node.setLeftTopRightBottom(0, 0, width, height);
         node.setClipToBounds(false);
         final DisplayListCanvas canvas = node.start(width, height);
@@ -169,7 +169,7 @@ public class TransitionUtils {
             matrix.postTranslate(-bounds.left, -bounds.top);
             matrix.postScale(scale, scale);
 
-            final RenderNode node = RenderNode.create("TransitionUtils", null);
+            final RenderNode node = RenderNode.create("TransitionUtils", view);
             node.setLeftTopRightBottom(0, 0, bitmapWidth, bitmapHeight);
             node.setClipToBounds(false);
             final DisplayListCanvas canvas = node.start(bitmapWidth, bitmapHeight);
