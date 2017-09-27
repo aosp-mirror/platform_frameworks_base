@@ -374,19 +374,19 @@ final class SmartSelectSprite {
         final List<RoundedRectangleShape> shapes = new LinkedList<>();
         final List<Animator> cornerAnimators = new LinkedList<>();
 
-        final RectF centerRectangle = destinationRectangles
-                .stream()
-                .filter((r) -> contains(r, start))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Center point is not inside any of the rectangles!"));
+        RectF centerRectangle = null;
 
         int startingOffset = 0;
         for (RectF rectangle : destinationRectangles) {
-            if (rectangle.equals(centerRectangle)) {
+            if (contains(rectangle, start)) {
+                centerRectangle = rectangle;
                 break;
             }
             startingOffset += rectangle.width();
+        }
+
+        if (centerRectangle == null) {
+            throw new IllegalArgumentException("Center point is not inside any of the rectangles!");
         }
 
         startingOffset += start.x - centerRectangle.left;
