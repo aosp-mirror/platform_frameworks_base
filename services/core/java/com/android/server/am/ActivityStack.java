@@ -471,7 +471,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
-        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds);
+        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds,
+                mStackSupervisor.mWindowManager);
     }
 
     T getWindowContainerController() {

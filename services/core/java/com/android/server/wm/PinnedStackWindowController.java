@@ -37,8 +37,8 @@ public class PinnedStackWindowController extends StackWindowController {
     private Rect mTmpToBounds = new Rect();
 
     public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds) {
-        super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
+            int displayId, boolean onTop, Rect outBounds, WindowManagerService service) {
+        super(stackId, listener, displayId, onTop, outBounds, service);
     }
 
     /**
