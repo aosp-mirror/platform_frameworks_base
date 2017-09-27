@@ -114,9 +114,9 @@ final class SmartSelectSprite {
         private final RectF mClipRect = new RectF();
         private final Path mClipPath = new Path();
 
-        /** How far offset the left edge of the rectangle is from the bounding box. */
+        /** How offset the left edge of the rectangle is from the left side of the bounding box. */
         private float mLeftBoundary = 0;
-        /** How far offset the right edge of the rectangle is from the bounding box. */
+        /** How offset the right edge of the rectangle is from the left side of the bounding box. */
         private float mRightBoundary = 0;
 
         private RoundedRectangleShape(
@@ -148,6 +148,10 @@ final class SmartSelectSprite {
          */
         @Override
         public void draw(Canvas canvas, Paint paint) {
+            if (mLeftBoundary == mRightBoundary) {
+                return;
+            }
+
             final float cornerRadius = getCornerRadius();
             final float adjustedCornerRadius = getAdjustedCornerRadius();
 
