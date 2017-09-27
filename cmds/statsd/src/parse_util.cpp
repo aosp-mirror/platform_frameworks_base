@@ -25,10 +25,24 @@ using android::os::statsd::KeyValuePair;
 using android::os::statsd::TagId;
 using android::os::statsd::TagId_IsValid;
 
-EventMetricData parse(log_msg msg) {
+static inline uint32_t get4LE(const char* src) {
+    return src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24);
+}
+
+EventMetricData parse(log_msg msg)
+{
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     EventMetricData eventMetricData;
+
+    // set tag.
+    char* eventData = msg.msg();
+    uint32_t tag = get4LE(eventData);
+    if (!TagId_IsValid(tag)) {
+        // return when an invalid tag is found.
+        return eventMetricData;
+    }
+    eventMetricData.set_tag(static_cast<TagId>(tag));
 
     // set timestamp of the event.
     KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
@@ -45,32 +59,23 @@ EventMetricData parse(log_msg msg) {
         memset(&elem, 0, sizeof(elem));
         size_t index = 0;
         int32_t key = -1;
-        int32_t tag = -1;
 
         do {
             elem = android_log_read_next(context);
             switch ((int)elem.type) {
                 case EVENT_TYPE_INT:
-                    if (index == 0) {
-                        tag = elem.data.int32;
-                        if (TagId_IsValid(tag)) {
-                            eventMetricData.set_tag(static_cast<TagId>(tag));
-                        } else {
-                            break;
-                        }
-                    } else if (index % 2 == 1) {
+                    if (index % 2 == 0) {
                         key = elem.data.int32;
                     } else if (KeyId_IsValid(key)) {
                         int32_t val = elem.data.int32;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
                         keyValuePair->set_value_int(val);
-                    } else {
                     }
                     index++;
                     break;
                 case EVENT_TYPE_FLOAT:
-                    if (index % 2 == 0 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1 && KeyId_IsValid(key)) {
                         float val = elem.data.float32;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
@@ -79,7 +84,7 @@ EventMetricData parse(log_msg msg) {
                     index++;
                     break;
                 case EVENT_TYPE_STRING:
-                    if (index % 2 == 0 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1 && KeyId_IsValid(key)) {
                         char* val = elem.data.string;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
@@ -88,7 +93,7 @@ EventMetricData parse(log_msg msg) {
                     index++;
                     break;
                 case EVENT_TYPE_LONG:
-                    if (index % 2 == 0 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1 && KeyId_IsValid(key)) {
                         int64_t val = elem.data.int64;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
                         keyValuePair->set_key(static_cast<KeyId>(key));
