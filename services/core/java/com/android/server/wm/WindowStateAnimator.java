@@ -667,8 +667,6 @@ class WindowStateAnimator {
     }
 
     void computeShownFrameLocked() {
-        Transformation appTransformation = (mAppAnimator != null && mAppAnimator.hasTransformation)
-                ? mAppAnimator.transformation : null;
 
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
@@ -677,14 +675,14 @@ class WindowStateAnimator {
                 screenRotationAnimation != null && screenRotationAnimation.isAnimating();
 
         mHasClipRect = false;
-        if (appTransformation != null || screenAnimation) {
+        if (screenAnimation) {
             // cache often used attributes locally
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
             final Matrix tmpMatrix = mWin.mTmpMatrix;
 
             // Compute the desired transformation.
-            if (screenAnimation && screenRotationAnimation.isRotating()) {
+            if (screenRotationAnimation.isRotating()) {
                 // If we are doing a screen animation, the global rotation
                 // applied to windows can result in windows that are carefully
                 // aligned with each other to slightly separate, allowing you
@@ -702,6 +700,7 @@ class WindowStateAnimator {
             } else {
                 tmpMatrix.reset();
             }
+
             tmpMatrix.postScale(mWin.mGlobalScale, mWin.mGlobalScale);
 
             // WindowState.prepareSurfaces expands for surface insets (in order they don't get
@@ -709,9 +708,6 @@ class WindowStateAnimator {
             tmpMatrix.postTranslate(mWin.mXOffset + mWin.mAttrs.surfaceInsets.left,
                     mWin.mYOffset + mWin.mAttrs.surfaceInsets.top);
 
-            if (appTransformation != null) {
-                tmpMatrix.postConcat(appTransformation.getMatrix());
-            }
 
             // "convert" it into SurfaceFlinger's format
             // (a 2x2 matrix + an offset)
@@ -740,24 +736,6 @@ class WindowStateAnimator {
                     || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)
                             && x == frame.left && y == frame.top))) {
                 //Slog.i(TAG_WM, "Applying alpha transform");
-                if (appTransformation != null) {
-                    mShownAlpha *= appTransformation.getAlpha();
-                    if (appTransformation.hasClipRect()) {
-                        mClipRect.set(appTransformation.getClipRect());
-                        mHasClipRect = true;
-                        // The app transformation clip will be in the coordinate space of the main
-                        // activity window, which the animation correctly assumes will be placed at
-                        // (0,0)+(insets) relative to the containing frame. This isn't necessarily
-                        // true for child windows though which can have an arbitrary frame position
-                        // relative to their containing frame. We need to offset the difference
-                        // between the containing frame as used to calculate the crop and our
-                        // bounds to compensate for this.
-                        if (mWin.layoutInParentFrame()) {
-                            mClipRect.offset( (mWin.mContainingFrame.left - mWin.mFrame.left),
-                                    mWin.mContainingFrame.top - mWin.mFrame.top );
-                        }
-                    }
-                }
                 if (screenAnimation) {
                     mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
                 }
@@ -768,7 +746,6 @@ class WindowStateAnimator {
             if ((DEBUG_ANIM || WindowManagerService.localLOGV)
                     && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
                     TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
-                    + " app=" + (appTransformation == null ? "null" : appTransformation.getAlpha())
                     + " screen=" + (screenAnimation ?
                             screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
             return;
