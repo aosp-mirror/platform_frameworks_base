@@ -75,7 +75,7 @@ interface IConnectivityManager
 
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported();
+    boolean isTetheringSupported(String callerPkg);
 
     void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
             String callerPkg);

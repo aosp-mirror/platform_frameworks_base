@@ -2988,12 +2988,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return mTethering.getTetheredDhcpRanges();
     }
 
+    @Override
+    public boolean isTetheringSupported(String callerPkg) {
+        ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
+        return isTetheringSupported();
+    }
+
     // if ro.tether.denied = true we default to no tethering
     // gservices could set the secure setting to 1 though to enable it on a build where it
     // had previously been turned off.
-    @Override
-    public boolean isTetheringSupported() {
-        enforceTetherAccessPermission();
+    private boolean isTetheringSupported() {
         int defaultVal = encodeBool(!mSystemProperties.get("ro.tether.denied").equals("true"));
         boolean tetherSupported = toBool(Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal));
@@ -5464,6 +5468,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public String getCaptivePortalServerUrl() {
+        enforceConnectivityInternalPermission();
         return NetworkMonitor.getCaptivePortalServerHttpUrl(mContext);
     }
 
