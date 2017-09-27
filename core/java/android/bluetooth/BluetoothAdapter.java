@@ -1134,6 +1134,29 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of
+     * the local Bluetooth adapter.
+     *
+     * @param bluetoothClass {@link BluetoothClass} to set the local Bluetooth adapter to.
+     * @return true if successful, false if unsuccessful.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setBluetoothClass(BluetoothClass bluetoothClass) {
+        if (getState() != STATE_ON) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.setBluetoothClass(bluetoothClass);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
      * Get the current Bluetooth scan mode of the local Bluetooth adapter.
      * <p>The Bluetooth scan mode determines if the local adapter is
      * connectable and/or discoverable from remote Bluetooth devices.
