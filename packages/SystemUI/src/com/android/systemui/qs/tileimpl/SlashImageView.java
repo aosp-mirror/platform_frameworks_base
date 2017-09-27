@@ -34,7 +34,15 @@ public class SlashImageView extends ImageView {
         super(context);
     }
 
-    private void ensureSlashDrawable() {
+    protected SlashDrawable getSlash() {
+        return mSlash;
+    }
+
+    protected void setSlash(SlashDrawable slash) {
+        mSlash = slash;
+    }
+
+    protected void ensureSlashDrawable() {
         if (mSlash == null) {
             mSlash = new SlashDrawable(getDrawable());
             mSlash.setAnimationEnabled(mAnimationEnabled);
@@ -56,8 +64,16 @@ public class SlashImageView extends ImageView {
         }
     }
 
+    protected void setImageViewDrawable(SlashDrawable slash) {
+        super.setImageDrawable(slash);
+    }
+
     public void setAnimationEnabled(boolean enabled) {
         mAnimationEnabled = enabled;
+    }
+
+    public boolean getAnimationEnabled() {
+        return mAnimationEnabled;
     }
 
     private void setSlashState(@NonNull SlashState slashState) {
