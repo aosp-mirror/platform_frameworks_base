@@ -21,7 +21,7 @@
 #include "android_media_MediaDescrambler.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_os_HwRemoteBinder.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android/hardware/cas/native/1.0/BpHwDescrambler.h>
 #include <android/hardware/cas/native/1.0/BnHwDescrambler.h>

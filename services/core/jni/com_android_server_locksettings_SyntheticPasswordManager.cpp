@@ -16,7 +16,7 @@
 
 #define LOG_TAG "SyntheticPasswordManager"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 #include <android_runtime/Log.h>
