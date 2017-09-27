@@ -159,8 +159,10 @@ public class Shader {
         if (mNativeInstance == 0) {
             mNativeInstance = createNativeInstance(mLocalMatrix == null
                     ? 0 : mLocalMatrix.native_instance);
-            mCleaner = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
-                    this, mNativeInstance);
+            if (mNativeInstance != 0) {
+                mCleaner = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                        this, mNativeInstance);
+            }
         }
         return mNativeInstance;
     }
