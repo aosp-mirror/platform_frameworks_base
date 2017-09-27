@@ -124,7 +124,7 @@ bool BootAction::init(const std::string& libraryPath) {
 
     float brightness = -1.0f;
     float volume = -1.0f;
-    std::vector<BootParameter> parameters;
+    std::vector<ABootActionParameter> parameters;
     SavedBootParameters saved_parameters;
 
     if (loadParameters(&saved_parameters)) {
