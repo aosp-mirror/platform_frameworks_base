@@ -18,7 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 
-/*
+/**
  * @deprecated The WebSyncManager no longer does anything.
  */
 @Deprecated
