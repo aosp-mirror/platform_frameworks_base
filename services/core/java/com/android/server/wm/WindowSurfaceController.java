@@ -259,7 +259,7 @@ class WindowSurfaceController {
                     mSurfaceControl.setLayer(layer);
                 }
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("setLayer");
             }
         }
     }
@@ -385,7 +385,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setTransparentRegionHint(region);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setTransparentRegion");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setTransparentRegion");
         }
@@ -403,7 +403,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setOpaque(isOpaque);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setOpaqueLocked");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
         }
     }
@@ -420,7 +420,7 @@ class WindowSurfaceController {
         try {
             mSurfaceControl.setSecure(isSecure);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setSecure");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
         }
     }

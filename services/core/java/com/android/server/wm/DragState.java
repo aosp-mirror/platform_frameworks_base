@@ -458,7 +458,7 @@ class DragState {
                     + mSurfaceControl + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("notifyMoveLw");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLocked");
         }

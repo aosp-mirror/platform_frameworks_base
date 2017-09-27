@@ -296,7 +296,7 @@ class ScreenRotationAnimation {
             setRotationInTransaction(originalRotation);
         } finally {
             if (!inTransaction) {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("ScreenRotationAnimation");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation");
             }
@@ -567,7 +567,7 @@ class ScreenRotationAnimation {
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
                 if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                         TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
@@ -607,7 +607,7 @@ class ScreenRotationAnimation {
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
                 if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                         TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
@@ -629,7 +629,7 @@ class ScreenRotationAnimation {
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
-                mService.closeSurfaceTransaction();
+                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
                 if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                         TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");

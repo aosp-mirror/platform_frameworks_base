@@ -732,7 +732,7 @@ class WindowStateAnimator {
             mSurfaceController.setLayerStackInTransaction(getLayerStack());
             mSurfaceController.setLayer(mAnimLayer);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("createSurfaceLocked");
         }
 
         mLastHidden = true;
@@ -1711,7 +1711,7 @@ class WindowStateAnimator {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("setWallpaperOffset");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setWallpaperOffset");
         }

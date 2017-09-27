@@ -457,7 +457,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         try {
             forAllWindows(sRemoveReplacedWindowsConsumer, true /* traverseTopToBottom */);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("removeReplacedWindows");
             if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
         }
     }
@@ -599,7 +599,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            mService.closeSurfaceTransaction();
+            mService.closeSurfaceTransaction("performLayoutAndPlaceSurfaces");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
