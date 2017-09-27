@@ -516,6 +516,8 @@
   <java-symbol type="string" name="dial" />
   <java-symbol type="string" name="map" />
   <java-symbol type="string" name="browse" />
+  <java-symbol type="string" name="sms" />
+  <java-symbol type="string" name="add_contact" />
   <java-symbol type="string" name="textSelectionCABTitle" />
   <java-symbol type="string" name="BaMmi" />
   <java-symbol type="string" name="CLIRDefaultOffNextCallOff" />

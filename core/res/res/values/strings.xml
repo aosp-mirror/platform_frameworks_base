@@ -2685,6 +2685,12 @@
     <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
     <string name="browse">Browser</string>
 
+    <!-- Label for item in the text selection menu to trigger an SMS app [CHAR LIMIT=20] -->
+    <string name="sms">SMS</string>
+
+    <!-- Label for item in the text selection menu to trigger adding a contact [CHAR LIMIT=20] -->
+    <string name="add_contact">Contact</string>
+
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
