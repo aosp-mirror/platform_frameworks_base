@@ -52,6 +52,11 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.core.lifecycle.Lifecycle;
+import com.android.settingslib.core.lifecycle.LifecycleObserver;
+import com.android.settingslib.core.lifecycle.events.OnDestroy;
+import com.android.settingslib.core.lifecycle.events.OnPause;
+import com.android.settingslib.core.lifecycle.events.OnResume;
 
 import java.io.File;
 import java.io.IOException;
@@ -180,7 +185,11 @@ public class ApplicationsState {
     }
 
     public Session newSession(Callbacks callbacks) {
-        Session s = new Session(callbacks);
+        return newSession(callbacks, null);
+    }
+
+    public Session newSession(Callbacks callbacks, Lifecycle lifecycle) {
+        Session s = new Session(callbacks, lifecycle);
         synchronized (mEntriesMap) {
             mSessions.add(s);
         }
@@ -586,7 +595,7 @@ public class ApplicationsState {
                 .replaceAll("").toLowerCase();
     }
 
-    public class Session {
+    public class Session implements LifecycleObserver, OnPause, OnResume, OnDestroy {
         final Callbacks mCallbacks;
         boolean mResumed;
 
@@ -600,11 +609,19 @@ public class ApplicationsState {
         ArrayList<AppEntry> mLastAppList;
         boolean mRebuildForeground;
 
-        Session(Callbacks callbacks) {
+        private final boolean mHasLifecycle;
+
+        Session(Callbacks callbacks, Lifecycle lifecycle) {
             mCallbacks = callbacks;
+            if (lifecycle != null) {
+                lifecycle.addObserver(this);
+                mHasLifecycle = true;
+            } else {
+                mHasLifecycle = false;
+            }
         }
 
-        public void resume() {
+        public void onResume() {
             if (DEBUG_LOCKING) Log.v(TAG, "resume about to acquire lock...");
             synchronized (mEntriesMap) {
                 if (!mResumed) {
@@ -616,7 +633,7 @@ public class ApplicationsState {
             if (DEBUG_LOCKING) Log.v(TAG, "...resume releasing lock");
         }
 
-        public void pause() {
+        public void onPause() {
             if (DEBUG_LOCKING) Log.v(TAG, "pause about to acquire lock...");
             synchronized (mEntriesMap) {
                 if (mResumed) {
@@ -735,8 +752,11 @@ public class ApplicationsState {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         }
 
-        public void release() {
-            pause();
+        public void onDestroy() {
+            if (!mHasLifecycle) {
+                // TODO: Legacy, remove this later once all usages are switched to Lifecycle
+                onPause();
+            }
             synchronized (mEntriesMap) {
                 mSessions.remove(this);
             }
