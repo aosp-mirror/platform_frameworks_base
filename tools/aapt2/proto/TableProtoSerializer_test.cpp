@@ -19,6 +19,7 @@
 #include "ResourceTable.h"
 #include "test/Test.h"
 
+using ::android::StringPiece;
 using ::google::protobuf::io::StringOutputStream;
 using ::testing::Eq;
 using ::testing::NotNull;
@@ -237,6 +238,99 @@ TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
 
   uint64_t offset, len;
   EXPECT_FALSE(in_file_stream.ReadDataMetaData(&offset, &len));
+}
+
+static void ExpectConfigSerializes(const StringPiece& config_str) {
+  const ConfigDescription expected_config = test::ParseConfigOrDie(config_str);
+  pb::Configuration pb_config;
+  SerializeConfig(expected_config, &pb_config);
+
+  ConfigDescription actual_config;
+  ASSERT_TRUE(DeserializeConfigDescriptionFromPb(pb_config, &actual_config));
+  EXPECT_EQ(expected_config, actual_config);
+}
+
+TEST(TableProtoSerializer, SerializeDeserializeConfiguration) {
+  ExpectConfigSerializes("");
+
+  ExpectConfigSerializes("mcc123");
+
+  ExpectConfigSerializes("mnc123");
+
+  ExpectConfigSerializes("en");
+  ExpectConfigSerializes("en-rGB");
+  ExpectConfigSerializes("b+en+GB");
+
+  ExpectConfigSerializes("ldltr");
+  ExpectConfigSerializes("ldrtl");
+
+  ExpectConfigSerializes("sw3600dp");
+
+  ExpectConfigSerializes("w300dp");
+
+  ExpectConfigSerializes("h400dp");
+
+  ExpectConfigSerializes("small");
+  ExpectConfigSerializes("normal");
+  ExpectConfigSerializes("large");
+  ExpectConfigSerializes("xlarge");
+
+  ExpectConfigSerializes("long");
+  ExpectConfigSerializes("notlong");
+
+  ExpectConfigSerializes("round");
+  ExpectConfigSerializes("notround");
+
+  ExpectConfigSerializes("widecg");
+  ExpectConfigSerializes("nowidecg");
+
+  ExpectConfigSerializes("highdr");
+  ExpectConfigSerializes("lowdr");
+
+  ExpectConfigSerializes("port");
+  ExpectConfigSerializes("land");
+  ExpectConfigSerializes("square");
+
+  ExpectConfigSerializes("desk");
+  ExpectConfigSerializes("car");
+  ExpectConfigSerializes("television");
+  ExpectConfigSerializes("appliance");
+  ExpectConfigSerializes("watch");
+  ExpectConfigSerializes("vrheadset");
+
+  ExpectConfigSerializes("night");
+  ExpectConfigSerializes("notnight");
+
+  ExpectConfigSerializes("300dpi");
+  ExpectConfigSerializes("hdpi");
+
+  ExpectConfigSerializes("notouch");
+  ExpectConfigSerializes("stylus");
+  ExpectConfigSerializes("finger");
+
+  ExpectConfigSerializes("keysexposed");
+  ExpectConfigSerializes("keyshidden");
+  ExpectConfigSerializes("keyssoft");
+
+  ExpectConfigSerializes("nokeys");
+  ExpectConfigSerializes("qwerty");
+  ExpectConfigSerializes("12key");
+
+  ExpectConfigSerializes("navhidden");
+  ExpectConfigSerializes("navexposed");
+
+  ExpectConfigSerializes("nonav");
+  ExpectConfigSerializes("dpad");
+  ExpectConfigSerializes("trackball");
+  ExpectConfigSerializes("wheel");
+
+  ExpectConfigSerializes("300x200");
+
+  ExpectConfigSerializes("v8");
+
+  ExpectConfigSerializes(
+      "mcc123-mnc456-b+en+GB-ldltr-sw300dp-w300dp-h400dp-large-long-round-widecg-highdr-land-car-"
+      "night-xhdpi-stylus-keysexposed-qwerty-navhidden-dpad-300x200-v23");
 }
 
 }  // namespace aapt

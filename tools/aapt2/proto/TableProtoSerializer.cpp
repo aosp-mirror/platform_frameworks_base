@@ -282,10 +282,10 @@ CompiledFileOutputStream::CompiledFileOutputStream(ZeroCopyOutputStream* out) : 
 }
 
 void CompiledFileOutputStream::EnsureAlignedWrite() {
-  const int padding = out_.ByteCount() % 4;
-  if (padding > 0) {
+  const int overflow = out_.ByteCount() % 4;
+  if (overflow > 0) {
     uint32_t zero = 0u;
-    out_.WriteRaw(&zero, padding);
+    out_.WriteRaw(&zero, 4 - overflow);
   }
 }
 
@@ -322,10 +322,10 @@ CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size)
     : in_(static_cast<const uint8_t*>(data), size) {}
 
 void CompiledFileInputStream::EnsureAlignedRead() {
-  const int padding = in_.CurrentPosition() % 4;
-  if (padding > 0) {
+  const int overflow = in_.CurrentPosition() % 4;
+  if (overflow > 0) {
     // Reads are always 4 byte aligned.
-    in_.Skip(padding);
+    in_.Skip(4 - overflow);
   }
 }
 

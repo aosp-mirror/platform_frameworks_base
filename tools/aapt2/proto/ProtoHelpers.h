@@ -20,11 +20,12 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "ConfigDescription.h"
+#include "Configuration.pb.h"
 #include "ResourceTable.h"
-#include "Source.h"
-#include "StringPool.h"
 #include "Resources.pb.h"
 #include "ResourcesInternal.pb.h"
+#include "Source.h"
+#include "StringPool.h"
 
 namespace aapt {
 
@@ -39,9 +40,9 @@ pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state);
 
 SymbolState DeserializeVisibilityFromPb(pb::SymbolStatus_Visibility pb_visibility);
 
-void SerializeConfig(const ConfigDescription& config, pb::ConfigDescription* out_pb_config);
+void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config);
 
-bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
+bool DeserializeConfigDescriptionFromPb(const pb::Configuration& pb_config,
                                         ConfigDescription* out_config);
 
 pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type);

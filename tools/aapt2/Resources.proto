@@ -16,18 +16,12 @@
 
 syntax = "proto3";
 
+import "frameworks/base/tools/aapt2/Configuration.proto";
+
 package aapt.pb;
 
 option java_package = "com.android.aapt";
 option optimize_for = LITE_RUNTIME;
-
-// A configuration description that wraps the binary form of the C++ class
-// aapt::ConfigDescription, with an added product definition.
-// TODO(adamlesinski): Flesh this out to be represented in proto.
-message ConfigDescription {
-  bytes data = 1;
-  string product = 2;
-}
 
 // A string pool that wraps the binary form of the C++ class android::ResStringPool.
 message StringPool {
@@ -163,7 +157,7 @@ message Entry {
 
 // A Configuration/Value pair.
 message ConfigValue {
-  ConfigDescription config = 1;
+  Configuration config = 1;
   Value value = 2;
 }
 

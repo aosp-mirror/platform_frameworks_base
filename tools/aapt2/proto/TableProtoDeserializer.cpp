@@ -123,7 +123,7 @@ class PackagePbDeserializer {
         }
 
         for (const pb::ConfigValue& pb_config_value : pb_entry.config_value()) {
-          const pb::ConfigDescription& pb_config = pb_config_value.config();
+          const pb::Configuration& pb_config = pb_config_value.config();
 
           ConfigDescription config;
           if (!DeserializeConfigDescriptionFromPb(pb_config, &config)) {
@@ -395,14 +395,16 @@ std::unique_ptr<ResourceFile> DeserializeCompiledFileFromPb(
   }
   file->name = name_ref.ToResourceName();
   file->source.path = pb_file.source_path();
-  DeserializeConfigDescriptionFromPb(pb_file.config(), &file->config);
+  if (!DeserializeConfigDescriptionFromPb(pb_file.config(), &file->config)) {
+    diag->Error(DiagMessage(source) << "invalid resource configuration in compiled file header");
+    return {};
+  }
 
   for (const pb::internal::CompiledFile_Symbol& pb_symbol : pb_file.exported_symbol()) {
     // Need to create an lvalue here so that nameRef can point to something real.
     if (!ResourceUtils::ParseResourceName(pb_symbol.resource_name(), &name_ref)) {
       diag->Error(DiagMessage(source)
-                  << "invalid resource name for exported symbol in "
-                     "compiled file header: "
+                  << "invalid resource name for exported symbol in compiled file header: "
                   << pb_file.resource_name());
       return {};
     }
