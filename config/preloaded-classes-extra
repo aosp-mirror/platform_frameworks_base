@@ -8,6 +8,7 @@ android.media.MediaPlayer
 android.media.SoundPool
 android.text.format.Formatter
 android.text.Html$HtmlParser
+android.util.Log$PreloadHolder
 com.android.org.conscrypt.TrustedCertificateStore
 org.ccil.cowan.tagsoup.HTMLScanner
 sun.security.jca.Providers
