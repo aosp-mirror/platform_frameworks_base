@@ -436,7 +436,7 @@ public class PackageDexOptimizer {
             }
 
             if (useInfo.isUsedByOtherApps(path)) {
-                pw.println("used be other apps: " + useInfo.getLoadingPackages(path));
+                pw.println("used by other apps: " + useInfo.getLoadingPackages(path));
             }
 
             Map<String, PackageDexUsage.DexUseInfo> dexUseInfoMap = useInfo.getDexUseInfoMap();
@@ -452,7 +452,7 @@ public class PackageDexOptimizer {
                     // TODO(calin): get the status of the oat file (needs installd call)
                     pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
                     if (dexUseInfo.isUsedByOtherApps()) {
-                        pw.println("used be other apps: " + dexUseInfo.getLoadingPackages());
+                        pw.println("used by other apps: " + dexUseInfo.getLoadingPackages());
                     }
                     pw.decreaseIndent();
                 }
