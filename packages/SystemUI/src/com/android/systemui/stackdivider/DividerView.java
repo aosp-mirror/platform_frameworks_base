@@ -64,6 +64,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
@@ -1208,6 +1209,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mState.growAfterRecentsDrawn = true;
             startDragging(false /* animate */, false /* touching */);
         }
+    }
+
+    public final void onBusEvent(DockedFirstAnimationFrameEvent event) {
+        saveSnapTargetBeforeMinimized(mSnapAlgorithm.getMiddleTarget());
     }
 
     public final void onBusEvent(DockedTopTaskEvent event) {
