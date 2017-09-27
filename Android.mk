@@ -548,9 +548,10 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	telephony/java/com/android/internal/telephony/euicc/IEuiccController.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl \
-	wifi/java/android/net/wifi/aware/IWifiAwareManager.aidl \
 	wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareMacAddressProvider.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/rtt/IRttCallback.aidl \
 	wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl \
