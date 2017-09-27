@@ -17942,6 +17942,13 @@ public class PackageManagerService extends IPackageManager.Stub
                                         + " target SDK " + oldTargetSdk + " does.");
                         return;
                     }
+                    // Prevent persistent apps from being updated
+                    if ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0) {
+                        res.setError(PackageManager.INSTALL_FAILED_INVALID_APK,
+                                "Package " + oldPackage.packageName + " is a persistent app. "
+                                        + "Persistent apps are not updateable.");
+                        return;
+                    }
                     // Prevent apps from downgrading their targetSandbox.
                     final int oldTargetSandbox = oldPackage.applicationInfo.targetSandboxVersion;
                     final int newTargetSandbox = pkg.applicationInfo.targetSandboxVersion;
