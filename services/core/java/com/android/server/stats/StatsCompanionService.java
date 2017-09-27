@@ -30,7 +30,11 @@ import android.os.ServiceManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.KernelWakelockReader;
+import com.android.internal.os.KernelWakelockStats;
 import com.android.server.SystemService;
+
+import java.util.Map;
 
 /**
  * Helper service for statsd (the native stats management service in cmds/statsd/).
@@ -156,7 +160,44 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    @Override
+    // These values must be kept in sync with cmd/statsd/StatsPuller.h.
+    // TODO: pull the constant from stats_events.proto instead
+    private static final int PULL_CODE_KERNEL_WAKELOCKS = 20;
+
+    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
+    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+
+    @Override // Binder call
+    public String pullData(int pullCode) {
+        enforceCallingPermission();
+        if (DEBUG) Slog.d(TAG, "Fetching " + pullCode);
+
+        StringBuilder s = new StringBuilder(); // TODO: use and return a Parcel instead of a string
+        switch (pullCode) {
+            case PULL_CODE_KERNEL_WAKELOCKS:
+                final KernelWakelockStats wakelockStats =
+                        mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
+
+                for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
+                    String name = ent.getKey();
+                    KernelWakelockStats.Entry kws = ent.getValue();
+                    s.append("Wakelock ")
+                            .append(name)
+                            .append(", time=")
+                            .append(kws.mTotalTime)
+                            .append(", count=")
+                            .append(kws.mCount)
+                            .append('\n');
+                }
+                break;
+            default:
+                Slog.w(TAG, "No such pollable data as " + pullCode);
+                return null;
+        }
+        return s.toString();
+    }
+
+    @Override // Binder call
     public void statsdReady() {
         enforceCallingPermission();
         if (DEBUG) Slog.d(TAG, "learned that statsdReady");

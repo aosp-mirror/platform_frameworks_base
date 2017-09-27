@@ -20,11 +20,11 @@ package android.os;
   * Binder interface to communicate with the Java-based statistics service helper.
   * {@hide}
   */
-oneway interface IStatsCompanionService {
+interface IStatsCompanionService {
     /**
      * Tell statscompanion that stastd is up and running.
      */
-    void statsdReady();
+    oneway void statsdReady();
 
     /**
     * Register an alarm for anomaly detection to fire at the given timestamp (ms since epoch).
@@ -32,10 +32,10 @@ oneway interface IStatsCompanionService {
     * Uses AlarmManager.set API, so  if the timestamp is in the past, alarm fires immediately, and
     * alarm is inexact.
     */
-    void setAnomalyAlarm(long timestampMs);
+    oneway void setAnomalyAlarm(long timestampMs);
 
     /** Cancel any anomaly detection alarm. */
-    void cancelAnomalyAlarm();
+    oneway void cancelAnomalyAlarm();
 
     /**
       * Register a repeating alarm for polling to fire at the given timestamp and every
@@ -44,8 +44,11 @@ oneway interface IStatsCompanionService {
       * Uses AlarmManager.setRepeating API, so if the timestamp is in past, alarm fires immediately,
       * and alarm is inexact.
       */
-    void setPollingAlarms(long timestampMs, long intervalMs);
+    oneway void setPollingAlarms(long timestampMs, long intervalMs);
 
     /** Cancel any repeating polling alarm. */
-    void cancelPollingAlarms();
+    oneway void cancelPollingAlarms();
+
+    /** Pull the specified data. Results will be sent to statsd when complete. */
+    String pullData(int pullCode);
 }
