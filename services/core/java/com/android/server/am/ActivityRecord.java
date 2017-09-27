@@ -1948,7 +1948,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
                 || (mStackSupervisor.isCurrentProfileLocked(userId)
-                && service.mUserController.isUserRunningLocked(userId, 0 /* flags */));
+                && service.mUserController.isUserRunning(userId, 0 /* flags */));
     }
 
     /**

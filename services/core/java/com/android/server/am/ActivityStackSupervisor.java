@@ -3660,7 +3660,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Checks whether the userid is a profile of the current user. */
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
-        return mService.mUserController.isCurrentProfileLocked(userId);
+        return mService.mUserController.isCurrentProfile(userId);
     }
 
     /**
