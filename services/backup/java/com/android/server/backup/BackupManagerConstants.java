@@ -123,7 +123,7 @@ class BackupManagerConstants extends ContentObserver {
     // group the calls of these methods in a block syncrhonized on
     // a reference of this object.
     public synchronized long getKeyValueBackupIntervalMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getKeyValueBackupIntervalMilliseconds(...) returns "
                     + mKeyValueBackupIntervalMilliseconds);
         }
@@ -131,7 +131,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized long getKeyValueBackupFuzzMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getKeyValueBackupFuzzMilliseconds(...) returns "
                     + mKeyValueBackupFuzzMilliseconds);
         }
@@ -139,7 +139,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized boolean getKeyValueBackupRequireCharging() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getKeyValueBackupRequireCharging(...) returns "
                     + mKeyValueBackupRequireCharging);
         }
@@ -147,7 +147,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized int getKeyValueBackupRequiredNetworkType() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getKeyValueBackupRequiredNetworkType(...) returns "
                     + mKeyValueBackupRequiredNetworkType);
         }
@@ -155,7 +155,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized long getFullBackupIntervalMilliseconds() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getFullBackupIntervalMilliseconds(...) returns "
                     + mFullBackupIntervalMilliseconds);
         }
@@ -163,7 +163,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized boolean getFullBackupRequireCharging() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getFullBackupRequireCharging(...) returns " + mFullBackupRequireCharging);
         }
         return mFullBackupRequireCharging;
@@ -171,7 +171,7 @@ class BackupManagerConstants extends ContentObserver {
     }
 
     public synchronized int getFullBackupRequiredNetworkType() {
-        if (BackupManagerService.DEBUG_SCHEDULING) {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getFullBackupRequiredNetworkType(...) returns "
                     + mFullBackupRequiredNetworkType);
         }
