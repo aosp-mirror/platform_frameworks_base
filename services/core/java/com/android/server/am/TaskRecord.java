@@ -18,20 +18,19 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
-import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
@@ -573,36 +572,36 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     /**
      * Convenience method to reparent a task to the top or bottom position of the stack.
      */
-    boolean reparent(int preferredStackId, boolean toTop, @ReparentMoveStackMode int moveStackMode,
-            boolean animate, boolean deferResume, String reason) {
-        return reparent(preferredStackId, toTop ? MAX_VALUE : 0, moveStackMode, animate,
-                deferResume, true /* schedulePictureInPictureModeChange */, reason);
+    boolean reparent(ActivityStack preferredStack, boolean toTop,
+            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            String reason) {
+        return reparent(preferredStack, toTop ? MAX_VALUE : 0, moveStackMode, animate, deferResume,
+                true /* schedulePictureInPictureModeChange */, reason);
     }
 
     /**
      * Convenience method to reparent a task to the top or bottom position of the stack, with
      * an option to skip scheduling the picture-in-picture mode change.
      */
-    boolean reparent(int preferredStackId, boolean toTop, @ReparentMoveStackMode int moveStackMode,
-            boolean animate, boolean deferResume, boolean schedulePictureInPictureModeChange,
-            String reason) {
-        return reparent(preferredStackId, toTop ? MAX_VALUE : 0, moveStackMode, animate,
+    boolean reparent(ActivityStack preferredStack, boolean toTop,
+            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            boolean schedulePictureInPictureModeChange, String reason) {
+        return reparent(preferredStack, toTop ? MAX_VALUE : 0, moveStackMode, animate,
                 deferResume, schedulePictureInPictureModeChange, reason);
     }
 
-    /**
-     * Convenience method to reparent a task to a specific position of the stack.
-     */
-    boolean reparent(int preferredStackId, int position, @ReparentMoveStackMode int moveStackMode,
-            boolean animate, boolean deferResume, String reason) {
-        return reparent(preferredStackId, position, moveStackMode, animate, deferResume,
+    /** Convenience method to reparent a task to a specific position of the stack. */
+    boolean reparent(ActivityStack preferredStack, int position,
+            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            String reason) {
+        return reparent(preferredStack, position, moveStackMode, animate, deferResume,
                 true /* schedulePictureInPictureModeChange */, reason);
     }
 
     /**
      * Reparents the task into a preferred stack, creating it if necessary.
      *
-     * @param preferredStackId the stack id of the target stack to move this task
+     * @param preferredStack the target stack to move this task
      * @param position the position to place this task in the new stack
      * @param animate whether or not we should wait for the new window created as a part of the
      *            reparenting to be drawn and animated in
@@ -616,13 +615,16 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @param reason the caller of this reparenting
      * @return whether the task was reparented
      */
-    boolean reparent(int preferredStackId, int position, @ReparentMoveStackMode int moveStackMode,
-            boolean animate, boolean deferResume, boolean schedulePictureInPictureModeChange,
-            String reason) {
+    // TODO: Inspect all call sites and change to just changing windowing mode of the stack vs.
+    // re-parenting the task. Can only be done when we are no longer using static stack Ids like
+    /** {@link ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} */
+    boolean reparent(ActivityStack preferredStack, int position,
+            @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
+            boolean schedulePictureInPictureModeChange, String reason) {
         final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
         final WindowManagerService windowManager = mService.mWindowManager;
         final ActivityStack sourceStack = getStack();
-        final ActivityStack toStack = supervisor.getReparentTargetStack(this, preferredStackId,
+        final ActivityStack toStack = supervisor.getReparentTargetStack(this, preferredStack,
                 position == MAX_VALUE);
         if (toStack == sourceStack) {
             return false;
@@ -705,19 +707,22 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             toStack.prepareFreezingTaskBounds();
 
             // Make sure the task has the appropriate bounds/size for the stack it is in.
+            final int toStackWindowingMode = toStack.getWindowingMode();
+            final boolean toStackSplitScreenPrimary =
+                    toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
             if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
                     && !Objects.equals(mBounds, toStack.mBounds)) {
                 kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
                         deferResume);
-            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
+            } else if (toStackWindowingMode == WINDOWING_MODE_FREEFORM) {
                 Rect bounds = getLaunchBounds();
                 if (bounds == null) {
                     toStack.layoutTaskInStack(this, null);
                     bounds = mBounds;
                 }
                 kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
-            } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-                if (stackId == DOCKED_STACK_ID && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
+            } else if (toStackSplitScreenPrimary || toStackWindowingMode == WINDOWING_MODE_PINNED) {
+                if (toStackSplitScreenPrimary && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
                     // Move recents to front so it is not behind home stack when going into docked
                     // mode
                     mService.mStackSupervisor.moveRecentsStackToFront(reason);
@@ -744,11 +749,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.
-        supervisor.handleNonResizableTaskIfNeeded(this, getWindowingModeForStackId(preferredStackId,
-                        supervisor.getStack(DOCKED_STACK_ID) != null), DEFAULT_DISPLAY, stackId);
+        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenStack();
+        supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
+                DEFAULT_DISPLAY, stackId);
 
-        boolean successful = (preferredStackId == stackId);
-        if (successful && stackId == DOCKED_STACK_ID) {
+        boolean successful = (preferredStack == toStack);
+        if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             // If task moved to docked stack - show recents if needed.
             mService.mWindowManager.showRecentApps(false /* fromHome */);
         }
@@ -941,8 +947,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.taskId;
     }
 
-    ActivityStack getStack() {
-        return mStack;
+    <T extends ActivityStack> T getStack() {
+        return (T) mStack;
     }
 
     /**
@@ -1457,10 +1463,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return isResizeable(true /* checkSupportsPip */);
     }
 
-    boolean supportsSplitScreen() {
+    @Override
+    public boolean supportsSplitScreenWindowingMode() {
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
-        return mService.mSupportsSplitScreenMultiWindow
+        return super.supportsSplitScreenWindowingMode()
+                && mService.mSupportsSplitScreenMultiWindow
                 && (mService.mForceResizableActivities
                         || (isResizeable(false /* checkSupportsPip */)
                                 && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
@@ -2101,12 +2109,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             return null;
         }
 
-        final int stackId = mStack.mStackId;
-        if (stackId == HOME_STACK_ID
-                || stackId == RECENTS_STACK_ID
-                || stackId == ASSISTANT_STACK_ID
-                || stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                || (stackId == DOCKED_STACK_ID && !isResizeable())) {
+        final int windowingMode = getWindowingMode();
+        if (!isActivityTypeStandardOrUndefined()
+                || windowingMode == WINDOWING_MODE_FULLSCREEN
+                || (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && !isResizeable())) {
             return isResizeable() ? mStack.mBounds : null;
         } else if (!getWindowConfiguration().persistTaskBounds()) {
             return mStack.mBounds;

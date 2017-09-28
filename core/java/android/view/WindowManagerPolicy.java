@@ -592,9 +592,10 @@ public interface WindowManagerPolicy {
         int getDockedDividerInsetsLw();
 
         /**
-         * Retrieves the {@param outBounds} from the stack with id {@param stackId}.
+         * Retrieves the {@param outBounds} from the stack matching the {@param windowingMode} and
+         * {@param activityType}.
          */
-        void getStackBounds(int stackId, Rect outBounds);
+        void getStackBounds(int windowingMode, int activityType, Rect outBounds);
 
         /**
          * Notifies window manager that {@link #isShowingDreamLw} has changed.

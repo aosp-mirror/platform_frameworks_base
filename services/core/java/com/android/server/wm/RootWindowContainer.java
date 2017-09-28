@@ -422,6 +422,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return null;
     }
 
+    TaskStack getStack(int windowingMode, int activityType) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final DisplayContent dc = mChildren.get(i);
+            final TaskStack stack = dc.getStack(windowingMode, activityType);
+            if (stack != null) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
     void setSecureSurfaceState(int userId, boolean disabled) {
         forAllWindows((w) -> {
             if (w.mHasSurface && userId == UserHandle.getUserId(w.mOwnerUid)) {

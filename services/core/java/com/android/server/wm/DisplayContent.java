@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -1470,7 +1469,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Returns the topmost stack on the display that is compatible with the input windowing mode and
      * activity type. Null is no compatible stack on the display.
      */
-    private TaskStack getStack(int windowingMode, int activityType) {
+    TaskStack getStack(int windowingMode, int activityType) {
         for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
             final TaskStack stack = mTaskStackContainers.get(i);
             if (stack.isCompatible(windowingMode, activityType)) {
@@ -1486,10 +1485,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @VisibleForTesting
-    int getStackPosById(int stackId) {
+    int getStackPosition(int windowingMode, int activityType) {
         for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
             final TaskStack stack = mTaskStackContainers.get(i);
-            if (stack.mStackId == stackId) {
+            if (stack.isCompatible(windowingMode, activityType)) {
                 return i;
             }
         }
@@ -2049,8 +2048,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
                 final TaskStack stack = mTaskStackContainers.get(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
-                if (stack.isVisible() && (imeOnBottom || isDockedOnBottom) &&
-                        StackId.isStackAffectedByDragResizing(stack.mStackId)) {
+                if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)
+                        && stack.inSplitScreenWindowingMode()) {
                     stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
                 } else {
                     stack.resetAdjustedForIme(false);
@@ -3379,7 +3378,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          * @see WindowManagerService#addStackToDisplay(int, int, boolean)
          */
         void addStackToDisplay(TaskStack stack, boolean onTop) {
-            if (stack.mStackId == HOME_STACK_ID) {
+            if (stack.isActivityTypeHome()) {
                 if (mHomeStack != null) {
                     throw new IllegalArgumentException("attachStack: HOME_STACK_ID (0) not first.");
                 }

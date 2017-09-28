@@ -21,8 +21,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static com.android.server.wm.proto.ConfigurationContainerProto.FULL_CONFIGURATION;
 import static com.android.server.wm.proto.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
@@ -152,6 +154,17 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         onOverrideConfigurationChanged(mTmpConfig);
     }
 
+    /**
+     * Returns true if this container is currently in multi-window mode. I.e. sharing the screen
+     * with another activity.
+     */
+    public boolean inMultiWindowMode() {
+        /*@WindowConfiguration.WindowingMode*/ int windowingMode =
+                mFullConfiguration.windowConfiguration.getWindowingMode();
+        return windowingMode != WINDOWING_MODE_FULLSCREEN
+                && windowingMode != WINDOWING_MODE_UNDEFINED;
+    }
+
     /** Returns true if this container is currently in split-screen windowing mode. */
     public boolean inSplitScreenWindowingMode() {
         /*@WindowConfiguration.WindowingMode*/ int windowingMode =
@@ -175,7 +188,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * {@link WindowConfiguration##WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} windowing modes based on
      * its current state.
      */
-    public boolean supportSplitScreenWindowingMode() {
+    public boolean supportsSplitScreenWindowingMode() {
         return mFullConfiguration.windowConfiguration.supportSplitScreenWindowingMode();
     }
 
@@ -238,6 +251,16 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /**
      * Returns true if this container is compatible with the input windowing mode and activity type.
+     * The container is compatible:
+     * - If {@param activityType} and {@param windowingMode} match this container activity type and
+     * windowing mode.
+     * - If {@param activityType} is {@link WindowConfiguration#ACTIVITY_TYPE_UNDEFINED} or
+     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} and this containers activity type is also
+     * standard or undefined and its windowing mode matches {@param windowingMode}.
+     * - If {@param activityType} isn't {@link WindowConfiguration#ACTIVITY_TYPE_UNDEFINED} or
+     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} or this containers activity type isn't
+     * also standard or undefined and its activity type matches {@param activityType} regardless of
+     * if {@param windowingMode} matches the containers windowing mode.
      */
     public boolean isCompatible(int windowingMode, int activityType) {
         final int thisActivityType = getActivityType();
@@ -249,7 +272,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             return true;
         }
 
-        if (activityType != ACTIVITY_TYPE_UNDEFINED && activityType != ACTIVITY_TYPE_STANDARD) {
+        if ((activityType != ACTIVITY_TYPE_UNDEFINED && activityType != ACTIVITY_TYPE_STANDARD)
+                || !isActivityTypeStandardOrUndefined()) {
             // Only activity type need to match for non-standard activity types that are defined.
             return sameActivityType;
         }

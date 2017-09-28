@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
 import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
@@ -1774,7 +1776,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public void onTaskStackChangedBackground() {
             try {
                 ActivityManager.StackInfo info = ActivityManager.getService().getStackInfo(
-                        ActivityManager.StackId.ASSISTANT_STACK_ID);
+                        WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_ASSISTANT);
                 if (info == null) {
                     return;
                 }

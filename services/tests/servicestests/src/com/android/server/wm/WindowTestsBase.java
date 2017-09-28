@@ -16,7 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.VISIBLE;
 
@@ -167,14 +168,14 @@ class WindowTestsBase {
         sWm.mAnimationHandler.runWithScissors(() -> { }, 0);
     }
 
-    private WindowToken createWindowToken(DisplayContent dc, int stackId, int type) {
+    private WindowToken createWindowToken(
+            DisplayContent dc, int windowingMode, int activityType, int type) {
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
             return new WindowTestUtils.TestWindowToken(type, dc);
         }
 
-        final TaskStack stack = stackId == INVALID_STACK_ID
-                ? createTaskStackOnDisplay(dc)
-                : createStackControllerOnStackOnDisplay(stackId, dc).mContainer;
+        final TaskStack stack =
+                createStackControllerOnStackOnDisplay(windowingMode, activityType, dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
         task.addChild(token, 0);
@@ -187,9 +188,9 @@ class WindowTestsBase {
                 : createWindow(parent, type, parent.mToken, name);
     }
 
-    WindowState createWindowOnStack(WindowState parent, int stackId, int type,
-            DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, stackId, type);
+    WindowState createWindowOnStack(WindowState parent, int windowingMode, int activityType,
+            int type, DisplayContent dc, String name) {
+        final WindowToken token = createWindowToken(dc, windowingMode, activityType, type);
         return createWindow(parent, type, token, name);
     }
 
@@ -200,13 +201,15 @@ class WindowTestsBase {
     }
 
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
+        final WindowToken token = createWindowToken(
+                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
         return createWindow(parent, type, token, name);
     }
 
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
             boolean ownerCanAddInternalSystemWindow) {
-        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
+        final WindowToken token = createWindowToken(
+                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
         return createWindow(parent, type, token, name, ownerCanAddInternalSystemWindow);
     }
 
@@ -233,14 +236,16 @@ class WindowTestsBase {
     }
 
     StackWindowController createStackControllerOnDisplay(DisplayContent dc) {
-        final int stackId = ++sNextStackId;
-        return createStackControllerOnStackOnDisplay(stackId, dc);
+        return createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
     }
 
-    StackWindowController createStackControllerOnStackOnDisplay(int stackId, DisplayContent dc) {
+    StackWindowController createStackControllerOnStackOnDisplay(
+            int windowingMode, int activityType, DisplayContent dc) {
         final Configuration overrideConfig = new Configuration();
-        overrideConfig.windowConfiguration.setWindowingMode(
-                getWindowingModeForStackId(stackId, false /* inSplitScreenMode */));
+        overrideConfig.windowConfiguration.setWindowingMode(windowingMode);
+        overrideConfig.windowConfiguration.setActivityType(activityType);
+        final int stackId = ++sNextStackId;
         final StackWindowController controller = new StackWindowController(stackId, null,
                 dc.getDisplayId(), true /* onTop */, new Rect(), sWm);
         controller.onOverrideConfigurationChanged(overrideConfig);

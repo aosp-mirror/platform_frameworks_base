@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -103,7 +102,6 @@ import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.am.ActivityStack.PAUSE_TIMEOUT_MSG;
-import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStack.STOP_TIMEOUT_MSG;
 import static com.android.server.am.EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME;
 import static com.android.server.am.EventLogTags.AM_ACTIVITY_LAUNCH_TIME;
@@ -1069,6 +1067,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return getStack() != null ? getStack().mStackId : INVALID_STACK_ID;
     }
 
+    ActivityDisplay getDisplay() {
+        final ActivityStack stack = getStack();
+        return stack != null ? stack.getDisplay() : null;
+    }
+
     boolean changeWindowTranslucency(boolean toOpaque) {
         if (fullscreen == toOpaque) {
             return false;
@@ -1134,10 +1137,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether this activity supports split-screen multi-window and can be put in the docked
      *         stack.
      */
-    boolean supportsSplitScreen() {
+    @Override
+    public boolean supportsSplitScreenWindowingMode() {
         // An activity can not be docked even if it is considered resizeable because it only
         // supports picture-in-picture mode but has a non-resizeable resizeMode
-        return service.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+        return super.supportsSplitScreenWindowingMode()
+                && service.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
     }
 
     /**
@@ -1198,7 +1203,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         boolean isKeyguardLocked = service.isKeyguardLocked();
         boolean isCurrentAppLocked = service.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
-        boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
+        final ActivityDisplay display = getDisplay();
+        boolean hasPinnedStack = display != null && display.hasPinnedStack();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
         boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
@@ -1544,8 +1550,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (service.mSupportsLeanbackOnly && isVisible && isActivityTypeRecents()) {
             // On devices that support leanback only (Android TV), Recents activity can only be
             // visible if the home stack is the focused stack or we are in split-screen mode.
-            isVisible = mStackSupervisor.getStack(DOCKED_STACK_ID) != null
-                    || mStackSupervisor.isFocusedStack(getStack());
+            final ActivityDisplay display = getDisplay();
+            boolean hasSplitScreenStack = display != null && display.hasSplitScreenStack();
+            isVisible = hasSplitScreenStack || mStackSupervisor.isFocusedStack(getStack());
         }
 
         return isVisible;

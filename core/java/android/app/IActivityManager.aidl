@@ -380,7 +380,8 @@ interface IActivityManager {
             boolean preserveWindows, boolean animate, int animationDuration);
     List<ActivityManager.StackInfo> getAllStackInfos();
     void setFocusedStack(int stackId);
-    ActivityManager.StackInfo getStackInfo(int stackId);
+    ActivityManager.StackInfo getFocusedStackInfo();
+    ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType);
     boolean convertFromTranslucent(in IBinder token);
     boolean convertToTranslucent(in IBinder token, in Bundle options);
     void notifyActivityDrawn(in IBinder token);
@@ -440,7 +441,6 @@ interface IActivityManager {
     // Start of M transactions
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
     int createStackOnDisplay(int displayId);
-    int getFocusedStackId();
     void setTaskResizeable(int taskId, int resizeableMode);
     boolean requestAssistContextExtras(int requestType, in IResultReceiver receiver,
             in Bundle receiverExtras, in IBinder activityToken,
@@ -540,6 +540,13 @@ interface IActivityManager {
     void notifyPinnedStackAnimationStarted();
     void notifyPinnedStackAnimationEnded();
     void removeStack(int stackId);
+    /**
+     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
+     */
+    void removeStacksInWindowingModes(in int[] windowingModes);
+    /** Removes stack of the activity types from the system. */
+    void removeStacksWithActivityTypes(in int[] activityTypes);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();
     /**

@@ -56,7 +56,7 @@ public class WindowManagerProxy {
     private final Rect mTouchableRegion = new Rect();
 
     private boolean mDimLayerVisible;
-    private int mDimLayerTargetStack;
+    private int mDimLayerTargetWindowingMode;
     private float mDimLayerAlpha;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
@@ -113,7 +113,7 @@ public class WindowManagerProxy {
         public void run() {
             try {
                 WindowManagerGlobal.getWindowManagerService().setResizeDimLayer(mDimLayerVisible,
-                        mDimLayerTargetStack, mDimLayerAlpha);
+                        mDimLayerTargetWindowingMode, mDimLayerAlpha);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }
@@ -200,9 +200,9 @@ public class WindowManagerProxy {
         return DOCKED_INVALID;
     }
 
-    public void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
+    public void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha) {
         mDimLayerVisible = visible;
-        mDimLayerTargetStack = targetStackId;
+        mDimLayerTargetWindowingMode = targetWindowingMode;
         mDimLayerAlpha = alpha;
         mExecutor.execute(mDimLayerRunnable);
     }

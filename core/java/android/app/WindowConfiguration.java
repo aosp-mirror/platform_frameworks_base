@@ -500,10 +500,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean supportSplitScreenWindowingMode() {
-        if (mActivityType == ACTIVITY_TYPE_ASSISTANT) {
+        return supportSplitScreenWindowingMode(mWindowingMode, mActivityType);
+    }
+
+    /** @hide */
+    public static boolean supportSplitScreenWindowingMode(int windowingMode, int activityType) {
+        if (activityType == ACTIVITY_TYPE_ASSISTANT) {
             return false;
         }
-        return mWindowingMode != WINDOWING_MODE_FREEFORM && mWindowingMode != WINDOWING_MODE_PINNED;
+        return windowingMode != WINDOWING_MODE_FREEFORM && windowingMode != WINDOWING_MODE_PINNED;
     }
 
     private static String windowingModeToString(@WindowingMode int windowingMode) {

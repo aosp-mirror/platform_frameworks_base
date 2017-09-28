@@ -18,12 +18,12 @@ package com.android.systemui.recents.misc;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -38,6 +38,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -486,16 +487,22 @@ public class SystemServicesProxy {
     public ActivityManager.RunningTaskInfo getRunningTask() {
         // Note: The set of running tasks from the system is ordered by recency
         List<ActivityManager.RunningTaskInfo> tasks = mAm.getRunningTasks(10);
-        if (tasks != null && !tasks.isEmpty()) {
-            // Find the first task in a valid stack, we ignore everything from the Recents and PiP
-            // stacks
-            for (int i = 0; i < tasks.size(); i++) {
-                ActivityManager.RunningTaskInfo task = tasks.get(i);
-                int stackId = task.stackId;
-                if (stackId != RECENTS_STACK_ID && stackId != PINNED_STACK_ID) {
-                    return task;
-                }
+        if (tasks == null || tasks.isEmpty()) {
+            return null;
+        }
+
+        // Find the first task in a valid stack, we ignore everything from the Recents and PiP
+        // stacks
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RunningTaskInfo task = tasks.get(i);
+            final WindowConfiguration winConfig = task.configuration.windowConfiguration;
+            if (winConfig.getActivityType() == ACTIVITY_TYPE_RECENTS) {
+                continue;
             }
+            if (winConfig.getWindowingMode() == WINDOWING_MODE_PINNED) {
+                continue;
+            }
+            return task;
         }
         return null;
     }
@@ -522,12 +529,17 @@ public class SystemServicesProxy {
             ActivityManager.StackInfo fullscreenStackInfo = null;
             ActivityManager.StackInfo recentsStackInfo = null;
             for (int i = 0; i < stackInfos.size(); i++) {
-                StackInfo stackInfo = stackInfos.get(i);
-                if (stackInfo.stackId == HOME_STACK_ID) {
+                final StackInfo stackInfo = stackInfos.get(i);
+                final WindowConfiguration winConfig = stackInfo.configuration.windowConfiguration;
+                final int activityType = winConfig.getActivityType();
+                final int windowingMode = winConfig.getWindowingMode();
+                if (activityType == ACTIVITY_TYPE_HOME) {
                     homeStackInfo = stackInfo;
-                } else if (stackInfo.stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                } else if (activityType == ACTIVITY_TYPE_STANDARD
+                        && (windowingMode == WINDOWING_MODE_FULLSCREEN
+                            || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)) {
                     fullscreenStackInfo = stackInfo;
-                } else if (stackInfo.stackId == RECENTS_STACK_ID) {
+                } else if (activityType == ACTIVITY_TYPE_RECENTS) {
                     recentsStackInfo = stackInfo;
                 }
             }
@@ -606,27 +618,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns whether the given stack id is the home stack id.
-     */
-    public static boolean isHomeStack(int stackId) {
-        return stackId == HOME_STACK_ID;
-    }
-
-    /**
-     * Returns whether the given stack id is the pinned stack id.
-     */
-    public static boolean isPinnedStack(int stackId){
-        return stackId == PINNED_STACK_ID;
-    }
-
-    /**
-     * Returns whether the given stack id is the docked stack id.
-     */
-    public static boolean isDockedStack(int stackId) {
-        return stackId == DOCKED_STACK_ID;
-    }
-
-    /**
      * Returns whether the given stack id is the freeform workspace stack id.
      */
     public static boolean isFreeformStack(int stackId) {
@@ -641,7 +632,8 @@ public class SystemServicesProxy {
 
         ActivityManager.StackInfo stackInfo = null;
         try {
-            stackInfo = mIam.getStackInfo(DOCKED_STACK_ID);
+            stackInfo =
+                    mIam.getStackInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -1106,9 +1098,10 @@ public class SystemServicesProxy {
 
         try {
             // Use the recents stack bounds, fallback to fullscreen stack if it is null
-            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(RECENTS_STACK_ID);
+            ActivityManager.StackInfo stackInfo =
+                    mIam.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
             if (stackInfo == null) {
-                stackInfo = mIam.getStackInfo(FULLSCREEN_WORKSPACE_STACK_ID);
+                stackInfo = mIam.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
             }
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
