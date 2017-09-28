@@ -58,10 +58,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
@@ -151,7 +149,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
-                new AccessPointControllerImpl(context, bgLooper),
+                new AccessPointControllerImpl(context),
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
                 deviceProvisionedController);
