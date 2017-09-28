@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"确定"</string>
     <string name="no" msgid="5141531044935541497">"取消"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="loading" msgid="7933681260296021180">"正在加载..."</string>
     <string name="capital_on" msgid="1544682755514494298">"开启"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"缩放"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"始终显示"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"在“系统设置”&gt;“应用”&gt;“已下载”中重新启用此模式。"</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持当前的显示大小设置，因此可能无法正常显示。"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"一律显示"</string>
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
@@ -1137,7 +1143,7 @@
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"点按即可查看相关设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"邀请已发送"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"已发出邀请"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"连接邀请"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"发件人："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>

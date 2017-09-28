@@ -192,7 +192,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"업데이트 준비 중…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"업데이트 패키지 처리 중…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"다시 시작하는 중..."</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"공장 초기화"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"초기화"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"다시 시작하는 중..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"종료 중..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"태블릿이 종료됩니다."</string>
@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="yes" msgid="5362982303337969312">"확인"</string>
     <string name="no" msgid="5141531044935541497">"취소"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"주의"</string>
     <string name="loading" msgid="7933681260296021180">"로드 중.."</string>
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"배율"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"항상 표시"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 이 모드를 다시 사용하도록 설정합니다."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 현재 디스플레이 크기 설정을 지원하지 않으며 예기치 않게 동작할 수 있습니다."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"항상 표시"</string>
     <string name="smv_application" msgid="3307209192155442829">"앱 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>

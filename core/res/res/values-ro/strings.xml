@@ -1009,6 +1009,8 @@
     <string name="cancel" msgid="6442560571259935130">"Anulați"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Anulați"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenție"</string>
     <string name="loading" msgid="7933681260296021180">"Se încarcă…"</string>
     <string name="capital_on" msgid="1544682755514494298">"DA"</string>
@@ -1065,6 +1067,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Scară"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Afișați întotdeauna"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reactivați acest mod din Setări de sistem &gt; Aplicații &gt; Descărcate."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă setarea actuală pentru Dimensiunea afișării și este posibil să aibă un comportament neașteptat."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Afișează întotdeauna"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplicația <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) a încălcat propria politică StrictMode."</string>

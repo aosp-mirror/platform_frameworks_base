@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"បោះ​បង់​"</string>
     <string name="yes" msgid="5362982303337969312">"យល់​ព្រម​"</string>
     <string name="no" msgid="5141531044935541497">"បោះ​បង់​"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"ប្រយ័ត្ន"</string>
     <string name="loading" msgid="7933681260296021180">"កំពុង​ផ្ទុក..."</string>
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
@@ -1047,6 +1049,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"មាត្រដ្ឋាន"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"បង្ហាញ​ជា​និច្ច"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"បើក​វា​ឡើងវិញ​ក្នុង​ការ​កំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនគាំទ្រការកំណត់ទំហំនៃការបង្ហាញបច្ចុប្បន្ន និងអាចមានសកម្មភាពខុសពីការរំពឹងទុក។"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"បង្ហាញ​ជា​និច្ច"</string>
     <string name="smv_application" msgid="3307209192155442829">"កម្មវិធី <xliff:g id="APPLICATION">%1$s</xliff:g> (ដំណើរការ <xliff:g id="PROCESS">%2$s</xliff:g>) បាន​បំពាន​គោលនយោបាយ​របៀប​តឹងរ៉ឹង​អនុវត្ត​ដោយ​ខ្លួន​​ឯង។"</string>

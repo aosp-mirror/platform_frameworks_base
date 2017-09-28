@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
     <string name="yes" msgid="5362982303337969312">"ঠিক আছে"</string>
     <string name="no" msgid="5141531044935541497">"বাতিল করুন"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"খেয়াল করুন"</string>
     <string name="loading" msgid="7933681260296021180">"লোড হচ্ছে..."</string>
     <string name="capital_on" msgid="1544682755514494298">"চালু করুন"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"স্কেল"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"সবসময় দেখান"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"সিস্টেম সেটিংস&gt; অ্যাপ্স&gt; ডাউনলোড করাগুলি এ এটি পুনঃসক্ষম করুন৷"</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g>, বর্তমান প্রদর্শনের আকারের সেটিংস সমর্থন করে না এবং অপ্রত্যাশিত আচরণ করতে পারে৷"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"সর্বদা দেখান"</string>
     <string name="smv_application" msgid="3307209192155442829">"অ্যাপ্লিকেশানটি <xliff:g id="APPLICATION">%1$s</xliff:g> (প্রক্রিয়া <xliff:g id="PROCESS">%2$s</xliff:g>) তার স্ব-প্রয়োগ করা কঠোর মোড নীতি লঙ্ঘন করেছে৷"</string>

@@ -1029,6 +1029,8 @@
     <string name="cancel" msgid="6442560571259935130">"Prekliči"</string>
     <string name="yes" msgid="5362982303337969312">"V redu"</string>
     <string name="no" msgid="5141531044935541497">"Prekliči"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"Pozor"</string>
     <string name="loading" msgid="7933681260296021180">"Nalaganje …"</string>
     <string name="capital_on" msgid="1544682755514494298">"VKLOPLJENO"</string>
@@ -1085,6 +1087,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Lestvica"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vedno pokaži"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Znova omogočite to v sistemskih nastavitvah &gt; Aplikacije &gt; Preneseno."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira trenutne nastavitve velikosti zaslona, kar lahko vodi v nepričakovano delovanje."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vedno pokaži"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) krši svoj samouveljavljiv pravilnik o strogem načinu."</string>
