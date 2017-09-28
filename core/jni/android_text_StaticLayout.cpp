@@ -172,6 +172,46 @@ static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
     b->finish();
 }
 
+class ScopedNullableUtfString {
+public:
+    ScopedNullableUtfString(JNIEnv* env, jstring s) : mEnv(env), mStr(s) {
+        if (s == nullptr) {
+            mUtf8Chars = nullptr;
+        } else {
+            mUtf8Chars = mEnv->GetStringUTFChars(s, nullptr);
+        }
+    }
+
+    ~ScopedNullableUtfString() {
+        if (mUtf8Chars != nullptr) {
+            mEnv->ReleaseStringUTFChars(mStr, mUtf8Chars);
+        }
+    }
+
+    const char* get() const {
+        return mUtf8Chars;
+    }
+
+private:
+    JNIEnv* mEnv;
+    jstring mStr;
+    const char* mUtf8Chars;
+};
+
+static std::vector<minikin::Hyphenator*> makeHyphenators(JNIEnv* env, jlongArray hyphenators) {
+    std::vector<minikin::Hyphenator*> out;
+    if (hyphenators == nullptr) {
+        return out;
+    }
+    ScopedLongArrayRO longArray(env, hyphenators);
+    size_t size = longArray.size();
+    out.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        out.push_back(reinterpret_cast<minikin::Hyphenator*>(longArray[i]));
+    }
+    return out;
+}
+
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePaint, jint start,
         jint end, jboolean isRtl, jstring langTags, jlongArray hyphenators) {
@@ -183,40 +223,28 @@ static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePai
     minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
             typeface);
 
-    std::vector<minikin::Hyphenator*> hyphVec;
-    const char* langTagStr;
-    if (langTags == nullptr) {
-        langTagStr = nullptr;  // nullptr languageTag means keeping current locale
-    } else {
-        ScopedLongArrayRO hyphArr(env, hyphenators);
-        const size_t numLocales = hyphArr.size();
-        hyphVec.reserve(numLocales);
-        for (size_t i = 0; i < numLocales; i++) {
-          hyphVec.push_back(reinterpret_cast<minikin::Hyphenator*>(hyphArr[i]));
-        }
-        langTagStr = env->GetStringUTFChars(langTags, nullptr);
-    }
+    ScopedNullableUtfString langTagsString(env, langTags);
     float result = b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start,
-            end, isRtl, langTagStr, hyphVec);
-    if (langTagStr != nullptr)  {
-        env->ReleaseStringUTFChars(langTags, langTagStr);
-    }
+            end, isRtl, langTagsString.get(), makeHyphenators(env, hyphenators));
     return result;
 }
 
 // Accept width measurements for the run, passed in from Java
 static void nAddMeasuredRun(JNIEnv* env, jclass, jlong nativePtr,
-        jint start, jint end, jfloatArray widths) {
+        jint start, jint end, jfloatArray widths, jstring langTags, jlongArray hyphenators) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     env->GetFloatArrayRegion(widths, start, end - start, b->charWidths() + start);
+
+    ScopedNullableUtfString langTagsString(env, langTags);
     b->addStyleRun(nullptr, nullptr, minikin::FontStyle{}, start, end, false,
-            nullptr /* keep current locale */, std::vector<minikin::Hyphenator*>());
+            langTagsString.get(), makeHyphenators(env, hyphenators));
 }
 
 static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
-        jint start, jint end, jfloat width) {
+        jint start, jint end, jfloat width, jstring langTags, jlongArray hyphenators) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
-    b->addReplacement(start, end, width);
+    ScopedNullableUtfString langTagsString(env, langTags);
+    b->addReplacement(start, end, width, langTagsString.get(), makeHyphenators(env, hyphenators));
 }
 
 static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths) {
@@ -231,8 +259,8 @@ static const JNINativeMethod gMethods[] = {
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ[I[I[II)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJIIZLjava/lang/String;[J)F", (void*) nAddStyleRun},
-    {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
-    {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
+    {"nAddMeasuredRun", "(JII[FLjava/lang/String;[J)V", (void*) nAddMeasuredRun},
+    {"nAddReplacementRun", "(JIIFLjava/lang/String;[J)V", (void*) nAddReplacementRun},
     {"nGetWidths", "(J[F)V", (void*) nGetWidths},
     {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[F[F[II)I",
         (void*) nComputeLineBreaks}
