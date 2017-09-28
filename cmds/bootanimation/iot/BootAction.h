@@ -21,6 +21,7 @@
 #include <string>
 
 #include <base/json/json_value_converter.h>
+#include <boot_action/boot_action.h>  // libandroidthings native API.
 #include <utils/RefBase.h>
 
 using base::JSONValueConverter;
@@ -29,11 +30,6 @@ namespace android {
 
 class BootAction : public RefBase {
 public:
-    struct BootParameter {
-      const char* key;
-      const char* value;
-    };
-
     struct SavedBootParameters {
       int brightness;
       int volume;
@@ -65,7 +61,8 @@ public:
     void shutdown();
 
 private:
-    typedef bool (*libInit)(const BootParameter* parameters, size_t num_parameters);
+    typedef bool (*libInit)(const ABootActionParameter* parameters,
+                            size_t num_parameters);
     typedef void (*libStartPart)(int partNumber, int playNumber);
     typedef void (*libShutdown)();
 

@@ -25,9 +25,9 @@ LOCAL_SRC_FILES:= \
 
 ifeq ($(PRODUCT_IOT),true)
 
-LOCAL_SHARED_LIBRARIES += libchrome
-
-LOCAL_C_INCLUDES += external/libchrome
+LOCAL_SHARED_LIBRARIES += \
+    libandroidthings \
+    libchrome \
 
 LOCAL_SRC_FILES += \
     iot/iotbootanimation_main.cpp \
