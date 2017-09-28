@@ -17,6 +17,8 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
@@ -90,7 +92,14 @@ public final class PlaybackActivityMonitor
     private final HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
             new HashMap<Integer, AudioPlaybackConfiguration>();
 
-    PlaybackActivityMonitor() {
+    private final Context mContext;
+    private int mSavedAlarmVolume = -1;
+    private final int mMaxAlarmVolume;
+    private int mPrivilegedAlarmActiveCount = 0;
+
+    PlaybackActivityMonitor(Context context, int maxAlarmVolume) {
+        mContext = context;
+        mMaxAlarmVolume = maxAlarmVolume;
         PlayMonitorClient.sListenerDeathMonitor = this;
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
     }
@@ -175,6 +184,38 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    private void checkVolumeForPrivilegedAlarm(AudioPlaybackConfiguration apc, int event) {
+        if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED ||
+                apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+            if ((apc.getAudioAttributes().getAllFlags() &
+                    AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0 &&
+                    apc.getAudioAttributes().getUsage() == AudioAttributes.USAGE_ALARM &&
+                    mContext.checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE,
+                            apc.getClientPid(), apc.getClientUid()) ==
+                            PackageManager.PERMISSION_GRANTED) {
+                if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED &&
+                        apc.getPlayerState() != AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                    if (mPrivilegedAlarmActiveCount++ == 0) {
+                        mSavedAlarmVolume = AudioSystem.getStreamVolumeIndex(
+                                AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER);
+                        AudioSystem.setStreamVolumeIndex(AudioSystem.STREAM_ALARM,
+                                mMaxAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                    }
+                } else if (event != AudioPlaybackConfiguration.PLAYER_STATE_STARTED &&
+                        apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                    if (--mPrivilegedAlarmActiveCount == 0) {
+                        if (AudioSystem.getStreamVolumeIndex(
+                                AudioSystem.STREAM_ALARM, AudioSystem.DEVICE_OUT_SPEAKER) ==
+                                mMaxAlarmVolume) {
+                            AudioSystem.setStreamVolumeIndex(AudioSystem.STREAM_ALARM,
+                                    mSavedAlarmVolume, AudioSystem.DEVICE_OUT_SPEAKER);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void playerEvent(int piid, int event, int binderUid) {
         if (DEBUG) { Log.v(TAG, String.format("playerEvent(piid=%d, event=%d)", piid, event)); }
         final boolean change;
@@ -200,6 +241,7 @@ public final class PlaybackActivityMonitor
             }
             if (checkConfigurationCaller(piid, apc, binderUid)) {
                 //TODO add generation counter to only update to the latest state
+                checkVolumeForPrivilegedAlarm(apc, event);
                 change = apc.handleStateEvent(event);
             } else {
                 Log.e(TAG, "Error handling event " + event);
@@ -228,6 +270,7 @@ public final class PlaybackActivityMonitor
                         "releasing player piid:" + piid));
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
+                checkVolumeForPrivilegedAlarm(apc, AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
                 apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
             }
         }
