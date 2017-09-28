@@ -744,7 +744,7 @@
     <string name="tuner_left" msgid="8404287986475034806">"Links"</string>
     <string name="tuner_right" msgid="6222734772467850156">"Rechts"</string>
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
-    <string name="tuner_app" msgid="3507057938640108777">"Apps <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>-app"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Algemene berichten"</string>
