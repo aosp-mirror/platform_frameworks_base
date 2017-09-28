@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Ezer ez"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Itxaron araztaileari"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Araztutako aplikazioa araztailea erantsi arte itxaroten ari da exekutatu aurretik"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telefono-gainbegiratzailea"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Telefono-gainbegiratzaileak erregistroak bilduko ditu telefono/modem funtzioarekin arazoren bat dagoela hautematen duenean, eta akatsaren berri emateko eskatuko dio erabiltzaileari"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Sarrera"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Marrazkia"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardware bidez bizkortutako errendatzea"</string>

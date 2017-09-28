@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Nekas"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Gaidīt atkļūdotāju"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Gaida atkļūdotāju, ko pirms izp. piev. atkļ. liet."</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telefonijas pārraugs"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Ja tiks konstatēta problēma saistībā ar telefonijas/modema funkcionalitāti, telefonijas pārraugs apkopos žurnālus un paziņojumā aicinās lietotāju reģistrēt kļūdu."</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ievade"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Zīmējums"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Aparatūras paātrinātā atveidošana"</string>

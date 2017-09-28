@@ -71,7 +71,7 @@
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Dijeljenje kontakta"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Koristi za dijeljenje kontakta"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Dijeljenje internet veze"</string>
-    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tekstualne poruke"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"SMS-ovi"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Pristup SIM-u"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD audio"</string>
@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Ništa"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Pričekajte na program za otklanjanje grešaka"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija u kojoj se otklanjaju greške čeka da se priloži program za otklanjanje grešaka prije izvršavanja"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Nadzor telefonije"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Nadzor telefonije će prikupiti zapisnike kada otkrije problem u funkcioniranju telefona/modema i obavijestiti korisnika da prijavi grešku"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ulaz"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Crtanje"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Prikaz s hardverskom akceleracijom"</string>

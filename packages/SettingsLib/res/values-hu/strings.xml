@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Semmi"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Várjon a hibakeresőre."</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"A javított alkalmazás a hibakeresőre vár."</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"A TelephonyMonitor begyűjti a naplókat, ha problémát észlel a telefonos szolgáltatások vagy a modem működésében, és javasolja a felhasználónak a hiba jelentését"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Bevitel"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Rajz"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardveres gyorsítású megjelenítés"</string>

@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"কিছুই না"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ডিবাগারের জন্য অপেক্ষা করুন"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"চালানোর আগে সংযুক্ত করতে জন্য ডিবাগ করা অ্যাপ্লিকেশনটি ডিবাগারের জন্য অপেক্ষা করছে"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"টেলিফোনি মনিটর"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"টেলিফোনি মনিটর টেলিফোনি/মোডেমের কার্যকারিতায় কোনও সমস্যা শনাক্ত করলে সমস্যাটি লগ করবে এবং সমস্যাটি জানাতে একটি বাগ ফাইল করার জন্য ব্যবহারকারিকে বিজ্ঞপ্তি পাঠাবে"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ইনপুট"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"অঙ্কন"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"হার্ডওয়্যার দ্বারা চালিত রেন্ডারিং"</string>
