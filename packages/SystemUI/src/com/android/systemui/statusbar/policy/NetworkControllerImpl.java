@@ -382,13 +382,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... args) {
-                // Disable tethering if enabling Wifi
-                final int wifiApState = mWifiManager.getWifiApState();
-                if (enabled && ((wifiApState == WifiManager.WIFI_AP_STATE_ENABLING) ||
-                        (wifiApState == WifiManager.WIFI_AP_STATE_ENABLED))) {
-                    mWifiManager.setWifiApEnabled(null, false);
-                }
-
                 mWifiManager.setWifiEnabled(enabled);
                 return null;
             }

@@ -19,7 +19,6 @@ package com.android.connectivitymanagertest;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import com.android.connectivitymanagertest.unit.WifiClientTest;
-import com.android.connectivitymanagertest.unit.WifiSoftAPTest;
 
 import junit.framework.TestSuite;
 
@@ -35,7 +34,6 @@ public class ConnectivityManagerUnitTestRunner extends InstrumentationTestRunner
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(WifiClientTest.class);
-        suite.addTestSuite(WifiSoftAPTest.class);
         return suite;
     }
 
