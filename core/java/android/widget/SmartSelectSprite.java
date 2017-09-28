@@ -365,7 +365,7 @@ final class SmartSelectSprite {
     public void startAnimation(
             final PointF start,
             final List<RectF> destinationRectangles,
-            final Runnable onAnimationEnd) throws IllegalArgumentException {
+            final Runnable onAnimationEnd) {
         cancelAnimation();
 
         final ValueAnimator.AnimatorUpdateListener updateListener =
