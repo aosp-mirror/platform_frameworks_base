@@ -268,7 +268,7 @@ public class RippleDrawable extends LayerDrawable {
 
         setRippleActive(focused || (enabled && pressed));
 
-        setBackgroundActive(hovered || focused || (enabled && pressed), focused || hovered);
+        setBackgroundActive(hovered, hovered);
 
         return changed;
     }
@@ -694,7 +694,9 @@ public class RippleDrawable extends LayerDrawable {
         // have a mask or content and the ripple bounds if we're projecting.
         final Rect bounds = getDirtyBounds();
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
-        canvas.clipRect(bounds);
+        if (isBounded()) {
+            canvas.clipRect(bounds);
+        }
 
         drawContent(canvas);
         drawBackgroundAndRipples(canvas);
