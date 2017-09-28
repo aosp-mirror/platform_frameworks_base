@@ -162,11 +162,6 @@ class RippleForeground extends RippleComponent {
 
     @Override
     protected Animator createSoftwareEnter(boolean fast) {
-        // Bounded ripples don't have enter animations.
-        if (mIsBounded) {
-            return null;
-        }
-
         final int duration = (int)
                 (1000 * Math.sqrt(mTargetRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensityScale) + 0.5);
 

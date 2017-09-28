@@ -266,7 +266,8 @@ public class RippleDrawable extends LayerDrawable {
             }
         }
 
-        setRippleActive(enabled && pressed);
+        setRippleActive(focused || (enabled && pressed));
+
         setBackgroundActive(hovered || focused || (enabled && pressed), focused || hovered);
 
         return changed;
