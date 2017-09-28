@@ -32,11 +32,15 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
+import android.service.autofill.InternalTransformation;
+import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
 import android.text.Html;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -57,6 +61,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Autofill Save Prompt
@@ -185,68 +190,17 @@ final class SaveUi {
 
         setServiceIcon(context, view, serviceIcon);
 
-        ScrollView subtitleContainer = null;
-        final CustomDescription customDescription = info.getCustomDescription();
-        if (customDescription != null) {
-            writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
-
+        final boolean hasCustomDescription =
+                applyCustomDescription(context, view, valueFinder, info);
+        if (hasCustomDescription) {
             mSubTitle = null;
-            if (sDebug) Slog.d(TAG, "Using custom description");
-
-            final RemoteViews presentation = customDescription.getPresentation(valueFinder);
-            if (presentation != null) {
-                final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
-                    @Override
-                    public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                            Intent intent) {
-                        final LogMaker log =
-                                newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
-                        // We need to hide the Save UI before launching the pending intent, and
-                        // restore back it once the activity is finished, and that's achieved by
-                        // adding a custom extra in the activity intent.
-                        final boolean isValid = isValidLink(pendingIntent, intent);
-                        if (!isValid) {
-                            log.setType(MetricsEvent.TYPE_UNKNOWN);
-                            mMetricsLogger.write(log);
-                            return false;
-                        }
-                        if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
-                        final IBinder token = mPendingUi.getToken();
-                        intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                        try {
-                            pendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                                    intent);
-                            mPendingUi.setState(PendingUi.STATE_PENDING);
-                            if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-                            hide();
-                            log.setType(MetricsEvent.TYPE_OPEN);
-                            mMetricsLogger.write(log);
-                            return true;
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "error triggering pending intent: " + intent);
-                            log.setType(MetricsEvent.TYPE_FAILURE);
-                            mMetricsLogger.write(log);
-                            return false;
-                        }
-                    }
-                };
-
-                try {
-                    final View customSubtitleView = presentation.apply(context, null, handler);
-                    subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
-                    subtitleContainer.addView(customSubtitleView);
-                    subtitleContainer.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Could not inflate custom description. ", e);
-                }
-            } else {
-                Slog.w(TAG, "could not create remote presentation for custom title");
-            }
+            if (sDebug) Slog.d(TAG, "on constructor: applied custom description");
         } else {
             mSubTitle = info.getDescription();
             if (mSubTitle != null) {
                 writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE, type);
-                subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
+                final ScrollView subtitleContainer =
+                        view.findViewById(R.id.autofill_save_custom_subtitle);
                 final TextView subtitleView = new TextView(context);
                 subtitleView.setText(mSubTitle);
                 subtitleContainer.addView(subtitleView,
@@ -291,6 +245,122 @@ final class SaveUi {
         params.windowAnimations = R.style.AutofillSaveAnimation;
 
         show();
+    }
+
+    private boolean applyCustomDescription(@NonNull Context context, @NonNull View saveUiView,
+            @NonNull ValueFinder valueFinder, @NonNull SaveInfo info) {
+        final CustomDescription customDescription = info.getCustomDescription();
+        if (customDescription == null) {
+            return false;
+        }
+        final int type = info.getType();
+        writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
+
+        final RemoteViews template = customDescription.getPresentation();
+        if (template == null) {
+            Slog.w(TAG, "No remote view on custom description");
+            return false;
+        }
+
+        // First apply the unconditional transformations (if any) to the templates.
+        final ArrayList<Pair<Integer, InternalTransformation>> transformations =
+                customDescription.getTransformations();
+        if (transformations != null) {
+            if (!InternalTransformation.batchApply(valueFinder, template, transformations)) {
+                Slog.w(TAG, "could not apply main transformations on custom description");
+                return false;
+            }
+        }
+
+        final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
+            @Override
+            public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                    Intent intent) {
+                final LogMaker log =
+                        newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
+                // We need to hide the Save UI before launching the pending intent, and
+                // restore back it once the activity is finished, and that's achieved by
+                // adding a custom extra in the activity intent.
+                final boolean isValid = isValidLink(pendingIntent, intent);
+                if (!isValid) {
+                    log.setType(MetricsEvent.TYPE_UNKNOWN);
+                    mMetricsLogger.write(log);
+                    return false;
+                }
+                if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+                final IBinder token = mPendingUi.getToken();
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                try {
+                    mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
+                            intent);
+                    mPendingUi.setState(PendingUi.STATE_PENDING);
+                    if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+                    hide();
+                    log.setType(MetricsEvent.TYPE_OPEN);
+                    mMetricsLogger.write(log);
+                    return true;
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "error triggering pending intent: " + intent);
+                    log.setType(MetricsEvent.TYPE_FAILURE);
+                    mMetricsLogger.write(log);
+                    return false;
+                }
+            }
+        };
+
+        try {
+            // Create the remote view peer.
+            final View customSubtitleView = template.apply(context, null, handler);
+
+            // And apply batch updates (if any).
+            final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
+                    customDescription.getUpdates();
+            if (updates != null) {
+                final int size = updates.size();
+                if (sDebug) Slog.d(TAG, "custom description has " + size + " batch updates");
+                for (int i = 0; i < size; i++) {
+                    final Pair<InternalValidator, BatchUpdates> pair = updates.get(i);
+                    final InternalValidator condition = pair.first;
+                    if (condition == null || !condition.isValid(valueFinder)) {
+                        if (sDebug) Slog.d(TAG, "Skipping batch update #" + i );
+                        continue;
+                    }
+                    final BatchUpdates batchUpdates = pair.second;
+                    // First apply the updates...
+                    final RemoteViews templateUpdates = batchUpdates.getUpdates();
+                    if (templateUpdates != null) {
+                        if (sDebug) Slog.d(TAG, "Applying template updates for batch update #" + i);
+                        templateUpdates.reapply(context, customSubtitleView);
+                    }
+                    // Then the transformations...
+                    final ArrayList<Pair<Integer, InternalTransformation>> batchTransformations =
+                            batchUpdates.getTransformations();
+                    if (batchTransformations != null) {
+                        if (sDebug) {
+                            Slog.d(TAG, "Applying child transformation for batch update #" + i
+                                    + ": " + batchTransformations);
+                        }
+                        if (!InternalTransformation.batchApply(valueFinder, template,
+                                batchTransformations)) {
+                            Slog.w(TAG, "Could not apply child transformation for batch update "
+                                    + "#" + i + ": " + batchTransformations);
+                            return false;
+                        }
+                        template.reapply(context, customSubtitleView);
+                    }
+                }
+            }
+
+            // Finally, add the custom description to the save UI.
+            final ScrollView subtitleContainer =
+                    saveUiView.findViewById(R.id.autofill_save_custom_subtitle);
+            subtitleContainer.addView(customSubtitleView);
+            subtitleContainer.setVisibility(View.VISIBLE);
+            return true;
+        } catch (Exception e) {
+            Slog.e(TAG, "Error applying custom description. ", e);
+        }
+        return false;
     }
 
     private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
