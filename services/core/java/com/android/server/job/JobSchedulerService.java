@@ -500,11 +500,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Receieved: " + action);
             }
+            final String pkgName = getPackageName(intent);
+            final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+
             if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 // Purge the app's jobs if the whole package was just disabled.  When this is
                 // the case the component name will be a bare package name.
-                final String pkgName = getPackageName(intent);
-                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 if (pkgName != null && pkgUid != -1) {
                     final String[] changedComponents = intent.getStringArrayExtra(
                             Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
@@ -524,7 +525,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                                             Slog.d(TAG, "Removing jobs for package " + pkgName
                                                     + " in user " + userId);
                                         }
-                                        cancelJobsForUid(pkgUid, "app package state changed");
+                                        cancelJobsForPackageAndUid(pkgName, pkgUid,
+                                                "app disabled");
                                     }
                                 } catch (RemoteException|IllegalArgumentException e) {
                                     /*
@@ -553,7 +555,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
                     }
-                    cancelJobsForUid(uidRemoved, "app uninstalled");
+                    cancelJobsForPackageAndUid(pkgName, uidRemoved, "app uninstalled");
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
@@ -564,8 +566,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
             } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
                 // Has this package scheduled any jobs, such that we will take action
                 // if it were to be force-stopped?
-                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                final String pkgName = intent.getData().getSchemeSpecificPart();
                 if (pkgUid != -1) {
                     List<JobStatus> jobsForUid;
                     synchronized (mLock) {
@@ -584,13 +584,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             } else if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
                 // possible force-stop
-                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                final String pkgName = intent.getData().getSchemeSpecificPart();
                 if (pkgUid != -1) {
                     if (DEBUG) {
                         Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
                     }
-                    cancelJobsForPackageAndUid(pkgName, pkgUid);
+                    cancelJobsForPackageAndUid(pkgName, pkgUid, "app force stopped");
                 }
             }
         }
@@ -759,13 +757,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void cancelJobsForPackageAndUid(String pkgName, int uid) {
+    void cancelJobsForPackageAndUid(String pkgName, int uid, String reason) {
+        if ("android".equals(pkgName)) {
+            Slog.wtfStack(TAG, "Can't cancel all jobs for system package");
+            return;
+        }
         synchronized (mLock) {
             final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
             for (int i = jobsForUid.size() - 1; i >= 0; i--) {
                 final JobStatus job = jobsForUid.get(i);
                 if (job.getSourcePackageName().equals(pkgName)) {
-                    cancelJobImplLocked(job, null, "app force stopped");
+                    cancelJobImplLocked(job, null, reason);
                 }
             }
         }
@@ -779,6 +781,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
      *
      */
     public void cancelJobsForUid(int uid, String reason) {
+        if (uid == Process.SYSTEM_UID) {
+            Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
+            return;
+        }
         synchronized (mLock) {
             final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
             for (int i=0; i<jobsForUid.size(); i++) {
