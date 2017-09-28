@@ -174,8 +174,6 @@ public class RecentsView extends FrameLayout {
                         ? R.layout.recents_low_ram_stack_action_button
                         : R.layout.recents_stack_action_button,
                     this, false);
-            mStackActionButton.setOnClickListener(
-                    v -> EventBus.getDefault().send(new DismissAllTaskViewsEvent()));
 
             mStackButtonShadowRadius = mStackActionButton.getShadowRadius();
             mStackButtonShadowDistance = new PointF(mStackActionButton.getShadowDx(),
@@ -572,7 +570,7 @@ public class RecentsView extends FrameLayout {
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
                 event.taskView, event.screenPinningRequested, event.targetTaskStack);
         if (Recents.getConfiguration().isLowRamDevice) {
-            hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, false /* translate */);
+            EventBus.getDefault().send(new HideStackActionButtonEvent(false /* translate */));
         }
     }
 
@@ -580,7 +578,7 @@ public class RecentsView extends FrameLayout {
         int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Hide the stack action button
-            hideStackActionButton(taskViewExitToHomeDuration, false /* translate */);
+            EventBus.getDefault().send(new HideStackActionButtonEvent());
         }
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
 
@@ -741,13 +739,10 @@ public class RecentsView extends FrameLayout {
             animateBackgroundScrim(getOpaqueScrimAlpha(),
                     TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
-        if (Recents.getConfiguration().isLowRamDevice && mEmptyView.getVisibility() != View.VISIBLE) {
-            showStackActionButton(SHOW_STACK_ACTION_BUTTON_DURATION, false /* translate */);
-        }
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
-        hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
+        EventBus.getDefault().send(new HideStackActionButtonEvent());
     }
 
     public final void onBusEvent(DismissAllTaskViewsEvent event) {
@@ -795,7 +790,8 @@ public class RecentsView extends FrameLayout {
             mStackActionButton.setVisibility(View.VISIBLE);
             mStackActionButton.setAlpha(0f);
             if (translate) {
-                mStackActionButton.setTranslationY(-mStackActionButton.getMeasuredHeight() * 0.25f);
+                mStackActionButton.setTranslationY(mStackActionButton.getMeasuredHeight() *
+                        (Recents.getConfiguration().isLowRamDevice ? 1 : -0.25f));
             } else {
                 mStackActionButton.setTranslationY(0f);
             }
@@ -841,8 +837,8 @@ public class RecentsView extends FrameLayout {
 
         if (mStackActionButton.getVisibility() == View.VISIBLE) {
             if (translate) {
-                mStackActionButton.animate()
-                    .translationY(-mStackActionButton.getMeasuredHeight() * 0.25f);
+                mStackActionButton.animate().translationY(mStackActionButton.getMeasuredHeight()
+                        * (Recents.getConfiguration().isLowRamDevice ? 1 : -0.25f));
             }
             mStackActionButton.animate()
                     .alpha(0f)
@@ -954,7 +950,7 @@ public class RecentsView extends FrameLayout {
     /**
      * @return the bounds of the stack action button.
      */
-    private Rect getStackActionButtonBoundsFromStackLayout() {
+    Rect getStackActionButtonBoundsFromStackLayout() {
         Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect());
         int left, top;
         if (Recents.getConfiguration().isLowRamDevice) {
@@ -974,6 +970,16 @@ public class RecentsView extends FrameLayout {
         actionButtonRect.set(left, top, left + mStackActionButton.getMeasuredWidth(),
                 top + mStackActionButton.getMeasuredHeight());
         return actionButtonRect;
+    }
+
+    View getStackActionButton() {
+        return mStackActionButton;
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        mTouchHandler.cancelStackActionButtonClick();
     }
 
     public void dump(String prefix, PrintWriter writer) {
