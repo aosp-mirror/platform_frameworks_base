@@ -119,6 +119,8 @@ public class StaticLayout extends Layout {
             b.mLeftIndents = null;
             b.mRightIndents = null;
             b.mLocales = null;
+            b.mLeftPaddings = null;
+            b.mRightPaddings = null;
             nFinishBuilder(b.mNativePtr);
             sPool.release(b);
         }
@@ -130,6 +132,8 @@ public class StaticLayout extends Layout {
             mPaint = null;
             mLeftIndents = null;
             mRightIndents = null;
+            mLeftPaddings = null;
+            mRightPaddings = null;
             mMeasuredText.finish();
         }
 
@@ -358,6 +362,28 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set available paddings to draw overhanging text on. Arguments are arrays holding the
+         * amount of padding available, one per line, measured in pixels. For lines past the last
+         * element in the array, the last element repeats.
+         *
+         * The individual padding amounts should be non-negative. The result of passing negative
+         * paddings is undefined.
+         *
+         * @param leftPaddings array of amounts of available padding for left margin, in pixels
+         * @param rightPaddings array of amounts of available padding for right margin, in pixels
+         * @return this builder, useful for chaining
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setAvailablePaddings(@Nullable int[] leftPaddings,
+                @Nullable int[] rightPaddings) {
+            mLeftPaddings = leftPaddings;
+            mRightPaddings = rightPaddings;
+            return this;
+        }
+
+        /**
          * Set paragraph justification mode. The default value is
          * {@link Layout#JUSTIFICATION_MODE_NONE}. If the last line is too short for justification,
          * the last line will be displayed with the alignment set by {@link #setAlignment}.
@@ -484,6 +510,8 @@ public class StaticLayout extends Layout {
         private int mHyphenationFrequency;
         @Nullable private int[] mLeftIndents;
         @Nullable private int[] mRightIndents;
+        @Nullable private int[] mLeftPaddings;
+        @Nullable private int[] mRightPaddings;
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
 
@@ -644,6 +672,8 @@ public class StaticLayout extends Layout {
 
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
+        mLeftPaddings = b.mLeftPaddings;
+        mRightPaddings = b.mRightPaddings;
         setJustificationMode(b.mJustificationMode);
 
         generate(b, b.mIncludePad, b.mIncludePad);
@@ -785,7 +815,10 @@ public class StaticLayout extends Layout {
                     firstWidth, firstWidthLineCount, restWidth,
                     variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency,
                     // TODO: Support more justification mode, e.g. letter spacing, stretching.
-                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE, indents, mLineCount);
+                    b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
+                    // TODO: indents and paddings don't need to get passed to native code for every
+                    // paragraph. Pass them to native code just once.
+                    indents, mLeftPaddings, mRightPaddings, mLineCount);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -1506,7 +1539,8 @@ public class StaticLayout extends Layout {
             @FloatRange(from = 0.0f) float restWidth, @Nullable int[] variableTabStops,
             int defaultTabStop, @BreakStrategy int breakStrategy,
             @HyphenationFrequency int hyphenationFrequency, boolean isJustified,
-            @Nullable int[] indents, @IntRange(from = 0) int indentsOffset);
+            @Nullable int[] indents, @Nullable int[] leftPaddings, @Nullable int[] rightPaddings,
+            @IntRange(from = 0) int indentsOffset);
 
     private static native float nAddStyleRun(
             /* non zero */ long nativePtr, /* non zero */ long nativePaint,
@@ -1594,4 +1628,6 @@ public class StaticLayout extends Layout {
 
     @Nullable private int[] mLeftIndents;
     @Nullable private int[] mRightIndents;
+    @Nullable private int[] mLeftPaddings;
+    @Nullable private int[] mRightPaddings;
 }

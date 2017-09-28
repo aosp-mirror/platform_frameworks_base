@@ -87,7 +87,8 @@ class JNILineBreakerLineWidth : public minikin::LineBreaker::LineWidthDelegate {
 static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
         jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency,
-        jboolean isJustified, jintArray indents, jint indentsOffset) {
+        jboolean isJustified, jintArray indents, jintArray leftPaddings, jintArray rightPaddings,
+        jint indentsOffset) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->resize(length);
     env->GetCharArrayRegion(text, 0, length, b->buffer());
@@ -245,7 +246,7 @@ static const JNINativeMethod gMethods[] = {
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
-    {"nSetupParagraph", "(J[CIFIF[IIIIZ[II)V", (void*) nSetupParagraph},
+    {"nSetupParagraph", "(J[CIFIF[IIIIZ[I[I[II)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJIIZLjava/lang/String;[J)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
