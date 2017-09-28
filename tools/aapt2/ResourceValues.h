@@ -33,7 +33,8 @@
 
 namespace aapt {
 
-struct RawValueVisitor;
+class ValueVisitor;
+class ConstValueVisitor;
 
 // A resource value. This is an all-encompassing representation
 // of Item and Map and their subclasses. The way to do
@@ -45,36 +46,58 @@ class Value {
   virtual ~Value() = default;
 
   // Whether this value is weak and can be overridden without warning or error. Default is false.
-  bool IsWeak() const { return weak_; }
+  bool IsWeak() const {
+    return weak_;
+  }
 
-  void SetWeak(bool val) { weak_ = val; }
+  void SetWeak(bool val) {
+    weak_ = val;
+  }
 
-  // Whether the value is marked as translatable.
-  // This does not persist when flattened.
+  // Whether the value is marked as translatable. This does not persist when flattened to binary.
   // It is only used during compilation phase.
-  void SetTranslatable(bool val) { translatable_ = val; }
+  void SetTranslatable(bool val) {
+    translatable_ = val;
+  }
 
   // Default true.
-  bool IsTranslatable() const { return translatable_; }
+  bool IsTranslatable() const {
+    return translatable_;
+  }
 
   // Returns the source where this value was defined.
-  const Source& GetSource() const { return source_; }
+  const Source& GetSource() const {
+    return source_;
+  }
 
-  void SetSource(const Source& source) { source_ = source; }
+  void SetSource(const Source& source) {
+    source_ = source;
+  }
 
-  void SetSource(Source&& source) { source_ = std::move(source); }
+  void SetSource(Source&& source) {
+    source_ = std::move(source);
+  }
 
   // Returns the comment that was associated with this resource.
-  const std::string& GetComment() const { return comment_; }
+  const std::string& GetComment() const {
+    return comment_;
+  }
 
-  void SetComment(const android::StringPiece& str) { comment_ = str.to_string(); }
+  void SetComment(const android::StringPiece& str) {
+    comment_ = str.to_string();
+  }
 
-  void SetComment(std::string&& str) { comment_ = std::move(str); }
+  void SetComment(std::string&& str) {
+    comment_ = std::move(str);
+  }
 
   virtual bool Equals(const Value* value) const = 0;
 
   // Calls the appropriate overload of ValueVisitor.
-  virtual void Accept(RawValueVisitor* visitor) = 0;
+  virtual void Accept(ValueVisitor* visitor) = 0;
+
+  // Calls the appropriate overload of ConstValueVisitor.
+  virtual void Accept(ConstValueVisitor* visitor) const = 0;
 
   // Clone the value. `new_pool` is the new StringPool that
   // any resources with strings should use when copying their string.
@@ -95,7 +118,8 @@ class Value {
 // Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseValue : public Value {
-  void Accept(RawValueVisitor* visitor) override;
+  void Accept(ValueVisitor* visitor) override;
+  void Accept(ConstValueVisitor* visitor) const override;
 };
 
 // A resource item with a single value. This maps to android::ResTable_entry.
@@ -111,7 +135,8 @@ struct Item : public Value {
 // Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseItem : public Item {
-  void Accept(RawValueVisitor* visitor) override;
+  void Accept(ValueVisitor* visitor) override;
+  void Accept(ConstValueVisitor* visitor) const override;
 };
 
 // A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
@@ -144,7 +169,10 @@ bool operator==(const Reference&, const Reference&);
 
 // An ID resource. Has no real value, just a place holder.
 struct Id : public BaseItem<Id> {
-  Id() { weak_ = true; }
+  Id() {
+    weak_ = true;
+  }
+
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out) const override;
   Id* Clone(StringPool* new_pool) const override;

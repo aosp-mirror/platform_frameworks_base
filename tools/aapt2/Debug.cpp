@@ -35,9 +35,9 @@ namespace aapt {
 
 namespace {
 
-class PrintVisitor : public ValueVisitor {
+class PrintVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   void Visit(Attribute* attr) override {
     std::cout << "(attr) type=";

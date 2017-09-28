@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+#include "proto/ProtoSerialize.h"
+
+#include "android-base/logging.h"
+
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "StringPool.h"
 #include "ValueVisitor.h"
 #include "proto/ProtoHelpers.h"
-#include "proto/ProtoSerialize.h"
 #include "util/BigBuffer.h"
-
-#include "android-base/logging.h"
 
 using ::google::protobuf::io::CodedInputStream;
 using ::google::protobuf::io::CodedOutputStream;
@@ -32,9 +33,9 @@ namespace aapt {
 
 namespace {
 
-class PbSerializerVisitor : public RawValueVisitor {
+class PbSerializerVisitor : public ConstValueVisitor {
  public:
-  using RawValueVisitor::Visit;
+  using ConstValueVisitor::Visit;
 
   // Constructor to use when expecting to serialize any value.
   PbSerializerVisitor(StringPool* source_pool, pb::Value* out_pb_value)
@@ -46,19 +47,19 @@ class PbSerializerVisitor : public RawValueVisitor {
       : source_pool_(sourcePool), out_pb_value_(nullptr), out_pb_item_(outPbItem) {
   }
 
-  void Visit(Reference* ref) override {
+  void Visit(const Reference* ref) override {
     SerializeReferenceToPb(*ref, pb_item()->mutable_ref());
   }
 
-  void Visit(String* str) override {
+  void Visit(const String* str) override {
     pb_item()->mutable_str()->set_value(*str->value);
   }
 
-  void Visit(RawString* str) override {
+  void Visit(const RawString* str) override {
     pb_item()->mutable_raw_str()->set_value(*str->value);
   }
 
-  void Visit(StyledString* str) override {
+  void Visit(const StyledString* str) override {
     pb::StyledString* pb_str = pb_item()->mutable_styled_str();
     pb_str->set_value(str->value->value);
 
@@ -70,15 +71,15 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
   }
 
-  void Visit(FileReference* file) override {
+  void Visit(const FileReference* file) override {
     pb_item()->mutable_file()->set_path(*file->path);
   }
 
-  void Visit(Id* /*id*/) override {
+  void Visit(const Id* /*id*/) override {
     pb_item()->mutable_id();
   }
 
-  void Visit(BinaryPrimitive* prim) override {
+  void Visit(const BinaryPrimitive* prim) override {
     android::Res_value val = {};
     prim->Flatten(&val);
 
@@ -87,17 +88,17 @@ class PbSerializerVisitor : public RawValueVisitor {
     pb_prim->set_data(val.data);
   }
 
-  void VisitItem(Item* item) override {
+  void VisitItem(const Item* item) override {
     LOG(FATAL) << "unimplemented item";
   }
 
-  void Visit(Attribute* attr) override {
+  void Visit(const Attribute* attr) override {
     pb::Attribute* pb_attr = pb_compound_value()->mutable_attr();
     pb_attr->set_format_flags(attr->type_mask);
     pb_attr->set_min_int(attr->min_int);
     pb_attr->set_max_int(attr->max_int);
 
-    for (auto& symbol : attr->symbols) {
+    for (const auto& symbol : attr->symbols) {
       pb::Attribute_Symbol* pb_symbol = pb_attr->add_symbol();
       SerializeItemCommonToPb(symbol.symbol, pb_symbol);
       SerializeReferenceToPb(symbol.symbol, pb_symbol->mutable_name());
@@ -105,7 +106,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
   }
 
-  void Visit(Style* style) override {
+  void Visit(const Style* style) override {
     pb::Style* pb_style = pb_compound_value()->mutable_style();
     if (style->parent) {
       SerializeReferenceToPb(style->parent.value(), pb_style->mutable_parent());
@@ -113,7 +114,7 @@ class PbSerializerVisitor : public RawValueVisitor {
                           pb_style->mutable_parent_source());
     }
 
-    for (Style::Entry& entry : style->entries) {
+    for (const Style::Entry& entry : style->entries) {
       pb::Style_Entry* pb_entry = pb_style->add_entry();
       SerializeReferenceToPb(entry.key, pb_entry->mutable_key());
 
@@ -124,18 +125,18 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
   }
 
-  void Visit(Styleable* styleable) override {
+  void Visit(const Styleable* styleable) override {
     pb::Styleable* pb_styleable = pb_compound_value()->mutable_styleable();
-    for (Reference& entry : styleable->entries) {
+    for (const Reference& entry : styleable->entries) {
       pb::Styleable_Entry* pb_entry = pb_styleable->add_entry();
       SerializeItemCommonToPb(entry, pb_entry);
       SerializeReferenceToPb(entry, pb_entry->mutable_attr());
     }
   }
 
-  void Visit(Array* array) override {
+  void Visit(const Array* array) override {
     pb::Array* pb_array = pb_compound_value()->mutable_array();
-    for (auto& value : array->elements) {
+    for (const auto& value : array->elements) {
       pb::Array_Element* pb_element = pb_array->add_element();
       SerializeItemCommonToPb(*value, pb_element);
       PbSerializerVisitor sub_visitor(source_pool_, pb_element->mutable_item());
@@ -143,7 +144,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
   }
 
-  void Visit(Plural* plural) override {
+  void Visit(const Plural* plural) override {
     pb::Plural* pb_plural = pb_compound_value()->mutable_plural();
     const size_t count = plural->values.size();
     for (size_t i = 0; i < count; i++) {
