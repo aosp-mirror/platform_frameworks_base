@@ -78,11 +78,17 @@ message IncidentProto {
         (section).type = SECTION_DUMPSYS,
         (section).args = "notification --proto"
     ];
+
     android.service.battery.BatteryServiceDumpProto battery = 3006 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "battery --proto"
     ];
-    android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007;
+
+    android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "diskstats --proto"
+    ];
+
     android.service.pm.PackageServiceDumpProto package = 3008;
     android.service.power.PowerServiceDumpProto power = 3009;
     android.service.print.PrintServiceDumpProto print = 3010;
