@@ -4154,7 +4154,8 @@ public class AudioService extends IAudioService.Stub
                     newDevice, AudioSystem.getOutputDeviceName(newDevice)));
         }
         synchronized (mConnectedDevices) {
-            if ((newDevice & DEVICE_MEDIA_UNMUTED_ON_PLUG) != 0
+            if (mNm.getZenMode() != Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
+                    && (newDevice & DEVICE_MEDIA_UNMUTED_ON_PLUG) != 0
                     && mStreamStates[AudioSystem.STREAM_MUSIC].mIsMuted
                     && mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(newDevice) != 0
                     && (newDevice & AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC)) != 0)
