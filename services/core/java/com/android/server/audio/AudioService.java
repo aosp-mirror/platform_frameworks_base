@@ -2546,13 +2546,15 @@ public class AudioService extends IAudioService.Stub
             }
         }
         int status = AudioSystem.AUDIO_STATUS_OK;
+        int actualMode;
         do {
+            actualMode = mode;
             if (mode == AudioSystem.MODE_NORMAL) {
                 // get new mode from client at top the list if any
                 if (!mSetModeDeathHandlers.isEmpty()) {
                     hdlr = mSetModeDeathHandlers.get(0);
                     cb = hdlr.getBinder();
-                    mode = hdlr.getMode();
+                    actualMode = hdlr.getMode();
                     if (DEBUG_MODE) {
                         Log.w(TAG, " using mode=" + mode + " instead due to death hdlr at pid="
                                 + hdlr.mPid);
@@ -2576,12 +2578,11 @@ public class AudioService extends IAudioService.Stub
                 hdlr.setMode(mode);
             }
 
-            if (mode != mMode) {
-                status = AudioSystem.setPhoneState(mode);
+            if (actualMode != mMode) {
+                status = AudioSystem.setPhoneState(actualMode);
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
-                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + mode); }
-                    mMode = mode;
-                    mModeLogger.log(new PhoneStateEvent(caller, pid, mode));
+                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + actualMode); }
+                    mMode = actualMode;
                 } else {
                     if (hdlr != null) {
                         mSetModeDeathHandlers.remove(hdlr);
@@ -2597,13 +2598,16 @@ public class AudioService extends IAudioService.Stub
         } while (status != AudioSystem.AUDIO_STATUS_OK && !mSetModeDeathHandlers.isEmpty());
 
         if (status == AudioSystem.AUDIO_STATUS_OK) {
-            if (mode != AudioSystem.MODE_NORMAL) {
+            if (actualMode != AudioSystem.MODE_NORMAL) {
                 if (mSetModeDeathHandlers.isEmpty()) {
                     Log.e(TAG, "setMode() different from MODE_NORMAL with empty mode client stack");
                 } else {
                     newModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
                 }
             }
+            // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
+            mModeLogger.log(
+                    new PhoneStateEvent(caller, pid, mode, newModeOwnerPid, actualMode));
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int device = getDeviceForStream(streamType);
             int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
