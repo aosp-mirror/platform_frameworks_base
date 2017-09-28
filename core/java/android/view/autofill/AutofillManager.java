@@ -91,10 +91,10 @@ import java.util.Objects;
  * </ul>
  *
  * <p>When the service returns datasets, the Android System displays an autofill dataset picker
- * UI affordance associated with the view, when the view is focused on and is part of a dataset.
- * The application can be notified when the affordance is shown by registering an
+ * UI associated with the view, when the view is focused on and is part of a dataset.
+ * The application can be notified when the UI is shown by registering an
  * {@link AutofillCallback} through {@link #registerCallback(AutofillCallback)}. When the user
- * selects a dataset from the affordance, all views present in the dataset are autofilled, through
+ * selects a dataset from the UI, all views present in the dataset are autofilled, through
  * calls to {@link View#autofill(AutofillValue)} or {@link View#autofill(SparseArray)}.
  *
  * <p>When the service returns ids of savable views, the Android System keeps track of changes
@@ -108,7 +108,7 @@ import java.util.Objects;
  * </ul>
  *
  * <p>Finally, after the autofill context is commited (i.e., not cancelled), the Android System
- * shows a save UI affordance if the value of savable views have changed. If the user selects the
+ * shows an autofill save UI if the value of savable views have changed. If the user selects the
  * option to Save, the current value of the views is then sent to the autofill service.
  *
  * <p>It is safe to call into its methods from any thread.
@@ -310,6 +310,14 @@ public final class AutofillManager {
     /** Views that are only tracked because they are fillable and could be anchoring the UI. */
     @GuardedBy("mLock")
     @Nullable private ArraySet<AutofillId> mFillableIds;
+
+    /** If set, session is commited when the field is clicked. */
+    @GuardedBy("mLock")
+    @Nullable private AutofillId mSaveTriggerId;
+
+    /** If set, session is commited when the activity is finished; otherwise session is canceled. */
+    @GuardedBy("mLock")
+    private boolean mSaveOnFinish;
 
     /** @hide */
     public interface AutofillClient {
@@ -834,6 +842,46 @@ public final class AutofillManager {
         }
     }
 
+
+    /**
+     * Called when a {@link View} is clicked. Currently only used by views that should trigger save.
+     *
+     * @hide
+     */
+    public void notifyViewClicked(View view) {
+        final AutofillId id = view.getAutofillId();
+
+        if (sVerbose) Log.v(TAG, "notifyViewClicked(): id=" + id + ", trigger=" + mSaveTriggerId);
+
+        synchronized (mLock) {
+            if (mSaveTriggerId != null && mSaveTriggerId.equals(id)) {
+                if (sDebug) Log.d(TAG, "triggering commit by click of " + id);
+                commitLocked();
+                mMetricsLogger.action(MetricsEvent.AUTOFILL_SAVE_EXPLICITLY_TRIGGERED,
+                        mContext.getPackageName());
+            }
+        }
+    }
+
+    /**
+     * Called by {@link android.app.Activity} to commit or cancel the session on finish.
+     *
+     * @hide
+     */
+    public void onActivityFinished() {
+        if (!hasAutofillFeature()) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mSaveOnFinish) {
+                commitLocked();
+            } else {
+                if (sDebug) Log.d(TAG, "Cancelling session on finish() as requested by service");
+                cancelLocked();
+            }
+        }
+    }
+
     /**
      * Called to indicate the current autofill context should be commited.
      *
@@ -850,12 +898,15 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (!mEnabled && !isActiveLocked()) {
-                return;
-            }
-
-            finishSessionLocked();
+            commitLocked();
         }
+    }
+
+    private void commitLocked() {
+        if (!mEnabled && !isActiveLocked()) {
+            return;
+        }
+        finishSessionLocked();
     }
 
     /**
@@ -874,12 +925,15 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            if (!mEnabled && !isActiveLocked()) {
-                return;
-            }
-
-            cancelSessionLocked();
+            cancelLocked();
         }
+    }
+
+    private void cancelLocked() {
+        if (!mEnabled && !isActiveLocked()) {
+            return;
+        }
+        cancelSessionLocked();
     }
 
     /** @hide */
@@ -1038,6 +1092,7 @@ public final class AutofillManager {
         mState = STATE_UNKNOWN;
         mTrackedViews = null;
         mFillableIds = null;
+        mSaveTriggerId = null;
     }
 
     private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int action,
@@ -1289,12 +1344,15 @@ public final class AutofillManager {
     /**
      *  Set the tracked views.
      *
-     * @param trackedIds The views to be tracked
+     * @param trackedIds The views to be tracked.
      * @param saveOnAllViewsInvisible Finish the session once all tracked views are invisible.
+     * @param saveOnFinish Finish the session once the activity is finished.
      * @param fillableIds Views that might anchor FillUI.
+     * @param saveTriggerId View that when clicked triggers commit().
      */
     private void setTrackedViews(int sessionId, @Nullable AutofillId[] trackedIds,
-            boolean saveOnAllViewsInvisible, @Nullable AutofillId[] fillableIds) {
+            boolean saveOnAllViewsInvisible, boolean saveOnFinish,
+            @Nullable AutofillId[] fillableIds, @Nullable AutofillId saveTriggerId) {
         synchronized (mLock) {
             if (mEnabled && mSessionId == sessionId) {
                 if (saveOnAllViewsInvisible) {
@@ -1302,6 +1360,7 @@ public final class AutofillManager {
                 } else {
                     mTrackedViews = null;
                 }
+                mSaveOnFinish = saveOnFinish;
                 if (fillableIds != null) {
                     if (mFillableIds == null) {
                         mFillableIds = new ArraySet<>(fillableIds.length);
@@ -1314,8 +1373,28 @@ public final class AutofillManager {
                                 + ", mFillableIds" + mFillableIds);
                     }
                 }
+
+                if (mSaveTriggerId != null && !mSaveTriggerId.equals(saveTriggerId)) {
+                    // Turn off trigger on previous view id.
+                    setNotifyOnClickLocked(mSaveTriggerId, false);
+                }
+
+                if (saveTriggerId != null && !saveTriggerId.equals(mSaveTriggerId)) {
+                    // Turn on trigger on new view id.
+                    mSaveTriggerId = saveTriggerId;
+                    setNotifyOnClickLocked(mSaveTriggerId, true);
+                }
             }
         }
+    }
+
+    private void setNotifyOnClickLocked(@NonNull AutofillId id, boolean notify) {
+        final View view = findView(id);
+        if (view == null) {
+            Log.w(TAG, "setNotifyOnClick(): invalid id: " + id);
+            return;
+        }
+        view.setNotifyAutofillManagerOnClick(notify);
     }
 
     private void setSaveUiState(int sessionId, boolean shown) {
@@ -1504,6 +1583,8 @@ public final class AutofillManager {
             pw.print(pfx2); pw.print("invisible:"); pw.println(mTrackedViews.mInvisibleTrackedIds);
         }
         pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
+        pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
+        pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
     }
 
     private String getStateAsStringLocked() {
@@ -1752,7 +1833,7 @@ public final class AutofillManager {
      * Callback for autofill related events.
      *
      * <p>Typically used for applications that display their own "auto-complete" views, so they can
-     * enable / disable such views when the autofill UI affordance is shown / hidden.
+     * enable / disable such views when the autofill UI is shown / hidden.
      */
     public abstract static class AutofillCallback {
 
@@ -1762,26 +1843,26 @@ public final class AutofillManager {
         public @interface AutofillEventType {}
 
         /**
-         * The autofill input UI affordance associated with the view was shown.
+         * The autofill input UI associated with the view was shown.
          *
-         * <p>If the view provides its own auto-complete UI affordance and its currently shown, it
+         * <p>If the view provides its own auto-complete UI and its currently shown, it
          * should be hidden upon receiving this event.
          */
         public static final int EVENT_INPUT_SHOWN = 1;
 
         /**
-         * The autofill input UI affordance associated with the view was hidden.
+         * The autofill input UI associated with the view was hidden.
          *
-         * <p>If the view provides its own auto-complete UI affordance that was hidden upon a
+         * <p>If the view provides its own auto-complete UI that was hidden upon a
          * {@link #EVENT_INPUT_SHOWN} event, it could be shown again now.
          */
         public static final int EVENT_INPUT_HIDDEN = 2;
 
         /**
-         * The autofill input UI affordance associated with the view isn't shown because
+         * The autofill input UI associated with the view isn't shown because
          * autofill is not available.
          *
-         * <p>If the view provides its own auto-complete UI affordance but was not displaying it
+         * <p>If the view provides its own auto-complete UI but was not displaying it
          * to avoid flickering, it could shown it upon receiving this event.
          */
         public static final int EVENT_INPUT_UNAVAILABLE = 3;
@@ -1883,12 +1964,12 @@ public final class AutofillManager {
 
         @Override
         public void setTrackedViews(int sessionId, AutofillId[] ids,
-                boolean saveOnAllViewsInvisible, AutofillId[] fillableIds) {
+                boolean saveOnAllViewsInvisible, boolean saveOnFinish, AutofillId[] fillableIds,
+                AutofillId saveTriggerId) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() ->
-                        afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible, fillableIds)
-                );
+                afm.post(() -> afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible,
+                        saveOnFinish, fillableIds, saveTriggerId));
             }
         }
 

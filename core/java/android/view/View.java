@@ -6398,6 +6398,60 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Set by {@link AutofillManager} if it needs to be notified when this view is clicked.
+     */
+    private boolean mNotifyAutofillManagerOnClick;
+
+    /**
+     * Temporary variable used to make sure the autofill manager is not called twice on
+     * {@link #performClickInternal()}.
+     */
+    private boolean mAlreadyNotifiedAutofillManagerOnClick;
+
+    /** @hide */
+    public void setNotifyAutofillManagerOnClick(boolean notify) {
+        mNotifyAutofillManagerOnClick = notify;
+    }
+
+    private void notifyAutofillManagerOnClick() {
+        if (!mNotifyAutofillManagerOnClick || mAlreadyNotifiedAutofillManagerOnClick) {
+            return;
+        }
+        // Must notify manager first to avoid scenarios where app has a listener
+        // that changes the state of views the autofill service might be interested on.
+        try {
+            getAutofillManager().notifyViewClicked(this);
+        } finally {
+            // Set it to already called so it's not called twice when
+            mAlreadyNotifiedAutofillManagerOnClick = true;
+        }
+    }
+
+    /**
+     * Entry point for {@link #performClick()} - other methods on View should call it instead of
+     * {@code performClick()} directly to make sure the autofill manager is notified when
+     * necessary (as subclasses could extend {@code performClick()} without calling the parent's
+     * method).
+     */
+    private boolean performClickInternal() {
+        mAlreadyNotifiedAutofillManagerOnClick = false;
+
+        // Must notify autofill manager before performing the click actions to avoid scenarios where
+        // the app has a click listener that changes the state of views the autofill service might
+        // be interested on.
+        notifyAutofillManagerOnClick();
+
+        boolean performed;
+        try {
+            performed = performClick();
+        } finally {
+            // Reset it for next call.
+            mAlreadyNotifiedAutofillManagerOnClick = false;
+        }
+        return performed;
+    }
+
+    /**
      * Call this view's OnClickListener, if it is defined.  Performs all normal
      * actions associated with clicking: reporting accessibility event, playing
      * a sound, etc.
@@ -6405,7 +6459,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True there was an assigned OnClickListener that was called, false
      *         otherwise is returned.
      */
+    // NOTE: other methods on View should not call this method directly, but performClickInternal()
+    // instead, to guarantee that the autofill manager is notified when necessary (as subclasses
+    // could extend this method without calling super.performClick()).
     public boolean performClick() {
+        try {
+            // We still need to call this method to handle the cases where performClick() was called
+            // externally, instead of through performClickInternal()
+            notifyAutofillManagerOnClick();
+        } finally {
+            // Reset it for next call.
+            mAlreadyNotifiedAutofillManagerOnClick = false;
+        }
+
         final boolean result;
         final ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnClickListener != null) {
@@ -11503,7 +11569,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
-                    performClick();
+                    performClickInternal();
                     return true;
                 }
             } break;
@@ -12615,7 +12681,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // This is a tap, so remove the longpress check
                     removeLongPressCallback();
                     if (!event.isCanceled()) {
-                        return performClick();
+                        return performClickInternal();
                     }
                 }
             }
@@ -13187,7 +13253,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     mPerformClick = new PerformClick();
                                 }
                                 if (!post(mPerformClick)) {
-                                    performClick();
+                                    performClickInternal();
                                 }
                             }
                         }
@@ -18228,10 +18294,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @SuppressWarnings({"UnusedDeclaration"})
     public void outputDirtyFlags(String indent, boolean clear, int clearMask) {
-        Log.d("View", indent + this + "             DIRTY(" + (mPrivateFlags & View.PFLAG_DIRTY_MASK) +
-                ") DRAWN(" + (mPrivateFlags & PFLAG_DRAWN) + ")" + " CACHE_VALID(" +
-                (mPrivateFlags & View.PFLAG_DRAWING_CACHE_VALID) +
-                ") INVALIDATED(" + (mPrivateFlags & PFLAG_INVALIDATED) + ")");
+        Log.d(VIEW_LOG_TAG, indent + this + "             DIRTY("
+                + (mPrivateFlags & View.PFLAG_DIRTY_MASK)
+                + ") DRAWN(" + (mPrivateFlags & PFLAG_DRAWN) + ")" + " CACHE_VALID("
+                + (mPrivateFlags & View.PFLAG_DRAWING_CACHE_VALID)
+                + ") INVALIDATED(" + (mPrivateFlags & PFLAG_INVALIDATED) + ")");
         if (clear) {
             mPrivateFlags &= clearMask;
         }
@@ -20008,7 +20075,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean changed = false;
 
         if (DBG) {
-            Log.d("View", this + " View.setFrame(" + left + "," + top + ","
+            Log.d(VIEW_LOG_TAG, this + " View.setFrame(" + left + "," + top + ","
                     + right + "," + bottom + ")");
         }
 
@@ -25054,7 +25121,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private final class PerformClick implements Runnable {
         @Override
         public void run() {
-            performClick();
+            performClickInternal();
         }
     }
 

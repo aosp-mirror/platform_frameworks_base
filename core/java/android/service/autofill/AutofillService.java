@@ -65,7 +65,7 @@ import com.android.internal.os.SomeArgs;
  *   <li>The service replies through {@link FillCallback#onSuccess(FillResponse)}.
  *   <li>The Android System calls {@link #onDisconnected()} and unbinds from the
  *       {@code AutofillService}.
- *   <li>The Android System displays an UI affordance with the options sent by the service.
+ *   <li>The Android System displays an autofill UI with the options sent by the service.
  *   <li>The user picks an option.
  *   <li>The proper views are autofilled.
  * </ol>
