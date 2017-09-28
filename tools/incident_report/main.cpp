@@ -97,8 +97,8 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
-                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d\n", tag, tag,
-                                                    in->CurrentPosition());
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_FIXED64:
@@ -106,14 +106,14 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt64(fieldId, value64);
                     break;
                 } else {
-                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d\n", tag, tag,
-                            in->CurrentPosition());
+                    fprintf(stderr, "bad VARINT: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             case WireFormatLite::WIRETYPE_LENGTH_DELIMITED:
                 if (!read_length_delimited(in, fieldId, descriptor, message)) {
-                    fprintf(stderr, "bad LENGTH_DELIMITED: 0x%x (%d) at index %d\n",
-                            tag, tag, in->CurrentPosition());
+                    fprintf(stderr, "bad LENGTH_DELIMITED: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
                 break;
@@ -122,13 +122,13 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
                     message->addInt32(fieldId, value32);
                     break;
                 } else {
-                    fprintf(stderr, "bad FIXED32: 0x%x (%d) at index %d\n", tag, tag,
-                            in->CurrentPosition());
+                    fprintf(stderr, "bad FIXED32: 0x%x (%d) at index %d of field %s\n",
+                            tag, tag, in->CurrentPosition(), descriptor->name().c_str());
                     return false;
                 }
             default:
-                fprintf(stderr, "bad tag: 0x%x (%d) at index %d\n", tag, tag,
-                        in->CurrentPosition());
+                fprintf(stderr, "bad tag: 0x%x (%d) at index %d of field %s\n", tag, tag,
+                        in->CurrentPosition(), descriptor->name().c_str());
                 return false;
         }
     }
@@ -153,7 +153,8 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     out->printf("%f", *(float*)&node.value32);
                     break;
                 default:
-                    out->printf("(unexpected value32 %d (0x%x)", node.value32, node.value32);
+                    out->printf("(unexpected type %d: value32 %d (0x%x)",
+                                type, node.value32, node.value32);
                     break;
             }
             break;
@@ -194,7 +195,8 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     }
                     break;
                 default:
-                    out->printf("(unexpected value64 %lld (0x%x))", node.value64, node.value64);
+                    out->printf("(unexpected type %d: value64 %lld (0x%x))",
+                                type, node.value64, node.value64);
                     break;
             }
             break;

@@ -30,6 +30,9 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+
+import com.android.server.am.proto.BroadcastRecordProto;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -331,9 +334,17 @@ final class BroadcastRecord extends Binder {
         return didSomething;
     }
 
+    @Override
     public String toString() {
         return "BroadcastRecord{"
             + Integer.toHexString(System.identityHashCode(this))
             + " u" + userId + " " + intent.getAction() + "}";
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(BroadcastRecordProto.USER_ID, userId);
+        proto.write(BroadcastRecordProto.INTENT_ACTION, intent.getAction());
+        proto.end(token);
     }
 }

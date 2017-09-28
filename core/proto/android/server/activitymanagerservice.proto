@@ -16,8 +16,11 @@
 
 syntax = "proto3";
 
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
+import "frameworks/base/core/proto/android/os/looper.proto";
 
 package com.android.server.am.proto;
 
@@ -25,6 +28,12 @@ option java_multiple_files = true;
 
 message ActivityManagerServiceProto {
   ActivityStackSupervisorProto activities = 1;
+
+  BroadcastProto broadcasts = 2;
+
+  ServiceProto services = 3;
+
+  ProcessProto processes = 4;
 }
 
 message ActivityStackSupervisorProto {
@@ -81,4 +90,86 @@ message ActivityRecordProto {
 message KeyguardControllerProto {
   bool keyguard_showing = 1;
   bool keyguard_occluded = 2;
+}
+
+message BroadcastProto {
+  repeated ReceiverListProto  receiver_list = 1;
+
+  .com.android.server.IntentResolverProto receiver_resolver = 2;
+
+  repeated BroadcastQueueProto broadcast_queue = 3;
+
+  repeated StickyBroadcastProto sticky_broadcasts = 4;
+
+  message MainHandler {
+    string handler = 1;
+    .android.os.LooperProto looper = 2;
+  }
+  MainHandler handler = 5;
+}
+
+message ReceiverListProto {
+  ProcessRecordProto app = 1;
+  int32 pid = 2;
+  int32 uid = 3;
+  int32 user = 4;
+  BroadcastRecordProto current = 5;
+  bool linked_to_death = 6;
+  repeated BroadcastFilterProto filters = 7;
+  string hex_hash = 8; // this hash is used to find the object in IntentResolver
+}
+
+message ProcessRecordProto {
+  int32 pid = 1;
+  string process_name = 2;
+  int32 uid = 3;
+  int32 user_id = 4;
+  int32 app_id = 5;
+  int32 isolated_app_id = 6;
+}
+
+message BroadcastRecordProto {
+  int32 user_id = 1;
+  string intent_action = 2;
+}
+
+message BroadcastFilterProto {
+  .android.content.IntentFilterProto intent_filter = 1;
+  string required_permission = 2;
+  string hex_hash = 3; // used to find the object in IntentResolver
+  int32 owning_user_id = 4;
+}
+
+message BroadcastQueueProto {
+  string queue_name = 1;
+  repeated BroadcastRecordProto parallel_broadcasts = 2;
+  repeated BroadcastRecordProto ordered_broadcasts = 3;
+  BroadcastRecordProto pending_broadcast = 4;
+  repeated BroadcastRecordProto historical_broadcasts = 5;
+
+  message BroadcastSummary {
+    .android.content.IntentProto intent = 1;
+    int64 enqueue_clock_time_ms = 2;
+    int64 dispatch_clock_time_ms = 3;
+    int64 finish_clock_time_ms = 4;
+  }
+  repeated BroadcastSummary historical_broadcasts_summary = 6;
+}
+
+message StickyBroadcastProto {
+  int32 user = 1;
+
+  message StickyAction {
+    string name = 1;
+    repeated .android.content.IntentProto intents = 2;
+  }
+  repeated StickyAction actions = 2;
+}
+
+message ServiceProto {
+  // TODO: "dumpsys activity --proto services"
+}
+
+message ProcessProto {
+  // TODO: "dumpsys activity --proto processes"
 }
