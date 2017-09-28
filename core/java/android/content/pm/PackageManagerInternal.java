@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
@@ -25,6 +28,8 @@ import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
 import android.util.SparseArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -33,6 +38,20 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
+    public static final int PACKAGE_SYSTEM = 0;
+    public static final int PACKAGE_SETUP_WIZARD = 1;
+    public static final int PACKAGE_INSTALLER = 2;
+    public static final int PACKAGE_VERIFIER = 3;
+    public static final int PACKAGE_BROWSER = 4;
+    @IntDef(value = {
+        PACKAGE_SYSTEM,
+        PACKAGE_SETUP_WIZARD,
+        PACKAGE_INSTALLER,
+        PACKAGE_VERIFIER,
+        PACKAGE_BROWSER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KnownPackage {}
 
     /**
      * Provider for package names.
@@ -170,6 +189,13 @@ public abstract class PackageManagerInternal {
      */
     public abstract List<ResolveInfo> queryIntentActivities(Intent intent,
             @ResolveInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve all services that can be performed for the given intent.
+     * @see PackageManager#queryIntentServices(Intent, int)
+     */
+    public abstract List<ResolveInfo> queryIntentServices(
+            Intent intent, int flags, int callingUid, int userId);
 
     /**
      * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.
@@ -343,13 +369,18 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId);
+            int flags, int userId, boolean resolveForStart);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
     */
-   public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
+    public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
            int flags, int userId, int callingUid);
+
+   /**
+    * Resolves a content provider intent.
+    */
+    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
     /**
      * Track the creator of a new isolated uid.
@@ -383,4 +414,38 @@ public abstract class PackageManagerInternal {
      * Updates a package last used time.
      */
     public abstract void notifyPackageUse(String packageName, int reason);
+
+    /**
+     * Returns a package object for the given package name.
+     */
+    public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
+
+    /**
+     * Returns a package object for the disabled system package name.
+     */
+    public abstract @Nullable PackageParser.Package getDisabledPackage(@NonNull String packageName);
+
+    /**
+     * Returns whether or not the component is the resolver activity.
+     */
+    public abstract boolean isResolveActivityComponent(@NonNull ComponentInfo component);
+
+    /**
+     * Returns the package name for a known package.
+     */
+    public abstract @Nullable String getKnownPackageName(
+            @KnownPackage int knownPackage, int userId);
+
+    /*
+     * NOTE: The following methods are temporary until permissions are extracted from
+     * the package manager into a component specifically for handling permissions.
+     */
+    /** Returns a permission object for the given permission name. */
+    public abstract @Nullable Object getPermissionTEMP(@NonNull String permName);
+    /** Returns the flags for the given permission. */
+    public abstract @Nullable int getPermissionFlagsTEMP(@NonNull String permName,
+            @NonNull String packageName, int userId);
+    /** Updates the flags for the given permission. */
+    public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
+            @NonNull String packageName, int flagMask, int flagValues, int userId);
 }

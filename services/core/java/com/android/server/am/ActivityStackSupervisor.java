@@ -1246,7 +1246,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         synchronized (mService) {
             return mService.getPackageManagerInternalLocked().resolveIntent(intent, resolvedType,
                     PackageManager.MATCH_INSTANT | PackageManager.MATCH_DEFAULT_ONLY | flags
-                    | ActivityManagerService.STOCK_PM_FLAGS, userId);
+                    | ActivityManagerService.STOCK_PM_FLAGS, userId, true);
         }
     }
 

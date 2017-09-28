@@ -23,13 +23,15 @@ import android.content.pm.UserInfo;
 import android.service.pm.PackageProto;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.pm.permission.PermissionsState;
+
 import java.io.File;
 import java.util.List;
 
 /**
  * Settings data for a particular package we know about.
  */
-final class PackageSetting extends PackageSettingBase {
+public final class PackageSetting extends PackageSettingBase {
     int appId;
     PackageParser.Package pkg;
     /**
@@ -108,6 +110,10 @@ final class PackageSetting extends PackageSettingBase {
         return (sharedUser != null)
                 ? sharedUser.getPermissionsState()
                 : super.getPermissionsState();
+    }
+
+    public PackageParser.Package getPackage() {
+        return pkg;
     }
 
     public boolean isPrivileged() {

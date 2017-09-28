@@ -103,10 +103,9 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
-import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
-import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
-import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
-
+import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
+import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
+import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
 
 import android.Manifest;
@@ -164,6 +163,7 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
+import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageStats;
@@ -283,13 +283,16 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
+import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
+import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
@@ -864,7 +867,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 String targetPath) {
             return getStaticOverlayPaths(targetPackageName, targetPath);
         }
-    };
+    }
 
     class ParallelPackageParserCallback extends PackageParserCallback {
         List<PackageParser.Package> mOverlayPackages = null;
@@ -2478,14 +2481,25 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
+            // Expose private service for system components to use.
+            LocalServices.addService(
+                    PackageManagerInternal.class, new PackageManagerInternalImpl());
+
             mHandlerThread = new ServiceThread(TAG,
                     Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
-
-            mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(this);
+            mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(
+                    mContext, mHandlerThread.getLooper(), new DefaultPermissionGrantedCallback() {
+                        @Override
+                        public void onDefaultRuntimePermissionsGranted(int userId) {
+                            synchronized(mPackages) {
+                                mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
+                            }
+                        }
+                    });
             mInstantAppRegistry = new InstantAppRegistry(this);
 
             File dataDir = Environment.getDataDirectory();
@@ -3112,8 +3126,6 @@ public class PackageManagerService extends IPackageManager.Stub
         // once we have a booted system.
         mInstaller.setWarnIfHeld(mPackages);
 
-        // Expose private service for system components to use.
-        LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
@@ -5518,7 +5530,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void grantRuntimePermission(String packageName, String name, final int userId) {
-        grantRuntimePermission(packageName, name, userId, false /* Only if not fixed by policy */);
+        grantRuntimePermission(packageName, name, userId, false /*overridePolicy*/);
     }
 
     private void grantRuntimePermission(String packageName, String name, final int userId,
@@ -6158,7 +6170,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * <br />
      * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
      */
-    static int compareSignatures(Signature[] s1, Signature[] s2) {
+    public static int compareSignatures(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
@@ -6512,9 +6524,14 @@ public class PackageManagerService extends IPackageManager.Stub
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
         return resolveIntentInternal(
-                intent, resolvedType, flags, userId, false /*includeInstantApps*/);
+                intent, resolvedType, flags, userId, false /*resolveForStart*/);
     }
 
+    /**
+     * Normally instant apps can only be resolved when they're visible to the caller.
+     * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
+     * since we need to allow the system to start any installed application.
+     */
     private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
             int flags, int userId, boolean resolveForStart) {
         try {
@@ -8732,6 +8749,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
+        return resolveContentProviderInternal(name, flags, userId);
+    }
+
+    private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId, name);
         final String instantAppPkgName = getInstantAppPackageName(Binder.getCallingUid());
@@ -15501,7 +15522,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             boolean result = mSettings.setDefaultBrowserPackageNameLPw(packageName, userId);
             if (packageName != null) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowserLPr(
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(
                         packageName, userId);
             }
             return result;
@@ -22150,9 +22171,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         sUserManager.systemReady();
 
-        // If we upgraded grant all default permissions before kicking off.
-        for (int userId : grantPermissionsUserIds) {
-            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+        synchronized(mPackages) {
+            // If we upgraded grant all default permissions before kicking off.
+            for (int userId : grantPermissionsUserIds) {
+                mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
+            }
         }
 
         if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
@@ -24553,7 +24576,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     void onNewUserCreated(final int userId) {
-        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
+        synchronized(mPackages) {
+            mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
+        }
         // If permission review for legacy apps is required, we represent
         // dagerous permissions for such apps as always granted runtime
         // permissions to keep per user flag state whether review is needed.
@@ -24993,70 +25018,109 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
-        public void setLocationPackagesProvider(PackagesProvider provider) {
+        public Object getPermissionTEMP(String permName) {
             synchronized (mPackages) {
-                mDefaultPermissionPolicy.setLocationPackagesProviderLPw(provider);
+                return mSettings.mPermissions.get(permName);
             }
+        }
+
+        @Override
+        public void updatePermissionFlagsTEMP(String permName, String packageName, int flagMask,
+                int flagValues, int userId) {
+            PackageManagerService.this.updatePermissionFlags(
+                    permName, packageName, flagMask, flagValues, userId);
+        }
+
+        @Override
+        public int getPermissionFlagsTEMP(String permName, String packageName, int userId) {
+            return PackageManagerService.this.getPermissionFlags(permName, packageName, userId);
+        }
+
+        @Override
+        public PackageParser.Package getPackage(String packageName) {
+            synchronized (mPackages) {
+                return mPackages.get(packageName);
+            }
+        }
+
+        @Override
+        public PackageParser.Package getDisabledPackage(String packageName) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
+                return (ps != null) ? ps.pkg : null;
+            }
+        }
+
+        @Override
+        public String getKnownPackageName(int knownPackage, int userId) {
+            switch(knownPackage) {
+                case PackageManagerInternal.PACKAGE_BROWSER:
+                    return getDefaultBrowserPackageName(userId);
+                case PackageManagerInternal.PACKAGE_INSTALLER:
+                    return mRequiredInstallerPackage;
+                case PackageManagerInternal.PACKAGE_SETUP_WIZARD:
+                    return mSetupWizardPackage;
+                case PackageManagerInternal.PACKAGE_SYSTEM:
+                    return "android";
+                case PackageManagerInternal.PACKAGE_VERIFIER:
+                    return mRequiredVerifierPackage;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean isResolveActivityComponent(ComponentInfo component) {
+            return mResolveActivity.packageName.equals(component.packageName)
+                    && mResolveActivity.name.equals(component.name);
+        }
+
+        @Override
+        public void setLocationPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setLocationPackagesProvider(provider);
         }
 
         @Override
         public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setVoiceInteractionPackagesProviderLPw(provider);
-            }
+            mDefaultPermissionPolicy.setVoiceInteractionPackagesProvider(provider);
         }
 
         @Override
         public void setSmsAppPackagesProvider(PackagesProvider provider) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setSmsAppPackagesProviderLPw(provider);
-            }
+            mDefaultPermissionPolicy.setSmsAppPackagesProvider(provider);
         }
 
         @Override
         public void setDialerAppPackagesProvider(PackagesProvider provider) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setDialerAppPackagesProviderLPw(provider);
-            }
+            mDefaultPermissionPolicy.setDialerAppPackagesProvider(provider);
         }
 
         @Override
         public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setSimCallManagerPackagesProviderLPw(provider);
-            }
+            mDefaultPermissionPolicy.setSimCallManagerPackagesProvider(provider);
         }
 
         @Override
         public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.setSyncAdapterPackagesProviderLPw(provider);
-            }
+            mDefaultPermissionPolicy.setSyncAdapterPackagesProvider(provider);
         }
 
         @Override
         public void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSmsAppLPr(
-                        packageName, userId);
-            }
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSmsApp(packageName, userId);
         }
 
         @Override
         public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
             synchronized (mPackages) {
                 mSettings.setDefaultDialerPackageNameLPw(packageName, userId);
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerAppLPr(
-                        packageName, userId);
             }
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerApp(packageName, userId);
         }
 
         @Override
         public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
-            synchronized (mPackages) {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManagerLPr(
-                        packageName, userId);
-            }
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManager(
+                    packageName, userId);
         }
 
         @Override
@@ -25140,6 +25204,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return PackageManagerService.this
                     .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+        }
+
+        @Override
+        public List<ResolveInfo> queryIntentServices(
+                Intent intent, int flags, int callingUid, int userId) {
+            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+            return PackageManagerService.this
+                    .queryIntentServicesInternal(intent, resolvedType, flags, userId, callingUid,
+                            false);
         }
 
         @Override
@@ -25309,15 +25382,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         @Override
         public ResolveInfo resolveIntent(Intent intent, String resolvedType,
-                int flags, int userId) {
+                int flags, int userId, boolean resolveForStart) {
             return resolveIntentInternal(
-                    intent, resolvedType, flags, userId, true /*resolveForStart*/);
+                    intent, resolvedType, flags, userId, resolveForStart);
         }
 
         @Override
         public ResolveInfo resolveService(Intent intent, String resolvedType,
                 int flags, int userId, int callingUid) {
             return resolveServiceInternal(intent, resolvedType, flags, userId, callingUid);
+        }
+
+        @Override
+        public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
+            return PackageManagerService.this.resolveContentProviderInternal(
+                    name, flags, userId);
         }
 
         @Override
@@ -25367,7 +25446,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mPackages) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierAppsLPr(
+                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledCarrierApps(
                         packageNames, userId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -25381,7 +25460,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mPackages) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledImsServicesLPr(
+                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledImsServices(
                         packageNames, userId);
             } finally {
                 Binder.restoreCallingIdentity(identity);

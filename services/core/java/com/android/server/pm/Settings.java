@@ -86,8 +86,9 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.PermissionsState.PermissionState;
 
 import libcore.io.IoUtils;
 

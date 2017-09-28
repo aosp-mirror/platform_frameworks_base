@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
 
+import com.android.server.pm.permission.PermissionsState;
+
 abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
