@@ -35,7 +35,7 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ਆਪਣਾ ਚਾਰਜਰ ਕਨੈਕਟ ਕਰੋ।"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ਅਣਲਾਕ ਕਰਨ ਲਈ \"ਮੀਨੂ\" ਦਬਾਓ।"</string>
-    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ਨੈੱਟਵਰਕ ਲੌਕ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ਨੈੱਟਵਰਕ  ਲਾਕ  ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"ਕੋਈ ਸਿਮ ਕਾਰਡ ਨਹੀਂ"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"ਟੈਬਲੈੱਟ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ।"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ਫ਼ੋਨ ਵਿੱਚ ਕੋਈ ਸਿਮ ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ।"</string>
@@ -43,8 +43,8 @@
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM ਕਾਰਡ ਮੌਜੂਦ ਨਹੀਂ ਜਾਂ ਪੜ੍ਹਨਯੋਗ ਨਹੀਂ ਹੈ। ਇੱਕ SIM ਕਾਰਡ ਪਾਓ।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"ਨਾ-ਵਰਤਣਯੋਗ SIM ਕਾਰਡ।"</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"ਤੁਹਾਡਾ ਸਿਮ ਕਾਰਡ ਸਥਾਈ ਤੌਰ \'ਤੇ ਅਯੋਗ ਬਣਾ ਦਿੱਤਾ ਗਿਆ ਹੈ।\n ਇੱਕ ਹੋਰ ਸਿਮ ਕਾਰਡ ਲਈ ਆਪਣੇ ਵਾਇਰਲੈੱਸ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM ਕਾਰਡ ਲੌਕ ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM ਕਾਰਡ PUK-ਲੌਕ ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM ਕਾਰਡ  ਲਾਕ  ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM ਕਾਰਡ PUK- ਲਾਕ  ਕੀਤਾ ਹੋਇਆ ਹੈ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM ਕਾਰਡ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ਪਿੰਨ ਖੇਤਰ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ਸਿਮ ਪਿੰਨ ਖੇਤਰ"</string>
