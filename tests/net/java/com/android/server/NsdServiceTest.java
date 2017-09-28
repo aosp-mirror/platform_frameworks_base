@@ -77,7 +77,10 @@ public class NsdServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        mThread.quit();
+        if (mThread != null) {
+            mThread.quit();
+            mThread = null;
+        }
     }
 
     @Test
