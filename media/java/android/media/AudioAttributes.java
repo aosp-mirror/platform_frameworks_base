@@ -200,6 +200,22 @@ public final class AudioAttributes implements Parcelable {
      * @see #SUPPRESSIBLE_USAGES
      */
     public final static int SUPPRESSIBLE_NEVER = 3;
+    /**
+     * @hide
+     * Denotes a usage for alarms,
+     * will be muted when the Zen mode doesn't allow alarms
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_ALARM = 4;
+    /**
+     * @hide
+     * Denotes a usage for all other sounds not caught in SUPPRESSIBLE_NOTIFICATION,
+     * SUPPRESSIBLE_CALL,SUPPRESSIBLE_NEVER or SUPPRESSIBLE_ALARM.
+     * This includes media, system, game, navigation, the assistant, and more.
+     * These will be muted when the Zen mode doesn't allow media/system/other.
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_MEDIA_SYSTEM_OTHER = 5;
 
     /**
      * @hide
@@ -219,6 +235,13 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_EVENT,                SUPPRESSIBLE_NOTIFICATION);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_ACCESSIBILITY,          SUPPRESSIBLE_NEVER);
         SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION,               SUPPRESSIBLE_NEVER);
+        SUPPRESSIBLE_USAGES.put(USAGE_ALARM,                             SUPPRESSIBLE_ALARM);
+        SUPPRESSIBLE_USAGES.put(USAGE_MEDIA,                             SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION_SIGNALLING,    SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
     }
 
     /**

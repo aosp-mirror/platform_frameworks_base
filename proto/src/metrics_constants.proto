@@ -4636,6 +4636,18 @@ message MetricsEvent {
     // OS: P
     DIALOG_ENABLE_ADB = 1161;
 
+    // ACTION: DND Settings > Priority only allows > Alarms toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_ALARMS = 1162;
+
+    // ACTION: DND Settings > Priority only allows > Media toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_MEDIA = 1163;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

@@ -117,13 +117,17 @@ public class ZenModeFiltering {
                 ZenLog.traceIntercepted(record, "alarmsOnly");
                 return true;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                if (isAlarm(record)) {
-                    // Alarms are always priority
-                    return false;
-                }
                 // allow user-prioritized packages through in priority mode
                 if (record.getPackagePriority() == Notification.PRIORITY_MAX) {
                     ZenLog.traceNotIntercepted(record, "priorityApp");
+                    return false;
+                }
+
+                if (isAlarm(record)) {
+                    if (!config.allowAlarms) {
+                        ZenLog.traceIntercepted(record, "!allowAlarms");
+                        return true;
+                    }
                     return false;
                 }
                 if (isCall(record)) {
@@ -155,6 +159,15 @@ public class ZenModeFiltering {
                 if (isReminder(record)) {
                     if (!config.allowReminders) {
                         ZenLog.traceIntercepted(record, "!allowReminders");
+                        return true;
+                    }
+                    return false;
+                }
+                AudioAttributes aa = record.getAudioAttributes();
+                if (aa != null && AudioAttributes.SUPPRESSIBLE_USAGES.get(aa.getUsage()) ==
+                        AudioAttributes.SUPPRESSIBLE_MEDIA_SYSTEM_OTHER) {
+                    if (!config.allowMediaSystemOther) {
+                        ZenLog.traceIntercepted(record, "!allowMediaSystemOther");
                         return true;
                     }
                     return false;
