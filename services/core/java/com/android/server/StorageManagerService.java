@@ -386,17 +386,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         }
     }
 
-    private static String escapeNull(String arg) {
-        if (TextUtils.isEmpty(arg)) {
-            return "!";
-        } else {
-            if (arg.indexOf('\0') != -1 || arg.indexOf(' ') != -1) {
-                throw new IllegalArgumentException(arg);
-            }
-            return arg;
-        }
-    }
-
     /** List of crypto types.
       * These must match CRYPT_TYPE_XXX in cryptfs.h AND their
       * corresponding commands in CommandListener.cpp */
@@ -415,10 +404,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
-
-    private final Object mUnmountLock = new Object();
-    @GuardedBy("mUnmountLock")
-    private CountDownLatch mUnmountSignal;
 
     /**
      * The size of the crypto algorithm key in bits for OBB files. Currently
@@ -698,18 +683,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
             }
         }
     };
-
-    @Override
-    public void waitForAsecScan() {
-        throw new UnsupportedOperationException();
-    }
-
-    private void waitForLatch(CountDownLatch latch, String condition) {
-        try {
-            waitForLatch(latch, condition, -1);
-        } catch (TimeoutException ignored) {
-        }
-    }
 
     private void waitForLatch(CountDownLatch latch, String condition, long timeoutMillis)
             throws TimeoutException {
@@ -1533,48 +1506,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     @Override
-    public boolean isUsbMassStorageConnected() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setUsbMassStorageEnabled(boolean enable) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isUsbMassStorageEnabled() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getVolumeState(String mountPoint) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isExternalStorageEmulated() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int mountVolume(String path) {
-        mount(findVolumeIdForPathOrThrow(path));
-        return 0;
-    }
-
-    @Override
-    public void unmountVolume(String path, boolean force, boolean removeEncryption) {
-        unmount(findVolumeIdForPathOrThrow(path));
-    }
-
-    @Override
-    public int formatVolume(String path) {
-        format(findVolumeIdForPathOrThrow(path));
-        return 0;
-    }
-
-    @Override
     public void mount(String volId) {
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
@@ -1594,22 +1525,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
-
-        // TODO: expand PMS to know about multiple volumes
-        if (vol.isPrimaryPhysical()) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                synchronized (mUnmountLock) {
-                    mUnmountSignal = new CountDownLatch(1);
-                    mPms.updateExternalMediaStatus(false, true);
-                    waitForLatch(mUnmountSignal, "mUnmountSignal");
-                    mUnmountSignal = null;
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
         try {
             mVold.unmount(vol.id);
         } catch (Exception e) {
@@ -2004,11 +1919,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         }
     }
 
-    @Override
-    public int[] getStorageUsers(String path) {
-        throw new UnsupportedOperationException();
-    }
-
     private void warnOnNotMounted() {
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -2021,79 +1931,6 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         }
 
         Slog.w(TAG, "No primary storage mounted!");
-    }
-
-    @Override
-    public String[] getSecureContainerList() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int createSecureContainer(String id, int sizeMb, String fstype, String key,
-            int ownerUid, boolean external) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int resizeSecureContainer(String id, int sizeMb, String key) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int finalizeSecureContainer(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int fixPermissionsSecureContainer(String id, int gid, String filename) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int destroySecureContainer(String id, boolean force) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int mountSecureContainer(String id, String key, int ownerUid, boolean readOnly) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int unmountSecureContainer(String id, boolean force) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isSecureContainerMounted(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int renameSecureContainer(String oldId, String newId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getSecureContainerPath(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getSecureContainerFilesystemPath(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void finishMediaUpdate() {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to call finishMediaUpdate()");
-        }
-        if (mUnmountSignal != null) {
-            mUnmountSignal.countDown();
-        } else {
-            Slog.w(TAG, "Odd, nobody asked to unmount?");
-        }
     }
 
     private boolean isUidOwnerOfPackageOrSystem(String packageName, int callerUid) {

@@ -36,7 +36,6 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
-import static com.android.server.pm.PackageInstallerService.prepareExternalStageCid;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.Manifest;
@@ -481,12 +480,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (stageDir != null) {
                 mResolvedStageDir = stageDir;
             } else {
-                final String path = PackageHelper.getSdDir(stageCid);
-                if (path != null) {
-                    mResolvedStageDir = new File(path);
-                } else {
-                    throw new IOException("Failed to resolve path to container " + stageCid);
-                }
+                throw new IOException("Missing stageDir");
             }
         }
         return mResolvedStageDir;
@@ -880,14 +874,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        if (stageCid != null) {
-            // Figure out the final installed size and resize the container once
-            // and for all. Internally the parser handles straddling between two
-            // locations when inheriting.
-            final long finalSize = calculateInstalledSize();
-            resizeContainer(stageCid, finalSize);
-        }
-
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
@@ -924,11 +910,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Unpack native libraries
         extractNativeLibraries(mResolvedStageDir, params.abiOverride);
 
-        // Container is ready to go, let's seal it up!
-        if (stageCid != null) {
-            finalizeAndFixContainer(stageCid);
-        }
-
         // We've reached point of no return; call into PMS to install the stage.
         // Regardless of success or failure we always destroy session.
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
@@ -953,7 +934,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mRelinquished = true;
-        mPm.installStage(mPackageName, stageDir, stageCid, localObserver, params,
+        mPm.installStage(mPackageName, stageDir, localObserver, params,
                 mInstallerPackageName, mInstallerUid, user, mCertificates);
     }
 
@@ -1212,11 +1193,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // straddled between the inherited and staged APKs.
         final PackageLite pkg = new PackageLite(null, baseApk, null, null, null, null,
                 splitPaths.toArray(new String[splitPaths.size()]), null);
-        final boolean isForwardLocked =
-                (params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
 
         try {
-            return PackageHelper.calculateInstalledSize(pkg, isForwardLocked, params.abiOverride);
+            return PackageHelper.calculateInstalledSize(pkg, params.abiOverride);
         } catch (IOException e) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Failed to calculate install size", e);
@@ -1345,52 +1324,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private static void resizeContainer(String cid, long targetSize)
-            throws PackageManagerException {
-        String path = PackageHelper.getSdDir(cid);
-        if (path == null) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to find mounted " + cid);
-        }
-
-        final long currentSize = new File(path).getTotalSpace();
-        if (currentSize > targetSize) {
-            Slog.w(TAG, "Current size " + currentSize + " is larger than target size "
-                    + targetSize + "; skipping resize");
-            return;
-        }
-
-        if (!PackageHelper.unMountSdDir(cid)) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to unmount " + cid + " before resize");
-        }
-
-        if (!PackageHelper.resizeSdDir(targetSize, cid,
-                PackageManagerService.getEncryptKey())) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to resize " + cid + " to " + targetSize + " bytes");
-        }
-
-        path = PackageHelper.mountSdDir(cid, PackageManagerService.getEncryptKey(),
-                Process.SYSTEM_UID, false);
-        if (path == null) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to mount " + cid + " after resize");
-        }
-    }
-
-    private void finalizeAndFixContainer(String cid) throws PackageManagerException {
-        if (!PackageHelper.finalizeSdDir(cid)) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to finalize container " + cid);
-        }
-
-        if (!PackageHelper.fixSdPermissions(cid, defaultContainerGid, null)) {
-            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to fix permissions on container " + cid);
-        }
-    }
-
     void setPermissionsResult(boolean accepted) {
         if (!mSealed) {
             throw new SecurityException("Must be sealed to accept permissions");
@@ -1419,20 +1352,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!mPrepared) {
                 if (stageDir != null) {
                     prepareStageDir(stageDir);
-                } else if (stageCid != null) {
-                    final long identity = Binder.clearCallingIdentity();
-                    try {
-                        prepareExternalStageCid(stageCid, params.sizeBytes);
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
-                    }
-
-                    // TODO: deliver more granular progress for ASEC allocation
-                    mInternalProgress = 0.25f;
-                    computeProgressLocked(true);
                 } else {
-                    throw new IllegalArgumentException(
-                            "Exactly one of stageDir or stageCid stage must be set");
+                    throw new IllegalArgumentException("stageDir must be set");
                 }
 
                 mPrepared = true;
@@ -1533,9 +1454,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
             }
-        }
-        if (stageCid != null) {
-            PackageHelper.destroySdDir(stageCid);
         }
     }
 
