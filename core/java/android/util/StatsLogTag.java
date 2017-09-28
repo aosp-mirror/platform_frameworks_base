@@ -13,27 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-syntax = "proto2";
 
-package android.os.statsd;
+// THIS FILE IS AUTO-GENERATED.
+// DO NOT MODIFY.
 
-option optimize_for = LITE_RUNTIME;
+package android.util;
 
-option java_package = "com.android.internal.logging";
-option java_outer_classname = "StatsConstantsProto";
+/** @hide */
+public class StatsLogTag {
+    private StatsLogTag() {}
 
-enum TagId {
-  WAKELOCK = 1;
-  SCREEN = 2;
-  PROCESS = 1112; // TODO: Temporary usage only for testing.
-}
+    /** android.os.statsd.ScreenStateChange. */
+    public static final int SCREEN_STATE_CHANGE = 2;
 
-enum KeyId {
-  STATE = 1;
-  ANOTHER_STATE = 2;
-  EVENT_TIMESTAMP = 1001;
-  PACKAGE_NAME = 1002;
-  PACKAGE_VERSION = 1003;
-  PACKAGE_VERSION_STRING = 1004;
-  ATTRIBUTION_CHAIN = 1005;
+    /** android.os.statsd.ProcessStateChange. */
+    public static final int PROCESS_STATE_CHANGE = 1112;
+
 }
