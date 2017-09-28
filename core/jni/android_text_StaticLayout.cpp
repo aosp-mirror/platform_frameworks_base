@@ -172,22 +172,6 @@ static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
     b->finish();
 }
 
-static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset,
-        jint minPrefix, jint minSuffix) {
-    const uint8_t* bytebuf = nullptr;
-    if (buffer != nullptr) {
-        void* rawbuf = env->GetDirectBufferAddress(buffer);
-        if (rawbuf != nullptr) {
-            bytebuf = reinterpret_cast<const uint8_t*>(rawbuf) + offset;
-        } else {
-            ALOGE("failed to get direct buffer address");
-        }
-    }
-    minikin::Hyphenator* hyphenator = minikin::Hyphenator::loadBinary(
-            bytebuf, minPrefix, minSuffix);
-    return reinterpret_cast<jlong>(hyphenator);
-}
-
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr, jlong nativePaint, jint start,
         jint end, jboolean isRtl, jstring langTags, jlongArray hyphenators) {
@@ -245,7 +229,6 @@ static const JNINativeMethod gMethods[] = {
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
-    {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ[I[I[II)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJIIZLjava/lang/String;[J)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
