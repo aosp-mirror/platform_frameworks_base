@@ -547,7 +547,7 @@
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Prehrať/pozastaviť"</string>
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Zastaviť"</string>
-    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Nasledujúce"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Ďalej"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Predchádzajúce"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Pretočiť späť"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Pretočiť dopredu"</string>

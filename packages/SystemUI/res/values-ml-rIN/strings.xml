@@ -184,7 +184,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ലോക്ക് സ്‌ക്രീൻ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണം"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"അവലോകനം."</string>
-    <string name="accessibility_desc_close" msgid="7479755364962766729">"അടയ്‌ക്കുക"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"അവസാനിപ്പിക്കുക"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ഉപയോക്താവ് <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"വൈഫൈ ഓഫാക്കി."</string>
