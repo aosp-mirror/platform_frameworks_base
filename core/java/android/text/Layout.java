@@ -2145,18 +2145,14 @@ public abstract class Layout {
      * text within the layout of a line.
      */
     public static class Directions {
-        // Directions represents directional runs within a line of text.
-        // Runs are pairs of ints listed in visual order, starting from the
-        // leading margin.  The first int of each pair is the offset from
-        // the first character of the line to the start of the run.  The
-        // second int represents both the length and level of the run.
-        // The length is in the lower bits, accessed by masking with
-        // DIR_LENGTH_MASK.  The level is in the higher bits, accessed
-        // by shifting by DIR_LEVEL_SHIFT and masking by DIR_LEVEL_MASK.
-        // To simply test for an RTL direction, test the bit using
-        // DIR_RTL_FLAG, if set then the direction is rtl.
-
         /**
+         * Directions represents directional runs within a line of text. Runs are pairs of ints
+         * listed in visual order, starting from the leading margin.  The first int of each pair is
+         * the offset from the first character of the line to the start of the run.  The second int
+         * represents both the length and level of the run. The length is in the lower bits,
+         * accessed by masking with RUN_LENGTH_MASK.  The level is in the higher bits, accessed by
+         * shifting by RUN_LEVEL_SHIFT and masking by RUN_LEVEL_MASK. To simply test for an RTL
+         * direction, test the bit using RUN_RTL_FLAG, if set then the direction is rtl.
          * @hide
          */
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
