@@ -1891,6 +1891,9 @@
   <java-symbol type="string" name="anr_application_process" />
   <java-symbol type="string" name="anr_process" />
   <java-symbol type="string" name="anr_title" />
+  <java-symbol type="string" name="top_app_killed_title" />
+  <java-symbol type="string" name="top_app_killed_message" />
+  <java-symbol type="string" name="close" />
   <java-symbol type="string" name="car_mode_disable_notification_message" />
   <java-symbol type="string" name="car_mode_disable_notification_title" />
   <java-symbol type="string" name="chooser_wallpaper" />
