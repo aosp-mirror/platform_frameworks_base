@@ -1278,13 +1278,11 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
-
         mInCallNotificationUri = Uri.parse("file://" +
                 resources.getString(R.string.config_inCallNotificationSound));
         mInCallNotificationAudioAttributes = new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .build();
         mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
 
