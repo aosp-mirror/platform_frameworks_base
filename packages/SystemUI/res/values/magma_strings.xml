@@ -21,6 +21,13 @@
     <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>
     <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
 
+    <!-- USB Tethering tile -->
+    <string name="accessibility_quick_settings_usb_tether_off">USB tethering off</string>
+    <string name="accessibility_quick_settings_usb_tether_on">USB tethering on</string>
+    <string name="accessibility_quick_settings_usb_tether_changed_off">USB tethering turned off</string>
+    <string name="accessibility_quick_settings_usb_tether_changed_on">USB tethering turned on</string>
+    <string name="quick_settings_usb_tether_label">USB tethering</string>
+
     <!-- Screenrecord stuff -->
     <string name="screenrecord_stopdot_label">Show stop dot</string>
     <string name="screenrecord_low_quality_label">Low quality</string>
