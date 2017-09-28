@@ -70,14 +70,15 @@ final class SelectionActionModeHelper {
         mEditor = Preconditions.checkNotNull(editor);
         mTextView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
-                mTextView.getTextClassifier(), mTextView.getText(),
+                mTextView.getTextClassifier(),
+                getText(mTextView),
                 0, 1, mTextView.getTextLocales());
         mSelectionTracker = new SelectionTracker(mTextView);
     }
 
     public void startActionModeAsync(boolean adjustSelection) {
         mSelectionTracker.onOriginalSelection(
-                mTextView.getText(),
+                getText(mTextView),
                 mTextView.getSelectionStart(),
                 mTextView.getSelectionEnd(),
                 mTextView.isTextEditable());
@@ -166,7 +167,7 @@ final class SelectionActionModeHelper {
     }
 
     private void startActionMode(@Nullable SelectionResult result) {
-        final CharSequence text = mTextView.getText();
+        final CharSequence text = getText(mTextView);
         if (result != null && text instanceof Spannable) {
             Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
             mTextClassification = result.mClassification;
@@ -198,7 +199,9 @@ final class SelectionActionModeHelper {
     }
 
     private void resetTextClassificationHelper() {
-        mTextClassificationHelper.reset(mTextView.getTextClassifier(), mTextView.getText(),
+        mTextClassificationHelper.reset(
+                mTextView.getTextClassifier(),
+                getText(mTextView),
                 mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
                 mTextView.getTextLocales());
     }
@@ -301,7 +304,7 @@ final class SelectionActionModeHelper {
             if (isSelectionStarted()
                     && mAllowReset
                     && textIndex >= mSelectionStart && textIndex <= mSelectionEnd
-                    && textView.getText() instanceof Spannable) {
+                    && getText(textView) instanceof Spannable) {
                 mAllowReset = false;
                 boolean selected = editor.selectCurrentWord();
                 if (selected) {
@@ -557,7 +560,7 @@ final class SelectionActionModeHelper {
             mSelectionResultSupplier = Preconditions.checkNotNull(selectionResultSupplier);
             mSelectionResultCallback = Preconditions.checkNotNull(selectionResultCallback);
             // Make a copy of the original text.
-            mOriginalText = mTextView.getText().toString();
+            mOriginalText = getText(mTextView).toString();
         }
 
         @Override
@@ -573,7 +576,7 @@ final class SelectionActionModeHelper {
         @Override
         @UiThread
         protected void onPostExecute(SelectionResult result) {
-            result = TextUtils.equals(mOriginalText, mTextView.getText()) ? result : null;
+            result = TextUtils.equals(mOriginalText, getText(mTextView)) ? result : null;
             mSelectionResultCallback.accept(result);
         }
 
@@ -702,8 +705,6 @@ final class SelectionActionModeHelper {
         }
     }
 
-
-
     @SelectionEvent.ActionType
     private static int getActionType(int menuItemId) {
         switch (menuItemId) {
@@ -723,5 +724,15 @@ final class SelectionActionModeHelper {
             default:
                 return SelectionEvent.ActionType.OTHER;
         }
+    }
+
+    private static CharSequence getText(TextView textView) {
+        // Extracts the textView's text.
+        // TODO: Investigate why/when TextView.getText() is null.
+        final CharSequence text = textView.getText();
+        if (text != null) {
+            return text;
+        }
+        return "";
     }
 }

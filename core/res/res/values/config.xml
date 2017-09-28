@@ -3023,7 +3023,7 @@
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
     <!-- Volume level of in-call notification tone playback [0..1] -->
-    <item name="config_inCallNotificationVolume" format="float" type="dimen">.25</item>
+    <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
 
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>
