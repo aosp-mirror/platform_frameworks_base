@@ -18,6 +18,9 @@ package android.text;
 
 import static org.junit.Assert.assertEquals;
 
+import android.content.Context;;
+import android.graphics.Typeface;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
@@ -45,57 +48,24 @@ public class StaticLayoutLineBreakingTest {
 
     private static final int[] NO_BREAK = new int[] {};
 
-    private static final TextPaint sTextPaint = new MockTextPaint();
+    private static final TextPaint sTextPaint = new TextPaint();
 
-    private static class MockTextPaint extends TextPaint {
-
-        @Override
-        public float getTextRunAdvances(char[] chars, int index, int count,
-                int contextIndex, int contextCount, boolean isRtl, float[] advances,
-                int advancesIndex) {
-
-            // Conditions copy pasted from Paint
-            if (chars == null) {
-                throw new IllegalArgumentException("text cannot be null");
-            }
-
-            if ((index | count | contextIndex | contextCount | advancesIndex
-                    | (index - contextIndex) | (contextCount - count)
-                    | ((contextIndex + contextCount) - (index + count))
-                    | (chars.length - (contextIndex + contextCount))
-                    | (advances == null ? 0 :
-                        (advances.length - (advancesIndex + count)))) < 0) {
-                throw new IndexOutOfBoundsException();
-            }
-
-            float res = 0.0f;
-
-            if (advances != null) {
-                for (int i = 0; i < count; i++) {
-                    float width = getCharWidth(chars[index + i]);
-                    advances[advancesIndex + i] = width;
-                    res += width;
-                }
-            }
-
-            return res;
-        }
-    }
-
-    private static float getCharWidth(char c) {
-        switch (Character.toUpperCase(c)) {
-            // Roman figures
-            case 'I': return 1.0f;
-            case 'V': return 5.0f;
-            case 'X': return 10.0f;
-            case 'L': return 50.0f;
-            case 'C': return 100.0f; // equals to WIDTH
-            case ' ': return 10.0f;
-            case '_': return 0.0f; // 0-width character
-            case SURR_FIRST: return 7.0f;
-            case SURR_SECOND: return 3.0f; // Sum of SURR_FIRST-SURR_SECOND is 10
-            default: return 10.0f;
-        }
+    static {
+        // The test font has following coverage and width.
+        // U+0020: 10em
+        // U+002E (,): 10em
+        // U+0043 (C): 100em
+        // U+0049 (I): 1em
+        // U+004C (L): 50em
+        // U+0056 (V): 5em
+        // U+0058 (X): 10em
+        // U+005F (_): 0em
+        // U+FFFD (invalid surrogate will be replaced to this): 7em
+        // U+10331 (\uD800\uDF31): 10em
+        Context context = InstrumentationRegistry.getTargetContext();
+        sTextPaint.setTypeface(Typeface.createFromAsset(context.getAssets(),
+                  "fonts/StaticLayoutLineBreakingTestFont.ttf"));
+        sTextPaint.setTextSize(1.0f);  // Make 1em == 1px.
     }
 
     private static StaticLayout getStaticLayout(CharSequence source, int width) {
@@ -406,13 +376,13 @@ public class StaticLayoutLineBreakingTest {
     public void testWithSurrogate() {
         layout("LX" + SURR_FIRST + SURR_SECOND, NO_BREAK);
         layout("LXXXX" + SURR_FIRST + SURR_SECOND, NO_BREAK);
-        // LXXXXI (91) + SURR_FIRST (7) fits. But we should not break the surrogate pair
-        // Bug: surrogate pair is broken, should be 6 (breaking after the 'V')
-        // Maybe not: may be ok if the second character of a pair always has a 0-width
-        layout("LXXXXI" + SURR_FIRST + SURR_SECOND, new int[] {7});
+        // LXXXXI (91) + SURR_FIRST + SURR_SECOND (10). Do not break in the middle point of
+        // surrogatge pair.
+        layout("LXXXXI" + SURR_FIRST + SURR_SECOND, new int[] {6});
 
-        // LXXXXI (95) + SURR_SECOND (3) fits, but this is not a valid surrogate pair, breaking it
-        layout("LXXXXV" + SURR_SECOND + SURR_FIRST, new int[] {7});
+        // LXXXXI (91) + SURR_SECOND (replaced with REPLACEMENT CHARACTER. width is 7px) fits.
+        // Break just after invalid trailing surrogate.
+        layout("LXXXXI" + SURR_SECOND + SURR_FIRST, new int[] {7});
 
         layout("C" + SURR_FIRST + SURR_SECOND, new int[] {1});
     }
