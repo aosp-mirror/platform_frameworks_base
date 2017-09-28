@@ -641,7 +641,7 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"कार्य मोबाईल"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"कार्य पेजर"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"सहाय्यक"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"साहाय्यक"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"सानुकूल"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"वाढदिवस"</string>
@@ -674,7 +674,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"अन्य"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"सानुकूल"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"सानुकूल"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"सहाय्यक"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"साहाय्यक"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाऊ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"घरातील जोडीदार"</string>
@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द करा"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
     <string name="no" msgid="5141531044935541497">"रद्द करा"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"लक्ष द्या"</string>
     <string name="loading" msgid="7933681260296021180">"लोड करीत आहे..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"स्केल"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"नेहमी दर्शवा"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> वर्तमान डिस्प्ले आकार सेटिंगला समर्थन देत नाही आणि अनपेक्षित वर्तन करू शकते."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"नेहमी दर्शवा"</string>
     <string name="smv_application" msgid="3307209192155442829">"अॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>

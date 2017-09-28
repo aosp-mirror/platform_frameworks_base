@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"റദ്ദാക്കുക"</string>
     <string name="yes" msgid="5362982303337969312">"ശരി"</string>
     <string name="no" msgid="5141531044935541497">"റദ്ദാക്കുക"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"ശ്രദ്ധിക്കുക"</string>
     <string name="loading" msgid="7933681260296021180">"ലോഡുചെയ്യുന്നു..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ഓൺ"</string>
@@ -1026,7 +1028,7 @@
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> നിലയ്ക്കുന്നത് തുടരുന്നു"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ആപ്പ് വീണ്ടും തുറക്കുക"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ഫീഡ്‌ബാക്ക് അയയ്‌ക്കുക"</string>
-    <string name="aerr_close" msgid="2991640326563991340">"അടയ്‌ക്കുക"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"അവസാനിപ്പിക്കുക"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ഉപകരണം പുനഃരാരംഭിക്കുന്നത് വരെ മ്യൂട്ടുചെയ്യുക"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"കാത്തിരിക്കുക"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ആപ്പ് അടയ്‌ക്കുക"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"സ്കെയിൽ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"എപ്പോഴും പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ &gt; അപ്ലിക്കേഷനുകൾ &gt; ഡൗൺലോഡുചെയ്‌തവ എന്നതിൽ ഇത് വീണ്ടും പ്രവർത്തനക്ഷമമാക്കുക."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"നിലവിലെ ഡിസ്പ്ലേ വലുപ്പ ക്രമീകരണത്തെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്ക്കുന്നില്ല, അതിനാൽ പ്രതീക്ഷിക്കാത്ത തരത്തിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കാം."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"എല്ലായ്‌പ്പോഴും ദൃശ്യമാക്കുക"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷൻ (<xliff:g id="PROCESS">%2$s</xliff:g> പ്രോസസ്സ്) അതിന്റെ സ്വയം നിർബന്ധിത StrictMode നയം ലംഘിച്ചു."</string>
@@ -1697,7 +1703,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതൽ‍ ഓപ്ഷനുകള്‍"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"വലുതാക്കുക"</string>
-    <string name="close_button_text" msgid="3937902162644062866">"അടയ്‌ക്കുക"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
