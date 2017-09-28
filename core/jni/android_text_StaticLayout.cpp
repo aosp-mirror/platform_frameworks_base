@@ -55,32 +55,56 @@ static JLineBreaksID gLineBreaks_fieldID;
 class JNILineBreakerLineWidth : public minikin::LineBreaker::LineWidthDelegate {
     public:
         JNILineBreakerLineWidth(float firstWidth, int32_t firstLineCount, float restWidth,
-                std::vector<float>&& indents, int32_t indentsOffset)
+                std::vector<float>&& indents, std::vector<float>&& leftPaddings,
+                std::vector<float>&& rightPaddings, int32_t indentsAndPaddingsOffset)
             : mFirstWidth(firstWidth), mFirstLineCount(firstLineCount), mRestWidth(restWidth),
-              mIndents(std::move(indents)), mIndentsOffset(indentsOffset) {}
+              mIndents(std::move(indents)), mLeftPaddings(std::move(leftPaddings)),
+              mRightPaddings(std::move(rightPaddings)), mOffset(indentsAndPaddingsOffset) {}
 
         float getLineWidth(size_t lineNo) override {
             const float width = ((ssize_t)lineNo < (ssize_t)mFirstLineCount)
                     ? mFirstWidth : mRestWidth;
-            if (mIndents.empty()) {
-                return width;
-            }
+            return width - get(mIndents, lineNo);
+        }
 
-            const size_t indentIndex = lineNo + mIndentsOffset;
-            if (indentIndex < mIndents.size()) {
-                return width - mIndents[indentIndex];
-            } else {
-                return width - mIndents.back();
-            }
+        float getLeftPadding(size_t lineNo) override {
+            return get(mLeftPaddings, lineNo);
+        }
+
+        float getRightPadding(size_t lineNo) override {
+            return get(mRightPaddings, lineNo);
         }
 
     private:
+        float get(const std::vector<float>& vec, size_t lineNo) {
+            if (vec.empty()) {
+                return 0;
+            }
+            const size_t index = lineNo + mOffset;
+            if (index < vec.size()) {
+                return vec[index];
+            } else {
+                return vec.back();
+            }
+        }
+
         const float mFirstWidth;
         const int32_t mFirstLineCount;
         const float mRestWidth;
         const std::vector<float> mIndents;
-        const int32_t mIndentsOffset;
+        const std::vector<float> mLeftPaddings;
+        const std::vector<float> mRightPaddings;
+        const int32_t mOffset;
 };
+
+static inline std::vector<float> jintArrayToFloatVector(JNIEnv* env, jintArray javaArray) {
+    if (javaArray == nullptr) {
+         return std::vector<float>();
+    } else {
+        ScopedIntArrayRO intArr(env, javaArray);
+        return std::vector<float>(intArr.get(), intArr.get() + intArr.size());
+    }
+}
 
 // set text and set a number of parameters for creating a layout (width, tabstops, strategy,
 // hyphenFrequency)
@@ -88,7 +112,7 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
         jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency,
         jboolean isJustified, jintArray indents, jintArray leftPaddings, jintArray rightPaddings,
-        jint indentsOffset) {
+        jint indentsAndPaddingsOffset) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     b->resize(length);
     env->GetCharArrayRegion(text, 0, length, b->buffer());
@@ -103,14 +127,11 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
     b->setHyphenationFrequency(static_cast<minikin::HyphenationFrequency>(hyphenFrequency));
     b->setJustified(isJustified);
 
-    std::vector<float> indentVec;
-    // TODO: copy indents only once when LineBreaker is started to be used.
-    if (indents != nullptr) {
-        ScopedIntArrayRO indentArr(env, indents);
-        indentVec.assign(indentArr.get(), indentArr.get() + indentArr.size());
-    }
+    // TODO: copy indents and paddings only once when LineBreaker is started to be used.
     b->setLineWidthDelegate(std::make_unique<JNILineBreakerLineWidth>(
-            firstWidth, firstWidthLineLimit, restWidth, std::move(indentVec), indentsOffset));
+            firstWidth, firstWidthLineLimit, restWidth, jintArrayToFloatVector(env, indents),
+            jintArrayToFloatVector(env, leftPaddings), jintArrayToFloatVector(env, rightPaddings),
+            indentsAndPaddingsOffset));
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
