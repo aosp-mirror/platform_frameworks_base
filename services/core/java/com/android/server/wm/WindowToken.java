@@ -267,13 +267,13 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         proto.write(HASH_CODE, System.identityHashCode(this));
         for (int i = 0; i < mChildren.size(); i++) {
             final WindowState w = mChildren.get(i);
-            w.writeToProto(proto, WINDOWS);
+            w.writeToProto(proto, WINDOWS, trim);
         }
         proto.end(token);
     }

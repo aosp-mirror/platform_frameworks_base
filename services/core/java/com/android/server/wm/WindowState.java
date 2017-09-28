@@ -3120,9 +3120,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(DISPLAY_ID, getDisplayId());
         proto.write(STACK_ID, getStackId());
@@ -3137,7 +3137,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWinAnimator.writeToProto(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         for (int i = 0; i < mChildren.size(); i++) {
-            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS);
+            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS, trim);
         }
         proto.end(token);
     }
