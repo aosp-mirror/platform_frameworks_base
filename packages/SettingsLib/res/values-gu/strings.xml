@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"કંઈ નહીં"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ડીબગર માટે રાહ જુઓ"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ડીબગ કરેલ ઍપ્લિકેશનો ક્રિયાન્વિત થતા પહેલાં ડીબગર જોડાઈ તેની રાહ જુએ છે"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor ને જ્યારે ટેલિફોની/મૉડેમની કાર્યક્ષમતામાં કોઈ સમસ્યા મળે ત્યારે તે લૉગ એકત્રિત કરશે અને વપરાશકર્તાને બગની જાણ કરવાની સૂચનાનો સંકેત આપશે"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ઇનપુટ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"રેખાંકન"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"હાર્ડવેર પ્રવેગક રેન્ડરિંગ"</string>

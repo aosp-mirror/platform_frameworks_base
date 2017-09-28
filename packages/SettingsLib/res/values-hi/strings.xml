@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"कुछ भी नहीं"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"डीबगर की प्रतीक्षा करें"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"डीबग किया गया ऐप्स  निष्पादन के पहले अनुलग्न करने के लिए डीबगर की प्रतीक्षा करता है"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"टेलीफ़ोनी मॉनिटर"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"टेलीफ़ोनी मॉनिटर को जब टेलीफ़ोनी/मॉडेम के फंक्शन में कोई समस्या मिलती है, तो वह लॉग इकट्ठा करता है और उपयोगकर्ता को एक गड़बड़ी दर्ज करने के लिए सूचना देता है"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"हिंदी में लिखें"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ड्रॉइंग"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"हार्डवेयर त्वरित रेंडरिंग"</string>

@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"တခုမှမရှိ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"အပြစ်ရှာဖွေ ဖယ်ရှားချက်ကိုစောင့်ရန်"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"အမှားပြင်ဆင်ရှာဖွေသည့် အပလီကေးရှင်းသည် လုပ်ငန်းမစမီ တွဲဖက်ရန် အမှားရှာဖွေမည့်သူကို စောင့်နေသည်။"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"တယ်လီဖုန်းဆက်သွယ်မှု မော်နီတာ"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"တယ်လီဖုန်းဆက်သွယ်မှု မော်နီတာသည် တယ်လီဖုန်းဆက်သွယ်မှု/မိုဒမ် လုပ်ဆောင်ချက်တို့တွင် ပြဿနာရှိနေလျှင် မှတ်တမ်းပြုစုပြီး ချွတ်ယွင်းချက် အစီရင်ခံရန် အသုံးပြုသူကို အကြောင်းကြားပေးမည် ဖြစ်သည်။"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ထည့်သွင်းရန်"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ရေးဆွဲခြင်း"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ဟာ့ဒ်ဝဲ အရှိန်မြှင့် ပုံဖော်ခြင်း"</string>

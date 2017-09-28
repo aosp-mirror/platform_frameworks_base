@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Нічога"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Пачакайце адладчык"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Адладжанае прыкладанне чакае далучэння да iнструмента для адладкi перад працай"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Сродак адсочвання тэлефаніі"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Праграма TelephonyMonitor будзе заносіць у журналы выпадкі выяўлення праблем, што датычацца фукнцый тэлефаніі/мадэма, а таксама паказваць карыстальніку адпаведнае апавяшчэнне з прапановай адпраўкі паведамлення пра памылку"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Увод"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Чарцёж"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Апаратнае паскарэнне рэндэрынгу"</string>

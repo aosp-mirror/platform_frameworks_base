@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Hakuna chochote"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Subiri kitatuaji"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Programu ya utatuaji husubiri kitatuaji ili kuambatisha kabla ya kutekeleza"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Kichunguzi cha Shughuli za Simu"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Kichunguzi cha Shughuli za Simu kitakusanya kumbukumbu wakati kinatambua tatizo katika utendaji wa simu au modemu, na kumwarifu mtumiaji kuwasilisha ripoti ya hitilafu"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ingizo"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Uchoraji"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Kutunguliza kwa maunzi kulikoharakishwa"</string>

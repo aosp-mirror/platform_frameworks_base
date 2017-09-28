@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"없음"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"디버거 연결을 위해 대기"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"디버깅된 애플리케이션이 실행되기 전에 디버거 연결을 위해 대기"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"통신 모니터"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"통신 모니터는 통신/모뎀 기능에서 문제가 감지될 경우 로그를 수집하며 사용자에게 버그를 신고하라는 알림을 표시합니다."</string>
     <string name="debug_input_category" msgid="1811069939601180246">"입력"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"그림"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"하드웨어 가속 렌더링"</string>

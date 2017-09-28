@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Không có ứng dụng"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Đợi trình gỡ lỗi"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Ứng dụng được gỡ lỗi chờ trình gỡ lỗi đính kèm trước khi thực hiện"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Giám sát điện thoại"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor sẽ thu thập nhật ký khi phát hiện thấy sự cố với chức năng điện thoại/modem và gửi thông báo khẩn cấp tới người dùng để gửi lỗi"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Nhập"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Vẽ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Kết xuất có tăng tốc phần cứng"</string>
