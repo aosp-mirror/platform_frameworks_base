@@ -3373,6 +3373,12 @@ public class NotificationManagerService extends SystemService {
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
         @Override
+        public NotificationChannel getNotificationChannel(String pkg, int uid, String
+                channelId) {
+            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, false);
+        }
+
+        @Override
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,

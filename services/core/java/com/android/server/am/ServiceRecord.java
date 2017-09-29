@@ -517,11 +517,14 @@ final class ServiceRecord extends Binder {
                             } catch (PackageManager.NameNotFoundException e) {
                             }
                         }
-                        if (localForegroundNoti.getSmallIcon() == null) {
+                        if (localForegroundNoti.getSmallIcon() == null
+                                || nm.getNotificationChannel(localPackageName, appUid,
+                                localForegroundNoti.getChannelId()) == null) {
                             // Notifications whose icon is 0 are defined to not show
                             // a notification, silently ignoring it.  We don't want to
                             // just ignore it, we want to prevent the service from
                             // being foreground.
+                            // Also every notification needs a channel.
                             throw new RuntimeException("invalid service notification: "
                                     + foregroundNoti);
                         }
