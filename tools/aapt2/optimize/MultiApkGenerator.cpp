@@ -17,6 +17,7 @@
 #include "MultiApkGenerator.h"
 
 #include <algorithm>
+#include <regex>
 #include <string>
 
 #include "androidfw/StringPiece.h"
@@ -125,6 +126,16 @@ class ContextWrapper : public IAaptContext {
   int min_sdk_ = -1;
 };
 
+class SignatureFilter : public IPathFilter {
+  bool Keep(const std::string& path) override {
+    static std::regex signature_regex(R"regex(^META-INF/.*\.(RSA|DSA|EC|SF)$)regex");
+    if (std::regex_search(path, signature_regex)) {
+      return false;
+    }
+    return !(path == "META-INF/MANIFEST.MF");
+  }
+};
+
 MultiApkGenerator::MultiApkGenerator(LoadedApk* apk, IAaptContext* context)
     : apk_(apk), context_(context) {
 }
@@ -209,6 +220,7 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
       diag.Note(DiagMessage() << "Writing output: " << out);
     }
 
+    filters.AddFilter(util::make_unique<SignatureFilter>());
     if (!apk_->WriteToArchive(&wrapped_context, table.get(), options.table_flattener_options,
                               &filters, writer.get(), manifest.get())) {
       return false;
