@@ -391,10 +391,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     != mTmpWindowAnimator.mAnimTransactionSequence) {
                 appAnimator.thumbnailTransactionSeq =
                         mTmpWindowAnimator.mAnimTransactionSequence;
-                appAnimator.thumbnailLayer = 0;
-            }
-            if (appAnimator.thumbnailLayer < winAnimator.mAnimLayer) {
-                appAnimator.thumbnailLayer = winAnimator.mAnimLayer;
             }
         }
     };
