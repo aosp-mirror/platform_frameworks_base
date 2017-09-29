@@ -248,8 +248,9 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     // ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
 
-    std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(&table);
-    if (!pb_table->SerializeToZeroCopyStream(&copying_adaptor)) {
+    pb::ResourceTable pb_table;
+    SerializeTableToPb(table, &pb_table);
+    if (!pb_table.SerializeToZeroCopyStream(&copying_adaptor)) {
       context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write");
       return false;
     }
@@ -282,9 +283,10 @@ static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path, const R
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
-    output_stream.WriteCompiledFile(compiled_file.get());
-    output_stream.WriteData(&buffer);
+    pb::internal::CompiledFile pb_compiled_file;
+    SerializeCompiledFileToPb(file, &pb_compiled_file);
+    output_stream.WriteCompiledFile(pb_compiled_file);
+    output_stream.WriteData(buffer);
 
     if (output_stream.HadError()) {
       diag->Error(DiagMessage(output_path) << "failed to write data");
@@ -319,8 +321,9 @@ static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const Res
     // Number of CompiledFiles.
     output_stream.WriteLittleEndian32(1);
 
-    std::unique_ptr<pb::internal::CompiledFile> compiled_file = SerializeCompiledFileToPb(file);
-    output_stream.WriteCompiledFile(compiled_file.get());
+    pb::internal::CompiledFile pb_compiled_file;
+    SerializeCompiledFileToPb(file, &pb_compiled_file);
+    output_stream.WriteCompiledFile(pb_compiled_file);
     output_stream.WriteData(map.getDataPtr(), map.getDataLength());
 
     if (output_stream.HadError()) {
@@ -346,13 +349,13 @@ static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& outp
     return false;
   }
 
-  std::unique_ptr<pb::internal::CompiledFile> pb_compiled_file =
-      SerializeCompiledFileToPb(xmlres->file);
-  out->WriteCompiledFile(pb_compiled_file.get());
-  out->WriteData(&buffer);
+  pb::internal::CompiledFile pb_compiled_file;
+  SerializeCompiledFileToPb(xmlres->file, &pb_compiled_file);
+  out->WriteCompiledFile(pb_compiled_file);
+  out->WriteData(buffer);
 
   if (out->HadError()) {
-    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write data");
+    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write XML data");
     return false;
   }
   return true;
