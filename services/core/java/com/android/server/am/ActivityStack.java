@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -34,8 +33,8 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
-
 import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityDisplay.POSITION_TOP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -99,12 +98,13 @@ import static java.lang.Integer.MAX_VALUE;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.ActivityType;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -2169,7 +2169,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mResumedActivity = r;
         r.state = ActivityState.RESUMED;
         mService.setResumedActivityUncheckLocked(r, reason);
-        mStackSupervisor.addRecentActivity(r);
+        mStackSupervisor.mRecentTasks.add(r.getTask());
     }
 
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
@@ -4467,7 +4467,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Don't refocus if invisible to current user
         final ActivityRecord top = tr.getTopActivity();
         if (top == null || !top.okToShowLocked()) {
-            mStackSupervisor.addRecentActivity(top);
+            if (top != null) {
+                mStackSupervisor.mRecentTasks.add(top.getTask());
+            }
             ActivityOptions.abort(options);
             return;
         }
@@ -5072,7 +5074,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (task.autoRemoveFromRecents() || isVoiceSession) {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
-                mStackSupervisor.removeTaskFromRecents(task);
+                mStackSupervisor.mRecentTasks.remove(task);
             }
 
             task.removeWindowContainer();

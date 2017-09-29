@@ -46,6 +46,7 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
@@ -85,12 +86,13 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
@@ -101,7 +103,6 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityOptions;
@@ -175,7 +176,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener {
+public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener,
+        RecentTasks.Callbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
@@ -285,7 +287,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     final ActivityManagerService mService;
 
-    private RecentTasks mRecentTasks;
+    RecentTasks mRecentTasks;
 
     final ActivityStackSupervisorHandler mHandler;
 
@@ -577,6 +579,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void setRecentTasks(RecentTasks recentTasks) {
         mRecentTasks = recentTasks;
+        mRecentTasks.registerCallback(this);
     }
 
     /**
@@ -750,7 +753,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Otherwise, check the recent tasks and return if we find it there and we are not restoring
         // the task from recents
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
-        final TaskRecord task = mRecentTasks.taskForIdLocked(id);
+        final TaskRecord task = mRecentTasks.getTask(id);
 
         if (task == null) {
             if (DEBUG_RECENTS) {
@@ -859,7 +862,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // [u*MAX_TASK_IDS_PER_USER, (u+1)*MAX_TASK_IDS_PER_USER-1], so if MAX_TASK_IDS_PER_USER
         // was 10, user 0 could only have taskIds 0 to 9, user 1: 10 to 19, user 2: 20 to 29, so on.
         int candidateTaskId = nextTaskIdForUser(currentTaskId, userId);
-        while (mRecentTasks.taskIdTakenForUserLocked(candidateTaskId, userId)
+        while (mRecentTasks.containsTaskId(candidateTaskId, userId)
                 || anyTaskForIdLocked(
                         candidateTaskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
             candidateTaskId = nextTaskIdForUser(candidateTaskId, userId);
@@ -2893,23 +2896,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return false;
     }
 
-    void addRecentActivity(ActivityRecord r) {
-        if (r == null) {
-            return;
-        }
-        final TaskRecord task = r.getTask();
-        mRecentTasks.addLocked(task);
-        task.touchActiveTime();
-    }
-
-    void removeTaskFromRecents(TaskRecord task) {
-        mRecentTasks.remove(task);
-        task.removedFromRecents();
-    }
-
     void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess, boolean removeFromRecents) {
         if (removeFromRecents) {
-            removeTaskFromRecents(tr);
+            mRecentTasks.remove(tr);
         }
         ComponentName component = tr.getBaseIntent().getComponent();
         if (component == null) {
@@ -2989,7 +2978,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * Restores a recent task to a stack
+     * Called to restore the state of the task into the stack that it's supposed to go into.
+     *
      * @param task The recent task to be restored.
      * @param aOptions The activity options to use for restoration.
      * @return true if the task has been restored successfully.
@@ -3018,6 +3008,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             activities.get(activityNdx).createWindowContainer();
         }
         return true;
+    }
+
+    @Override
+    public void onRecentTaskAdded(TaskRecord task) {
+        task.touchActiveTime();
+    }
+
+    @Override
+    public void onRecentTaskRemoved(TaskRecord task) {
+        task.removedFromRecents();
     }
 
     /**
@@ -3500,7 +3500,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final ActivityStack stack = task.getStack();
 
         r.mLaunchTaskBehind = false;
-        mRecentTasks.addLocked(task);
+        mRecentTasks.add(task);
         mService.mTaskChangeNotificationController.notifyTaskStackChanged();
         r.setVisibility(false);
 
