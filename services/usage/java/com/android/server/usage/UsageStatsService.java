@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
+import android.app.usage.AppStandby;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
@@ -648,6 +649,55 @@ public class UsageStatsService extends SystemService implements
                 final int appId = mAppStandby.getAppId(packageName);
                 if (appId < 0) return;
                 mAppStandby.setAppIdleAsync(packageName, idle, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public int getAppStandbyBucket(String packageName, String callingPackage, int userId) {
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException("Don't have permission to query app standby bucket");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManager.getService().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, true,
+                        "getAppStandbyBucket", null);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
+                    userId);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mAppStandby.getAppStandbyBucket(packageName, userId,
+                        SystemClock.elapsedRealtime(), obfuscateInstantApps);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setAppStandbyBucket(String packageName,
+                int bucket, int userId) {
+            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
+                    "No permission to change app standby state");
+
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManager.getService().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, true,
+                        "setAppStandbyBucket", null);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
+                        AppStandby.REASON_PREDICTED + ":" + callingUid,
+                        SystemClock.elapsedRealtime());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

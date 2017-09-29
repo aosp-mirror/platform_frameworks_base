@@ -36,4 +36,6 @@ interface IUsageStatsManager {
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);
+    int getAppStandbyBucket(String packageName, String callingPackage, int userId);
+    void setAppStandbyBucket(String packageName, int bucket, int userId);
 }

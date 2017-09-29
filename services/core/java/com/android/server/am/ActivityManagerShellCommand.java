@@ -222,6 +222,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetInactive(pw);
                 case "get-inactive":
                     return runGetInactive(pw);
+                case "set-standby-bucket":
+                    return runSetStandbyBucket(pw);
                 case "send-trim-memory":
                     return runSendTrimMemory(pw);
                 case "display":
@@ -1824,6 +1826,27 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runSetStandbyBucket(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        String packageName = getNextArgRequired();
+        String value = getNextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        usm.setAppStandbyBucket(packageName, Integer.parseInt(value), userId);
+        return 0;
+    }
+
     int runGetInactive(PrintWriter pw) throws RemoteException {
         int userId = UserHandle.USER_CURRENT;
 
@@ -2571,6 +2594,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Sets the inactive state of an app.");
             pw.println("  get-inactive [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the inactive state of an app.");
+            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> <BUCKET>");
+            pw.println("      Puts an app in the standby bucket.");
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
             pw.println("      Send a memory trim event to a <PROCESS>.  May also supply a raw trim int level.");

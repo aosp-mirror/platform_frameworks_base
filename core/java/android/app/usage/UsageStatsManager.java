@@ -19,6 +19,7 @@ package android.app.usage;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.usage.AppStandby.StandbyBuckets;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
@@ -244,6 +245,29 @@ public final class UsageStatsManager {
             mService.setAppInactive(packageName, inactive, UserHandle.myUserId());
         } catch (RemoteException e) {
             // fall through
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public @StandbyBuckets int getAppStandbyBucket(String packageName) {
+        try {
+            return mService.getAppStandbyBucket(packageName, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+        }
+        return AppStandby.STANDBY_BUCKET_ACTIVE;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAppStandbyBucket(String packageName, @StandbyBuckets int bucket) {
+        try {
+            mService.setAppStandbyBucket(packageName, bucket, mContext.getUserId());
+        } catch (RemoteException e) {
+            // Nothing to do
         }
     }
 
