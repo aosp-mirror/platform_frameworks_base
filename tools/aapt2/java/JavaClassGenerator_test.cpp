@@ -24,6 +24,8 @@
 
 using ::android::StringPiece;
 using ::testing::HasSubstr;
+using ::testing::Lt;
+using ::testing::Ne;
 using ::testing::Not;
 
 namespace aapt {
@@ -304,6 +306,53 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
   EXPECT_THAT(output, HasSubstr("attr description"));
   EXPECT_THAT(output, HasSubstr(attr.GetComment()));
   EXPECT_THAT(output, HasSubstr(styleable.GetComment()));
+}
+
+TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:attr/layout_gravity", util::make_unique<Attribute>())
+          .AddValue("android:attr/background", util::make_unique<Attribute>())
+          .AddValue("android:styleable/ActionBar",
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/background", ResourceId(0x01010000))
+                        .Build())
+          .AddValue("android:styleable/ActionBar.LayoutParams",
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/layout_gravity", ResourceId(0x01010001))
+                        .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"android"})
+          .Build();
+
+  JavaClassGeneratorOptions options;
+  JavaClassGenerator generator(context.get(), table.get(), {});
+  std::stringstream out;
+  ASSERT_TRUE(generator.Generate("android", &out));
+  std::string output = out.str();
+
+  std::string::size_type actionbar_pos = output.find("int[] ActionBar");
+  ASSERT_THAT(actionbar_pos, Ne(std::string::npos));
+
+  std::string::size_type actionbar_background_pos = output.find("int ActionBar_background");
+  ASSERT_THAT(actionbar_background_pos, Ne(std::string::npos));
+
+  std::string::size_type actionbar_layout_params_pos = output.find("int[] ActionBar_LayoutParams");
+  ASSERT_THAT(actionbar_layout_params_pos, Ne(std::string::npos));
+
+  std::string::size_type actionbar_layout_params_layout_gravity_pos =
+      output.find("int ActionBar_LayoutParams_layout_gravity");
+  ASSERT_THAT(actionbar_layout_params_layout_gravity_pos, Ne(std::string::npos));
+
+  EXPECT_THAT(actionbar_pos, Lt(actionbar_background_pos));
+  EXPECT_THAT(actionbar_pos, Lt(actionbar_layout_params_pos));
+  EXPECT_THAT(actionbar_background_pos, Lt(actionbar_layout_params_pos));
+  EXPECT_THAT(actionbar_layout_params_pos, Lt(actionbar_layout_params_layout_gravity_pos));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
