@@ -64,7 +64,7 @@ applications that come with the platform
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.launcher">
+    <privapp-permissions package="com.android.launcher3">
         <permission name="android.permission.BIND_APPWIDGET"/>
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
