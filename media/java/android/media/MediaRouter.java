@@ -598,14 +598,20 @@ public class MediaRouter {
 
             @Override
             public void onRestoreRoute() {
-                // Skip restoring route if the selected route is not a system audio route, or
-                // MediaRouter is initializing.
-                if ((mSelectedRoute != mDefaultAudioVideo && mSelectedRoute != mBluetoothA2dpRoute)
-                        || mSelectedRoute == null) {
-                    return;
-                }
-                Log.v(TAG, "onRestoreRoute() : a2dp=" + isBluetoothA2dpOn());
-                mSelectedRoute.select();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Skip restoring route if the selected route is not a system audio route,
+                        // MediaRouter is initializing, or mClient was changed.
+                        if (Client.this != mClient || mSelectedRoute == null
+                                || (mSelectedRoute != mDefaultAudioVideo
+                                        && mSelectedRoute != mBluetoothA2dpRoute)) {
+                            return;
+                        }
+                        Log.v(TAG, "onRestoreRoute() : route=" + mSelectedRoute);
+                        mSelectedRoute.select();
+                    }
+                });
             }
         }
     }
