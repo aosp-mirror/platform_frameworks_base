@@ -180,7 +180,7 @@ class MeasuredText {
             if (widths != null) {
                 width = paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, widths, p);
                 if (mBuilder != null) {
-                    mBuilder.addMeasuredRun(p, p + len, widths);
+                    mBuilder.addMeasuredRun(paint, p, p + len, widths);
                 }
             } else {
                 width = mBuilder.addStyleRun(paint, p, p + len, isRtl);
@@ -197,7 +197,7 @@ class MeasuredText {
                     totalAdvance +=
                             paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, widths, q);
                     if (mBuilder != null) {
-                        mBuilder.addMeasuredRun(q, i, widths);
+                        mBuilder.addMeasuredRun(paint, q, i, widths);
                     }
                 } else {
                     totalAdvance += mBuilder.addStyleRun(paint, q, i, isRtl);
@@ -243,7 +243,7 @@ class MeasuredText {
                 for (int i = mPos + 1, e = mPos + len; i < e; i++)
                     w[i] = 0;
             } else {
-                mBuilder.addReplacementRun(mPos, mPos + len, wid);
+                mBuilder.addReplacementRun(paint, mPos, mPos + len, wid);
             }
             mPos += len;
         }
