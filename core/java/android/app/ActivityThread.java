@@ -5281,7 +5281,7 @@ public final class ActivityThread {
                                 final ApplicationInfo aInfo =
                                         sPackageManager.getApplicationInfo(
                                                 packageName,
-                                                0 /*flags*/,
+                                                PackageManager.GET_SHARED_LIBRARY_FILES,
                                                 UserHandle.myUserId());
 
                                 if (mActivities.size() > 0) {
