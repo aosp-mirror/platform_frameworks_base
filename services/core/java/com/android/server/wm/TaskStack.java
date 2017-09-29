@@ -923,7 +923,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     void resetAnimationBackgroundAnimator() {
         mAnimationBackgroundAnimator = null;
-        mAnimationBackgroundSurface.hide();
+        if (mAnimationBackgroundSurface != null) {
+            mAnimationBackgroundSurface.hide();
+        }
     }
 
     void setAnimationBackground(WindowStateAnimator winAnimator, int color) {
