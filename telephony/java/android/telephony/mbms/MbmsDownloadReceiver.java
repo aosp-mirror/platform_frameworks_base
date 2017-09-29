@@ -166,6 +166,12 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
                 return false;
             }
+            // We do not need to verify below extras if the result is not success.
+            if (MbmsDownloadSession.RESULT_SUCCESSFUL !=
+                    intent.getIntExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_RESULT,
+                    MbmsDownloadSession.RESULT_CANCELLED)) {
+                return true;
+            }
             if (!intent.hasExtra(MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST)) {
                 Log.w(LOG_TAG, "Download result did not include the associated request. Ignoring.");
                 return false;

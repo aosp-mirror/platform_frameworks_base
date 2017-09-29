@@ -38,8 +38,9 @@ public class VendorUtils {
 
     /**
      * The MBMS middleware should send this when a download of single file has completed or
-     * failed. Mandatory extras are
+     * failed. The only mandatory extra is
      * {@link MbmsDownloadSession#EXTRA_MBMS_DOWNLOAD_RESULT}
+     * and the following are required when the download has completed:
      * {@link MbmsDownloadSession#EXTRA_MBMS_FILE_INFO}
      * {@link MbmsDownloadSession#EXTRA_MBMS_DOWNLOAD_REQUEST}
      * {@link #EXTRA_TEMP_LIST}
