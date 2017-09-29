@@ -266,7 +266,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
 
         @Override
-        public void setNoSims(boolean show) {
+        public void setNoSims(boolean show, boolean simDetected) {
             mInfo.noSim = show;
             if (mInfo.noSim) {
                 // Make sure signal gets cleared out when no sims.
