@@ -2138,14 +2138,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         try {
             // Protect against recursion.
             mStackSupervisor.inResumeTopActivity = true;
-            // The contained logic must be synchronized, since we are both changing the visibility
-            // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
-            // ultimately cause the client code to schedule a layout. Since layouts retrieve the
-            // current {@link Configuration}, we must ensure that the below code updates it before
-            // the layout can occur.
-            synchronized (mWindowManager.getWindowManagerLock()) {
-                result = resumeTopActivityInnerLocked(prev, options);
-            }
+            result = resumeTopActivityInnerLocked(prev, options);
         } finally {
             mStackSupervisor.inResumeTopActivity = false;
         }
@@ -2454,128 +2447,139 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     || (lastStack.mLastPausedActivity != null
                     && !lastStack.mLastPausedActivity.fullscreen));
 
-            // This activity is now becoming visible.
-            if (!next.visible || next.stopped || lastActivityTranslucent) {
-                next.setVisibility(true);
-            }
-
-            // schedule launch ticks to collect information about slow apps.
-            next.startLaunchTickingLocked();
-
-            ActivityRecord lastResumedActivity =
-                    lastStack == null ? null :lastStack.mResumedActivity;
-            ActivityState lastState = next.state;
-
-            mService.updateCpuStats();
-
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next + " (in existing)");
-
-            setResumedActivityLocked(next, "resumeTopActivityInnerLocked");
-
-            mService.updateLruProcessLocked(next.app, true, null);
-            updateLRUListLocked(next);
-            mService.updateOomAdjLocked();
-
-            // Have the window manager re-evaluate the orientation of
-            // the screen based on the new activity order.
-            boolean notUpdated = true;
-            if (mStackSupervisor.isFocusedStack(this)) {
-
-                // We have special rotation behavior when Keyguard is locked. Make sure all activity
-                // visibilities are set correctly as well as the transition is updated if needed to
-                // get the correct rotation behavior.
-                // TODO: Remove this once visibilities are set correctly immediately when starting
-                // an activity.
-                if (mStackSupervisor.mKeyguardController.isKeyguardLocked()) {
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
-                            0 /* configChanges */, false /* preserveWindows */);
-                }
-                final Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                        mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
-                        next.mayFreezeScreenLocked(next.app) ? next.appToken : null, mDisplayId);
-                if (config != null) {
-                    next.frozenBeforeDestroy = true;
-                }
-                notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
-                        false /* deferResume */, mDisplayId);
-            }
-
-            if (notUpdated) {
-                // The configuration update wasn't able to keep the existing
-                // instance of the activity, and instead started a new one.
-                // We should be all done, but let's just make sure our activity
-                // is still at the top and schedule another run if something
-                // weird happened.
-                ActivityRecord nextNext = topRunningActivityLocked();
-                if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
-                        "Activity config changed during resume: " + next
-                        + ", new next: " + nextNext);
-                if (nextNext != next) {
-                    // Do over!
-                    mStackSupervisor.scheduleResumeTopActivities();
-                }
-                if (!next.visible || next.stopped) {
+            // The contained logic must be synchronized, since we are both changing the visibility
+            // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
+            // ultimately cause the client code to schedule a layout. Since layouts retrieve the
+            // current {@link Configuration}, we must ensure that the below code updates it before
+            // the layout can occur.
+            synchronized(mWindowManager.getWindowManagerLock()) {
+                // This activity is now becoming visible.
+                if (!next.visible || next.stopped || lastActivityTranslucent) {
                     next.setVisibility(true);
                 }
-                next.completeResumeLocked();
-                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                return true;
-            }
 
-            try {
-                // Deliver all pending results.
-                ArrayList<ResultInfo> a = next.results;
-                if (a != null) {
-                    final int N = a.size();
-                    if (!next.finishing && N > 0) {
-                        if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
-                                "Delivering results to " + next + ": " + a);
-                        next.app.thread.scheduleSendResult(next.appToken, a);
+                // schedule launch ticks to collect information about slow apps.
+                next.startLaunchTickingLocked();
+
+                ActivityRecord lastResumedActivity =
+                        lastStack == null ? null :lastStack.mResumedActivity;
+                ActivityState lastState = next.state;
+
+                mService.updateCpuStats();
+
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
+                        + " (in existing)");
+
+                setResumedActivityLocked(next, "resumeTopActivityInnerLocked");
+
+                mService.updateLruProcessLocked(next.app, true, null);
+                updateLRUListLocked(next);
+                mService.updateOomAdjLocked();
+
+                // Have the window manager re-evaluate the orientation of
+                // the screen based on the new activity order.
+                boolean notUpdated = true;
+
+                if (mStackSupervisor.isFocusedStack(this)) {
+
+                    // We have special rotation behavior when Keyguard is locked. Make sure all
+                    // activity visibilities are set correctly as well as the transition is updated
+                    // if needed to get the correct rotation behavior.
+                    // TODO: Remove this once visibilities are set correctly immediately when
+                    // starting an activity.
+                    if (mStackSupervisor.mKeyguardController.isKeyguardLocked()) {
+                        mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
+                                0 /* configChanges */, false /* preserveWindows */);
                     }
+                    final Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                            mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
+                            next.mayFreezeScreenLocked(next.app) ? next.appToken : null,
+                                    mDisplayId);
+                    if (config != null) {
+                        next.frozenBeforeDestroy = true;
+                    }
+                    notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
+                            false /* deferResume */, mDisplayId);
                 }
 
-                if (next.newIntents != null) {
-                    next.app.thread.scheduleNewIntent(
-                            next.newIntents, next.appToken, false /* andPause */);
+                if (notUpdated) {
+                    // The configuration update wasn't able to keep the existing
+                    // instance of the activity, and instead started a new one.
+                    // We should be all done, but let's just make sure our activity
+                    // is still at the top and schedule another run if something
+                    // weird happened.
+                    ActivityRecord nextNext = topRunningActivityLocked();
+                    if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
+                            "Activity config changed during resume: " + next
+                                    + ", new next: " + nextNext);
+                    if (nextNext != next) {
+                        // Do over!
+                        mStackSupervisor.scheduleResumeTopActivities();
+                    }
+                    if (!next.visible || next.stopped) {
+                        next.setVisibility(true);
+                    }
+                    next.completeResumeLocked();
+                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                    return true;
                 }
 
-                // Well the app will no longer be stopped.
-                // Clear app token stopped state in window manager if needed.
-                next.notifyAppResumed(next.stopped);
+                try {
+                    // Deliver all pending results.
+                    ArrayList<ResultInfo> a = next.results;
+                    if (a != null) {
+                        final int N = a.size();
+                        if (!next.finishing && N > 0) {
+                            if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
+                                    "Delivering results to " + next + ": " + a);
+                            next.app.thread.scheduleSendResult(next.appToken, a);
+                        }
+                    }
 
-                EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
-                        System.identityHashCode(next), next.getTask().taskId,
-                        next.shortComponentName);
+                    if (next.newIntents != null) {
+                        next.app.thread.scheduleNewIntent(
+                                next.newIntents, next.appToken, false /* andPause */);
+                    }
 
-                next.sleeping = false;
-                mService.showUnsupportedZoomDialogIfNeededLocked(next);
-                mService.showAskCompatModeDialogLocked(next);
-                next.app.pendingUiClean = true;
-                next.app.forceProcessStateUpTo(mService.mTopProcessState);
-                next.clearOptionsLocked();
-                next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
-                        mService.isNextTransitionForward(), resumeAnimOptions);
+                    // Well the app will no longer be stopped.
+                    // Clear app token stopped state in window manager if needed.
+                    next.notifyAppResumed(next.stopped);
 
-                if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed " + next);
-            } catch (Exception e) {
-                // Whoops, need to restart this activity!
-                if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
-                        + lastState + ": " + next);
-                next.state = lastState;
-                if (lastStack != null) {
-                    lastStack.mResumedActivity = lastResumedActivity;
+                    EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
+                            System.identityHashCode(next), next.getTask().taskId,
+                            next.shortComponentName);
+
+                    next.sleeping = false;
+                    mService.showUnsupportedZoomDialogIfNeededLocked(next);
+                    mService.showAskCompatModeDialogLocked(next);
+                    next.app.pendingUiClean = true;
+                    next.app.forceProcessStateUpTo(mService.mTopProcessState);
+                    next.clearOptionsLocked();
+                    next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
+                            mService.isNextTransitionForward(), resumeAnimOptions);
+
+                    if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
+                            + next);
+                } catch (Exception e) {
+                    // Whoops, need to restart this activity!
+                    if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
+                            + lastState + ": " + next);
+                    next.state = lastState;
+                    if (lastStack != null) {
+                        lastStack.mResumedActivity = lastResumedActivity;
+                    }
+                    Slog.i(TAG, "Restarting because process died: " + next);
+                    if (!next.hasBeenLaunched) {
+                        next.hasBeenLaunched = true;
+                    } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
+                            mStackSupervisor.isFrontStackOnDisplay(lastStack)) {
+                        next.showStartingWindow(null /* prev */, false /* newTask */,
+                                false /* taskSwitch */);
+                    }
+                    mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                    return true;
                 }
-                Slog.i(TAG, "Restarting because process died: " + next);
-                if (!next.hasBeenLaunched) {
-                    next.hasBeenLaunched = true;
-                } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
-                        mStackSupervisor.isFrontStackOnDisplay(lastStack)) {
-                    next.showStartingWindow(null /* prev */, false /* newTask */,
-                            false /* taskSwitch */);
-                }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false);
-                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                return true;
             }
 
             // From this point on, if something goes wrong there is no way
