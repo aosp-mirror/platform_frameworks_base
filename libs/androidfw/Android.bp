@@ -79,7 +79,7 @@ cc_library {
                 "libutils",
             ],
             shared_libs: [
-                "libz-host",
+                "libz",
             ],
         },
         windows: {
