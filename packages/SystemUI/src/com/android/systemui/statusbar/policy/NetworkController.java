@@ -52,7 +52,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
                 String description, boolean isWide, int subId, boolean roaming) {}
         default void setSubs(List<SubscriptionInfo> subs) {}
-        default void setNoSims(boolean show) {}
+        default void setNoSims(boolean show, boolean simDetected) {}
 
         default void setEthernetIndicators(IconState icon) {}
 
