@@ -105,16 +105,12 @@ bool DropboxReader::parseFromFile(const unique_fd& fd, StatsLogReport& logReport
 }
 
 void DropboxReader::printLog(FILE* out, const StatsLogReport& logReport) {
-    fprintf(out, "start_time_msec=%lld, end_time_msec=%lld, ", logReport.start_report_millis(),
-            logReport.end_report_millis());
+    fprintf(out, "start_time_ns=%lld, end_time_ns=%lld, ", logReport.start_report_nanos(),
+            logReport.end_report_nanos());
     for (int i = 0; i < logReport.event_metrics().data_size(); i++) {
         EventMetricData eventMetricData = logReport.event_metrics().data(i);
-        for (int j = 0; j < eventMetricData.key_value_pair_size(); j++) {
-            fprintf(out, "key=%d, ", eventMetricData.key_value_pair(j).key());
-            fprintf(out, "value_str=%s ", eventMetricData.key_value_pair(j).value_str().c_str());
-            fprintf(out, "value_int=%lld ", eventMetricData.key_value_pair(j).value_int());
-            fprintf(out, "value_float=%f ", eventMetricData.key_value_pair(j).value_float());
-        }
+        // TODO: Pretty-print the proto.
+        // fprintf(out, "EventMetricData=%s", eventMetricData.SerializeAsString().c_str());
     }
     fprintf(out, "\n");
 }

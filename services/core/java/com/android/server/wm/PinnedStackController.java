@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
@@ -494,7 +494,7 @@ class PinnedStackController {
         pw.println(prefix + "PinnedStackController");
         pw.print(prefix + "  defaultBounds="); getDefaultBounds().printShortString(pw);
         pw.println();
-        mService.getStackBounds(PINNED_STACK_ID, mTmpRect);
+        mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
         pw.print(prefix + "  movementBounds="); getMovementBounds(mTmpRect).printShortString(pw);
         pw.println();
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
@@ -515,7 +515,7 @@ class PinnedStackController {
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         getDefaultBounds().writeToProto(proto, DEFAULT_BOUNDS);
-        mService.getStackBounds(PINNED_STACK_ID, mTmpRect);
+        mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
         getMovementBounds(mTmpRect).writeToProto(proto, MOVEMENT_BOUNDS);
         proto.end(token);
     }

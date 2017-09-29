@@ -23,9 +23,11 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -160,12 +162,14 @@ public class WindowLayersControllerTests extends WindowTestsBase {
 
     @Test
     public void testStackLayers() throws Exception {
-        WindowState pinnedStackWindow = createWindowOnStack(null, PINNED_STACK_ID,
-                TYPE_BASE_APPLICATION, mDisplayContent, "pinnedStackWindow");
-        WindowState dockedStackWindow = createWindowOnStack(null, DOCKED_STACK_ID,
-                TYPE_BASE_APPLICATION, mDisplayContent, "dockedStackWindow");
-        WindowState assistantStackWindow = createWindowOnStack(null, ASSISTANT_STACK_ID,
-                TYPE_BASE_APPLICATION, mDisplayContent, "assistantStackWindow");
+        WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+                ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent, "pinnedStackWindow");
+        WindowState dockedStackWindow = createWindowOnStack(null,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
+                mDisplayContent, "dockedStackWindow");
+        WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
+                mDisplayContent, "assistantStackWindow");
 
         mLayersController.assignWindowLayers(mDisplayContent);
 

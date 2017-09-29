@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Ninguna"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Esperar al depurador"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"La aplicación depurada espera a que se active el depurador para ejecutarse"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Monitor de telefonía"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor recopilará los registros al detectar un problema con la función de módem o telefonía y mostrará una notificación al usuario para registrar un error"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Entrada"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Dibujo"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Renderización acelerada por hardware"</string>

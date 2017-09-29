@@ -2193,6 +2193,7 @@ android.util.IntProperty
 android.util.Log
 android.util.Log$1
 android.util.Log$ImmediateLogWriter
+android.util.Log$PreloadHolder
 android.util.Log$TerribleFailureHandler
 android.util.LogPrinter
 android.util.LongArray
@@ -2723,13 +2724,11 @@ android.widget.RemoteViews$3
 android.widget.RemoteViews$Action
 android.widget.RemoteViews$BitmapCache
 android.widget.RemoteViews$LayoutParamAction
-android.widget.RemoteViews$MemoryUsageCounter
-android.widget.RemoteViews$MutablePair
 android.widget.RemoteViews$OnClickHandler
 android.widget.RemoteViews$ReflectionAction
 android.widget.RemoteViews$RemoteView
 android.widget.RemoteViews$RuntimeAction
-android.widget.RemoteViews$SetDrawableParameters
+android.widget.RemoteViews$SetDrawableTint
 android.widget.RemoteViewsAdapter$RemoteAdapterConnectionCallback
 android.widget.RtlSpacingHelper
 android.widget.ScrollBarDrawable

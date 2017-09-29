@@ -104,7 +104,7 @@ class RippleBackground extends RippleComponent {
         final AnimatorSet set = new AnimatorSet();
 
         // Linear exit after enter is completed.
-        final ObjectAnimator exit = ObjectAnimator.ofFloat(this, RippleBackground.OPACITY, 0);
+        final ObjectAnimator exit = ObjectAnimator.ofFloat(this, OPACITY, 0);
         exit.setInterpolator(LINEAR_INTERPOLATOR);
         exit.setDuration(OPACITY_EXIT_DURATION);
         exit.setAutoCancel(true);
@@ -115,7 +115,7 @@ class RippleBackground extends RippleComponent {
         final int fastEnterDuration = mIsBounded ?
                 (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST) : 0;
         if (fastEnterDuration > 0) {
-            final ObjectAnimator enter = ObjectAnimator.ofFloat(this, RippleBackground.OPACITY, 1);
+            final ObjectAnimator enter = ObjectAnimator.ofFloat(this, OPACITY, 1);
             enter.setInterpolator(LINEAR_INTERPOLATOR);
             enter.setDuration(fastEnterDuration);
             enter.setAutoCancel(true);

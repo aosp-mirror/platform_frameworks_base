@@ -1768,8 +1768,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // In grid layout, the stack action button always remains visible.
-        if (mEnterAnimationComplete && !useGridLayout() &&
-                !Recents.getConfiguration().isLowRamDevice) {
+        if (mEnterAnimationComplete && !useGridLayout()) {
+            if (Recents.getConfiguration().isLowRamDevice) {
+                // Show stack button when user drags down to show older tasks on low ram devices
+                if (mStack.getTaskCount() > 0 && !mStackActionButtonVisible
+                        && mTouchHandler.mIsScrolling && curScroll - prevScroll < 0) {
+                    // Going up
+                    EventBus.getDefault().send(
+                            new ShowStackActionButtonEvent(true /* translate */));
+                }
+                return;
+            }
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     mStack.getTaskCount() > 0) {
@@ -1956,6 +1965,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Remove the task from the stack
         mStack.removeTask(event.task, event.animation, false /* fromDockGesture */);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
+        if (mStack.getTaskCount() > 0 && Recents.getConfiguration().isLowRamDevice) {
+            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
+        }
 
         MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS,
                 event.task.key.getComponent().toString());

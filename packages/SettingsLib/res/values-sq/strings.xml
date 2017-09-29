@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Asnjë"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Prit për korrigjuesin"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacioni i korrigjimit të gabimeve pret që korrigjuesi të bashkëngjitet para ekzekutimit"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Monitori i telefonisë"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Monitori i telefonisë do të mbledhë regjistrat kur të zbulojë një problem me funksionalitetin e telefonisë/modemit dhe do t\'i paraqesë një njoftim përdoruesit që të regjistrojë një defekt në kod"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Hyrja"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Vizatime"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Interpretimi i përshpejtuar i harduerit"</string>

@@ -192,6 +192,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * @Deprecated Use RefactoredBackupManagerService instead. This class is only
+ * kept for fallback and archeology reasons and will be removed soon.
+ */
 public class BackupManagerService implements BackupManagerServiceInterface {
 
     private static final String TAG = "BackupManagerService";

@@ -342,7 +342,7 @@ class KeyguardController {
             // show on top of the lock screen. In this can we want to dismiss the docked
             // stack since it will be complicated/risky to try to put the activity on top
             // of the lock screen in the right fullscreen configuration.
-            final ActivityStack stack = mStackSupervisor.getStack(DOCKED_STACK_ID);
+            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getSplitScreenStack();
             if (stack == null) {
                 return;
             }

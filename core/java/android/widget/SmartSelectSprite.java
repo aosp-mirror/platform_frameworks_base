@@ -173,7 +173,7 @@ final class SmartSelectSprite {
 
             canvas.save();
             mClipRect.set(mBoundingRectangle);
-            mClipRect.inset(-mStrokeWidth, -mStrokeWidth);
+            mClipRect.inset(-mStrokeWidth / 2, -mStrokeWidth / 2);
             canvas.clipRect(mClipRect);
             canvas.drawRoundRect(mDrawRect, adjustedCornerRadius, adjustedCornerRadius, paint);
             canvas.restore();
@@ -365,7 +365,7 @@ final class SmartSelectSprite {
     public void startAnimation(
             final PointF start,
             final List<RectF> destinationRectangles,
-            final Runnable onAnimationEnd) throws IllegalArgumentException {
+            final Runnable onAnimationEnd) {
         cancelAnimation();
 
         final ValueAnimator.AnimatorUpdateListener updateListener =
@@ -374,19 +374,19 @@ final class SmartSelectSprite {
         final List<RoundedRectangleShape> shapes = new LinkedList<>();
         final List<Animator> cornerAnimators = new LinkedList<>();
 
-        final RectF centerRectangle = destinationRectangles
-                .stream()
-                .filter((r) -> contains(r, start))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Center point is not inside any of the rectangles!"));
+        RectF centerRectangle = null;
 
         int startingOffset = 0;
         for (RectF rectangle : destinationRectangles) {
-            if (rectangle.equals(centerRectangle)) {
+            if (contains(rectangle, start)) {
+                centerRectangle = rectangle;
                 break;
             }
             startingOffset += rectangle.width();
+        }
+
+        if (centerRectangle == null) {
+            throw new IllegalArgumentException("Center point is not inside any of the rectangles!");
         }
 
         startingOffset += start.x - centerRectangle.left;

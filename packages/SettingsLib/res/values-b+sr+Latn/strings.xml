@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Nijedna"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Sačekaj program za otklanjanje grešaka"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija čeka program za otklanjanje grešaka da priloži pre izvršavanja"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"TelephonyMonitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor će prikupljati evidenciju kada otkrije problem sa funkcionisanjem telefonije/modema i zatražiće od korisnika da prijavi grešku"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Unos"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Crtanje"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardverski ubrzano prikazivanje"</string>

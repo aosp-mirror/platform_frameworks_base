@@ -35,6 +35,7 @@ namespace xml {
 
 class Element;
 class Visitor;
+class ConstVisitor;
 
 // Base class for all XML nodes.
 class Node {
@@ -47,6 +48,7 @@ class Node {
   std::string comment;
 
   virtual void Accept(Visitor* visitor) = 0;
+  virtual void Accept(ConstVisitor* visitor) const = 0;
 
   using ElementCloneFunc = std::function<void(const Element&, Element*)>;
 
@@ -112,6 +114,7 @@ class Element : public Node {
   std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) const override;
 
   void Accept(Visitor* visitor) override;
+  void Accept(ConstVisitor* visitor) const override;
 };
 
 // A Text (CDATA) XML node. Can not have any children.
@@ -122,6 +125,7 @@ class Text : public Node {
   std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) const override;
 
   void Accept(Visitor* visitor) override;
+  void Accept(ConstVisitor* visitor) const override;
 };
 
 // An XML resource with a source, name, and XML tree.
@@ -180,6 +184,38 @@ class Visitor {
   friend class Element;
 };
 
+class ConstVisitor {
+ public:
+  virtual ~ConstVisitor() = default;
+
+  virtual void Visit(const Element* el) {
+    VisitChildren(el);
+  }
+
+  virtual void Visit(const Text* text) {
+  }
+
+ protected:
+  ConstVisitor() = default;
+
+  void VisitChildren(const Element* el) {
+    for (const auto& child : el->children) {
+      child->Accept(this);
+    }
+  }
+
+  virtual void BeforeVisitElement(const Element* el) {
+  }
+
+  virtual void AfterVisitElement(const Element* el) {
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ConstVisitor);
+
+  friend class Element;
+};
+
 // An XML DOM visitor that will record the package name for a namespace prefix.
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
@@ -207,19 +243,19 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
 namespace internal {
 
 // Base class that overrides the default behaviour and does not descend into child nodes.
-class NodeCastBase : public Visitor {
+class NodeCastBase : public ConstVisitor {
  public:
-  void Visit(Element* el) override {
+  void Visit(const Element* el) override {
   }
-  void Visit(Text* el) override {
+  void Visit(const Text* el) override {
   }
 
  protected:
   NodeCastBase() = default;
 
-  void BeforeVisitElement(Element* el) override {
+  void BeforeVisitElement(const Element* el) override {
   }
-  void AfterVisitElement(Element* el) override {
+  void AfterVisitElement(const Element* el) override {
   }
 
  private:
@@ -233,9 +269,9 @@ class NodeCastImpl : public NodeCastBase {
 
   NodeCastImpl() = default;
 
-  T* value = nullptr;
+  const T* value = nullptr;
 
-  void Visit(T* v) override {
+  void Visit(const T* v) override {
     value = v;
   }
 
@@ -246,10 +282,15 @@ class NodeCastImpl : public NodeCastBase {
 }  // namespace internal
 
 template <typename T>
-T* NodeCast(Node* node) {
+const T* NodeCast(const Node* node) {
   internal::NodeCastImpl<T> visitor;
   node->Accept(&visitor);
   return visitor.value;
+}
+
+template <typename T>
+T* NodeCast(Node* node) {
+  return const_cast<T*>(NodeCast<T>(static_cast<const T*>(node)));
 }
 
 }  // namespace xml

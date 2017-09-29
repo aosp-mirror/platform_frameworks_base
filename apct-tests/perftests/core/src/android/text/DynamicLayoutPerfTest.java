@@ -16,35 +16,28 @@
 
 package android.text;
 
-import android.app.Activity;
+import static android.text.Layout.Alignment.ALIGN_NORMAL;
+
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
-import android.os.Bundle;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.style.ReplacementSpan;
 import android.util.ArraySet;
 
-import static android.text.Layout.Alignment.ALIGN_NORMAL;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Random;
-
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Random;
 
 @LargeTest
 @RunWith(Parameterized.class)

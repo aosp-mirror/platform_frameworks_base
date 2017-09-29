@@ -21,7 +21,6 @@
 
 #include "Resource.h"
 #include "ResourceValues.h"
-#include "ValueVisitor.h"
 #include "link/Linkers.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"

@@ -16,8 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
@@ -523,12 +527,18 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mCurrentNotifs.clear();
         mUiOffloadThread.submit(() -> {
             try {
-                int focusedId = ActivityManager.getService().getFocusedStackId();
-                if (focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID) {
-                    checkStack(StackId.FULLSCREEN_WORKSPACE_STACK_ID, notifs, noMan, pm);
+                final StackInfo focusedStack = ActivityManager.getService().getFocusedStackInfo();
+                if (focusedStack != null) {
+                    final int windowingMode =
+                            focusedStack.configuration.windowConfiguration.getWindowingMode();
+                    if (windowingMode == WINDOWING_MODE_FULLSCREEN
+                            || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                        checkStack(focusedStack, notifs, noMan, pm);
+                    }
                 }
                 if (mDockedStackExists) {
-                    checkStack(StackId.DOCKED_STACK_ID, notifs, noMan, pm);
+                    checkStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED,
+                            notifs, noMan, pm);
                 }
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
@@ -539,10 +549,19 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         });
     }
 
-    private void checkStack(int stackId, ArraySet<Pair<String, Integer>> notifs,
+    private void checkStack(int windowingMode, int activityType,
+            ArraySet<Pair<String, Integer>> notifs, NotificationManager noMan, IPackageManager pm) {
+        try {
+            final StackInfo info =
+                    ActivityManager.getService().getStackInfo(windowingMode, activityType);
+            checkStack(info, notifs, noMan, pm);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+    private void checkStack(StackInfo info, ArraySet<Pair<String, Integer>> notifs,
             NotificationManager noMan, IPackageManager pm) {
         try {
-            StackInfo info = ActivityManager.getService().getStackInfo(stackId);
             if (info == null || info.topActivity == null) return;
             String pkg = info.topActivity.getPackageName();
             if (!hasNotif(notifs, pkg, info.userId)) {

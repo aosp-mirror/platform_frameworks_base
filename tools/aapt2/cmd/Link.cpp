@@ -33,6 +33,8 @@
 #include "Locale.h"
 #include "NameMangler.h"
 #include "ResourceUtils.h"
+#include "ResourceValues.h"
+#include "ValueVisitor.h"
 #include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "filter/ConfigFilter.h"
@@ -56,6 +58,7 @@
 #include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "proto/ProtoDeserialize.h"
 #include "proto/ProtoSerialize.h"
 #include "split/TableSplitter.h"
 #include "unflatten/BinaryResourceParser.h"
@@ -279,8 +282,10 @@ static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, cons
     return {};
   }
 
-  std::unique_ptr<ResourceTable> table = DeserializeTableFromPb(pb_table, source, diag);
-  if (!table) {
+  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
+  std::string error;
+  if (!DeserializeTableFromPb(pb_table, table.get(), &error)) {
+    diag->Error(DiagMessage(source) << "invalid compiled table: " << error);
     return {};
   }
   return table;
@@ -915,8 +920,9 @@ class LinkCommand {
   }
 
   bool FlattenTableToPb(ResourceTable* table, IArchiveWriter* writer) {
-    std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(table);
-    return io::CopyProtoToArchive(context_, pb_table.get(), "resources.arsc.flat", 0, writer);
+    pb::ResourceTable pb_table;
+    SerializeTableToPb(*table, &pb_table);
+    return io::CopyProtoToArchive(context_, &pb_table, "resources.arsc.flat", 0, writer);
   }
 
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
@@ -1395,14 +1401,15 @@ class LinkCommand {
           return false;
         }
 
-        std::unique_ptr<ResourceFile> resource_file = DeserializeCompiledFileFromPb(
-            compiled_file, file->GetSource(), context_->GetDiagnostics());
-        if (!resource_file) {
+        ResourceFile resource_file;
+        std::string error;
+        if (!DeserializeCompiledFileFromPb(compiled_file, &resource_file, &error)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src)
+                                            << "failed to read compiled header: " << error);
           return false;
         }
 
-        if (!MergeCompiledFile(file->CreateFileSegment(offset, len), resource_file.get(),
-                               override)) {
+        if (!MergeCompiledFile(file->CreateFileSegment(offset, len), &resource_file, override)) {
           return false;
         }
       }

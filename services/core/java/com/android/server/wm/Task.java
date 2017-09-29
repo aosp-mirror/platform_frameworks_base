@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSC
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
@@ -37,7 +38,6 @@ import static com.android.server.wm.proto.TaskProto.TEMP_INSET_BOUNDS;
 import static com.android.server.wm.proto.TaskProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -280,15 +280,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     // WindowConfiguration long term.
     private int setBounds(Rect bounds, Configuration overrideConfig) {
         if (overrideConfig == null) {
-            overrideConfig = Configuration.EMPTY;
+            overrideConfig = EMPTY;
         }
-        if (bounds == null && !Configuration.EMPTY.equals(overrideConfig)) {
-            throw new IllegalArgumentException("null bounds but non empty configuration: "
-                    + overrideConfig);
-        }
-        if (bounds != null && Configuration.EMPTY.equals(overrideConfig)) {
-            throw new IllegalArgumentException("non null bounds, but empty configuration");
-        }
+
         boolean oldFullscreen = mFillsParent;
         int rotation = Surface.ROTATION_0;
         final DisplayContent displayContent = mStack.getDisplayContent();
@@ -323,7 +317,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (displayContent != null) {
             displayContent.mDimLayerController.updateDimLayer(this);
         }
-        onOverrideConfigurationChanged(mFillsParent ? Configuration.EMPTY : overrideConfig);
+        onOverrideConfigurationChanged(overrideConfig);
         return boundsChange;
     }
 
@@ -406,7 +400,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      *                    the adjusted bounds's top.
      */
     void alignToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
-        if (!isResizeable() || Configuration.EMPTY.equals(getOverrideConfiguration())) {
+        if (!isResizeable() || EMPTY.equals(getOverrideConfiguration())) {
             return;
         }
 
@@ -531,7 +525,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     void setDragResizing(boolean dragResizing, int dragResizeMode) {
         if (mDragResizing != dragResizing) {
-            if (!DragResizeMode.isModeAllowedForStack(mStack.mStackId, dragResizeMode)) {
+            if (!DragResizeMode.isModeAllowedForStack(mStack, dragResizeMode)) {
                 throw new IllegalArgumentException("Drag resize mode not allow for stack stackId="
                         + mStack.mStackId + " dragResizeMode=" + dragResizeMode);
             }
@@ -554,7 +548,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             return;
         }
         if (mFillsParent) {
-            setBounds(null, Configuration.EMPTY);
+            // TODO: Yeah...not sure if this works with WindowConfiguration, but shouldn't be a
+            // problem once we move mBounds into WindowConfiguration.
+            setBounds(null, getOverrideConfiguration());
             return;
         }
         final int newRotation = displayContent.getDisplayInfo().rotation;

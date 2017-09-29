@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"ഒന്നുമില്ല"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ഡീബഗ്ഗറിനായി കാത്തിരിക്കുക"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ഡീബഗ്ഗുചെയ്‌ത അപ്ലിക്കേഷൻ നിർവ്വഹണത്തിനുമുമ്പായി അറ്റാച്ചുചെയ്യുന്നതിന് ഡീബഗ്ഗറിനായി കാത്തിരിക്കുന്നു."</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"ടെലിഫോണി മോണിറ്റർ"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"ടെലിഫോണി മോണിറ്റർ, ടെലിഫോണി/മോഡവുമായി ബന്ധപ്പെട്ട് എന്തെങ്കിലും പ്രശ്‌നം കണ്ടെത്തുമ്പോൾ, അതിന്റെ ലോഗുകൾ ശേഖരിക്കുകയും ഒരു ബഗ് ഫയൽ ചെയ്യാൻ ഉപയോക്താവിന് അറിയിപ്പ് നൽകുകയും ചെയ്യും"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ഇൻപുട്ട്"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ഡ്രോയിംഗ്"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തിയ റെൻഡർ ചെയ്യൽ"</string>

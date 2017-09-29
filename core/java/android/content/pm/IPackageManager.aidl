@@ -554,14 +554,6 @@ interface IPackageManager {
      */
     void reconcileSecondaryDexFiles(String packageName);
 
-    /**
-     * Update status of external media on the package manager to scan and
-     * install packages installed on the external media. Like say the
-     * StorageManagerService uses this to call into the package manager to update
-     * status of sdcard.
-     */
-    void updateExternalMediaStatus(boolean mounted, boolean reportStatus);
-
     PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
     int getMoveStatus(int moveId);

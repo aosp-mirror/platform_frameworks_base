@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"Ingen"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Vent på fejlfinder"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Fejlrettet app venter på tilknytning af fejlfinder før udførelse"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Overvågning af telefoni"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Overvågning af telefoni indsamler logfiler, når der registreres et problem med telefoni-/modemfunktioner, og sender brugeren en underretning, der beder vedkommende om at indsende en fejlrapport"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Input"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Tegning"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardware-accelereret gengivelse"</string>

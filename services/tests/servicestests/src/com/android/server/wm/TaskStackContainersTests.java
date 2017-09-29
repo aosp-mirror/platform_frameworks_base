@@ -29,7 +29,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -53,8 +53,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         final Configuration overrideConfig = new Configuration();
-        overrideConfig.windowConfiguration.setWindowingMode(
-                getWindowingModeForStackId(PINNED_STACK_ID, false /* inSplitScreenMode */));
+        overrideConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         mPinnedStack = new StackWindowController(PINNED_STACK_ID, null,
                 mDisplayContent.getDisplayId(), true /* onTop */, new Rect(), sWm).mContainer;
         mPinnedStack.onOverrideConfigurationChanged(overrideConfig);

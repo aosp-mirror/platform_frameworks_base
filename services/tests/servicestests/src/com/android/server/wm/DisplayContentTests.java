@@ -16,7 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -347,17 +348,20 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testPinnedStackLocation() {
-        createStackControllerOnStackOnDisplay(PINNED_STACK_ID, mDisplayContent);
+        createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final int initialStackCount = mDisplayContent.getStackCount();
         // Ensure that the pinned stack was placed at the end
-        assertEquals(initialStackCount - 1, mDisplayContent.getStackPosById(PINNED_STACK_ID));
+        assertEquals(initialStackCount - 1,
+                mDisplayContent.getStackPosition(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD));
         // By default, this should try to create a new stack on top
         createTaskStackOnDisplay(mDisplayContent);
         final int afterStackCount = mDisplayContent.getStackCount();
         // Make sure the stack count has increased
         assertEquals(initialStackCount + 1, afterStackCount);
         // Ensure that the pinned stack is still on top
-        assertEquals(afterStackCount - 1, mDisplayContent.getStackPosById(PINNED_STACK_ID));
+        assertEquals(afterStackCount - 1,
+                mDisplayContent.getStackPosition(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD));
     }
 
     /**

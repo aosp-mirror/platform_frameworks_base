@@ -97,21 +97,21 @@ static void FontFamily_unref(jlong familyPtr) {
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
         jint givenWeight, jint givenItalic) {
-    uirenderer::FatVector<SkFontMgr::FontParameters::Axis, 2> skiaAxes;
+    uirenderer::FatVector<SkFontArguments::Axis, 2> skiaAxes;
     for (const auto& axis : builder->axes) {
-        skiaAxes.emplace_back(SkFontMgr::FontParameters::Axis{axis.axisTag, axis.value});
+        skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
     }
 
     const size_t fontSize = data->size();
     const void* fontPtr = data->data();
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
-    SkFontMgr::FontParameters params;
+    SkFontArguments params;
     params.setCollectionIndex(ttcIndex);
     params.setAxes(skiaAxes.data(), skiaAxes.size());
 
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
+    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), params));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");
         builder->axes.clear();

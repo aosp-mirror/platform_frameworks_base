@@ -461,6 +461,12 @@ void Element::Accept(Visitor* visitor) {
   visitor->AfterVisitElement(this);
 }
 
+void Element::Accept(ConstVisitor* visitor) const {
+  visitor->BeforeVisitElement(this);
+  visitor->Visit(this);
+  visitor->AfterVisitElement(this);
+}
+
 std::unique_ptr<Node> Text::Clone(const ElementCloneFunc&) const {
   auto t = util::make_unique<Text>();
   t->comment = comment;
@@ -471,6 +477,10 @@ std::unique_ptr<Node> Text::Clone(const ElementCloneFunc&) const {
 }
 
 void Text::Accept(Visitor* visitor) {
+  visitor->Visit(this);
+}
+
+void Text::Accept(ConstVisitor* visitor) const {
   visitor->Visit(this);
 }
 

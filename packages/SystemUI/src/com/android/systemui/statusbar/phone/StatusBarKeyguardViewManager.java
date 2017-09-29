@@ -225,7 +225,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mShowing) {
             if (mOccluded && !mDozing) {
                 mStatusBar.hideKeyguard();
-                mStatusBar.stopWaitingForKeyguardExit();
                 if (hideBouncerWhenShowing || mBouncer.needsFullscreenBouncer()) {
                     hideBouncer(false /* destroyView */);
                 }

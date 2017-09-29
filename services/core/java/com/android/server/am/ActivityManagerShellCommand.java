@@ -76,6 +76,7 @@ import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -2113,9 +2114,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runStackInfo(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        ActivityManager.StackInfo info = mInterface.getStackInfo(stackId);
+        int windowingMode = Integer.parseInt(getNextArgRequired());
+        int activityType = Integer.parseInt(getNextArgRequired());
+        ActivityManager.StackInfo info = mInterface.getStackInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }
@@ -2149,7 +2150,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final String delayStr = getNextArg();
         final int delayMs = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
 
-        ActivityManager.StackInfo info = mInterface.getStackInfo(DOCKED_STACK_ID);
+        ActivityManager.StackInfo info = mInterface.getStackInfo(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         if (info == null) {
             err.println("Docked stack doesn't exist");
             return -1;
@@ -2252,10 +2254,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return runTaskResizeable(pw);
         } else if (op.equals("resize")) {
             return runTaskResize(pw);
-        } else if (op.equals("drag-task-test")) {
-            return runTaskDragTaskTest(pw);
-        } else if (op.equals("size-task-test")) {
-            return runTaskSizeTaskTest(pw);
         } else if (op.equals("focus")) {
             return runTaskFocus(pw);
         } else {
@@ -2306,58 +2304,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             Thread.sleep(delay_ms);
         } catch (InterruptedException e) {
         }
-    }
-
-    int runTaskDragTaskTest(PrintWriter pw) throws RemoteException {
-        final int taskId = Integer.parseInt(getNextArgRequired());
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String delayStr = getNextArg();
-        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-        final ActivityManager.StackInfo stackInfo;
-        Rect taskBounds;
-        stackInfo = mInterface.getStackInfo(mInterface.getFocusedStackId());
-        taskBounds = mInterface.getTaskBounds(taskId);
-        final Rect stackBounds = stackInfo.bounds;
-        int travelRight = stackBounds.width() - taskBounds.width();
-        int travelLeft = -travelRight;
-        int travelDown = stackBounds.height() - taskBounds.height();
-        int travelUp = -travelDown;
-        int passes = 0;
-
-        // We do 2 passes to get back to the original location of the task.
-        while (passes < 2) {
-            // Move right
-            pw.println("Moving right...");
-            pw.flush();
-            travelRight = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelRight, MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel right by " + travelRight);
-
-            // Move down
-            pw.println("Moving down...");
-            pw.flush();
-            travelDown = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelDown, MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel down by " + travelDown);
-
-            // Move left
-            pw.println("Moving left...");
-            pw.flush();
-            travelLeft = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelLeft, !MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel left by " + travelLeft);
-
-            // Move up
-            pw.println("Moving up...");
-            pw.flush();
-            travelUp = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelUp, !MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel up by " + travelUp);
-
-            taskBounds = mInterface.getTaskBounds(taskId);
-            passes++;
-        }
-        return 0;
     }
 
     int moveTask(int taskId, Rect taskRect, Rect stackRect, int stepSize,
@@ -2420,133 +2366,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         return stepSize;
-    }
-
-    int runTaskSizeTaskTest(PrintWriter pw) throws RemoteException {
-        final int taskId = Integer.parseInt(getNextArgRequired());
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String delayStr = getNextArg();
-        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-        final ActivityManager.StackInfo stackInfo;
-        final Rect initialTaskBounds;
-        stackInfo = mInterface.getStackInfo(mInterface.getFocusedStackId());
-        initialTaskBounds = mInterface.getTaskBounds(taskId);
-        final Rect stackBounds = stackInfo.bounds;
-        stackBounds.inset(STACK_BOUNDS_INSET, STACK_BOUNDS_INSET);
-        final Rect currentTaskBounds = new Rect(initialTaskBounds);
-
-        // Size by top-left
-        pw.println("Growing top-left");
-        pw.flush();
-        do {
-            currentTaskBounds.top -= getStepSize(
-                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.left -= getStepSize(
-                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.top < currentTaskBounds.top
-                || stackBounds.left < currentTaskBounds.left);
-
-        // Back to original size
-        pw.println("Shrinking top-left");
-        pw.flush();
-        do {
-            currentTaskBounds.top += getStepSize(
-                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.left += getStepSize(
-                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.top > currentTaskBounds.top
-                || initialTaskBounds.left > currentTaskBounds.left);
-
-        // Size by top-right
-        pw.println("Growing top-right");
-        pw.flush();
-        do {
-            currentTaskBounds.top -= getStepSize(
-                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.right += getStepSize(
-                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.top < currentTaskBounds.top
-                || stackBounds.right > currentTaskBounds.right);
-
-        // Back to original size
-        pw.println("Shrinking top-right");
-        pw.flush();
-        do {
-            currentTaskBounds.top += getStepSize(
-                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
-                    stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.top > currentTaskBounds.top
-                || initialTaskBounds.right < currentTaskBounds.right);
-
-        // Size by bottom-left
-        pw.println("Growing bottom-left");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom += getStepSize(
-                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.left -= getStepSize(
-                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.bottom > currentTaskBounds.bottom
-                || stackBounds.left < currentTaskBounds.left);
-
-        // Back to original size
-        pw.println("Shrinking bottom-left");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
-                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.left += getStepSize(
-                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
-                || initialTaskBounds.left > currentTaskBounds.left);
-
-        // Size by bottom-right
-        pw.println("Growing bottom-right");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom += getStepSize(
-                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.right += getStepSize(
-                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.bottom > currentTaskBounds.bottom
-                || stackBounds.right > currentTaskBounds.right);
-
-        // Back to original size
-        pw.println("Shrinking bottom-right");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
-                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
-                    stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
-                || initialTaskBounds.right < currentTaskBounds.right);
-        return 0;
     }
 
     int runTaskFocus(PrintWriter pw) throws RemoteException {
@@ -2880,8 +2699,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Place <TASK_ID> in <STACK_ID> at <POSITION>");
             pw.println("       list");
             pw.println("           List all of the activity stacks and their sizes.");
-            pw.println("       info <STACK_ID>");
-            pw.println("           Display the information about activity stack <STACK_ID>.");
+            pw.println("       info <WINDOWING_MODE> <ACTIVITY_TYPE>");
+            pw.println("           Display the information about activity stack in <WINDOWING_MODE> and <ACTIVITY_TYPE>.");
             pw.println("       remove <STACK_ID>");
             pw.println("           Remove stack <STACK_ID>.");
             pw.println("  task [COMMAND] [...]: sub-commands for operating on activity tasks.");
@@ -2899,14 +2718,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Makes sure <TASK_ID> is in a stack with the specified bounds.");
             pw.println("           Forces the task to be resizeable and creates a stack if no existing stack");
             pw.println("           has the specified bounds.");
-            pw.println("       drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS]");
-            pw.println("           Test command for dragging/moving <TASK_ID> by");
-            pw.println("           <STEP_SIZE> increments around the screen applying the optional [DELAY_MS]");
-            pw.println("           between each step.");
-            pw.println("       size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS]");
-            pw.println("           Test command for sizing <TASK_ID> by <STEP_SIZE>");
-            pw.println("           increments within the screen applying the optional [DELAY_MS] between");
-            pw.println("           each step.");
             pw.println("  update-appinfo <USER_ID> <PACKAGE_NAME> [<PACKAGE_NAME>...]");
             pw.println("      Update the ApplicationInfo objects of the listed packages for <USER_ID>");
             pw.println("      without restarting any processes.");

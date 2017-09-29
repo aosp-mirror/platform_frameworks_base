@@ -2905,9 +2905,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void getStackBounds(int stackId, Rect bounds) {
+    public void getStackBounds(int windowingMode, int activityType, Rect bounds) {
         synchronized (mWindowMap) {
-            final TaskStack stack = mRoot.getStackById(stackId);
+            final TaskStack stack = mRoot.getStack(windowingMode, activityType);
             if (stack != null) {
                 stack.getBounds(bounds);
                 return;
@@ -7151,10 +7151,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
+    public void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha) {
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController().setResizeDimLayer(
-                    visible, targetStackId, alpha);
+                    visible, targetWindowingMode, alpha);
         }
     }
 

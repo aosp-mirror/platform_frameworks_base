@@ -179,8 +179,8 @@ Reporter::runReport()
             // Execute - go get the data and write it into the file descriptors.
             err = (*section)->Execute(&batch);
             if (err != NO_ERROR) {
-                ALOGW("Incident section %s (%d) failed. Stopping report.",
-                        (*section)->name.string(), id);
+                ALOGW("Incident section %s (%d) failed: %s. Stopping report.",
+                        (*section)->name.string(), id, strerror(-err));
                 goto DONE;
             }
 

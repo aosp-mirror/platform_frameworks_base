@@ -16,6 +16,9 @@
 
 package com.android.systemui.recents;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.app.ActivityManager;
@@ -437,9 +440,12 @@ public class Recents extends SystemUI
         int currentUser = sSystemServicesProxy.getCurrentUser();
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+        final int activityType = runningTask != null
+                ? runningTask.configuration.windowConfiguration.getActivityType()
+                : ACTIVITY_TYPE_UNDEFINED;
         boolean screenPinningActive = ssp.isScreenPinningActive();
-        boolean isRunningTaskInHomeOrRecentsStack = runningTask != null &&
-                ActivityManager.StackId.isHomeOrRecentsStack(runningTask.stackId);
+        boolean isRunningTaskInHomeOrRecentsStack =
+                activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS;
         if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {
             logDockAttempt(mContext, runningTask.topActivity, runningTask.resizeMode);
             if (runningTask.supportsSplitScreenMultiWindow) {

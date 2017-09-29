@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"無"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"等待除錯程式"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"執行已除錯的應用程式前等待附加除錯程式"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"電話監控工具"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Telephony Monitor 會在偵測到電話/數據機功能發生問題時收集記錄，並通知使用者報告錯誤"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"輸入"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"繪圖"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"硬件加速轉譯"</string>

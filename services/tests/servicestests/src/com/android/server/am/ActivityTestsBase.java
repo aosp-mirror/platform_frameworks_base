@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
@@ -76,16 +76,6 @@ public class ActivityTestsBase {
         return service;
     }
 
-    protected static ActivityStack createActivityStack(ActivityManagerService service,
-            int stackId, int displayId, boolean onTop) {
-        if (service.mStackSupervisor instanceof TestActivityStackSupervisor) {
-            return ((TestActivityStackSupervisor) service.mStackSupervisor)
-                    .createTestStack(stackId, onTop);
-        }
-
-        return null;
-    }
-
     protected static ActivityRecord createActivity(ActivityManagerService service,
             ComponentName component, TaskRecord task) {
         return createActivity(service, component, task, 0 /* userId */);
@@ -114,8 +104,8 @@ public class ActivityTestsBase {
         return activity;
     }
 
-    protected static TaskRecord createTask(ActivityManagerService service,
-            ComponentName component, int stackId) {
+    protected static TaskRecord createTask(ActivityStackSupervisor supervisor,
+            ComponentName component, ActivityStack stack) {
         final ActivityInfo aInfo = new ActivityInfo();
         aInfo.applicationInfo = new ApplicationInfo();
         aInfo.applicationInfo.packageName = component.getPackageName();
@@ -123,11 +113,9 @@ public class ActivityTestsBase {
         Intent intent = new Intent();
         intent.setComponent(component);
 
-        final TaskRecord task = new TaskRecord(service, 0, aInfo, intent /*intent*/,
+        final TaskRecord task = new TaskRecord(supervisor.mService, 0, aInfo, intent /*intent*/,
                 null /*_taskDescription*/);
-        final ActivityStack stack = service.mStackSupervisor.getStack(stackId,
-                true /*createStaticStackIfNeeded*/, true /*onTop*/);
-        service.mStackSupervisor.setFocusStackUnchecked("test", stack);
+        supervisor.setFocusStackUnchecked("test", stack);
         stack.addTask(task, true, "creating test task");
         task.setStack(stack);
         task.setWindowContainerController(mock(TaskWindowContainerController.class));
@@ -135,16 +123,18 @@ public class ActivityTestsBase {
         return task;
     }
 
-
     /**
      * An {@link ActivityManagerService} subclass which provides a test
      * {@link ActivityStackSupervisor}.
      */
     protected static class TestActivityManagerService extends ActivityManagerService {
-        public TestActivityManagerService(Context context) {
+        TestActivityManagerService(Context context) {
             super(context);
             mSupportsMultiWindow = true;
             mSupportsMultiDisplay = true;
+            mSupportsSplitScreenMultiWindow = true;
+            mSupportsFreeformWindowManagement = true;
+            mSupportsPictureInPicture = true;
             mWindowManager = WindowTestUtils.getWindowManagerService(context);
         }
 
@@ -171,8 +161,13 @@ public class ActivityTestsBase {
             mDisplayManager =
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
-            mDisplay = new ActivityDisplay(this, DEFAULT_DISPLAY);
+            mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
             attachDisplay(mDisplay);
+        }
+
+        @Override
+        ActivityDisplay getDefaultDisplay() {
+            return mDisplay;
         }
 
         // TODO: Use Mockito spy instead. Currently not possible due to TestActivityStackSupervisor
@@ -218,40 +213,35 @@ public class ActivityTestsBase {
                 boolean preserveWindows) {
         }
 
-        <T extends ActivityStack> T createTestStack(int stackId, boolean onTop) {
-            return (T) createStack(stackId, mDisplay, onTop);
+        // Always keep things awake
+        @Override
+        boolean hasAwakeDisplay() {
+            return true;
+        }
+    }
+
+    private static class TestActivityDisplay extends ActivityDisplay {
+
+        private final ActivityStackSupervisor mSupervisor;
+        TestActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
+            super(supervisor, displayId);
+            mSupervisor = supervisor;
         }
 
         @Override
-        ActivityStack createStack(int stackId, ActivityDisplay display, boolean onTop) {
-            if (stackId == PINNED_STACK_ID) {
-                return new PinnedActivityStack(display, stackId, this, onTop) {
+        <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
+                int stackId, boolean onTop) {
+            if (windowingMode == WINDOWING_MODE_PINNED) {
+                return (T) new PinnedActivityStack(this, stackId, mSupervisor, onTop) {
                     @Override
                     Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                         return new Rect(50, 50, 100, 100);
                     }
                 };
             } else {
-                return new TestActivityStack(display, stackId, this, onTop);
+                return (T) new TestActivityStack(
+                        this, stackId, mSupervisor, windowingMode, activityType, onTop);
             }
-        }
-
-        @Override
-        protected <T extends ActivityStack> T getStack(int stackId,
-                boolean createStaticStackIfNeeded, boolean createOnTop) {
-            final T stack = super.getStack(stackId, createStaticStackIfNeeded, createOnTop);
-
-            if (stack != null || !createStaticStackIfNeeded) {
-                return stack;
-            }
-
-            return createTestStack(stackId, createOnTop);
-        }
-
-        // Always keep things awake
-        @Override
-        boolean hasAwakeDisplay() {
-            return true;
         }
     }
 
@@ -282,9 +272,10 @@ public class ActivityTestsBase {
             extends ActivityStack<T> implements ActivityStackReporter {
         private int mOnActivityRemovedFromStackCount = 0;
         private T mContainerController;
+
         TestActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
-                boolean onTop) {
-            super(display, stackId, supervisor, onTop);
+                int windowingMode, int activityType, boolean onTop) {
+            super(display, stackId, supervisor, windowingMode, activityType, onTop);
         }
 
         @Override
@@ -308,38 +299,6 @@ public class ActivityTestsBase {
         @Override
         T getWindowContainerController() {
             return mContainerController;
-        }
-    }
-
-
-    protected static class ActivityStackBuilder {
-        private boolean mOnTop = true;
-        private int mStackId = 0;
-        private int mDisplayId = 1;
-
-        private final ActivityManagerService mService;
-
-        public ActivityStackBuilder(ActivityManagerService ams) {
-            mService = ams;
-        }
-
-        public ActivityStackBuilder setOnTop(boolean onTop) {
-            mOnTop = onTop;
-            return this;
-        }
-
-        public ActivityStackBuilder setStackId(int id) {
-            mStackId = id;
-            return this;
-        }
-
-        public ActivityStackBuilder setDisplayId(int id) {
-            mDisplayId = id;
-            return this;
-        }
-
-        public ActivityStack build() {
-            return createActivityStack(mService, mStackId, mDisplayId, mOnTop);
         }
     }
 }

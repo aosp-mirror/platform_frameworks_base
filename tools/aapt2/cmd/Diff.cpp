@@ -22,7 +22,7 @@
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -325,9 +325,9 @@ static bool EmitResourceTableDiff(IAaptContext* context, LoadedApk* apk_a, Loade
   return diff;
 }
 
-class ZeroingReferenceVisitor : public ValueVisitor {
+class ZeroingReferenceVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   void Visit(Reference* ref) override {
     if (ref->name && ref->id) {

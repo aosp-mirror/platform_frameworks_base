@@ -16,6 +16,19 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.getStackIdForWindowingMode;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
@@ -27,10 +40,12 @@ import static com.android.server.am.proto.ActivityDisplayProto.STACKS;
 import static com.android.server.am.proto.ActivityDisplayProto.ID;
 
 import android.app.ActivityManagerInternal;
+import android.app.WindowConfiguration;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.ConfigurationContainer;
 
 import java.util.ArrayList;
@@ -127,6 +142,204 @@ class ActivityDisplay extends ConfigurationContainer {
             }
         }
         return null;
+    }
+
+    /**
+     * @return the topmost stack on the display that is compatible with the input windowing mode and
+     * activity type. {@code null} means no compatible stack on the display.
+     * @see ConfigurationContainer#isCompatible(int, int)
+     */
+    <T extends ActivityStack> T getStack(int windowingMode, int activityType) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mStacks.get(i);
+            // TODO: Should undefined windowing and activity type be compatible with standard type?
+            if (stack.isCompatible(windowingMode, activityType)) {
+                return (T) stack;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @see #getStack(int, int)
+     * @see #createStack(int, int, boolean)
+     */
+    <T extends ActivityStack> T getOrCreateStack(int windowingMode, int activityType,
+            boolean onTop) {
+        T stack = getStack(windowingMode, activityType);
+        if (stack != null) {
+            return stack;
+        }
+        return createStack(windowingMode, activityType, onTop);
+    }
+
+    /**
+     * Creates a stack matching the input windowing mode and activity type on this display.
+     * @param windowingMode The windowing mode the stack should be created in. If
+     *                      {@link WindowConfiguration#WINDOWING_MODE_UNDEFINED} then the stack will
+     *                      be created in {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+     * @param activityType The activityType the stack should be created in. If
+     *                     {@link WindowConfiguration#ACTIVITY_TYPE_UNDEFINED} then the stack will
+     *                     be created in {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
+     * @param onTop If true the stack will be created at the top of the display, else at the bottom.
+     * @return The newly created stack.
+     */
+    <T extends ActivityStack> T createStack(int windowingMode, int activityType, boolean onTop) {
+
+        if (activityType == ACTIVITY_TYPE_UNDEFINED) {
+            // Can't have an undefined stack type yet...so re-map to standard. Anyone that wants
+            // anything else should be passing it in anyways...
+            activityType = ACTIVITY_TYPE_STANDARD;
+        }
+
+        if (activityType != ACTIVITY_TYPE_STANDARD) {
+            // For now there can be only one stack of a particular non-standard activity type on a
+            // display. So, get that ignoring whatever windowing mode it is currently in.
+            T stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
+            if (stack != null) {
+                throw new IllegalArgumentException("Stack=" + stack + " of activityType="
+                        + activityType + " already on display=" + this + ". Can't have multiple.");
+            }
+        }
+
+        final ActivityManagerService service = mSupervisor.mService;
+        if (!mSupervisor.isWindowingModeSupported(windowingMode, service.mSupportsMultiWindow,
+                service.mSupportsSplitScreenMultiWindow, service.mSupportsFreeformWindowManagement,
+                service.mSupportsPictureInPicture, activityType)) {
+            throw new IllegalArgumentException("Can't create stack for unsupported windowingMode="
+                    + windowingMode);
+        }
+
+        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+            // TODO: Should be okay to have stacks with with undefined windowing mode long term, but
+            // have to set them to something for now due to logic that depending on them.
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
+        }
+
+        final boolean inSplitScreenMode = hasSplitScreenStack();
+        if (!inSplitScreenMode
+                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
+            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
+            // trying to launch in split-screen secondary.
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
+        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+                && WindowConfiguration.supportSplitScreenWindowingMode(
+                        windowingMode, activityType)) {
+            windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+        }
+
+        int stackId = INVALID_STACK_ID;
+        if (mDisplayId == DEFAULT_DISPLAY && (activityType == ACTIVITY_TYPE_STANDARD
+                || activityType == ACTIVITY_TYPE_UNDEFINED)) {
+            // TODO: Will be removed once we are no longer using static stack ids.
+            stackId = getStackIdForWindowingMode(windowingMode);
+            if (stackId == INVALID_STACK_ID) {
+                // Whatever...put in fullscreen stack for now.
+                stackId = FULLSCREEN_WORKSPACE_STACK_ID;
+            }
+            final T stack = getStack(stackId);
+            if (stack != null) {
+                return stack;
+            }
+        }
+
+        if (stackId == INVALID_STACK_ID) {
+            stackId = mSupervisor.getNextStackId();
+        }
+
+        final T stack = createStackUnchecked(windowingMode, activityType, stackId, onTop);
+
+        if (mDisplayId == DEFAULT_DISPLAY && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            // Make sure recents stack exist when creating a dock stack as it normally need to be on
+            // the other side of the docked stack and we make visibility decisions based on that.
+            // TODO: Not sure if this is needed after we change to calculate visibility based on
+            // stack z-order vs. id.
+            getOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS, onTop);
+        }
+
+        return stack;
+    }
+
+    @VisibleForTesting
+    <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
+            int stackId, boolean onTop) {
+        switch (windowingMode) {
+            case WINDOWING_MODE_PINNED:
+                return (T) new PinnedActivityStack(this, stackId, mSupervisor, onTop);
+            default:
+                return (T) new ActivityStack(
+                        this, stackId, mSupervisor, windowingMode, activityType, onTop);
+        }
+    }
+
+    /**
+     * Removes stacks in the input windowing modes from the system if they are of activity type
+     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
+     */
+    void removeStacksInWindowingModes(int... windowingModes) {
+        if (windowingModes == null || windowingModes.length == 0) {
+            return;
+        }
+
+        for (int j = windowingModes.length - 1 ; j >= 0; --j) {
+            final int windowingMode = windowingModes[j];
+            for (int i = mStacks.size() - 1; i >= 0; --i) {
+                final ActivityStack stack = mStacks.get(i);
+                if (!stack.isActivityTypeStandardOrUndefined()) {
+                    continue;
+                }
+                if (stack.getWindowingMode() != windowingMode) {
+                    continue;
+                }
+                mSupervisor.removeStackLocked(stack.mStackId);
+            }
+        }
+    }
+
+    void removeStacksWithActivityTypes(int... activityTypes) {
+        if (activityTypes == null || activityTypes.length == 0) {
+            return;
+        }
+
+        for (int j = activityTypes.length - 1 ; j >= 0; --j) {
+            final int activityType = activityTypes[j];
+            for (int i = mStacks.size() - 1; i >= 0; --i) {
+                final ActivityStack stack = mStacks.get(i);
+                if (stack.getActivityType() == activityType) {
+                    mSupervisor.removeStackLocked(stack.mStackId);
+                }
+            }
+        }
+    }
+
+    /** Returns the top visible stack activity type that isn't in the exclude windowing mode. */
+    int getTopVisibleStackActivityType(int excludeWindowingMode) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mStacks.get(i);
+            if (stack.getWindowingMode() == excludeWindowingMode) {
+                continue;
+            }
+            if (stack.shouldBeVisible(null /* starting */)) {
+                return stack.getActivityType();
+            }
+        }
+        return ACTIVITY_TYPE_UNDEFINED;
+    }
+
+    ActivityStack getSplitScreenStack() {
+        return getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+    }
+
+    boolean hasSplitScreenStack() {
+        return getSplitScreenStack() != null;
+    }
+
+    PinnedActivityStack getPinnedStack() {
+        return getStack(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+    }
+
+    boolean hasPinnedStack() {
+        return getPinnedStack() != null;
     }
 
     @Override

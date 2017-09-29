@@ -314,7 +314,7 @@ public class CarStatusBar extends StatusBar implements
             ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
             if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
                 mController.taskChanged(runningTaskInfo.baseActivity.getPackageName(),
-                        runningTaskInfo.stackId);
+                        runningTaskInfo);
             }
         }
     }

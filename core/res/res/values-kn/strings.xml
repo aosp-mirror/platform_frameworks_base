@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"ರದ್ದುಮಾಡಿ"</string>
     <string name="yes" msgid="5362982303337969312">"ಸರಿ"</string>
     <string name="no" msgid="5141531044935541497">"ರದ್ದುಮಾಡಿ"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"ಗಮನಿಸಿ"</string>
     <string name="loading" msgid="7933681260296021180">"ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ಆನ್‌ ಮಾಡಿ"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ಮಾಪಕ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ಯಾವಾಗಲೂ ತೋರಿಸಿ"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್‌ ಆಗಿರುವುದರಲ್ಲಿ ಇದನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಪ್ರಸ್ತುತ ಪ್ರದರ್ಶನ ಗಾತ್ರದ ಸೆಟ್ಟಿಂಗ್‌ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ ಮತ್ತು ಅನಿರೀಕ್ಷಿತವಾಗಿ ವರ್ತಿಸಬಹುದು."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ಯಾವಾಗಲೂ ತೋರಿಸು"</string>
     <string name="smv_application" msgid="3307209192155442829">"ಅಪ್ಲಿಕೇಶನ್‌‌ <xliff:g id="APPLICATION">%1$s</xliff:g> (ಪ್ರಕ್ರಿಯೆಯು <xliff:g id="PROCESS">%2$s</xliff:g>) ತನ್ನ ಸ್ವಯಂ-ಜಾರಿ ಕಠಿಣ ಮೋಡ್ ನೀತಿಯನ್ನು ಉಲ್ಲಂಘನೆ ಮಾಡಿದೆ."</string>

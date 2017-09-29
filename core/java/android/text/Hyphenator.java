@@ -16,7 +16,12 @@
 
 package android.text;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -24,9 +29,6 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -37,39 +39,19 @@ import java.util.Locale;
  * @hide
  */
 public class Hyphenator {
-    // This class has deliberately simple lifetime management (no finalizer) because in
-    // the common case a process will use a very small number of locales.
-
     private static String TAG = "Hyphenator";
-
-    // TODO: Confirm that these are the best values. Various sources suggest (1, 1), but
-    // that appears too small.
-    private static final int INDIC_MIN_PREFIX = 2;
-    private static final int INDIC_MIN_SUFFIX = 2;
 
     private final static Object sLock = new Object();
 
     @GuardedBy("sLock")
     final static HashMap<Locale, Hyphenator> sMap = new HashMap<Locale, Hyphenator>();
 
-    // Reasonable enough values for cases where we have no hyphenation patterns but may be able to
-    // do some automatic hyphenation based on characters. These values would be used very rarely.
-    private static final int DEFAULT_MIN_PREFIX = 2;
-    private static final int DEFAULT_MIN_SUFFIX = 2;
-    final static Hyphenator sEmptyHyphenator =
-            new Hyphenator(StaticLayout.nLoadHyphenator(
-                                   null, 0, DEFAULT_MIN_PREFIX, DEFAULT_MIN_SUFFIX),
-                           null);
+    private final long mNativePtr;
+    private final HyphenationData mData;
 
-    final private long mNativePtr;
-
-    // We retain a reference to the buffer to keep the memory mapping valid
-    @SuppressWarnings("unused")
-    final private ByteBuffer mBuffer;
-
-    private Hyphenator(long nativePtr, ByteBuffer b) {
+    private Hyphenator(long nativePtr, HyphenationData data) {
         mNativePtr = nativePtr;
-        mBuffer = b;
+        mData = data;
     }
 
     public long getNativePtr() {
@@ -90,8 +72,7 @@ public class Hyphenator {
                         new Locale(locale.getLanguage(), "", variant);
                 result = sMap.get(languageAndVariantOnlyLocale);
                 if (result != null) {
-                    sMap.put(locale, result);
-                    return result;
+                    return putAlias(locale, result);
                 }
             }
 
@@ -99,8 +80,7 @@ public class Hyphenator {
             final Locale languageOnlyLocale = new Locale(locale.getLanguage());
             result = sMap.get(languageOnlyLocale);
             if (result != null) {
-                sMap.put(locale, result);
-                return result;
+                return putAlias(locale, result);
             }
 
             // Fall back to script-only, if available
@@ -112,135 +92,94 @@ public class Hyphenator {
                         .build();
                 result = sMap.get(scriptOnlyLocale);
                 if (result != null) {
-                    sMap.put(locale, result);
-                    return result;
+                    return putAlias(locale, result);
                 }
             }
 
-            sMap.put(locale, sEmptyHyphenator);  // To remember we found nothing.
+            return putEmptyAlias(locale);
         }
-        return sEmptyHyphenator;
     }
 
     private static class HyphenationData {
-        final String mLanguageTag;
-        final int mMinPrefix, mMinSuffix;
+        private static final String SYSTEM_HYPHENATOR_LOCATION = "/system/usr/hyphen-data";
+
+        public final int mMinPrefix, mMinSuffix;
+        public final long mDataAddress;
+
+        // Reasonable enough values for cases where we have no hyphenation patterns but may be able
+        // to do some automatic hyphenation based on characters. These values would be used very
+        // rarely.
+        private static final int DEFAULT_MIN_PREFIX = 2;
+        private static final int DEFAULT_MIN_SUFFIX = 2;
+
+        public static final HyphenationData sEmptyData =
+                new HyphenationData(DEFAULT_MIN_PREFIX, DEFAULT_MIN_SUFFIX);
+
+        // Create empty HyphenationData.
+        private HyphenationData(int minPrefix, int minSuffix) {
+            mMinPrefix = minPrefix;
+            mMinSuffix = minSuffix;
+            mDataAddress = 0;
+        }
+
         HyphenationData(String languageTag, int minPrefix, int minSuffix) {
-            this.mLanguageTag = languageTag;
-            this.mMinPrefix = minPrefix;
-            this.mMinSuffix = minSuffix;
-        }
-    }
+            mMinPrefix = minPrefix;
+            mMinSuffix = minSuffix;
 
-    private static Hyphenator loadHyphenator(HyphenationData data) {
-        String patternFilename = "hyph-" + data.mLanguageTag.toLowerCase(Locale.US) + ".hyb";
-        File patternFile = new File(getSystemHyphenatorLocation(), patternFilename);
-        if (!patternFile.canRead()) {
-            Log.e(TAG, "hyphenation patterns for " + patternFile + " not found or unreadable");
-            return null;
-        }
-        try {
-            RandomAccessFile f = new RandomAccessFile(patternFile, "r");
-            try {
-                FileChannel fc = f.getChannel();
-                MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-                long nativePtr = StaticLayout.nLoadHyphenator(
-                        buf, 0, data.mMinPrefix, data.mMinSuffix);
-                return new Hyphenator(nativePtr, buf);
-            } finally {
-                f.close();
+            final String patternFilename = "hyph-" + languageTag.toLowerCase(Locale.US) + ".hyb";
+            final File patternFile = new File(SYSTEM_HYPHENATOR_LOCATION, patternFilename);
+            if (!patternFile.canRead()) {
+                Log.e(TAG, "hyphenation patterns for " + patternFile + " not found or unreadable");
+                mDataAddress = 0;
+            } else {
+                long address;
+                try (RandomAccessFile f = new RandomAccessFile(patternFile, "r")) {
+                    address = Os.mmap(0, f.length(), OsConstants.PROT_READ,
+                            OsConstants.MAP_SHARED, f.getFD(), 0 /* offset */);
+                } catch (IOException | ErrnoException e) {
+                    Log.e(TAG, "error loading hyphenation " + patternFile, e);
+                    address = 0;
+                }
+                mDataAddress = address;
             }
-        } catch (IOException e) {
-            Log.e(TAG, "error loading hyphenation " + patternFile, e);
-            return null;
         }
     }
 
-    private static File getSystemHyphenatorLocation() {
-        return new File("/system/usr/hyphen-data");
+    // Do not call this method outside of init method.
+    private static Hyphenator putNewHyphenator(Locale loc, HyphenationData data) {
+        final Hyphenator hyphenator = new Hyphenator(nBuildHyphenator(
+                data.mDataAddress, loc.getLanguage(), data.mMinPrefix, data.mMinSuffix), data);
+        sMap.put(loc, hyphenator);
+        return hyphenator;
     }
 
-    // This array holds pairs of language tags that are used to prefill the map from locale to
-    // hyphenation data: The hyphenation data for the first field will be prefilled from the
-    // hyphenation data for the second field.
-    //
-    // The aliases that are computable by the get() method above are not included.
-    private static final String[][] LOCALE_FALLBACK_DATA = {
-        // English locales that fall back to en-US. The data is
-        // from CLDR. It's all English locales, minus the locales whose
-        // parent is en-001 (from supplementalData.xml, under <parentLocales>).
-        // TODO: Figure out how to get this from ICU.
-        {"en-AS", "en-US"}, // English (American Samoa)
-        {"en-GU", "en-US"}, // English (Guam)
-        {"en-MH", "en-US"}, // English (Marshall Islands)
-        {"en-MP", "en-US"}, // English (Northern Mariana Islands)
-        {"en-PR", "en-US"}, // English (Puerto Rico)
-        {"en-UM", "en-US"}, // English (United States Minor Outlying Islands)
-        {"en-VI", "en-US"}, // English (Virgin Islands)
+    // Do not call this method outside of init method.
+    private static void loadData(String langTag, int minPrefix, int maxPrefix) {
+        final HyphenationData data = new HyphenationData(langTag, minPrefix, maxPrefix);
+        putNewHyphenator(Locale.forLanguageTag(langTag), data);
+    }
 
-        // All English locales other than those falling back to en-US are mapped to en-GB.
-        {"en", "en-GB"},
+    // Caller must acquire sLock before calling this method.
+    // The Hyphenator for the baseLangTag must exists.
+    private static Hyphenator addAliasByTag(String langTag, String baseLangTag) {
+        return putAlias(Locale.forLanguageTag(langTag),
+                sMap.get(Locale.forLanguageTag(baseLangTag)));
+    }
 
-        // For German, we're assuming the 1996 (and later) orthography by default.
-        {"de", "de-1996"},
-        // Liechtenstein uses the Swiss hyphenation rules for the 1901 orthography.
-        {"de-LI-1901", "de-CH-1901"},
+    // Caller must acquire sLock before calling this method.
+    private static Hyphenator putAlias(Locale locale, Hyphenator base) {
+        return putNewHyphenator(locale, base.mData);
+    }
 
-        // Norwegian is very probably Norwegian Bokmål.
-        {"no", "nb"},
+    // Caller must acquire sLock before calling this method.
+    private static Hyphenator putEmptyAlias(Locale locale) {
+        return putNewHyphenator(locale, HyphenationData.sEmptyData);
+    }
 
-        // Use mn-Cyrl. According to CLDR's likelySubtags.xml, mn is most likely to be mn-Cyrl.
-        {"mn", "mn-Cyrl"}, // Mongolian
-
-        // Fall back to Ethiopic script for languages likely to be written in Ethiopic.
-        // Data is from CLDR's likelySubtags.xml.
-        // TODO: Convert this to a mechanism using ICU4J's ULocale#addLikelySubtags().
-        {"am", "und-Ethi"}, // Amharic
-        {"byn", "und-Ethi"}, // Blin
-        {"gez", "und-Ethi"}, // Geʻez
-        {"ti", "und-Ethi"}, // Tigrinya
-        {"wal", "und-Ethi"}, // Wolaytta
-    };
-
-    private static final HyphenationData[] AVAILABLE_LANGUAGES = {
-        new HyphenationData("as", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Assamese
-        new HyphenationData("bg", 2, 2), // Bulgarian
-        new HyphenationData("bn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Bengali
-        new HyphenationData("cu", 1, 2), // Church Slavonic
-        new HyphenationData("cy", 2, 3), // Welsh
-        new HyphenationData("da", 2, 2), // Danish
-        new HyphenationData("de-1901", 2, 2), // German 1901 orthography
-        new HyphenationData("de-1996", 2, 2), // German 1996 orthography
-        new HyphenationData("de-CH-1901", 2, 2), // Swiss High German 1901 orthography
-        new HyphenationData("en-GB", 2, 3), // British English
-        new HyphenationData("en-US", 2, 3), // American English
-        new HyphenationData("es", 2, 2), // Spanish
-        new HyphenationData("et", 2, 3), // Estonian
-        new HyphenationData("eu", 2, 2), // Basque
-        new HyphenationData("fr", 2, 3), // French
-        new HyphenationData("ga", 2, 3), // Irish
-        new HyphenationData("gu", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Gujarati
-        new HyphenationData("hi", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Hindi
-        new HyphenationData("hr", 2, 2), // Croatian
-        new HyphenationData("hu", 2, 2), // Hungarian
-        // texhyphen sources say Armenian may be (1, 2), but that it needs confirmation.
-        // Going with a more conservative value of (2, 2) for now.
-        new HyphenationData("hy", 2, 2), // Armenian
-        new HyphenationData("kn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Kannada
-        new HyphenationData("ml", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Malayalam
-        new HyphenationData("mn-Cyrl", 2, 2), // Mongolian in Cyrillic script
-        new HyphenationData("mr", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Marathi
-        new HyphenationData("nb", 2, 2), // Norwegian Bokmål
-        new HyphenationData("nn", 2, 2), // Norwegian Nynorsk
-        new HyphenationData("or", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Oriya
-        new HyphenationData("pa", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Punjabi
-        new HyphenationData("pt", 2, 3), // Portuguese
-        new HyphenationData("sl", 2, 2), // Slovenian
-        new HyphenationData("ta", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Tamil
-        new HyphenationData("te", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX), // Telugu
-        new HyphenationData("tk", 2, 2), // Turkmen
-        new HyphenationData("und-Ethi", 1, 1), // Any language in Ethiopic script
-    };
+    // TODO: Confirm that these are the best values. Various sources suggest (1, 1), but
+    // that appears too small.
+    private static final int INDIC_MIN_PREFIX = 2;
+    private static final int INDIC_MIN_SUFFIX = 2;
 
     /**
      * Load hyphenation patterns at initialization time. We want to have patterns
@@ -250,20 +189,85 @@ public class Hyphenator {
      * @hide
      */
     public static void init() {
-        sMap.put(null, null);
+        synchronized (sLock) {
+            sMap.put(null, null);
 
-        for (int i = 0; i < AVAILABLE_LANGUAGES.length; i++) {
-            HyphenationData data = AVAILABLE_LANGUAGES[i];
-            Hyphenator h = loadHyphenator(data);
-            if (h != null) {
-                sMap.put(Locale.forLanguageTag(data.mLanguageTag), h);
-            }
-        }
+            loadData("as", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Assamese
+            loadData("bg", 2, 2); // Bulgarian
+            loadData("bn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Bengali
+            loadData("cu", 1, 2); // Church Slavonic
+            loadData("cy", 2, 3); // Welsh
+            loadData("da", 2, 2); // Danish
+            loadData("de-1901", 2, 2); // German 1901 orthography
+            loadData("de-1996", 2, 2); // German 1996 orthography
+            loadData("de-CH-1901", 2, 2); // Swiss High German 1901 orthography
+            loadData("en-GB", 2, 3); // British English
+            loadData("en-US", 2, 3); // American English
+            loadData("es", 2, 2); // Spanish
+            loadData("et", 2, 3); // Estonian
+            loadData("eu", 2, 2); // Basque
+            loadData("fr", 2, 3); // French
+            loadData("ga", 2, 3); // Irish
+            loadData("gu", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Gujarati
+            loadData("hi", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Hindi
+            loadData("hr", 2, 2); // Croatian
+            loadData("hu", 2, 2); // Hungarian
+            // texhyphen sources say Armenian may be (1, 2); but that it needs confirmation.
+            // Going with a more conservative value of (2, 2) for now.
+            loadData("hy", 2, 2); // Armenian
+            loadData("kn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Kannada
+            loadData("ml", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Malayalam
+            loadData("mn-Cyrl", 2, 2); // Mongolian in Cyrillic script
+            loadData("mr", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Marathi
+            loadData("nb", 2, 2); // Norwegian Bokmål
+            loadData("nn", 2, 2); // Norwegian Nynorsk
+            loadData("or", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Oriya
+            loadData("pa", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Punjabi
+            loadData("pt", 2, 3); // Portuguese
+            loadData("sl", 2, 2); // Slovenian
+            loadData("ta", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Tamil
+            loadData("te", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Telugu
+            loadData("tk", 2, 2); // Turkmen
+            loadData("und-Ethi", 1, 1); // Any language in Ethiopic script
 
-        for (int i = 0; i < LOCALE_FALLBACK_DATA.length; i++) {
-            String language = LOCALE_FALLBACK_DATA[i][0];
-            String fallback = LOCALE_FALLBACK_DATA[i][1];
-            sMap.put(Locale.forLanguageTag(language), sMap.get(Locale.forLanguageTag(fallback)));
+            // English locales that fall back to en-US. The data is
+            // from CLDR. It's all English locales, minus the locales whose
+            // parent is en-001 (from supplementalData.xml, under <parentLocales>).
+            // TODO: Figure out how to get this from ICU.
+            addAliasByTag("en-AS", "en-US"); // English (American Samoa)
+            addAliasByTag("en-GU", "en-US"); // English (Guam)
+            addAliasByTag("en-MH", "en-US"); // English (Marshall Islands)
+            addAliasByTag("en-MP", "en-US"); // English (Northern Mariana Islands)
+            addAliasByTag("en-PR", "en-US"); // English (Puerto Rico)
+            addAliasByTag("en-UM", "en-US"); // English (United States Minor Outlying Islands)
+            addAliasByTag("en-VI", "en-US"); // English (Virgin Islands)
+
+            // All English locales other than those falling back to en-US are mapped to en-GB.
+            addAliasByTag("en", "en-GB");
+
+            // For German, we're assuming the 1996 (and later) orthography by default.
+            addAliasByTag("de", "de-1996");
+            // Liechtenstein uses the Swiss hyphenation rules for the 1901 orthography.
+            addAliasByTag("de-LI-1901", "de-CH-1901");
+
+            // Norwegian is very probably Norwegian Bokmål.
+            addAliasByTag("no", "nb");
+
+            // Use mn-Cyrl. According to CLDR's likelySubtags.xml, mn is most likely to be mn-Cyrl.
+            addAliasByTag("mn", "mn-Cyrl"); // Mongolian
+
+            // Fall back to Ethiopic script for languages likely to be written in Ethiopic.
+            // Data is from CLDR's likelySubtags.xml.
+            // TODO: Convert this to a mechanism using ICU4J's ULocale#addLikelySubtags().
+            addAliasByTag("am", "und-Ethi"); // Amharic
+            addAliasByTag("byn", "und-Ethi"); // Blin
+            addAliasByTag("gez", "und-Ethi"); // Geʻez
+            addAliasByTag("ti", "und-Ethi"); // Tigrinya
+            addAliasByTag("wal", "und-Ethi"); // Wolaytta
         }
-    }
+    };
+
+    private static native long nBuildHyphenator(/* non-zero */ long dataAddress,
+            @NonNull String langTag, @IntRange(from = 1) int minPrefix,
+            @IntRange(from = 1) int minSuffix);
 }

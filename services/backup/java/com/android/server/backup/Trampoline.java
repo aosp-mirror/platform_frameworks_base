@@ -98,7 +98,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     protected boolean isRefactoredServiceEnabled() {
         return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 1) == 0;
+                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 0) == 0;
     }
 
     protected int binderGetCallingUid() {

@@ -19,22 +19,60 @@
 
 #include "android-base/macros.h"
 #include "google/protobuf/io/coded_stream.h"
-#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
-#include "Diagnostics.h"
+#include "ConfigDescription.h"
+#include "Configuration.pb.h"
 #include "ResourceTable.h"
-#include "Source.h"
-#include "proto/ProtoHelpers.h"
+#include "ResourceValues.h"
+#include "Resources.pb.h"
+#include "ResourcesInternal.pb.h"
+#include "StringPool.h"
+#include "xml/XmlDom.h"
+
+namespace google {
+namespace protobuf {
+namespace io {
+class ZeroCopyOutputStream;
+}  // namespace io
+}  // namespace protobuf
+}  // namespace google
 
 namespace aapt {
 
+// Serializes a Value to its protobuf representation. An optional StringPool will hold the
+// source path string.
+void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* src_pool = nullptr);
+
+// Serialize an Item into its protobuf representation. pb::Item does not store the source path nor
+// comments of an Item.
+void SerializeItemToPb(const Item& item, pb::Item* out_item);
+
+// Serializes an XML element into its protobuf representation.
+void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node);
+
+// Serializes an XmlResource into its protobuf representation. The ResourceFile is NOT serialized.
+void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node);
+
+// Serializes a StringPool into its protobuf representation, which is really just the binary
+// ResStringPool representation stuffed into a bytes field.
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool);
+
+// Serializes a ConfigDescription into its protobuf representation.
+void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config);
+
+// Serializes a ResourceTable into its protobuf representation.
+void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table);
+
+// Serializes a ResourceFile into its protobuf representation.
+void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file);
+
 class CompiledFileOutputStream {
  public:
-  explicit CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out);
+  explicit CompiledFileOutputStream(::google::protobuf::io::ZeroCopyOutputStream* out);
 
   void WriteLittleEndian32(uint32_t value);
-  void WriteCompiledFile(const pb::internal::CompiledFile* compiledFile);
-  void WriteData(const BigBuffer* buffer);
+  void WriteCompiledFile(const pb::internal::CompiledFile& compiledFile);
+  void WriteData(const BigBuffer& buffer);
   void WriteData(const void* data, size_t len);
   bool HadError();
 
@@ -43,32 +81,8 @@ class CompiledFileOutputStream {
 
   void EnsureAlignedWrite();
 
-  google::protobuf::io::CodedOutputStream out_;
+  ::google::protobuf::io::CodedOutputStream out_;
 };
-
-class CompiledFileInputStream {
- public:
-  explicit CompiledFileInputStream(const void* data, size_t size);
-
-  bool ReadLittleEndian32(uint32_t* outVal);
-  bool ReadCompiledFile(pb::internal::CompiledFile* outVal);
-  bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
-
-  void EnsureAlignedRead();
-
-  google::protobuf::io::CodedInputStream in_;
-};
-
-std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table);
-std::unique_ptr<ResourceTable> DeserializeTableFromPb(const pb::ResourceTable& pbTable,
-                                                      const Source& source, IDiagnostics* diag);
-
-std::unique_ptr<pb::internal::CompiledFile> SerializeCompiledFileToPb(const ResourceFile& file);
-std::unique_ptr<ResourceFile> DeserializeCompiledFileFromPb(
-    const pb::internal::CompiledFile& pbFile, const Source& source, IDiagnostics* diag);
 
 }  // namespace aapt
 

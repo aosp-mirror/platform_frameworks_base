@@ -416,7 +416,7 @@ public final class Pm {
                     PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
                             null, null);
                     params.sessionParams.setSize(
-                            PackageHelper.calculateInstalledSize(pkgLite, false,
+                            PackageHelper.calculateInstalledSize(pkgLite,
                             params.sessionParams.abiOverride));
                 } catch (PackageParserException | IOException e) {
                     System.err.println("Error: Failed to parse APK file: " + e);

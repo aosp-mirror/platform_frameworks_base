@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"ஒன்றுமில்லை"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"பிழைதிருத்திக்குக் காத்திருக்கவும்"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"பிழைதிருத்தப்பட்ட பயன்பாடு செயல்படுவதற்கு முன்பு பிழைதிருத்தியை இணைப்பதற்குக் காத்திருக்கிறது"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"டெலிஃபோனி மானிட்டர்"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"TelephonyMonitor ஆனது டெலிஃபோனி/மோடம் செயல்பாட்டில் சிக்கல் இருப்பதைக் கண்டறியும் போது, பதிவுகளைச் சேகரிக்கும். அத்துடன், பிழையைப் புகாரளிக்கும்படி பயனருக்கு அறிவிப்பைக் காட்டும்"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"உள்ளீடு"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"வரைபொருள்"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"வன்பொருள் முடுக்கத்துடன் கூடிய காட்சியாக்கம்"</string>

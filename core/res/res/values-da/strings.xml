@@ -989,6 +989,8 @@
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annuller"</string>
+    <!-- no translation found for close (2318214661230355730) -->
+    <skip />
     <string name="dialog_alert_title" msgid="2049658708609043103">"Bemærk"</string>
     <string name="loading" msgid="7933681260296021180">"Indlæser…"</string>
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
@@ -1045,6 +1047,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skaler"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vis altid"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivér dette igen i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
+    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
+    <skip />
+    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
+    <skip />
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke den aktuelle indstilling for visningsstørrelse og vil muligvis ikke fungere som forventet."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vis altid"</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>

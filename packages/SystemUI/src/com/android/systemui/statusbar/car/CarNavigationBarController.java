@@ -21,7 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.app.ActivityManager.StackId;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -107,7 +107,7 @@ class CarNavigationBarController {
         }
     }
 
-    public void taskChanged(String packageName, int stackId) {
+    public void taskChanged(String packageName, ActivityManager.RunningTaskInfo taskInfo) {
         // If the package name belongs to a filter, then highlight appropriate button in
         // the navigation bar.
         if (mFacetPackageMap.containsKey(packageName)) {
@@ -121,8 +121,9 @@ class CarNavigationBarController {
         }
 
         // Set up the persistent docked task if needed.
-        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
-                && stackId != StackId.HOME_STACK_ID) {
+        boolean isHomeTask =
+                taskInfo.configuration.windowConfiguration.getActivityType() == ACTIVITY_TYPE_HOME;
+        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask() && !isHomeTask) {
             mStatusBar.startActivityOnStack(mPersistentTaskIntent,
                     WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         }

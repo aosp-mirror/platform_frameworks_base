@@ -1,15 +1,30 @@
-syntax = "proto2";
-package android.os.statsd;
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+syntax = "proto2";
 option optimize_for = LITE_RUNTIME;
+
+package android.os.statsd;
 
 option java_package = "com.android.internal.os";
 option java_outer_classname = "StatsdConfigProto";
 
-import "frameworks/base/cmds/statsd/src/stats_constants.proto";
-
 message KeyMatcher {
-  optional KeyId key = 1;
+  optional int32 key = 1;
+
   optional bool as_package_name = 2 [ default = false ];
 }
 
@@ -19,14 +34,15 @@ message KeyValueMatcher {
   oneof value_matcher {
     bool eq_bool = 2;
     string eq_string = 3;
-    int32 eq_int32 = 4;
-    int64 eq_int64 = 5;
-    int32 lt_int32 = 6;
-    int32 gt_int32 = 7;
-    int64 lt_int64 = 8;
-    int64 gt_int64 = 9;
-    float lt_float = 10;
-    float gt_float = 11;
+    int32 eq_int = 4;
+
+    int64 lt_int = 5;
+    int64 gt_int = 6;
+    float lt_float = 7;
+    float gt_float = 8;
+
+    int64 lte_int = 9;
+    int64 gte_int = 10;
   }
 }
 
@@ -39,7 +55,7 @@ enum LogicalOperation {
 }
 
 message SimpleLogEntryMatcher {
-  repeated TagId tag = 1;
+  repeated int32 tag = 1;
 
   repeated KeyValueMatcher key_value_matcher = 2;
 }

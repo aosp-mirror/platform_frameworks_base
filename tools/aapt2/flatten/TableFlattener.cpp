@@ -76,9 +76,9 @@ struct FlatEntry {
   uint32_t entry_key;
 };
 
-class MapFlattenVisitor : public RawValueVisitor {
+class MapFlattenVisitor : public ValueVisitor {
  public:
-  using RawValueVisitor::Visit;
+  using ValueVisitor::Visit;
 
   MapFlattenVisitor(ResTable_entry_ext* out_entry, BigBuffer* buffer)
       : out_entry_(out_entry), buffer_(buffer) {}

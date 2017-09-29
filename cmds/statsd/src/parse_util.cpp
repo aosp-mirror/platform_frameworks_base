@@ -17,13 +17,8 @@
 #include <log/log_event_list.h>
 #include <parse_util.h>
 
-using android::os::statsd::EVENT_TIMESTAMP;
 using android::os::statsd::EventMetricData;
-using android::os::statsd::KeyId;
-using android::os::statsd::KeyId_IsValid;
 using android::os::statsd::KeyValuePair;
-using android::os::statsd::TagId;
-using android::os::statsd::TagId_IsValid;
 
 static inline uint32_t get4LE(const char* src) {
     return src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24);
@@ -38,16 +33,11 @@ EventMetricData parse(log_msg msg)
     // set tag.
     char* eventData = msg.msg();
     uint32_t tag = get4LE(eventData);
-    if (!TagId_IsValid(tag)) {
-        // return when an invalid tag is found.
-        return eventMetricData;
-    }
-    eventMetricData.set_tag(static_cast<TagId>(tag));
+    // TODO: Replace the following line when we can serialize on the fly.
+    //eventMetricData.set_tag(tag);
 
     // set timestamp of the event.
-    KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
-    keyValuePair->set_key(EVENT_TIMESTAMP);
-    keyValuePair->set_value_int(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec);
+    eventMetricData.set_timestamp_nanos(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec);
 
     // start iterating k,v pairs.
     android_log_context context =
@@ -66,38 +56,50 @@ EventMetricData parse(log_msg msg)
                 case EVENT_TYPE_INT:
                     if (index % 2 == 0) {
                         key = elem.data.int32;
-                    } else if (KeyId_IsValid(key)) {
+                    } else {
+                        // TODO: Fix the following lines when we can serialize on the fly.
+                        /*
                         int32_t val = elem.data.int32;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
-                        keyValuePair->set_key(static_cast<KeyId>(key));
+                        keyValuePair->set_key(key);
                         keyValuePair->set_value_int(val);
+                        */
                     }
                     index++;
                     break;
                 case EVENT_TYPE_FLOAT:
-                    if (index % 2 == 1 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1) {
+                        // TODO: Fix the following lines when we can serialize on the fly.
+                        /*
                         float val = elem.data.float32;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
-                        keyValuePair->set_key(static_cast<KeyId>(key));
+                        keyValuePair->set_key(key);
                         keyValuePair->set_value_float(val);
+                        */
                     }
                     index++;
                     break;
                 case EVENT_TYPE_STRING:
-                    if (index % 2 == 1 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1) {
+                        // TODO: Fix the following lines when we can serialize on the fly.
+                        /*
                         char* val = elem.data.string;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
-                        keyValuePair->set_key(static_cast<KeyId>(key));
+                        keyValuePair->set_key(key);
                         keyValuePair->set_value_str(val);
+                        */
                     }
                     index++;
                     break;
                 case EVENT_TYPE_LONG:
-                    if (index % 2 == 1 && KeyId_IsValid(key)) {
+                    if (index % 2 == 1) {
+                        // TODO: Fix the following lines when we can serialize on the fly.
+                        /*
                         int64_t val = elem.data.int64;
                         KeyValuePair* keyValuePair = eventMetricData.add_key_value_pair();
-                        keyValuePair->set_key(static_cast<KeyId>(key));
+                        keyValuePair->set_key(key);
                         keyValuePair->set_value_int(val);
+                        */
                     }
                     index++;
                     break;

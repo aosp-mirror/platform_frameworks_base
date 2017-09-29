@@ -55,7 +55,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
-import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
@@ -230,7 +229,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
-import android.util.TimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -244,6 +242,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.TimingsTraceLog;
 import android.util.Xml;
 import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
@@ -654,9 +653,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private boolean mDexOptDialogShown;
-
-    /** The location for ASEC container files on internal storage. */
-    final String mAsecInternalPath;
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
@@ -1316,7 +1312,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int POST_INSTALL = 9;
     static final int MCS_RECONNECT = 10;
     static final int MCS_GIVE_UP = 11;
-    static final int UPDATED_MEDIA_STATUS = 12;
     static final int WRITE_SETTINGS = 13;
     static final int WRITE_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
@@ -1714,32 +1709,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
-                } break;
-                case UPDATED_MEDIA_STATUS: {
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Got message UPDATED_MEDIA_STATUS");
-                    boolean reportStatus = msg.arg1 == 1;
-                    boolean doGc = msg.arg2 == 1;
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "reportStatus=" + reportStatus + ", doGc = " + doGc);
-                    if (doGc) {
-                        // Force a gc to clear up stale containers.
-                        Runtime.getRuntime().gc();
-                    }
-                    if (msg.obj != null) {
-                        @SuppressWarnings("unchecked")
-                        Set<AsecInstallArgs> args = (Set<AsecInstallArgs>) msg.obj;
-                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading all containers");
-                        // Unload containers
-                        unloadAllContainers(args);
-                    }
-                    if (reportStatus) {
-                        try {
-                            if (DEBUG_SD_INSTALL) Log.i(TAG,
-                                    "Invoking StorageManagerService call back");
-                            PackageHelper.getStorageManager().finishMediaUpdate();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "StorageManagerService not running?");
-                        }
-                    }
                 } break;
                 case WRITE_SETTINGS: {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
@@ -2165,14 +2134,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     unloadPrivatePackages(vol);
                 }
             }
-
-            if (vol.type == VolumeInfo.TYPE_PUBLIC && vol.isPrimary()) {
-                if (vol.state == VolumeInfo.STATE_MOUNTED) {
-                    updateExternalMediaStatus(true, false);
-                } else if (vol.state == VolumeInfo.STATE_EJECTING) {
-                    updateExternalMediaStatus(false, false);
-                }
-            }
         }
 
         @Override
@@ -2490,7 +2451,6 @@ public class PackageManagerService extends IPackageManager.Stub
             File dataDir = Environment.getDataDirectory();
             mAppInstallDir = new File(dataDir, "app");
             mAppLib32InstallDir = new File(dataDir, "app-lib");
-            mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
             sUserManager = new UserManagerService(context, this,
                     new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore), mPackages);
@@ -3314,6 +3274,24 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             removeCodePathLI(dstCodePath);
             return null;
+        }
+
+        // If we have a profile for a compressed APK, copy it to the reference location.
+        // Since the package is the stub one, remove the stub suffix to get the normal package and
+        // APK name.
+        File profileFile = new File(getPrebuildProfilePath(pkg).replace(STUB_SUFFIX, ""));
+        if (profileFile.exists()) {
+            try {
+                // We could also do this lazily before calling dexopt in
+                // PackageDexOptimizer to prevent this happening on first boot. The issue
+                // is that we don't have a good way to say "do this only once".
+                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                        pkg.applicationInfo.uid, pkg.packageName)) {
+                    Log.e(TAG, "decompressPackage failed to copy system profile!");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ", e);
+            }
         }
         return dstCodePath;
     }
@@ -9739,7 +9717,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            String compilerFilter, boolean bootComplete) {
+            final String compilerFilter, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -9749,6 +9727,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         for (PackageParser.Package pkg : pkgs) {
             numberOfPackagesVisited++;
+
+            boolean useProfileForDexopt = false;
 
             if ((isFirstBoot() || isUpgrade()) && isSystemApp(pkg)) {
                 // Copy over initial preopt profiles since we won't get any JIT samples for methods
@@ -9763,10 +9743,29 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
                                 pkg.applicationInfo.uid, pkg.packageName)) {
                             Log.e(TAG, "Installer failed to copy system profile!");
+                        } else {
+                            // Disabled as this causes speed-profile compilation during first boot
+                            // even if things are already compiled.
+                            // useProfileForDexopt = true;
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
                                 e);
+                    }
+                } else {
+                    PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+                    // Handle compressed APKs in this path. Only do this for stubs with profiles to
+                    // minimize the number off apps being speed-profile compiled during first boot.
+                    // The other paths will not change the filter.
+                    if (disabledPs != null && disabledPs.pkg.isStub) {
+                        // The package is the stub one, remove the stub suffix to get the normal
+                        // package and APK names.
+                        String systemProfilePath =
+                                getPrebuildProfilePath(disabledPs.pkg).replace(STUB_SUFFIX, "");
+                        File systemProfile = new File(systemProfilePath);
+                        // Use the profile for compilation if there exists one for the same package
+                        // in the system partition.
+                        useProfileForDexopt = systemProfile.exists();
                     }
                 }
             }
@@ -9796,6 +9795,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            String pkgCompilerFilter = compilerFilter;
+            if (useProfileForDexopt) {
+                // Use background dexopt mode to try and use the profile. Note that this does not
+                // guarantee usage of the profile.
+                pkgCompilerFilter =
+                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
+            }
+
             // checkProfiles is false to avoid merging profiles during boot which
             // might interfere with background compilation (b/28612421).
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
@@ -9804,7 +9812,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    compilerFilter,
+                    pkgCompilerFilter,
                     dexoptFlags));
 
             switch (primaryDexOptStaus) {
@@ -14828,7 +14836,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return installReason;
     }
 
-    void installStage(String packageName, File stagedDir, String stagedCid,
+    void installStage(String packageName, File stagedDir,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
             Certificate[][] certificates) {
@@ -14841,12 +14849,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 sessionParams.originatingUri, sessionParams.referrerUri,
                 sessionParams.originatingUid, installerUid);
 
-        final OriginInfo origin;
-        if (stagedDir != null) {
-            origin = OriginInfo.fromStagedFile(stagedDir);
-        } else {
-            origin = OriginInfo.fromStagedContainer(stagedCid);
-        }
+        final OriginInfo origin = OriginInfo.fromStagedFile(stagedDir);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final int installReason = fixUpInstallReason(installerPackageName, installerUid,
@@ -16046,7 +16049,6 @@ public class PackageManagerService extends IPackageManager.Stub
          * file, or a cluster directory. This location may be untrusted.
          */
         final File file;
-        final String cid;
 
         /**
          * Flag indicating that {@link #file} or {@link #cid} has already been
@@ -16065,35 +16067,27 @@ public class PackageManagerService extends IPackageManager.Stub
         final File resolvedFile;
 
         static OriginInfo fromNothing() {
-            return new OriginInfo(null, null, false, false);
+            return new OriginInfo(null, false, false);
         }
 
         static OriginInfo fromUntrustedFile(File file) {
-            return new OriginInfo(file, null, false, false);
+            return new OriginInfo(file, false, false);
         }
 
         static OriginInfo fromExistingFile(File file) {
-            return new OriginInfo(file, null, false, true);
+            return new OriginInfo(file, false, true);
         }
 
         static OriginInfo fromStagedFile(File file) {
-            return new OriginInfo(file, null, true, false);
+            return new OriginInfo(file, true, false);
         }
 
-        static OriginInfo fromStagedContainer(String cid) {
-            return new OriginInfo(null, cid, true, false);
-        }
-
-        private OriginInfo(File file, String cid, boolean staged, boolean existing) {
+        private OriginInfo(File file, boolean staged, boolean existing) {
             this.file = file;
-            this.cid = cid;
             this.staged = staged;
             this.existing = existing;
 
-            if (cid != null) {
-                resolvedPath = PackageHelper.getSdDir(cid);
-                resolvedFile = new File(resolvedPath);
-            } else if (file != null) {
+            if (file != null) {
                 resolvedPath = file.getAbsolutePath();
                 resolvedFile = file;
             } else {
@@ -16186,7 +16180,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public String toString() {
             return "InstallParams{" + Integer.toHexString(System.identityHashCode(this))
-                    + " file=" + origin.file + " cid=" + origin.cid + "}";
+                    + " file=" + origin.file + "}";
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite) {
@@ -16297,9 +16291,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (origin.file != null) {
                     installFlags |= PackageManager.INSTALL_INTERNAL;
                     installFlags &= ~PackageManager.INSTALL_EXTERNAL;
-                } else if (origin.cid != null) {
-                    installFlags |= PackageManager.INSTALL_EXTERNAL;
-                    installFlags &= ~PackageManager.INSTALL_INTERNAL;
                 } else {
                     throw new IllegalStateException("Invalid stage location");
                 }
@@ -16337,7 +16328,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             Environment.getDataDirectory());
 
                     final long sizeBytes = mContainerService.calculateInstalledSize(
-                            origin.resolvedPath, isForwardLocked(), packageAbiOverride);
+                            origin.resolvedPath, packageAbiOverride);
 
                     try {
                         mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
@@ -16574,43 +16565,11 @@ public class PackageManagerService extends IPackageManager.Stub
             mArgs = createInstallArgs(this);
             mRet = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         }
-
-        public boolean isForwardLocked() {
-            return (installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
-        }
-    }
-
-    /**
-     * Used during creation of InstallArgs
-     *
-     * @param installFlags package installation flags
-     * @return true if should be installed on external storage
-     */
-    private static boolean installOnExternalAsec(int installFlags) {
-        if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-            return false;
-        }
-        if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Used during creation of InstallArgs
-     *
-     * @param installFlags package installation flags
-     * @return true if should be installed as forward locked
-     */
-    private static boolean installForwardLocked(int installFlags) {
-        return (installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
     }
 
     private InstallArgs createInstallArgs(InstallParams params) {
         if (params.move != null) {
             return new MoveInstallArgs(params);
-        } else if (installOnExternalAsec(params.installFlags) || params.isForwardLocked()) {
-            return new AsecInstallArgs(params);
         } else {
             return new FileInstallArgs(params);
         }
@@ -16622,27 +16581,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private InstallArgs createInstallArgsForExisting(int installFlags, String codePath,
             String resourcePath, String[] instructionSets) {
-        final boolean isInAsec;
-        if (installOnExternalAsec(installFlags)) {
-            /* Apps on SD card are always in ASEC containers. */
-            isInAsec = true;
-        } else if (installForwardLocked(installFlags)
-                && !codePath.startsWith(mDrmAppPrivateInstallDir.getAbsolutePath())) {
-            /*
-             * Forward-locked apps are only in ASEC containers if they're the
-             * new style
-             */
-            isInAsec = true;
-        } else {
-            isInAsec = false;
-        }
-
-        if (isInAsec) {
-            return new AsecInstallArgs(codePath, instructionSets,
-                    installOnExternalAsec(installFlags), installForwardLocked(installFlags));
-        } else {
-            return new FileInstallArgs(codePath, resourcePath, instructionSets);
-        }
+        return new FileInstallArgs(codePath, resourcePath, instructionSets);
     }
 
     static abstract class InstallArgs {
@@ -16976,11 +16915,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean isAsecExternal(String cid) {
-        final String asecPath = PackageHelper.getSdFilesystem(cid);
-        return !asecPath.startsWith(mAsecInternalPath);
-    }
-
     private static void maybeThrowExceptionForMultiArchCopy(String message, int copyRet) throws
             PackageManagerException {
         if (copyRet < 0) {
@@ -17000,308 +16934,6 @@ public class PackageManagerService extends IPackageManager.Stub
         String subStr1 = fullCodePath.substring(0, eidx);
         int sidx = subStr1.lastIndexOf("/");
         return subStr1.substring(sidx+1, eidx);
-    }
-
-    /**
-     * Logic to handle installation of ASEC applications, including copying and
-     * renaming logic.
-     */
-    class AsecInstallArgs extends InstallArgs {
-        static final String RES_FILE_NAME = "pkg.apk";
-        static final String PUBLIC_RES_FILE_NAME = "res.zip";
-
-        String cid;
-        String packagePath;
-        String resourcePath;
-
-        /** New install */
-        AsecInstallArgs(InstallParams params) {
-            super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid,
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
-                    params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie, params.certificates,
-                    params.installReason);
-        }
-
-        /** Existing install */
-        AsecInstallArgs(String fullCodePath, String[] instructionSets,
-                        boolean isExternal, boolean isForwardLocked) {
-            super(OriginInfo.fromNothing(), null, null, (isExternal ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
-                    instructionSets, null, null, null, 0, null /*certificates*/,
-                    PackageManager.INSTALL_REASON_UNKNOWN);
-            // Hackily pretend we're still looking at a full code path
-            if (!fullCodePath.endsWith(RES_FILE_NAME)) {
-                fullCodePath = new File(fullCodePath, RES_FILE_NAME).getAbsolutePath();
-            }
-
-            // Extract cid from fullCodePath
-            int eidx = fullCodePath.lastIndexOf("/");
-            String subStr1 = fullCodePath.substring(0, eidx);
-            int sidx = subStr1.lastIndexOf("/");
-            cid = subStr1.substring(sidx+1, eidx);
-            setMountPath(subStr1);
-        }
-
-        AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked) {
-            super(OriginInfo.fromNothing(), null, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
-                    instructionSets, null, null, null, 0, null /*certificates*/,
-                    PackageManager.INSTALL_REASON_UNKNOWN);
-            this.cid = cid;
-            setMountPath(PackageHelper.getSdDir(cid));
-        }
-
-        void createCopyFile() {
-            cid = mInstallerService.allocateExternalStageCidLegacy();
-        }
-
-        int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
-            if (origin.staged && origin.cid != null) {
-                if (DEBUG_INSTALL) Slog.d(TAG, origin.cid + " already staged; skipping copy");
-                cid = origin.cid;
-                setMountPath(PackageHelper.getSdDir(cid));
-                return PackageManager.INSTALL_SUCCEEDED;
-            }
-
-            if (temp) {
-                createCopyFile();
-            } else {
-                /*
-                 * Pre-emptively destroy the container since it's destroyed if
-                 * copying fails due to it existing anyway.
-                 */
-                PackageHelper.destroySdDir(cid);
-            }
-
-            final String newMountPath = imcs.copyPackageToContainer(
-                    origin.file.getAbsolutePath(), cid, getEncryptKey(), isExternalAsec(),
-                    isFwdLocked(), deriveAbiOverride(abiOverride, null /* settings */));
-
-            if (newMountPath != null) {
-                setMountPath(newMountPath);
-                return PackageManager.INSTALL_SUCCEEDED;
-            } else {
-                return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-            }
-        }
-
-        @Override
-        String getCodePath() {
-            return packagePath;
-        }
-
-        @Override
-        String getResourcePath() {
-            return resourcePath;
-        }
-
-        int doPreInstall(int status) {
-            if (status != PackageManager.INSTALL_SUCCEEDED) {
-                // Destroy container
-                PackageHelper.destroySdDir(cid);
-            } else {
-                boolean mounted = PackageHelper.isContainerMounted(cid);
-                if (!mounted) {
-                    String newMountPath = PackageHelper.mountSdDir(cid, getEncryptKey(),
-                            Process.SYSTEM_UID);
-                    if (newMountPath != null) {
-                        setMountPath(newMountPath);
-                    } else {
-                        return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-                    }
-                }
-            }
-            return status;
-        }
-
-        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
-            String newCacheId = getNextCodePath(oldCodePath, pkg.packageName, "/" + RES_FILE_NAME);
-            String newMountPath = null;
-            if (PackageHelper.isContainerMounted(cid)) {
-                // Unmount the container
-                if (!PackageHelper.unMountSdDir(cid)) {
-                    Slog.i(TAG, "Failed to unmount " + cid + " before renaming");
-                    return false;
-                }
-            }
-            if (!PackageHelper.renameSdDir(cid, newCacheId)) {
-                Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId +
-                        " which might be stale. Will try to clean up.");
-                // Clean up the stale container and proceed to recreate.
-                if (!PackageHelper.destroySdDir(newCacheId)) {
-                    Slog.e(TAG, "Very strange. Cannot clean up stale container " + newCacheId);
-                    return false;
-                }
-                // Successfully cleaned up stale container. Try to rename again.
-                if (!PackageHelper.renameSdDir(cid, newCacheId)) {
-                    Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId
-                            + " inspite of cleaning it up.");
-                    return false;
-                }
-            }
-            if (!PackageHelper.isContainerMounted(newCacheId)) {
-                Slog.w(TAG, "Mounting container " + newCacheId);
-                newMountPath = PackageHelper.mountSdDir(newCacheId,
-                        getEncryptKey(), Process.SYSTEM_UID);
-            } else {
-                newMountPath = PackageHelper.getSdDir(newCacheId);
-            }
-            if (newMountPath == null) {
-                Slog.w(TAG, "Failed to get cache path for  " + newCacheId);
-                return false;
-            }
-            Log.i(TAG, "Succesfully renamed " + cid +
-                    " to " + newCacheId +
-                    " at new path: " + newMountPath);
-            cid = newCacheId;
-
-            final File beforeCodeFile = new File(packagePath);
-            setMountPath(newMountPath);
-            final File afterCodeFile = new File(packagePath);
-
-            // Reflect the rename in scanned details
-            pkg.setCodePath(afterCodeFile.getAbsolutePath());
-            pkg.setBaseCodePath(FileUtils.rewriteAfterRename(beforeCodeFile,
-                    afterCodeFile, pkg.baseCodePath));
-            pkg.setSplitCodePaths(FileUtils.rewriteAfterRename(beforeCodeFile,
-                    afterCodeFile, pkg.splitCodePaths));
-
-            // Reflect the rename in app info
-            pkg.setApplicationVolumeUuid(pkg.volumeUuid);
-            pkg.setApplicationInfoCodePath(pkg.codePath);
-            pkg.setApplicationInfoBaseCodePath(pkg.baseCodePath);
-            pkg.setApplicationInfoSplitCodePaths(pkg.splitCodePaths);
-            pkg.setApplicationInfoResourcePath(pkg.codePath);
-            pkg.setApplicationInfoBaseResourcePath(pkg.baseCodePath);
-            pkg.setApplicationInfoSplitResourcePaths(pkg.splitCodePaths);
-
-            return true;
-        }
-
-        private void setMountPath(String mountPath) {
-            final File mountFile = new File(mountPath);
-
-            final File monolithicFile = new File(mountFile, RES_FILE_NAME);
-            if (monolithicFile.exists()) {
-                packagePath = monolithicFile.getAbsolutePath();
-                if (isFwdLocked()) {
-                    resourcePath = new File(mountFile, PUBLIC_RES_FILE_NAME).getAbsolutePath();
-                } else {
-                    resourcePath = packagePath;
-                }
-            } else {
-                packagePath = mountFile.getAbsolutePath();
-                resourcePath = packagePath;
-            }
-        }
-
-        int doPostInstall(int status, int uid) {
-            if (status != PackageManager.INSTALL_SUCCEEDED) {
-                cleanUp();
-            } else {
-                final int groupOwner;
-                final String protectedFile;
-                if (isFwdLocked()) {
-                    groupOwner = UserHandle.getSharedAppGid(uid);
-                    protectedFile = RES_FILE_NAME;
-                } else {
-                    groupOwner = -1;
-                    protectedFile = null;
-                }
-
-                if (uid < Process.FIRST_APPLICATION_UID
-                        || !PackageHelper.fixSdPermissions(cid, groupOwner, protectedFile)) {
-                    Slog.e(TAG, "Failed to finalize " + cid);
-                    PackageHelper.destroySdDir(cid);
-                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-                }
-
-                boolean mounted = PackageHelper.isContainerMounted(cid);
-                if (!mounted) {
-                    PackageHelper.mountSdDir(cid, getEncryptKey(), Process.myUid());
-                }
-            }
-            return status;
-        }
-
-        private void cleanUp() {
-            if (DEBUG_SD_INSTALL) Slog.i(TAG, "cleanUp");
-
-            // Destroy secure container
-            PackageHelper.destroySdDir(cid);
-        }
-
-        private List<String> getAllCodePaths() {
-            final File codeFile = new File(getCodePath());
-            if (codeFile != null && codeFile.exists()) {
-                try {
-                    final PackageLite pkg = PackageParser.parsePackageLite(codeFile, 0);
-                    return pkg.getAllCodePaths();
-                } catch (PackageParserException e) {
-                    // Ignored; we tried our best
-                }
-            }
-            return Collections.EMPTY_LIST;
-        }
-
-        void cleanUpResourcesLI() {
-            // Enumerate all code paths before deleting
-            cleanUpResourcesLI(getAllCodePaths());
-        }
-
-        private void cleanUpResourcesLI(List<String> allCodePaths) {
-            cleanUp();
-            removeDexFiles(allCodePaths, instructionSets);
-        }
-
-        String getPackageName() {
-            return getAsecPackageName(cid);
-        }
-
-        boolean doPostDeleteLI(boolean delete) {
-            if (DEBUG_SD_INSTALL) Slog.i(TAG, "doPostDeleteLI() del=" + delete);
-            final List<String> allCodePaths = getAllCodePaths();
-            boolean mounted = PackageHelper.isContainerMounted(cid);
-            if (mounted) {
-                // Unmount first
-                if (PackageHelper.unMountSdDir(cid)) {
-                    mounted = false;
-                }
-            }
-            if (!mounted && delete) {
-                cleanUpResourcesLI(allCodePaths);
-            }
-            return !mounted;
-        }
-
-        @Override
-        int doPreCopy() {
-            if (isFwdLocked()) {
-                if (!PackageHelper.fixSdPermissions(cid, getPackageUid(DEFAULT_CONTAINER_PACKAGE,
-                        MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM), RES_FILE_NAME)) {
-                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-                }
-            }
-
-            return PackageManager.INSTALL_SUCCEEDED;
-        }
-
-        @Override
-        int doPostCopy(int uid) {
-            if (isFwdLocked()) {
-                if (uid < Process.FIRST_APPLICATION_UID
-                        || !PackageHelper.fixSdPermissions(cid, UserHandle.getSharedAppGid(uid),
-                                RES_FILE_NAME)) {
-                    Slog.e(TAG, "Failed to finalize " + cid);
-                    PackageHelper.destroySdDir(cid);
-                    return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-                }
-            }
-
-            return PackageManager.INSTALL_SUCCEEDED;
-        }
     }
 
     /**
@@ -23382,135 +23014,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
-    /*
-     * Update media status on PackageManager.
-     */
-    @Override
-    public void updateExternalMediaStatus(final boolean mediaStatus, final boolean reportStatus) {
-        enforceSystemOrRoot("Media status can only be updated by the system");
-        // reader; this apparently protects mMediaMounted, but should probably
-        // be a different lock in that case.
-        synchronized (mPackages) {
-            Log.i(TAG, "Updating external media status from "
-                    + (mMediaMounted ? "mounted" : "unmounted") + " to "
-                    + (mediaStatus ? "mounted" : "unmounted"));
-            if (DEBUG_SD_INSTALL)
-                Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" + mediaStatus
-                        + ", mMediaMounted=" + mMediaMounted);
-            if (mediaStatus == mMediaMounted) {
-                final Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS, reportStatus ? 1
-                        : 0, -1);
-                mHandler.sendMessage(msg);
-                return;
-            }
-            mMediaMounted = mediaStatus;
-        }
-        // Queue up an async operation since the package installation may take a
-        // little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                updateExternalMediaStatusInner(mediaStatus, reportStatus, true);
-            }
-        });
-    }
-
-    /**
-     * Called by StorageManagerService when the initial ASECs to scan are available.
-     * Should block until all the ASEC containers are finished being scanned.
-     */
-    public void scanAvailableAsecs() {
-        updateExternalMediaStatusInner(true, false, false);
-    }
-
-    /*
-     * Collect information of applications on external media, map them against
-     * existing containers and update information based on current mount status.
-     * Please note that we always have to report status if reportStatus has been
-     * set to true especially when unloading packages.
-     */
-    private void updateExternalMediaStatusInner(boolean isMounted, boolean reportStatus,
-            boolean externalStorage) {
-        ArrayMap<AsecInstallArgs, String> processCids = new ArrayMap<>();
-        int[] uidArr = EmptyArray.INT;
-
-        final String[] list = PackageHelper.getSecureContainerList();
-        if (ArrayUtils.isEmpty(list)) {
-            Log.i(TAG, "No secure containers found");
-        } else {
-            // Process list of secure containers and categorize them
-            // as active or stale based on their package internal state.
-
-            // reader
-            synchronized (mPackages) {
-                for (String cid : list) {
-                    // Leave stages untouched for now; installer service owns them
-                    if (PackageInstallerService.isStageName(cid)) continue;
-
-                    if (DEBUG_SD_INSTALL)
-                        Log.i(TAG, "Processing container " + cid);
-                    String pkgName = getAsecPackageName(cid);
-                    if (pkgName == null) {
-                        Slog.i(TAG, "Found stale container " + cid + " with no package name");
-                        continue;
-                    }
-                    if (DEBUG_SD_INSTALL)
-                        Log.i(TAG, "Looking for pkg : " + pkgName);
-
-                    final PackageSetting ps = mSettings.mPackages.get(pkgName);
-                    if (ps == null) {
-                        Slog.i(TAG, "Found stale container " + cid + " with no matching settings");
-                        continue;
-                    }
-
-                    /*
-                     * Skip packages that are not external if we're unmounting
-                     * external storage.
-                     */
-                    if (externalStorage && !isMounted && !isExternal(ps)) {
-                        continue;
-                    }
-
-                    final AsecInstallArgs args = new AsecInstallArgs(cid,
-                            getAppDexInstructionSets(ps), ps.isForwardLocked());
-                    // The package status is changed only if the code path
-                    // matches between settings and the container id.
-                    if (ps.codePathString != null
-                            && ps.codePathString.startsWith(args.getCodePath())) {
-                        if (DEBUG_SD_INSTALL) {
-                            Log.i(TAG, "Container : " + cid + " corresponds to pkg : " + pkgName
-                                    + " at code path: " + ps.codePathString);
-                        }
-
-                        // We do have a valid package installed on sdcard
-                        processCids.put(args, ps.codePathString);
-                        final int uid = ps.appId;
-                        if (uid != -1) {
-                            uidArr = ArrayUtils.appendInt(uidArr, uid);
-                        }
-                    } else {
-                        Slog.i(TAG, "Found stale container " + cid + ": expected codePath="
-                                + ps.codePathString);
-                    }
-                }
-            }
-
-            Arrays.sort(uidArr);
-        }
-
-        // Process packages with valid entries.
-        if (isMounted) {
-            if (DEBUG_SD_INSTALL)
-                Log.i(TAG, "Loading packages");
-            loadMediaPackages(processCids, uidArr, externalStorage);
-            startCleaningPackages();
-            mInstallerService.onSecureContainersAvailable();
-        } else {
-            if (DEBUG_SD_INSTALL)
-                Log.i(TAG, "Unloading packages");
-            unloadMediaPackages(processCids, uidArr, reportStatus);
-        }
-    }
-
     private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
             ArrayList<ApplicationInfo> infos, IIntentReceiver finishedReceiver) {
         final int size = infos.size();
@@ -23547,193 +23050,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                     : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
             sendPackageBroadcast(action, null, extras, 0, null, finishedReceiver, null);
-        }
-    }
-
-   /*
-     * Look at potentially valid container ids from processCids If package
-     * information doesn't match the one on record or package scanning fails,
-     * the cid is added to list of removeCids. We currently don't delete stale
-     * containers.
-     */
-    private void loadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int[] uidArr,
-            boolean externalStorage) {
-        ArrayList<String> pkgList = new ArrayList<String>();
-        Set<AsecInstallArgs> keys = processCids.keySet();
-
-        for (AsecInstallArgs args : keys) {
-            String codePath = processCids.get(args);
-            if (DEBUG_SD_INSTALL)
-                Log.i(TAG, "Loading container : " + args.cid);
-            int retCode = PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-            try {
-                // Make sure there are no container errors first.
-                if (args.doPreInstall(PackageManager.INSTALL_SUCCEEDED) != PackageManager.INSTALL_SUCCEEDED) {
-                    Slog.e(TAG, "Failed to mount cid : " + args.cid
-                            + " when installing from sdcard");
-                    continue;
-                }
-                // Check code path here.
-                if (codePath == null || !codePath.startsWith(args.getCodePath())) {
-                    Slog.e(TAG, "Container " + args.cid + " cachepath " + args.getCodePath()
-                            + " does not match one in settings " + codePath);
-                    continue;
-                }
-                // Parse package
-                int parseFlags = mDefParseFlags;
-                if (args.isExternalAsec()) {
-                    parseFlags |= PackageParser.PARSE_EXTERNAL_STORAGE;
-                }
-                if (args.isFwdLocked()) {
-                    parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
-                }
-
-                synchronized (mInstallLock) {
-                    PackageParser.Package pkg = null;
-                    try {
-                        // Sadly we don't know the package name yet to freeze it
-                        pkg = scanPackageTracedLI(new File(codePath), parseFlags,
-                                SCAN_IGNORE_FROZEN, 0, null);
-                    } catch (PackageManagerException e) {
-                        Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
-                    }
-                    // Scan the package
-                    if (pkg != null) {
-                        /*
-                         * TODO why is the lock being held? doPostInstall is
-                         * called in other places without the lock. This needs
-                         * to be straightened out.
-                         */
-                        // writer
-                        synchronized (mPackages) {
-                            retCode = PackageManager.INSTALL_SUCCEEDED;
-                            pkgList.add(pkg.packageName);
-                            // Post process args
-                            args.doPostInstall(PackageManager.INSTALL_SUCCEEDED,
-                                    pkg.applicationInfo.uid);
-                        }
-                    } else {
-                        Slog.i(TAG, "Failed to install pkg from  " + codePath + " from sdcard");
-                    }
-                }
-
-            } finally {
-                if (retCode != PackageManager.INSTALL_SUCCEEDED) {
-                    Log.w(TAG, "Container " + args.cid + " is stale, retCode=" + retCode);
-                }
-            }
-        }
-        // writer
-        synchronized (mPackages) {
-            // If the platform SDK has changed since the last time we booted,
-            // we need to re-grant app permission to catch any new ones that
-            // appear. This is really a hack, and means that apps can in some
-            // cases get permissions that the user didn't initially explicitly
-            // allow... it would be nice to have some better way to handle
-            // this situation.
-            final VersionInfo ver = externalStorage ? mSettings.getExternalVersion()
-                    : mSettings.getInternalVersion();
-            final String volumeUuid = externalStorage ? StorageManager.UUID_PRIMARY_PHYSICAL
-                    : StorageManager.UUID_PRIVATE_INTERNAL;
-
-            int updateFlags = UPDATE_PERMISSIONS_ALL;
-            if (ver.sdkVersion != mSdkVersion) {
-                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for external");
-                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
-            }
-            updatePermissionsLPw(null, null, volumeUuid, updateFlags);
-
-            // Yay, everything is now upgraded
-            ver.forceCurrent();
-
-            // can downgrade to reader
-            // Persist settings
-            mSettings.writeLPr();
-        }
-        // Send a broadcast to let everyone know we are done processing
-        if (pkgList.size() > 0) {
-            sendResourcesChangedBroadcast(true, false, pkgList, uidArr, null);
-        }
-    }
-
-   /*
-     * Utility method to unload a list of specified containers
-     */
-    private void unloadAllContainers(Set<AsecInstallArgs> cidArgs) {
-        // Just unmount all valid containers.
-        for (AsecInstallArgs arg : cidArgs) {
-            synchronized (mInstallLock) {
-                arg.doPostDeleteLI(false);
-           }
-       }
-   }
-
-    /*
-     * Unload packages mounted on external media. This involves deleting package
-     * data from internal structures, sending broadcasts about disabled packages,
-     * gc'ing to free up references, unmounting all secure containers
-     * corresponding to packages on external media, and posting a
-     * UPDATED_MEDIA_STATUS message if status has been requested. Please note
-     * that we always have to post this message if status has been requested no
-     * matter what.
-     */
-    private void unloadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int uidArr[],
-            final boolean reportStatus) {
-        if (DEBUG_SD_INSTALL)
-            Log.i(TAG, "unloading media packages");
-        ArrayList<String> pkgList = new ArrayList<String>();
-        ArrayList<AsecInstallArgs> failedList = new ArrayList<AsecInstallArgs>();
-        final Set<AsecInstallArgs> keys = processCids.keySet();
-        for (AsecInstallArgs args : keys) {
-            String pkgName = args.getPackageName();
-            if (DEBUG_SD_INSTALL)
-                Log.i(TAG, "Trying to unload pkg : " + pkgName);
-            // Delete package internally
-            PackageRemovedInfo outInfo = new PackageRemovedInfo(this);
-            synchronized (mInstallLock) {
-                final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
-                final boolean res;
-                try (PackageFreezer freezer = freezePackageForDelete(pkgName, deleteFlags,
-                        "unloadMediaPackages")) {
-                    res = deletePackageLIF(pkgName, null, false, null, deleteFlags, outInfo, false,
-                            null);
-                }
-                if (res) {
-                    pkgList.add(pkgName);
-                } else {
-                    Slog.e(TAG, "Failed to delete pkg from sdcard : " + pkgName);
-                    failedList.add(args);
-                }
-            }
-        }
-
-        // reader
-        synchronized (mPackages) {
-            // We didn't update the settings after removing each package;
-            // write them now for all packages.
-            mSettings.writeLPr();
-        }
-
-        // We have to absolutely send UPDATED_MEDIA_STATUS only
-        // after confirming that all the receivers processed the ordered
-        // broadcast when packages get disabled, force a gc to clean things up.
-        // and unload all the containers.
-        if (pkgList.size() > 0) {
-            sendResourcesChangedBroadcast(false, false, pkgList, uidArr,
-                    new IIntentReceiver.Stub() {
-                public void performReceive(Intent intent, int resultCode, String data,
-                        Bundle extras, boolean ordered, boolean sticky,
-                        int sendingUser) throws RemoteException {
-                    Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS,
-                            reportStatus ? 1 : 0, 1, keys);
-                    mHandler.sendMessage(msg);
-                }
-            });
-        } else {
-            Message msg = mHandler.obtainMessage(UPDATED_MEDIA_STATUS, reportStatus ? 1 : 0, -1,
-                    keys);
-            mHandler.sendMessage(msg);
         }
     }
 

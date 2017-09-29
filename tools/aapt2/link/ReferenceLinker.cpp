@@ -42,9 +42,9 @@ namespace {
 // to the reference object.
 //
 // NOTE: All of the entries in the ResourceTable must be assigned IDs.
-class ReferenceLinkerVisitor : public ValueVisitor {
+class ReferenceLinkerVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   ReferenceLinkerVisitor(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
                          StringPool* string_pool, xml::IPackageDeclStack* decl)

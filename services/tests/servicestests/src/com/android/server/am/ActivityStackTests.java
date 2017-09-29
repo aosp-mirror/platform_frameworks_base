@@ -16,12 +16,14 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
@@ -30,6 +32,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -48,78 +51,80 @@ public class ActivityStackTests extends ActivityTestsBase {
     private static final ComponentName testOverlayComponent =
             ComponentName.unflattenFromString("com.foo/.OverlayActivity");
 
+    private ActivityManagerService mService;
+    private ActivityStackSupervisor mSupervisor;
+    private ActivityStack mStack;
+    private TaskRecord mTask;
+
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mService = createActivityManagerService();
+        mSupervisor = mService.mStackSupervisor;
+        mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        mTask = createTask(mSupervisor, testActivityComponent, mStack);
+    }
+
     @Test
     public void testEmptyTaskCleanupOnRemove() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        assertNotNull(task.getWindowContainerController());
-        service.mStackSupervisor.getStack(TEST_STACK_ID).removeTask(task,
-                "testEmptyTaskCleanupOnRemove", ActivityStack.REMOVE_TASK_MODE_DESTROYING);
-        assertNull(task.getWindowContainerController());
+        assertNotNull(mTask.getWindowContainerController());
+        mStack.removeTask(mTask, "testEmptyTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
+        assertNull(mTask.getWindowContainerController());
     }
 
     @Test
     public void testOccupiedTaskCleanupOnRemove() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
-        assertNotNull(task.getWindowContainerController());
-        service.mStackSupervisor.getStack(TEST_STACK_ID).removeTask(task,
-                "testOccupiedTaskCleanupOnRemove", ActivityStack.REMOVE_TASK_MODE_DESTROYING);
-        assertNotNull(task.getWindowContainerController());
+        final ActivityRecord r = createActivity(mService, testActivityComponent, mTask);
+        assertNotNull(mTask.getWindowContainerController());
+        mStack.removeTask(mTask, "testOccupiedTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
+        assertNotNull(mTask.getWindowContainerController());
     }
 
     @Test
     public void testNoPauseDuringResumeTopActivity() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
-        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
+        final ActivityRecord r = createActivity(mService, testActivityComponent, mTask);
 
         // Simulate the a resumed activity set during
         // {@link ActivityStack#resumeTopActivityUncheckedLocked}.
-        service.mStackSupervisor.inResumeTopActivity = true;
-        testStack.mResumedActivity = activityRecord;
+        mSupervisor.inResumeTopActivity = true;
+        mStack.mResumedActivity = r;
 
-        final boolean waiting = testStack.goToSleepIfPossible(false);
+        final boolean waiting = mStack.goToSleepIfPossible(false);
 
         // Ensure we report not being ready for sleep.
         assertFalse(waiting);
 
         // Make sure the resumed activity is untouched.
-        assertEquals(testStack.mResumedActivity, activityRecord);
+        assertEquals(mStack.mResumedActivity, r);
     }
 
     @Test
     public void testStopActivityWhenActivityDestroyed() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
-        activityRecord.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
-        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
-        service.mStackSupervisor.setFocusStackUnchecked("testStopActivityWithDestroy", testStack);
-
-        testStack.stopActivityLocked(activityRecord);
+        final ActivityRecord r = createActivity(mService, testActivityComponent, mTask);
+        r.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
+        mSupervisor.setFocusStackUnchecked("testStopActivityWithDestroy", mStack);
+        mStack.stopActivityLocked(r);
+        // Mostly testing to make sure there is a crash in the call part, so if we get here we are
+        // good-to-go!
     }
 
     @Test
     public void testFindTaskWithOverlay() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
-        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task,
-                0);
+        final ActivityRecord r = createActivity(mService, testActivityComponent, mTask, 0);
         // Overlay must be for a different user to prevent recognizing a matching top activity
-        final ActivityRecord taskOverlay = createActivity(service, testOverlayComponent, task,
+        final ActivityRecord taskOverlay = createActivity(mService, testOverlayComponent, mTask,
                 UserHandle.PER_USER_RANGE * 2);
         taskOverlay.mTaskOverlay = true;
 
-        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
         final ActivityStackSupervisor.FindTaskResult result =
                 new ActivityStackSupervisor.FindTaskResult();
-        testStack.findTaskLocked(activityRecord, result);
+        mStack.findTaskLocked(r, result);
 
-        assertEquals(task.getTopActivity(false /* includeOverlays */), activityRecord);
-        assertEquals(task.getTopActivity(true /* includeOverlays */), taskOverlay);
+        assertEquals(mTask.getTopActivity(false /* includeOverlays */), r);
+        assertEquals(mTask.getTopActivity(true /* includeOverlays */), taskOverlay);
         assertNotNull(result.r);
     }
 }

@@ -1,0 +1,57 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+
+package android.os.statsd;
+
+option java_package = "com.android.os";
+option java_outer_classname = "StatsEventProto";
+
+message StatsEvent {
+  oneof log_entry_event {
+    ScreenStateChange screen_state_change = 2;
+    ProcessStateChange process_state_change = 1112;
+  }
+}
+
+message ScreenStateChange {
+  enum State {
+    STATE_UNKNOWN = 0;
+    STATE_OFF = 1;
+    STATE_ON = 2;
+    STATE_DOZE = 3;
+    STATE_DOZE_SUSPEND = 4;
+    STATE_VR = 5;
+  }
+  optional State display_state = 1;
+}
+
+message ProcessStateChange {
+  enum State {
+    START = 1;
+    CRASH = 2;
+  }
+  optional State state = 1;
+
+  optional int32 uid = 2;
+
+  optional string package_name = 1002;
+
+  optional int32 package_version = 3;
+  optional string package_version_string = 4;
+}

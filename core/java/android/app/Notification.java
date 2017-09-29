@@ -3839,8 +3839,8 @@ public class Notification implements Parcelable
                 contentView.setImageViewBitmap(R.id.profile_badge, profileBadge);
                 contentView.setViewVisibility(R.id.profile_badge, View.VISIBLE);
                 if (isColorized()) {
-                    contentView.setDrawableParameters(R.id.profile_badge, false, -1,
-                            getPrimaryTextColor(), PorterDuff.Mode.SRC_ATOP, -1);
+                    contentView.setDrawableTint(R.id.profile_badge, false,
+                            getPrimaryTextColor(), PorterDuff.Mode.SRC_ATOP);
                 }
             }
         }
@@ -4130,18 +4130,14 @@ public class Notification implements Parcelable
 
                 if (action != null) {
                     int contrastColor = resolveContrastColor();
-                    contentView.setDrawableParameters(R.id.reply_icon_action,
+                    contentView.setDrawableTint(R.id.reply_icon_action,
                             true /* targetBackground */,
-                            -1,
-                            contrastColor,
-                            PorterDuff.Mode.SRC_ATOP, -1);
+                            contrastColor, PorterDuff.Mode.SRC_ATOP);
                     int iconColor = NotificationColorUtil.isColorLight(contrastColor)
                             ? Color.BLACK : Color.WHITE;
-                    contentView.setDrawableParameters(R.id.reply_icon_action,
+                    contentView.setDrawableTint(R.id.reply_icon_action,
                             false /* targetBackground */,
-                            -1,
-                            iconColor,
-                            PorterDuff.Mode.SRC_ATOP, -1);
+                            iconColor, PorterDuff.Mode.SRC_ATOP);
                     contentView.setOnClickPendingIntent(R.id.right_icon,
                             action.actionIntent);
                     contentView.setOnClickPendingIntent(R.id.reply_icon_action,
@@ -4185,8 +4181,8 @@ public class Notification implements Parcelable
 
         private void bindExpandButton(RemoteViews contentView) {
             int color = getPrimaryHighlightColor();
-            contentView.setDrawableParameters(R.id.expand_button, false, -1, color,
-                    PorterDuff.Mode.SRC_ATOP, -1);
+            contentView.setDrawableTint(R.id.expand_button, false, color,
+                    PorterDuff.Mode.SRC_ATOP);
             contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
                     color);
         }
@@ -4293,8 +4289,7 @@ public class Notification implements Parcelable
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
-            contentView.setDrawableParameters(R.id.icon, false /* targetBackground */,
-                    -1 /* alpha */, -1 /* colorFilter */, null /* mode */, mN.iconLevel);
+            contentView.setInt(R.id.icon, "setImageLevel", mN.iconLevel);
             processSmallIconColor(mN.mSmallIcon, contentView, ambient);
         }
 
@@ -4684,8 +4679,8 @@ public class Notification implements Parcelable
                     bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
                             : R.color.notification_action_list_dark);
                 }
-                button.setDrawableParameters(R.id.button_holder, true, -1, bgColor,
-                        PorterDuff.Mode.SRC_ATOP, -1);
+                button.setDrawableTint(R.id.button_holder, true,
+                        bgColor, PorterDuff.Mode.SRC_ATOP);
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = null;
                 if (isLegacy()) {
@@ -4818,8 +4813,8 @@ public class Notification implements Parcelable
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
             int color = ambient ? resolveAmbientColor() : getPrimaryHighlightColor();
             if (colorable) {
-                contentView.setDrawableParameters(R.id.icon, false, -1, color,
-                        PorterDuff.Mode.SRC_ATOP, -1);
+                contentView.setDrawableTint(R.id.icon, false, color,
+                        PorterDuff.Mode.SRC_ATOP);
 
             }
             contentView.setInt(R.id.notification_header, "setOriginalIconColor",
@@ -4835,8 +4830,8 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
-                        PorterDuff.Mode.SRC_ATOP, -1);
+                contentView.setDrawableTint(R.id.icon, false, resolveContrastColor(),
+                        PorterDuff.Mode.SRC_ATOP);
             }
         }
 
@@ -6750,8 +6745,8 @@ public class Notification implements Parcelable
                     : NotificationColorUtil.resolveColor(mBuilder.mContext,
                             Notification.COLOR_DEFAULT);
 
-            button.setDrawableParameters(R.id.action0, false, -1, tintColor,
-                    PorterDuff.Mode.SRC_ATOP, -1);
+            button.setDrawableTint(R.id.action0, false, tintColor,
+                    PorterDuff.Mode.SRC_ATOP);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }

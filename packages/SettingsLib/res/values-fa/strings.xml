@@ -248,8 +248,6 @@
     <string name="no_application" msgid="2813387563129153880">"هیچ چیز"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"انتظار برای اشکال‌زدا"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"برنامه اشکال‌زدایی شده منتظر پیوست شدن اشکال‌زدا قبل از اجرا است"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"‏TelephonyMonitor وقتی مشکلی در ارتباط با عملکرد تلفن/مودم تشخیص می‌دهد، گزارش جمع‌آوری می‌کند و با اعلانی از کاربر می‌خواهد گزارش اشکال تهیه کند"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ورودی"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"طراحی"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"پردازش سخت‌افزاری سریع"</string>
