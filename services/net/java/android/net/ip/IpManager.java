@@ -1515,7 +1515,8 @@ public class IpManager extends StateMachine {
 
         private ConnectivityPacketTracker createPacketTracker() {
             try {
-                return new ConnectivityPacketTracker(mNetworkInterface, mConnectivityPacketLog);
+                return new ConnectivityPacketTracker(
+                        getHandler(), mNetworkInterface, mConnectivityPacketLog);
             } catch (IllegalArgumentException e) {
                 return null;
             }
