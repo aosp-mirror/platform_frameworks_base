@@ -1260,12 +1260,12 @@ public class AssistStructure implements Parcelable {
          * <p>Typically used when the view associated with the view is a container for an HTML
          * document.
          *
-         * <strong>WARNING:</strong> a {@link android.service.autofill.AutofillService} should only
-         * use this domain for autofill purposes when it trusts the app generating it (i.e., the app
-         * defined by {@link AssistStructure#getActivityComponent()}).
+         * <p><b>Warning:</b> an autofill service cannot trust the value reported by this method
+         * without verifing its authenticity&mdash;see the "Web security" section of
+         * {@link android.service.autofill.AutofillService} for more details.
          *
          * @return domain-only part of the document. For example, if the full URL is
-         * {@code http://my.site/login?user=my_user}, it returns {@code my.site}.
+         * {@code https://my.site/login?user=my_user}, it returns {@code my.site}.
          */
         @Nullable public String getWebDomain() {
             return mWebDomain;
