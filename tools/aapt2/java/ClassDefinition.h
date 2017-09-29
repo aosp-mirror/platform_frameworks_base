@@ -18,8 +18,9 @@
 #define AAPT_JAVA_CLASSDEFINITION_H
 
 #include <ostream>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
@@ -73,21 +74,18 @@ class PrimitiveMember : public ClassMember {
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
     ClassMember::WriteToStream(prefix, final, out);
-
-    *out << prefix << "public static " << (final ? "final " : "") << "int "
-         << name_ << "=" << val_ << ";";
+    *out << prefix << "public static " << (final ? "final " : "") << "int " << name_ << "=" << val_
+         << ";";
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
+
   std::string name_;
   T val_;
-
-  DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
 };
 
-/**
- * Specialization for strings so they get the right type and are quoted with "".
- */
+// Specialization for strings so they get the right type and are quoted with "".
 template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
@@ -111,10 +109,10 @@ class PrimitiveMember<std::string> : public ClassMember {
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
+
   std::string name_;
   std::string val_;
-
-  DISALLOW_COPY_AND_ASSIGN(PrimitiveMember);
 };
 
 using IntMember = PrimitiveMember<uint32_t>;
@@ -160,10 +158,10 @@ class PrimitiveArrayMember : public ClassMember {
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(PrimitiveArrayMember);
+
   std::string name_;
   std::vector<T> elements_;
-
-  DISALLOW_COPY_AND_ASSIGN(PrimitiveArrayMember);
 };
 
 using ResourceArrayMember = PrimitiveArrayMember<ResourceId>;
@@ -185,12 +183,16 @@ class MethodDefinition : public ClassMember {
   }
 
   // Even if the method is empty, we always want to write the method signature.
-  bool empty() const override { return false; }
+  bool empty() const override {
+    return false;
+  }
 
   void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override;
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(MethodDefinition);
+
   std::string signature_;
   std::vector<std::string> statements_;
 };
@@ -222,19 +224,13 @@ class ClassDefinition : public ClassMember {
                      std::ostream* out) const override;
 
  private:
-  struct ClassMemberCompare {
-    using T = std::unique_ptr<ClassMember>;
-    bool operator()(const T& a, const T& b) const {
-      return a->GetName() < b->GetName();
-    }
-  };
+  DISALLOW_COPY_AND_ASSIGN(ClassDefinition);
 
   std::string name_;
   ClassQualifier qualifier_;
   bool create_if_empty_;
-  std::set<std::unique_ptr<ClassMember>, ClassMemberCompare> members_;
-
-  DISALLOW_COPY_AND_ASSIGN(ClassDefinition);
+  std::vector<std::unique_ptr<ClassMember>> ordered_members_;
+  std::unordered_map<android::StringPiece, size_t> indexed_members_;
 };
 
 }  // namespace aapt
