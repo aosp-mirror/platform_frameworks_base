@@ -61,6 +61,13 @@ public class SliceQuery {
     /**
      * @hide
      */
+    public static List<SliceItem> findAll(SliceItem s, int type) {
+        return findAll(s, type, (String[]) null, null);
+    }
+
+    /**
+     * @hide
+     */
     public static List<SliceItem> findAll(SliceItem s, int type, String hints, String nonHints) {
         return findAll(s, type, new String[]{ hints }, new String[]{ nonHints });
     }
@@ -80,6 +87,13 @@ public class SliceQuery {
      */
     public static SliceItem find(Slice s, int type, String hints, String nonHints) {
         return find(s, type, new String[]{ hints }, new String[]{ nonHints });
+    }
+
+    /**
+     * @hide
+     */
+    public static SliceItem find(Slice s, int type) {
+        return find(s, type, (String[]) null, null);
     }
 
     /**
