@@ -5904,8 +5904,8 @@ public class NotificationManagerService extends SystemService {
 
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
-                + "allow_listener COMPONENT\n"
-                + "disallow_listener COMPONENT\n"
+                + "allow_listener COMPONENT [user_id]\n"
+                + "disallow_listener COMPONENT [user_id]\n"
                 + "set_assistant COMPONENT\n"
                 + "remove_assistant COMPONENT\n"
                 + "allow_dnd PACKAGE\n"
@@ -5936,7 +5936,13 @@ public class NotificationManagerService extends SystemService {
                             pw.println("Invalid listener - must be a ComponentName");
                             return -1;
                         }
-                        getBinderService().setNotificationListenerAccessGranted(cn, true);
+                        String userId = getNextArg();
+                        if (userId == null) {
+                            getBinderService().setNotificationListenerAccessGranted(cn, true);
+                        } else {
+                            getBinderService().setNotificationListenerAccessGrantedForUser(
+                                    cn, Integer.parseInt(userId), true);
+                        }
                     }
                     break;
                     case "disallow_listener": {
@@ -5945,7 +5951,13 @@ public class NotificationManagerService extends SystemService {
                             pw.println("Invalid listener - must be a ComponentName");
                             return -1;
                         }
-                        getBinderService().setNotificationListenerAccessGranted(cn, false);
+                        String userId = getNextArg();
+                        if (userId == null) {
+                            getBinderService().setNotificationListenerAccessGranted(cn, false);
+                        } else {
+                            getBinderService().setNotificationListenerAccessGrantedForUser(
+                                    cn, Integer.parseInt(userId), false);
+                        }
                     }
                     break;
                     case "allow_assistant": {
