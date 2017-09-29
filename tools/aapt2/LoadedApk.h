@@ -21,27 +21,35 @@
 
 #include "ResourceTable.h"
 #include "filter/Filter.h"
-#include "flatten/Archive.h"
-#include "flatten/TableFlattener.h"
+#include "format/Archive.h"
+#include "format/binary/BinaryResourceParser.h"
+#include "format/binary/TableFlattener.h"
 #include "io/ZipArchive.h"
-#include "unflatten/BinaryResourceParser.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
 
-/** Info about an APK loaded in memory. */
+// Info about an APK loaded in memory.
 class LoadedApk {
  public:
-  LoadedApk(const Source& source, std::unique_ptr<io::IFileCollection> apk,
-            std::unique_ptr<ResourceTable> table)
-      : source_(source), apk_(std::move(apk)), table_(std::move(table)) {
+  LoadedApk(
+      const Source& source,
+      std::unique_ptr<io::IFileCollection> apk,
+      std::unique_ptr<ResourceTable> table)
+      : source_(source), apk_(std::move(apk)), table_(std::move(table)) {}
+  virtual ~LoadedApk() = default;
+
+  io::IFileCollection* GetFileCollection() {
+    return apk_.get();
   }
 
-  io::IFileCollection* GetFileCollection() { return apk_.get(); }
+  ResourceTable* GetResourceTable() {
+    return table_.get();
+  }
 
-  ResourceTable* GetResourceTable() { return table_.get(); }
-
-  const Source& GetSource() { return source_; }
+  const Source& GetSource() {
+    return source_;
+  }
 
   /**
    * Writes the APK on disk at the given path, while also removing the resource
@@ -70,11 +78,11 @@ class LoadedApk {
                                                     const android::StringPiece& path);
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(LoadedApk);
+
   Source source_;
   std::unique_ptr<io::IFileCollection> apk_;
   std::unique_ptr<ResourceTable> table_;
-
-  DISALLOW_COPY_AND_ASSIGN(LoadedApk);
 };
 
 }  // namespace aapt

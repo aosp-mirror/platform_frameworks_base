@@ -18,9 +18,9 @@
 
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-#include "flatten/Archive.h"
-#include "flatten/TableFlattener.h"
-#include "flatten/XmlFlattener.h"
+#include "format/Archive.h"
+#include "format/binary/TableFlattener.h"
+#include "format/binary/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
 #include "io/Util.h"
 #include "xml/XmlDom.h"

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_RES_CHUNK_PULL_PARSER_H
-#define AAPT_RES_CHUNK_PULL_PARSER_H
+#ifndef AAPT_FORMAT_BINARY_RESCHUNKPULLPARSER_H
+#define AAPT_FORMAT_BINARY_RESCHUNKPULLPARSER_H
 
 #include <string>
 
@@ -26,18 +26,13 @@
 
 namespace aapt {
 
-/**
- * A pull parser, modeled after XmlPullParser, that reads
- * android::ResChunk_header structs from a block of data.
- *
- * An android::ResChunk_header specifies a type, headerSize,
- * and size. The pull parser will verify that the chunk's size
- * doesn't extend beyond the available data, and will iterate
- * over each chunk in the given block of data.
- *
- * Processing nested chunks is done by creating a new ResChunkPullParser
- * pointing to the data portion of a chunk.
- */
+// A pull parser, modeled after XmlPullParser, that reads android::ResChunk_header structs from a
+// block of data.
+// An android::ResChunk_header specifies a type, headerSize, and size. The pull parser will verify
+// that the chunk's size doesn't extend beyond the available data, and will iterate over each chunk
+// in the given block of data.
+// Processing nested chunks is done by creating a new ResChunkPullParser pointing to the data
+// portion of a chunk.
 class ResChunkPullParser {
  public:
   enum class Event {
@@ -48,24 +43,18 @@ class ResChunkPullParser {
     kChunk,
   };
 
-  /**
-   * Returns false if the event is EndDocument or BadDocument.
-   */
+  // Returns false if the event is EndDocument or BadDocument.
   static bool IsGoodEvent(Event event);
 
-  /**
-   * Create a ResChunkPullParser to read android::ResChunk_headers
-   * from the memory pointed to by data, of len bytes.
-   */
+  // Create a ResChunkPullParser to read android::ResChunk_headers from the memory pointed to by
+  // data, of len bytes.
   ResChunkPullParser(const void* data, size_t len);
 
   Event event() const;
   const std::string& error() const;
   const android::ResChunk_header* chunk() const;
 
-  /**
-   * Move to the next android::ResChunk_header.
-   */
+  // Move to the next android::ResChunk_header.
   Event Next();
 
  private:
@@ -86,15 +75,12 @@ inline static const T* ConvertTo(const android::ResChunk_header* chunk) {
   return reinterpret_cast<const T*>(chunk);
 }
 
-inline static const uint8_t* GetChunkData(
-    const android::ResChunk_header* chunk) {
-  return reinterpret_cast<const uint8_t*>(chunk) +
-         util::DeviceToHost16(chunk->headerSize);
+inline static const uint8_t* GetChunkData(const android::ResChunk_header* chunk) {
+  return reinterpret_cast<const uint8_t*>(chunk) + util::DeviceToHost16(chunk->headerSize);
 }
 
 inline static uint32_t GetChunkDataLen(const android::ResChunk_header* chunk) {
-  return util::DeviceToHost32(chunk->size) -
-         util::DeviceToHost16(chunk->headerSize);
+  return util::DeviceToHost32(chunk->size) - util::DeviceToHost16(chunk->headerSize);
 }
 
 //
@@ -109,13 +95,16 @@ inline ResChunkPullParser::ResChunkPullParser(const void* data, size_t len)
     : event_(Event::kStartDocument),
       data_(reinterpret_cast<const android::ResChunk_header*>(data)),
       len_(len),
-      current_chunk_(nullptr) {}
+      current_chunk_(nullptr) {
+}
 
 inline ResChunkPullParser::Event ResChunkPullParser::event() const {
   return event_;
 }
 
-inline const std::string& ResChunkPullParser::error() const { return error_; }
+inline const std::string& ResChunkPullParser::error() const {
+  return error_;
+}
 
 inline const android::ResChunk_header* ResChunkPullParser::chunk() const {
   return current_chunk_;
@@ -123,4 +112,4 @@ inline const android::ResChunk_header* ResChunkPullParser::chunk() const {
 
 }  // namespace aapt
 
-#endif  // AAPT_RES_CHUNK_PULL_PARSER_H
+#endif  // AAPT_FORMAT_BINARY_RESCHUNKPULLPARSER_H

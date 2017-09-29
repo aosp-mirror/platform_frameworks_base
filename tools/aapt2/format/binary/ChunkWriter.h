@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FLATTEN_CHUNKWRITER_H
-#define AAPT_FLATTEN_CHUNKWRITER_H
+#ifndef AAPT_FORMAT_BINARY_CHUNKWRITER_H
+#define AAPT_FORMAT_BINARY_CHUNKWRITER_H
 
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
@@ -27,7 +27,8 @@ namespace aapt {
 
 class ChunkWriter {
  public:
-  explicit inline ChunkWriter(BigBuffer* buffer) : buffer_(buffer) {}
+  explicit inline ChunkWriter(BigBuffer* buffer) : buffer_(buffer) {
+  }
   ChunkWriter(ChunkWriter&&) = default;
   ChunkWriter& operator=(ChunkWriter&&) = default;
 
@@ -46,11 +47,17 @@ class ChunkWriter {
     return buffer_->NextBlock<T>(count);
   }
 
-  inline BigBuffer* buffer() { return buffer_; }
+  inline BigBuffer* buffer() {
+    return buffer_;
+  }
 
-  inline android::ResChunk_header* chunk_header() { return header_; }
+  inline android::ResChunk_header* chunk_header() {
+    return header_;
+  }
 
-  inline size_t size() { return buffer_->size() - start_size_; }
+  inline size_t size() {
+    return buffer_->size() - start_size_;
+  }
 
   inline android::ResChunk_header* Finish() {
     buffer_->Align4();
@@ -77,4 +84,4 @@ inline android::ResChunk_header* ChunkWriter::StartChunk(uint16_t type) {
 
 }  // namespace aapt
 
-#endif /* AAPT_FLATTEN_CHUNKWRITER_H */
+#endif /* AAPT_FORMAT_BINARY_CHUNKWRITER_H */

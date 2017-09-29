@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_PROTO_PROTODESERIALIZE_H
-#define AAPT_PROTO_PROTODESERIALIZE_H
+#ifndef AAPT_FORMAT_PROTO_PROTODESERIALIZE_H
+#define AAPT_FORMAT_PROTO_PROTODESERIALIZE_H
 
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
@@ -75,4 +75,4 @@ class CompiledFileInputStream {
 
 }  // namespace aapt
 
-#endif /* AAPT_PROTO_PROTODESERIALIZE_H */
+#endif /* AAPT_FORMAT_PROTO_PROTODESERIALIZE_H */

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FLATTEN_XMLFLATTENER_H
-#define AAPT_FLATTEN_XMLFLATTENER_H
+#ifndef AAPT_FORMAT_BINARY_XMLFLATTENER_H
+#define AAPT_FORMAT_BINARY_XMLFLATTENER_H
 
 #include "android-base/macros.h"
 
@@ -26,16 +26,15 @@
 namespace aapt {
 
 struct XmlFlattenerOptions {
-  /**
-   * Keep attribute raw string values along with typed values.
-   */
+  // Keep attribute raw string values along with typed values.
   bool keep_raw_values = false;
 };
 
 class XmlFlattener : public IXmlResourceConsumer {
  public:
   XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options)
-      : buffer_(buffer), options_(options) {}
+      : buffer_(buffer), options_(options) {
+  }
 
   bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
@@ -50,4 +49,4 @@ class XmlFlattener : public IXmlResourceConsumer {
 
 }  // namespace aapt
 
-#endif /* AAPT_FLATTEN_XMLFLATTENER_H */
+#endif /* AAPT_FORMAT_BINARY_XMLFLATTENER_H */

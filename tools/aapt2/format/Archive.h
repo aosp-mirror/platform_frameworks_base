@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FLATTEN_ARCHIVE_H
-#define AAPT_FLATTEN_ARCHIVE_H
+#ifndef AAPT_FORMAT_ARCHIVE_H
+#define AAPT_FORMAT_ARCHIVE_H
 
 #include <fstream>
 #include <memory>
@@ -78,4 +78,4 @@ std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
 
 }  // namespace aapt
 
-#endif /* AAPT_FLATTEN_ARCHIVE_H */
+#endif /* AAPT_FORMAT_ARCHIVE_H */

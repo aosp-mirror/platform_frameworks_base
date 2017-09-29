@@ -21,10 +21,10 @@
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
+#include "format/binary/BinaryResourceParser.h"
+#include "format/proto/ProtoDeserialize.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
-#include "proto/ProtoDeserialize.h"
-#include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
 
 using ::android::StringPiece;

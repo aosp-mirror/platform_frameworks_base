@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "proto/ProtoSerialize.h"
+#include "format/proto/ProtoSerialize.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 

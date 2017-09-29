@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "unflatten/ResChunkPullParser.h"
+#include "format/binary/ResChunkPullParser.h"
 
 #include <inttypes.h>
 #include <cstddef>
@@ -44,9 +44,8 @@ ResChunkPullParser::Event ResChunkPullParser::Next() {
   if (event_ == Event::kStartDocument) {
     current_chunk_ = data_;
   } else {
-    current_chunk_ =
-        (const ResChunk_header*)(((const char*)current_chunk_) +
-                                 util::DeviceToHost32(current_chunk_->size));
+    current_chunk_ = (const ResChunk_header*)(((const char*)current_chunk_) +
+                                              util::DeviceToHost32(current_chunk_->size));
   }
 
   const std::ptrdiff_t diff = (const char*)current_chunk_ - (const char*)data_;

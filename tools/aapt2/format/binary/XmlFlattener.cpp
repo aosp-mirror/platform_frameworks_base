@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "flatten/XmlFlattener.h"
+#include "format/binary/XmlFlattener.h"
 
 #include <algorithm>
 #include <map>
@@ -26,8 +26,8 @@
 #include "utils/misc.h"
 
 #include "SdkConstants.h"
-#include "flatten/ChunkWriter.h"
-#include "flatten/ResourceTypeExtensions.h"
+#include "format/binary/ChunkWriter.h"
+#include "format/binary/ResourceTypeExtensions.h"
 #include "xml/XmlDom.h"
 
 using namespace android;
@@ -71,7 +71,8 @@ class XmlFlattenerVisitor : public xml::Visitor {
   std::vector<StringFlattenDest> string_refs;
 
   XmlFlattenerVisitor(BigBuffer* buffer, XmlFlattenerOptions options)
-      : buffer_(buffer), options_(options) {}
+      : buffer_(buffer), options_(options) {
+  }
 
   void Visit(xml::Text* node) override {
     if (util::TrimWhitespace(node->text).empty()) {
@@ -152,15 +153,14 @@ class XmlFlattenerVisitor : public xml::Visitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlFlattenerVisitor);
 
-  void AddString(const StringPiece& str, uint32_t priority,
-                 android::ResStringPool_ref* dest,
+  void AddString(const StringPiece& str, uint32_t priority, android::ResStringPool_ref* dest,
                  bool treat_empty_string_as_null = false) {
     if (str.empty() && treat_empty_string_as_null) {
       // Some parts of the runtime treat null differently than empty string.
       dest->index = util::DeviceToHost32(-1);
     } else {
-      string_refs.push_back(StringFlattenDest{
-          pool.MakeRef(str, StringPool::Context(priority)), dest});
+      string_refs.push_back(
+          StringFlattenDest{pool.MakeRef(str, StringPool::Context(priority)), dest});
     }
   }
 
@@ -208,8 +208,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
     uint16_t attribute_index = 1;
     for (const xml::Attribute* xml_attr : filtered_attrs_) {
       // Assign the indices for specific attributes.
-      if (xml_attr->compiled_attribute &&
-          xml_attr->compiled_attribute.value().id &&
+      if (xml_attr->compiled_attribute && xml_attr->compiled_attribute.value().id &&
           xml_attr->compiled_attribute.value().id.value() == kIdAttr) {
         flat_elem->idIndex = util::HostToDevice16(attribute_index);
       } else if (xml_attr->namespace_uri.empty()) {
@@ -241,9 +240,8 @@ class XmlFlattenerVisitor : public xml::Visitor {
         // Lookup the StringPool for this package and make the reference there.
         const xml::AaptAttribute& aapt_attr = xml_attr->compiled_attribute.value();
 
-        StringPool::Ref name_ref =
-            package_pools[aapt_attr.id.value().package_id()].MakeRef(
-                xml_attr->name, StringPool::Context(aapt_attr.id.value().id));
+        StringPool::Ref name_ref = package_pools[aapt_attr.id.value().package_id()].MakeRef(
+            xml_attr->name, StringPool::Context(aapt_attr.id.value().id));
 
         // Add it to the list of strings to flatten.
         AddString(name_ref, &flat_attr->name);
@@ -272,7 +270,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
         flat_attr->typedValue.dataType = android::Res_value::TYPE_STRING;
 
         AddString(str_builder.ToString(), kLowPriority,
-                  (ResStringPool_ref*) &flat_attr->typedValue.data);
+                  (ResStringPool_ref*)&flat_attr->typedValue.data);
       }
 
       flat_attr->typedValue.size = util::HostToDevice16(sizeof(flat_attr->typedValue));

@@ -23,12 +23,12 @@
 
 #include "NameMangler.h"
 #include "SdkConstants.h"
-#include "flatten/ResourceTypeExtensions.h"
+#include "format/binary/ResourceTypeExtensions.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
-using android::StringPiece;
-using android::StringPiece16;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 namespace ResourceUtils {

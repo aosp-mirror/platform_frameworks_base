@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_BINARY_RESOURCE_PARSER_H
-#define AAPT_BINARY_RESOURCE_PARSER_H
+#ifndef AAPT_FORMAT_BINARY_RESOURCEPARSER_H
+#define AAPT_FORMAT_BINARY_RESOURCEPARSER_H
 
 #include <string>
 
@@ -32,25 +32,17 @@ namespace aapt {
 
 struct SymbolTable_entry;
 
-/*
- * Parses a binary resource table (resources.arsc) and adds the entries
- * to a ResourceTable. This is different than the libandroidfw ResTable
- * in that it scans the table from top to bottom and doesn't require
- * support for random access. It is also able to parse non-runtime
- * chunks and types.
- */
+// Parses a binary resource table (resources.arsc) and adds the entries to a ResourceTable.
+// This is different than the libandroidfw ResTable in that it scans the table from top to bottom
+// and doesn't require support for random access.
 class BinaryResourceParser {
  public:
-  /*
-   * Creates a parser, which will read `len` bytes from `data`, and
-   * add any resources parsed to `table`. `source` is for logging purposes.
-   */
+  // Creates a parser, which will read `len` bytes from `data`, and add any resources parsed to
+  // `table`. `source` is for logging purposes.
   BinaryResourceParser(IAaptContext* context, ResourceTable* table, const Source& source,
                        const void* data, size_t data_len, io::IFileCollection* files = nullptr);
 
-  /*
-   * Parses the binary resource table and returns true if successful.
-   */
+  // Parses the binary resource table and returns true if successful.
   bool Parse();
 
  private:
@@ -59,31 +51,25 @@ class BinaryResourceParser {
   bool ParseTable(const android::ResChunk_header* chunk);
   bool ParsePackage(const android::ResChunk_header* chunk);
   bool ParseTypeSpec(const android::ResChunk_header* chunk);
-  bool ParseType(const ResourceTablePackage* package,
-                 const android::ResChunk_header* chunk);
+  bool ParseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
   bool ParseLibrary(const android::ResChunk_header* chunk);
 
   std::unique_ptr<Item> ParseValue(const ResourceNameRef& name, const ConfigDescription& config,
                                    const android::Res_value& value);
 
-  std::unique_ptr<Value> ParseMapEntry(const ResourceNameRef& name,
-                                       const ConfigDescription& config,
+  std::unique_ptr<Value> ParseMapEntry(const ResourceNameRef& name, const ConfigDescription& config,
                                        const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Style> ParseStyle(const ResourceNameRef& name,
-                                    const ConfigDescription& config,
+  std::unique_ptr<Style> ParseStyle(const ResourceNameRef& name, const ConfigDescription& config,
                                     const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Attribute> ParseAttr(const ResourceNameRef& name,
-                                       const ConfigDescription& config,
+  std::unique_ptr<Attribute> ParseAttr(const ResourceNameRef& name, const ConfigDescription& config,
                                        const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Array> ParseArray(const ResourceNameRef& name,
-                                    const ConfigDescription& config,
+  std::unique_ptr<Array> ParseArray(const ResourceNameRef& name, const ConfigDescription& config,
                                     const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Plural> ParsePlural(const ResourceNameRef& name,
-                                      const ConfigDescription& config,
+  std::unique_ptr<Plural> ParsePlural(const ResourceNameRef& name, const ConfigDescription& config,
                                       const android::ResTable_map_entry* map);
 
   /**
@@ -125,13 +111,10 @@ class BinaryResourceParser {
 
 namespace android {
 
-/**
- * Iterator functionality for ResTable_map_entry.
- */
+// Iterator functionality for ResTable_map_entry.
 
 inline const ResTable_map* begin(const ResTable_map_entry* map) {
-  return (const ResTable_map*)((const uint8_t*)map +
-                               aapt::util::DeviceToHost32(map->size));
+  return (const ResTable_map*)((const uint8_t*)map + ::aapt::util::DeviceToHost32(map->size));
 }
 
 inline const ResTable_map* end(const ResTable_map_entry* map) {
@@ -140,4 +123,4 @@ inline const ResTable_map* end(const ResTable_map_entry* map) {
 
 }  // namespace android
 
-#endif  // AAPT_BINARY_RESOURCE_PARSER_H
+#endif  // AAPT_FORMAT_BINARY_RESOURCEPARSER_H

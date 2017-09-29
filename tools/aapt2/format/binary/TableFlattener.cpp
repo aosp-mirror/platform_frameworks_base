@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "flatten/TableFlattener.h"
+#include "format/binary/TableFlattener.h"
 
 #include <algorithm>
 #include <numeric>
@@ -28,8 +28,8 @@
 #include "ResourceValues.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
-#include "flatten/ChunkWriter.h"
-#include "flatten/ResourceTypeExtensions.h"
+#include "format/binary/ChunkWriter.h"
+#include "format/binary/ResourceTypeExtensions.h"
 #include "util/BigBuffer.h"
 
 using namespace android;
@@ -81,7 +81,8 @@ class MapFlattenVisitor : public ValueVisitor {
   using ValueVisitor::Visit;
 
   MapFlattenVisitor(ResTable_entry_ext* out_entry, BigBuffer* buffer)
-      : out_entry_(out_entry), buffer_(buffer) {}
+      : out_entry_(out_entry), buffer_(buffer) {
+  }
 
   void Visit(Attribute* attr) override {
     {
@@ -92,15 +93,13 @@ class MapFlattenVisitor : public ValueVisitor {
 
     if (attr->min_int != std::numeric_limits<int32_t>::min()) {
       Reference key = Reference(ResourceId(ResTable_map::ATTR_MIN));
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC,
-                          static_cast<uint32_t>(attr->min_int));
+      BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->min_int));
       FlattenEntry(&key, &val);
     }
 
     if (attr->max_int != std::numeric_limits<int32_t>::max()) {
       Reference key = Reference(ResourceId(ResTable_map::ATTR_MAX));
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC,
-                          static_cast<uint32_t>(attr->max_int));
+      BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->max_int));
       FlattenEntry(&key, &val);
     }
 
@@ -188,7 +187,9 @@ class MapFlattenVisitor : public ValueVisitor {
    * Call this after visiting a Value. This will finish any work that
    * needs to be done to prepare the entry.
    */
-  void Finish() { out_entry_->count = util::HostToDevice32(entry_count_); }
+  void Finish() {
+    out_entry_->count = util::HostToDevice32(entry_count_);
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(MapFlattenVisitor);
@@ -223,7 +224,8 @@ class PackageFlattener {
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
-        use_sparse_entries_(use_sparse_entries) {}
+        use_sparse_entries_(use_sparse_entries) {
+  }
 
   bool FlattenPackage(BigBuffer* buffer) {
     ChunkWriter pkg_writer(buffer);
@@ -271,9 +273,9 @@ class PackageFlattener {
 
   template <typename T, bool IsItem>
   T* WriteEntry(FlatEntry* entry, BigBuffer* buffer) {
-    static_assert(std::is_same<ResTable_entry, T>::value ||
-                      std::is_same<ResTable_entry_ext, T>::value,
-                  "T must be ResTable_entry or ResTable_entry_ext");
+    static_assert(
+        std::is_same<ResTable_entry, T>::value || std::is_same<ResTable_entry_ext, T>::value,
+        "T must be ResTable_entry or ResTable_entry_ext");
 
     T* result = buffer->NextBlock<T>();
     ResTable_entry* out_entry = (ResTable_entry*)result;
@@ -302,8 +304,7 @@ class PackageFlattener {
       CHECK(item->Flatten(outValue)) << "flatten failed";
       outValue->size = util::HostToDevice16(sizeof(*outValue));
     } else {
-      ResTable_entry_ext* out_entry =
-          WriteEntry<ResTable_entry_ext, false>(entry, buffer);
+      ResTable_entry_ext* out_entry = WriteEntry<ResTable_entry_ext, false>(entry, buffer);
       MapFlattenVisitor visitor(out_entry, buffer);
       entry->value->Accept(&visitor);
       visitor.Finish();
@@ -318,8 +319,7 @@ class PackageFlattener {
     CHECK(num_total_entries <= std::numeric_limits<uint16_t>::max());
 
     ChunkWriter type_writer(buffer);
-    ResTable_type* type_header =
-        type_writer.StartChunk<ResTable_type>(RES_TABLE_TYPE_TYPE);
+    ResTable_type* type_header = type_writer.StartChunk<ResTable_type>(RES_TABLE_TYPE_TYPE);
     type_header->id = type->id.value();
     type_header->config = config;
     type_header->config.swapHtoD();
@@ -395,8 +395,7 @@ class PackageFlattener {
 
       sorted_types.push_back(type.get());
     }
-    std::sort(sorted_types.begin(), sorted_types.end(),
-              cmp_ids<ResourceTableType>);
+    std::sort(sorted_types.begin(), sorted_types.end(), cmp_ids<ResourceTableType>);
     return sorted_types;
   }
 
@@ -411,13 +410,11 @@ class PackageFlattener {
     return sorted_entries;
   }
 
-  bool FlattenTypeSpec(ResourceTableType* type,
-                       std::vector<ResourceEntry*>* sorted_entries,
+  bool FlattenTypeSpec(ResourceTableType* type, std::vector<ResourceEntry*>* sorted_entries,
                        BigBuffer* buffer) {
     ChunkWriter type_spec_writer(buffer);
     ResTable_typeSpec* spec_header =
-        type_spec_writer.StartChunk<ResTable_typeSpec>(
-            RES_TABLE_TYPE_SPEC_TYPE);
+        type_spec_writer.StartChunk<ResTable_typeSpec>(RES_TABLE_TYPE_SPEC_TYPE);
     spec_header->id = type->id.value();
 
     if (sorted_entries->empty()) {
@@ -443,8 +440,7 @@ class PackageFlattener {
       // Populate the config masks for this entry.
 
       if (entry->symbol_status.state == SymbolState::kPublic) {
-        config_masks[entry->id.value()] |=
-            util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+        config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
       }
 
       const size_t config_count = entry->values.size();
