@@ -28,9 +28,9 @@ namespace aapt {
 
 namespace {
 
-class ReferenceIdToNameVisitor : public ValueVisitor {
+class ReferenceIdToNameVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   explicit ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceNameRef>* mapping)
       : mapping_(mapping) {

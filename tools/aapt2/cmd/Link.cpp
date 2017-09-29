@@ -33,6 +33,8 @@
 #include "Locale.h"
 #include "NameMangler.h"
 #include "ResourceUtils.h"
+#include "ResourceValues.h"
+#include "ValueVisitor.h"
 #include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "filter/ConfigFilter.h"

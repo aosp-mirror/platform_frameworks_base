@@ -35,13 +35,23 @@ std::ostream& operator<<(std::ostream& out, const Value& value) {
 }
 
 template <typename Derived>
-void BaseValue<Derived>::Accept(RawValueVisitor* visitor) {
+void BaseValue<Derived>::Accept(ValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
 }
 
 template <typename Derived>
-void BaseItem<Derived>::Accept(RawValueVisitor* visitor) {
+void BaseValue<Derived>::Accept(ConstValueVisitor* visitor) const {
+  visitor->Visit(static_cast<const Derived*>(this));
+}
+
+template <typename Derived>
+void BaseItem<Derived>::Accept(ValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
+}
+
+template <typename Derived>
+void BaseItem<Derived>::Accept(ConstValueVisitor* visitor) const {
+  visitor->Visit(static_cast<const Derived*>(this));
 }
 
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {}

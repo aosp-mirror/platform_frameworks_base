@@ -44,9 +44,9 @@ namespace {
 
 // Visitor that converts a reference's resource ID to a resource name, given a mapping from
 // resource ID to resource name.
-class ReferenceIdToNameVisitor : public ValueVisitor {
+class ReferenceIdToNameVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   explicit ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceName>* mapping)
       : mapping_(mapping) {

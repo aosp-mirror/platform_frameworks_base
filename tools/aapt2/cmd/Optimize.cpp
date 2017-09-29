@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "android-base/stringprintf.h"
+
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 

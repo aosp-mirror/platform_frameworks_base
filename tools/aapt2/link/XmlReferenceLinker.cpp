@@ -21,6 +21,7 @@
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
+#include "ValueVisitor.h"
 #include "link/ReferenceLinker.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -34,9 +35,9 @@ namespace {
 // Visits all references (including parents of styles, references in styles, arrays, etc) and
 // links their symbolic name to their Resource ID, performing mangling and package aliasing
 // as needed.
-class ReferenceVisitor : public ValueVisitor {
+class ReferenceVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   ReferenceVisitor(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
                    xml::IPackageDeclStack* decls)

@@ -24,8 +24,8 @@
 #include "compile/Pseudolocalizer.h"
 #include "util/Util.h"
 
-using android::StringPiece;
-using android::StringPiece16;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 
@@ -215,7 +215,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
 
 namespace {
 
-class Visitor : public RawValueVisitor {
+class Visitor : public ValueVisitor {
  public:
   // Either value or item will be populated upon visiting the value.
   std::unique_ptr<Value> value;
