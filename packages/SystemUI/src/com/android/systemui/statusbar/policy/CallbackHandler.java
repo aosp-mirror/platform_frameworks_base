@@ -71,7 +71,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
                 break;
             case MSG_NO_SIM_VISIBLE_CHANGED:
                 for (SignalCallback signalCluster : mSignalCallbacks) {
-                    signalCluster.setNoSims(msg.arg1 != 0);
+                    signalCluster.setNoSims(msg.arg1 != 0, msg.arg2 != 0);
                 }
                 break;
             case MSG_ETHERNET_CHANGED:
@@ -144,8 +144,8 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
-    public void setNoSims(boolean show) {
-        obtainMessage(MSG_NO_SIM_VISIBLE_CHANGED, show ? 1 : 0, 0).sendToTarget();
+    public void setNoSims(boolean show, boolean simDetected) {
+        obtainMessage(MSG_NO_SIM_VISIBLE_CHANGED, show ? 1 : 0, simDetected ? 1 : 0).sendToTarget();
     }
 
     @Override
