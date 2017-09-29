@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "PageTypeInfoProto";
 
@@ -38,9 +37,9 @@ package android.os;
  */
 message PageTypeInfo {
 
-    int32 page_block_order = 1;
+    optional int32 page_block_order = 1;
 
-    int32 pages_per_block = 2;
+    optional int32 pages_per_block = 2;
 
     repeated MigrateTypeProto migrate_types = 3;
 
@@ -50,11 +49,11 @@ message PageTypeInfo {
 // Next tag: 5
 message MigrateTypeProto {
 
-    int32 node = 1;
+    optional int32 node = 1;
 
-    string zone = 2;
+    optional string zone = 2;
 
-    string type = 3;
+    optional string type = 3;
 
     // order level starts from 0 for 4KB to page_block_order defined above, e.g. 10 for 4096KB
     repeated int32 free_pages_count = 4;
@@ -63,19 +62,19 @@ message MigrateTypeProto {
 // Next tag: 9
 message BlockProto {
 
-    int32 node = 1;
+    optional int32 node = 1;
 
-    string zone = 2;
+    optional string zone = 2;
 
-    int32 unmovable = 3;
+    optional int32 unmovable = 3;
 
-    int32 reclaimable = 4;
+    optional int32 reclaimable = 4;
 
-    int32 movable = 5;
+    optional int32 movable = 5;
 
-    int32 cma = 6;
+    optional int32 cma = 6;
 
-    int32 reserve = 7;
+    optional int32 reserve = 7;
 
-    int32 isolate = 8;
+    optional int32 isolate = 8;
 }

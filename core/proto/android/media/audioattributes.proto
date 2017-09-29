@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.media";
 option java_multiple_files = true;
 
@@ -25,10 +24,10 @@ package android.media;
  * An android.media.AudioAttributes object.
  */
 message AudioAttributesProto {
-    Usage usage = 1;
-    ContentType content_type = 2;
+    optional Usage usage = 1;
+    optional ContentType content_type = 2;
     // Bit representation of set flags.
-    int32 flags = 3;
+    optional int32 flags = 3;
     repeated string tags = 4;
 }
 

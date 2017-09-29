@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.view;
 
 option java_multiple_files = true;
 
 /* represents WindowManager.LayoutParams */
 message WindowLayoutParamsProto {
-  int32 type = 1;
+  optional int32 type = 1;
 }

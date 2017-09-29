@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "WakeupSourcesProto";
 
@@ -29,23 +28,23 @@ message KernelWakeSources {
 // Next Tag: 11
 message WakeupSourceProto {
     // Name of the event which triggers application processor
-    string name = 1;
+    optional string name = 1;
 
-    int32 active_count = 2;
+    optional int32 active_count = 2;
 
-    int32 event_count = 3;
+    optional int32 event_count = 3;
 
-    int32 wakeup_count = 4;
+    optional int32 wakeup_count = 4;
 
-    int32 expire_count = 5;
+    optional int32 expire_count = 5;
 
-    int64 active_since = 6;
+    optional int64 active_since = 6;
 
-    int64 total_time = 7;
+    optional int64 total_time = 7;
 
-    int64 max_time = 8;
+    optional int64 max_time = 8;
 
-    int64 last_change = 9;
+    optional int64 last_change = 9;
 
-    int64 prevent_suspend_time = 10;
+    optional int64 prevent_suspend_time = 10;
 }

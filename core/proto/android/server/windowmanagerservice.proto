@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
@@ -26,21 +25,21 @@ package com.android.server.wm.proto;
 option java_multiple_files = true;
 
 message WindowManagerServiceProto {
-  WindowManagerPolicyProto policy = 1;
+  optional WindowManagerPolicyProto policy = 1;
   /* window hierarchy root */
-  RootWindowContainerProto root_window_container = 2;
-  IdentifierProto focused_window = 3;
-  string focused_app = 4;
-  IdentifierProto input_method_window = 5;
-  bool display_frozen = 6;
-  int32 rotation = 7;
-  int32 last_orientation = 8;
-  AppTransitionProto app_transition = 9;
+  optional RootWindowContainerProto root_window_container = 2;
+  optional IdentifierProto focused_window = 3;
+  optional string focused_app = 4;
+  optional IdentifierProto input_method_window = 5;
+  optional bool display_frozen = 6;
+  optional int32 rotation = 7;
+  optional int32 last_orientation = 8;
+  optional AppTransitionProto app_transition = 9;
 }
 
 /* represents DisplayContent */
 message RootWindowContainerProto {
-  WindowContainerProto window_container = 1;
+  optional WindowContainerProto window_container = 1;
   repeated DisplayProto displays = 2;
   /* window references in top down z order */
   repeated IdentifierProto windows = 3;
@@ -48,7 +47,7 @@ message RootWindowContainerProto {
 
 /* represents PhoneWindowManager */
 message WindowManagerPolicyProto {
-  .android.graphics.RectProto stable_bounds = 1;
+  optional .android.graphics.RectProto stable_bounds = 1;
 }
 
 /* represents AppTransition */
@@ -59,7 +58,7 @@ message AppTransitionProto {
     APP_STATE_RUNNING = 2;
     APP_STATE_TIMEOUT = 3;
   }
-  AppState app_transition_state = 1;
+  optional AppState app_transition_state = 1;
   /* definitions for constants found in {@link com.android.server.wm.AppTransition} */
   enum TransitionType {
     TRANSIT_NONE = 0;
@@ -83,124 +82,124 @@ message AppTransitionProto {
     TRANSIT_KEYGUARD_OCCLUDE = 22;
     TRANSIT_KEYGUARD_UNOCCLUDE = 23;
   }
-  TransitionType last_used_app_transition = 2;
+  optional TransitionType last_used_app_transition = 2;
 }
 
 /* represents DisplayContent */
 message DisplayProto {
-  WindowContainerProto window_container = 1;
-  int32 id = 2;
+  optional WindowContainerProto window_container = 1;
+  optional int32 id = 2;
   repeated StackProto stacks = 3;
-  DockedStackDividerControllerProto docked_stack_divider_controller = 4;
-  PinnedStackControllerProto pinned_stack_controller = 5;
+  optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
+  optional PinnedStackControllerProto pinned_stack_controller = 5;
   /* non app windows */
   repeated WindowTokenProto above_app_windows = 6;
   repeated WindowTokenProto below_app_windows = 7;
   repeated WindowTokenProto ime_windows = 8;
-  int32 dpi = 9;
-  .android.view.DisplayInfoProto display_info = 10;
-  int32 rotation = 11;
-  ScreenRotationAnimationProto screen_rotation_animation = 12;
+  optional int32 dpi = 9;
+  optional .android.view.DisplayInfoProto display_info = 10;
+  optional int32 rotation = 11;
+  optional ScreenRotationAnimationProto screen_rotation_animation = 12;
 }
 
 
 /* represents DockedStackDividerController */
 message DockedStackDividerControllerProto {
-  bool minimized_dock = 1;
+  optional bool minimized_dock = 1;
 }
 
 /* represents PinnedStackController */
 message PinnedStackControllerProto {
-  .android.graphics.RectProto default_bounds = 1;
-  .android.graphics.RectProto movement_bounds = 2;
+  optional .android.graphics.RectProto default_bounds = 1;
+  optional .android.graphics.RectProto movement_bounds = 2;
 }
 
 /* represents TaskStack */
 message StackProto {
-  WindowContainerProto window_container = 1;
-  int32 id = 2;
+  optional WindowContainerProto window_container = 1;
+  optional int32 id = 2;
   repeated TaskProto tasks = 3;
-  bool fills_parent = 4;
-  .android.graphics.RectProto bounds = 5;
-  bool animation_background_surface_is_dimming = 6;
+  optional bool fills_parent = 4;
+  optional .android.graphics.RectProto bounds = 5;
+  optional bool animation_background_surface_is_dimming = 6;
 }
 
 /* represents Task */
 message TaskProto {
-  WindowContainerProto window_container = 1;
-  int32 id = 2;
+  optional WindowContainerProto window_container = 1;
+  optional int32 id = 2;
   repeated AppWindowTokenProto app_window_tokens = 3;
-  bool fills_parent = 4;
-  .android.graphics.RectProto bounds = 5;
-  .android.graphics.RectProto temp_inset_bounds = 6;
+  optional bool fills_parent = 4;
+  optional .android.graphics.RectProto bounds = 5;
+  optional .android.graphics.RectProto temp_inset_bounds = 6;
 }
 
 /* represents AppWindowToken */
 message AppWindowTokenProto {
   /* obtained from ActivityRecord */
-  string name = 1;
-  WindowTokenProto window_token = 2;
+  optional string name = 1;
+  optional WindowTokenProto window_token = 2;
 }
 
 /* represents WindowToken */
 message WindowTokenProto {
-  WindowContainerProto window_container = 1;
-  int32 hash_code = 2;
+  optional WindowContainerProto window_container = 1;
+  optional int32 hash_code = 2;
   repeated WindowStateProto windows = 3;
 }
 
 /* represents WindowState */
 message WindowStateProto {
-  WindowContainerProto window_container = 1;
-  IdentifierProto identifier = 2;
-  int32 display_id = 3;
-  int32 stack_id = 4;
-  .android.view.WindowLayoutParamsProto attributes = 5;
-  .android.graphics.RectProto given_content_insets = 6;
-  .android.graphics.RectProto frame = 7;
-  .android.graphics.RectProto containing_frame = 8;
-  .android.graphics.RectProto parent_frame = 9;
-  .android.graphics.RectProto content_frame = 10;
-  .android.graphics.RectProto content_insets = 11;
-  .android.graphics.RectProto surface_insets = 12;
-  WindowStateAnimatorProto animator = 13;
-  bool animating_exit = 14;
+  optional WindowContainerProto window_container = 1;
+  optional IdentifierProto identifier = 2;
+  optional int32 display_id = 3;
+  optional int32 stack_id = 4;
+  optional .android.view.WindowLayoutParamsProto attributes = 5;
+  optional .android.graphics.RectProto given_content_insets = 6;
+  optional .android.graphics.RectProto frame = 7;
+  optional .android.graphics.RectProto containing_frame = 8;
+  optional .android.graphics.RectProto parent_frame = 9;
+  optional .android.graphics.RectProto content_frame = 10;
+  optional .android.graphics.RectProto content_insets = 11;
+  optional .android.graphics.RectProto surface_insets = 12;
+  optional WindowStateAnimatorProto animator = 13;
+  optional bool animating_exit = 14;
   repeated WindowStateProto child_windows = 15;
 }
 
 message IdentifierProto {
-  int32 hash_code = 1;
-  int32 user_id = 2;
-  string title = 3;
+  optional int32 hash_code = 1;
+  optional int32 user_id = 2;
+  optional string title = 3;
 }
 
 /* represents WindowStateAnimator */
 message WindowStateAnimatorProto {
-  .android.graphics.RectProto last_clip_rect = 1;
-  WindowSurfaceControllerProto surface = 2;
+  optional .android.graphics.RectProto last_clip_rect = 1;
+  optional WindowSurfaceControllerProto surface = 2;
 }
 
 /* represents WindowSurfaceController */
 message WindowSurfaceControllerProto {
-  bool shown = 1;
-  int32 layer = 2;
+  optional bool shown = 1;
+  optional int32 layer = 2;
 }
 
 /* represents ScreenRotationAnimation */
 message ScreenRotationAnimationProto {
-  bool started = 1;
-  bool animation_running = 2;
+  optional bool started = 1;
+  optional bool animation_running = 2;
 }
 
 /* represents WindowContainer */
 message WindowContainerProto {
-  ConfigurationContainerProto configuration_container = 1;
-  int32 orientation = 2;
+  optional ConfigurationContainerProto configuration_container = 1;
+  optional int32 orientation = 2;
 }
 
 /* represents ConfigurationContainer */
 message ConfigurationContainerProto {
-  .android.content.ConfigurationProto override_configuration = 1;
-  .android.content.ConfigurationProto full_configuration = 2;
-  .android.content.ConfigurationProto merged_override_configuration = 3;
+  optional .android.content.ConfigurationProto override_configuration = 1;
+  optional .android.content.ConfigurationProto full_configuration = 2;
+  optional .android.content.ConfigurationProto merged_override_configuration = 3;
 }

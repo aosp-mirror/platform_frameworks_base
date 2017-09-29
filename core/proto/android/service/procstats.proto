@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "ProcessStatsServiceProto";
 
@@ -30,11 +29,11 @@ package android.service.procstats;
  */
 message ProcessStatsServiceDumpProto {
 
-    ProcessStatsSectionProto procstats_now = 1;
+    optional ProcessStatsSectionProto procstats_now = 1;
 
-    ProcessStatsSectionProto procstats_over_3hrs = 2;
+    optional ProcessStatsSectionProto procstats_over_3hrs = 2;
 
-    ProcessStatsSectionProto procstats_over_24hrs = 3;
+    optional ProcessStatsSectionProto procstats_over_24hrs = 3;
 }
 
 /**
@@ -46,22 +45,22 @@ message ProcessStatsServiceDumpProto {
 message ProcessStatsSectionProto {
 
     // Elapsed realtime at start of report.
-    int64 start_realtime_ms = 1;
+    optional int64 start_realtime_ms = 1;
 
     // Elapsed realtime at end of report.
-    int64 end_realtime_ms = 2;
+    optional int64 end_realtime_ms = 2;
 
     // CPU uptime at start of report.
-    int64 start_uptime_ms = 3;
+    optional int64 start_uptime_ms = 3;
 
     // CPU uptime at end of report.
-    int64 end_uptime_ms = 4;
+    optional int64 end_uptime_ms = 4;
 
     // System runtime library. e.g. "libdvm.so", "libart.so".
-    string runtime = 5;
+    optional string runtime = 5;
 
     // whether kernel reports swapped pss.
-    bool has_swapped_pss = 6;
+    optional bool has_swapped_pss = 6;
 
     // Data completeness. e.g. "complete", "partial", shutdown", or "sysprops".
     enum Status {
@@ -81,23 +80,23 @@ message ProcessStatsSectionProto {
 message ProcessStatsProto {
 
     // Name of process.
-    string process = 1;
+    optional string process = 1;
 
     // Uid of the process.
-    int32 uid = 2;
+    optional int32 uid = 2;
 
     // Information about how often kills occurred
     message Kill {
       // Count of excessive CPU kills
-      int32 cpu = 1;
+      optional int32 cpu = 1;
 
       // Count of kills when cached
-      int32 cached = 2;
+      optional int32 cached = 2;
 
       // PSS stats during cached kill
-      android.util.AggStats cached_pss = 3;
+      optional android.util.AggStats cached_pss = 3;
     }
-    Kill kill = 3;
+    optional Kill kill = 3;
 
     message State {
         enum ScreenState {
@@ -105,7 +104,7 @@ message ProcessStatsProto {
             OFF = 1;
             ON = 2;
         }
-        ScreenState screen_state = 1;
+        optional ScreenState screen_state = 1;
 
         enum MemoryState {
             MEMORY_UNKNOWN = 0;
@@ -114,7 +113,7 @@ message ProcessStatsProto {
             LOW = 3;        // low memory.
             CRITICAL = 4;   // critical memory.
         }
-        MemoryState memory_state = 2;
+        optional MemoryState memory_state = 2;
 
         enum ProcessState {
             PROCESS_UNKNOWN = 0;
@@ -147,19 +146,19 @@ message ProcessStatsProto {
             // Cached process that is empty.
             CACHED_EMPTY = 14;
         }
-        ProcessState process_state = 3;
+        optional ProcessState process_state = 3;
 
         // Millisecond duration spent in this state
-        int64 duration_ms = 4;
+        optional int64 duration_ms = 4;
 
         // # of samples taken
-        int32 sample_size = 5;
+        optional int32 sample_size = 5;
 
         // PSS is memory reserved for this process
-        android.util.AggStats pss = 6;
+        optional android.util.AggStats pss = 6;
 
         // USS is memory shared between processes, divided evenly for accounting
-        android.util.AggStats uss = 7;
+        optional android.util.AggStats uss = 7;
     }
     repeated State states = 5;
 }

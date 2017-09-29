@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 
 package android.os;
 
 message PatternMatcherProto {
-    string pattern = 1;
+    optional string pattern = 1;
 
     enum Type {
         TYPE_LITERAL = 0;
@@ -29,7 +28,7 @@ message PatternMatcherProto {
         TYPE_SIMPLE_GLOB = 2;
         TYPE_ADVANCED_GLOB = 3;
     }
-    Type type = 2;
+    optional Type type = 2;
 
     // This data is too much for dump
     // repeated int32 parsed_pattern = 3;

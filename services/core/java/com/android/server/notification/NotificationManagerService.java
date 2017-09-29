@@ -133,7 +133,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
-import android.service.notification.NotificationServiceProto;
 import android.service.notification.NotificationStats;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
@@ -3263,7 +3262,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationRecord nr = mNotificationList.get(i);
                     if (filter.filtered && !filter.matches(nr.sbn)) continue;
                     nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationServiceProto.POSTED);
+                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.POSTED);
                 }
             }
             N = mEnqueuedNotifications.size();
@@ -3272,7 +3271,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationRecord nr = mEnqueuedNotifications.get(i);
                     if (filter.filtered && !filter.matches(nr.sbn)) continue;
                     nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationServiceProto.ENQUEUED);
+                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.ENQUEUED);
                 }
             }
             List<NotificationRecord> snoozed = mSnoozeHelper.getSnoozed();
@@ -3282,7 +3281,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationRecord nr = snoozed.get(i);
                     if (filter.filtered && !filter.matches(nr.sbn)) continue;
                     nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationServiceProto.SNOOZED);
+                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.SNOOZED);
                 }
             }
             proto.end(records);

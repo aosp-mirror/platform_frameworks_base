@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.batterystats;
 
 option java_multiple_files = true;
@@ -24,5 +23,5 @@ option java_outer_classname = "BatteryStatsServiceProto";
 import "frameworks/base/core/proto/android/os/batterystats.proto";
 
 message BatteryStatsServiceDumpProto {
-  android.os.BatteryStatsProto batterystats = 1;
+  optional android.os.BatteryStatsProto batterystats = 1;
 }
