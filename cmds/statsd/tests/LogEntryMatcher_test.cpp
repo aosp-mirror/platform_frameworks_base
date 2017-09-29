@@ -27,28 +27,32 @@
 using namespace android::os::statsd;
 using std::unordered_map;
 
+const int kTagIdWakelock = 123;
+const int kKeyIdState = 45;
+const int kKeyIdPackageVersion = 67;
+
 #ifdef __ANDROID__
 TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
     unordered_map<int, float> floatMap;
     unordered_map<int, bool> boolMap;
 
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap, boolMap));
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap, boolMap));
 }
 
 TEST(LogEntryMatcherTest, TestBoolMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(KeyId::STATE);
+    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
 
 
     unordered_map<int, long> intMap;
@@ -57,16 +61,16 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
     unordered_map<int, bool> boolMap;
 
     keyValue->set_eq_bool(true);
-    boolMap[KeyId::STATE] = true;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    boolMap[kKeyIdState] = true;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 
     keyValue->set_eq_bool(false);
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 
-    boolMap[TagId::WAKELOCK] = false;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    boolMap[kKeyIdState] = false;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
 
@@ -74,9 +78,9 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(KeyId::STATE);
+    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
     keyValue->set_eq_string("wakelock_name");
 
     unordered_map<int, long> intMap;
@@ -84,18 +88,18 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     unordered_map<int, float> floatMap;
     unordered_map<int, bool> boolMap;
 
-    strMap[KeyId::STATE] = "wakelock_name";
+    strMap[kKeyIdState] = "wakelock_name";
 
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap, boolMap));
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap, boolMap));
 }
 
 TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(KeyId::STATE);
+    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -103,25 +107,25 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     unordered_map<int, bool> boolMap;
 
     keyValue->set_lt_int(10);
-    intMap[KeyId::STATE] = 11;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 11;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 10;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 10;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 9;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 
     keyValue->set_gt_int(10);
-    intMap[KeyId::STATE] = 11;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 11;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 10;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 10;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 9;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 }
 
@@ -129,9 +133,9 @@ TEST(LogEntryMatcherTest, TestIntWithEqualityComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(KeyId::STATE);
+    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -139,25 +143,25 @@ TEST(LogEntryMatcherTest, TestIntWithEqualityComparisonMatcher) {
     unordered_map<int, bool> boolMap;
 
     keyValue->set_lte_int(10);
-    intMap[KeyId::STATE] = 11;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 11;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 10;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 10;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 9;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 
     keyValue->set_gte_int(10);
-    intMap[KeyId::STATE] = 11;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 11;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 10;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 10;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    intMap[KeyId::STATE] = 9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    intMap[kKeyIdState] = 9;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 }
 
@@ -165,9 +169,9 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TagId::WAKELOCK);
+    simpleMatcher->add_tag(kTagIdWakelock);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(KeyId::STATE);
+    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -175,24 +179,24 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     unordered_map<int, bool> boolMap;
 
     keyValue->set_lt_float(10.0);
-    floatMap[KeyId::STATE] = 10.1;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    floatMap[kKeyIdState] = 10.1;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    floatMap[KeyId::STATE] = 9.9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    floatMap[kKeyIdState] = 9.9;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 
     keyValue->set_gt_float(10.0);
-    floatMap[KeyId::STATE] = 10.1;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    floatMap[kKeyIdState] = 10.1;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
-    floatMap[KeyId::STATE] = 9.9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap,
+    floatMap[kKeyIdState] = 9.9;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap,
         floatMap, boolMap));
 }
 
 // Helper for the composite matchers.
-void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, TagId tag, KeyId key, int val) {
+void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, int val) {
     simpleMatcher->add_tag(tag);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(key);
@@ -205,23 +209,23 @@ TEST(LogEntryMatcherTest, TestAndMatcher) {
     auto combination = matcher.mutable_combination();
     combination->set_operation(LogicalOperation::AND);
 
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(), TagId::WAKELOCK, KeyId::STATE, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(), TagId::WAKELOCK, KeyId::PACKAGE_VERSION, 4);
+    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(), kTagIdWakelock, kKeyIdState, 3);
+    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(), kTagIdWakelock, kKeyIdPackageVersion, 4);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
     unordered_map<int, float> floatMap;
     unordered_map<int, bool> boolMap;
 
-    intMap[1003] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap, boolMap));
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap, boolMap));
     intMap.clear();
-    intMap[1] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap, boolMap));
+    intMap[kKeyIdState] = 3;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap, boolMap));
     intMap.clear();
-    intMap[1] = 3;
-    intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap, boolMap));
+    intMap[kKeyIdState] = 3;
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap, boolMap));
 }
 
 TEST(LogEntryMatcherTest, TestOrMatcher) {
@@ -231,9 +235,9 @@ TEST(LogEntryMatcherTest, TestOrMatcher) {
     combination->set_operation(LogicalOperation::OR);
 
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::STATE, 3);
+        kTagIdWakelock, kKeyIdState, 3);
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::PACKAGE_VERSION, 4);
+        kTagIdWakelock, kKeyIdPackageVersion, 4);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -241,19 +245,19 @@ TEST(LogEntryMatcherTest, TestOrMatcher) {
     unordered_map<int, bool> boolMap;
 
     // Don't set any key-value pairs.
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
-        boolMap));
-    intMap.clear();
-    intMap[1] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
     intMap.clear();
-    intMap[1] = 3;
-    intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdState] = 3;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
+        boolMap));
+    intMap.clear();
+    intMap[kKeyIdState] = 3;
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
 
@@ -265,7 +269,7 @@ TEST(LogEntryMatcherTest, TestNotMatcher) {
 
     // Define first simpleMatcher
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::STATE, 3);
+        kTagIdWakelock, kKeyIdState, 3);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -273,8 +277,8 @@ TEST(LogEntryMatcherTest, TestNotMatcher) {
     unordered_map<int, bool> boolMap;
 
     // Don't set any key-value pairs.
-    intMap[KeyId::STATE] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdState] = 3;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
 
@@ -285,9 +289,9 @@ TEST(LogEntryMatcherTest, TestNANDMatcher) {
     combination->set_operation(LogicalOperation::NAND);
 
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::STATE, 3);
+        kTagIdWakelock, kKeyIdState, 3);
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::PACKAGE_VERSION, 4);
+        kTagIdWakelock, kKeyIdPackageVersion, 4);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -295,13 +299,13 @@ TEST(LogEntryMatcherTest, TestNANDMatcher) {
     unordered_map<int, bool> boolMap;
 
     // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::STATE] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdState] = 3;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::PACKAGE_VERSION] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
 
@@ -312,9 +316,9 @@ TEST(LogEntryMatcherTest, TestNORMatcher) {
     combination->set_operation(LogicalOperation::NOR);
 
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::STATE, 3);
+        kTagIdWakelock, kKeyIdState, 3);
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::PACKAGE_VERSION, 4);
+        kTagIdWakelock, kKeyIdPackageVersion, 4);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -322,13 +326,13 @@ TEST(LogEntryMatcherTest, TestNORMatcher) {
     unordered_map<int, bool> boolMap;
 
     // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::STATE] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdState] = 3;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::PACKAGE_VERSION] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
 
@@ -342,9 +346,9 @@ TEST(LogEntryMatcherTest, TestMultipleLayerMatcher) {
     auto combination = not_combination->add_matcher()->mutable_combination();
     combination->set_operation(LogicalOperation::AND);
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::STATE, 3);
+        kTagIdWakelock, kKeyIdState, 3);
     addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        TagId::WAKELOCK, KeyId::PACKAGE_VERSION, 4);
+        kTagIdWakelock, kKeyIdPackageVersion, 4);
 
     unordered_map<int, long> intMap;
     unordered_map<int, string> strMap;
@@ -352,15 +356,16 @@ TEST(LogEntryMatcherTest, TestMultipleLayerMatcher) {
     unordered_map<int, bool> boolMap;
 
     // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::STATE] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdState] = 3;
+    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
-    intMap[KeyId::PACKAGE_VERSION] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, TagId::WAKELOCK, intMap, strMap, floatMap,
+    intMap[kKeyIdPackageVersion] = 4;
+    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, kTagIdWakelock, intMap, strMap, floatMap,
         boolMap));
 }
+
 #else
             GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

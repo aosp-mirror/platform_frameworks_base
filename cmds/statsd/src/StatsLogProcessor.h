@@ -16,6 +16,7 @@
 #ifndef STATS_LOG_PROCESSOR_H
 #define STATS_LOG_PROCESSOR_H
 
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "parse_util.h"
 
 #include <unordered_map>
@@ -47,7 +48,7 @@ private:
     DropboxWriter m_dropbox_writer;
 
     /**
-     * Configs that have been specified, keyed by the source. This allows us to over-ride the config
+     * Configs that have been specified, keyed by the source. This allows us to override the config
      * from a source later.
      */
     std::unordered_map<int, StatsdConfig> m_configs;

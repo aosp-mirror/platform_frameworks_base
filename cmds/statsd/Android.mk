@@ -52,7 +52,6 @@ LOCAL_SRC_FILES := \
     src/StatsLogProcessor.cpp \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/stats_constants.proto \
     src/DropboxReader.cpp \
     src/matchers/LogEntryMatcherManager.cpp \
 
@@ -122,7 +121,6 @@ LOCAL_CFLAGS += \
 LOCAL_SRC_FILES := \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/stats_constants.proto \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
