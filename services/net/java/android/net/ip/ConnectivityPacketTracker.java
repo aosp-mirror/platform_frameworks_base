@@ -61,11 +61,11 @@ public class ConnectivityPacketTracker {
     private static final String MARK_STOP = "--- STOP ---";
 
     private final String mTag;
-    private final Handler mHandler;
     private final LocalLog mLog;
     private final BlockingSocketReader mPacketListener;
+    private boolean mRunning;
 
-    public ConnectivityPacketTracker(NetworkInterface netif, LocalLog log) {
+    public ConnectivityPacketTracker(Handler h, NetworkInterface netif, LocalLog log) {
         final String ifname;
         final int ifindex;
         final byte[] hwaddr;
@@ -81,44 +81,40 @@ public class ConnectivityPacketTracker {
         }
 
         mTag = TAG + "." + ifname;
-        mHandler = new Handler();
         mLog = log;
-        mPacketListener = new PacketListener(ifindex, hwaddr, mtu);
+        mPacketListener = new PacketListener(h, ifindex, hwaddr, mtu);
     }
 
     public void start() {
-        mLog.log(MARK_START);
+        mRunning = true;
         mPacketListener.start();
     }
 
     public void stop() {
         mPacketListener.stop();
-        mLog.log(MARK_STOP);
+        mRunning = false;
     }
 
     private final class PacketListener extends BlockingSocketReader {
         private final int mIfIndex;
         private final byte mHwAddr[];
 
-        PacketListener(int ifindex, byte[] hwaddr, int mtu) {
-            super(mtu);
+        PacketListener(Handler h, int ifindex, byte[] hwaddr, int mtu) {
+            super(h, mtu);
             mIfIndex = ifindex;
             mHwAddr = hwaddr;
         }
 
         @Override
-        protected FileDescriptor createSocket() {
+        protected FileDescriptor createFd() {
             FileDescriptor s = null;
             try {
-                // TODO: Evaluate switching to SOCK_DGRAM and changing the
-                // BlockingSocketReader's read() to recvfrom(), so that this
-                // might work on non-ethernet-like links (via SLL).
                 s = Os.socket(AF_PACKET, SOCK_RAW, 0);
                 NetworkUtils.attachControlPacketFilter(s, ARPHRD_ETHER);
                 Os.bind(s, new PacketSocketAddress((short) ETH_P_ALL, mIfIndex));
             } catch (ErrnoException | IOException e) {
                 logError("Failed to create packet tracking socket: ", e);
-                closeSocket(s);
+                closeFd(s);
                 return null;
             }
             return s;
@@ -136,13 +132,27 @@ public class ConnectivityPacketTracker {
         }
 
         @Override
+        protected void onStart() {
+            mLog.log(MARK_START);
+        }
+
+        @Override
+        protected void onStop() {
+            if (mRunning) {
+                mLog.log(MARK_STOP);
+            } else {
+                mLog.log(MARK_STOP + " (packet listener stopped unexpectedly)");
+            }
+        }
+
+        @Override
         protected void logError(String msg, Exception e) {
             Log.e(mTag, msg, e);
             addLogEntry(msg + e);
         }
 
         private void addLogEntry(String entry) {
-            mHandler.post(() -> mLog.log(entry));
+            mLog.log(entry);
         }
     }
 }
