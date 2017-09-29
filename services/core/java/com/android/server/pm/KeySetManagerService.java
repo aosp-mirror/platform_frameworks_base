@@ -565,7 +565,7 @@ public class KeySetManagerService {
     }
 
     public void dumpLPr(PrintWriter pw, String packageName,
-                        PackageManagerService.DumpState dumpState) {
+                        DumpState dumpState) {
         boolean printedHeader = false;
         for (ArrayMap.Entry<String, PackageSetting> e : mPackages.entrySet()) {
             String keySetPackage = e.getKey();

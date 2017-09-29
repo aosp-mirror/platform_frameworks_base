@@ -103,6 +103,7 @@ final class PackageSetting extends PackageSettingBase {
         sharedUserId = orig.sharedUserId;
     }
 
+    @Override
     public PermissionsState getPermissionsState() {
         return (sharedUser != null)
                 ? sharedUser.getPermissionsState()
@@ -125,6 +126,7 @@ final class PackageSetting extends PackageSettingBase {
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    @Override
     public boolean isSharedUser() {
         return sharedUser != null;
     }
