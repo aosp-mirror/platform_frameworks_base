@@ -18,10 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -31,6 +28,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
@@ -520,7 +518,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // All we can do for now is update the bounds so it can be used when the task is
             // added to window manager.
             updateOverrideConfiguration(bounds);
-            if (getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+            if (!inFreeformWindowingMode()) {
                 // re-restore the task so it can have the proper stack association.
                 mService.mStackSupervisor.restoreRecentTaskLocked(this, null);
             }
@@ -616,8 +614,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @return whether the task was reparented
      */
     // TODO: Inspect all call sites and change to just changing windowing mode of the stack vs.
-    // re-parenting the task. Can only be done when we are no longer using static stack Ids like
-    /** {@link ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} */
+    // re-parenting the task. Can only be done when we are no longer using static stack Ids.
     boolean reparent(ActivityStack preferredStack, int position,
             @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
@@ -630,12 +627,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             return false;
         }
 
-        final int sourceStackId = getStackId();
-        final int stackId = toStack.getStackId();
+        final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopActivity();
 
-        final boolean mightReplaceWindow = StackId.replaceWindowsOnTaskMove(sourceStackId, stackId)
-                && topActivity != null;
+        final boolean mightReplaceWindow =
+                replaceWindowsOnTaskMove(getWindowingMode(), toStackWindowingMode)
+                        && topActivity != null;
         if (mightReplaceWindow) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
@@ -707,10 +704,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             toStack.prepareFreezingTaskBounds();
 
             // Make sure the task has the appropriate bounds/size for the stack it is in.
-            final int toStackWindowingMode = toStack.getWindowingMode();
             final boolean toStackSplitScreenPrimary =
                     toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
+            if ((toStackWindowingMode == WINDOWING_MODE_FULLSCREEN
+                    || toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
                     && !Objects.equals(mBounds, toStack.mBounds)) {
                 kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
                         deferResume);
@@ -751,7 +748,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // TODO: Handle incorrect request to move before the actual move, not after.
         final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenStack();
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, stackId);
+                DEFAULT_DISPLAY, toStack.mStackId);
 
         boolean successful = (preferredStack == toStack);
         if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
@@ -759,6 +756,18 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             mService.mWindowManager.showRecentApps(false /* fromHome */);
         }
         return successful;
+    }
+
+    /**
+     * Returns true if the windows of tasks being moved to the target stack from the source
+     * stack should be replaced, meaning that window manager will keep the old window around
+     * until the new is ready.
+     * @hide
+     */
+    private static boolean replaceWindowsOnTaskMove(
+            int sourceWindowingMode, int targetWindowingMode) {
+        return sourceWindowingMode == WINDOWING_MODE_FREEFORM
+                || targetWindowingMode == WINDOWING_MODE_FREEFORM;
     }
 
     void cancelWindowTransition() {
@@ -1263,7 +1272,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             mService.notifyTaskPersisterLocked(this, false);
         }
 
-        if (getStackId() == PINNED_STACK_ID) {
+        if (inPinnedWindowingMode()) {
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
@@ -1493,7 +1502,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @return True if the requested bounds are okay for a resizing request.
      */
     private boolean canResizeToBounds(Rect bounds) {
-        if (bounds == null || getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+        if (bounds == null || !inFreeformWindowingMode()) {
             // Note: If not on the freeform workspace, we ignore the bounds.
             return true;
         }
@@ -1911,7 +1920,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (getStackId() != PINNED_STACK_ID) {
+        if (!inPinnedWindowingMode()) {
             if (minWidth == INVALID_MIN_SIZE) {
                 minWidth = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             }
@@ -2085,7 +2094,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             return;
         }
 
-        if (inStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+        if (inStack.inFreeformWindowingMode()) {
             if (!isResizeable()) {
                 throw new IllegalArgumentException("Can not position non-resizeable task="
                         + this + " in stack=" + inStack);

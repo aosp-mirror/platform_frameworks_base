@@ -16,10 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -979,8 +977,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             // In the presence of the PINNED stack or System Alert
-            // windows we unforuntately can not seamlessly rotate.
-            if (getStackById(PINNED_STACK_ID) != null) {
+            // windows we unfortunately can not seamlessly rotate.
+            if (getStack(WINDOWING_MODE_PINNED) != null) {
                 mayRotateSeamlessly = false;
             }
             for (int i = 0; i < mService.mSessions.size(); i++) {
@@ -1773,7 +1771,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTaskStackContainers.addStackToDisplay(stack, onTop);
         }
 
-        if (stackId == DOCKED_STACK_ID) {
+        if (stack.inSplitScreenPrimaryWindowingMode()) {
             mDividerControllerLocked.notifyDockedStackExistsChanged(true);
         }
         return stack;
@@ -2037,7 +2035,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowState imeWin = mService.mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
                 && !mDividerControllerLocked.isImeHideRequested();
-        final boolean dockVisible = isStackVisible(DOCKED_STACK_ID);
+        final boolean dockVisible = isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final TaskStack imeTargetStack = mService.getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?
                 imeTargetStack.getDockSide() : DOCKED_INVALID;
@@ -2260,10 +2258,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return "Display " + mDisplayId + " name=\"" + mDisplayInfo.name + "\"";
     }
 
-    /** Checks if stack with provided id is visible on this display. */
-    boolean isStackVisible(int stackId) {
-        final TaskStack stack = getStackById(stackId);
-        return (stack != null && stack.isVisible());
+    /** Returns true if the stack in the windowing mode is visible. */
+    boolean isStackVisible(int windowingMode) {
+        final TaskStack stack = getStack(windowingMode);
+        return stack != null && stack.isVisible();
     }
 
     /**
@@ -3556,7 +3554,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         int getOrientation() {
-            if (isStackVisible(DOCKED_STACK_ID) || isStackVisible(FREEFORM_WORKSPACE_STACK_ID)) {
+            if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
+                    || isStackVisible(WINDOWING_MODE_FREEFORM)) {
                 // Apps and their containers are not allowed to specify an orientation while the
                 // docked or freeform stack is visible...except for the home stack/task if the
                 // docked stack is minimized and it actually set something.

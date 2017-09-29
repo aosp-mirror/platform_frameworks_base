@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
@@ -213,7 +211,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         // then we want to preserve our insets so that there will not
         // be a jump in the area covered by system decorations. We rely
         // on the pinned animation to later unset this value.
-        if (stack.mStackId == PINNED_STACK_ID) {
+        if (stack.inPinnedWindowingMode()) {
             mPreserveNonFloatingState = true;
         } else {
             mPreserveNonFloatingState = false;
@@ -492,7 +490,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         final boolean dockedResizing = displayContent != null
                 && displayContent.mDividerControllerLocked.isResizing();
         if (useCurrentBounds()) {
-            if (inFreeformWorkspace() && getMaxVisibleBounds(out)) {
+            if (inFreeformWindowingMode() && getMaxVisibleBounds(out)) {
                 return;
             }
 
@@ -596,14 +594,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     boolean showForAllUsers() {
         final int tokensCount = mChildren.size();
         return (tokensCount != 0) && mChildren.get(tokensCount - 1).mShowForAllUsers;
-    }
-
-    boolean inFreeformWorkspace() {
-        return mStack != null && mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
-    }
-
-    boolean inPinnedWorkspace() {
-        return mStack != null && mStack.mStackId == PINNED_STACK_ID;
     }
 
     /**

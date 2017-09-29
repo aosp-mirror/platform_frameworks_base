@@ -1112,7 +1112,7 @@ class WindowStateAnimator {
      */
     private boolean useFinalClipRect() {
         return (isAnimationSet() && resolveStackClip() == STACK_CLIP_AFTER_ANIM)
-                || mDestroyPreservedSurfaceUponRedraw || mWin.inPinnedWorkspace();
+                || mDestroyPreservedSurfaceUponRedraw || mWin.inPinnedWindowingMode();
     }
 
     /**
@@ -1177,7 +1177,7 @@ class WindowStateAnimator {
             return false;
         }
 
-        if (w.inPinnedWorkspace()) {
+        if (w.inPinnedWindowingMode()) {
             return false;
         }
 

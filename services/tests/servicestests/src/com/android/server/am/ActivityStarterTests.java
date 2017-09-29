@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -83,7 +82,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertTrue(task2.getStack() instanceof PinnedActivityStack);
         mStarter.updateBounds(task2, bounds);
 
-        verify(mService, times(1)).resizeStack(eq(ActivityManager.StackId.PINNED_STACK_ID),
+        verify(mService, times(1)).resizeStack(eq(task2.getStack().mStackId),
                 eq(bounds), anyBoolean(), anyBoolean(), anyBoolean(), anyInt());
 
         // In the case of no animation, the stack and task bounds should be set immediately.

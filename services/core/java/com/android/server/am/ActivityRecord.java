@@ -17,9 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
@@ -661,8 +659,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return;
         }
 
-        final boolean inPictureInPictureMode = (task.getStackId() == PINNED_STACK_ID) &&
-                (targetStackBounds != null);
+        final boolean inPictureInPictureMode = inPinnedWindowingMode() && targetStackBounds != null;
         if (inPictureInPictureMode != mLastReportedPictureInPictureMode || forceUpdate) {
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
             // update that here in order
@@ -682,10 +679,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         } catch (Exception e) {
             // If process died, no one cares.
         }
-    }
-
-    boolean isFreeform() {
-        return task != null && task.getStackId() == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     @Override
@@ -948,7 +941,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // update the initial multi-window modes so that the callbacks are scheduled correctly when
         // the user leaves that mode.
         mLastReportedMultiWindowMode = !task.mFullscreen;
-        mLastReportedPictureInPictureMode = (task.getStackId() == PINNED_STACK_ID);
+        mLastReportedPictureInPictureMode = inPinnedWindowingMode();
     }
 
     void removeWindowContainer() {
