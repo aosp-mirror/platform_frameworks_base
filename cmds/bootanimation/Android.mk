@@ -31,12 +31,13 @@ LOCAL_SHARED_LIBRARIES += \
 
 LOCAL_SRC_FILES += \
     iot/iotbootanimation_main.cpp \
-    iot/BootAction.cpp
+    iot/BootAction.cpp \
+    iot/BootParameters.cpp \
 
 LOCAL_SHARED_LIBRARIES += \
     libandroidthings \
     libbase \
-    libbinder
+    libbinder \
 
 LOCAL_STATIC_LIBRARIES += cpufeatures
 
