@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
+import android.provider.ContactsContract;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -356,7 +357,16 @@ final class TextClassifierImpl implements TextClassifier {
         final String type = getHighestScoringType(classifications);
         builder.setLogType(IntentFactory.getLogType(type));
 
-        final Intent intent = IntentFactory.create(mContext, type, text.toString());
+        final List<Intent> intents = IntentFactory.create(mContext, type, text.toString());
+        for (Intent intent : intents) {
+            extendClassificationWithIntent(intent, builder);
+        }
+
+        return builder.setVersionInfo(getVersionInfo()).build();
+    }
+
+    /** Extends the classification with the intent if it can be resolved. */
+    private void extendClassificationWithIntent(Intent intent, TextClassification.Builder builder) {
         final PackageManager pm;
         final ResolveInfo resolveInfo;
         if (intent != null) {
@@ -367,30 +377,29 @@ final class TextClassifierImpl implements TextClassifier {
             resolveInfo = null;
         }
         if (resolveInfo != null && resolveInfo.activityInfo != null) {
-            builder.setIntent(intent)
-                    .setOnClickListener(TextClassification.createStartActivityOnClickListener(
-                            mContext, intent));
-
             final String packageName = resolveInfo.activityInfo.packageName;
+            CharSequence label;
+            Drawable icon;
             if ("android".equals(packageName)) {
                 // Requires the chooser to find an activity to handle the intent.
-                builder.setLabel(IntentFactory.getLabel(mContext, type));
+                label = IntentFactory.getLabel(mContext, intent);
+                icon = null;
             } else {
                 // A default activity will handle the intent.
                 intent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
-                Drawable icon = resolveInfo.activityInfo.loadIcon(pm);
+                icon = resolveInfo.activityInfo.loadIcon(pm);
                 if (icon == null) {
                     icon = resolveInfo.loadIcon(pm);
                 }
-                builder.setIcon(icon);
-                CharSequence label = resolveInfo.activityInfo.loadLabel(pm);
+                label = resolveInfo.activityInfo.loadLabel(pm);
                 if (label == null) {
                     label = resolveInfo.loadLabel(pm);
                 }
-                builder.setLabel(label != null ? label.toString() : null);
             }
+            builder.addAction(
+                    intent, label != null ? label.toString() : null, icon,
+                    TextClassification.createStartActivityOnClickListener(mContext, intent));
         }
-        return builder.setVersionInfo(getVersionInfo()).build();
     }
 
     private static int getHintFlags(CharSequence text, int start, int end) {
@@ -477,10 +486,11 @@ final class TextClassifierImpl implements TextClassifier {
                     if (results.length > 0) {
                         final String type = getHighestScoringType(results);
                         if (matches(type, linkMask)) {
-                            final Intent intent = IntentFactory.create(
+                            // For links without disambiguation, we simply use the default intent.
+                            final List<Intent> intents = IntentFactory.create(
                                     context, type, text.substring(selectionStart, selectionEnd));
-                            if (hasActivityHandler(context, intent)) {
-                                final ClickableSpan span = createSpan(context, intent);
+                            if (!intents.isEmpty() && hasActivityHandler(context, intents.get(0))) {
+                                final ClickableSpan span = createSpan(context, intents.get(0));
                                 spans.add(new SpanSpec(selectionStart, selectionEnd, span));
                             }
                         }
@@ -564,7 +574,7 @@ final class TextClassifierImpl implements TextClassifier {
             };
         }
 
-        private static boolean hasActivityHandler(Context context, @Nullable Intent intent) {
+        private static boolean hasActivityHandler(Context context, Intent intent) {
             if (intent == null) {
                 return false;
             }
@@ -625,20 +635,32 @@ final class TextClassifierImpl implements TextClassifier {
 
         private IntentFactory() {}
 
-        @Nullable
-        public static Intent create(Context context, String type, String text) {
+        @NonNull
+        public static List<Intent> create(Context context, String type, String text) {
+            final List<Intent> intents = new ArrayList<>();
             type = type.trim().toLowerCase(Locale.ENGLISH);
             text = text.trim();
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
-                    return new Intent(Intent.ACTION_SENDTO)
-                            .setData(Uri.parse(String.format("mailto:%s", text)));
+                    intents.add(new Intent(Intent.ACTION_SENDTO)
+                            .setData(Uri.parse(String.format("mailto:%s", text))));
+                    intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
+                    break;
                 case TextClassifier.TYPE_PHONE:
-                    return new Intent(Intent.ACTION_DIAL)
-                            .setData(Uri.parse(String.format("tel:%s", text)));
+                    intents.add(new Intent(Intent.ACTION_DIAL)
+                            .setData(Uri.parse(String.format("tel:%s", text))));
+                    intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                            .putExtra(ContactsContract.Intents.Insert.PHONE, text));
+                    intents.add(new Intent(Intent.ACTION_SENDTO)
+                            .setData(Uri.parse(String.format("smsto:%s", text))));
+                    break;
                 case TextClassifier.TYPE_ADDRESS:
-                    return new Intent(Intent.ACTION_VIEW)
-                            .setData(Uri.parse(String.format("geo:0,0?q=%s", text)));
+                    intents.add(new Intent(Intent.ACTION_VIEW)
+                            .setData(Uri.parse(String.format("geo:0,0?q=%s", text))));
+                    break;
                 case TextClassifier.TYPE_URL:
                     final String httpPrefix = "http://";
                     final String httpsPrefix = "https://";
@@ -649,25 +671,47 @@ final class TextClassifierImpl implements TextClassifier {
                     } else {
                         text = httpPrefix + text;
                     }
-                    return new Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
-                default:
-                    return null;
+                    intents.add(new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()));
+                    break;
             }
+            return intents;
         }
 
         @Nullable
-        public static String getLabel(Context context, String type) {
-            type = type.trim().toLowerCase(Locale.ENGLISH);
-            switch (type) {
-                case TextClassifier.TYPE_EMAIL:
-                    return context.getString(com.android.internal.R.string.email);
-                case TextClassifier.TYPE_PHONE:
+        public static String getLabel(Context context, @Nullable Intent intent) {
+            if (intent == null || intent.getAction() == null) {
+                return null;
+            }
+            switch (intent.getAction()) {
+                case Intent.ACTION_DIAL:
                     return context.getString(com.android.internal.R.string.dial);
-                case TextClassifier.TYPE_ADDRESS:
-                    return context.getString(com.android.internal.R.string.map);
-                case TextClassifier.TYPE_URL:
-                    return context.getString(com.android.internal.R.string.browse);
+                case Intent.ACTION_SENDTO:
+                    switch (intent.getScheme()) {
+                        case "mailto":
+                            return context.getString(com.android.internal.R.string.email);
+                        case "smsto":
+                            return context.getString(com.android.internal.R.string.sms);
+                        default:
+                            return null;
+                    }
+                case Intent.ACTION_INSERT_OR_EDIT:
+                    switch (intent.getDataString()) {
+                        case ContactsContract.Contacts.CONTENT_ITEM_TYPE:
+                            return context.getString(com.android.internal.R.string.add_contact);
+                        default:
+                            return null;
+                    }
+                case Intent.ACTION_VIEW:
+                    switch (intent.getScheme()) {
+                        case "geo":
+                            return context.getString(com.android.internal.R.string.map);
+                        case "http": // fall through
+                        case "https":
+                            return context.getString(com.android.internal.R.string.browse);
+                        default:
+                            return null;
+                    }
                 default:
                     return null;
             }
