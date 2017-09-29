@@ -35,6 +35,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
+import android.text.Layout;
 import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -42,9 +43,9 @@ import android.view.animation.Interpolator;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -76,6 +77,26 @@ final class SmartSelectSprite {
     private Drawable mExistingDrawable = null;
     private RectangleList mExistingRectangleList = null;
 
+    static final class RectangleWithTextSelectionLayout {
+        private final RectF mRectangle;
+        @Layout.TextSelectionLayout
+        private final int mTextSelectionLayout;
+
+        RectangleWithTextSelectionLayout(RectF rectangle, int textSelectionLayout) {
+            mRectangle = Preconditions.checkNotNull(rectangle);
+            mTextSelectionLayout = textSelectionLayout;
+        }
+
+        public RectF getRectangle() {
+            return mRectangle;
+        }
+
+        @Layout.TextSelectionLayout
+        public int getTextSelectionLayout() {
+            return mTextSelectionLayout;
+        }
+    }
+
     /**
      * A rounded rectangle with a configurable corner radius and the ability to expand outside of
      * its bounding rectangle and clip against it.
@@ -84,12 +105,23 @@ final class SmartSelectSprite {
 
         private static final String PROPERTY_ROUND_RATIO = "roundRatio";
 
+        /**
+         * The direction in which the rectangle will perform its expansion. A rectangle can expand
+         * from its left edge, its right edge or from the center (or, more precisely, the user's
+         * touch point). For example, in left-to-right text, a selection spanning two lines with the
+         * user's action being on the first line will have the top rectangle and expansion direction
+         * of CENTER, while the bottom one will have an expansion direction of RIGHT.
+         */
         @Retention(SOURCE)
         @IntDef({ExpansionDirection.LEFT, ExpansionDirection.CENTER, ExpansionDirection.RIGHT})
         private @interface ExpansionDirection {
-        int LEFT = 0;
-        int CENTER = 1;
-        int RIGHT = 2;
+            int LEFT = -1;
+            int CENTER = 0;
+            int RIGHT = 1;
+        }
+
+        private static @ExpansionDirection int invert(@ExpansionDirection int expansionDirection) {
+            return expansionDirection * -1;
         }
 
         @Retention(SOURCE)
@@ -119,15 +151,28 @@ final class SmartSelectSprite {
         /** How far offset the right edge of the rectangle is from the bounding box. */
         private float mRightBoundary = 0;
 
+        /** Whether the horizontal bounds are inverted (for RTL scenarios). */
+        private final boolean mInverted;
+
+        private final float mBoundingWidth;
+
         private RoundedRectangleShape(
                 final RectF boundingRectangle,
                 final @ExpansionDirection int expansionDirection,
                 final @RectangleBorderType int rectangleBorderType,
+                final boolean inverted,
                 final float strokeWidth) {
             mBoundingRectangle = new RectF(boundingRectangle);
-            mExpansionDirection = expansionDirection;
+            mBoundingWidth = boundingRectangle.width();
             mRectangleBorderType = rectangleBorderType;
             mStrokeWidth = strokeWidth;
+            mInverted = inverted && expansionDirection != ExpansionDirection.CENTER;
+
+            if (inverted) {
+                mExpansionDirection = invert(expansionDirection);
+            } else {
+                mExpansionDirection = expansionDirection;
+            }
 
             if (boundingRectangle.height() > boundingRectangle.width()) {
                 setRoundRatio(0.0f);
@@ -190,20 +235,28 @@ final class SmartSelectSprite {
             canvas.restore();
         }
 
-        public void setRoundRatio(@FloatRange(from = 0.0, to = 1.0) final float roundRatio) {
+        void setRoundRatio(@FloatRange(from = 0.0, to = 1.0) final float roundRatio) {
             mRoundRatio = roundRatio;
         }
 
-        public float getRoundRatio() {
+        float getRoundRatio() {
             return mRoundRatio;
         }
 
-        private void setLeftBoundary(final float leftBoundary) {
-            mLeftBoundary = leftBoundary;
+        private void setStartBoundary(final float startBoundary) {
+            if (mInverted) {
+                mRightBoundary = mBoundingWidth - startBoundary;
+            } else {
+                mLeftBoundary = startBoundary;
+            }
         }
 
-        private void setRightBoundary(final float rightBoundary) {
-            mRightBoundary = rightBoundary;
+        private void setEndBoundary(final float endBoundary) {
+            if (mInverted) {
+                mLeftBoundary = mBoundingWidth - endBoundary;
+            } else {
+                mRightBoundary = endBoundary;
+            }
         }
 
         private float getCornerRadius() {
@@ -247,8 +300,8 @@ final class SmartSelectSprite {
         private @DisplayType int mDisplayType = DisplayType.RECTANGLES;
 
         private RectangleList(final List<RoundedRectangleShape> rectangles) {
-            mRectangles = new LinkedList<>(rectangles);
-            mReversedRectangles = new LinkedList<>(rectangles);
+            mRectangles = new ArrayList<>(rectangles);
+            mReversedRectangles = new ArrayList<>(rectangles);
             Collections.reverse(mReversedRectangles);
             mOutlinePolygonPath = generateOutlinePolygonPath(rectangles);
         }
@@ -258,11 +311,11 @@ final class SmartSelectSprite {
             for (RoundedRectangleShape rectangle : mReversedRectangles) {
                 final float rectangleLeftBoundary = boundarySoFar - rectangle.getBoundingWidth();
                 if (leftBoundary < rectangleLeftBoundary) {
-                    rectangle.setLeftBoundary(0);
+                    rectangle.setStartBoundary(0);
                 } else if (leftBoundary > boundarySoFar) {
-                    rectangle.setLeftBoundary(rectangle.getBoundingWidth());
+                    rectangle.setStartBoundary(rectangle.getBoundingWidth());
                 } else {
-                    rectangle.setLeftBoundary(
+                    rectangle.setStartBoundary(
                             rectangle.getBoundingWidth() - boundarySoFar + leftBoundary);
                 }
 
@@ -275,11 +328,11 @@ final class SmartSelectSprite {
             for (RoundedRectangleShape rectangle : mRectangles) {
                 final float rectangleRightBoundary = rectangle.getBoundingWidth() + boundarySoFar;
                 if (rectangleRightBoundary < rightBoundary) {
-                    rectangle.setRightBoundary(rectangle.getBoundingWidth());
+                    rectangle.setEndBoundary(rectangle.getBoundingWidth());
                 } else if (boundarySoFar > rightBoundary) {
-                    rectangle.setRightBoundary(0);
+                    rectangle.setEndBoundary(0);
                 } else {
-                    rectangle.setRightBoundary(rightBoundary - boundarySoFar);
+                    rectangle.setEndBoundary(rightBoundary - boundarySoFar);
                 }
 
                 boundarySoFar = rectangleRightBoundary;
@@ -331,8 +384,8 @@ final class SmartSelectSprite {
     }
 
     /**
-     * @param context     The {@link Context} in which the animation will run
-     * @param invalidator A {@link Runnable} which will be called every time the animation updates,
+     * @param context     the {@link Context} in which the animation will run
+     * @param invalidator a {@link Runnable} which will be called every time the animation updates,
      *                    indicating that the view drawing the animation should invalidate itself
      */
     SmartSelectSprite(final Context context, final Runnable invalidator) {
@@ -356,30 +409,36 @@ final class SmartSelectSprite {
      *                              "selection" and finally join them into a single polygon. In
      *                              order to get the correct visual behavior, these rectangles
      *                              should be sorted according to {@link #RECTANGLE_COMPARATOR}.
-     * @param onAnimationEnd        The callback which will be invoked once the whole animation
-     *                              completes.
+     * @param onAnimationEnd        the callback which will be invoked once the whole animation
+     *                              completes
      * @throws IllegalArgumentException if the given start point is not in any of the
-     *                                  destinationRectangles.
+     *                                  destinationRectangles
      * @see #cancelAnimation()
      */
+    // TODO nullability checks on parameters
     public void startAnimation(
             final PointF start,
-            final List<RectF> destinationRectangles,
+            final List<RectangleWithTextSelectionLayout> destinationRectangles,
             final Runnable onAnimationEnd) {
         cancelAnimation();
 
         final ValueAnimator.AnimatorUpdateListener updateListener =
                 valueAnimator -> mInvalidator.run();
 
-        final List<RoundedRectangleShape> shapes = new LinkedList<>();
-        final List<Animator> cornerAnimators = new LinkedList<>();
+        final int rectangleCount = destinationRectangles.size();
 
-        RectF centerRectangle = null;
+        final List<RoundedRectangleShape> shapes = new ArrayList<>(rectangleCount);
+        final List<Animator> cornerAnimators = new ArrayList<>(rectangleCount);
+
+        RectangleWithTextSelectionLayout centerRectangle = null;
 
         int startingOffset = 0;
-        for (RectF rectangle : destinationRectangles) {
+        for (int index = 0; index < rectangleCount; ++index) {
+            final RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout =
+                    destinationRectangles.get(index);
+            final RectF rectangle = rectangleWithTextSelectionLayout.getRectangle();
             if (contains(rectangle, start)) {
-                centerRectangle = rectangle;
+                centerRectangle = rectangleWithTextSelectionLayout;
                 break;
             }
             startingOffset += rectangle.width();
@@ -389,9 +448,9 @@ final class SmartSelectSprite {
             throw new IllegalArgumentException("Center point is not inside any of the rectangles!");
         }
 
-        startingOffset += start.x - centerRectangle.left;
+        startingOffset += start.x - centerRectangle.getRectangle().left;
 
-        final float centerRectangleHalfHeight = centerRectangle.height() / 2;
+        final float centerRectangleHalfHeight = centerRectangle.getRectangle().height() / 2;
         final float startingOffsetLeft = startingOffset - centerRectangleHalfHeight;
         final float startingOffsetRight = startingOffset + centerRectangleHalfHeight;
 
@@ -399,19 +458,21 @@ final class SmartSelectSprite {
                 generateDirections(centerRectangle, destinationRectangles);
 
         final @RoundedRectangleShape.RectangleBorderType int[] rectangleBorderTypes =
-                generateBorderTypes(destinationRectangles);
+                generateBorderTypes(rectangleCount);
 
-        int index = 0;
-
-        for (RectF rectangle : destinationRectangles) {
+        for (int index = 0; index < rectangleCount; ++index) {
+            final RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout =
+                    destinationRectangles.get(index);
+            final RectF rectangle = rectangleWithTextSelectionLayout.getRectangle();
             final RoundedRectangleShape shape = new RoundedRectangleShape(
                     rectangle,
                     expansionDirections[index],
                     rectangleBorderTypes[index],
+                    rectangleWithTextSelectionLayout.getTextSelectionLayout()
+                            == Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT,
                     mStrokeWidth);
             cornerAnimators.add(createCornerAnimator(shape, updateListener));
             shapes.add(shape);
-            index++;
         }
 
         final RectangleList rectangleList = new RectangleList(shapes);
@@ -511,7 +572,8 @@ final class SmartSelectSprite {
     }
 
     private static @RoundedRectangleShape.ExpansionDirection int[] generateDirections(
-            final RectF centerRectangle, final List<RectF> rectangles) {
+            final RectangleWithTextSelectionLayout centerRectangle,
+            final List<RectangleWithTextSelectionLayout> rectangles) {
         final @RoundedRectangleShape.ExpansionDirection int[] result = new int[rectangles.size()];
 
         final int centerRectangleIndex = rectangles.indexOf(centerRectangle);
@@ -538,8 +600,8 @@ final class SmartSelectSprite {
     }
 
     private static @RoundedRectangleShape.RectangleBorderType int[] generateBorderTypes(
-            final List<RectF> rectangles) {
-        final @RoundedRectangleShape.RectangleBorderType int[] result = new int[rectangles.size()];
+            final int numberOfRectangles) {
+        final @RoundedRectangleShape.RectangleBorderType int[] result = new int[numberOfRectangles];
 
         for (int i = 1; i < result.length - 1; ++i) {
             result[i] = RoundedRectangleShape.RectangleBorderType.OVERSHOOT;

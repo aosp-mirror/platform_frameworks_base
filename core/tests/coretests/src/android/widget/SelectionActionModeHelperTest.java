@@ -18,6 +18,8 @@ package android.widget;
 
 import static org.junit.Assert.assertEquals;
 
+import static java.util.function.Function.identity;
+
 import android.graphics.PointF;
 import android.graphics.RectF;
 
@@ -105,7 +107,7 @@ public final class SelectionActionModeHelperTest {
         final PointF point = new PointF(pointX, pointY);
         final PointF adjustedPoint =
                 SelectionActionModeHelper.movePointInsideNearestRectangle(point,
-                        mRectFList);
+                        mRectFList, identity());
 
         assertEquals(expectedPointX, adjustedPoint.x, 0.0f);
         assertEquals(expectedPointY, adjustedPoint.y, 0.0f);
@@ -254,7 +256,8 @@ public final class SelectionActionModeHelperTest {
         final List<RectF> result = new ArrayList<>();
         final int size = inputRectangles.length;
         for (int index = 0; index < size; ++index) {
-            SelectionActionModeHelper.mergeRectangleIntoList(result, inputRectangles[index]);
+            SelectionActionModeHelper.mergeRectangleIntoList(result, inputRectangles[index],
+                    identity(), identity());
         }
 
         assertEquals(expectedOutput, result);
