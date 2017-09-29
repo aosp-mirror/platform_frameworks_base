@@ -80,9 +80,6 @@ class RippleForeground extends RippleComponent {
     private float mTweenX = 0;
     private float mTweenY = 0;
 
-    /** Whether this ripple is bounded. */
-    private boolean mIsBounded;
-
     /** Whether this ripple has finished its exit animation. */
     private boolean mHasFinishedExit;
 
@@ -90,7 +87,6 @@ class RippleForeground extends RippleComponent {
             boolean isBounded, boolean forceSoftware) {
         super(owner, bounds, forceSoftware);
 
-        mIsBounded = isBounded;
         mStartingX = startingX;
         mStartingY = startingY;
 
@@ -210,31 +206,15 @@ class RippleForeground extends RippleComponent {
         return (int) (1000 * mOpacity / WAVE_OPACITY_DECAY_VELOCITY + 0.5f);
     }
 
-    /**
-     * Compute target values that are dependent on bounding.
-     */
-    private void computeBoundedTargetValues() {
-        mTargetX = (mClampedStartingX - mBounds.exactCenterX()) * .7f;
-        mTargetY = (mClampedStartingY - mBounds.exactCenterY()) * .7f;
-        mTargetRadius = mBoundedRadius;
-    }
-
     @Override
     protected Animator createSoftwareExit() {
         final int radiusDuration;
         final int originDuration;
         final int opacityDuration;
-        if (mIsBounded) {
-            computeBoundedTargetValues();
 
-            radiusDuration = BOUNDED_RADIUS_EXIT_DURATION;
-            originDuration = BOUNDED_ORIGIN_EXIT_DURATION;
-            opacityDuration = BOUNDED_OPACITY_EXIT_DURATION;
-        } else {
-            radiusDuration = getRadiusExitDuration();
-            originDuration = radiusDuration;
-            opacityDuration = getOpacityExitDuration();
-        }
+        radiusDuration = getRadiusExitDuration();
+        originDuration = radiusDuration;
+        opacityDuration = getOpacityExitDuration();
 
         final ObjectAnimator tweenRadius = ObjectAnimator.ofFloat(this, TWEEN_RADIUS, 1);
         tweenRadius.setAutoCancel(true);
@@ -263,17 +243,10 @@ class RippleForeground extends RippleComponent {
         final int radiusDuration;
         final int originDuration;
         final int opacityDuration;
-        if (mIsBounded) {
-            computeBoundedTargetValues();
 
-            radiusDuration = BOUNDED_RADIUS_EXIT_DURATION;
-            originDuration = BOUNDED_ORIGIN_EXIT_DURATION;
-            opacityDuration = BOUNDED_OPACITY_EXIT_DURATION;
-        } else {
-            radiusDuration = getRadiusExitDuration();
-            originDuration = radiusDuration;
-            opacityDuration = getOpacityExitDuration();
-        }
+        radiusDuration = getRadiusExitDuration();
+        originDuration = radiusDuration;
+        opacityDuration = getOpacityExitDuration();
 
         final float startX = getCurrentX();
         final float startY = getCurrentY();
