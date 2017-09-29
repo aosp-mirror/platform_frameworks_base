@@ -795,18 +795,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @param uid Uid to check against for removal of a job.
      *
      */
-    public void cancelJobsForUid(int uid, String reason) {
+    public boolean cancelJobsForUid(int uid, String reason) {
         if (uid == Process.SYSTEM_UID) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
-            return;
+            return false;
         }
+
+        boolean jobsCanceled = false;
         synchronized (mLock) {
             final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
             for (int i=0; i<jobsForUid.size(); i++) {
                 JobStatus toRemove = jobsForUid.get(i);
                 cancelJobImplLocked(toRemove, null, reason);
+                jobsCanceled = true;
             }
         }
+        return jobsCanceled;
     }
 
     /**
@@ -816,13 +820,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @param uid Uid of the calling client.
      * @param jobId Id of the job, provided at schedule-time.
      */
-    public void cancelJob(int uid, int jobId) {
+    public boolean cancelJob(int uid, int jobId) {
         JobStatus toCancel;
         synchronized (mLock) {
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
             if (toCancel != null) {
                 cancelJobImplLocked(toCancel, null, "cancel() called by app");
             }
+            return (toCancel != null);
         }
     }
 
@@ -2144,6 +2149,39 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 pw.println("No matching executing jobs found.");
             }
         }
+        return 0;
+    }
+
+    // Shell command infrastructure: cancel a scheduled job
+    int executeCancelCommand(PrintWriter pw, String pkgName, int userId,
+            boolean hasJobId, int jobId) {
+        if (DEBUG) {
+            Slog.v(TAG, "executeCancelCommand(): " + pkgName + "/" + userId + " " + jobId);
+        }
+
+        int pkgUid = -1;
+        try {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            pkgUid = pm.getPackageUid(pkgName, 0, userId);
+        } catch (RemoteException e) { /* can't happen */ }
+
+        if (pkgUid < 0) {
+            pw.println("Package " + pkgName + " not found.");
+            return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+        }
+
+        if (!hasJobId) {
+            pw.println("Canceling all jobs for " + pkgName + " in user " + userId);
+            if (!cancelJobsForUid(pkgUid, "cancel shell command for package")) {
+                pw.println("No matching jobs found.");
+            }
+        } else {
+            pw.println("Canceling job " + pkgName + "/#" + jobId + " in user " + userId);
+            if (!cancelJob(pkgUid, jobId)) {
+                pw.println("No matching job found.");
+            }
+        }
+
         return 0;
     }
 
