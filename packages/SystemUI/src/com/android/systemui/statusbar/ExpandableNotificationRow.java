@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -452,6 +453,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             headsUpheight = mMaxHeadsUpHeightIncreased;
         } else {
             headsUpheight = mMaxHeadsUpHeight;
+        }
+        NotificationViewWrapper headsUpWrapper = layout.getVisibleWrapper(
+                NotificationContentView.VISIBLE_TYPE_HEADSUP);
+        if (headsUpWrapper != null) {
+            headsUpheight = Math.max(headsUpheight, headsUpWrapper.getMinLayoutHeight());
         }
         layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight,
                 mNotificationAmbientHeight);
@@ -1256,16 +1262,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void initDimens() {
-        mNotificationMinHeightLegacy = getFontScaledHeight(R.dimen.notification_min_height_legacy);
-        mNotificationMinHeight = getFontScaledHeight(R.dimen.notification_min_height);
-        mNotificationMinHeightLarge = getFontScaledHeight(
+        mNotificationMinHeightLegacy = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_min_height_legacy);
+        mNotificationMinHeight = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_min_height);
+        mNotificationMinHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_increased);
-        mNotificationMaxHeight = getFontScaledHeight(R.dimen.notification_max_height);
-        mNotificationAmbientHeight = getFontScaledHeight(R.dimen.notification_ambient_height);
-        mMaxHeadsUpHeightLegacy = getFontScaledHeight(
+        mNotificationMaxHeight = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_max_height);
+        mNotificationAmbientHeight = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_ambient_height);
+        mMaxHeadsUpHeightLegacy = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
-        mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
-        mMaxHeadsUpHeightIncreased = getFontScaledHeight(
+        mMaxHeadsUpHeight = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_max_heads_up_height);
+        mMaxHeadsUpHeightIncreased = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_increased);
 
         Resources res = getResources();
@@ -1277,17 +1288,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 res.getBoolean(R.bool.config_enableNonGroupedNotificationExpand);
         mShowGroupBackgroundWhenExpanded =
                 res.getBoolean(R.bool.config_showGroupNotificationBgWhenExpanded);
-    }
-
-    /**
-     * @param dimenId the dimen to look up
-     * @return the font scaled dimen as if it were in sp but doesn't shrink sizes below dp
-     */
-    private int getFontScaledHeight(int dimenId) {
-        int dimensionPixelSize = getResources().getDimensionPixelSize(dimenId);
-        float factor = Math.max(1.0f, getResources().getDisplayMetrics().scaledDensity /
-                getResources().getDisplayMetrics().density);
-        return (int) (dimensionPixelSize * factor);
     }
 
     /**

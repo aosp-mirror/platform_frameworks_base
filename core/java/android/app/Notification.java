@@ -6084,25 +6084,12 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            if (!increasedHeight) {
-                Message m = findLatestIncomingMessage();
-                CharSequence title = mConversationTitle != null
-                        ? mConversationTitle
-                        : (m == null) ? null : m.mSender;
-                CharSequence text = (m == null)
-                        ? null
-                        : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
-
-                return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
-                        mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
-            } else {
-                mBuilder.mOriginalActions = mBuilder.mActions;
-                mBuilder.mActions = new ArrayList<>();
-                RemoteViews remoteViews = makeBigContentView();
-                mBuilder.mActions = mBuilder.mOriginalActions;
-                mBuilder.mOriginalActions = null;
-                return remoteViews;
-            }
+            mBuilder.mOriginalActions = mBuilder.mActions;
+            mBuilder.mActions = new ArrayList<>();
+            RemoteViews remoteViews = makeBigContentView();
+            mBuilder.mActions = mBuilder.mOriginalActions;
+            mBuilder.mOriginalActions = null;
+            return remoteViews;
         }
 
         private Message findLatestIncomingMessage() {
@@ -6148,10 +6135,6 @@ public class Notification implements Parcelable
                     mBuilder.getMessagingLayoutResource(),
                     mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
                             .hideLargeIcon(isOneToOne).alwaysShowReply(true));
-            contentView.setViewLayoutMarginBottomDimen(R.id.line1,
-                    hasTitle ? R.dimen.notification_messaging_spacing : 0);
-            contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
-                    !mBuilder.mN.hasLargeIcon() ? 0 : (hasTitle ? 1 : 2));
             addExtras(mBuilder.mN.extras);
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
@@ -6185,49 +6168,14 @@ public class Notification implements Parcelable
             return title;
         }
 
-        private CharSequence makeMessageLine(Message m, Builder builder) {
-            BidiFormatter bidi = BidiFormatter.getInstance();
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            boolean colorize = builder.isColorized();
-            TextAppearanceSpan colorSpan;
-            CharSequence messageName;
-            if (TextUtils.isEmpty(m.mSender)) {
-                CharSequence replyName = mUserDisplayName == null ? "" : mUserDisplayName;
-                sb.append(bidi.unicodeWrap(replyName),
-                        makeFontColorSpan(colorize
-                                ? builder.getPrimaryTextColor()
-                                : mBuilder.resolveContrastColor()),
-                        0 /* flags */);
-            } else {
-                sb.append(bidi.unicodeWrap(m.mSender),
-                        makeFontColorSpan(colorize
-                                ? builder.getPrimaryTextColor()
-                                : Color.BLACK),
-                        0 /* flags */);
-            }
-            CharSequence text = m.mText == null ? "" : m.mText;
-            sb.append("  ").append(bidi.unicodeWrap(text));
-            return sb;
-        }
-
         /**
          * @hide
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            if (increasedHeight) {
-                return makeBigContentView();
-            }
-            Message m = findLatestIncomingMessage();
-            CharSequence title = mConversationTitle != null
-                    ? mConversationTitle
-                    : (m == null) ? null : m.mSender;
-            CharSequence text = (m == null)
-                    ? null
-                    : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
-
-            return mBuilder.applyStandardTemplateWithActions(mBuilder.getBigBaseLayoutResource(),
-                    mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
+            RemoteViews remoteViews = makeBigContentView();
+            remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
+            return remoteViews;
         }
 
         private static TextAppearanceSpan makeFontColorSpan(int color) {

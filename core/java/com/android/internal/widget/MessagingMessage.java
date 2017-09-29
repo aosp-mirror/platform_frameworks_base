@@ -145,6 +145,11 @@ public class MessagingMessage extends ImageFloatingTextView implements
     }
 
     @Override
+    public void setMaxDisplayedLines(int lines) {
+        setMaxLines(lines);
+    }
+
+    @Override
     public int getConsumedLines() {
         return getLineCount();
     }

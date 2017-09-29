@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
  */
 public class NotificationMessagingTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
+    private final int mMinHeightWithActions;
     private MessagingLayout mMessagingLayout;
     private View mContractedMessage;
 
@@ -40,6 +42,8 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
             ExpandableNotificationRow row) {
         super(ctx, view, row);
         mMessagingLayout = (MessagingLayout) view;
+        mMinHeightWithActions = NotificationUtils.getFontScaledHeight(ctx,
+                R.dimen.notification_messaging_actions_min_height);
     }
 
     private void resolveViews() {
@@ -68,5 +72,13 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
     @Override
     public void setRemoteInputVisible(boolean visible) {
         mMessagingLayout.showHistoricMessages(visible);
+    }
+
+    @Override
+    public int getMinLayoutHeight() {
+        if (mActionsContainer != null && mActionsContainer.getVisibility() != View.GONE) {
+            return mMinHeightWithActions;
+        }
+        return super.getMinLayoutHeight();
     }
 }

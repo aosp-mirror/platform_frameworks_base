@@ -186,7 +186,13 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 result += ((MessagingLinearLayout.MessagingChild) child).getConsumedLines();
             }
         }
-        return result;
+        // A group is usually taking up quite some space with the padding and the name, let's add 1
+        return result + 1;
+    }
+
+    @Override
+    public void setMaxDisplayedLines(int lines) {
+        mMessageContainer.setMaxDisplayedLines(lines);
     }
 
     public Icon getAvatarSymbolIfMatching(CharSequence avatarName, String avatarSymbol,

@@ -42,12 +42,7 @@ public class MessagingLinearLayout extends ViewGroup {
      */
     private int mSpacing;
 
-    /**
-     * The maximum height allowed.
-     */
-    private int mMaxHeight;
-
-    private int mIndentLines;
+    private int mMaxDisplayedLines = Integer.MAX_VALUE;
 
     /**
      * Id of the child that's also visible in the contracted layout.
@@ -111,6 +106,7 @@ public class MessagingLinearLayout extends ViewGroup {
 
             totalHeight = mPaddingTop + mPaddingBottom;
             boolean first = true;
+            int linesRemaining = mMaxDisplayedLines;
 
             // Starting from the bottom: we measure every view as if it were the only one. If it still
 
@@ -121,7 +117,11 @@ public class MessagingLinearLayout extends ViewGroup {
                 }
                 final View child = getChildAt(i);
                 LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-
+                MessagingChild messagingChild = null;
+                if (child instanceof MessagingChild) {
+                    messagingChild = (MessagingChild) child;
+                    messagingChild.setMaxDisplayedLines(linesRemaining);
+                }
                 int spacing = first ? 0 : mSpacing;
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
                         - mPaddingTop - mPaddingBottom + spacing);
@@ -131,8 +131,8 @@ public class MessagingLinearLayout extends ViewGroup {
                         lp.bottomMargin + spacing);
                 first = false;
                 int measureType = MessagingChild.MEASURED_NORMAL;
-                if (child instanceof MessagingChild) {
-                    measureType = ((MessagingChild) child).getMeasuredType();
+                if (messagingChild != null) {
+                    measureType = messagingChild.getMeasuredType();
                     linesRemaining -= messagingChild.getConsumedLines();
                 }
                 boolean isShortened = measureType == MessagingChild.MEASURED_SHORTENED;
@@ -143,7 +143,7 @@ public class MessagingLinearLayout extends ViewGroup {
                             child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
                                     + mPaddingLeft + mPaddingRight);
                     lp.hide = false;
-                    if (isShortened) {
+                    if (isShortened || linesRemaining <= 0) {
                         break;
                     }
                 } else {
@@ -239,21 +239,21 @@ public class MessagingLinearLayout extends ViewGroup {
     }
 
     /**
-     * Sets how many lines should be indented to avoid a floating image.
+     * Sets how many lines should be displayed at most
      */
     @RemotableViewMethod
-    public boolean setNumIndentLines(int numberLines) {
-        boolean changed = numberLines != mIndentLines;
-        mIndentLines = numberLines;
-        return changed;
+    public void setMaxDisplayedLines(int numberLines) {
+        mMaxDisplayedLines = numberLines;
     }
 
     public interface MessagingChild {
         int MEASURED_NORMAL = 0;
         int MEASURED_SHORTENED = 1;
         int MEASURED_TOO_SMALL = 2;
+
         int getMeasuredType();
         int getConsumedLines();
+        void setMaxDisplayedLines(int lines);
     }
 
     public static class LayoutParams extends MarginLayoutParams {
