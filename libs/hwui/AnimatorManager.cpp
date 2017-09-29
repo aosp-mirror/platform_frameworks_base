@@ -71,9 +71,11 @@ void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
 
 void AnimatorManager::pushStaging() {
     if (mNewAnimators.size()) {
-        LOG_ALWAYS_FATAL_IF(!mAnimationHandle,
-                "Trying to start new animators on %p (%s) without an animation handle!",
-                &mParent, mParent.getName());
+        if (CC_UNLIKELY(!mAnimationHandle)) {
+            ALOGW("Trying to start new animators on %p (%s) without an animation handle!",
+                    &mParent, mParent.getName());
+            return;
+        }
 
         // Only add new animators that are not already in the mAnimators list
         for (auto& anim : mNewAnimators) {

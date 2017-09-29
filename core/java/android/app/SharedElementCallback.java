@@ -176,7 +176,7 @@ public abstract class SharedElementCallback {
             Drawable d = imageView.getDrawable();
             Drawable bg = imageView.getBackground();
             if (d != null && (bg == null || bg.getAlpha() == 0)) {
-                Bitmap bitmap = TransitionUtils.createDrawableBitmap(d);
+                Bitmap bitmap = TransitionUtils.createDrawableBitmap(d, imageView);
                 if (bitmap != null) {
                     Bundle bundle = new Bundle();
                     if (bitmap.getConfig() != Bitmap.Config.HARDWARE) {

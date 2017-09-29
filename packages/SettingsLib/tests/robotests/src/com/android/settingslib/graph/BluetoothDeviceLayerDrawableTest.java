@@ -100,4 +100,15 @@ public class BluetoothDeviceLayerDrawableTest {
         assertThat(twinDrawable.getLayerInsetTop(1)).isEqualTo(
                 drawable.getLayerInsetTop(1));
     }
+
+    @Test
+    public void testCreateLayerDrawable_bluetoothDrawable_hasCorrectFrameColor() {
+        BluetoothDeviceLayerDrawable drawable = BluetoothDeviceLayerDrawable.createLayerDrawable(
+                mContext, RES_ID, BATTERY_LEVEL);
+        BluetoothDeviceLayerDrawable.BatteryMeterDrawable batteryMeterDrawable =
+                (BluetoothDeviceLayerDrawable.BatteryMeterDrawable) drawable.getDrawable(1);
+
+        assertThat(batteryMeterDrawable.mFrameColor).isEqualTo(
+                mContext.getColor(R.color.meter_background_color));
+    }
 }

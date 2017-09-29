@@ -115,7 +115,7 @@ public class TransitionUtils {
     /**
      * Get a copy of bitmap of given drawable, return null if intrinsic size is zero
      */
-    public static Bitmap createDrawableBitmap(Drawable drawable) {
+    public static Bitmap createDrawableBitmap(Drawable drawable, View hostView) {
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         if (width <= 0 || height <= 0) {
@@ -128,7 +128,7 @@ public class TransitionUtils {
         }
         int bitmapWidth = (int) (width * scale);
         int bitmapHeight = (int) (height * scale);
-        final RenderNode node = RenderNode.create("TransitionUtils", null);
+        final RenderNode node = RenderNode.create("TransitionUtils", hostView);
         node.setLeftTopRightBottom(0, 0, width, height);
         node.setClipToBounds(false);
         final DisplayListCanvas canvas = node.start(width, height);
@@ -159,17 +159,20 @@ public class TransitionUtils {
      * @return A bitmap of the given view or null if bounds has no width or height.
      */
     public static Bitmap createViewBitmap(View view, Matrix matrix, RectF bounds) {
+        if (!view.isAttachedToWindow()) {
+            return null;
+        }
         Bitmap bitmap = null;
         int bitmapWidth = Math.round(bounds.width());
         int bitmapHeight = Math.round(bounds.height());
         if (bitmapWidth > 0 && bitmapHeight > 0) {
-            float scale = Math.min(1f, ((float)MAX_IMAGE_SIZE) / (bitmapWidth * bitmapHeight));
+            float scale = Math.min(1f, ((float) MAX_IMAGE_SIZE) / (bitmapWidth * bitmapHeight));
             bitmapWidth *= scale;
             bitmapHeight *= scale;
             matrix.postTranslate(-bounds.left, -bounds.top);
             matrix.postScale(scale, scale);
 
-            final RenderNode node = RenderNode.create("TransitionUtils", null);
+            final RenderNode node = RenderNode.create("TransitionUtils", view);
             node.setLeftTopRightBottom(0, 0, bitmapWidth, bitmapHeight);
             node.setClipToBounds(false);
             final DisplayListCanvas canvas = node.start(bitmapWidth, bitmapHeight);

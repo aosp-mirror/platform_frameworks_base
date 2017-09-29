@@ -47,6 +47,19 @@ public class AutofillPopupWindow extends PopupWindow {
     private final WindowPresenter mWindowPresenter;
     private WindowManager.LayoutParams mWindowLayoutParams;
 
+    private final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
+            new View.OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            /* ignore - handled by the super class */
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            dismiss();
+        }
+    };
+
     /**
      * Creates a popup window with a presenter owning the window and responsible for
      * showing/hiding/updating the backing window. This can be useful of the window is
@@ -208,7 +221,21 @@ public class AutofillPopupWindow extends PopupWindow {
         p.packageName = anchor.getContext().getPackageName();
         mWindowPresenter.show(p, getTransitionEpicenter(), isLayoutInsetDecor(),
                 anchor.getLayoutDirection());
-        return;
+    }
+
+    @Override
+    protected void attachToAnchor(View anchor, int xoff, int yoff, int gravity) {
+        super.attachToAnchor(anchor, xoff, yoff, gravity);
+        anchor.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
+    }
+
+    @Override
+    protected void detachFromAnchor() {
+        final View anchor = getAnchor();
+        if (anchor != null) {
+            anchor.removeOnAttachStateChangeListener(mOnAttachStateChangeListener);
+        }
+        super.detachFromAnchor();
     }
 
     @Override

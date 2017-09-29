@@ -308,7 +308,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
-import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -408,7 +407,6 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
@@ -1212,8 +1210,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int[] mDeviceIdleWhitelist = new int[0];
 
-    int[] mDeviceIdleUserWhitelist = new int[0];
-
     /**
      * Set of app ids that are temporarily allowed to escape bg check due to high-pri message
      */
@@ -1694,6 +1690,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
+    static final int TOP_APP_KILLED_BY_LMK_MSG = 73;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1923,6 +1920,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int pid = msg.arg1;
                 final int uid = msg.arg2;
                 dispatchProcessDied(pid, uid);
+                break;
+            }
+            case TOP_APP_KILLED_BY_LMK_MSG: {
+                final String appName = (String) msg.obj;
+                final AlertDialog d = new BaseErrorDialog(mUiContext);
+                d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+                d.setTitle(mUiContext.getText(R.string.top_app_killed_title));
+                d.setMessage(mUiContext.getString(R.string.top_app_killed_message, appName));
+                d.setButton(DialogInterface.BUTTON_POSITIVE, mUiContext.getText(R.string.close),
+                        obtainMessage(DISMISS_DIALOG_UI_MSG, d));
+                d.show();
                 break;
             }
             case DISPATCH_UIDS_CHANGED_UI_MSG: {
@@ -5434,6 +5442,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doLowMem = app.instr == null;
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
+                maybeNotifyTopAppKilled(app);
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid + ") has died: "
                         + ProcessList.makeOomAdjString(app.setAdj)
                         + ProcessList.makeProcStateString(app.setProcState));
@@ -5465,6 +5474,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
                     + thread.asBinder());
         }
+    }
+
+    /** Show system error dialog when a top app is killed by LMK */
+    void maybeNotifyTopAppKilled(ProcessRecord app) {
+        if (!shouldNotifyTopAppKilled(app)) {
+            return;
+        }
+
+        Message msg = mHandler.obtainMessage(TOP_APP_KILLED_BY_LMK_MSG);
+        msg.obj = mContext.getPackageManager().getApplicationLabel(app.info);
+        mUiHandler.sendMessage(msg);
+    }
+
+    /** Only show notification when the top app is killed on low ram devices */
+    private boolean shouldNotifyTopAppKilled(ProcessRecord app) {
+        return app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
+            ActivityManager.isLowRamDeviceStatic();
     }
 
     /**
@@ -7869,15 +7895,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
         enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
                 "getIntentForIntentSender()");
@@ -8540,7 +8557,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-//xxx
     // Unified app-op and target sdk check
     int appRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
@@ -8550,14 +8566,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return ActivityManager.APP_START_MODE_DELAYED_RIGID;
         }
-        if (uid >= Process.FIRST_APPLICATION_UID && mForceAppStandby) {
-
-            // This is used for implicit broadcasts. User-whitelist should still affect it.
-            if (!isOnDeviceIdleUserWhitelistLocked(uid)) {
-                return ActivityManager.APP_START_MODE_DELAYED;
-            }
-        }
-
         // ...and legacy apps get an AppOp check
         int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
                 uid, packageName);
@@ -8670,11 +8678,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return Arrays.binarySearch(mDeviceIdleWhitelist, appId) >= 0
                 || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0
                 || mPendingTempWhitelist.indexOfKey(uid) >= 0;
-    }
-
-    boolean isOnDeviceIdleUserWhitelistLocked(int uid) {
-        final int appId = UserHandle.getAppId(uid);
-        return Arrays.binarySearch(mDeviceIdleUserWhitelist, appId) >= 0;
     }
 
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
@@ -14173,26 +14176,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mSystemReady = true;
         }
 
-        final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
-        if (pmi != null) {
-            pmi.registerLowPowerModeObserver(
-                    new PowerManagerInternal.LowPowerModeListener() {
-                        @Override
-                        public int getServiceType() {
-                            return ServiceType.FORCE_APPS_STANDBY;
-                        }
-
-                        @Override
-                        public void onLowPowerModeChanged(PowerSaveState result) {
-                            updateForceAppStandby(result.batterySaverEnabled);
-                        }
-                    });
-            updateForceAppStandby(
-                    pmi.getLowPowerState(ServiceType.FORCE_APPS_STANDBY).batterySaverEnabled);
-        } else {
-            Slog.wtf(TAG, "PowerManagerInternal not found.");
-        }
-
         try {
             sTheRealBuildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
                     ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
@@ -14352,22 +14335,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
-        }
-    }
-
-    boolean mForceAppStandby;
-
-    void updateForceAppStandby(boolean enabled) {
-        synchronized (this) {
-            if (mForceAppStandby != enabled) {
-                mForceAppStandby = enabled;
-
-                if (mForceAppStandby) {
-                    Slog.w(TAG, "Forcing app standby.");
-
-                    doStopUidForIdleUidsLocked();
-                }
-            }
         }
     }
 
@@ -15940,7 +15907,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
-            pw.println("  mDeviceIdleUserWhitelist=" + Arrays.toString(mDeviceIdleUserWhitelist));
             pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
             if (mPendingTempWhitelist.size() > 0) {
                 pw.println("  mPendingTempWhitelist:");
@@ -23255,21 +23221,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void doStopUidForIdleUidsLocked() {
-        final int size = mActiveUids.size();
-        for (int i = 0; i < size; i++) {
-            final int uid = mActiveUids.keyAt(i);
-            if (uid < Process.FIRST_APPLICATION_UID) {
-                continue;
-            }
-            final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (!uidRec.idle) {
-                continue;
-            }
-            doStopUidLocked(uidRec.uid, uidRec);
-        }
-    }
-
     final void doStopUidLocked(int uid, final UidRecord uidRec) {
         mServices.stopInBackgroundLocked(uid);
         enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
@@ -24070,10 +24021,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setDeviceIdleWhitelist(int[] userAppids, int[] allAppids) {
+        public void setDeviceIdleWhitelist(int[] appids) {
             synchronized (ActivityManagerService.this) {
-                mDeviceIdleUserWhitelist = userAppids;
-                mDeviceIdleWhitelist = allAppids;
+                mDeviceIdleWhitelist = appids;
             }
         }
 

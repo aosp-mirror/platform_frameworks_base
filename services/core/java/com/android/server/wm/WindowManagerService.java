@@ -398,7 +398,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
-    // final boolean mAllowAnimationsInLowPowerMode;
+    final boolean mAllowAnimationsInLowPowerMode;
 
     final boolean mAllowBootMessages;
 
@@ -1039,8 +1039,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_defaultInTouchMode);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
-//        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
-//                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
+        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
@@ -1086,7 +1086,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 public void onLowPowerModeChanged(PowerSaveState result) {
                     synchronized (mWindowMap) {
                         final boolean enabled = result.batterySaverEnabled;
-                        if (mAnimationsDisabled != enabled) {
+                        if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
                             mAnimationsDisabled = enabled;
                             dispatchNewAnimatorScaleLocked(null);
                         }
@@ -2186,8 +2186,18 @@ public class WindowManagerService extends IWindowManager.Stub
             // and needs process it before handling the corresponding window frame. the variable
             // {@code mergedConfiguration} is an out parameter that will be passed back to the
             // client over IPC and checked there.
-            win.getMergedConfiguration(mergedConfiguration);
-            win.setReportedConfiguration(mergedConfiguration);
+            // Note: in the cases where the window is tied to an activity, we should not send a
+            // configuration update when the window has requested to be hidden. Doing so can lead
+            // to the client erroneously accepting a configuration that would have otherwise caused
+            // an activity restart. We instead hand back the last reported
+            // {@link MergedConfiguration}.
+            if (win.mAppToken == null || !win.mAppToken.isClientHidden()) {
+                win.getMergedConfiguration(mergedConfiguration);
+            } else {
+                win.getLastReportedMergedConfiguration(mergedConfiguration);
+            }
+
+            win.setLastReportedMergedConfiguration(mergedConfiguration);
 
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);

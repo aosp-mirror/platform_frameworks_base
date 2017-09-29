@@ -1116,6 +1116,11 @@
     <!-- Is the lock-screen disabled for new users by default -->
     <bool name="config_disableLockscreenByDefault">false</bool>
 
+    <!-- If true, enables verification of the lockscreen credential in the factory reset protection
+        flow. This should be true if gatekeeper / weaver credentials can still be checked after a
+        factory reset. -->
+    <bool name="config_enableCredentialFactoryResetProtection">true</bool>
+
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Launch all apps intent
@@ -1352,7 +1357,7 @@
 
     <!-- The package of the time zone rules updater application. Expected to be the same
          for all Android devices that support APK-based time zone rule updates.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          The package referenced here must have the android.permission.UPDATE_TIME_ZONE_RULES
@@ -1363,7 +1368,7 @@
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          [This is only used if config_enableUpdateableTimeZoneRules and
@@ -3018,7 +3023,7 @@
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
     <!-- Volume level of in-call notification tone playback [0..1] -->
-    <item name="config_inCallNotificationVolume" format="float" type="dimen">.25</item>
+    <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
 
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>

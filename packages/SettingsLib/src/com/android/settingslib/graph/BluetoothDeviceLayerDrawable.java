@@ -73,7 +73,7 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
         final Drawable deviceDrawable = context.getDrawable(resId);
 
         final BatteryMeterDrawable batteryDrawable = new BatteryMeterDrawable(context,
-                R.color.meter_background_color, batteryLevel);
+                context.getColor(R.color.meter_background_color), batteryLevel);
         final int pad = context.getResources().getDimensionPixelSize(R.dimen.bt_battery_padding);
         batteryDrawable.setPadding(pad, pad, pad, pad);
 
@@ -107,6 +107,8 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
     @VisibleForTesting
     static class BatteryMeterDrawable extends BatteryMeterDrawableBase {
         private final float mAspectRatio;
+        @VisibleForTesting
+        int mFrameColor;
 
         public BatteryMeterDrawable(Context context, int frameColor, int batteryLevel) {
             super(context, frameColor);
@@ -118,6 +120,7 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
             final int tintColor = Utils.getColorAttr(context, android.R.attr.colorControlNormal);
             setColorFilter(new PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN));
             setBatteryLevel(batteryLevel);
+            mFrameColor = frameColor;
         }
 
         @Override

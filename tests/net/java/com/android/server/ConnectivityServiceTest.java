@@ -19,6 +19,8 @@ package com.android.server;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
@@ -781,6 +783,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             return new FakeWakeupMessage(context, handler, cmdName, cmd, 0, 0, obj);
         }
 
+        @Override
+        public boolean hasService(String name) {
+            // Currenty, the only relevant service that ConnectivityService checks for is
+            // ETHERNET_SERVICE.
+            return Context.ETHERNET_SERVICE.equals(name);
+        }
+
         public WrappedNetworkMonitor getLastCreatedWrappedNetworkMonitor() {
             return mLastCreatedNetworkMonitor;
         }
@@ -928,6 +937,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // will fail. Failing here is much easier to debug.
         assertTrue(mCm.isNetworkSupported(TYPE_WIFI));
         assertTrue(mCm.isNetworkSupported(TYPE_MOBILE));
+        assertTrue(mCm.isNetworkSupported(TYPE_MOBILE_MMS));
+        assertFalse(mCm.isNetworkSupported(TYPE_MOBILE_FOTA));
+
+        // Check that TYPE_ETHERNET is supported. Unlike the asserts above, which only validate our
+        // mocks, this assert exercises the ConnectivityService code path that ensures that
+        // TYPE_ETHERNET is supported if the ethernet service is running.
+        assertTrue(mCm.isNetworkSupported(TYPE_ETHERNET));
     }
 
     @SmallTest
