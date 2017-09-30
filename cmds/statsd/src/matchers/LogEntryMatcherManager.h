@@ -17,19 +17,29 @@
 #ifndef LOG_ENTRY_MATCHER_MANAGER_H
 #define LOG_ENTRY_MATCHER_MANAGER_H
 
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include <log/logprint.h>
 #include <log/log_read.h>
+#include <log/logprint.h>
 #include <set>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
-using std::unordered_map;
 using std::string;
+using std::unordered_map;
 
 namespace android {
 namespace os {
 namespace statsd {
+
+typedef struct {
+    int tagId;
+    long timestamp_ns;
+    std::unordered_map<int, long> intMap;
+    std::unordered_map<int, std::string> strMap;
+    std::unordered_map<int, bool> boolMap;
+    std::unordered_map<int, float> floatMap;
+} LogEventWrapper;
 
 /**
  * Keeps track per log entry which simple log entry matchers match.
@@ -38,23 +48,19 @@ class LogEntryMatcherManager {
 public:
     LogEntryMatcherManager();
 
-    ~LogEntryMatcherManager() {};
+    ~LogEntryMatcherManager(){};
 
-    static bool matches(const LogEntryMatcher &matcher, const int tagId,
-                        const unordered_map<int, long> &intMap,
-                        const unordered_map<int, string> &strMap,
-                        const unordered_map<int, float> &floatMap,
-                        const unordered_map<int, bool> &boolMap);
+    static LogEventWrapper parseLogEvent(log_msg msg);
 
-    static bool matchesSimple(const SimpleLogEntryMatcher &simpleMatcher,
-                              const int tagId,
-                              const unordered_map<int, long> &intMap,
-                              const unordered_map<int, string> &strMap,
-                              const unordered_map<int, float> &floatMap,
-                              const unordered_map<int, bool> &boolMap);
+    static std::set<int> getTagIdsFromMatcher(const LogEntryMatcher& matcher);
+
+    static bool matches(const LogEntryMatcher& matcher, const LogEventWrapper& wrapper);
+
+    static bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher,
+                              const LogEventWrapper& wrapper);
 };
 
-} // namespace statsd
-} // namespace os
-} // namespace android
-#endif //LOG_ENTRY_MATCHER_MANAGER_H
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
+#endif  // LOG_ENTRY_MATCHER_MANAGER_H

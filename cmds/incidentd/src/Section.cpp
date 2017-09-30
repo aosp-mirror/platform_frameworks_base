@@ -16,15 +16,15 @@
 
 #define LOG_TAG "incidentd"
 
-#include "EncodedBuffer.h"
 #include "FdBuffer.h"
 #include "Privacy.h"
+#include "PrivacyBuffer.h"
 #include "Section.h"
 
 #include "io_util.h"
-#include "protobuf.h"
 #include "section_list.h"
 
+#include <android/util/protobuf.h>
 #include <private/android_filesystem_config.h>
 #include <binder/IServiceManager.h>
 #include <map>
@@ -32,8 +32,13 @@
 #include <wait.h>
 #include <unistd.h>
 
+using namespace android::util;
 using namespace std;
 
+// special section ids
+const int FIELD_ID_INCIDENT_HEADER = 1;
+
+// incident section parameters
 const int   WAIT_MAX = 5;
 const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
 const char* INCIDENT_HELPER = "/system/bin/incident_helper";
@@ -127,7 +132,8 @@ static status_t
 write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* requests)
 {
     status_t err = -EBADF;
-    EncodedBuffer encodedBuffer(buffer, get_privacy_of_section(id));
+    EncodedBuffer::iterator data = buffer.data();
+    PrivacyBuffer privacyBuffer(get_privacy_of_section(id), data);
     int writeable = 0;
 
     // The streaming ones, group requests by spec in order to save unnecessary strip operations
@@ -143,34 +149,34 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
 
     for (map<PrivacySpec, vector<sp<ReportRequest>>>::iterator mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
         PrivacySpec spec = mit->first;
-        err = encodedBuffer.strip(spec);
-        if (err != NO_ERROR) return err; // it means the encodedBuffer data is corrupted.
-        if (encodedBuffer.size() == 0) continue;
+        err = privacyBuffer.strip(spec);
+        if (err != NO_ERROR) return err; // it means the privacyBuffer data is corrupted.
+        if (privacyBuffer.size() == 0) continue;
 
         for (vector<sp<ReportRequest>>::iterator it = mit->second.begin(); it != mit->second.end(); it++) {
             sp<ReportRequest> request = *it;
-            err = write_section_header(request->fd, id, encodedBuffer.size());
+            err = write_section_header(request->fd, id, privacyBuffer.size());
             if (err != NO_ERROR) { request->err = err; continue; }
-            err = encodedBuffer.flush(request->fd);
+            err = privacyBuffer.flush(request->fd);
             if (err != NO_ERROR) { request->err = err; continue; }
             writeable++;
-            ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, encodedBuffer.size(), request->fd, spec.dest);
+            ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, privacyBuffer.size(), request->fd, spec.dest);
         }
-        encodedBuffer.clear();
+        privacyBuffer.clear();
     }
 
     // The dropbox file
     if (requests->mainFd() >= 0) {
-        err = encodedBuffer.strip(get_default_dropbox_spec());
+        err = privacyBuffer.strip(get_default_dropbox_spec());
         if (err != NO_ERROR) return err; // the buffer data is corrupted.
-        if (encodedBuffer.size() == 0) goto DONE;
+        if (privacyBuffer.size() == 0) goto DONE;
 
-        err = write_section_header(requests->mainFd(), id, encodedBuffer.size());
+        err = write_section_header(requests->mainFd(), id, privacyBuffer.size());
         if (err != NO_ERROR) { requests->setMainFd(-1); goto DONE; }
-        err = encodedBuffer.flush(requests->mainFd());
+        err = privacyBuffer.flush(requests->mainFd());
         if (err != NO_ERROR) { requests->setMainFd(-1); goto DONE; }
         writeable++;
-        ALOGD("Section %d flushed %zu bytes to dropbox %d", id, encodedBuffer.size(), requests->mainFd());
+        ALOGD("Section %d flushed %zu bytes to dropbox %d", id, privacyBuffer.size(), requests->mainFd());
     }
 
 DONE:

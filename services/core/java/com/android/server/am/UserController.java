@@ -115,7 +115,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 class UserController implements Handler.Callback {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
 
-    // Maximum number of users we allow to be running at a time.
+    /**
+     * Maximum number of users we allow to be running at a time, including the system user and
+     * its profiles.
+     * Note changing this to 2 is not recommended, since that would mean, if the user uses
+     * work profile and then switch to a secondary user, then the work profile user would be killed,
+     * which should work fine, but aggressively killing the work profile user that has just been
+     * running could cause data loss.  (Even without work profile, witching from secondary user A
+     * to secondary user B would cause similar issues on user B.)
+     *
+     * TODO: Consider adding or replacing with "MAX_RUNNING_*SECONDARY*_USERS", which is the max
+     * number of running *secondary, switchable* users.
+     */
     static final int MAX_RUNNING_USERS = 3;
 
     // Amount of time we wait for observers to handle a user switch before

@@ -52,6 +52,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.permission.BasePermission;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

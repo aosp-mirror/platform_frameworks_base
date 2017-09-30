@@ -17,8 +17,13 @@
 #define STATS_LOG_PROCESSOR_H
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "DropboxWriter.h"
+#include "LogReader.h"
+#include "metrics/MetricsManager.h"
 #include "parse_util.h"
 
+#include <log/logprint.h>
+#include <stdio.h>
 #include <unordered_map>
 
 namespace android {
@@ -32,26 +37,15 @@ public:
 
     virtual void OnLogEvent(const log_msg& msg);
 
-    virtual void UpdateConfig(const int config_source, StatsdConfig config);
+    void UpdateConfig(const int config_source, const StatsdConfig& config);
 
 private:
-    /**
-     * Numeric to string tag name mapping.
-     */
-    EventTagMap* m_tags;
-
-    /**
-     * Pretty printing format.
-     */
-    AndroidLogFormat* m_format;
-
+    // TODO: use EventMetrics to log the events.
     DropboxWriter m_dropbox_writer;
 
-    /**
-     * Configs that have been specified, keyed by the source. This allows us to override the config
-     * from a source later.
-     */
-    std::unordered_map<int, StatsdConfig> m_configs;
+    std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
+
+    static StatsdConfig buildFakeConfig();
 };
 
 }  // namespace statsd

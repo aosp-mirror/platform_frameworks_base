@@ -35,6 +35,7 @@ import com.android.server.SystemService;
 /**
  * Helper service for statsd (the native stats management service in cmds/statsd/).
  * Used for registering and receiving alarms on behalf of statsd.
+ * @hide
  */
 public class StatsCompanionService extends IStatsCompanionService.Stub {
     static final String TAG = "StatsCompanionService";

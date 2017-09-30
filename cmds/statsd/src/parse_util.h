@@ -21,8 +21,16 @@
 
 #include <log/logprint.h>
 
-using android::os::statsd::EventMetricData;
+namespace android {
+namespace os {
+namespace statsd {
 
-EventMetricData parse(const log_msg msg);
+EventMetricData parse(log_msg msg);
+
+int getTagId(log_msg msg);
+
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
 #endif  // PARSE_UTIL_H

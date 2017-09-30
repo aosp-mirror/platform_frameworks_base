@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef PROTOBUF_H
-#define PROTOBUF_H
+#ifndef ANDROID_UTIL_PROTOBUF_H
+#define ANDROID_UTIL_PROTOBUF_H
 
 #include <stdint.h>
-#include <vector>
+
+namespace android {
+namespace util {
 
 using namespace std;
 
@@ -50,19 +52,7 @@ uint8_t* write_raw_varint(uint8_t* buf, uint32_t val);
  */
 uint8_t* write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size);
 
-/**
- * Write a varint into a vector. Return the size of the varint.
- */
-size_t write_raw_varint(vector<uint8_t>* buf, uint32_t val);
+} // util
+} // android
 
-/**
- * Write a protobuf header. Return the size of the header.
- */
-size_t write_header(vector<uint8_t>* buf, uint32_t fieldId, uint8_t wireType);
-
-enum {
-    // IncidentProto.header
-    FIELD_ID_INCIDENT_HEADER = 1
-};
-
-#endif  // PROTOBUF_H
+#endif  // ANDROID_UTIL_PROTOUBUF_H

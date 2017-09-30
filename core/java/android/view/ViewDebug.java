@@ -1427,7 +1427,9 @@ public class ViewDebug {
                 result.append(name).append(' ');
             }
         }
-        result.deleteCharAt(result.length() - 1);
+        if (result.length() > 0) {
+            result.deleteCharAt(result.length() - 1);
+        }
         return result.toString();
     }
 

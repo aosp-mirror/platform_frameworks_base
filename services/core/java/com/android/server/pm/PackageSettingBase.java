@@ -24,14 +24,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
-import android.os.storage.VolumeInfo;
 import android.service.pm.PackageProto;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +40,7 @@ import java.util.Set;
 /**
  * Settings base class for pending and resolved classes.
  */
-abstract class PackageSettingBase extends SettingBase {
+public abstract class PackageSettingBase extends SettingBase {
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -230,6 +228,9 @@ abstract class PackageSettingBase extends SettingBase {
         return updateAvailable;
     }
 
+    public boolean isSharedUser() {
+        return false;
+    }
     /**
      * Makes a shallow copy of the given package settings.
      *

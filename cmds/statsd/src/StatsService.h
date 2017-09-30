@@ -24,7 +24,6 @@
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
-#include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <utils/Looper.h>
 
 #include <deque>

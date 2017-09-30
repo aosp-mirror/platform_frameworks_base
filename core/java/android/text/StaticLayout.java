@@ -28,6 +28,7 @@ import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.ArrayUtils;
@@ -430,7 +431,6 @@ public class StaticLayout extends Layout {
          * Then, for each run within the paragraph:
          *  - one of the following, depending on the type of run:
          *    + addStyleRun (a text run, to be measured in native code)
-         *    + addMeasuredRun (a run already measured in Java, passed into native code)
          *    + addReplacementRun (a replacement run, width is given)
          *
          * After measurement, nGetWidths() is valid if the widths are needed (eg for ellipsis).
@@ -439,29 +439,29 @@ public class StaticLayout extends Layout {
          * After all paragraphs, call finish() to release expensive buffers.
          */
 
-        /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
+        private Pair<String, long[]> getLocaleAndHyphenatorIfChanged(TextPaint paint) {
             final LocaleList locales = paint.getTextLocales();
             final String languageTags;
             long[] hyphenators;
             if (!locales.equals(mLocales)) {
-                languageTags = locales.toLanguageTags();
-                hyphenators = getHyphenators(locales);
+                mLocales = locales;
+                return new Pair(locales.toLanguageTags(), getHyphenators(locales));
             } else {
                 // passing null means keep current locale.
                 // TODO: move locale change detection to native.
-                languageTags = null;
-                hyphenators = null;
+                return new Pair(null, null);
             }
+        }
+
+        /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
+            Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
             return nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl,
-                    languageTags, hyphenators);
+                    locHyph.first, locHyph.second);
         }
 
-        /* package */ void addMeasuredRun(int start, int end, float[] widths) {
-            nAddMeasuredRun(mNativePtr, start, end, widths);
-        }
-
-        /* package */ void addReplacementRun(int start, int end, float width) {
-            nAddReplacementRun(mNativePtr, start, end, width);
+        /* package */ void addReplacementRun(TextPaint paint, int start, int end, float width) {
+            Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
+            nAddReplacementRun(mNativePtr, start, end, width, locHyph.first, locHyph.second);
         }
 
         /**
@@ -809,6 +809,9 @@ public class StaticLayout extends Layout {
                     variableTabStops = stops;
                 }
             }
+
+            // TODO: Move locale tracking code to native.
+            b.mLocales = null;  // Reset the locale tracking.
 
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
@@ -1539,14 +1542,14 @@ public class StaticLayout extends Layout {
             @IntRange(from = 0) int indentsOffset);
 
     private static native float nAddStyleRun(
-            /* non zero */ long nativePtr, /* non zero */ long nativePaint,
+            /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl,
             @Nullable String languageTags, @Nullable long[] hyphenators);
 
-    private static native void nAddMeasuredRun(long nativePtr,
-            int start, int end, float[] widths);
-
-    private static native void nAddReplacementRun(long nativePtr, int start, int end, float width);
+    private static native void nAddReplacementRun(/* non-zero */ long nativePtr,
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @FloatRange(from = 0.0f) float width, @Nullable String languageTags,
+            @Nullable long[] hyphenators);
 
     private static native void nGetWidths(long nativePtr, float[] widths);
 
