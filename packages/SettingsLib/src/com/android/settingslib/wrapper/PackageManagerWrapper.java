@@ -228,5 +228,12 @@ public class PackageManagerWrapper {
     public CharSequence getApplicationLabel(ApplicationInfo info) {
         return mPm.getApplicationLabel(info);
     }
+
+    /**
+     * Calls {@code PackageManager.queryBroadcastReceivers}
+     */
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
+        return mPm.queryBroadcastReceivers(intent, flags);
+    }
 }
 
