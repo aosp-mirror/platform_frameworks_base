@@ -165,40 +165,26 @@ class MeasuredText {
             paint.getFontMetricsInt(fm);
         }
 
-        int p = mPos;
+        final int p = mPos;
         mPos = p + len;
 
-        // try to do widths measurement in native code, but use Java if paint has been subclassed
-        // FIXME: may want to eliminate special case for subclass
-        float[] widths = null;
-        if (mBuilder == null || paint.getClass() != TextPaint.class) {
-            widths = mWidths;
-        }
         if (mEasy) {
-            boolean isRtl = mDir != Layout.DIR_LEFT_TO_RIGHT;
-            float width = 0;
-            if (widths != null) {
-                width = paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, widths, p);
-                if (mBuilder != null) {
-                    mBuilder.addMeasuredRun(paint, p, p + len, widths);
-                }
+            final boolean isRtl = mDir != Layout.DIR_LEFT_TO_RIGHT;
+            if (mBuilder == null) {
+                return paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, mWidths, p);
             } else {
-                width = mBuilder.addStyleRun(paint, p, p + len, isRtl);
+                return mBuilder.addStyleRun(paint, p, p + len, isRtl);
             }
-            return width;
         }
 
         float totalAdvance = 0;
         int level = mLevels[p];
         for (int q = p, i = p + 1, e = p + len;; ++i) {
             if (i == e || mLevels[i] != level) {
-                boolean isRtl = (level & 0x1) != 0;
-                if (widths != null) {
+                final boolean isRtl = (level & 0x1) != 0;
+                if (mBuilder == null) {
                     totalAdvance +=
-                            paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, widths, q);
-                    if (mBuilder != null) {
-                        mBuilder.addMeasuredRun(paint, q, i, widths);
-                    }
+                            paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, mWidths, q);
                 } else {
                     totalAdvance += mBuilder.addStyleRun(paint, q, i, isRtl);
                 }

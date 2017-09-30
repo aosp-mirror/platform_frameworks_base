@@ -431,7 +431,6 @@ public class StaticLayout extends Layout {
          * Then, for each run within the paragraph:
          *  - one of the following, depending on the type of run:
          *    + addStyleRun (a text run, to be measured in native code)
-         *    + addMeasuredRun (a run already measured in Java, passed into native code)
          *    + addReplacementRun (a replacement run, width is given)
          *
          * After measurement, nGetWidths() is valid if the widths are needed (eg for ellipsis).
@@ -458,11 +457,6 @@ public class StaticLayout extends Layout {
             Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
             return nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl,
                     locHyph.first, locHyph.second);
-        }
-
-        /* package */ void addMeasuredRun(TextPaint paint, int start, int end, float[] widths) {
-            Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
-            nAddMeasuredRun(mNativePtr, start, end, widths, locHyph.first, locHyph.second);
         }
 
         /* package */ void addReplacementRun(TextPaint paint, int start, int end, float width) {
@@ -1550,10 +1544,6 @@ public class StaticLayout extends Layout {
     private static native float nAddStyleRun(
             /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl,
-            @Nullable String languageTags, @Nullable long[] hyphenators);
-
-    private static native void nAddMeasuredRun(/* non-zero */ long nativePtr,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end, @NonNull float[] widths,
             @Nullable String languageTags, @Nullable long[] hyphenators);
 
     private static native void nAddReplacementRun(/* non-zero */ long nativePtr,
