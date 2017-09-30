@@ -54,6 +54,9 @@ LOCAL_SRC_FILES := \
     src/statsd_config.proto \
     src/DropboxReader.cpp \
     src/matchers/LogEntryMatcherManager.cpp \
+    src/metrics/CountMetricProducer.cpp \
+    src/metrics/ConditionTracker.cpp \
+    src/metrics/MetricsManager.cpp \
 
 
 LOCAL_CFLAGS += \

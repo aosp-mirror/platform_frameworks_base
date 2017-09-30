@@ -13,43 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_LOG_PROCESSOR_H
-#define STATS_LOG_PROCESSOR_H
 
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "DropboxWriter.h"
-#include "LogReader.h"
-#include "metrics/MetricsManager.h"
-#include "parse_util.h"
+#ifndef METRIC_PRODUCER_H
+#define METRIC_PRODUCER_H
 
 #include <log/logprint.h>
-#include <stdio.h>
-#include <unordered_map>
+#include "../matchers/LogEntryMatcherManager.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsLogProcessor : public LogListener {
+// A MetricProducer is responsible for compute one single metrics, creating stats log report, and
+// writing the report to dropbox.
+class MetricProducer {
 public:
-    StatsLogProcessor();
-    virtual ~StatsLogProcessor();
+    virtual ~MetricProducer(){};
 
-    virtual void OnLogEvent(const log_msg& msg);
+    // Consume the stats log if it's interesting to this metric.
+    virtual void onMatchedLogEvent(const LogEventWrapper& event) = 0;
 
-    void UpdateConfig(const int config_source, const StatsdConfig& config);
+    // This is called when the metric collecting is done, e.g., when there is a new configuration
+    // coming. MetricProducer should do the clean up, and dump existing data to dropbox.
+    virtual void finish() = 0;
 
-private:
-    // TODO: use EventMetrics to log the events.
-    DropboxWriter m_dropbox_writer;
-
-    std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
-
-    static StatsdConfig buildFakeConfig();
+    virtual void onDumpReport() = 0;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATS_LOG_PROCESSOR_H
+#endif  // METRIC_PRODUCER_H

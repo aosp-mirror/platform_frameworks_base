@@ -17,22 +17,25 @@
 #include <log/log_event_list.h>
 #include <parse_util.h>
 
-using android::os::statsd::EventMetricData;
-using android::os::statsd::KeyValuePair;
+namespace android {
+namespace os {
+namespace statsd {
 
 static inline uint32_t get4LE(const char* src) {
     return src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24);
 }
 
-EventMetricData parse(log_msg msg)
-{
+int getTagId(log_msg msg) {
+    return get4LE(msg.msg());
+}
+
+EventMetricData parse(log_msg msg) {
     // dump all statsd logs to dropbox for now.
     // TODO: Add filtering, aggregation, etc.
     EventMetricData eventMetricData;
 
     // set tag.
-    char* eventData = msg.msg();
-    uint32_t tag = get4LE(eventData);
+    int tag = getTagId(msg);
     // TODO: Replace the following line when we can serialize on the fly.
     //eventMetricData.set_tag(tag);
 
@@ -124,3 +127,6 @@ EventMetricData parse(log_msg msg)
 
     return eventMetricData;
 }
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
