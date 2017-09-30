@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-#include "protobuf.h"
+#include <android/util/protobuf.h>
 
-uint8_t read_wire_type(uint32_t varint)
+namespace android {
+namespace util {
+
+uint8_t
+read_wire_type(uint32_t varint)
 {
     return (uint8_t) (varint & 0x07);
 }
 
-uint32_t read_field_id(uint32_t varint)
+uint32_t
+read_field_id(uint32_t varint)
 {
     return varint >> 3;
 }
@@ -49,24 +54,5 @@ write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size)
     return buf;
 }
 
-size_t
-write_raw_varint(vector<uint8_t>* buf, uint32_t val)
-{
-    size_t size = 0;
-    while (true) {
-        size++;
-        if ((val & ~0x7F) == 0) {
-            buf->push_back((uint8_t) val);
-            return size;
-        } else {
-            buf->push_back((uint8_t)((val & 0x7F) | 0x80));
-            val >>= 7;
-        }
-    }
-}
-
-size_t
-write_header(vector<uint8_t>* buf, uint32_t fieldId, uint8_t wireType)
-{
-    return write_raw_varint(buf, (fieldId << 3) | wireType);
-}
+} // util
+} // android
