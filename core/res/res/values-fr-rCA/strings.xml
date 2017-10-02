@@ -253,7 +253,7 @@
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> applications sollicitent la pile"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Mode sans échec"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Passer au profil professionnel"</string>
@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Annuler"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annuler"</string>
+    <string name="close" msgid="2318214661230355730">"FERMER"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Attention"</string>
     <string name="loading" msgid="7933681260296021180">"Chargement en cours..."</string>
     <string name="capital_on" msgid="1544682755514494298">"OUI"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Redimensionner"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Toujours afficher"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Réactivez ce mode en accédant à Paramètres système &gt; Applications &gt; Téléchargements"</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"L\'application ne répond pas"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise peut-être trop de mémoire."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas compatible avec le paramètre de taille d\'affichage actuel et peut se comporter de manière inattendue."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Toujours afficher"</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>

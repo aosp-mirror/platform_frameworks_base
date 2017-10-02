@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Ləğv et"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Ləğv et"</string>
+    <string name="close" msgid="2318214661230355730">"BAĞLAYIN"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Diqqət"</string>
     <string name="loading" msgid="7933681260296021180">"Yüklənir…"</string>
     <string name="capital_on" msgid="1544682755514494298">"AÇIQ"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Miqyas"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Həmişə göstər"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Bunları Sistem ayarlarında yenidən aktivləşdir Yüklənmiş &gt; Tətbiqlər &gt;."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Tətbiq cavab vermir"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> daha çox yaddaş istifadə edə bilər."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> cari Ekran ölçüsü ayarını dəstəkləmir və gözlənilməz şəkildə davrana bilər."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Həmişə göstərin"</string>
     <string name="smv_application" msgid="3307209192155442829">"Tətbiq <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) StrictMode siyasətini pozdu."</string>

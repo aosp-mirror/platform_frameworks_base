@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"ரத்துசெய்"</string>
     <string name="yes" msgid="5362982303337969312">"சரி"</string>
     <string name="no" msgid="5141531044935541497">"ரத்துசெய்"</string>
+    <string name="close" msgid="2318214661230355730">"மூடு"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"கவனத்திற்கு"</string>
     <string name="loading" msgid="7933681260296021180">"ஏற்றுகிறது..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ஆன்"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"அளவு"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"எப்போதும் காட்டு"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"சிஸ்டம் அமைப்பு &gt; பயன்பாடுகள் &gt; பதிவிறக்கம் என்பதில் இதை மீண்டும் இயக்கவும்."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"பயன்பாடு செயல்படவில்லை"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடு, அதிகளவு நினைவகத்தைப் பயன்படுத்தக்கூடும்."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"தற்போதைய திரை அளவு அமைப்பை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காததால், அது வழக்கத்திற்கு மாறாகச் செயல்படக்கூடும்."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"எப்போதும் காட்டு"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>

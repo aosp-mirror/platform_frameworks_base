@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Hủy"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Hủy"</string>
+    <string name="close" msgid="2318214661230355730">"ĐÓNG"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Chú ý"</string>
     <string name="loading" msgid="7933681260296021180">"Đang tải…"</string>
     <string name="capital_on" msgid="1544682755514494298">"BẬT"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Tỷ lệ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Luôn hiển thị"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Bật lại chế độ này trong cài đặt Hệ thống &gt; Ứng dụng &gt; Đã tải xuống."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Ứng dụng không phản hồi"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> có thể đang sử dụng quá nhiều bộ nhớ."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ cài đặt kích thước Màn hình hiện tại và có thể hoạt động không như mong đợi."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Luôn hiển thị"</string>
     <string name="smv_application" msgid="3307209192155442829">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (quá trình <xliff:g id="PROCESS">%2$s</xliff:g>) đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
@@ -1615,7 +1618,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Do quản trị viên của bạn cài đặt"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Do quản trị viên của bạn xóa"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng thời lượng pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Ứng dụng email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
