@@ -473,6 +473,12 @@
     <!-- [CHAR LIMIT=NONE] Label for displaying Bluetooth Audio Codec Parameters while streaming -->
     <string name="bluetooth_select_a2dp_codec_streaming_label">Streaming: <xliff:g id="streaming_parameter">%1$s</xliff:g></string>
 
+    <!-- Title of the developer option for DNS over TLS. -->
+    <string name="dns_tls">DNS over TLS</string>
+    <!-- Summary to explain the developer option for DNS over TLS.  This allows the user to
+    request that the system attempt TLS with all DNS servers, or none. -->
+    <string name="dns_tls_summary">If enabled, attempt DNS over TLS on port 853.</string>
+
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->

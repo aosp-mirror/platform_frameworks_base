@@ -17,9 +17,11 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -28,14 +30,15 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
@@ -175,6 +178,7 @@ public class SettingsBackupTest {
                     Settings.Global.DNS_RESOLVER_MIN_SAMPLES,
                     Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
                     Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
+                    Settings.Global.DNS_TLS_DISABLED,
                     Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY,
                     Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
                     Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
