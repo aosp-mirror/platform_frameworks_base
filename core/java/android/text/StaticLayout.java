@@ -453,10 +453,10 @@ public class StaticLayout extends Layout {
             }
         }
 
-        /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
+        /* package */ void addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
             Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
-            return nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl,
-                    locHyph.first, locHyph.second);
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl, locHyph.first,
+                    locHyph.second);
         }
 
         /* package */ void addReplacementRun(TextPaint paint, int start, int end, float width) {
@@ -1541,7 +1541,7 @@ public class StaticLayout extends Layout {
             @Nullable int[] indents, @Nullable int[] leftPaddings, @Nullable int[] rightPaddings,
             @IntRange(from = 0) int indentsOffset);
 
-    private static native float nAddStyleRun(
+    private static native void nAddStyleRun(
             /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl,
             @Nullable String languageTags, @Nullable long[] hyphenators);
