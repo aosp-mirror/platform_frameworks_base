@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Khansela"</string>
     <string name="yes" msgid="5362982303337969312">"KULUNGILE"</string>
     <string name="no" msgid="5141531044935541497">"Khansela"</string>
+    <string name="close" msgid="2318214661230355730">"VALA"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Qaphela"</string>
     <string name="loading" msgid="7933681260296021180">"Iyalayisha…"</string>
     <string name="capital_on" msgid="1544682755514494298">"VULIWE"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Isilinganisi"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Bonisa njalo"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Yenza kuphinde kusebenze kuzilungiselelo Zesistimue &gt; Izinhlelo zokusebenza &gt; Okulayishiwe."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"I-App ayiphenduli"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ingasebenzisa imemori eningi."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isilungiselelo sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Bonisa njalo"</string>
     <string name="smv_application" msgid="3307209192155442829">"Inqubo <xliff:g id="APPLICATION">%1$s</xliff:g> (yohlelo <xliff:g id="PROCESS">%2$s</xliff:g>) iphule inqubomgomo oziphoqelela yona Yemodi Ebukhali."</string>

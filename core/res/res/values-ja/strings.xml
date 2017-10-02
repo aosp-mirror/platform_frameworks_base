@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"キャンセル"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"キャンセル"</string>
+    <string name="close" msgid="2318214661230355730">"閉じる"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="loading" msgid="7933681260296021180">"読み込んでいます..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"スケール"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"常に表示"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]で再度有効にします。"</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"このアプリは応答していません"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」のメモリの使用量は多すぎる可能性があります。"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」は現在の [表示サイズ] 設定に対応していないため、予期しない動作が発生するおそれがあります。"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"常に表示"</string>
     <string name="smv_application" msgid="3307209192155442829">"アプリ「<xliff:g id="APPLICATION">%1$s</xliff:g>」（プロセス「<xliff:g id="PROCESS">%2$s</xliff:g>」）でStrictModeポリシー違反がありました。"</string>

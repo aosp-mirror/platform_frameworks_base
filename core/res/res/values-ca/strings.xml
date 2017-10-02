@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Cancel·la"</string>
     <string name="yes" msgid="5362982303337969312">"D\'acord"</string>
     <string name="no" msgid="5141531044935541497">"Cancel·la"</string>
+    <string name="close" msgid="2318214661230355730">"TANCA"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenció"</string>
     <string name="loading" msgid="7933681260296021180">"S\'està carregant…"</string>
     <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Escala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mostra sempre"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Torna a activar-ho a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"L\'aplicació no respon"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"És possible que <xliff:g id="APP_NAME">%1$s</xliff:g> faci servir massa memòria."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet la mida de pantalla actual i és possible que funcioni de manera inesperada."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostra sempre"</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g>(procés <xliff:g id="PROCESS">%2$s</xliff:g>) ha incomplert la seva política autoimposada de mode estricte."</string>
@@ -1275,7 +1278,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Oient de notificacions"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador de RV"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Processador d\'RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveïdor de condicions"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servei de classificació de notificacions"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
