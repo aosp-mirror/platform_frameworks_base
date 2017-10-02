@@ -239,5 +239,10 @@
     <!-- Default for Settings.Secure.AWARE_LOCK_ENABLED -->
     <bool name="def_aware_lock_enabled">false</bool>
 
+    <!-- Default for Settings.System.TEXT_SHOW_PASSWORD -->
     <bool name="def_text_show_password">false</bool>
+
+    <!-- Default for Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE -->
+    <integer name="def_ota_disable_automatic_update">1</integer>
+
 </resources>
