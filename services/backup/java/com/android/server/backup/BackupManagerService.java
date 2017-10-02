@@ -1983,7 +1983,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 if (uri == null) {
                     return;
                 }
-                String pkgName = uri.getSchemeSpecificPart();
+                final String pkgName = uri.getSchemeSpecificPart();
                 if (pkgName != null) {
                     pkgList = new String[] { pkgName };
                 }
@@ -1991,7 +1991,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
                 // At package-changed we only care about looking at new transport states
                 if (changed) {
-                    String[] components =
+                    final String[] components =
                             intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
 
                     if (MORE_DEBUG) {
@@ -2001,7 +2001,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         }
                     }
 
-                    mTransportManager.onPackageChanged(pkgName, components);
+                    mBackupHandler.post(
+                            () -> mTransportManager.onPackageChanged(pkgName, components));
                     return; // nothing more to do in the PACKAGE_CHANGED case
                 }
 
@@ -2033,7 +2034,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 }
                 // If they're full-backup candidates, add them there instead
                 final long now = System.currentTimeMillis();
-                for (String packageName : pkgList) {
+                for (final String packageName : pkgList) {
                     try {
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
                         if (appGetsFullBackup(app)
@@ -2050,7 +2051,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                             writeFullBackupScheduleAsync();
                         }
 
-                        mTransportManager.onPackageAdded(packageName);
+                        mBackupHandler.post(
+                                () -> mTransportManager.onPackageAdded(packageName));
 
                     } catch (NameNotFoundException e) {
                         // doesn't really exist; ignore it
@@ -2074,8 +2076,9 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         removePackageParticipantsLocked(pkgList, uid);
                     }
                 }
-                for (String pkgName : pkgList) {
-                    mTransportManager.onPackageRemoved(pkgName);
+                for (final String pkgName : pkgList) {
+                    mBackupHandler.post(
+                            () -> mTransportManager.onPackageRemoved(pkgName));
                 }
             }
         }
