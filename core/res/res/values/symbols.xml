@@ -987,8 +987,6 @@
   <java-symbol type="string" name="volume_icon_description_notification" />
   <java-symbol type="string" name="volume_icon_description_ringer" />
   <java-symbol type="string" name="wait" />
-  <java-symbol type="string" name="web_user_agent" />
-  <java-symbol type="string" name="web_user_agent_target_content" />
   <java-symbol type="string" name="webpage_unresponsive" />
   <java-symbol type="string" name="whichApplication" />
   <java-symbol type="string" name="whichHomeApplication" />
