@@ -1020,6 +1020,10 @@
     <string name="dial" msgid="4204975095406423102">"טלפון"</string>
     <string name="map" msgid="6068210738233985748">"מפות"</string>
     <string name="browse" msgid="6993590095938149861">"דפדפן"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏אין מספיק שטח אחסון עבור המערכת. ודא שיש לך שטח פנוי בגודל 250MB התחל שוב."</string>
@@ -1029,8 +1033,7 @@
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="yes" msgid="5362982303337969312">"אישור"</string>
     <string name="no" msgid="5141531044935541497">"ביטול"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"סגירה"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"זהירות"</string>
     <string name="loading" msgid="7933681260296021180">"טוען..."</string>
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
@@ -1087,10 +1090,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"שינוי קנה-מידה"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"הצג תמיד"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"‏אפשר תכונה זו מחדש ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"האפליקציה לא מגיבה"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"ייתכן שהאפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> משתמשת ביותר מדי שטח זיכרון."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> אינו תומך בהגדרת הגודל הנוכחית של התצוגה, והתנהגותו עשויה להיות בלתי צפויה."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"הצג תמיד"</string>
     <string name="smv_application" msgid="3307209192155442829">"‏האפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הפר את מדיניות StrictMode באכיפה עצמית שלו."</string>

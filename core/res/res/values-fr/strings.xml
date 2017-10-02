@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Téléphone"</string>
     <string name="map" msgid="6068210738233985748">"Cartes"</string>
     <string name="browse" msgid="6993590095938149861">"Navigateur"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Annuler"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annuler"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"FERMER"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Attention"</string>
     <string name="loading" msgid="7933681260296021180">"Chargement…"</string>
     <string name="capital_on" msgid="1544682755514494298">"OUI"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Mise à l\'échelle"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Toujours afficher"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Réactivez ce mode en accédant à Paramètres système &gt; Applications &gt; Téléchargements"</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"L\'application ne répond pas"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise peut-être trop de mémoire."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas compatible avec le paramètre de taille d\'affichage actuel et peut présenter un comportement inattendu."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Toujours afficher"</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>

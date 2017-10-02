@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="6068210738233985748">"Térkép"</string>
     <string name="browse" msgid="6993590095938149861">"Böngésző"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kevés a szabad terület"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Előfordulhat, hogy néhány rendszerfunkció nem működik."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nincs elegendő tárhely a rendszerhez. Győződjön meg arról, hogy rendelkezik 250 MB szabad területtel, majd kezdje elölről."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Mégse"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Mégse"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"BEZÁRÁS"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Figyelem"</string>
     <string name="loading" msgid="7933681260296021180">"Betöltés..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Be"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skála"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mindig megjelenik"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Újbóli engedélyezés itt: Rendszerbeállítások &gt; Alkalmazások &gt; Letöltve."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Az alkalmazás nem válaszol"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"Lehetséges, hogy a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> túl sok memóriát használ."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás nem támogatja a képernyőméret jelenlegi beállításait, ezért nem várt módon viselkedhet."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mindig megjelenik"</string>
     <string name="smv_application" msgid="3307209192155442829">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás (<xliff:g id="PROCESS">%2$s</xliff:g> folyamat) megsértette az általa kényszerített Szigorú üzemmód irányelvet."</string>

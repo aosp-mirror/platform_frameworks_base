@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"फोन गर्नुहोस्"</string>
     <string name="map" msgid="6068210738233985748">"नक्सा"</string>
     <string name="browse" msgid="6993590095938149861">"ब्राउजर"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द गर्नुहोस्"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक छ"</string>
     <string name="no" msgid="5141531044935541497">"रद्द गर्नुहोस्"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"बन्द गर्नुहोस्"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"सावधानी"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हुँदै..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालु"</string>
@@ -1053,10 +1056,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"स्केल"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"सधैँ देखाउनुहोस्"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"प्रणाली सेटिङहरूमा यसलाई पुनःसक्षम गराउनुहोस् &gt; अनुप्रयोगहरू &gt; डाउनलोड गरेको।"</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"अनुप्रयोग चलिरहेको छैन"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले अत्यधिक मेमोरी प्रयोग गरिरहेको हुनसक्छ।"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले हालको प्रदर्शनको आकार सम्बन्धी सेटिङलाई समर्थन गर्दैन र अप्रत्याशित तरिकाले व्यवहार गर्न सक्छ।"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"सधैँ देखाउनुहोस्"</string>
     <string name="smv_application" msgid="3307209192155442829">"अनुप्रयोग <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ले यसको स्वयं-लागु गरिएको स्ट्रिटमोड नीति उलङ्घन गरेको छ।"</string>

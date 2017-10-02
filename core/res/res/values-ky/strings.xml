@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Телефон"</string>
     <string name="map" msgid="6068210738233985748">"Карталар"</string>
     <string name="browse" msgid="6993590095938149861">"Серепчи"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Системанын кээ бир функциялары иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
