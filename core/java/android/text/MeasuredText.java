@@ -90,10 +90,6 @@ class MeasuredText {
         }
     }
 
-    void setPos(int pos) {
-        mPos = pos - mTextStart;
-    }
-
     /**
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
