@@ -193,4 +193,7 @@
 
     <!-- Default for Settings.Secure.BACKUP_MANAGER_CONSTANTS -->
     <string name="def_backup_manager_constants"></string>
+
+    <!-- Default setting for Settings.Global.MOBILE_DATA_ALWAYS_ON -->
+    <bool name="def_mobile_data_always_on">true</bool>
 </resources>
