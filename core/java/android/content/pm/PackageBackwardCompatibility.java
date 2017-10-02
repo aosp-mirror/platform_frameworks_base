@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageParser.Package;
 import android.os.Build;
 
@@ -56,7 +58,7 @@ public class PackageBackwardCompatibility {
             boolean apacheHttpLegacyPresent = isLibraryPresent(
                     usesLibraries, usesOptionalLibraries, APACHE_HTTP_LEGACY);
             if (!apacheHttpLegacyPresent) {
-                usesLibraries = ArrayUtils.add(usesLibraries, APACHE_HTTP_LEGACY);
+                usesLibraries = prefix(usesLibraries, APACHE_HTTP_LEGACY);
             }
         }
 
@@ -85,5 +87,13 @@ public class PackageBackwardCompatibility {
             ArrayList<String> usesOptionalLibraries, String apacheHttpLegacy) {
         return ArrayUtils.contains(usesLibraries, apacheHttpLegacy)
                 || ArrayUtils.contains(usesOptionalLibraries, apacheHttpLegacy);
+    }
+
+    private static @NonNull <T> ArrayList<T> prefix(@Nullable ArrayList<T> cur, T val) {
+        if (cur == null) {
+            cur = new ArrayList<>();
+        }
+        cur.add(0, val);
+        return cur;
     }
 }
