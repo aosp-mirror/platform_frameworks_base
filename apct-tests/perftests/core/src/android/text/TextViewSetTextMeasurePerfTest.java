@@ -48,23 +48,17 @@ public class TextViewSetTextMeasurePerfTest {
 
     private static final boolean[] BOOLEANS = new boolean[]{false, true};
 
-    // keep it one char longer than 32 so that 32 chars can fit into one line
-    private static final int LINE_LENGTH = 33;
-
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Parameterized.Parameters(name = "cached={3},{1} chars,{0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
-        for (int length : new int[]{32, 64, 128, 256, 512}) {
+        for (int length : new int[]{128}) {
             for (boolean cached : BOOLEANS) {
-                for (boolean multiLine : BOOLEANS) {
-                    for (TextType textType : TextType.values()) {
-                        params.add(new Object[]{
-                                (multiLine ? "MultiLine" : "SingleLine") + "," + textType.name(),
-                                length, textType, cached, multiLine});
-                    }
+                for (TextType textType : new TextType[]{TextType.STRING,
+                        TextType.SPANNABLE_BUILDER}) {
+                    params.add(new Object[]{textType.name(), length, textType, cached});
                 }
             }
         }
@@ -75,19 +69,16 @@ public class TextViewSetTextMeasurePerfTest {
     private final int mLength;
     private final TextType mTextType;
     private final boolean mCached;
-    private final boolean mMultiLine;
     private final TextPaint mTextPaint;
 
     public TextViewSetTextMeasurePerfTest(String label, int length, TextType textType,
-            boolean cached, boolean multiLine) {
+            boolean cached) {
         mLength = length;
         mTextType = textType;
         mCached = cached;
-        mMultiLine = multiLine;
         mTextPaint = new TextPaint();
         mTextPaint.setTextSize(10);
-        final CharSequence text = createRandomText(LINE_LENGTH);
-        mLineWidth = mMultiLine ? (int) mTextPaint.measureText(text.toString()) : Integer.MAX_VALUE;
+        mLineWidth = Integer.MAX_VALUE;
     }
 
     /**

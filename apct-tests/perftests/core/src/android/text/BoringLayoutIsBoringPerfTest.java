@@ -43,10 +43,11 @@ public class BoringLayoutIsBoringPerfTest {
     @Parameterized.Parameters(name = "cached={4},{1} chars,{0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
-        for (int length : new int[]{32, 64, 128, 256, 512}) {
+        for (int length : new int[]{128}) {
             for (boolean boring : BOOLEANS) {
                 for (boolean cached : BOOLEANS) {
-                    for (TextType textType : TextType.values()) {
+                    for (TextType textType : new TextType[]{TextType.STRING,
+                            TextType.SPANNABLE_BUILDER}) {
                         params.add(new Object[]{
                                 (boring ? "Boring" : "NotBoring") + "," + textType.name(),
                                 length, boring, textType, cached});

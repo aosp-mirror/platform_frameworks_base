@@ -45,7 +45,7 @@ public class PaintMeasureDrawPerfTest {
     @Parameterized.Parameters(name = "cached={1},{0} chars")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
-        for (int length : new int[]{32, 64, 128, 256, 512}) {
+        for (int length : new int[]{128}) {
             for (boolean cached : BOOLEANS) {
                 params.add(new Object[]{length, cached});
             }
