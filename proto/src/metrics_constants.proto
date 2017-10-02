@@ -4538,6 +4538,30 @@ message MetricsEvent {
     // OS: O MR
     AUTOFILL_UI_LATENCY = 1136;
 
+    // Action: the snooze leave-behind was shown after the user clicked the snooze icon
+    // OS: O MR
+    NOTIFICATION_SNOOZE_CLICKED = 1137;
+
+    // Action: user selected a notification snooze duration from the drop down
+    // OS: O MR
+    NOTIFICATION_SELECT_SNOOZE = 1138;
+
+    // attached to NOTIFICATION_SNOOZED and NOTIFICATION_SELECT_SNOOZE events
+    // OS: O MR
+    FIELD_NOTIFICATION_SNOOZE_DURATION_MS = 1139;
+
+    // attached to NOTIFICATION_SELECT_SNOOZE events to indicate the option selected
+    // OS: O MR
+    FIELD_NOTIFICATION_SNOOZE_INDEX = 1140;
+
+    // Action: user tapped undo on the notification snooze leave-behind
+    // OS: O MR
+    NOTIFICATION_UNDO_SNOOZE = 1141;
+
+    // Action: user togged the visibility of the notification snooze options drop down
+    // OS: O MR
+    NOTIFICATION_SNOOZE_OPTIONS = 1142;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // Add new aosp constants above this line.
