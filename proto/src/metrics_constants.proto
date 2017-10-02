@@ -3851,7 +3851,7 @@ message MetricsEvent {
     // Tag of a field for the length of the filter text
     FIELD_AUTOFILL_FILTERTEXT_LEN = 911;
 
-    // An autofill authentification succeeded
+    // An autofill authentication succeeded
     // Package: Package of app that was autofilled
     AUTOFILL_AUTHENTICATED = 912;
 
@@ -4462,19 +4462,19 @@ message MetricsEvent {
     // OS: O MR
     FIELD_AUTOFILL_PREVIOUS_LENGTH = 1125;
 
-    // An autofill dataset authentification succeeded
+    // An autofill dataset authentication succeeded
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_DATASET_AUTHENTICATED = 1126;
 
-    // An autofill service provided an invalid dataset authentification
+    // An autofill service provided an invalid dataset authentication
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
 
-    // An autofill service provided an invalid authentification extra
+    // An autofill service provided an invalid authentication extra
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
