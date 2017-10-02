@@ -177,6 +177,9 @@ Status StatsService::informPollAlarmFired() {
 
     if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
     // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
+    String16 output = StatsPuller::pull(StatsPuller::PULL_CODE_KERNEL_WAKELOCKS);
+    // TODO: do something useful with the output instead of writing a string to screen.
+    ALOGD("%s", String8(output).string());
 
     return Status::ok();
 }

@@ -19,6 +19,7 @@
 
 #include "AnomalyMonitor.h"
 #include "StatsLogProcessor.h"
+#include "StatsPuller.h"
 
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
@@ -66,19 +67,21 @@ public:
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
 
-private:
-    sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
+    // TODO: Move this to a more logical file/class
+    // TODO: Should be private. Temporarily public for testing purposes only.
+    const sp<AnomalyMonitor> mAnomalyMonitor;
 
-    const sp<AnomalyMonitor> mAnomalyMonitor;  // TODO: Move this to a more logical file/class
+    /** Fetches and returns the StatsCompanionService. */
+    static sp<IStatsCompanionService> getStatsCompanionService();
+
+ private:
+    sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
 
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
 
     void printCmdHelp(FILE* out);
 
     status_t doLoadConfig(FILE* in);
-
-    /** Fetches the StatsCompanionService. */
-    sp<IStatsCompanionService> getStatsCompanionService();
 };
 
 // --- StatsdDeathRecipient ---
