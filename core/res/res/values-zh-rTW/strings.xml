@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"電話"</string>
     <string name="map" msgid="6068210738233985748">"地圖"</string>
     <string name="browse" msgid="6993590095938149861">"瀏覽器"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"確定"</string>
     <string name="no" msgid="5141531044935541497">"取消"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"關閉"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"注意"</string>
     <string name="loading" msgid="7933681260296021180">"載入中…"</string>
     <string name="capital_on" msgid="1544682755514494298">"開啟"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"比例"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"一律顯示"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"前往 [系統設定] &gt; [應用程式] &gt; [下載] 重新啟用這個模式。"</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"應用程式沒有回應"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」可能使用了過多記憶體。"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援目前的顯示大小設定，可能會發生非預期的行為。"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"一律顯示"</string>
     <string name="smv_application" msgid="3307209192155442829">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>

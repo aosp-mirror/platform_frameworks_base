@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"फोन"</string>
     <string name="map" msgid="6068210738233985748">"नकाशे"</string>
     <string name="browse" msgid="6993590095938149861">"ब्राउझर"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"संचयन स्थान संपत आहे"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द करा"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
     <string name="no" msgid="5141531044935541497">"रद्द करा"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"बंद करा"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"लक्ष द्या"</string>
     <string name="loading" msgid="7933681260296021180">"लोड करीत आहे..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"स्केल"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"नेहमी दर्शवा"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"अॅप प्रतिसाद देत नाही"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> कदाचित बरीच मेमरी वापरत आहे."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> वर्तमान डिस्प्ले आकार सेटिंगला समर्थन देत नाही आणि अनपेक्षित वर्तन करू शकते."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"नेहमी दर्शवा"</string>
     <string name="smv_application" msgid="3307209192155442829">"अॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>

@@ -1020,6 +1020,10 @@
     <string name="dial" msgid="4204975095406423102">"Telefón"</string>
     <string name="map" msgid="6068210738233985748">"Mapy"</string>
     <string name="browse" msgid="6993590095938149861">"Prehliadač"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
@@ -1029,8 +1033,7 @@
     <string name="cancel" msgid="6442560571259935130">"Zrušiť"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Zrušiť"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"ZAVRIEŤ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornenie"</string>
     <string name="loading" msgid="7933681260296021180">"Načítava sa…"</string>
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
@@ -1087,10 +1090,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Prispôsobiť veľkosť"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vždy zobraziť"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Povoľte to znova v sekcii Nastavenia systému &gt; Aplikácie &gt; Stiahnuté súbory."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Aplikácia nereaguje"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> pravdepodobne používa príliš veľa pamäte."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> aktuálne nastavenie veľkosti zobrazenia nepodporuje a môže sa správať neočakávane."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vždy zobrazovať"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila svoje vlastné vynútené pravidlá StrictMode."</string>

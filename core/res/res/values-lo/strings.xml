@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"ໂທລະສັບ"</string>
     <string name="map" msgid="6068210738233985748">"ແຜນທີ່"</string>
     <string name="browse" msgid="6993590095938149861">"ໂປຣແກຣມທ່ອງເວັບ"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ການເຮັດວຽກບາງຢ່າງຂອງລະບົບບາງອາດຈະໃຊ້ບໍ່ໄດ້"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"​ບໍ່​ມີ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ພຽງ​ພໍ​ສຳ​ລັບ​ລະ​ບົບ. ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ທ່ານ​ມີ​ພື້ນ​ທີ່​ຫວ່າງ​ຢ່າງ​ໜ້ອຍ 250MB ​ແລ້ວລອງ​ໃໝ່."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"ຍົກເລີກ"</string>
     <string name="yes" msgid="5362982303337969312">"ຕົກລົງ"</string>
     <string name="no" msgid="5141531044935541497">"ຍົກເລີກ"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"ປິດ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ກະລຸນາຮັບຊາບ"</string>
     <string name="loading" msgid="7933681260296021180">"ກຳລັງໂຫລດ..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ເປີດ"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ຂະໜາດ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ສະແດງຕະຫຼອດເວລາ"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ເປີດການເຮັດວຽກນີ້ຄືນໄດ້ໃນ ການຕັ້ງຄ່າລະບົບ &gt; ແອັບຯ &gt; ດາວໂຫລດແລ້ວ"</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"ແອັບບໍ່ຕອບສະໜອງ"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ອາດກຳລັງໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບການຕັ້ງຄ່າຂະໜາດສະແດງຜົນປັດຈຸບັນ ແລະ ອາດມີຄວາມຜິດພາດໄດ້."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ສະແດງທຸກເທື່ອ"</string>
     <string name="smv_application" msgid="3307209192155442829">"ແອັບຯ <xliff:g id="APPLICATION">%1$s</xliff:g> (ໂປຣເຊສ <xliff:g id="PROCESS">%2$s</xliff:g>) ໄດ້ລະເມີດນະໂຍບາຍ StrictMode ທີ່ບັງຄັບໃຊ້ດ້ວຍໂຕເອງ."</string>

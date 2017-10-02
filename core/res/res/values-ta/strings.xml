@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"ஃபோன்"</string>
     <string name="map" msgid="6068210738233985748">"வரைபடம்"</string>
     <string name="browse" msgid="6993590095938149861">"உலாவி"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"ரத்துசெய்"</string>
     <string name="yes" msgid="5362982303337969312">"சரி"</string>
     <string name="no" msgid="5141531044935541497">"ரத்துசெய்"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"மூடு"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"கவனத்திற்கு"</string>
     <string name="loading" msgid="7933681260296021180">"ஏற்றுகிறது..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ஆன்"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"அளவு"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"எப்போதும் காட்டு"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"சிஸ்டம் அமைப்பு &gt; பயன்பாடுகள் &gt; பதிவிறக்கம் என்பதில் இதை மீண்டும் இயக்கவும்."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"பயன்பாடு செயல்படவில்லை"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடு, அதிகளவு நினைவகத்தைப் பயன்படுத்தக்கூடும்."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"தற்போதைய திரை அளவு அமைப்பை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காததால், அது வழக்கத்திற்கு மாறாகச் செயல்படக்கூடும்."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"எப்போதும் காட்டு"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>

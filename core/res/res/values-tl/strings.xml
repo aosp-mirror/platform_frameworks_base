@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Telepono"</string>
     <string name="map" msgid="6068210738233985748">"Mga Mapa"</string>
     <string name="browse" msgid="6993590095938149861">"Browser"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Kanselahin"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"ISARA"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Bigyang pansin"</string>
     <string name="loading" msgid="7933681260296021180">"Naglo-load…"</string>
     <string name="capital_on" msgid="1544682755514494298">"I-ON"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Sukat"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Palaging ipakita"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Muling paganahin ito sa mga setting ng System &gt; Apps &gt; Na-download."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Hindi tumutugon ang app"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"Maaaring gumagamit ang <xliff:g id="APP_NAME">%1$s</xliff:g> ng masyadong maraming memory."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang kasalukuyang setting ng laki ng Display at maaaring may mangyaring hindi inaasahan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Palaging ipakita"</string>
     <string name="smv_application" msgid="3307209192155442829">"Ang app na <xliff:g id="APPLICATION">%1$s</xliff:g> (prosesong <xliff:g id="PROCESS">%2$s</xliff:g>) ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
