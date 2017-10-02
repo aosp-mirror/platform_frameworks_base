@@ -2972,8 +2972,12 @@ public class WebView extends AbsoluteLayout
             return webviewPackage;
         }
 
+        IWebViewUpdateService service = WebViewFactory.getUpdateService();
+        if (service == null) {
+            return null;
+        }
         try {
-            return WebViewFactory.getUpdateService().getCurrentWebViewPackage();
+            return service.getCurrentWebViewPackage();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
