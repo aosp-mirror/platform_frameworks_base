@@ -215,6 +215,13 @@ public class PackageManagerWrapper {
     }
 
     /**
+     * Calls {@code PackageManager.setComponentEnabledSetting}
+     */
+    public void setComponentEnabledSetting(ComponentName componentName, int newState, int flags) {
+        mPm.setComponentEnabledSetting(componentName, newState, flags);
+    }
+
+    /**
      * Calls {@code PackageManager.getApplicationInfo}
      */
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
