@@ -838,6 +838,33 @@ public class MtpDatabase implements AutoCloseable {
         return MtpConstants.RESPONSE_OK;
     }
 
+    private int moveObject(int handle, int newParent, String newPath) {
+        String[] whereArgs = new String[] {  Integer.toString(handle) };
+
+        // do not allow renaming any of the special subdirectories
+        if (isStorageSubDirectory(newPath)) {
+            return MtpConstants.RESPONSE_OBJECT_WRITE_PROTECTED;
+        }
+
+        // update database
+        ContentValues values = new ContentValues();
+        values.put(Files.FileColumns.DATA, newPath);
+        values.put(Files.FileColumns.PARENT, newParent);
+        int updated = 0;
+        try {
+            // note - we are relying on a special case in MediaProvider.update() to update
+            // the paths for all children in the case where this is a directory.
+            updated = mMediaProvider.update(mObjectsUri, values, ID_WHERE, whereArgs);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in mMediaProvider.update", e);
+        }
+        if (updated == 0) {
+            Log.e(TAG, "Unable to update path for " + handle + " to " + newPath);
+            return MtpConstants.RESPONSE_GENERAL_ERROR;
+        }
+        return MtpConstants.RESPONSE_OK;
+    }
+
     private int setObjectProperty(int handle, int property,
                             long intValue, String stringValue) {
         switch (property) {
