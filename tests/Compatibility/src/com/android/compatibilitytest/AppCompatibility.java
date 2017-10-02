@@ -17,62 +17,91 @@
 package com.android.compatibilitytest;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.IActivityController;
+import android.app.IActivityManager;
+import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.app.UiModeManager;
-import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.test.InstrumentationTestCase;
+import android.os.DropBoxManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Application Compatibility Test that launches an application and detects
  * crashes.
  */
-public class AppCompatibility extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class AppCompatibility {
 
     private static final String TAG = AppCompatibility.class.getSimpleName();
     private static final String PACKAGE_TO_LAUNCH = "package_to_launch";
     private static final String APP_LAUNCH_TIMEOUT_MSECS = "app_launch_timeout_ms";
     private static final String WORKSPACE_LAUNCH_TIMEOUT_MSECS = "workspace_launch_timeout_ms";
+    private static final Set<String> DROPBOX_TAGS = new HashSet<>();
+    static {
+        DROPBOX_TAGS.add("SYSTEM_TOMBSTONE");
+        DROPBOX_TAGS.add("system_app_anr");
+        DROPBOX_TAGS.add("system_app_native_crash");
+        DROPBOX_TAGS.add("system_app_crash");
+        DROPBOX_TAGS.add("data_app_anr");
+        DROPBOX_TAGS.add("data_app_native_crash");
+        DROPBOX_TAGS.add("data_app_crash");
+    }
 
+    // time waiting for app to launch
     private int mAppLaunchTimeout = 7000;
+    // time waiting for launcher home screen to show up
     private int mWorkspaceLaunchTimeout = 2000;
 
     private Context mContext;
     private ActivityManager mActivityManager;
     private PackageManager mPackageManager;
-    private AppCompatibilityRunner mRunner;
     private Bundle mArgs;
+    private Instrumentation mInstrumentation;
+    private String mLauncherPackageName;
+    private IActivityController mCrashSupressor = new CrashSuppressor();
+    private Map<String, List<String>> mAppErrors = new HashMap<>();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-        mRunner = (AppCompatibilityRunner) getInstrumentation();
-        assertNotNull("Could not fetch InstrumentationTestRunner.", mRunner);
-
-        mContext = mRunner.getTargetContext();
-        Assert.assertNotNull("Could not get the Context", mContext);
-
-        mActivityManager = (ActivityManager)
-                mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        Assert.assertNotNull("Could not get Activity Manager", mActivityManager);
-
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mContext = InstrumentationRegistry.getTargetContext();
+        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mPackageManager = mContext.getPackageManager();
-        Assert.assertNotNull("Missing Package Manager", mPackageManager);
+        mArgs = InstrumentationRegistry.getArguments();
 
-        mArgs = mRunner.getBundle();
+        // resolve launcher package name
+        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolveInfo = mPackageManager.resolveActivity(
+                intent, PackageManager.MATCH_DEFAULT_ONLY);
+        mLauncherPackageName = resolveInfo.activityInfo.packageName;
+        Assert.assertNotNull("failed to resolve package name for launcher", mLauncherPackageName);
+        Log.v(TAG, "Using launcher package name: " + mLauncherPackageName);
 
         // Parse optional inputs.
         String appLaunchTimeoutMsecs = mArgs.getString(APP_LAUNCH_TIMEOUT_MSECS);
@@ -83,13 +112,20 @@ public class AppCompatibility extends InstrumentationTestCase {
         if (workspaceLaunchTimeoutMsecs != null) {
             mWorkspaceLaunchTimeout = Integer.parseInt(workspaceLaunchTimeoutMsecs);
         }
-        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0);
+        mInstrumentation.getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0);
+
+        // set activity controller to suppress crash dialogs and collects them by process name
+        mAppErrors.clear();
+        IActivityManager.Stub.asInterface(ServiceManager.checkService(Context.ACTIVITY_SERVICE))
+            .setActivityController(mCrashSupressor, false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        // unset activity controller
+        IActivityManager.Stub.asInterface(ServiceManager.checkService(Context.ACTIVITY_SERVICE))
+            .setActivityController(null, false);
+        mInstrumentation.getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE);
     }
 
     /**
@@ -98,6 +134,7 @@ public class AppCompatibility extends InstrumentationTestCase {
      *
      * @throws Exception
      */
+    @Test
     public void testAppStability() throws Exception {
         String packageName = mArgs.getString(PACKAGE_TO_LAUNCH);
         if (packageName != null) {
@@ -107,13 +144,23 @@ public class AppCompatibility extends InstrumentationTestCase {
                 Log.w(TAG, String.format("Skipping %s; no launch intent", packageName));
                 return;
             }
-            ProcessErrorStateInfo err = launchActivity(packageName, intent);
-            // Make sure there are no errors when launching the application,
-            // otherwise raise an
-            // exception with the first error encountered.
-            assertNull(getStackTrace(err), err);
+            long startTime = System.currentTimeMillis();
+            launchActivity(packageName, intent);
             try {
-                assertTrue("App crashed after launch.", processStillUp(packageName));
+                checkDropbox(startTime, packageName);
+                if (mAppErrors.containsKey(packageName)) {
+                    StringBuilder message = new StringBuilder("Error detected for package: ")
+                            .append(packageName);
+                    for (String err : mAppErrors.get(packageName)) {
+                        message.append("\n\n");
+                        message.append(err);
+                    }
+                    Assert.fail(message.toString());
+                }
+                // last check: see if app process is still running
+                Assert.assertTrue("app package \"" + packageName + "\" no longer found in running "
+                    + "tasks, but no explicit crashes were detected; check logcat for details",
+                    processStillUp(packageName));
             } finally {
                 returnHome();
             }
@@ -124,31 +171,30 @@ public class AppCompatibility extends InstrumentationTestCase {
     }
 
     /**
-     * Gets the stack trace for the error.
-     *
-     * @param in {@link ProcessErrorStateInfo} to parse.
-     * @return {@link String} the long message of the error.
+     * Check dropbox for entries of interest regarding the specified process
+     * @param startTime if not 0, only check entries with timestamp later than the start time
+     * @param processName the process name to check for
      */
-    private String getStackTrace(ProcessErrorStateInfo in) {
-        if (in == null) {
-            return null;
-        } else {
-            return in.stackTrace;
-        }
-    }
-
-    /**
-     * Returns the process name that the package is going to use.
-     *
-     * @param packageName name of the package
-     * @return process name of the package
-     */
-    private String getProcessName(String packageName) {
-        try {
-            PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
-            return pi.applicationInfo.processName;
-        } catch (NameNotFoundException e) {
-            return packageName;
+    private void checkDropbox(long startTime, String processName) {
+        DropBoxManager dropbox = (DropBoxManager) mContext
+                .getSystemService(Context.DROPBOX_SERVICE);
+        DropBoxManager.Entry entry = null;
+        while (null != (entry = dropbox.getNextEntry(null, startTime))) {
+            try {
+                // only check entries with tag that's of interest
+                String tag = entry.getTag();
+                if (DROPBOX_TAGS.contains(tag)) {
+                    String content = entry.getText(4096);
+                    if (content != null) {
+                        if (content.contains(processName)) {
+                            addProcessError(processName, "dropbox:" + tag, content);
+                        }
+                    }
+                }
+                startTime = entry.getTimeMillis();
+            } finally {
+                entry.close();
+            }
         }
     }
 
@@ -166,8 +212,7 @@ public class AppCompatibility extends InstrumentationTestCase {
     }
 
     private Intent getLaunchIntentForPackage(String packageName) {
-        UiModeManager umm = (UiModeManager)
-                getInstrumentation().getContext().getSystemService(Context.UI_MODE_SERVICE);
+        UiModeManager umm = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
         boolean isLeanback = umm.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
         Intent intent = null;
         if (isLeanback) {
@@ -186,35 +231,32 @@ public class AppCompatibility extends InstrumentationTestCase {
      * @return {@link Collection} of {@link ProcessErrorStateInfo} detected
      *         during the app launch.
      */
-    private ProcessErrorStateInfo launchActivity(String packageName, Intent intent) {
+    private void launchActivity(String packageName, Intent intent) {
         Log.d(TAG, String.format("launching package \"%s\" with intent: %s",
                 packageName, intent.toString()));
-
-        String processName = getProcessName(packageName);
 
         // Launch Activity
         mContext.startActivity(intent);
 
         try {
+            // artificial delay: in case app crashes after doing some work during launch
             Thread.sleep(mAppLaunchTimeout);
         } catch (InterruptedException e) {
             // ignore
         }
+    }
 
-        // See if there are any errors. We wait until down here to give ANRs as much time as
-        // possible to occur.
-        final Collection<ProcessErrorStateInfo> postErr =
-                mActivityManager.getProcessesInErrorState();
-
-        if (postErr == null) {
-            return null;
+    private void addProcessError(String processName, String errorType, String errorInfo) {
+        // parse out the package name if necessary, for apps with multiple proceses
+        String pkgName = processName.split(":", 2)[0];
+        List<String> errors;
+        if (mAppErrors.containsKey(pkgName)) {
+            errors = mAppErrors.get(pkgName);
+        }  else {
+            errors = new ArrayList<>();
         }
-        for (ProcessErrorStateInfo error : postErr) {
-            if (error.processName.equals(processName)) {
-                return error;
-            }
-        }
-        return null;
+        errors.add(String.format("type: %s details:\n%s", errorType, errorInfo));
+        mAppErrors.put(pkgName, errors);
     }
 
     /**
@@ -232,5 +274,56 @@ public class AppCompatibility extends InstrumentationTestCase {
             }
         }
         return false;
+    }
+
+    /**
+     * An {@link IActivityController} that instructs framework to kill processes hitting crashes
+     * directly without showing crash dialogs
+     *
+     */
+    private class CrashSuppressor extends IActivityController.Stub {
+
+        @Override
+        public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
+            Log.d(TAG, "activity starting: " + intent.getComponent().toShortString());
+            return true;
+        }
+
+        @Override
+        public boolean activityResuming(String pkg) throws RemoteException {
+            Log.d(TAG, "activity resuming: " + pkg);
+            return true;
+        }
+
+        @Override
+        public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
+                long timeMillis, String stackTrace) throws RemoteException {
+            Log.d(TAG, "app crash: " + processName);
+            addProcessError(processName, "crash", stackTrace);
+            // don't show dialog
+            return false;
+        }
+
+        @Override
+        public int appEarlyNotResponding(String processName, int pid, String annotation)
+                throws RemoteException {
+            // ignore
+            return 0;
+        }
+
+        @Override
+        public int appNotResponding(String processName, int pid, String processStats)
+                throws RemoteException {
+            Log.d(TAG, "app ANR: " + processName);
+            addProcessError(processName, "ANR", processStats);
+            // don't show dialog
+            return -1;
+        }
+
+        @Override
+        public int systemNotResponding(String msg) throws RemoteException {
+            // ignore
+            return -1;
+        }
     }
 }

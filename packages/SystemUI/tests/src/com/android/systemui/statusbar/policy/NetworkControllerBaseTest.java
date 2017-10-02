@@ -46,8 +46,6 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -292,10 +290,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyHasNoSims(boolean hasNoSimsVisible) {
-        ArgumentCaptor<Boolean> hasNoSimsArg = ArgumentCaptor.forClass(Boolean.class);
-
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(hasNoSimsArg.capture());
-        assertEquals("No sims", hasNoSimsVisible, (boolean) hasNoSimsArg.getValue());
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(
+                eq(hasNoSimsVisible), eq(false));
     }
 
     protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,

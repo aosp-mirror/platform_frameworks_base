@@ -2027,10 +2027,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.i(TAG_WM, "Relayout " + win + ": oldVis=" + oldVisibility
                         + " newVis=" + viewVisibility, stack);
             }
-            if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mAppToken.isClientHidden())) {
 
+            // We should only relayout if the view is visible, it is a starting window, or the
+            // associated appToken is not hidden.
+            final boolean shouldRelayout = viewVisibility == View.VISIBLE &&
+                (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                    || !win.mAppToken.isClientHidden());
+
+            if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
                 // We are about to create a surface, but we didn't run a layout yet. So better run
@@ -2191,7 +2195,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // to the client erroneously accepting a configuration that would have otherwise caused
             // an activity restart. We instead hand back the last reported
             // {@link MergedConfiguration}.
-            if (win.mAppToken == null || !win.mAppToken.isClientHidden()) {
+            if (shouldRelayout) {
                 win.getMergedConfiguration(mergedConfiguration);
             } else {
                 win.getLastReportedMergedConfiguration(mergedConfiguration);

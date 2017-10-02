@@ -51,12 +51,6 @@ final class SelectionActionModeHelper {
 
     private static final String LOG_TAG = "SelectActionModeHelper";
 
-    /**
-     * Maximum time (in milliseconds) to wait for a result before timing out.
-     */
-    // TODO: Consider making this a ViewConfiguration.
-    private static final int TIMEOUT_DURATION = 200;
-
     private final Editor mEditor;
     private final TextView mTextView;
     private final TextClassificationHelper mTextClassificationHelper;
@@ -89,7 +83,7 @@ final class SelectionActionModeHelper {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
-                    TIMEOUT_DURATION,
+                    mTextClassificationHelper.getTimeoutDuration(),
                     adjustSelection
                             ? mTextClassificationHelper::suggestSelection
                             : mTextClassificationHelper::classifyText,
@@ -106,7 +100,7 @@ final class SelectionActionModeHelper {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
-                    TIMEOUT_DURATION,
+                    mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
                     this::invalidateActionMode)
                     .execute();
@@ -538,7 +532,7 @@ final class SelectionActionModeHelper {
     private static final class TextClassificationAsyncTask
             extends AsyncTask<Void, Void, SelectionResult> {
 
-        private final int mTimeOutDuration;
+        private final long mTimeOutDuration;
         private final Supplier<SelectionResult> mSelectionResultSupplier;
         private final Consumer<SelectionResult> mSelectionResultCallback;
         private final TextView mTextView;
@@ -551,7 +545,7 @@ final class SelectionActionModeHelper {
          * @param selectionResultCallback receives the selection results. Runs on the UiThread
          */
         TextClassificationAsyncTask(
-                @NonNull TextView textView, int timeOut,
+                @NonNull TextView textView, long timeOut,
                 @NonNull Supplier<SelectionResult> selectionResultSupplier,
                 @NonNull Consumer<SelectionResult> selectionResultCallback) {
             super(textView != null ? textView.getHandler() : null);
@@ -623,6 +617,9 @@ final class SelectionActionModeHelper {
         private LocaleList mLastClassificationLocales;
         private SelectionResult mLastClassificationResult;
 
+        /** Whether the TextClassifier has been initialized. */
+        private boolean mHot;
+
         TextClassificationHelper(TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             reset(textClassifier, text, selectionStart, selectionEnd, locales);
@@ -642,17 +639,35 @@ final class SelectionActionModeHelper {
 
         @WorkerThread
         public SelectionResult classifyText() {
-            return performClassification(null);
+            mHot = true;
+            return performClassification(null /* selection */);
         }
 
         @WorkerThread
         public SelectionResult suggestSelection() {
+            mHot = true;
             trimText();
             final TextSelection selection = mTextClassifier.suggestSelection(
                     mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
             mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
             mSelectionEnd = Math.min(mText.length(), selection.getSelectionEndIndex() + mTrimStart);
             return performClassification(selection);
+        }
+
+        /**
+         * Maximum time (in milliseconds) to wait for a textclassifier result before timing out.
+         */
+        // TODO: Consider making this a ViewConfiguration.
+        public long getTimeoutDuration() {
+            if (mHot) {
+                return 200;
+            } else {
+                // Return a slightly larger number than usual when the TextClassifier is first
+                // initialized. Initialization would usually take longer than subsequent calls to
+                // the TextClassifier. The impact of this on the UI is that we do not show the
+                // selection handles or toolbar until after this timeout.
+                return 500;
+            }
         }
 
         private SelectionResult performClassification(@Nullable TextSelection selection) {

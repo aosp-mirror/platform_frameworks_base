@@ -22,8 +22,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
@@ -53,6 +51,7 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView extends LinearLayout implements NetworkControllerImpl.SignalCallback,
@@ -73,6 +72,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
 
     private boolean mNoSimsVisible = false;
     private boolean mVpnVisible = false;
+    private boolean mSimDetected;
     private int mVpnIconId = 0;
     private int mLastVpnIconId = -1;
     private boolean mEthernetVisible = false;
@@ -327,8 +327,9 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     }
 
     @Override
-    public void setNoSims(boolean show) {
+    public void setNoSims(boolean show, boolean simDetected) {
         mNoSimsVisible = show && !mBlockMobile;
+        mSimDetected = simDetected;
         apply();
     }
 
@@ -548,6 +549,23 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         if (mNoSimsVisible) {
             mIconLogger.onIconShown(SLOT_MOBILE);
             mNoSimsCombo.setVisibility(View.VISIBLE);
+            if (!Objects.equals(mSimDetected, mNoSimsCombo.getTag())) {
+                mNoSimsCombo.setTag(mSimDetected);
+                if (mSimDetected) {
+                    SignalDrawable d = new SignalDrawable(mNoSims.getContext());
+                    d.setDarkIntensity(0);
+                    mNoSims.setImageDrawable(d);
+                    mNoSims.setImageLevel(SignalDrawable.getEmptyState(4));
+
+                    SignalDrawable dark = new SignalDrawable(mNoSims.getContext());
+                    dark.setDarkIntensity(1);
+                    mNoSimsDark.setImageDrawable(dark);
+                    mNoSimsDark.setImageLevel(SignalDrawable.getEmptyState(4));
+                } else {
+                    mNoSims.setImageResource(R.drawable.stat_sys_no_sims);
+                    mNoSimsDark.setImageResource(R.drawable.stat_sys_no_sims);
+                }
+            }
         } else {
             mIconLogger.onIconHidden(SLOT_MOBILE);
             mNoSimsCombo.setVisibility(View.GONE);
