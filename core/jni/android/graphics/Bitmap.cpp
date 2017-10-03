@@ -743,6 +743,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 
     sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bitmap, NULL);
     if (!nativeBitmap) {
+        ALOGE("OOM allocating Bitmap with dimensions %i x %i", width, height);
+        doThrowOOME(env);
         return NULL;
     }
 
