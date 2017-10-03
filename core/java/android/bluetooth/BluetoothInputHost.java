@@ -74,7 +74,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public static final byte SUBCLASS2_GAMEPAD = (byte) 0x02;
     public static final byte SUBCLASS2_REMOTE_CONTROL = (byte) 0x03;
     public static final byte SUBCLASS2_SENSING_DEVICE = (byte) 0x04;
-    public static final byte SUBCLASS2_DIGITIZER_TABLET = (byte) 0x05;
+    public static final byte SUBCLASS2_DIGITIZER_TABLED = (byte) 0x05;
     public static final byte SUBCLASS2_CARD_READER = (byte) 0x06;
 
     /**
