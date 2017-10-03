@@ -17,8 +17,10 @@
 package com.android.server.notification;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 
 public interface NotificationManagerInternal {
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int userId);
 
