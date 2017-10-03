@@ -214,8 +214,6 @@ public class WindowAnimator {
                     if (screenRotationAnimation != null) {
                         screenRotationAnimation.updateSurfacesInTransaction();
                     }
-
-                    orAnimating(dc.animateDimLayers());
                     orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
                     //TODO (multidisplay): Magnification is supported only for the default display.
                     if (accessibilityController != null && dc.isDefaultDisplay) {

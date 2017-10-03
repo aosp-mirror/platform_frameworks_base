@@ -75,7 +75,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * Applied as part of the animation pass in "prepareSurfaces".
      */
-    protected Transaction mPendingTransaction = new Transaction();
+    private Transaction mPendingTransaction = new Transaction();
 
     @Override
     final protected WindowContainer getParent() {
@@ -119,10 +119,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // If we don't yet have a surface, but we now have a parent, we should
             // build a surface.
             mSurfaceControl = makeSurface().build();
-            mPendingTransaction.show(mSurfaceControl);
+            getPendingTransaction().show(mSurfaceControl);
         } else {
             // If we have a surface but a new parent, we just need to perform a reparent.
-            mPendingTransaction.reparent(mSurfaceControl, mParent.mSurfaceControl.getHandle());
+            getPendingTransaction().reparent(mSurfaceControl, mParent.mSurfaceControl.getHandle());
         }
 
         // Either way we need to ask the parent to assign us a Z-order.
@@ -710,12 +710,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return p.makeChildSurface(this);
     }
 
+    /**
+     * @param child The WindowContainer this child surface is for, or null if the Surface
+     *              is not assosciated with a WindowContainer (e.g. a surface used for Dimming).
+     */
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
         final WindowContainer p = getParent();
         // Give the parent a chance to set properties. In hierarchy v1 we rely
         // on this to set full-screen dimensions on all our Surface-less Layers.
         final SurfaceControl.Builder b = p.makeChildSurface(child);
-        if (child.isScreenOverlay()) {
+        if (child != null && child.isScreenOverlay()) {
             // If it's a screen overlay it's been promoted in the hierarchy (wrt to the
             // WindowContainer hierarchy vs the SurfaceControl hierarchy)
             // and we shouldn't set ourselves as the parent.
@@ -786,7 +790,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void assignChildLayers() {
-        assignChildLayers(mPendingTransaction);
+        assignChildLayers(getPendingTransaction());
     }
 
     boolean needsZBoost() {
@@ -864,7 +868,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * rather than merging to global.
      */
     void prepareSurfaces() {
-        SurfaceControl.mergeToGlobalTransaction(mPendingTransaction);
+        SurfaceControl.mergeToGlobalTransaction(getPendingTransaction());
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).prepareSurfaces();
         }
@@ -894,5 +898,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mParent != null) {
             mParent.destroyAfterPendingTransaction(surface);
         }
+    }
+    
+    Transaction getPendingTransaction() {
+        return mPendingTransaction;
     }
 }

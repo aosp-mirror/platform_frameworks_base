@@ -1444,7 +1444,6 @@ class WindowStateAnimator {
             mReportSurfaceResized = true;
             mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-            w.applyDimLayerIfNeeded();
         }
     }
 

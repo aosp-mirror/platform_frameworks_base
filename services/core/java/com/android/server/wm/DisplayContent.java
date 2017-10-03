@@ -323,8 +323,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final DockedStackDividerController mDividerControllerLocked;
     final PinnedStackController mPinnedStackControllerLocked;
 
-    DimLayerController mDimLayerController;
-
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
 
     private boolean mHaveBootMsg = false;
@@ -584,12 +582,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     w.updateLastInsetValues();
                 }
 
-                // Window frames may have changed. Update dim layer with the new bounds.
-                final Task task = w.getTask();
-                if (task != null) {
-                    mDimLayerController.updateDimLayer(task);
-                }
-
                 if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.mFrame
                         + " mContainingFrame=" + w.mContainingFrame
                         + " mDisplayFrame=" + w.mDisplayFrame);
@@ -682,8 +674,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
         }
-
-        w.applyDimLayerIfNeeded();
 
         if (isDefaultDisplay && obscuredChanged && w.isVisibleLw()
                 && mWallpaperController.isWallpaperTarget(w)) {
@@ -789,7 +779,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
-        mDimLayerController = new DimLayerController(this);
 
         mSurfaceSize = Math.max(mBaseDisplayHeight, mBaseDisplayWidth);
 
@@ -799,13 +788,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWindowingLayer = b.setName("Display Root").build();
         mOverlayLayer = b.setName("Display Overlays").build();
 
-        mPendingTransaction.setLayer(mWindowingLayer, 0)
+        getPendingTransaction().setLayer(mWindowingLayer, 0)
                 .setLayerStack(mWindowingLayer, mDisplayId)
                 .show(mWindowingLayer)
                 .setLayer(mOverlayLayer, 1)
                 .setLayerStack(mOverlayLayer, mDisplayId)
                 .show(mOverlayLayer);
-        mPendingTransaction.apply();
+        getPendingTransaction().apply();
 
         // These are the only direct children we should ever have and they are permanent.
         super.addChild(mBelowAppWindowsContainers, null);
@@ -1069,11 +1058,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         setLayoutNeeded();
         final int[] anim = new int[2];
-        if (isDimming()) {
-            anim[0] = anim[1] = 0;
-        } else {
-            mService.mPolicy.selectRotationAnimationLw(anim);
-        }
+        mService.mPolicy.selectRotationAnimationLw(anim);
 
         if (!rotateSeamlessly) {
             mService.startFreezingDisplayLocked(inTransaction, anim[0], anim[1], this);
@@ -1945,22 +1930,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    boolean animateDimLayers() {
-        return mDimLayerController.animateDimLayers();
-    }
-
-    private void resetDimming() {
-        mDimLayerController.resetDimming();
-    }
-
-    boolean isDimming() {
-        return mDimLayerController.isDimming();
-    }
-
-    private void stopDimmingIfNeeded() {
-        mDimLayerController.stopDimmingIfNeeded();
-    }
-
     @Override
     void removeIfPossible() {
         if (isAnimating()) {
@@ -1976,7 +1945,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         try {
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-            mDimLayerController.close();
             if (mService.canDispatchPointerEvents()) {
                 if (mTapDetector != null) {
                     mService.unregisterPointerEventListener(mTapDetector);
@@ -2269,8 +2237,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 token.dump(pw, "    ");
             }
         }
-        pw.println();
-        mDimLayerController.dump(prefix, pw);
+
         pw.println();
 
         // Dump stack references
@@ -2383,12 +2350,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
-        assignChildLayers(mPendingTransaction);
+        assignChildLayers(getPendingTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
         }
 
-        // We accumlate the layer changes in-to "mPendingTransaction" but we defer
+        // We accumlate the layer changes in-to "getPendingTransaction()" but we defer
         // the application of this transaction until the animation pass triggers
         // prepareSurfaces. This allows us to synchronize Z-ordering changes with
         // the hiding and showing of surfaces.
@@ -2889,7 +2856,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } while (pendingLayoutChanges != 0);
 
         mTmpApplySurfaceChangesTransactionState.reset();
-        resetDimming();
 
         mTmpRecoveringMemory = recoveringMemory;
         forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
@@ -2899,8 +2865,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                 mTmpApplySurfaceChangesTransactionState.preferredModeId,
                 true /* inTraversal, must call performTraversalInTrans... below */);
-
-        stopDimmingIfNeeded();
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
         if (wallpaperVisible != mLastWallpaperVisible) {
@@ -3850,10 +3814,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     SurfaceControl.Builder makeChildSurface(WindowContainer child) {
-        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(child.getSession());
-        b.setName(child.getName());
-
+        SurfaceSession s = child != null ? child.getSession() : getSession();
+        final SurfaceControl.Builder b = mService.makeSurfaceBuilder(s);
         b.setSize(mSurfaceSize, mSurfaceSize);
+
+        if (child == null) {
+            return b;
+        }
+
+        b.setName(child.getName());
         if (child.isScreenOverlay()) {
             return b.setParent(mOverlayLayer);
         } else {
@@ -3873,8 +3842,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void applyMagnificationSpec(MagnificationSpec spec) {
-        applyMagnificationSpec(mPendingTransaction, spec);
-        mPendingTransaction.apply();
+        applyMagnificationSpec(getPendingTransaction(), spec);
+        getPendingTransaction().apply();
     }
 
     @Override

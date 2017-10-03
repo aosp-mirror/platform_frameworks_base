@@ -609,6 +609,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 };
             };
 
+    /**
+     * Indicates whether we have requested a Dim (in the sense of {@link Dimmer}) from our host
+     * container.
+     */
+    private boolean mIsDimming = false;
+
+    private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
@@ -2041,23 +2049,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return isVisibleOrAdding();
     }
 
-    void scheduleAnimationIfDimming() {
-        final DisplayContent dc = getDisplayContent();
-        if (dc == null) {
-            return;
-        }
-
-        // If layout is currently deferred, we want to hold of with updating the layers.
-        if (mService.mWindowPlacerLocked.isLayoutDeferred()) {
-            return;
-        }
-        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        if (dimLayerUser != null && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator)) {
-            // Force an animation pass just to update the mDimLayer layer.
-            mService.scheduleAnimationLocked();
-        }
-    }
-
     private final class DeadWindowEventReceiver extends InputEventReceiver {
         DeadWindowEventReceiver(InputChannel inputChannel) {
             super(inputChannel, mService.mH.getLooper());
@@ -2113,31 +2104,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputWindowHandle.inputChannel = null;
     }
 
-    void applyDimLayerIfNeeded() {
-        // When the app is terminated (eg. from Recents), the task might have already been
-        // removed with the window pending removal. Don't apply dim in such cases, as there
-        // will be no more updateDimLayer() calls, which leaves the dimlayer invalid.
-        final AppWindowToken token = mAppToken;
-        if (token != null && token.removed) {
-            return;
-        }
-
-        final DisplayContent dc = getDisplayContent();
-        if (!mAnimatingExit && mAppDied) {
-            // If app died visible, apply a dim over the window to indicate that it's inactive
-            dc.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
-        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && dc != null && !mAnimatingExit && isVisible()) {
-            dc.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
-        }
-    }
-
-    private DimLayer.DimLayerUser getDimLayerUser() {
+    private Dimmer getDimmer() {
         Task task = getTask();
         if (task != null) {
-            return task;
+            return task.getDimmer();
         }
-        return getStack();
+        return getStack().getDimmer();
     }
 
     /** Returns true if the replacement window was removed. */
@@ -2159,9 +2131,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void removeReplacedWindow() {
         if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + this);
-        if (isDimming()) {
-            transferDimToReplacement();
-        }
         mWillReplaceWindow = false;
         mAnimateReplacingWindow = false;
         mReplacingRemoveRequested = false;
@@ -2224,11 +2193,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // need to intercept touches outside of that window. The dim layer user
             // associated with the window (task or stack) will give us the good bounds, as
             // they would be used to display the dim layer.
-            final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-            if (dimLayerUser != null) {
-                dimLayerUser.getDimBounds(mTmpRect);
+            final Task task = getTask();
+            if (task != null) {
+                task.getDimBounds(mTmpRect);
             } else {
-                getVisibleBounds(mTmpRect);
+                getStack().getDimBounds(mTmpRect);
             }
             if (inFreeformWindowingMode()) {
                 // For freeform windows we the touch region to include the whole surface for the
@@ -2734,14 +2703,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         return displayContent.isDefaultDisplay;
-    }
-
-    @Override
-    public boolean isDimming() {
-        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        final DisplayContent dc = getDisplayContent();
-        return dimLayerUser != null && dc != null
-                && dc.mDimLayerController.isDimming(dimLayerUser, mWinAnimator);
     }
 
     void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
@@ -3598,15 +3559,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return winY;
     }
 
-    private void transferDimToReplacement() {
-        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
-        final DisplayContent dc = getDisplayContent();
-        if (dimLayerUser != null && dc != null) {
-            dc.mDimLayerController.applyDim(dimLayerUser,
-                    mReplacementWindow.mWinAnimator, (mAttrs.flags & FLAG_DIM_BEHIND) != 0);
-        }
-    }
-
     // During activity relaunch due to resize, we sometimes use window replacement
     // for only child windows (as the main window is handled by window preservation)
     // and the big surface.
@@ -4438,8 +4390,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mToken.makeChildSurface(this);
     }
 
+
     @Override
     void prepareSurfaces() {
+        mIsDimming = false;
+        if (!mAnimatingExit && mAppDied) {
+            mIsDimming = true;
+            getDimmer().dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
+                && !mAnimatingExit && isVisible()) {
+            mIsDimming = true;
+            getDimmer().dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
+        }
+
         mWinAnimator.prepareSurfaceLocked(true);
         super.prepareSurfaces();
     }
@@ -4454,5 +4417,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         getDisplayContent().assignRelativeLayerForImeTargetChild(t, this);
+    }
+
+    @Override
+    public boolean isDimming() {
+        return mIsDimming;
     }
 }

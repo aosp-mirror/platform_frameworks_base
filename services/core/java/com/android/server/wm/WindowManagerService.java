@@ -2483,11 +2483,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = true;
                 displayContent.setLayoutNeeded();
                 int anim[] = new int[2];
-                if (displayContent.isDimming()) {
-                    anim[0] = anim[1] = 0;
-                } else {
-                    mPolicy.selectRotationAnimationLw(anim);
-                }
+                mPolicy.selectRotationAnimationLw(anim);
+
                 startFreezingDisplayLocked(false, anim[0], anim[1], displayContent);
                 config = new Configuration(mTempConfiguration);
             }
@@ -5955,8 +5952,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): rotation on main screen only.
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
             // Get rotation animation again, with new top window
-            boolean isDimming = displayContent.isDimming();
-            if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, isDimming)) {
+            if (!mPolicy.validateRotationAnimationLw(mExitAnimId, mEnterAnimId, false)) {
                 mExitAnimId = mEnterAnimId = 0;
             }
             if (screenRotationAnimation.dismiss(MAX_ANIMATION_DURATION,
