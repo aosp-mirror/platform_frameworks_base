@@ -1437,6 +1437,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
         };
 
+        if (hideAnimatedList.isEmpty()) {
+            animationFinishAction.run();
+            return;
+        }
+
         // let's disable our normal animations
         mStackScroller.setDismissAllInProgress(true);
 
