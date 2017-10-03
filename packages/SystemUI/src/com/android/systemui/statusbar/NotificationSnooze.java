@@ -16,8 +16,10 @@ package com.android.systemui.statusbar;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
@@ -29,11 +31,13 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,11 +55,14 @@ import com.android.systemui.R;
 public class NotificationSnooze extends LinearLayout
         implements NotificationGuts.GutsContent, View.OnClickListener {
 
+    private static final String TAG = "NotificationSnooze";
     /**
      * If this changes more number increases, more assistant action resId's should be defined for
      * accessibility purposes, see {@link #setSnoozeOptions(List)}
      */
     private static final int MAX_ASSISTANT_SUGGESTIONS = 1;
+    private static final String KEY_DEFAULT_SNOOZE = "default";
+    private static final String KEY_OPTIONS = "options_array";
     private NotificationGuts mGutsContainer;
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
@@ -72,9 +79,29 @@ public class NotificationSnooze extends LinearLayout
     private boolean mSnoozing;
     private boolean mExpanded;
     private AnimatorSet mExpandAnimation;
+    private KeyValueListParser mParser;
+
+    private final static int[] sAccessibilityActions = {
+            R.id.action_snooze_shorter,
+            R.id.action_snooze_short,
+            R.id.action_snooze_long,
+            R.id.action_snooze_longer,
+    };
 
     public NotificationSnooze(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mParser = new KeyValueListParser(',');
+    }
+
+    @VisibleForTesting
+    SnoozeOption getDefaultOption()
+    {
+        return mDefaultOption;
+    }
+
+    @VisibleForTesting
+    void setKeyValueListParser(KeyValueListParser parser) {
+        mParser = parser;
     }
 
     @Override
@@ -172,15 +199,47 @@ public class NotificationSnooze extends LinearLayout
         mSbn = sbn;
     }
 
-    private ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
+    @VisibleForTesting
+    ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
+        final Resources resources = getContext().getResources();
         ArrayList<SnoozeOption> options = new ArrayList<>();
+        try {
+            final String config = Settings.Global.getString(getContext().getContentResolver(),
+                    Settings.Global.NOTIFICATION_SNOOZE_OPTIONS);
+            mParser.setString(config);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Bad snooze constants");
+        }
 
-        options.add(createOption(15 /* minutes */, R.id.action_snooze_15_min));
-        options.add(createOption(30 /* minutes */, R.id.action_snooze_30_min));
-        mDefaultOption = createOption(60 /* minutes */, R.id.action_snooze_1_hour);
-        options.add(mDefaultOption);
-        options.add(createOption(60 * 2 /* minutes */, R.id.action_snooze_2_hours));
+        final int defaultSnooze = mParser.getInt(KEY_DEFAULT_SNOOZE,
+                resources.getInteger(R.integer.config_notification_snooze_time_default));
+        final int[] snoozeTimes = parseIntArray(KEY_OPTIONS,
+                resources.getIntArray(R.array.config_notification_snooze_times));
+
+        for (int i = 0; i < snoozeTimes.length && i < sAccessibilityActions.length; i++) {
+            int snoozeTime = snoozeTimes[i];
+            SnoozeOption option = createOption(snoozeTime, sAccessibilityActions[i]);
+            if (i == 0 || snoozeTime == defaultSnooze) {
+                mDefaultOption = option;
+            }
+            options.add(option);
+        }
         return options;
+    }
+
+    @VisibleForTesting
+    int[] parseIntArray(final String key, final int[] defaultArray) {
+        final String value = mParser.getString(key, null);
+        if (value != null) {
+            try {
+                return Arrays.stream(value.split(":")).map(String::trim).mapToInt(
+                        Integer::parseInt).toArray();
+            } catch (NumberFormatException e) {
+                return defaultArray;
+            }
+        } else {
+            return defaultArray;
+        }
     }
 
     private SnoozeOption createOption(int minutes, int accessibilityActionId) {
