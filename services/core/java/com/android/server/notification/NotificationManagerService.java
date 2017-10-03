@@ -3741,6 +3741,8 @@ public class NotificationManagerService extends SystemService {
             MetricsLogger.action(r.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsEvent.TYPE_CLOSE)
+                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_SNOOZE_DURATION_MS,
+                            mDuration)
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
             boolean wasPosted = removeFromNotificationListsLocked(r);
