@@ -1336,6 +1336,7 @@ please see themes_device_defaults.xml.
 
     <!-- Default theme for Settings and activities launched from Settings. -->
     <style name="Theme.Material.Settings" parent="Theme.Material.Light.LightStatusBar">
+        <item name="homeAsUpIndicator">@drawable/ic_ab_back_material_settings</item>
         <item name="colorPrimary">@color/primary_material_settings_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings_light</item>
         <item name="colorSecondary">@color/secondary_material_settings_light</item>
