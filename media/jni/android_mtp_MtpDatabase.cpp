@@ -68,6 +68,7 @@ static jmethodID method_getObjectPropertyList;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
 static jmethodID method_deleteFile;
+static jmethodID method_moveObject;
 static jmethodID method_getObjectReferences;
 static jmethodID method_setObjectReferences;
 static jmethodID method_sessionStarted;
@@ -177,6 +178,9 @@ public:
                                             MtpObjectFormat format);
 
     virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property);
+
+    virtual MtpResponseCode         moveObject(MtpObjectHandle handle, MtpObjectHandle newParent,
+                                            MtpString& newPath);
 
     virtual void                    sessionStarted();
 
@@ -995,6 +999,18 @@ MtpResponseCode MyMtpDatabase::deleteFile(MtpObjectHandle handle) {
     return result;
 }
 
+MtpResponseCode MyMtpDatabase::moveObject(MtpObjectHandle handle, MtpObjectHandle newParent,
+        MtpString &newPath) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring stringValue = env->NewStringUTF((const char *) newPath);
+    MtpResponseCode result = env->CallIntMethod(mDatabase, method_moveObject,
+                (jint)handle, (jint)newParent, stringValue);
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(stringValue);
+    return result;
+}
+
 struct PropertyTableEntry {
     MtpObjectProperty   property;
     int                 type;
@@ -1358,6 +1374,11 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
     method_deleteFile = env->GetMethodID(clazz, "deleteFile", "(I)I");
     if (method_deleteFile == NULL) {
         ALOGE("Can't find deleteFile");
+        return -1;
+    }
+    method_moveObject = env->GetMethodID(clazz, "moveObject", "(IILjava/lang/String;)I");
+    if (method_moveObject == NULL) {
+        ALOGE("Can't find moveObject");
         return -1;
     }
     method_getObjectReferences = env->GetMethodID(clazz, "getObjectReferences", "(I)[I");
