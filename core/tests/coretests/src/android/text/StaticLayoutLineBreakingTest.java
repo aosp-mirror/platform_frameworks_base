@@ -53,7 +53,7 @@ public class StaticLayoutLineBreakingTest {
     static {
         // The test font has following coverage and width.
         // U+0020: 10em
-        // U+002E (,): 10em
+        // U+002E (.): 10em
         // U+0043 (C): 100em
         // U+0049 (I): 1em
         // U+004C (L): 50em
