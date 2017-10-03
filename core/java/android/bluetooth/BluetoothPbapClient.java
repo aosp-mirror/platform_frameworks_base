@@ -40,7 +40,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
     private static final boolean VDBG = false;
 
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-            "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.pbapclient.profile.action.CONNECTION_STATE_CHANGED";
 
     private volatile IBluetoothPbapClient mService;
     private final Context mContext;
