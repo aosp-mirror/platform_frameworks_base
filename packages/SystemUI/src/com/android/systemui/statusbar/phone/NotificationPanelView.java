@@ -43,6 +43,7 @@ import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -148,6 +149,8 @@ public class NotificationPanelView extends PanelView implements
 
     private static final String STATUS_BAR_QUICK_QS_PULLDOWN =
             "lineagesystem:" + LineageSettings.System.STATUS_BAR_QUICK_QS_PULLDOWN;
+    private static final String DOUBLE_TAP_SLEEP_GESTURE =
+            "lineagesystem:" + LineageSettings.System.DOUBLE_TAP_SLEEP_GESTURE;
 
     private static final Rect mDummyDirtyRect = new Rect(0, 0, 1, 1);
     private static final Rect mEmptyRect = new Rect();
@@ -345,6 +348,9 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(ShadeController.class);
     private int mDisplayId;
 
+    private boolean mDoubleTapToSleepEnabled;
+    private GestureDetector mDoubleTapGesture;
+
     /**
      * Cache the resource id of the theme to avoid unnecessary work in onThemeChanged.
      *
@@ -386,6 +392,16 @@ public class NotificationPanelView extends PanelView implements
         });
         mBottomAreaShadeAlphaAnimator.setDuration(160);
         mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
+        mDoubleTapGesture = new GestureDetector(mContext,
+                new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (mPowerManager != null) {
+                    mPowerManager.goToSleep(e.getEventTime());
+                }
+                return true;
+            }
+        });
     }
 
     /**
@@ -435,6 +451,7 @@ public class NotificationPanelView extends PanelView implements
         Dependency.get(ZenModeController.class).addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, STATUS_BAR_QUICK_QS_PULLDOWN);
+        Dependency.get(TunerService.class).addTunable(this, DOUBLE_TAP_SLEEP_GESTURE);
         // Theme might have changed between inflating this view and attaching it to the window, so
         // force a call to onThemeChanged
         onThemeChanged();
@@ -454,6 +471,8 @@ public class NotificationPanelView extends PanelView implements
     public void onTuningChanged(String key, String newValue) {
         if (STATUS_BAR_QUICK_QS_PULLDOWN.equals(key)) {
             mOneFingerQuickSettingsIntercept = newValue == null ? 1 : Integer.parseInt(newValue);
+        } else if (DOUBLE_TAP_SLEEP_GESTURE.equals(key)) {
+            mDoubleTapToSleepEnabled = newValue == null || Integer.parseInt(newValue) == 1;
         }
     }
 
@@ -1073,6 +1092,10 @@ public class NotificationPanelView extends PanelView implements
         // pull down QS or expand the shade.
         if (mStatusBar.isBouncerShowingScrimmed()) {
             return false;
+        }
+
+        if (mDoubleTapToSleepEnabled && mBarState == StatusBarState.KEYGUARD) {
+            mDoubleTapGesture.onTouchEvent(event);
         }
 
         initDownStates(event);

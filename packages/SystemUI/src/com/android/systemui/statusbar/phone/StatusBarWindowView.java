@@ -34,6 +34,7 @@ import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -71,6 +72,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.tuner.TunerService;
 
+import lineageos.providers.LineageSettings;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -80,6 +83,9 @@ import java.io.PrintWriter;
 public class StatusBarWindowView extends FrameLayout {
     public static final String TAG = "StatusBarWindowView";
     public static final boolean DEBUG = StatusBar.DEBUG;
+
+    private static final String DOUBLE_TAP_SLEEP_GESTURE =
+            "lineagesystem:" + LineageSettings.System.DOUBLE_TAP_SLEEP_GESTURE;
 
     private final GestureDetector mGestureDetector;
     private final StatusBarStateController mStatusBarStateController;
@@ -98,6 +104,9 @@ public class StatusBarWindowView extends FrameLayout {
     private StatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
     private FalsingManager mFalsingManager;
+
+    private boolean mDoubleTapToSleepEnabled;
+    private int mQuickQsTotalHeight;
 
     // Implements the floating action mode for TextView's Cut/Copy/Past menu. Normally provided by
     // DecorView, but since this is a special window we have to roll our own.
@@ -125,6 +134,14 @@ public class StatusBarWindowView extends FrameLayout {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            if (!mService.isDozing() && mDoubleTapToSleepEnabled
+                    && e.getY() < mQuickQsTotalHeight) {
+                PowerManager pm = mContext.getSystemService(PowerManager.class);
+                if (pm != null) {
+                    pm.goToSleep(e.getEventTime());
+                }
+                return true;
+            }
             if (mDoubleTapEnabled || mSingleTapEnabled) {
                 mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
                         "DOUBLE_TAP");
@@ -141,6 +158,10 @@ public class StatusBarWindowView extends FrameLayout {
                 break;
             case Settings.Secure.DOZE_TAP_SCREEN_GESTURE:
                 mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
+                break;
+            case DOUBLE_TAP_SLEEP_GESTURE:
+                mDoubleTapToSleepEnabled = newValue == null || Integer.parseInt(newValue) == 1;
+                break;
         }
     };
 
@@ -160,7 +181,10 @@ public class StatusBarWindowView extends FrameLayout {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         Dependency.get(TunerService.class).addTunable(mTunable,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
-                Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                DOUBLE_TAP_SLEEP_GESTURE);
+        mQuickQsTotalHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_total_height);
     }
 
     @Override
