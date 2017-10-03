@@ -28,6 +28,7 @@
 
 #include "BootAction.h"
 #include "BootAnimationUtil.h"
+#include "BootParameters.h"
 
 using namespace android;
 using android::base::ReadFileToString;
@@ -37,7 +38,11 @@ typedef android::BootAnimation::Animation Animation;
 
 namespace {
 
-class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {public:
+class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {
+public:
+    BootActionAnimationCallbacks(std::unique_ptr<BootParameters> bootParameters)
+        : mBootParameters(std::move(bootParameters)) {}
+
     void init(const Vector<Animation::Part>&) override {
         std::string library_path("/oem/lib/");
 
@@ -51,7 +56,7 @@ class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {p
         library_path += property;
 
         mBootAction = new BootAction();
-        if (!mBootAction->init(library_path)) {
+        if (!mBootAction->init(library_path, mBootParameters->getParameters())) {
             mBootAction = NULL;
         }
     };
@@ -86,6 +91,7 @@ class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {p
     };
 
 private:
+    std::unique_ptr<BootParameters> mBootParameters;
     sp<BootAction> mBootAction = nullptr;
 };
 
@@ -94,9 +100,8 @@ private:
 int main() {
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_DISPLAY);
 
-    // TODO(b/65462981): Should we set brightness/volume here in case the boot
-    // animation is disabled?
-    BootAction::swapBootConfigs();
+    // Clear our params for next boot no matter what.
+    std::unique_ptr<BootParameters> bootParameters(new BootParameters());
 
     if (bootAnimationDisabled()) {
         ALOGI("boot animation disabled");
@@ -108,7 +113,8 @@ int main() {
     sp<ProcessState> proc(ProcessState::self());
     ProcessState::self()->startThreadPool();
 
-    sp<BootAnimation> boot = new BootAnimation(new BootActionAnimationCallbacks());
+    sp<BootAnimation> boot = new BootAnimation(
+            new BootActionAnimationCallbacks(std::move(bootParameters)));
 
     IPCThreadState::self()->joinThreadPool();
     return 0;
