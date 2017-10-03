@@ -1,0 +1,168 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "ProcessStatsServiceProto";
+
+import "frameworks/base/core/proto/android/util/common.proto";
+
+package android.service.procstats;
+
+/**
+ * Data from ProcStatsService Dumpsys
+ *
+ * Next Tag: 4
+ */
+message ProcessStatsServiceDumpProto {
+
+    ProcessStatsSectionProto procstats_now = 1;
+
+    ProcessStatsSectionProto procstats_over_3hrs = 2;
+
+    ProcessStatsSectionProto procstats_over_24hrs = 3;
+}
+
+/**
+ * Data model from /frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
+ * This proto is defined based on the writeToParcel method.
+ *
+ * Next Tag: 9
+ */
+message ProcessStatsSectionProto {
+
+    // Elapsed realtime at start of report.
+    int64 start_realtime_ms = 1;
+
+    // Elapsed realtime at end of report.
+    int64 end_realtime_ms = 2;
+
+    // CPU uptime at start of report.
+    int64 start_uptime_ms = 3;
+
+    // CPU uptime at end of report.
+    int64 end_uptime_ms = 4;
+
+    // System runtime library. e.g. "libdvm.so", "libart.so".
+    string runtime = 5;
+
+    // whether kernel reports swapped pss.
+    bool has_swapped_pss = 6;
+
+    // Data completeness. e.g. "complete", "partial", shutdown", or "sysprops".
+    enum Status {
+        STATUS_UNKNOWN = 0;
+        STATUS_COMPLETE = 1;
+        STATUS_PARTIAL = 2;
+        STATUS_SHUTDOWN = 3;
+        STATUS_SYSPROPS = 4;
+    }
+    repeated Status status = 7;
+
+    // Stats for each process.
+    repeated ProcessStatsProto process_stats = 8;
+}
+
+// Next Tag: 6
+message ProcessStatsProto {
+
+    // Name of process.
+    string process = 1;
+
+    // Uid of the process.
+    int32 uid = 2;
+
+    // Information about how often kills occurred
+    message Kill {
+      // Count of excessive wakes kills
+      int32 wakes = 1;
+
+      // Count of excessive CPU kills
+      int32 cpu = 2;
+
+      // Count of kills when cached
+      int32 cached = 3;
+
+      // PSS stats during cached kill
+      android.util.AggStats cached_pss = 4;
+    }
+    Kill kill = 3;
+
+    message State {
+        enum ScreenState {
+            SCREEN_UNKNOWN = 0;
+            OFF = 1;
+            ON = 2;
+        }
+        ScreenState screen_state = 1;
+
+        enum MemoryState {
+            MEMORY_UNKNOWN = 0;
+            NORMAL = 1;     // normal.
+            MODERATE = 2;   // moderate memory pressure.
+            LOW = 3;        // low memory.
+            CRITICAL = 4;   // critical memory.
+        }
+        MemoryState memory_state = 2;
+
+        enum ProcessState {
+            PROCESS_UNKNOWN = 0;
+            // Persistent system process.
+            PERSISTENT = 1;
+            // Top activity; actually any visible activity.
+            TOP = 2;
+            // Important foreground process (ime, wallpaper, etc).
+            IMPORTANT_FOREGROUND = 3;
+            // Important background process.
+            IMPORTANT_BACKGROUND = 4;
+            // Performing backup operation.
+            BACKUP = 5;
+            // Heavy-weight process (currently not used).
+            HEAVY_WEIGHT = 6;
+            // Background process running a service.
+            SERVICE = 7;
+            // Process not running, but would be if there was enough RAM.
+            SERVICE_RESTARTING = 8;
+            // Process running a receiver.
+            RECEIVER = 9;
+            // Process hosting home/launcher app when not on top.
+            HOME = 10;
+            // Process hosting the last app the user was in.
+            LAST_ACTIVITY = 11;
+            // Cached process hosting a previous activity.
+            CACHED_ACTIVITY = 12;
+            // Cached process hosting a client activity.
+            CACHED_ACTIVITY_CLIENT = 13;
+            // Cached process that is empty.
+            CACHED_EMPTY = 14;
+        }
+        ProcessState process_state = 3;
+
+        // Millisecond duration spent in this state
+        int64 duration_ms = 4;
+
+        // # of samples taken
+        int32 sample_size = 5;
+
+        // PSS is memory reserved for this process
+        android.util.AggStats pss = 6;
+
+        // USS is memory shared between processes, divided evenly for accounting
+        android.util.AggStats uss = 7;
+    }
+    repeated State states = 5;
+}
