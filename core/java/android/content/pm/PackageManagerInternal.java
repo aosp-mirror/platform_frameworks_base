@@ -436,16 +436,37 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable String getKnownPackageName(
             @KnownPackage int knownPackage, int userId);
 
+    /**
+     * Returns whether the package is an instant app.
+     */
+    public abstract boolean isInstantApp(String packageName, int userId);
+
+    /**
+     * Returns whether the package is an instant app.
+     */
+    public abstract @Nullable String getInstantAppPackageName(int uid);
+
+    /**
+     * Returns whether or not access to the application should be filtered.
+     * <p>
+     * Access may be limited based upon whether the calling or target applications
+     * are instant applications.
+     *
+     * @see #canAccessInstantApps(int)
+     */
+    public abstract boolean filterAppAccess(
+            @Nullable PackageParser.Package pkg, int callingUid, int userId);
+
     /*
      * NOTE: The following methods are temporary until permissions are extracted from
      * the package manager into a component specifically for handling permissions.
      */
-    /** Returns a permission object for the given permission name. */
-    public abstract @Nullable Object getPermissionTEMP(@NonNull String permName);
     /** Returns the flags for the given permission. */
     public abstract @Nullable int getPermissionFlagsTEMP(@NonNull String permName,
             @NonNull String packageName, int userId);
     /** Updates the flags for the given permission. */
     public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
             @NonNull String packageName, int flagMask, int flagValues, int userId);
+    /** temporary until mPermissionTrees is moved to PermissionManager */
+    public abstract Object enforcePermissionTreeTEMP(@NonNull String permName, int callingUid);
 }

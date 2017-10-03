@@ -116,6 +116,10 @@ public final class PackageSetting extends PackageSettingBase {
         return pkg;
     }
 
+    public int getAppId() {
+        return appId;
+    }
+
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -142,6 +146,10 @@ public final class PackageSetting extends PackageSettingBase {
             return isSystem();
         }
         return true;
+    }
+
+    public boolean hasChildPackages() {
+        return childPackageNames != null && !childPackageNames.isEmpty();
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {

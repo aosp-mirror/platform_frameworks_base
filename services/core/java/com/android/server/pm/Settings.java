@@ -87,6 +87,7 @@ import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
 
@@ -377,10 +378,6 @@ public final class Settings {
     private final ArrayMap<Long, Integer> mKeySetRefs =
             new ArrayMap<Long, Integer>();
 
-    // Mapping from permission names to info about them.
-    final ArrayMap<String, BasePermission> mPermissions =
-            new ArrayMap<String, BasePermission>();
-
     // Mapping from permission tree names to info about them.
     final ArrayMap<String, BasePermission> mPermissionTrees =
             new ArrayMap<String, BasePermission>();
@@ -418,14 +415,16 @@ public final class Settings {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
+    /** Settings and other information about permissions */
+    private final PermissionSettings mPermissions;
 
-    Settings(Object lock) {
-        this(Environment.getDataDirectory(), lock);
+    Settings(PermissionSettings permissions, Object lock) {
+        this(Environment.getDataDirectory(), permissions, lock);
     }
 
-    Settings(File dataDir, Object lock) {
+    Settings(File dataDir, PermissionSettings permission, Object lock) {
         mLock = lock;
-
+        mPermissions = permission;
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(mLock);
 
         mSystemDir = new File(dataDir, "system");
@@ -488,7 +487,7 @@ public final class Settings {
         final PermissionsState perms = ps.getPermissionsState();
 
         for (RestoredPermissionGrant grant : grants) {
-            BasePermission bp = mPermissions.get(grant.permissionName);
+            BasePermission bp = mPermissions.getPermission(grant.permissionName);
             if (bp != null) {
                 if (grant.granted) {
                     perms.grantRuntimePermission(bp, userId);
@@ -503,6 +502,10 @@ public final class Settings {
             mRestoredUserGrants.remove(userId);
         }
         writeRuntimePermissionsForUserLPr(userId, false);
+    }
+
+    public boolean canPropagatePermissionToInstantApp(String permName) {
+        return mPermissions.canPropagatePermissionToInstantApp(permName);
     }
 
     void setInstallerPackageName(String pkgName, String installerPkgName) {
@@ -662,16 +665,11 @@ public final class Settings {
         }
     }
 
-    // Transfer ownership of permissions from one package to another.
+    /**
+     * Transfers ownership of permissions from one package to another.
+     */
     void transferPermissionsLPw(String origPackageName, String newPackageName) {
-        // Transfer ownership of permissions to the new package.
-        for (int i=0; i<2; i++) {
-            ArrayMap<String, BasePermission> permissions =
-                    i == 0 ? mPermissionTrees : mPermissions;
-            for (BasePermission bp : permissions.values()) {
-                bp.transfer(origPackageName, newPackageName);
-            }
-        }
+        mPermissions.transferPermissions(origPackageName, newPackageName, mPermissionTrees);
     }
 
     /**
@@ -1059,7 +1057,7 @@ public final class Settings {
 
         // Update permissions
         for (String eachPerm : deletedPs.pkg.requestedPermissions) {
-            BasePermission bp = mPermissions.get(eachPerm);
+            BasePermission bp = mPermissions.getPermission(eachPerm);
             if (bp == null) {
                 continue;
             }
@@ -2209,7 +2207,7 @@ public final class Settings {
             if (tagName.equals(TAG_ITEM)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
 
-                BasePermission bp = mPermissions.get(name);
+                BasePermission bp = mPermissions.getPermission(name);
                 if (bp == null) {
                     Slog.w(PackageManagerService.TAG, "Unknown permission: " + name);
                     XmlUtils.skipCurrentTag(parser);
@@ -2504,9 +2502,7 @@ public final class Settings {
             serializer.endTag(null, "permission-trees");
 
             serializer.startTag(null, "permissions");
-            for (BasePermission bp : mPermissions.values()) {
-                writePermissionLPr(serializer, bp);
-            }
+            mPermissions.writePermissions(serializer);
             serializer.endTag(null, "permissions");
 
             for (final PackageSetting pkg : mPackages.values()) {
@@ -3044,9 +3040,9 @@ public final class Settings {
                 if (tagName.equals("package")) {
                     readPackageLPw(parser);
                 } else if (tagName.equals("permissions")) {
-                    readPermissionsLPw(mPermissions, parser);
+                    mPermissions.readPermissions(parser);
                 } else if (tagName.equals("permission-trees")) {
-                    readPermissionsLPw(mPermissionTrees, parser);
+                    PermissionSettings.readPermissions(mPermissionTrees, parser);
                 } else if (tagName.equals("shared-user")) {
                     readSharedUserLPw(parser);
                 } else if (tagName.equals("preferred-packages")) {
@@ -3547,25 +3543,6 @@ public final class Settings {
                         "Unknown element under <preferred-activities>: " + parser.getName());
                 XmlUtils.skipCurrentTag(parser);
             }
-        }
-    }
-
-    private void readPermissionsLPw(ArrayMap<String, BasePermission> out, XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            if (!BasePermission.readLPw(out, parser)) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element reading permissions: " + parser.getName() + " at "
-                                + parser.getPositionDescription());
-            }
-            XmlUtils.skipCurrentTag(parser);
         }
     }
 
@@ -4907,11 +4884,8 @@ public final class Settings {
 
     void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
-        boolean printedSomething = false;
-        for (BasePermission bp : mPermissions.values()) {
-            printedSomething = bp.dumpPermissionsLPr(pw, packageName, permissionNames,
-                    mReadExternalStorageEnforced == Boolean.TRUE, printedSomething, dumpState);
-        }
+        mPermissions.dumpPermissions(pw, packageName, permissionNames,
+                (mReadExternalStorageEnforced == Boolean.TRUE), dumpState);
     }
 
     void dumpSharedUsersLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
@@ -5342,7 +5316,7 @@ public final class Settings {
             PermissionsState permissionsState = sb.getPermissionsState();
             for (PermissionState permissionState
                     : permissionsState.getRuntimePermissionStates(userId)) {
-                BasePermission bp = mPermissions.get(permissionState.getName());
+                BasePermission bp = mPermissions.getPermission(permissionState.getName());
                 if (bp != null) {
                     permissionsState.revokeRuntimePermission(bp, userId);
                     permissionsState.updatePermissionFlags(bp, userId,
@@ -5503,7 +5477,7 @@ public final class Settings {
                 switch (parser.getName()) {
                     case TAG_ITEM: {
                         String name = parser.getAttributeValue(null, ATTR_NAME);
-                        BasePermission bp = mPermissions.get(name);
+                        BasePermission bp = mPermissions.getPermission(name);
                         if (bp == null) {
                             Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
                             XmlUtils.skipCurrentTag(parser);

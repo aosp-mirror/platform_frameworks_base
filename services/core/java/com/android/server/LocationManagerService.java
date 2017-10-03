@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.app.ActivityManager;
 import android.annotation.NonNull;
-import android.content.pm.PackageManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import com.android.internal.content.PackageMonitor;
@@ -56,6 +55,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;

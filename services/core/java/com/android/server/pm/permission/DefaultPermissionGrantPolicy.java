@@ -18,6 +18,7 @@ package com.android.server.pm.permission;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
@@ -29,11 +30,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManagerInternal.PackagesProvider;
-import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManagerInternal.PackagesProvider;
+import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -185,6 +186,7 @@ public final class DefaultPermissionGrantPolicy {
     private final Context mContext;
     private final Object mLock = new Object();
     private final PackageManagerInternal mServiceInternal;
+    private final PermissionManagerService mPermissionManager;
     private final DefaultPermissionGrantedCallback mPermissionGrantedCallback;
     public interface DefaultPermissionGrantedCallback {
         /** Callback when permissions have been granted */
@@ -192,7 +194,8 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     public DefaultPermissionGrantPolicy(Context context, Looper looper,
-            DefaultPermissionGrantedCallback callback) {
+            @Nullable DefaultPermissionGrantedCallback callback,
+            @NonNull PermissionManagerService permissionManager) {
         mContext = context;
         mHandler = new Handler(looper) {
             @Override
@@ -207,6 +210,7 @@ public final class DefaultPermissionGrantPolicy {
             }
         };
         mPermissionGrantedCallback = callback;
+        mPermissionManager = permissionManager;
         mServiceInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
@@ -259,11 +263,10 @@ public final class DefaultPermissionGrantPolicy {
     private void grantRuntimePermissionsForPackage(int userId, PackageParser.Package pkg) {
         Set<String> permissions = new ArraySet<>();
         for (String permission :  pkg.requestedPermissions) {
-            final Object obj = mServiceInternal.getPermissionTEMP(permission);
-            if (obj == null || !(obj instanceof BasePermission)) {
+            final BasePermission bp = mPermissionManager.getPermission(permission);
+            if (bp == null) {
                 continue;
             }
-            final BasePermission bp = (BasePermission) obj;
             if (bp.isRuntime()) {
                 permissions.add(permission);
             }
@@ -781,7 +784,9 @@ public final class DefaultPermissionGrantPolicy {
                     STORAGE_PERMISSIONS, true, userId);
         }
 
-        mPermissionGrantedCallback.onDefaultRuntimePermissionsGranted(userId);
+        if (mPermissionGrantedCallback != null) {
+            mPermissionGrantedCallback.onDefaultRuntimePermissionsGranted(userId);
+        }
     }
 
     private void grantDefaultPermissionsToDefaultSystemDialerApp(
