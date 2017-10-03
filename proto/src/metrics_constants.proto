@@ -4542,104 +4542,104 @@ message MetricsEvent {
 
     // OPEN: Settings > Network & Internet > Mobile network
     // CATEGORY: SETTINGS
-    SETTINGS_MOBILE_NETWORK_CATEGORY = 1139;
+    SETTINGS_MOBILE_NETWORK_CATEGORY = 1200;
 
     // ACTION: Settings > Network & Internet > Mobile network > Roaming
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_DATA_ROAMING_TOGGLE = 1140;
+    ACTION_MOBILE_NETWORK_DATA_ROAMING_TOGGLE = 1201;
 
     // ACTION: Settings > Network & Internet > Mobile network > Advanced
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_EXPAND_ADVANCED_FIELDS = 1141;
+    ACTION_MOBILE_NETWORK_EXPAND_ADVANCED_FIELDS = 1202;
 
     // ACTION: Settings > Network & Internet > Mobile network > Enhanced 4G LTE Mode
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_ENHANCED_4G_LTE_MODE_TOGGLE = 1142;
+    ACTION_MOBILE_ENHANCED_4G_LTE_MODE_TOGGLE = 1203;
 
     // ACTION: Settings > Network & Internet > Mobile network > Preferred network type
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_SELECT_PREFERRED_NETWORK = 1143;
+    ACTION_MOBILE_NETWORK_SELECT_PREFERRED_NETWORK = 1204;
 
     // ACTION: Settings > Network & Internet > Mobile network > Preferred network type (enabled networks)
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_SELECT_ENABLED_NETWORK = 1144;
+    ACTION_MOBILE_NETWORK_SELECT_ENABLED_NETWORK = 1205;
 
     // OPEN: Settings > Network & Internet > Mobile network > Carrier
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_EUICC_SETTING = 1145;
+    ACTION_MOBILE_NETWORK_EUICC_SETTING = 1206;
 
     // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_WIFI_CALLING = 1146;
+    ACTION_MOBILE_NETWORK_WIFI_CALLING = 1207;
 
     // ACTION: Settings > Network & Internet > Mobile network > Carrier video calling
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_VIDEO_CALLING_TOGGLE = 1147;
+    ACTION_MOBILE_NETWORK_VIDEO_CALLING_TOGGLE = 1208;
 
     // ACTION: Settings > Network & Internet > Mobile network > Automatically select network
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_AUTO_SELECT_NETWORK_TOGGLE = 1148;
+    ACTION_MOBILE_NETWORK_AUTO_SELECT_NETWORK_TOGGLE = 1209;
 
     // ACTION: Settings > Network & Internet > Mobile network > Network
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1149;
+    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
 
     // FIELD - Manually selected mobile network
-    FIELD_MOBILE_NETWORK = 1150;
+    FIELD_MOBILE_NETWORK = 1211;
 
     // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_APN_SETTINGS = 1151;
+    ACTION_MOBILE_NETWORK_APN_SETTINGS = 1212;
 
     // OPEN: Settings > Network & Internet > Mobile network > Carrier settings
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_CARRIER_SETTINGS = 1152;
+    ACTION_MOBILE_NETWORK_CARRIER_SETTINGS = 1213;
 
     // OPEN: Settings > Network & Internet > Mobile network > System select
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_CDMA_SYSTEM_SELECT = 1153;
+    ACTION_MOBILE_NETWORK_CDMA_SYSTEM_SELECT = 1214;
 
     // OPEN: Settings > Network & Internet > Mobile network > CDMA subscription
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_CDMA_SUBSCRIPTION_SELECT = 1154;
+    ACTION_MOBILE_NETWORK_CDMA_SUBSCRIPTION_SELECT = 1215;
 
     // ACTION: Settings > Network & Internet > Mobile network > Set up data service
     // CATEGORY: SETTINGS
-    ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1155;
+    ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1216;
 
     // OPEN: Settings > Developer Options > Experiment dashboard
     // CATEGORY: SETTINGS
-    SETTINGS_FEATURE_FLAGS_DASHBOARD = 1156;
+    SETTINGS_FEATURE_FLAGS_DASHBOARD = 1217;
 
     // OPEN: Settings > Notifications > [App] > Topic Notifications
     // CATEGORY: SETTINGS
     // OS: P
-    NOTIFICATION_CHANNEL_GROUP = 1157;
+    NOTIFICATION_CHANNEL_GROUP = 1218;
 
     // OPEN: Settings > Developer options > Enable > Info dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_ENABLE_DEVELOPMENT_OPTIONS = 1158;
+    DIALOG_ENABLE_DEVELOPMENT_OPTIONS = 1219;
 
     // OPEN: Settings > Developer options > OEM unlocking > Info dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_ENABLE_OEM_UNLOCKING = 1159;
+    DIALOG_ENABLE_OEM_UNLOCKING = 1220;
 
     // OPEN: Settings > Security > Nexus Imprint > [Fingerprint]
     // CATEGORY: SETTINGS
     // OS: P
-    FINGERPRINT_AUTHENTICATE_SIDECAR = 1160;
+    FINGERPRINT_AUTHENTICATE_SIDECAR = 1221;
 
     // OPEN: Settings > Developer options > USB debugging > Info dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_ENABLE_ADB = 1161;
+    DIALOG_ENABLE_ADB = 1222;
 
     // OPEN: Settings > Developer options > Revoke USB debugging authorizations > Info dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_CLEAR_ADB_KEYS = 1162;
+    DIALOG_CLEAR_ADB_KEYS = 1223;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
