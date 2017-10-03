@@ -1463,35 +1463,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
-# Build ext.jar
-# ============================================================
-
-ext_dirs := \
-	../../external/nist-sip/java \
-	../../external/tagsoup/src \
-
-ext_src_files := $(call all-java-files-under,$(ext_dirs))
-
-# ====  the library  =========================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(ext_src_files)
-
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart
-LOCAL_STATIC_JAVA_LIBRARIES := libphonenumber-platform
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := ext
-
-LOCAL_DX_FLAGS := --core-library
-
-ifneq ($(INCREMENTAL_BUILDS),)
-    LOCAL_PROGUARD_ENABLED := disabled
-    LOCAL_JACK_ENABLED := incremental
-endif
-
-include $(BUILD_JAVA_LIBRARY)
-
 # ====  java proto host library  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := platformprotos
