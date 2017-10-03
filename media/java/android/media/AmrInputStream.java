@@ -30,7 +30,7 @@ import android.util.Log;
  */
 public final class AmrInputStream extends InputStream {
     private final static String TAG = "AmrInputStream";
-    
+
     // frame is 20 msec at 8.000 khz
     private final static int SAMPLES_PER_FRAME = 8000 * 20 / 1000;
 
@@ -140,19 +140,15 @@ public final class AmrInputStream extends InputStream {
                 }
             }
 
-            // now read encoded data from the encoder (blocking, since we just filled up the
-            // encoder's input with data it should be able to output at least one buffer)
-            while (true) {
-                int index = mCodec.dequeueOutputBuffer(mInfo, -1);
-                if (index >= 0) {
-                    mBufIn = mInfo.size;
-                    ByteBuffer out = mCodec.getOutputBuffer(index);
-                    out.get(mBuf, 0 /* offset */, mBufIn /* length */);
-                    mCodec.releaseOutputBuffer(index,  false /* render */);
-                    if ((mInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                        mSawOutputEOS = true;
-                    }
-                    break;
+            // now read encoded data from the encoder
+            int index = mCodec.dequeueOutputBuffer(mInfo, 0);
+            if (index >= 0) {
+                mBufIn = mInfo.size;
+                ByteBuffer out = mCodec.getOutputBuffer(index);
+                out.get(mBuf, 0 /* offset */, mBufIn /* length */);
+                mCodec.releaseOutputBuffer(index,  false /* render */);
+                if ((mInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    mSawOutputEOS = true;
                 }
             }
         }
