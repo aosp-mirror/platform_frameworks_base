@@ -971,7 +971,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Odaberi sve"</string>
     <string name="cut" msgid="3092569408438626261">"Izreži"</string>
-    <string name="copy" msgid="2681946229533511987">"Kopirajte"</string>
+    <string name="copy" msgid="2681946229533511987">"Kopiraj"</string>
     <string name="paste" msgid="5629880836805036433">"Zalijepi"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Zalijepi kao neformatiran tekst"</string>
     <string name="replace" msgid="5781686059063148930">"Zamijeniti..."</string>
@@ -999,6 +999,7 @@
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="yes" msgid="5362982303337969312">"Uredu"</string>
     <string name="no" msgid="5141531044935541497">"Otkaži"</string>
+    <string name="close" msgid="2318214661230355730">"ZATVORI"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Pažnja"</string>
     <string name="loading" msgid="7933681260296021180">"Učitavanje..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Uključeno"</string>
@@ -1057,6 +1058,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Razmjer"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Uvijek prikaži"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Ponovo omogućite ovu opciju u meniju Postavke sistema &gt; Aplikacije &gt; Preuzete aplikacije."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Aplikacija ne reagira"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"Moguće je da aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> koristi previše memorije."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava trenutnu postavku veličine ekrana i može se ponašati neočekivano."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvijek prikaži"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastita StrictMode pravila."</string>
@@ -1068,7 +1071,7 @@
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Neke aplikacije možda neće raditi ispravno dok traje nadogradnja"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> se nadograđuje…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimiziranje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="android_preparing_apk" msgid="8162599310274079154">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
+    <string name="android_preparing_apk" msgid="8162599310274079154">"Pripremanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Pokretanje pri kraju."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Pokrenuta je aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>

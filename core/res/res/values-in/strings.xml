@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="yes" msgid="5362982303337969312">"Oke"</string>
     <string name="no" msgid="5141531044935541497">"Batal"</string>
+    <string name="close" msgid="2318214661230355730">"TUTUP"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Perhatian"</string>
     <string name="loading" msgid="7933681260296021180">"Memuat..."</string>
     <string name="capital_on" msgid="1544682755514494298">"AKTIF"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Selalu tampilkan"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terdownload."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Aplikasi tidak merespons"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> mungkin menggunakan terlalu banyak memori."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung setelan Ukuran layar saat ini dan dapat menunjukkan perilaku yang tak diharapkan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Selalu tampilkan"</string>
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
@@ -1425,7 +1428,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Tidak tersedia"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Sedang digunakan"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Bawaan"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Layar HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
@@ -1592,7 +1595,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Melihat layar penuh"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, gesek ke bawah dari atas."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, geser layar ke bawah dari atas."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Mengerti"</string>
     <string name="done_label" msgid="2093726099505892398">"Selesai"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Penggeser putar jam"</string>

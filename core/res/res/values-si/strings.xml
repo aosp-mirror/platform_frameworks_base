@@ -981,6 +981,7 @@
     <string name="cancel" msgid="6442560571259935130">"අවලංගු කරන්න"</string>
     <string name="yes" msgid="5362982303337969312">"හරි"</string>
     <string name="no" msgid="5141531044935541497">"අවලංගු කරන්න"</string>
+    <string name="close" msgid="2318214661230355730">"වසන්න"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"අවධානය"</string>
     <string name="loading" msgid="7933681260296021180">"පූරණය වෙමින්..."</string>
     <string name="capital_on" msgid="1544682755514494298">"සක්‍රීයයි"</string>
@@ -1037,6 +1038,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"පරිමාණය"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"සැමවිටම පෙන්වන්න"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"පද්ධති සැකසීම් තුළ මෙය නැවත ක්‍රියාත්මක කරන්න &gt; යෙදුම් &gt; බාගන්නා ලදි."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"යෙදුම ප්‍රතිචාර නොදක්වයි"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> මතකය ඉතා වැඩියෙන් භාවිත කරනවා විය හැකිය."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> වත්මන් සංදර්ශක තරම සඳහා සහාය නොදක්වන අතර අනපේක්ෂිත ලෙස හැසිරීමට හැකිය."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"සැම විටම පෙන්වන්න"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> යෙදුම (<xliff:g id="PROCESS">%2$s</xliff:g> ක්‍රියාවලිය) එහි StrictMode කොන්දේසිය උල්ලංඝනය කර ඇත."</string>
