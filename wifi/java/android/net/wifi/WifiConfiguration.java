@@ -790,6 +790,28 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Returns true if this WiFi config is for an open network.
+     */
+    public boolean isOpenNetwork() {
+        final int cardinality = allowedKeyManagement.cardinality();
+        final boolean hasNoKeyMgmt = cardinality == 0
+                || (cardinality == 1 && allowedKeyManagement.get(KeyMgmt.NONE));
+
+        boolean hasNoWepKeys = true;
+        if (wepKeys != null) {
+            for (int i = 0; i < wepKeys.length; i++) {
+                if (wepKeys[i] != null) {
+                    hasNoWepKeys = false;
+                    break;
+                }
+            }
+        }
+
+        return hasNoKeyMgmt && hasNoWepKeys;
+    }
+
+    /**
+     * @hide
      * Setting this value will force scan results associated with this configuration to
      * be included in the bucket of networks that are externally scored.
      * If not set, associated scan results will be treated as legacy saved networks and
