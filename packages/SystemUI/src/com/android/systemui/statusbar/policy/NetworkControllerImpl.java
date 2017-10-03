@@ -150,7 +150,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
-                new AccessPointControllerImpl(context, bgLooper),
+                new AccessPointControllerImpl(context),
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
                 deviceProvisionedController);

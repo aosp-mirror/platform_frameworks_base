@@ -24,7 +24,6 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkKey;
 import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
@@ -36,10 +35,14 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiNetworkScoreCache.CacheListener;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.GuardedBy;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -47,8 +50,12 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.widget.Toast;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
+import com.android.settingslib.core.lifecycle.Lifecycle;
+import com.android.settingslib.core.lifecycle.LifecycleObserver;
+import com.android.settingslib.core.lifecycle.events.OnDestroy;
+import com.android.settingslib.core.lifecycle.events.OnStart;
+import com.android.settingslib.core.lifecycle.events.OnStop;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,7 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Tracks saved or available wifi networks and their state.
  */
-public class WifiTracker {
+public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestroy {
     /**
      * Default maximum age in millis of cached scored networks in
      * {@link AccessPoint#mScoredNetworkCache} to be used for speed label generation.
@@ -80,7 +87,7 @@ public class WifiTracker {
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
     public static boolean sVerboseLogging;
 
-    // TODO(b/36733768): Remove flag includeSaved and includePasspoints.
+    // TODO(b/36733768): Remove flag includeSaved
 
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
@@ -96,9 +103,9 @@ public class WifiTracker {
     private final WifiListener mListener;
     private final boolean mIncludeSaved;
     private final boolean mIncludeScans;
-    private final boolean mIncludePasspoints;
-    @VisibleForTesting final MainHandler mMainHandler;
-    @VisibleForTesting final WorkHandler mWorkHandler;
+    @VisibleForTesting MainHandler mMainHandler;
+    @VisibleForTesting WorkHandler mWorkHandler;
+    private HandlerThread mWorkThread;
 
     private WifiTrackerNetworkCallback mNetworkCallback;
 
@@ -142,7 +149,7 @@ public class WifiTracker {
     private WifiInfo mLastInfo;
 
     private final NetworkScoreManager mNetworkScoreManager;
-    private final WifiNetworkScoreCache mScoreCache;
+    private WifiNetworkScoreCache mScoreCache;
     private boolean mNetworkScoringUiEnabled;
     private long mMaxSpeedLabelScoreCacheAge;
 
@@ -169,51 +176,43 @@ public class WifiTracker {
         return filter;
     }
 
+    /**
+     * Use the lifecycle constructor below whenever possible
+     */
+    @Deprecated
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, null, includeSaved, includeScans);
-    }
-
-    public WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
-            boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, workerLooper, includeSaved, includeScans, false);
-    }
-
-    public WifiTracker(Context context, WifiListener wifiListener,
-            boolean includeSaved, boolean includeScans, boolean includePasspoints) {
-        this(context, wifiListener, null, includeSaved, includeScans, includePasspoints);
-    }
-
-    public WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
-                       boolean includeSaved, boolean includeScans, boolean includePasspoints) {
-        this(context, wifiListener, workerLooper, includeSaved, includeScans, includePasspoints,
+        this(context, wifiListener, includeSaved, includeScans,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
-                Looper.myLooper(), newIntentFilter());
+                newIntentFilter());
+    }
+
+    public WifiTracker(Context context, WifiListener wifiListener,
+            @NonNull Lifecycle lifecycle, boolean includeSaved, boolean includeScans) {
+        this(context, wifiListener, includeSaved, includeScans,
+                context.getSystemService(WifiManager.class),
+                context.getSystemService(ConnectivityManager.class),
+                context.getSystemService(NetworkScoreManager.class),
+                newIntentFilter());
+        lifecycle.addObserver(this);
     }
 
     @VisibleForTesting
-    WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
-                boolean includeSaved, boolean includeScans, boolean includePasspoints,
-                WifiManager wifiManager, ConnectivityManager connectivityManager,
-                NetworkScoreManager networkScoreManager, Looper currentLooper,
-                IntentFilter filter) {
+    WifiTracker(Context context, WifiListener wifiListener,
+            boolean includeSaved, boolean includeScans,
+            WifiManager wifiManager, ConnectivityManager connectivityManager,
+            NetworkScoreManager networkScoreManager,
+            IntentFilter filter) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
         mContext = context;
-        if (currentLooper == null) {
-            // When we aren't on a looper thread, default to the main.
-            currentLooper = Looper.getMainLooper();
-        }
-        mMainHandler = new MainHandler(currentLooper);
-        mWorkHandler = new WorkHandler(
-                workerLooper != null ? workerLooper : currentLooper);
+        mMainHandler = new MainHandler(Looper.getMainLooper());
         mWifiManager = wifiManager;
         mIncludeSaved = includeSaved;
         mIncludeScans = includeScans;
-        mIncludePasspoints = includePasspoints;
         mListener = wifiListener;
         mConnectivityManager = connectivityManager;
 
@@ -229,7 +228,22 @@ public class WifiTracker {
 
         mNetworkScoreManager = networkScoreManager;
 
-        mScoreCache = new WifiNetworkScoreCache(context, new CacheListener(mWorkHandler) {
+        final HandlerThread workThread = new HandlerThread(TAG
+                + "{" + Integer.toHexString(System.identityHashCode(this)) + "}",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        workThread.start();
+        setWorkThread(workThread);
+    }
+
+    /**
+     * Sanity warning: this wipes out mScoreCache, so use with extreme caution
+     * @param workThread substitute Handler thread, for testing purposes only
+     */
+    @VisibleForTesting
+    void setWorkThread(HandlerThread workThread) {
+        mWorkThread = workThread;
+        mWorkHandler = new WorkHandler(workThread.getLooper());
+        mScoreCache = new WifiNetworkScoreCache(mContext, new CacheListener(mWorkHandler) {
             @Override
             public void networkCacheUpdated(List<ScoredNetwork> networks) {
                 synchronized (mLock) {
@@ -242,6 +256,11 @@ public class WifiTracker {
                 updateNetworkScores();
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        mWorkThread.quit();
     }
 
     /** Synchronously update the list of access points with the latest information. */
@@ -312,8 +331,9 @@ public class WifiTracker {
      * <p>Registers listeners and starts scanning for wifi networks. If this is not called
      * then forceUpdate() must be called to populate getAccessPoints().
      */
+    @Override
     @MainThread
-    public void startTracking() {
+    public void onStart() {
         synchronized (mLock) {
             registerScoreCache();
 
@@ -361,15 +381,16 @@ public class WifiTracker {
     /**
      * Stop tracking wifi networks and scores.
      *
-     * <p>This should always be called when done with a WifiTracker (if startTracking was called) to
+     * <p>This should always be called when done with a WifiTracker (if onStart was called) to
      * ensure proper cleanup and prevent any further callbacks from occurring.
      *
      * <p>Calling this method will set the {@link #mStaleScanResults} bit, which prevents
      * {@link WifiListener#onAccessPointsChanged()} callbacks from being invoked (until the bit
      * is unset on the next SCAN_RESULTS_AVAILABLE_ACTION).
      */
+    @Override
     @MainThread
-    public void stopTracking() {
+    public void onStop() {
         synchronized (mLock) {
             if (mRegistered) {
                 mContext.unregisterReceiver(mReceiver);
@@ -769,9 +790,8 @@ public class WifiTracker {
     }
 
     public static List<AccessPoint> getCurrentAccessPoints(Context context, boolean includeSaved,
-            boolean includeScans, boolean includePasspoints) {
-        WifiTracker tracker = new WifiTracker(context,
-                null, null, includeSaved, includeScans, includePasspoints);
+            boolean includeScans) {
+        WifiTracker tracker = new WifiTracker(context, null, includeSaved, includeScans);
         tracker.forceUpdate();
         tracker.copyAndNotifyListeners(false /*notifyListeners*/);
         return tracker.getAccessPoints();
