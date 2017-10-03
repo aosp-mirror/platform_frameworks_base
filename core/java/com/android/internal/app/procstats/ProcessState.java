@@ -1181,7 +1181,6 @@ public final class ProcessState {
         proto.write(ProcessStatsProto.UID, uid);
         if (mNumExcessiveCpu > 0 || mNumCachedKill > 0 ) {
             final long killToken = proto.start(ProcessStatsProto.KILL);
-            proto.write(ProcessStatsProto.Kill.WAKES, mNumExcessiveWake);
             proto.write(ProcessStatsProto.Kill.CPU, mNumExcessiveCpu);
             proto.write(ProcessStatsProto.Kill.CACHED, mNumCachedKill);
             ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.Kill.CACHED_PSS,
