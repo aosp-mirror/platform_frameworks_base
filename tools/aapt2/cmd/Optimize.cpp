@@ -283,24 +283,8 @@ class OptimizeCommand {
 
 bool ExtractAppDataFromManifest(OptimizeContext* context, LoadedApk* apk,
                                 OptimizeOptions* out_options) {
-  io::IFile* manifest_file = apk->GetFileCollection()->FindFile("AndroidManifest.xml");
-  if (manifest_file == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                     << "missing AndroidManifest.xml");
-    return false;
-  }
-
-  std::unique_ptr<io::IData> data = manifest_file->OpenAsData();
-  if (data == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage(manifest_file->GetSource())
-                                     << "failed to open file");
-    return false;
-  }
-
-  std::unique_ptr<xml::XmlResource> manifest = xml::Inflate(
-      data->data(), data->size(), context->GetDiagnostics(), manifest_file->GetSource());
+  std::unique_ptr<xml::XmlResource> manifest = apk->InflateManifest(context);
   if (manifest == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to read binary AndroidManifest.xml");
     return false;
   }
 
