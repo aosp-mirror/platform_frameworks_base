@@ -1559,6 +1559,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // values in the TaskRecord.
             String label = null;
             String iconFilename = null;
+            int iconResource = -1;
             int colorPrimary = 0;
             int colorBackground = 0;
             int statusBarColor = 0;
@@ -1569,6 +1570,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 if (r.taskDescription != null) {
                     if (label == null) {
                         label = r.taskDescription.getLabel();
+                    }
+                    if (iconResource == -1) {
+                        iconResource = r.taskDescription.getIconResource();
                     }
                     if (iconFilename == null) {
                         iconFilename = r.taskDescription.getIconFilename();
@@ -1584,8 +1588,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 }
                 topActivity = false;
             }
-            lastTaskDescription = new TaskDescription(label, null, iconFilename, colorPrimary,
-                    colorBackground, statusBarColor, navigationBarColor);
+            lastTaskDescription = new TaskDescription(label, null, iconResource, iconFilename,
+                    colorPrimary, colorBackground, statusBarColor, navigationBarColor);
             if (mWindowContainerController != null) {
                 mWindowContainerController.setTaskDescription(lastTaskDescription);
             }

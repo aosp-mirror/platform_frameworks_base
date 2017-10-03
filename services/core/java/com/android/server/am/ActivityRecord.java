@@ -423,9 +423,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (iconFilename != null || taskDescription.getLabel() != null ||
                     taskDescription.getPrimaryColor() != 0) {
                 pw.print(prefix); pw.print("taskDescription:");
-                        pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" label=\""); pw.print(taskDescription.getLabel());
                                 pw.print("\"");
+                        pw.print(" icon="); pw.print(taskDescription.getInMemoryIcon() != null
+                                ? taskDescription.getInMemoryIcon().getByteCount() + " bytes"
+                                : "null");
+                        pw.print(" iconResource="); pw.print(taskDescription.getIconResource());
+                        pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
                         pw.print(prefix + " backgroundColor=");
@@ -434,9 +438,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                         pw.println(Integer.toHexString(taskDescription.getStatusBarColor()));
                         pw.print(prefix + " navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
-            }
-            if (iconFilename == null && taskDescription.getIcon() != null) {
-                pw.print(prefix); pw.println("taskDescription contains Bitmap");
             }
         }
         if (results != null) {

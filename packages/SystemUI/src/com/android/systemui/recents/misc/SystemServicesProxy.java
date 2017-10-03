@@ -45,6 +45,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -234,7 +235,6 @@ public class SystemServicesProxy {
      */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         if (mAm == null) return null;
-
         try {
             List<ActivityManager.RecentTaskInfo> tasks = mIam.getRecentTasks(numTasks,
                     RECENT_IGNORE_UNAVAILABLE, userId).getList();
@@ -627,12 +627,24 @@ public class SystemServicesProxy {
     public Drawable getBadgedTaskDescriptionIcon(ActivityManager.TaskDescription taskDescription,
             int userId, Resources res) {
         Bitmap tdIcon = taskDescription.getInMemoryIcon();
-        if (tdIcon == null) {
+        Drawable dIcon = null;
+        if (tdIcon != null) {
+            dIcon = new BitmapDrawable(res, tdIcon);
+        } else if (taskDescription.getIconResource() != 0) {
+            try {
+                dIcon = mContext.getDrawable(taskDescription.getIconResource());
+            } catch (NotFoundException e) {
+                Log.e(TAG, "Could not find icon drawable from resource", e);
+            }
+        } else {
             tdIcon = ActivityManager.TaskDescription.loadTaskDescriptionIcon(
                     taskDescription.getIconFilename(), userId);
+            if (tdIcon != null) {
+                dIcon = new BitmapDrawable(res, tdIcon);
+            }
         }
-        if (tdIcon != null) {
-            return getBadgedIcon(new BitmapDrawable(res, tdIcon), userId);
+        if (dIcon != null) {
+            return getBadgedIcon(dIcon, userId);
         }
         return null;
     }
