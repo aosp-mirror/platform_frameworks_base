@@ -1090,6 +1090,7 @@ public final class SystemServer {
                 if (!disableRtt) {
                     traceBeginAndSlog("StartWifiRtt");
                     mSystemServiceManager.startService("com.android.server.wifi.RttService");
+                    mSystemServiceManager.startService("com.android.server.wifi.rtt.RttService");
                     traceEnd();
                 }
 

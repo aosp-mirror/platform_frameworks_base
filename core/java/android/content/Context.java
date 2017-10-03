@@ -3467,6 +3467,19 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi
+     *
+     * Note: this is a replacement for WIFI_RTT_SERVICE above. It will
+     * be renamed once final implementation in place.
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.rtt.WifiRttManager
+     * @hide
+     */
+    public static final String WIFI_RTT2_SERVICE = "rttmanager2";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.lowpan.LowpanManager} for handling management of
      * LoWPAN access.
      *

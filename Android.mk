@@ -552,6 +552,8 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/aware/IWifiAwareManager.aidl \
 	wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
+	wifi/java/android/net/wifi/rtt/IRttCallback.aidl \
+	wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl \
 	wifi/java/android/net/wifi/IWifiScanner.aidl \
 	wifi/java/android/net/wifi/IRttManager.aidl \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
@@ -721,6 +723,8 @@ aidl_files := \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pGroup.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/nsd/WifiP2pServiceRequest.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/nsd/WifiP2pServiceInfo.aidl \
+	frameworks/base/wifi/java/android/net/wifi/rtt/RangingRequest.aidl \
+	frameworks/base/wifi/java/android/net/wifi/rtt/RangingResult.aidl \
 	frameworks/base/wifi/java/android/net/wifi/WpsInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/ScanResult.aidl \
 	frameworks/base/wifi/java/android/net/wifi/PasspointManagementObjectDefinition.aidl \
