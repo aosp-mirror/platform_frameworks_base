@@ -23,6 +23,7 @@
 
 #include "LoadedApk.h"
 #include "ResourceUtils.h"
+#include "ValueVisitor.h"
 #include "configuration/ConfigurationParser.h"
 #include "filter/AbiFilter.h"
 #include "filter/Filter.h"
@@ -33,12 +34,14 @@
 #include "split/TableSplitter.h"
 #include "util/Files.h"
 #include "xml/XmlDom.h"
+#include "xml/XmlUtil.h"
 
 namespace aapt {
 
 using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::xml::kSchemaAndroid;
 using ::aapt::xml::XmlResource;
 using ::android::StringPiece;
 
@@ -153,40 +156,10 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
     }
 
     std::unique_ptr<XmlResource> manifest;
-
-    Maybe<AndroidSdk> maybe_sdk = GetAndroidSdk(artifact, config, diag);
-    if (maybe_sdk) {
-      // TODO(safarmer): Handle the rest of the Android SDK.
-      const AndroidSdk& android_sdk = maybe_sdk.value();
-
-      manifest = apk_->InflateManifest(context_);
-      if (!manifest) {
-        return false;
-      }
-
-      // Make sure the first element is <manifest> with package attribute.
-      xml::Element* manifest_el = manifest->root.get();
-      if (manifest_el == nullptr) {
-        return {};
-      }
-
-      if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
-        diag->Error(DiagMessage(manifest->file.source) << "root tag must be <manifest>");
-        return {};
-      }
-
-      if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
-        if (xml::Attribute* min_sdk_attr =
-                uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
-          if (min_sdk_attr == nullptr) {
-            diag->Error(DiagMessage(manifest->file.source.WithLine(uses_sdk_el->line_number))
-                        << "missing android:minSdkVersion");
-            return {};
-          }
-          const std::string& min_sdk_str = std::to_string(android_sdk.min_sdk_version.value());
-          min_sdk_attr->compiled_value = ResourceUtils::TryParseInt(min_sdk_str);
-        }
-      }
+    if (!UpdateManifest(artifact, config, &manifest, diag)) {
+      diag->Error(DiagMessage() << "could not update AndroidManifest.xml for "
+                                << artifact_name.value());
+      return false;
     }
 
     std::string out = options.out_dir;
@@ -286,6 +259,97 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
   TableSplitter splitter{{}, splits};
   splitter.SplitTable(table.get());
   return table;
+}
+
+bool MultiApkGenerator::UpdateManifest(const Artifact& artifact,
+                                       const PostProcessingConfiguration& config,
+                                       std::unique_ptr<XmlResource>* updated_manifest,
+                                       IDiagnostics* diag) {
+  *updated_manifest = apk_->InflateManifest(context_);
+  XmlResource* manifest = updated_manifest->get();
+  if (manifest == nullptr) {
+    return false;
+  }
+
+  // Make sure the first element is <manifest> with package attribute.
+  xml::Element* manifest_el = manifest->root.get();
+  if (manifest_el == nullptr) {
+    return false;
+  }
+
+  if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
+    diag->Error(DiagMessage(manifest->file.source) << "root tag must be <manifest>");
+    return false;
+  }
+
+  // Update the versionCode attribute.
+  xml::Attribute* versionCode = manifest_el->FindAttribute(kSchemaAndroid, "versionCode");
+  if (versionCode == nullptr) {
+    diag->Error(DiagMessage(manifest->file.source) << "manifest must have a versionCode attribute");
+    return false;
+  }
+
+  auto* compiled_version = ValueCast<BinaryPrimitive>(versionCode->compiled_value.get());
+  if (compiled_version == nullptr) {
+    diag->Error(DiagMessage(manifest->file.source) << "versionCode is invalid");
+    return false;
+  }
+
+  int new_version = compiled_version->value.data + artifact.version;
+  versionCode->compiled_value = ResourceUtils::TryParseInt(std::to_string(new_version));
+
+  // Check to see if the minSdkVersion needs to be updated.
+  Maybe<AndroidSdk> maybe_sdk = GetAndroidSdk(artifact, config, diag);
+  if (maybe_sdk) {
+    // TODO(safarmer): Handle the rest of the Android SDK.
+    const AndroidSdk& android_sdk = maybe_sdk.value();
+
+    if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
+      if (xml::Attribute* min_sdk_attr =
+              uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
+        // Populate with a pre-compiles attribute to we don't need to relink etc.
+        const std::string& min_sdk_str = std::to_string(android_sdk.min_sdk_version.value());
+        min_sdk_attr->compiled_value = ResourceUtils::TryParseInt(min_sdk_str);
+      } else {
+        // There was no minSdkVersion. This is strange since at this point we should have been
+        // through the manifest fixer which sets the default minSdkVersion.
+        diag->Error(DiagMessage(manifest->file.source) << "missing minSdkVersion from <uses-sdk>");
+        return false;
+      }
+    } else {
+      // No uses-sdk present. This is strange since at this point we should have been
+      // through the manifest fixer which should have added it.
+      diag->Error(DiagMessage(manifest->file.source) << "missing <uses-sdk> from <manifest>");
+      return false;
+    }
+  }
+
+  if (artifact.screen_density_group) {
+    auto densities = config.screen_density_groups.find(artifact.screen_density_group.value());
+    CHECK(densities != config.screen_density_groups.end()) << "Missing density group";
+
+    xml::Element* screens_el = manifest_el->FindChild({}, "compatible-screens");
+    if (!screens_el) {
+      // create a new element.
+      std::unique_ptr<xml::Element> new_screens_el = util::make_unique<xml::Element>();
+      new_screens_el->name = "compatible-screens";
+      screens_el = new_screens_el.get();
+      manifest_el->InsertChild(0, std::move(new_screens_el));
+    } else {
+      // clear out the old element.
+      screens_el->GetChildElements().clear();
+    }
+
+    for (const auto& density : densities->second) {
+      std::unique_ptr<xml::Element> screen_el = util::make_unique<xml::Element>();
+      screen_el->name = "screen";
+      const char* density_str = density.toString().string();
+      screen_el->attributes.push_back(xml::Attribute{kSchemaAndroid, "screenDensity", density_str});
+      screens_el->AppendChild(std::move(screen_el));
+    }
+  }
+
+  return true;
 }
 
 }  // namespace aapt

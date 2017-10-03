@@ -39,6 +39,7 @@
   <!-- Groups output artifacts together by dimension labels. -->
   <xsd:complexType name="artifact">
     <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute name="version" type="xsd:integer"/>
     <xsd:attribute name="abi-group" type="xsd:string"/>
     <xsd:attribute name="android-sdk-group" type="xsd:string"/>
     <xsd:attribute name="device-feature-group" type="xsd:string"/>

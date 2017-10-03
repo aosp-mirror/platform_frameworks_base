@@ -54,6 +54,10 @@ class MultiApkGenerator {
     return context_->GetDiagnostics();
   }
 
+  bool UpdateManifest(const configuration::Artifact& artifact,
+                      const configuration::PostProcessingConfiguration& config,
+                      std::unique_ptr<xml::XmlResource>* updated_manifest, IDiagnostics* diag);
+
   LoadedApk* apk_;
   IAaptContext* context_;
 };

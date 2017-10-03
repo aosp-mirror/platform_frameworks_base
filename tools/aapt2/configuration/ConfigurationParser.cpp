@@ -330,15 +330,32 @@ Maybe<PostProcessingConfiguration> ConfigurationParser::Parse() {
   // TODO: Validate all references in the configuration are valid. It should be safe to assume from
   // this point on that any references from one section to another will be present.
 
+  // TODO: Automatically arrange artifacts so that they match Play Store multi-APK requirements.
+  // see: https://developer.android.com/google/play/publishing/multiple-apks.html
+  //
+  // For now, make sure the version codes are unique.
+  std::vector<Artifact>& artifacts = config.artifacts;
+  std::sort(artifacts.begin(), artifacts.end());
+  if (std::adjacent_find(artifacts.begin(), artifacts.end()) != artifacts.end()) {
+    diag_->Error(DiagMessage() << "Configuration has duplicate versions");
+    return {};
+  }
+
   return {config};
 }
 
 ConfigurationParser::ActionHandler ConfigurationParser::artifact_handler_ =
     [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+  // This will be incremented later so the first version will always be different to the base APK.
+  int current_version = (config->artifacts.empty()) ? 0 : config->artifacts.back().version;
+
   Artifact artifact{};
+  Maybe<int> version;
   for (const auto& attr : root_element->attributes) {
     if (attr.name == "name") {
       artifact.name = attr.value;
+    } else if (attr.name == "version") {
+      version = std::stoi(attr.value);
     } else if (attr.name == "abi-group") {
       artifact.abi_group = {attr.value};
     } else if (attr.name == "screen-density-group") {
@@ -356,6 +373,9 @@ ConfigurationParser::ActionHandler ConfigurationParser::artifact_handler_ =
                                << attr.value);
     }
   }
+
+  artifact.version = (version) ? version.value() : current_version + 1;
+
   config->artifacts.push_back(artifact);
   return true;
 };
