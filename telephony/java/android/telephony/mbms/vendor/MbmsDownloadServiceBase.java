@@ -46,6 +46,47 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     private final Map<IBinder, DownloadStateCallback> mDownloadCallbackBinderMap = new HashMap<>();
     private final Map<IBinder, DeathRecipient> mDownloadCallbackDeathRecipients = new HashMap<>();
 
+
+    // Filters the DownloadStateCallbacks by its configuration from the app.
+    private abstract static class FilteredDownloadStateCallback extends DownloadStateCallback {
+
+        private final IDownloadStateCallback mCallback;
+        public FilteredDownloadStateCallback(IDownloadStateCallback callback, int callbackFlags) {
+            super(callbackFlags);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo,
+                int currentDownloadSize, int fullDownloadSize, int currentDecodedSize,
+                int fullDecodedSize) {
+            if (!isFilterFlagSet(PROGRESS_UPDATES)) {
+                return;
+            }
+            try {
+                mCallback.onProgressUpdated(request, fileInfo, currentDownloadSize,
+                        fullDownloadSize, currentDecodedSize, fullDecodedSize);
+            } catch (RemoteException e) {
+                onRemoteException(e);
+            }
+        }
+
+        @Override
+        public void onStateUpdated(DownloadRequest request, FileInfo fileInfo,
+                @MbmsDownloadSession.DownloadStatus int state) {
+            if (!isFilterFlagSet(STATE_UPDATES)) {
+                return;
+            }
+            try {
+                mCallback.onStateUpdated(request, fileInfo, state);
+            } catch (RemoteException e) {
+                onRemoteException(e);
+            }
+        }
+
+        protected abstract void onRemoteException(RemoteException e);
+    }
+
     /**
      * Initialize the download service for this app and subId, registering the listener.
      *
@@ -196,9 +237,8 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @hide
      */
     @Override
-    public final int registerStateCallback(
-            final DownloadRequest downloadRequest, final IDownloadStateCallback callback)
-            throws RemoteException {
+    public final int registerStateCallback(final DownloadRequest downloadRequest,
+            final IDownloadStateCallback callback, int flags) throws RemoteException {
         final int uid = Binder.getCallingUid();
         DeathRecipient deathRecipient = new DeathRecipient() {
             @Override
@@ -211,28 +251,10 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
         mDownloadCallbackDeathRecipients.put(callback.asBinder(), deathRecipient);
         callback.asBinder().linkToDeath(deathRecipient, 0);
 
-        DownloadStateCallback exposedCallback = new DownloadStateCallback() {
+        DownloadStateCallback exposedCallback = new FilteredDownloadStateCallback(callback, flags) {
             @Override
-            public void onProgressUpdated(DownloadRequest request, FileInfo fileInfo, int
-                    currentDownloadSize, int fullDownloadSize, int currentDecodedSize, int
-                    fullDecodedSize) {
-                try {
-                    callback.onProgressUpdated(request, fileInfo, currentDownloadSize,
-                            fullDownloadSize,
-                            currentDecodedSize, fullDecodedSize);
-                } catch (RemoteException e) {
-                    onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
-                }
-            }
-
-            @Override
-            public void onStateUpdated(DownloadRequest request, FileInfo fileInfo,
-                    @MbmsDownloadSession.DownloadStatus int state) {
-                try {
-                    callback.onStateUpdated(request, fileInfo, state);
-                } catch (RemoteException e) {
-                    onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
-                }
+            protected void onRemoteException(RemoteException e) {
+                onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
             }
         };
 
