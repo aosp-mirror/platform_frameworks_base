@@ -21,8 +21,10 @@
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
+#include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/proto/ProtoDeserialize.h"
+#include "io/FileStream.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Files.h"
@@ -31,23 +33,34 @@ using ::android::StringPiece;
 
 namespace aapt {
 
-bool DumpCompiledFile(const pb::internal::CompiledFile& pb_file, const void* data, size_t len,
-                      const Source& source, IAaptContext* context) {
-  ResourceFile file;
-  std::string error;
-  if (!DeserializeCompiledFileFromPb(pb_file, &file, &error)) {
-    context->GetDiagnostics()->Warn(DiagMessage(source)
-                                    << "failed to read compiled file: " << error);
-    return false;
+static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
+  switch (type) {
+    case ResourceFile::Type::kPng:
+      return "PNG";
+    case ResourceFile::Type::kBinaryXml:
+      return "BINARY_XML";
+    case ResourceFile::Type::kProtoXml:
+      return "PROTO_XML";
+    default:
+      break;
   }
-
-  std::cout << "Resource: " << file.name << "\n"
-            << "Config:   " << file.config << "\n"
-            << "Source:   " << file.source << "\n";
-  return true;
+  return "UNKNOWN";
 }
 
-bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
+static void DumpCompiledFile(const ResourceFile& file, const Source& source, off64_t offset,
+                             size_t len) {
+  std::cout << "Resource: " << file.name << "\n"
+            << "Config:   " << file.config << "\n"
+            << "Source:   " << file.source << "\n"
+            << "Type:     " << ResourceFileTypeToString(file.type) << "\n"
+            << "DataOff:  " << offset << "\n"
+            << "DataLen:  " << len << "\n";
+}
+
+static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
+  DebugPrintTableOptions print_options;
+  print_options.show_sources = true;
+
   std::string err;
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
@@ -85,61 +98,71 @@ bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
       }
     }
 
-    DebugPrintTableOptions options;
-    options.show_sources = true;
-    Debug::PrintTable(&table, options);
+    Debug::PrintTable(&table, print_options);
     return true;
   }
 
   err.clear();
 
-  Maybe<android::FileMap> file = file::MmapPath(file_path, &err);
-  if (!file) {
-    context->GetDiagnostics()->Error(DiagMessage(file_path) << err);
+  io::FileInputStream input(file_path);
+  if (input.HadError()) {
+    context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                     << "failed to open file: " << input.GetError());
     return false;
-  }
-
-  android::FileMap* file_map = &file.value();
-
-  // Check to see if this is a loose ResourceTable.
-  pb::ResourceTable pb_table;
-  if (pb_table.ParseFromArray(file_map->getDataPtr(), file_map->getDataLength())) {
-    ResourceTable table;
-    if (DeserializeTableFromPb(pb_table, &table, &err)) {
-      DebugPrintTableOptions options;
-      options.show_sources = true;
-      Debug::PrintTable(&table, options);
-      return true;
-    }
   }
 
   // Try as a compiled file.
-  CompiledFileInputStream input(file_map->getDataPtr(), file_map->getDataLength());
-  uint32_t num_files = 0;
-  if (!input.ReadLittleEndian32(&num_files)) {
+  ContainerReader reader(&input);
+  if (reader.HadError()) {
+    context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                     << "failed to read container: " << reader.GetError());
     return false;
   }
 
-  for (uint32_t i = 0; i < num_files; i++) {
-    pb::internal::CompiledFile compiled_file;
-    if (!input.ReadCompiledFile(&compiled_file)) {
-      context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
-      return false;
-    }
+  ContainerReaderEntry* entry;
+  while ((entry = reader.Next()) != nullptr) {
+    if (entry->Type() == ContainerEntryType::kResTable) {
+      pb::ResourceTable pb_table;
+      if (!entry->GetResTable(&pb_table)) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to parse proto table: " << entry->GetError());
+        continue;
+      }
 
-    uint64_t offset, len;
-    if (!input.ReadDataMetaData(&offset, &len)) {
-      context->GetDiagnostics()->Warn(DiagMessage() << "failed to read meta data");
-      return false;
-    }
+      ResourceTable table;
+      err.clear();
+      if (!DeserializeTableFromPb(pb_table, &table, &err)) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to parse table: " << err);
+        continue;
+      }
 
-    const void* data = static_cast<const uint8_t*>(file_map->getDataPtr()) + offset;
-    if (!DumpCompiledFile(compiled_file, data, len, Source(file_path), context)) {
-      return false;
+      Debug::PrintTable(&table, print_options);
+    } else if (entry->Type() == ContainerEntryType::kResFile) {
+      pb::internal::CompiledFile pb_compiled_file;
+      off64_t offset;
+      size_t length;
+      if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &length)) {
+        context->GetDiagnostics()->Error(
+            DiagMessage(file_path) << "failed to parse compiled proto file: " << entry->GetError());
+        continue;
+      }
+
+      ResourceFile file;
+      std::string error;
+      if (!DeserializeCompiledFileFromPb(pb_compiled_file, &file, &error)) {
+        context->GetDiagnostics()->Warn(DiagMessage(file_path)
+                                        << "failed to parse compiled file: " << error);
+        continue;
+      }
+
+      DumpCompiledFile(file, Source(file_path), offset, length);
     }
   }
   return true;
 }
+
+namespace {
 
 class DumpContext : public IAaptContext {
  public:
@@ -153,7 +176,7 @@ class DumpContext : public IAaptContext {
   }
 
   NameMangler* GetNameMangler() override {
-    abort();
+    UNIMPLEMENTED(FATAL);
     return nullptr;
   }
 
@@ -167,7 +190,7 @@ class DumpContext : public IAaptContext {
   }
 
   SymbolTable* GetExternalSymbols() override {
-    abort();
+    UNIMPLEMENTED(FATAL);
     return nullptr;
   }
 
@@ -188,9 +211,9 @@ class DumpContext : public IAaptContext {
   bool verbose_ = false;
 };
 
-/**
- * Entry point for dump command.
- */
+}  // namespace
+
+// Entry point for dump command.
 int Dump(const std::vector<StringPiece>& args) {
   bool verbose = false;
   Flags flags = Flags().OptionalSwitch("-v", "increase verbosity of output", &verbose);
@@ -206,7 +229,6 @@ int Dump(const std::vector<StringPiece>& args) {
       return 1;
     }
   }
-
   return 0;
 }
 

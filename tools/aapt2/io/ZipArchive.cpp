@@ -22,7 +22,7 @@
 #include "Source.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 namespace io {
@@ -57,7 +57,13 @@ std::unique_ptr<IData> ZipFile::OpenAsData() {
   }
 }
 
-const Source& ZipFile::GetSource() const { return source_; }
+std::unique_ptr<io::InputStream> ZipFile::OpenInputStream() {
+  return OpenAsData();
+}
+
+const Source& ZipFile::GetSource() const {
+  return source_;
+}
 
 bool ZipFile::WasCompressed() {
   return zip_entry_.method != kCompressStored;
@@ -67,7 +73,9 @@ ZipFileCollectionIterator::ZipFileCollectionIterator(
     ZipFileCollection* collection)
     : current_(collection->files_.begin()), end_(collection->files_.end()) {}
 
-bool ZipFileCollectionIterator::HasNext() { return current_ != end_; }
+bool ZipFileCollectionIterator::HasNext() {
+  return current_ != end_;
+}
 
 IFile* ZipFileCollectionIterator::Next() {
   IFile* result = current_->get();

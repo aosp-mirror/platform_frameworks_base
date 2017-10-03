@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_IO_FILEINPUTSTREAM_H
-#define AAPT_IO_FILEINPUTSTREAM_H
+#ifndef AAPT_IO_FILESTREAM_H
+#define AAPT_IO_FILESTREAM_H
 
 #include "io/Io.h"
 
 #include <memory>
 #include <string>
 
+#include "android-base/file.h"  // for O_BINARY
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
 
@@ -57,7 +58,43 @@ class FileInputStream : public InputStream {
   size_t total_byte_count_;
 };
 
+class FileOutputStream : public OutputStream {
+ public:
+  explicit FileOutputStream(const std::string& path, int mode = O_RDWR | O_CREAT | O_BINARY,
+                            size_t buffer_capacity = 4096);
+
+  // Takes ownership of `fd`.
+  explicit FileOutputStream(int fd, size_t buffer_capacity = 4096);
+
+  ~FileOutputStream();
+
+  bool Next(void** data, size_t* size) override;
+
+  // Immediately flushes out the contents of the buffer to disk.
+  bool Flush();
+
+  void BackUp(size_t count) override;
+
+  size_t ByteCount() const override;
+
+  bool HadError() const override;
+
+  std::string GetError() const override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(FileOutputStream);
+
+  bool FlushImpl();
+
+  android::base::unique_fd fd_;
+  std::string error_;
+  std::unique_ptr<uint8_t[]> buffer_;
+  size_t buffer_capacity_;
+  size_t buffer_offset_;
+  size_t total_byte_count_;
+};
+
 }  // namespace io
 }  // namespace aapt
 
-#endif  // AAPT_IO_FILEINPUTSTREAM_H
+#endif  // AAPT_IO_FILESTREAM_H

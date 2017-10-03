@@ -78,6 +78,12 @@ struct IPackageDeclStack {
 // package declaration was private.
 void ResolvePackage(const IPackageDeclStack* decl_stack, Reference* in_ref);
 
+class Element;
+
+// Strips out any attributes in the http://schemas.android.com/tools namespace, which is owned by
+// Android Studio and should not make it to the final APK.
+void StripAndroidStudioAttributes(Element* el);
+
 }  // namespace xml
 }  // namespace aapt
 

@@ -16,13 +16,8 @@
 
 #include "format/proto/ProtoSerialize.h"
 
-#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
 #include "ValueVisitor.h"
 #include "util/BigBuffer.h"
-
-using ::google::protobuf::io::CodedOutputStream;
-using ::google::protobuf::io::ZeroCopyOutputStream;
 
 namespace aapt {
 
@@ -512,9 +507,23 @@ void SerializeItemToPb(const Item& item, pb::Item* out_item) {
   out_item->MergeFrom(value.item());
 }
 
+static pb::internal::CompiledFile::Type SerializeCompiledFileType(const ResourceFile::Type& type) {
+  switch (type) {
+    case ResourceFile::Type::kPng:
+      return pb::internal::CompiledFile::Type::CompiledFile_Type_PNG;
+    case ResourceFile::Type::kBinaryXml:
+      return pb::internal::CompiledFile::Type::CompiledFile_Type_BINARY_XML;
+    case ResourceFile::Type::kProtoXml:
+      return pb::internal::CompiledFile::Type::CompiledFile_Type_PROTO_XML;
+    default:
+      return pb::internal::CompiledFile::Type::CompiledFile_Type_UNKNOWN;
+  }
+}
+
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file) {
   out_file->set_resource_name(file.name.ToString());
   out_file->set_source_path(file.source.path);
+  out_file->set_type(SerializeCompiledFileType(file.type));
   SerializeConfig(file.config, out_file->mutable_config());
 
   for (const SourcedResourceName& exported : file.exported_symbols) {
@@ -577,46 +586,6 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node) {
 
 void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node) {
   SerializeXmlToPb(*resource.root, out_node);
-}
-
-CompiledFileOutputStream::CompiledFileOutputStream(ZeroCopyOutputStream* out) : out_(out) {
-}
-
-void CompiledFileOutputStream::EnsureAlignedWrite() {
-  const int overflow = out_.ByteCount() % 4;
-  if (overflow > 0) {
-    uint32_t zero = 0u;
-    out_.WriteRaw(&zero, 4 - overflow);
-  }
-}
-
-void CompiledFileOutputStream::WriteLittleEndian32(uint32_t val) {
-  EnsureAlignedWrite();
-  out_.WriteLittleEndian32(val);
-}
-
-void CompiledFileOutputStream::WriteCompiledFile(const pb::internal::CompiledFile& compiled_file) {
-  EnsureAlignedWrite();
-  out_.WriteLittleEndian64(static_cast<uint64_t>(compiled_file.ByteSize()));
-  compiled_file.SerializeWithCachedSizes(&out_);
-}
-
-void CompiledFileOutputStream::WriteData(const BigBuffer& buffer) {
-  EnsureAlignedWrite();
-  out_.WriteLittleEndian64(static_cast<uint64_t>(buffer.size()));
-  for (const BigBuffer::Block& block : buffer) {
-    out_.WriteRaw(block.buffer.get(), block.size);
-  }
-}
-
-void CompiledFileOutputStream::WriteData(const void* data, size_t len) {
-  EnsureAlignedWrite();
-  out_.WriteLittleEndian64(static_cast<uint64_t>(len));
-  out_.WriteRaw(data, len);
-}
-
-bool CompiledFileOutputStream::HadError() {
-  return out_.HadError();
 }
 
 }  // namespace aapt

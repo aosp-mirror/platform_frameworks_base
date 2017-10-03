@@ -26,7 +26,6 @@
 #include "ValueVisitor.h"
 
 using ::android::ResStringPool;
-using ::google::protobuf::io::CodedInputStream;
 
 namespace aapt {
 
@@ -485,6 +484,20 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* ou
   return true;
 }
 
+static ResourceFile::Type DeserializeCompiledFileType(
+    const pb::internal::CompiledFile::Type& pb_type) {
+  switch (pb_type) {
+    case pb::internal::CompiledFile::Type::CompiledFile_Type_PNG:
+      return ResourceFile::Type::kPng;
+    case pb::internal::CompiledFile::Type::CompiledFile_Type_BINARY_XML:
+      return ResourceFile::Type::kBinaryXml;
+    case pb::internal::CompiledFile::Type::CompiledFile_Type_PROTO_XML:
+      return ResourceFile::Type::kProtoXml;
+    default:
+      return ResourceFile::Type::kUnknown;
+  }
+}
+
 bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
                                    ResourceFile* out_file, std::string* out_error) {
   ResourceNameRef name_ref;
@@ -497,6 +510,7 @@ bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
 
   out_file->name = name_ref.ToResourceName();
   out_file->source.path = pb_file.source_path();
+  out_file->type = DeserializeCompiledFileType(pb_file.type());
 
   std::string config_error;
   if (!DeserializeConfigFromPb(pb_file.config(), &out_file->config, &config_error)) {
@@ -844,74 +858,6 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
         break;
     }
   }
-  return true;
-}
-
-CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size)
-    : in_(static_cast<const uint8_t*>(data), size) {
-}
-
-void CompiledFileInputStream::EnsureAlignedRead() {
-  const int overflow = in_.CurrentPosition() % 4;
-  if (overflow > 0) {
-    // Reads are always 4 byte aligned.
-    in_.Skip(4 - overflow);
-  }
-}
-
-bool CompiledFileInputStream::ReadLittleEndian32(uint32_t* out_val) {
-  EnsureAlignedRead();
-  return in_.ReadLittleEndian32(out_val);
-}
-
-bool CompiledFileInputStream::ReadCompiledFile(pb::internal::CompiledFile* out_val) {
-  EnsureAlignedRead();
-
-  google::protobuf::uint64 pb_size = 0u;
-  if (!in_.ReadLittleEndian64(&pb_size)) {
-    return false;
-  }
-
-  CodedInputStream::Limit l = in_.PushLimit(static_cast<int>(pb_size));
-
-  // Check that we haven't tried to read past the end.
-  if (static_cast<uint64_t>(in_.BytesUntilLimit()) != pb_size) {
-    in_.PopLimit(l);
-    in_.PushLimit(0);
-    return false;
-  }
-
-  if (!out_val->ParsePartialFromCodedStream(&in_)) {
-    in_.PopLimit(l);
-    in_.PushLimit(0);
-    return false;
-  }
-
-  in_.PopLimit(l);
-  return true;
-}
-
-bool CompiledFileInputStream::ReadDataMetaData(uint64_t* out_offset, uint64_t* out_len) {
-  EnsureAlignedRead();
-
-  google::protobuf::uint64 pb_size = 0u;
-  if (!in_.ReadLittleEndian64(&pb_size)) {
-    return false;
-  }
-
-  // Check that we aren't trying to read past the end.
-  if (pb_size > static_cast<uint64_t>(in_.BytesUntilLimit())) {
-    in_.PushLimit(0);
-    return false;
-  }
-
-  uint64_t offset = static_cast<uint64_t>(in_.CurrentPosition());
-  if (!in_.Skip(pb_size)) {
-    return false;
-  }
-
-  *out_offset = offset;
-  *out_len = pb_size;
   return true;
 }
 

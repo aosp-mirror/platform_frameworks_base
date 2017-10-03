@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "io/FileInputStream.h"
+#include "io/FileStream.h"
 
 #include "android-base/macros.h"
 #include "android-base/test_utils.h"
@@ -36,7 +36,7 @@ TEST(FileInputStreamTest, NextAndBackup) {
   lseek64(file.fd, 0, SEEK_SET);
 
   // Use a small buffer size so that we can call Next() a few times.
-  FileInputStream in(file.fd, 10u);
+  FileInputStream in(file.release(), 10u);
   ASSERT_FALSE(in.HadError());
   EXPECT_THAT(in.ByteCount(), Eq(0u));
 
@@ -81,6 +81,48 @@ TEST(FileInputStreamTest, NextAndBackup) {
 
   EXPECT_FALSE(in.Next(reinterpret_cast<const void**>(&buffer), &size));
   EXPECT_FALSE(in.HadError());
+}
+
+TEST(FileOutputStreamTest, NextAndBackup) {
+  const std::string input = "this is a cool string";
+
+  TemporaryFile file;
+  int fd = file.release();
+
+  // FileOutputStream takes ownership.
+  FileOutputStream out(fd, 10u);
+  ASSERT_FALSE(out.HadError());
+  EXPECT_THAT(out.ByteCount(), Eq(0u));
+
+  char* buffer;
+  size_t size;
+  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_THAT(size, Eq(10u));
+  ASSERT_THAT(buffer, NotNull());
+  EXPECT_THAT(out.ByteCount(), Eq(10u));
+  memcpy(buffer, input.c_str(), size);
+
+  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_THAT(size, Eq(10u));
+  ASSERT_THAT(buffer, NotNull());
+  EXPECT_THAT(out.ByteCount(), Eq(20u));
+  memcpy(buffer, input.c_str() + 10u, size);
+
+  ASSERT_TRUE(out.Next(reinterpret_cast<void**>(&buffer), &size));
+  ASSERT_THAT(size, Eq(10u));
+  ASSERT_THAT(buffer, NotNull());
+  EXPECT_THAT(out.ByteCount(), Eq(30u));
+  buffer[0] = input[20u];
+  out.BackUp(size - 1);
+  EXPECT_THAT(out.ByteCount(), Eq(21u));
+
+  ASSERT_TRUE(out.Flush());
+
+  lseek64(fd, 0, SEEK_SET);
+
+  std::string actual;
+  ASSERT_TRUE(android::base::ReadFdToString(fd, &actual));
+  EXPECT_THAT(actual, StrEq(input));
 }
 
 }  // namespace io

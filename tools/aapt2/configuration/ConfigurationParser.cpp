@@ -30,7 +30,7 @@
 #include "ResourceUtils.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"

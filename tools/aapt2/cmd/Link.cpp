@@ -25,7 +25,6 @@
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
-#include "google/protobuf/io/coded_stream.h"
 
 #include "AppInfo.h"
 #include "Debug.h"
@@ -39,13 +38,14 @@
 #include "compile/IdAssigner.h"
 #include "filter/ConfigFilter.h"
 #include "format/Archive.h"
+#include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
 #include "format/proto/ProtoSerialize.h"
-#include "io/BigBufferInputStream.h"
-#include "io/FileInputStream.h"
+#include "io/BigBufferStream.h"
+#include "io/FileStream.h"
 #include "io/FileSystem.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
@@ -467,6 +467,10 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
                                      << "linking " << src.path << " (" << doc->file.name << ")");
   }
 
+  // First, strip out any tools namespace attributes. AAPT stripped them out early, which means
+  // that existing projects have out-of-date references which pass compilation.
+  xml::StripAndroidStudioAttributes(doc->root.get());
+
   XmlReferenceLinker xml_linker;
   if (!xml_linker.Consume(context_, doc)) {
     return {};
@@ -543,9 +547,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           file_op.config = config_value->config;
           file_op.file_to_copy = file;
 
-          const StringPiece src_path = file->GetSource().path;
           if (type->type != ResourceType::kRaw &&
-              (util::EndsWith(src_path, ".xml.flat") || util::EndsWith(src_path, ".xml"))) {
+              (file_ref->type == ResourceFile::Type::kBinaryXml ||
+               file_ref->type == ResourceFile::Type::kProtoXml)) {
             std::unique_ptr<io::IData> data = file->OpenAsData();
             if (!data) {
               context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
@@ -553,11 +557,27 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               return false;
             }
 
-            file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(),
-                                                  context_->GetDiagnostics(), file->GetSource());
+            if (file_ref->type == ResourceFile::Type::kProtoXml) {
+              pb::XmlNode pb_xml_node;
+              if (!pb_xml_node.ParseFromArray(data->data(), static_cast<int>(data->size()))) {
+                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                  << "failed to parse proto xml");
+                return false;
+              }
 
-            if (!file_op.xml_to_flatten) {
-              return false;
+              std::string error;
+              file_op.xml_to_flatten = DeserializeXmlResourceFromPb(pb_xml_node, &error);
+              if (file_op.xml_to_flatten == nullptr) {
+                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                  << "failed to deserialize proto xml: " << error);
+                return false;
+              }
+            } else {
+              file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(),
+                                                    context_->GetDiagnostics(), file->GetSource());
+              if (file_op.xml_to_flatten == nullptr) {
+                return false;
+              }
             }
 
             file_op.xml_to_flatten->file.config = config_value->config;
@@ -1201,11 +1221,7 @@ class LinkCommand {
       // Clear the package name, so as to make the resources look like they are coming from the
       // local package.
       pkg->name = "";
-      if (override) {
-        result = table_merger_->MergeOverlay(Source(input), table.get(), collection.get());
-      } else {
-        result = table_merger_->Merge(Source(input), table.get(), collection.get());
-      }
+      result = table_merger_->Merge(Source(input), table.get(), override, collection.get());
 
     } else {
       // This is the proper way to merge libraries, where the package name is
@@ -1241,49 +1257,34 @@ class LinkCommand {
       return false;
     }
 
-    bool result = false;
-    if (override) {
-      result = table_merger_->MergeOverlay(file->GetSource(), table.get());
-    } else {
-      result = table_merger_->Merge(file->GetSource(), table.get());
-    }
-    return result;
+    return table_merger_->Merge(file->GetSource(), table.get(), override);
   }
 
-  bool MergeCompiledFile(io::IFile* file, ResourceFile* file_desc, bool override) {
+  bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "merging '" << file_desc->name
-                                                     << "' from compiled file "
-                                                     << file->GetSource());
+      context_->GetDiagnostics()->Note(DiagMessage()
+                                       << "merging '" << compiled_file.name
+                                       << "' from compiled file " << compiled_file.source);
     }
 
-    bool result = false;
-    if (override) {
-      result = table_merger_->MergeFileOverlay(*file_desc, file);
-    } else {
-      result = table_merger_->MergeFile(*file_desc, file);
-    }
-
-    if (!result) {
+    if (!table_merger_->MergeFile(compiled_file, override, file)) {
       return false;
     }
 
     // Add the exports of this file to the table.
-    for (SourcedResourceName& exported_symbol : file_desc->exported_symbols) {
-      if (exported_symbol.name.package.empty()) {
-        exported_symbol.name.package = context_->GetCompilationPackage();
+    for (const SourcedResourceName& exported_symbol : compiled_file.exported_symbols) {
+      ResourceName res_name = exported_symbol.name;
+      if (res_name.package.empty()) {
+        res_name.package = context_->GetCompilationPackage();
       }
 
-      ResourceNameRef res_name = exported_symbol.name;
-
-      Maybe<ResourceName> mangled_name =
-          context_->GetNameMangler()->MangleName(exported_symbol.name);
+      Maybe<ResourceName> mangled_name = context_->GetNameMangler()->MangleName(res_name);
       if (mangled_name) {
         res_name = mangled_name.value();
       }
 
       std::unique_ptr<Id> id = util::make_unique<Id>();
-      id->SetSource(file_desc->source.WithLine(exported_symbol.line));
+      id->SetSource(compiled_file.source.WithLine(exported_symbol.line));
       bool result = final_table_.AddResourceAllowMangled(
           res_name, ConfigDescription::DefaultConfig(), std::string(), std::move(id),
           context_->GetDiagnostics());
@@ -1294,15 +1295,11 @@ class LinkCommand {
     return true;
   }
 
-  /**
-   * Takes a path to load as a ZIP file and merges the files within into the
-   * master ResourceTable.
-   * If override is true, conflicting resources are allowed to override each
-   * other, in order of last seen.
-   *
-   * An io::IFileCollection is created from the ZIP file and added to the set of
-   * io::IFileCollections that are open.
-   */
+  // Takes a path to load as a ZIP file and merges the files within into the master ResourceTable.
+  // If override is true, conflicting resources are allowed to override each other, in order of last
+  // seen.
+  // An io::IFileCollection is created from the ZIP file and added to the set of
+  // io::IFileCollections that are open.
   bool MergeArchive(const std::string& input, bool override) {
     if (context_->IsVerbose()) {
       context_->GetDiagnostics()->Note(DiagMessage() << "merging archive " << input);
@@ -1328,18 +1325,11 @@ class LinkCommand {
     return !error;
   }
 
-  /**
-   * Takes a path to load and merge into the master ResourceTable. If override
-   * is true,
-   * conflicting resources are allowed to override each other, in order of last
-   * seen.
-   *
-   * If the file path ends with .flata, .jar, .jack, or .zip the file is treated
-   * as ZIP archive
-   * and the files within are merged individually.
-   *
-   * Otherwise the files is processed on its own.
-   */
+  // Takes a path to load and merge into the master ResourceTable. If override is true,
+  // conflicting resources are allowed to override each other, in order of last seen.
+  // If the file path ends with .flata, .jar, .jack, or .zip the file is treated
+  // as ZIP archive and the files within are merged individually.
+  // Otherwise the file is processed on its own.
   bool MergePath(const std::string& path, bool override) {
     if (util::EndsWith(path, ".flata") || util::EndsWith(path, ".jar") ||
         util::EndsWith(path, ".jack") || util::EndsWith(path, ".zip")) {
@@ -1352,70 +1342,15 @@ class LinkCommand {
     return MergeFile(file, override);
   }
 
-  /**
-   * Takes a file to load and merge into the master ResourceTable. If override
-   * is true,
-   * conflicting resources are allowed to override each other, in order of last
-   * seen.
-   *
-   * If the file ends with .arsc.flat, then it is loaded as a ResourceTable and
-   * merged into the
-   * master ResourceTable. If the file ends with .flat, then it is treated like
-   * a compiled file
-   * and the header data is read and merged into the final ResourceTable.
-   *
-   * All other file types are ignored. This is because these files could be
-   * coming from a zip,
-   * where we could have other files like classes.dex.
-   */
+  // Takes an AAPT Container file (.apc/.flat) to load and merge into the master ResourceTable.
+  // If override is true, conflicting resources are allowed to override each other, in order of last
+  // seen.
+  // All other file types are ignored. This is because these files could be coming from a zip,
+  // where we could have other files like classes.dex.
   bool MergeFile(io::IFile* file, bool override) {
     const Source& src = file->GetSource();
-    if (util::EndsWith(src.path, ".arsc.flat")) {
-      return MergeResourceTable(file, override);
 
-    } else if (util::EndsWith(src.path, ".flat")) {
-      // Try opening the file and looking for an Export header.
-      std::unique_ptr<io::IData> data = file->OpenAsData();
-      if (!data) {
-        context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to open");
-        return false;
-      }
-
-      CompiledFileInputStream input_stream(data->data(), data->size());
-      uint32_t num_files = 0;
-      if (!input_stream.ReadLittleEndian32(&num_files)) {
-        context_->GetDiagnostics()->Error(DiagMessage(src) << "failed read num files");
-        return false;
-      }
-
-      for (uint32_t i = 0; i < num_files; i++) {
-        pb::internal::CompiledFile compiled_file;
-        if (!input_stream.ReadCompiledFile(&compiled_file)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
-                                            << "failed to read compiled file header");
-          return false;
-        }
-
-        uint64_t offset, len;
-        if (!input_stream.ReadDataMetaData(&offset, &len)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to read data meta data");
-          return false;
-        }
-
-        ResourceFile resource_file;
-        std::string error;
-        if (!DeserializeCompiledFileFromPb(compiled_file, &resource_file, &error)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
-                                            << "failed to read compiled header: " << error);
-          return false;
-        }
-
-        if (!MergeCompiledFile(file->CreateFileSegment(offset, len), &resource_file, override)) {
-          return false;
-        }
-      }
-      return true;
-    } else if (util::EndsWith(src.path, ".xml") || util::EndsWith(src.path, ".png")) {
+    if (util::EndsWith(src.path, ".xml") || util::EndsWith(src.path, ".png")) {
       // Since AAPT compiles these file types and appends .flat to them, seeing
       // their raw extensions is a sign that they weren't compiled.
       const StringPiece file_type = util::EndsWith(src.path, ".xml") ? "XML" : "PNG";
@@ -1423,11 +1358,71 @@ class LinkCommand {
                                                          << " file passed as argument. Must be "
                                                             "compiled first into .flat file.");
       return false;
+    } else if (!util::EndsWith(src.path, ".apc") && !util::EndsWith(src.path, ".flat")) {
+      if (context_->IsVerbose()) {
+        context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring unrecognized file");
+        return true;
+      }
     }
 
-    // Ignore non .flat files. This could be classes.dex or something else that
-    // happens
-    // to be in an archive.
+    std::unique_ptr<io::InputStream> input_stream = file->OpenInputStream();
+    if (input_stream == nullptr) {
+      context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to open file");
+      return false;
+    }
+
+    if (input_stream->HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "failed to open file: " << input_stream->GetError());
+      return false;
+    }
+
+    ContainerReaderEntry* entry;
+    ContainerReader reader(input_stream.get());
+    while ((entry = reader.Next()) != nullptr) {
+      if (entry->Type() == ContainerEntryType::kResTable) {
+        pb::ResourceTable pb_table;
+        if (!entry->GetResTable(&pb_table)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to read resource table: "
+                                                             << entry->GetError());
+          return false;
+        }
+
+        ResourceTable table;
+        std::string error;
+        if (!DeserializeTableFromPb(pb_table, &table, &error)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src)
+                                            << "failed to deserialize resource table: " << error);
+          return false;
+        }
+
+        if (!table_merger_->Merge(src, &table, override)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to merge resource table");
+          return false;
+        }
+      } else if (entry->Type() == ContainerEntryType::kResFile) {
+        pb::internal::CompiledFile pb_compiled_file;
+        off64_t offset;
+        size_t len;
+        if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &len)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to get resource file: "
+                                                             << entry->GetError());
+          return false;
+        }
+
+        ResourceFile resource_file;
+        std::string error;
+        if (!DeserializeCompiledFileFromPb(pb_compiled_file, &resource_file, &error)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src)
+                                            << "failed to read compiled header: " << error);
+          return false;
+        }
+
+        if (!MergeCompiledFile(resource_file, file->CreateFileSegment(offset, len), override)) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 

@@ -16,14 +16,11 @@
 
 #include "format/proto/ProtoSerialize.h"
 
-#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
 #include "ResourceUtils.h"
 #include "format/proto/ProtoDeserialize.h"
 #include "test/Test.h"
 
 using ::android::StringPiece;
-using ::google::protobuf::io::StringOutputStream;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::NotNull;
@@ -135,113 +132,6 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   EXPECT_THAT(*actual_styled_str->value->spans[0].name, Eq("b"));
   EXPECT_THAT(actual_styled_str->value->spans[0].first_char, Eq(0u));
   EXPECT_THAT(actual_styled_str->value->spans[0].last_char, Eq(4u));
-}
-
-TEST(ProtoSerializeTest, SerializeFileHeader) {
-  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-
-  ResourceFile f;
-  f.config = test::ParseConfigOrDie("hdpi-v9");
-  f.name = test::ParseNameOrDie("com.app.a:layout/main");
-  f.source.path = "res/layout-hdpi-v9/main.xml";
-  f.exported_symbols.push_back(SourcedResourceName{test::ParseNameOrDie("id/unchecked"), 23u});
-
-  const std::string expected_data1 = "123";
-  const std::string expected_data2 = "1234";
-
-  std::string output_str;
-  {
-    pb::internal::CompiledFile pb_f1, pb_f2;
-    SerializeCompiledFileToPb(f, &pb_f1);
-
-    f.name.entry = "__" + f.name.entry + "$0";
-    SerializeCompiledFileToPb(f, &pb_f2);
-
-    StringOutputStream out_stream(&output_str);
-    CompiledFileOutputStream out_file_stream(&out_stream);
-    out_file_stream.WriteLittleEndian32(2);
-    out_file_stream.WriteCompiledFile(pb_f1);
-    out_file_stream.WriteData(expected_data1.data(), expected_data1.size());
-    out_file_stream.WriteCompiledFile(pb_f2);
-    out_file_stream.WriteData(expected_data2.data(), expected_data2.size());
-    ASSERT_FALSE(out_file_stream.HadError());
-  }
-
-  CompiledFileInputStream in_file_stream(output_str.data(), output_str.size());
-  uint32_t num_files = 0;
-  ASSERT_TRUE(in_file_stream.ReadLittleEndian32(&num_files));
-  ASSERT_EQ(2u, num_files);
-
-  // Read the first compiled file.
-
-  pb::internal::CompiledFile new_pb_f1;
-  ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_f1));
-
-  ResourceFile new_f1;
-  std::string error;
-  ASSERT_TRUE(DeserializeCompiledFileFromPb(new_pb_f1, &new_f1, &error));
-  EXPECT_THAT(error, IsEmpty());
-
-  uint64_t offset, len;
-  ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
-
-  std::string actual_data(output_str.data() + offset, len);
-  EXPECT_EQ(expected_data1, actual_data);
-
-  // Expect the data to be aligned.
-  EXPECT_EQ(0u, offset & 0x03);
-
-  ASSERT_EQ(1u, new_f1.exported_symbols.size());
-  EXPECT_EQ(test::ParseNameOrDie("id/unchecked"), new_f1.exported_symbols[0].name);
-
-  // Read the second compiled file.
-
-  pb::internal::CompiledFile new_pb_f2;
-  ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_f2));
-
-  ResourceFile new_f2;
-  ASSERT_TRUE(DeserializeCompiledFileFromPb(new_pb_f2, &new_f2, &error));
-  EXPECT_THAT(error, IsEmpty());
-
-  ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
-
-  actual_data = std::string(output_str.data() + offset, len);
-  EXPECT_EQ(expected_data2, actual_data);
-
-  // Expect the data to be aligned.
-  EXPECT_EQ(0u, offset & 0x03);
-}
-
-TEST(ProtoSerializeTest, DeserializeCorruptHeaderSafely) {
-  ResourceFile f;
-  pb::internal::CompiledFile pb_file;
-  SerializeCompiledFileToPb(f, &pb_file);
-
-  const std::string expected_data = "1234";
-
-  std::string output_str;
-  {
-    StringOutputStream out_stream(&output_str);
-    CompiledFileOutputStream out_file_stream(&out_stream);
-    out_file_stream.WriteLittleEndian32(1);
-    out_file_stream.WriteCompiledFile(pb_file);
-    out_file_stream.WriteData(expected_data.data(), expected_data.size());
-    ASSERT_FALSE(out_file_stream.HadError());
-  }
-
-  output_str[4] = 0xff;
-
-  CompiledFileInputStream in_file_stream(output_str.data(), output_str.size());
-
-  uint32_t num_files = 0;
-  EXPECT_TRUE(in_file_stream.ReadLittleEndian32(&num_files));
-  EXPECT_EQ(1u, num_files);
-
-  pb::internal::CompiledFile new_pb_file;
-  EXPECT_FALSE(in_file_stream.ReadCompiledFile(&new_pb_file));
-
-  uint64_t offset, len;
-  EXPECT_FALSE(in_file_stream.ReadDataMetaData(&offset, &len));
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
