@@ -10894,6 +10894,26 @@ public final class Settings {
          */
         public static final String ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE =
                 "enable_deletion_helper_no_threshold_toggle";
+
+        /**
+         * The list of snooze options for notifications
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "default=60,options_array=15:30:60:120"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * default               (int)
+         * options_array         (string)
+         * </pre>
+         *
+         * All delays in integer minutes. Array order is respected.
+         * Options will be used in order up to the maximum allowed by the UI.
+         * @hide
+         */
+        public static final String NOTIFICATION_SNOOZE_OPTIONS =
+                "notification_snooze_options";
     }
 
     /**
