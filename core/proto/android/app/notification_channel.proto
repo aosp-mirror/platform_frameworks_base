@@ -1,0 +1,54 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+option java_package = "android.app";
+option java_multiple_files = true;
+
+package android.app;
+
+import "frameworks/base/core/proto/android/media/audioattributes.proto";
+
+/**
+ * An android.app.NotificationChannel object.
+ */
+message NotificationChannelProto {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    int32 importance = 4;
+    bool can_bypass_dnd = 5;
+    // Default is VISIBILITY_NO_OVERRIDE (-1000).
+    int32 lockscreen_visibility = 6;
+    string sound = 7;
+    bool use_lights = 8;
+    // Default is 0.
+    int32 light_color = 9;
+    repeated int64 vibration = 10;
+    // Bitwise representation of fields that have been changed by the user,
+    // preventing the app from making changes to these fields.
+    int32 user_locked_fields = 11;
+    bool is_vibration_enabled = 12;
+    // Default is true.
+    bool show_badge = 13;
+    // Default is false.
+    bool is_deleted = 14;
+    string group = 15;
+    android.media.AudioAttributesProto audio_attributes = 16;
+    // If this is a blockable system notification channel.
+    bool is_blockable_system = 17;
+}
