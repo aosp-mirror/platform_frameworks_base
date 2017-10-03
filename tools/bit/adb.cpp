@@ -293,7 +293,9 @@ run_instrumentation_test(const string& packageName, const string& runner, const 
     print_command(cmd);
 
     int fds[2];
-    pipe(fds);
+    if (0 != pipe(fds)) {
+        return errno;
+    }
 
     pid_t pid = fork();
 
