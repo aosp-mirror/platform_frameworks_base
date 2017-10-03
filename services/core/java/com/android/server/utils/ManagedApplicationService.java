@@ -16,6 +16,7 @@
 package com.android.server.utils;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -97,20 +98,22 @@ public class ManagedApplicationService {
      * @param component the {@link ComponentName} of the application service to bind.
      * @param userId the user ID of user to bind the application service as.
      * @param clientLabel the resource ID of a label displayed to the user indicating the
-     *      binding service.
+     *      binding service, or 0 if none is desired.
      * @param settingsAction an action that can be used to open the Settings UI to enable/disable
-     *      binding to these services.
-     * @param binderChecker an interface used to validate the returned binder object.
+     *      binding to these services, or null if none is desired.
+     * @param binderChecker an interface used to validate the returned binder object, or null if
+     *      this interface is unchecked.
      * @param isImportant bind the user service with BIND_IMPORTANT.
      * @return a ManagedApplicationService instance.
      */
     public static ManagedApplicationService build(@NonNull final Context context,
-        @NonNull final ComponentName component, final int userId, @NonNull int clientLabel,
-        @NonNull String settingsAction, @NonNull BinderChecker binderChecker,
-        boolean isImportant) {
+            @NonNull final ComponentName component, final int userId, int clientLabel,
+            @Nullable String settingsAction, @Nullable BinderChecker binderChecker,
+            boolean isImportant) {
         return new ManagedApplicationService(context, component, userId, clientLabel,
             settingsAction, binderChecker, isImportant);
     }
+
 
     /**
      * @return the user ID of the user that owns the bound service.
@@ -194,11 +197,14 @@ public class ManagedApplicationService {
                 return;
             }
 
-            final PendingIntent pendingIntent = PendingIntent.getActivity(
-                    mContext, 0, new Intent(mSettingsAction), 0);
-            final Intent intent = new Intent().setComponent(mComponent).
-                    putExtra(Intent.EXTRA_CLIENT_LABEL, mClientLabel).
-                    putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
+            Intent intent  = new Intent().setComponent(mComponent);
+            if (mClientLabel != 0) {
+                intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mClientLabel);
+            }
+            if (mSettingsAction != null) {
+                intent.putExtra(Intent.EXTRA_CLIENT_INTENT,
+                        PendingIntent.getActivity(mContext, 0, new Intent(mSettingsAction), 0));
+            }
 
             final ServiceConnection serviceConnection = new ServiceConnection() {
                 @Override
@@ -218,18 +224,21 @@ public class ManagedApplicationService {
 
                         try {
                             iBinder.linkToDeath(mDeathRecipient, 0);
-                            mBoundInterface = mChecker.asInterface(iBinder);
-                            if (!mChecker.checkType(mBoundInterface)) {
-                                // Received an invalid binder, disconnect
-                                mContext.unbindService(this);
-                                mBoundInterface = null;
+                            mBoundInterface = null;
+                            if (mChecker != null) {
+                                mBoundInterface = mChecker.asInterface(iBinder);
+                                if (!mChecker.checkType(mBoundInterface)) {
+                                    // Received an invalid binder, disconnect
+                                    mContext.unbindService(this);
+                                    mBoundInterface = null;
+                                }
+                                iface = mBoundInterface;
+                                pendingEvent = mPendingEvent;
+                                mPendingEvent = null;
                             }
-                            iface = mBoundInterface;
-                            pendingEvent = mPendingEvent;
-                            mPendingEvent = null;
                         } catch (RemoteException e) {
                             // DOA
-                            Slog.w(TAG, "Unable to bind service: " + intent, e);
+                            Slog.w(TAG, "Unable to bind service: " + componentName, e);
                             mBoundInterface = null;
                         }
                     }
@@ -244,7 +253,7 @@ public class ManagedApplicationService {
 
                 @Override
                 public void onServiceDisconnected(ComponentName componentName) {
-                    Slog.w(TAG, "Service disconnected: " + intent);
+                    Slog.w(TAG, "Service disconnected: " + componentName);
                     mConnection = null;
                     mBoundInterface = null;
                 }
