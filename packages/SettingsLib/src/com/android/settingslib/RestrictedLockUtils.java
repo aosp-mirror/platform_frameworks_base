@@ -432,53 +432,9 @@ public class RestrictedLockUtils {
      * the admin component will be set to {@code null} and userId to {@link UserHandle#USER_NULL}
      */
     public static EnforcedAdmin checkIfMaximumTimeToLockIsSet(Context context) {
-        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        if (dpm == null) {
-            return null;
-        }
-        EnforcedAdmin enforcedAdmin = null;
-        final int userId = UserHandle.myUserId();
-        final UserManager um = UserManager.get(context);
-        final List<UserInfo> profiles = um.getProfiles(userId);
-        final int profilesSize = profiles.size();
-        // As we do not have a separate screen lock timeout settings for work challenge,
-        // we need to combine all profiles maximum time to lock even work challenge is
-        // enabled.
-        for (int i = 0; i < profilesSize; i++) {
-            final UserInfo userInfo = profiles.get(i);
-            final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
-            if (admins == null) {
-                continue;
-            }
-            for (ComponentName admin : admins) {
-                if (dpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
-                    if (enforcedAdmin == null) {
-                        enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                    } else {
-                        return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                    }
-                    // This same admins could have set policies both on the managed profile
-                    // and on the parent. So, if the admin has set the policy on the
-                    // managed profile here, we don't need to further check if that admin
-                    // has set policy on the parent admin.
-                    continue;
-                }
-                if (userInfo.isManagedProfile()) {
-                    // If userInfo.id is a managed profile, we also need to look at
-                    // the policies set on the parent.
-                    DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm, userInfo);
-                    if (parentDpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
-                        if (enforcedAdmin == null) {
-                            enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
-                        } else {
-                            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-                        }
-                    }
-                }
-            }
-        }
-        return enforcedAdmin;
+        return checkForLockSetting(context, UserHandle.myUserId(),
+                (DevicePolicyManager dpm, ComponentName admin, @UserIdInt int userId) ->
+                        dpm.getMaximumTimeToLock(admin, userId) > 0);
     }
 
     private interface LockSettingCheck {

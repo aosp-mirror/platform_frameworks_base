@@ -3049,23 +3049,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns maximum time to lock that applied by all profiles in this user. We do this because we
-     * do not have a separate timeout to lock for work challenge only.
-     *
-     * @hide
-     */
-    public long getMaximumTimeToLockForUserAndProfiles(int userHandle) {
-        if (mService != null) {
-            try {
-                return mService.getMaximumTimeToLockForUserAndProfiles(userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Called by a device/profile owner to set the timeout after which unlocking with secondary, non
      * strong auth (e.g. fingerprint, trust agents) times out, i.e. the user has to use a strong
      * authentication method like password, pin or pattern.

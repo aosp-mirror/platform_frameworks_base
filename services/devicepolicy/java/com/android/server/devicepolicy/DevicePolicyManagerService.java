@@ -4603,56 +4603,56 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    void updateMaximumTimeToLockLocked(int userHandle) {
-        // Calculate the min timeout for all profiles - including the ones with a separate
-        // challenge. Ideally if the timeout only affected the profile challenge we'd lock that
-        // challenge only and keep the screen on. However there is no easy way of doing that at the
-        // moment so we set the screen off timeout regardless of whether it affects the parent user
-        // or the profile challenge only.
-        long timeMs = Long.MAX_VALUE;
-        int[] profileIds = mUserManager.getProfileIdsWithDisabled(userHandle);
-        for (int profileId : profileIds) {
-            DevicePolicyData policy = getUserDataUnchecked(profileId);
-            final int N = policy.mAdminList.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
-                if (admin.maximumTimeToUnlock > 0
-                        && timeMs > admin.maximumTimeToUnlock) {
-                    timeMs = admin.maximumTimeToUnlock;
-                }
-                // If userInfo.id is a managed profile, we also need to look at
-                // the policies set on the parent.
-                if (admin.hasParentActiveAdmin()) {
-                    final ActiveAdmin parentAdmin = admin.getParentActiveAdmin();
-                    if (parentAdmin.maximumTimeToUnlock > 0
-                            && timeMs > parentAdmin.maximumTimeToUnlock) {
-                        timeMs = parentAdmin.maximumTimeToUnlock;
-                    }
-                }
-            }
+    private void updateMaximumTimeToLockLocked(@UserIdInt int userId) {
+        // Update the profile's timeout
+        if (isManagedProfile(userId)) {
+            updateProfileLockTimeoutLocked(userId);
         }
 
-        // We only store the last maximum time to lock on the parent profile. So if calling from a
-        // managed profile, retrieve the policy for the parent.
-        DevicePolicyData policy = getUserDataUnchecked(getProfileParentId(userHandle));
-        if (policy.mLastMaximumTimeToLock == timeMs) {
-            return;
-        }
-        policy.mLastMaximumTimeToLock = timeMs;
-
+        final long timeMs;
         final long ident = mInjector.binderClearCallingIdentity();
         try {
+            // Update the device timeout
+            final int parentId = getProfileParentId(userId);
+            timeMs = getMaximumTimeToLockPolicyFromAdmins(
+                    getActiveAdminsForLockscreenPoliciesLocked(parentId, false));
+
+            final DevicePolicyData policy = getUserDataUnchecked(parentId);
+            if (policy.mLastMaximumTimeToLock == timeMs) {
+                return;
+            }
+            policy.mLastMaximumTimeToLock = timeMs;
+
             if (policy.mLastMaximumTimeToLock != Long.MAX_VALUE) {
                 // Make sure KEEP_SCREEN_ON is disabled, since that
                 // would allow bypassing of the maximum time to lock.
                 mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
-
-            mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                    (int) Math.min(policy.mLastMaximumTimeToLock, Integer.MAX_VALUE));
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+
+        mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                UserHandle.USER_SYSTEM, timeMs);
+    }
+
+    private void updateProfileLockTimeoutLocked(@UserIdInt int userId) {
+        final long timeMs;
+        if (isSeparateProfileChallengeEnabled(userId)) {
+            timeMs = getMaximumTimeToLockPolicyFromAdmins(
+                    getActiveAdminsForLockscreenPoliciesLocked(userId, false /* parent */));
+        } else {
+            timeMs = Long.MAX_VALUE;
+        }
+
+        final DevicePolicyData policy = getUserDataUnchecked(userId);
+        if (policy.mLastMaximumTimeToLock == timeMs) {
+            return;
+        }
+        policy.mLastMaximumTimeToLock = timeMs;
+
+        mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                userId, policy.mLastMaximumTimeToLock);
     }
 
     @Override
@@ -4663,50 +4663,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
+                final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
                 return admin != null ? admin.maximumTimeToUnlock : 0;
             }
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+            final List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
                     userHandle, parent);
-            return getMaximumTimeToLockPolicyFromAdmins(admins);
-        }
-    }
-
-    @Override
-    public long getMaximumTimeToLockForUserAndProfiles(int userHandle) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            // All admins for this user.
-            ArrayList<ActiveAdmin> admins = new ArrayList<ActiveAdmin>();
-            for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-                DevicePolicyData policy = getUserData(userInfo.id);
-                admins.addAll(policy.mAdminList);
-                // If it is a managed profile, it may have parent active admins
-                if (userInfo.isManagedProfile()) {
-                    for (ActiveAdmin admin : policy.mAdminList) {
-                        if (admin.hasParentActiveAdmin()) {
-                            admins.add(admin.getParentActiveAdmin());
-                        }
-                    }
-                }
-            }
-            return getMaximumTimeToLockPolicyFromAdmins(admins);
+            final long timeMs = getMaximumTimeToLockPolicyFromAdmins(admins);
+            return timeMs == Long.MAX_VALUE ? 0 : timeMs;
         }
     }
 
     private long getMaximumTimeToLockPolicyFromAdmins(List<ActiveAdmin> admins) {
-        long time = 0;
-        final int N = admins.size();
-        for (int i = 0; i < N; i++) {
-            ActiveAdmin admin = admins.get(i);
-            if (time == 0) {
-                time = admin.maximumTimeToUnlock;
-            } else if (admin.maximumTimeToUnlock != 0
-                    && time > admin.maximumTimeToUnlock) {
+        long time = Long.MAX_VALUE;
+        for (final ActiveAdmin admin : admins) {
+            if (admin.maximumTimeToUnlock > 0 && admin.maximumTimeToUnlock < time) {
                 time = admin.maximumTimeToUnlock;
             }
         }
@@ -9132,7 +9103,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // ignore if it contradicts an existing policy
                 long timeMs = getMaximumTimeToLock(
                         who, mInjector.userHandleGetCallingUserId(), /* parent */ false);
-                if (timeMs > 0 && timeMs < Integer.MAX_VALUE) {
+                if (timeMs > 0 && timeMs < Long.MAX_VALUE) {
                     return;
                 }
             }
@@ -9593,6 +9564,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public boolean isUserAffiliatedWithDevice(int userId) {
             return DevicePolicyManagerService.this.isUserAffiliatedWithDeviceLocked(userId);
+        }
+
+        @Override
+        public void reportSeparateProfileChallengeChanged(@UserIdInt int userId) {
+            synchronized (DevicePolicyManagerService.this) {
+                updateMaximumTimeToLockLocked(userId);
+            }
         }
     }
 

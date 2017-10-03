@@ -179,6 +179,13 @@ public class MockSystemServices {
                     return getUserInfo(userId1);
                 }
         );
+        when(userManager.getProfileParent(anyInt())).thenAnswer(
+                invocation -> {
+                    final int userId1 = (int) invocation.getArguments()[0];
+                    final UserInfo ui = getUserInfo(userId1);
+                    return ui == null ? null : getUserInfo(ui.profileGroupId);
+                }
+        );
         when(userManager.getProfiles(anyInt())).thenAnswer(
                 invocation -> {
                     final int userId12 = (int) invocation.getArguments()[0];

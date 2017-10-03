@@ -88,7 +88,6 @@ interface IDevicePolicyManager {
 
     void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
-    long getMaximumTimeToLockForUserAndProfiles(int userHandle);
 
     void setRequiredStrongAuthTimeout(in ComponentName who, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);

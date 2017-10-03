@@ -110,7 +110,7 @@ public abstract class PowerManagerInternal {
      *
      * This method must only be called by the device administration policy manager.
      */
-    public abstract void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
+    public abstract void setMaximumScreenOffTimeoutFromDeviceAdmin(int userId, long timeMs);
 
     /**
      * Used by the dream manager to override certain properties while dozing.
