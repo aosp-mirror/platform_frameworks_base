@@ -1265,7 +1265,7 @@ public class AssistStructure implements Parcelable {
          * {@link android.service.autofill.AutofillService} for more details.
          *
          * @return domain-only part of the document. For example, if the full URL is
-         * {@code https://my.site/login?user=my_user}, it returns {@code my.site}.
+         * {@code https://example.com/login?user=my_user}, it returns {@code example.com}.
          */
         @Nullable public String getWebDomain() {
             return mWebDomain;
