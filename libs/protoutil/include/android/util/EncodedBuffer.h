@@ -52,10 +52,10 @@ public:
         size_t index() const;
         size_t offset() const;
 
-        void move(size_t amt);
-        inline void move() { move(1); };
+        Pointer* move(size_t amt);
+        inline Pointer* move() { return move(1); };
+        Pointer* rewind();
 
-        void rewind();
         Pointer copy() const;
 
     private:
@@ -88,14 +88,70 @@ public:
     size_t currentToWrite();
 
     /**
-     * Write a varint into a vector. Return the size of the varint.
+     * Write a single byte to the buffer.
      */
-    size_t writeRawVarint(uint32_t val);
+    void writeRawByte(uint8_t val);
+
+    /**
+     * Write a varint32 into the buffer. Return the size of the varint.
+     */
+    size_t writeRawVarint32(uint32_t val);
+
+    /**
+     * Write a varint64 into the buffer. Return the size of the varint.
+     */
+    size_t writeRawVarint64(uint64_t val);
+
+    /**
+     * Write Fixed32 into the buffer.
+     */
+    void writeRawFixed32(uint32_t val);
+
+    /**
+     * Write Fixed64 into the buffer.
+     */
+    void writeRawFixed64(uint64_t val);
 
     /**
      * Write a protobuf header. Return the size of the header.
      */
     size_t writeHeader(uint32_t fieldId, uint8_t wireType);
+
+    /********************************* Edit APIs ************************************************/
+    /**
+     * Returns the edit pointer.
+     */
+    Pointer* ep();
+
+    /**
+     * Read a single byte at ep, and move ep to next byte;
+     */
+    uint8_t readRawByte();
+
+    /**
+     * Read varint starting at ep, ep will move to pos of next byte.
+     */
+    uint64_t readRawVarint();
+
+    /**
+     * Read 4 bytes starting at ep, ep will move to pos of next byte.
+     */
+    uint32_t readRawFixed32();
+
+    /**
+     * Read 8 bytes starting at ep, ep will move to pos of next byte.
+     */
+    uint64_t readRawFixed64();
+
+    /**
+     * Edit 4 bytes starting at pos.
+     */
+    void editRawFixed32(size_t pos, uint32_t val);
+
+    /**
+     * Copy _size_ bytes of data starting at __srcPos__ to wp.
+     */
+    void copy(size_t srcPos, size_t size);
 
     /********************************* Read APIs ************************************************/
     class iterator;
@@ -141,9 +197,8 @@ public:
 
         /**
          * Read varint from iterator, the iterator will point to next available byte.
-         * Return the number of bytes of the varint.
          */
-        uint32_t readRawVarint();
+        uint64_t readRawVarint();
 
     private:
         const EncodedBuffer& mData;
@@ -160,6 +215,7 @@ private:
     vector<uint8_t*> mBuffers;
 
     Pointer mWp;
+    Pointer mEp;
 
     inline uint8_t* at(const Pointer& p) const; // helper function to get value
 };
@@ -168,3 +224,4 @@ private:
 } // android
 
 #endif // ANDROID_UTIL_ENCODED_BUFFER_H
+
