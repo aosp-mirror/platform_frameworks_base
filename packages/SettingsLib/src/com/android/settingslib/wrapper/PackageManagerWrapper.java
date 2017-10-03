@@ -215,6 +215,13 @@ public class PackageManagerWrapper {
     }
 
     /**
+     * Calls {@code PackageManager.setComponentEnabledSetting}
+     */
+    public void setComponentEnabledSetting(ComponentName componentName, int newState, int flags) {
+        mPm.setComponentEnabledSetting(componentName, newState, flags);
+    }
+
+    /**
      * Calls {@code PackageManager.getApplicationInfo}
      */
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
@@ -227,6 +234,13 @@ public class PackageManagerWrapper {
      */
     public CharSequence getApplicationLabel(ApplicationInfo info) {
         return mPm.getApplicationLabel(info);
+    }
+
+    /**
+     * Calls {@code PackageManager.queryBroadcastReceivers}
+     */
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
+        return mPm.queryBroadcastReceivers(intent, flags);
     }
 }
 

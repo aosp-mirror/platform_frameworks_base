@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"ഫോണ്‍"</string>
     <string name="map" msgid="6068210738233985748">"മാപ്‌സ്"</string>
     <string name="browse" msgid="6993590095938149861">"ബ്രൗസർ"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"റദ്ദാക്കുക"</string>
     <string name="yes" msgid="5362982303337969312">"ശരി"</string>
     <string name="no" msgid="5141531044935541497">"റദ്ദാക്കുക"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"അടയ്‌ക്കുക"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ശ്രദ്ധിക്കുക"</string>
     <string name="loading" msgid="7933681260296021180">"ലോഡുചെയ്യുന്നു..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ഓൺ"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"സ്കെയിൽ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"എപ്പോഴും പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ &gt; അപ്ലിക്കേഷനുകൾ &gt; ഡൗൺലോഡുചെയ്‌തവ എന്നതിൽ ഇത് വീണ്ടും പ്രവർത്തനക്ഷമമാക്കുക."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"ആപ്പ് പ്രതികരിക്കുന്നില്ല"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> വളരെയധികം മെമ്മറി ഉപയോഗിക്കുന്നുണ്ടാകാം."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"നിലവിലെ ഡിസ്പ്ലേ വലുപ്പ ക്രമീകരണത്തെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്ക്കുന്നില്ല, അതിനാൽ പ്രതീക്ഷിക്കാത്ത തരത്തിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കാം."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"എല്ലായ്‌പ്പോഴും ദൃശ്യമാക്കുക"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷൻ (<xliff:g id="PROCESS">%2$s</xliff:g> പ്രോസസ്സ്) അതിന്റെ സ്വയം നിർബന്ധിത StrictMode നയം ലംഘിച്ചു."</string>

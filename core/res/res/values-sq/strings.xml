@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Telefoni"</string>
     <string name="map" msgid="6068210738233985748">"Hartat"</string>
     <string name="browse" msgid="6993590095938149861">"Shfletuesi"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Anulo"</string>
     <string name="yes" msgid="5362982303337969312">"Në rregull"</string>
     <string name="no" msgid="5141531044935541497">"Anulo"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"MBYLL"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Kujdes!"</string>
     <string name="loading" msgid="7933681260296021180">"Po ngarkohet..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Aktivizuar"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Shkalla"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Shfaq gjithnjë"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivizoje sërish këtë te \"Cilësimet e sistemit\" &gt; \"Aplikacionet\" &gt; \"Të shkarkuara\"."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Aplikacioni nuk po përgjigjet"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> mund të jetë duke përdorur shumë memorie."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mbështet cilësimin aktual të madhësisë së ekranit dhe mund të shfaqë sjellje të papritura."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Shfaq gjithmonë"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>

@@ -1763,21 +1763,43 @@ public final class ShortcutInfo implements Parcelable {
         return 0;
     }
 
+
     /**
      * Return a string representation, intended for logging.  Some fields will be retracted.
      */
     @Override
     public String toString() {
-        return toStringInner(/* secure =*/ true, /* includeInternalData =*/ false);
+        return toStringInner(/* secure =*/ true, /* includeInternalData =*/ false,
+                /*indent=*/ null);
     }
 
     /** @hide */
     public String toInsecureString() {
-        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true);
+        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true,
+                /*indent=*/ null);
     }
 
-    private String toStringInner(boolean secure, boolean includeInternalData) {
+    /** @hide */
+    public String toDumpString(String indent) {
+        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true, indent);
+    }
+
+    private void addIndentOrComma(StringBuilder sb, String indent) {
+        if (indent != null) {
+            sb.append("\n  ");
+            sb.append(indent);
+        } else {
+            sb.append(", ");
+        }
+    }
+
+    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
         final StringBuilder sb = new StringBuilder();
+
+        if (indent != null) {
+            sb.append(indent);
+        }
+
         sb.append("ShortcutInfo {");
 
         sb.append("id=");
@@ -1787,47 +1809,51 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(Integer.toHexString(mFlags));
         sb.append(" [");
         if (!isEnabled()) {
-            sb.append("X");
+            sb.append("Dis");
         }
         if (isImmutable()) {
             sb.append("Im");
         }
         if (isManifestShortcut()) {
-            sb.append("M");
+            sb.append("Man");
         }
         if (isDynamic()) {
-            sb.append("D");
+            sb.append("Dyn");
         }
         if (isPinned()) {
-            sb.append("P");
+            sb.append("Pin");
         }
         if (hasIconFile()) {
-            sb.append("If");
+            sb.append("Ic-f");
         }
         if (isIconPendingSave()) {
-            sb.append("^");
+            sb.append("Pens");
         }
         if (hasIconResource()) {
-            sb.append("Ir");
+            sb.append("Ic-r");
         }
         if (hasKeyFieldsOnly()) {
-            sb.append("K");
+            sb.append("Key");
         }
         if (hasStringResourcesResolved()) {
-            sb.append("Sr");
+            sb.append("Str");
         }
         if (isReturnedByServer()) {
-            sb.append("V");
+            sb.append("Rets");
         }
         sb.append("]");
 
-        sb.append(", packageName=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("packageName=");
         sb.append(mPackageName);
 
         sb.append(", activity=");
         sb.append(mActivity);
 
-        sb.append(", shortLabel=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("shortLabel=");
         sb.append(secure ? "***" : mTitle);
         sb.append(", resId=");
         sb.append(mTitleResId);
@@ -1835,7 +1861,9 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mTitleResName);
         sb.append("]");
 
-        sb.append(", longLabel=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("longLabel=");
         sb.append(secure ? "***" : mText);
         sb.append(", resId=");
         sb.append(mTextResId);
@@ -1843,7 +1871,9 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mTextResName);
         sb.append("]");
 
-        sb.append(", disabledMessage=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("disabledMessage=");
         sb.append(secure ? "***" : mDisabledMessage);
         sb.append(", resId=");
         sb.append(mDisabledMessageResId);
@@ -1851,19 +1881,27 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mDisabledMessageResName);
         sb.append("]");
 
-        sb.append(", categories=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("categories=");
         sb.append(mCategories);
 
-        sb.append(", icon=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("icon=");
         sb.append(mIcon);
 
-        sb.append(", rank=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("rank=");
         sb.append(mRank);
 
         sb.append(", timestamp=");
         sb.append(mLastChangedTimestamp);
 
-        sb.append(", intents=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("intents=");
         if (mIntents == null) {
             sb.append("null");
         } else {
@@ -1885,12 +1923,15 @@ public final class ShortcutInfo implements Parcelable {
             }
         }
 
-        sb.append(", extras=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("extras=");
         sb.append(mExtras);
 
         if (includeInternalData) {
+            addIndentOrComma(sb, indent);
 
-            sb.append(", iconRes=");
+            sb.append("iconRes=");
             sb.append(mIconResId);
             sb.append("[");
             sb.append(mIconResName);

@@ -422,4 +422,14 @@
          increase the rate of unintentional unlocks. -->
     <bool name="config_lockscreenAntiFalsingClassifierEnabled">true</bool>
 
+    <!-- Snooze: default notificaiton snooze time. -->
+    <integer name="config_notification_snooze_time_default">60</integer>
+
+    <!-- Snooze: List of snooze values in integer minutes. -->
+    <integer-array name="config_notification_snooze_times">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+    </integer-array>
 </resources>

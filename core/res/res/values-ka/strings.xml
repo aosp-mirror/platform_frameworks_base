@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"ტელეფონი"</string>
     <string name="map" msgid="6068210738233985748">"Maps"</string>
     <string name="browse" msgid="6993590095938149861">"ბრაუზერი"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"თავისუფალი ადგილი იწურება"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"სისტემის ზოგიერთმა ფუნქციამ შესაძლოა არ იმუშავოს"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"სისტემისათვის საკმარისი საცავი არ არის. დარწმუნდით, რომ იქონიოთ სულ მცირე 250 მბაიტი თავისუფალი სივრცე და დაიწყეთ ხელახლა."</string>

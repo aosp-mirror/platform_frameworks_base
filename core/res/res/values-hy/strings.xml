@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Հեռախոս"</string>
     <string name="map" msgid="6068210738233985748">"Քարտեզներ"</string>
     <string name="browse" msgid="6993590095938149861">"Դիտարկիչ"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Հիշողությունը սպառվում է"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Համակարգի համար բավարար հիշողություն չկա: Համոզվեք, որ ունեք 250ՄԲ ազատ տարածություն և վերագործարկեք:"</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Չեղարկել"</string>
     <string name="yes" msgid="5362982303337969312">"Լավ"</string>
     <string name="no" msgid="5141531044935541497">"Չեղարկել"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"ՓԱԿԵԼ"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Ուշադրություն"</string>
     <string name="loading" msgid="7933681260296021180">"Բեռնում..."</string>
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Աստիճանակարգել"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Միշտ ցույց տալ"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Կրկին ակտիվացնել սա Համակարգի կարգավորումներում &amp;gt Ծրագրեր &gt; Ներբեռնումներ:"</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Հավելվածը չի արձագանքում"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"Հնարավոր է, որ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը չափազանց շատ հիշողություն է օգտագործում:"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը չի աջակցում Էկրանի չափի ընթացիկ կարգավորումները, ինչի պատճառով կարող են խնդիրներ առաջանալ:"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Միշտ ցուցադրել"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> ծրագիրը (գործընթաց <xliff:g id="PROCESS">%2$s</xliff:g>) խախտել է իր ինքնահարկադրված Խիստ ռեժիմ  քաղաքականությունը:"</string>
@@ -1767,10 +1768,10 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> ինքնալցման առաջարկ</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> ինքնալցման առաջարկ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Պահե՞լ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>-ը և <xliff:g id="TYPE_1">%2$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>-ը, <xliff:g id="TYPE_1">%2$s</xliff:g>-ը և <xliff:g id="TYPE_2">%3$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;-ում:"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Պահե՞լ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>ն ու <xliff:g id="TYPE_1">%2$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>ը, <xliff:g id="TYPE_1">%2$s</xliff:g>ն ու <xliff:g id="TYPE_2">%3$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Պահել"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ոչ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"գաղտնաբառ"</string>

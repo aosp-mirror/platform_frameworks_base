@@ -524,12 +524,12 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permite que la aplicación modifique cómo se registra el uso de red en relación con las aplicaciones. Las aplicaciones normales no deben usar este permiso."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"acceder a las notificaciones"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que la aplicación recupere, examine y borre notificaciones, incluidas las que han publicado otras aplicaciones."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"enlazar con un servicio de detector de notificaciones"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite enlazar con la interfaz de nivel superior de un servicio de detector de notificaciones. No debe ser necesario para las aplicaciones normales."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"enlazar con un servicio de proveedor de condiciones"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite enlazar con la interfaz de nivel superior de un servicio de proveedor de condiciones. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"enlazar con un servicio de salvapantallas"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite enlazar con la interfaz de nivel superior de un servicio de salvapantallas. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular con un servicio de detector de notificaciones"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite vincular con la interfaz de nivel superior de un servicio de detector de notificaciones. No debe ser necesario para las aplicaciones normales."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular con un servicio de proveedor de condiciones"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite vincular con la interfaz de nivel superior de un servicio de proveedor de condiciones. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"vincular con un servicio de salvapantallas"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite vincular con la interfaz de nivel superior de un servicio de salvapantallas. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ejecutar la aplicación de configuración proporcionada por el operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite ejecutar la aplicación de configuración proporcionada por el operador. No debe ser necesario para aplicaciones normales."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"detectar cambios en el estado de la red"</string>
@@ -542,10 +542,10 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite que esta aplicación reciba información sobre las transferencias actuales de Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"quitar certificados DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a una aplicación eliminar los certificados DRM. Las aplicaciones normales no deberí­an necesitar este permiso."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"enlazar con el servicio de mensajería de un operador"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite enlazar con la interfaz de nivel superior del servicio de mensajería de un operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"enlazar con servicios de operador"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite enlazar con servicios de operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular con el servicio de mensajería de un operador"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite vincular con la interfaz de nivel superior del servicio de mensajería de un operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular con servicios de operador"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite vincular con servicios de operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"acceso a No molestar"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de No molestar."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
@@ -980,6 +980,10 @@
     <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
     <string name="map" msgid="6068210738233985748">"Mapas"</string>
     <string name="browse" msgid="6993590095938149861">"Navegador"</string>
+    <!-- no translation found for sms (8250353543787396737) -->
+    <skip />
+    <!-- no translation found for add_contact (7990645816259405444) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>
@@ -989,8 +993,7 @@
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="yes" msgid="5362982303337969312">"Aceptar"</string>
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"CERRAR"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
     <string name="loading" msgid="7933681260296021180">"Cargando..."</string>
     <string name="capital_on" msgid="1544682755514494298">"ACTIVADO"</string>
@@ -1047,10 +1050,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Escala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mostrar siempre"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Para volver a habilitar esta opción, accede a Ajustes &gt; Aplicaciones &gt; Descargadas."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"La aplicación no responde"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"Es posible que <xliff:g id="APP_NAME">%1$s</xliff:g> esté usando demasiada memoria."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite el tamaño de pantalla actual y es posible que funcione de forma inesperada."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostrar siempre"</string>
     <string name="smv_application" msgid="3307209192155442829">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>

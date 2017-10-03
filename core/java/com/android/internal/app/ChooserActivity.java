@@ -100,7 +100,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final boolean DEBUG = false;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 5000;
+    private static final int WATCHDOG_TIMEOUT_MILLIS = 2000;
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -1585,8 +1585,8 @@ public class ChooserActivity extends ResolverActivity {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
                     mChooserActivity.unbindService(this);
-                    destroy();
                     mChooserActivity.mServiceConnections.remove(this);
+                    destroy();
                 }
             }
         }
@@ -1602,7 +1602,6 @@ public class ChooserActivity extends ResolverActivity {
                 }
 
                 mChooserActivity.unbindService(this);
-                destroy();
                 mChooserActivity.mServiceConnections.remove(this);
                 if (mChooserActivity.mServiceConnections.isEmpty()) {
                     mChooserActivity.mChooserHandler.removeMessages(
@@ -1610,6 +1609,7 @@ public class ChooserActivity extends ResolverActivity {
                     mChooserActivity.sendVoiceChoicesIfNeeded();
                 }
                 mConnectedComponent = null;
+                destroy();
             }
         }
 

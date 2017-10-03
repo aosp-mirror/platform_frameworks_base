@@ -2896,7 +2896,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 149;
+            private static final int SETTINGS_VERSION = 150;
 
             private final int mUserId;
 
@@ -3470,9 +3470,25 @@ public class SettingsProvider extends ContentProvider {
                                     true, SettingsState.SYSTEM_PACKAGE_NAME);
                         }
                     }
-
                     currentVersion = 149;
                 }
+
+                if (currentVersion == 149) {
+                    // Version 150: Set a default value for mobile data always on
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting currentSetting = globalSettings.getSettingLocked(
+                            Settings.Global.MOBILE_DATA_ALWAYS_ON);
+                    if (currentSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.MOBILE_DATA_ALWAYS_ON,
+                                getContext().getResources().getBoolean(
+                                        R.bool.def_mobile_data_always_on) ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 150;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
