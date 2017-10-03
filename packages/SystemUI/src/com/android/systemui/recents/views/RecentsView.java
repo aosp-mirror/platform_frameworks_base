@@ -203,10 +203,6 @@ public class RecentsView extends FrameLayout {
                         mStackButtonShadowDistance.x, mStackButtonShadowDistance.y,
                         mStackButtonShadowColor);
             }
-            if (Recents.getConfiguration().isLowRamDevice) {
-                int bgColor = Utils.getColorAttr(mContext, R.attr.clearAllBackgroundColor);
-                mStackActionButton.setBackgroundColor(bgColor);
-            }
         }
 
         // Let's also require dark status and nav bars if the text is dark
