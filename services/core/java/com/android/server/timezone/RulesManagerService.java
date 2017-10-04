@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import libcore.icu.ICU;
+import libcore.util.TimeZoneFinder;
 import libcore.util.ZoneInfoDB;
 
 import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
@@ -479,9 +480,10 @@ public final class RulesManagerService extends IRulesManager.Stub {
                         case 'a': {
                             // Report the active rules version (i.e. the rules in use by the current
                             // process).
-                            pw.println("Active rules version (ICU, libcore): "
+                            pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
                                     + ICU.getTZDataVersion() + ","
-                                    + ZoneInfoDB.getInstance().getVersion());
+                                    + ZoneInfoDB.getInstance().getVersion() + ","
+                                    + TimeZoneFinder.getInstance().getIanaVersion());
                             break;
                         }
                         default: {
@@ -494,8 +496,10 @@ public final class RulesManagerService extends IRulesManager.Stub {
         }
 
         pw.println("RulesManagerService state: " + toString());
-        pw.println("Active rules version (ICU, libcore): " + ICU.getTZDataVersion() + ","
-                + ZoneInfoDB.getInstance().getVersion());
+        pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
+                + ICU.getTZDataVersion() + ","
+                + ZoneInfoDB.getInstance().getVersion() + ","
+                + TimeZoneFinder.getInstance().getIanaVersion());
         pw.println("Distro state: " + rulesState.toString());
         mPackageTracker.dump(pw);
     }
