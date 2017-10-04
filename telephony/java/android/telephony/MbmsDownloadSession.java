@@ -523,8 +523,7 @@ public class MbmsDownloadSession implements AutoCloseable {
      * @param handler The {@link Handler} on which calls to {@code callback} should be enqueued on.
      */
     public void registerStateCallback(@NonNull DownloadRequest request,
-            @NonNull DownloadStateCallback callback,
-            @NonNull Handler handler) {
+            @NonNull DownloadStateCallback callback, @NonNull Handler handler) {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
             throw new IllegalStateException("Middleware not yet bound");
@@ -534,7 +533,8 @@ public class MbmsDownloadSession implements AutoCloseable {
                 new InternalDownloadStateCallback(callback, handler);
 
         try {
-            int result = downloadService.registerStateCallback(request, internalCallback);
+            int result = downloadService.registerStateCallback(request, internalCallback,
+                    callback.getCallbackFilterFlags());
             if (result != MbmsErrors.SUCCESS) {
                 if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                     throw new IllegalArgumentException("Unknown download request.");
