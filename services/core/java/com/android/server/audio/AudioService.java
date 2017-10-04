@@ -751,6 +751,9 @@ public class AudioService extends IAudioService.Stub
         // relies on audio policy having correct ranges for volume indexes.
         mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
+        mPlaybackMonitor =
+                new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
+
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
         mRecordMonitor = new RecordingActivityMonitor(mContext);
@@ -6977,7 +6980,7 @@ public class AudioService extends IAudioService.Stub
     //======================
     // Audio playback notification
     //======================
-    private final PlaybackActivityMonitor mPlaybackMonitor = new PlaybackActivityMonitor();
+    private final PlaybackActivityMonitor mPlaybackMonitor;
 
     public void registerPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
         final boolean isPrivileged =
