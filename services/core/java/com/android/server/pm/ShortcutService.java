@@ -134,6 +134,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * TODO:
@@ -3455,121 +3456,265 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void dumpNoCheck(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final DumpFilter filter = parseDumpArgs(args);
 
-        boolean dumpMain = true;
-        boolean checkin = false;
-        boolean clear = false;
-        boolean dumpUid = false;
-        boolean dumpFiles = false;
-
-        if (args != null) {
-            for (String arg : args) {
-                if ("-c".equals(arg)) {
-                    checkin = true;
-
-                } else if ("--checkin".equals(arg)) {
-                    checkin = true;
-                    clear = true;
-
-                } else if ("-a".equals(arg) || "--all".equals(arg)) {
-                    dumpUid = true;
-                    dumpFiles = true;
-
-                } else if ("-u".equals(arg) || "--uid".equals(arg)) {
-                    dumpUid = true;
-
-                } else if ("-f".equals(arg) || "--files".equals(arg)) {
-                    dumpFiles = true;
-
-                } else if ("-n".equals(arg) || "--no-main".equals(arg)) {
-                    dumpMain = false;
-                }
-            }
-        }
-
-        if (checkin) {
+        if (filter.shouldDumpCheckIn()) {
             // Other flags are not supported for checkin.
-            dumpCheckin(pw, clear);
+            dumpCheckin(pw, filter.shouldCheckInClear());
         } else {
-            if (dumpMain) {
-                dumpInner(pw);
+            if (filter.shouldDumpMain()) {
+                dumpInner(pw, filter);
                 pw.println();
             }
-            if (dumpUid) {
+            if (filter.shouldDumpUid()) {
                 dumpUid(pw);
                 pw.println();
             }
-            if (dumpFiles) {
+            if (filter.shouldDumpFiles()) {
                 dumpDumpFiles(pw);
                 pw.println();
             }
         }
     }
 
-    private void dumpInner(PrintWriter pw) {
-        synchronized (mLock) {
-            final long now = injectCurrentTimeMillis();
-            pw.print("Now: [");
-            pw.print(now);
-            pw.print("] ");
-            pw.print(formatTime(now));
+    private static DumpFilter parseDumpArgs(String[] args) {
+        final DumpFilter filter = new DumpFilter();
+        if (args == null) {
+            return filter;
+        }
 
-            pw.print("  Raw last reset: [");
-            pw.print(mRawLastResetTime);
-            pw.print("] ");
-            pw.print(formatTime(mRawLastResetTime));
+        int argIndex = 0;
+        while (argIndex < args.length) {
+            final String arg = args[argIndex++];
 
-            final long last = getLastResetTimeLocked();
-            pw.print("  Last reset: [");
-            pw.print(last);
-            pw.print("] ");
-            pw.print(formatTime(last));
+            if ("-c".equals(arg)) {
+                filter.setDumpCheckIn(true);
+                continue;
+            }
+            if ("--checkin".equals(arg)) {
+                filter.setDumpCheckIn(true);
+                filter.setCheckInClear(true);
+                continue;
+            }
+            if ("-a".equals(arg) || "--all".equals(arg)) {
+                filter.setDumpUid(true);
+                filter.setDumpFiles(true);
+                continue;
+            }
+            if ("-u".equals(arg) || "--uid".equals(arg)) {
+                filter.setDumpUid(true);
+                continue;
+            }
+            if ("-f".equals(arg) || "--files".equals(arg)) {
+                filter.setDumpFiles(true);
+                continue;
+            }
+            if ("-n".equals(arg) || "--no-main".equals(arg)) {
+                filter.setDumpMain(false);
+                continue;
+            }
+            if ("--user".equals(arg)) {
+                if (argIndex >= args.length) {
+                    throw new IllegalArgumentException("Missing user ID for --user");
+                }
+                try {
+                    filter.addUser(Integer.parseInt(args[argIndex++]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid user ID", e);
+                }
+                continue;
+            }
+            if ("-p".equals(arg) || "--package".equals(arg)) {
+                if (argIndex >= args.length) {
+                    throw new IllegalArgumentException("Missing package name for --package");
+                }
+                filter.addPackageRegex(args[argIndex++]);
+                filter.setDumpDetails(false);
+                continue;
+            }
+            if (arg.startsWith("-")) {
+                throw new IllegalArgumentException("Unknown option " + arg);
+            }
+            break;
+        }
+        while (argIndex < args.length) {
+            filter.addPackage(args[argIndex++]);
+        }
+        return filter;
+    }
 
-            final long next = getNextResetTimeLocked();
-            pw.print("  Next reset: [");
-            pw.print(next);
-            pw.print("] ");
-            pw.print(formatTime(next));
+    static class DumpFilter {
+        private boolean mDumpCheckIn = false;
+        private boolean mCheckInClear = false;
 
-            pw.print("  Config:");
-            pw.print("    Max icon dim: ");
-            pw.println(mMaxIconDimension);
-            pw.print("    Icon format: ");
-            pw.println(mIconPersistFormat);
-            pw.print("    Icon quality: ");
-            pw.println(mIconPersistQuality);
-            pw.print("    saveDelayMillis: ");
-            pw.println(mSaveDelayMillis);
-            pw.print("    resetInterval: ");
-            pw.println(mResetInterval);
-            pw.print("    maxUpdatesPerInterval: ");
-            pw.println(mMaxUpdatesPerInterval);
-            pw.print("    maxShortcutsPerActivity: ");
-            pw.println(mMaxShortcuts);
-            pw.println();
+        private boolean mDumpMain = true;
+        private boolean mDumpUid = false;
+        private boolean mDumpFiles = false;
 
-            pw.println("  Stats:");
-            synchronized (mStatLock) {
-                for (int i = 0; i < Stats.COUNT; i++) {
-                    dumpStatLS(pw, "    ", i);
+        private boolean mDumpDetails = true;
+        private List<Pattern> mPackagePatterns = new ArrayList<>();
+        private List<Integer> mUsers = new ArrayList<>();
+
+        void addPackageRegex(String regex) {
+            mPackagePatterns.add(Pattern.compile(regex));
+        }
+
+        public void addPackage(String packageName) {
+            addPackageRegex(Pattern.quote(packageName));
+        }
+
+        void addUser(int userId) {
+            mUsers.add(userId);
+        }
+
+        boolean isPackageMatch(String packageName) {
+            if (mPackagePatterns.size() == 0) {
+                return true;
+            }
+            for (int i = 0; i < mPackagePatterns.size(); i++) {
+                if (mPackagePatterns.get(i).matcher(packageName).find()) {
+                    return true;
                 }
             }
+            return false;
+        }
 
-            pw.println();
-            pw.print("  #Failures: ");
-            pw.println(mWtfCount);
+        boolean isUserMatch(int userId) {
+            if (mUsers.size() == 0) {
+                return true;
+            }
+            for (int i = 0; i < mUsers.size(); i++) {
+                if (mUsers.get(i) == userId) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-            if (mLastWtfStacktrace != null) {
-                pw.print("  Last failure stack trace: ");
-                pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+        public boolean shouldDumpCheckIn() {
+            return mDumpCheckIn;
+        }
+
+        public void setDumpCheckIn(boolean dumpCheckIn) {
+            mDumpCheckIn = dumpCheckIn;
+        }
+
+        public boolean shouldCheckInClear() {
+            return mCheckInClear;
+        }
+
+        public void setCheckInClear(boolean checkInClear) {
+            mCheckInClear = checkInClear;
+        }
+
+        public boolean shouldDumpMain() {
+            return mDumpMain;
+        }
+
+        public void setDumpMain(boolean dumpMain) {
+            mDumpMain = dumpMain;
+        }
+
+        public boolean shouldDumpUid() {
+            return mDumpUid;
+        }
+
+        public void setDumpUid(boolean dumpUid) {
+            mDumpUid = dumpUid;
+        }
+
+        public boolean shouldDumpFiles() {
+            return mDumpFiles;
+        }
+
+        public void setDumpFiles(boolean dumpFiles) {
+            mDumpFiles = dumpFiles;
+        }
+
+        public boolean shouldDumpDetails() {
+            return mDumpDetails;
+        }
+
+        public void setDumpDetails(boolean dumpDetails) {
+            mDumpDetails = dumpDetails;
+        }
+    }
+
+    private void dumpInner(PrintWriter pw) {
+        dumpInner(pw, new DumpFilter());
+    }
+
+    private void dumpInner(PrintWriter pw, DumpFilter filter) {
+        synchronized (mLock) {
+            if (filter.shouldDumpDetails()) {
+                final long now = injectCurrentTimeMillis();
+                pw.print("Now: [");
+                pw.print(now);
+                pw.print("] ");
+                pw.print(formatTime(now));
+
+                pw.print("  Raw last reset: [");
+                pw.print(mRawLastResetTime);
+                pw.print("] ");
+                pw.print(formatTime(mRawLastResetTime));
+
+                final long last = getLastResetTimeLocked();
+                pw.print("  Last reset: [");
+                pw.print(last);
+                pw.print("] ");
+                pw.print(formatTime(last));
+
+                final long next = getNextResetTimeLocked();
+                pw.print("  Next reset: [");
+                pw.print(next);
+                pw.print("] ");
+                pw.print(formatTime(next));
+
+                pw.print("  Config:");
+                pw.print("    Max icon dim: ");
+                pw.println(mMaxIconDimension);
+                pw.print("    Icon format: ");
+                pw.println(mIconPersistFormat);
+                pw.print("    Icon quality: ");
+                pw.println(mIconPersistQuality);
+                pw.print("    saveDelayMillis: ");
+                pw.println(mSaveDelayMillis);
+                pw.print("    resetInterval: ");
+                pw.println(mResetInterval);
+                pw.print("    maxUpdatesPerInterval: ");
+                pw.println(mMaxUpdatesPerInterval);
+                pw.print("    maxShortcutsPerActivity: ");
+                pw.println(mMaxShortcuts);
+                pw.println();
+
+                pw.println("  Stats:");
+                synchronized (mStatLock) {
+                    for (int i = 0; i < Stats.COUNT; i++) {
+                        dumpStatLS(pw, "    ", i);
+                    }
+                }
+
+                pw.println();
+                pw.print("  #Failures: ");
+                pw.println(mWtfCount);
+
+                if (mLastWtfStacktrace != null) {
+                    pw.print("  Last failure stack trace: ");
+                    pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+                }
+
+                pw.println();
+                mShortcutBitmapSaver.dumpLocked(pw, "  ");
+
+                pw.println();
             }
 
-            pw.println();
-            mShortcutBitmapSaver.dumpLocked(pw, "  ");
-
             for (int i = 0; i < mUsers.size(); i++) {
-                pw.println();
-                mUsers.valueAt(i).dump(pw, "  ");
+                final ShortcutUser user = mUsers.valueAt(i);
+                if (filter.isUserMatch(user.getUserId())) {
+                    user.dump(pw, "  ", filter);
+                    pw.println();
+                }
             }
         }
     }
