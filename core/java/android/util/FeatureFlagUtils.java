@@ -50,6 +50,13 @@ public class FeatureFlagUtils {
     }
 
     /**
+     * Override feature flag to new state.
+     */
+    public static void setEnabled(String feature, boolean enabled) {
+        SystemProperties.set(FFLAG_OVERRIDE_PREFIX + feature, enabled ? "true" : "false");
+    }
+
+    /**
      * Returns all feature flags in their raw form.
      */
     public static Map<String, String> getAllFeatureFlags() {
