@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "flatten/XmlFlattener.h"
 #include "io/StringInputStream.h"
 #include "test/Test.h"
 
@@ -49,6 +50,36 @@ TEST(XmlDomTest, Inflate) {
   EXPECT_THAT(el->namespace_decls, SizeIs(1u));
   EXPECT_THAT(el->namespace_decls[0].uri, StrEq(xml::kSchemaAndroid));
   EXPECT_THAT(el->namespace_decls[0].prefix, StrEq("android"));
+}
+
+TEST(XmlDomTest, BinaryInflate) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<XmlResource> doc = util::make_unique<XmlResource>();
+  doc->root = util::make_unique<Element>();
+  doc->root->name = "Layout";
+  doc->root->line_number = 2u;
+
+  NamespaceDecl decl;
+  decl.uri = kSchemaAndroid;
+  decl.prefix = "android";
+  decl.line_number = 2u;
+  doc->root->namespace_decls.push_back(decl);
+
+  BigBuffer buffer(4096);
+  XmlFlattener flattener(&buffer, {});
+  ASSERT_TRUE(flattener.Consume(context.get(), doc.get()));
+
+  auto block = util::Copy(buffer);
+  std::unique_ptr<XmlResource> new_doc =
+      Inflate(block.get(), buffer.size(), context->GetDiagnostics(), Source("test.xml"));
+  ASSERT_THAT(new_doc, NotNull());
+
+  EXPECT_THAT(new_doc->root->name, StrEq("Layout"));
+  EXPECT_THAT(new_doc->root->line_number, Eq(2u));
+  ASSERT_THAT(new_doc->root->namespace_decls, SizeIs(1u));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].uri, StrEq(kSchemaAndroid));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].prefix, StrEq("android"));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].line_number, Eq(2u));
 }
 
 // Escaping is handled after parsing of the values for resource-specific values.
