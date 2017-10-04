@@ -17,38 +17,21 @@
 #ifndef _BOOTANIMATION_BOOTACTION_H
 #define _BOOTANIMATION_BOOTACTION_H
 
-#include <map>
 #include <string>
+#include <vector>
 
-#include <base/json/json_value_converter.h>
 #include <boot_action/boot_action.h>  // libandroidthings native API.
 #include <utils/RefBase.h>
-
-using base::JSONValueConverter;
 
 namespace android {
 
 class BootAction : public RefBase {
 public:
-    struct SavedBootParameters {
-      int brightness;
-      int volume;
-      ScopedVector<std::string> param_names;
-      ScopedVector<std::string> param_values;
-      static void RegisterJSONConverter(
-          JSONValueConverter<SavedBootParameters>* converter);
-    };
-
     ~BootAction();
 
-    // Rename next_boot.json to last_boot.json so that we don't repeat
-    // parameters if there is a crash before the framework comes up.
-    // TODO(b/65462981): Is this what we want to do? Should we swap in the
-    // framework instead?
-    static void swapBootConfigs();
-
     // libraryPath is a fully qualified path to the target .so library.
-    bool init(const std::string& libraryPath);
+    bool init(const std::string& libraryPath,
+              const std::vector<ABootActionParameter>& parameters);
 
     // The animation is going to start playing partNumber for the playCount'th
     // time, update the action as needed.

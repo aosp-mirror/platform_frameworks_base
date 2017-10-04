@@ -156,6 +156,14 @@ class MeasuredText {
         }
     }
 
+    /**
+     * Apply the style.
+     *
+     * If StaticLyaout.Builder is not provided in setPara() method, this method measures the styled
+     * text width.
+     * If StaticLayout.Builder is provided in setPara() method, this method just passes the style
+     * information to native code by calling StaticLayout.Builder.addstyleRun() and returns 0.
+     */
     float addStyleRun(TextPaint paint, int len, Paint.FontMetricsInt fm) {
         if (fm != null) {
             paint.getFontMetricsInt(fm);
@@ -169,7 +177,8 @@ class MeasuredText {
             if (mBuilder == null) {
                 return paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, mWidths, p);
             } else {
-                return mBuilder.addStyleRun(paint, p, p + len, isRtl);
+                mBuilder.addStyleRun(paint, p, p + len, isRtl);
+                return 0.0f;  // Builder.addStyleRun doesn't return the width.
             }
         }
 
@@ -182,7 +191,8 @@ class MeasuredText {
                     totalAdvance +=
                             paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, mWidths, q);
                 } else {
-                    totalAdvance += mBuilder.addStyleRun(paint, q, i, isRtl);
+                    // Builder.addStyleRun doesn't return the width.
+                    mBuilder.addStyleRun(paint, q, i, isRtl);
                 }
                 if (i == e) {
                     break;
@@ -191,7 +201,7 @@ class MeasuredText {
                 level = mLevels[i];
             }
         }
-        return totalAdvance;
+        return totalAdvance;  // If mBuilder is null, the result is zero.
     }
 
     float addStyleRun(TextPaint paint, MetricAffectingSpan[] spans, int len,

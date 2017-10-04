@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager.ActionListener;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -59,11 +58,17 @@ public class AccessPointControllerImpl
 
     private int mCurrentUser;
 
-    public AccessPointControllerImpl(Context context, Looper bgLooper) {
+    public AccessPointControllerImpl(Context context) {
         mContext = context;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mWifiTracker = new WifiTracker(context, this, bgLooper, false, true);
+        mWifiTracker = new WifiTracker(context, this, false, true);
         mCurrentUser = ActivityManager.getCurrentUser();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        mWifiTracker.onDestroy();
     }
 
     public boolean canConfigWifi() {
@@ -81,7 +86,7 @@ public class AccessPointControllerImpl
         if (DEBUG) Log.d(TAG, "addCallback " + callback);
         mCallbacks.add(callback);
         if (mCallbacks.size() == 1) {
-            mWifiTracker.startTracking();
+            mWifiTracker.onStart();
         }
     }
 
@@ -91,7 +96,7 @@ public class AccessPointControllerImpl
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         mCallbacks.remove(callback);
         if (mCallbacks.isEmpty()) {
-            mWifiTracker.stopTracking();
+            mWifiTracker.onStop();
         }
     }
 

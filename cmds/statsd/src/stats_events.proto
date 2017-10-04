@@ -23,13 +23,19 @@ option java_package = "com.android.os";
 option java_outer_classname = "StatsEventProto";
 
 message StatsEvent {
-  oneof log_entry_event {
+  oneof event {
+    // Screen state change.
     ScreenStateChange screen_state_change = 2;
+    // Process state change.
     ProcessStateChange process_state_change = 1112;
   }
 }
 
+// Logs changes in screen state. This event is logged in
+// frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
 message ScreenStateChange {
+  // Screen state enums follow the values defined in below file.
+  // frameworks/base/core/java/android/view/Display.java
   enum State {
     STATE_UNKNOWN = 0;
     STATE_OFF = 1;
@@ -38,20 +44,20 @@ message ScreenStateChange {
     STATE_DOZE_SUSPEND = 4;
     STATE_VR = 5;
   }
+  // New screen state.
   optional State display_state = 1;
 }
 
+// Logs changes in process state. This event is logged in
+// frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
 message ProcessStateChange {
+  // Type of process event.
   enum State {
     START = 1;
     CRASH = 2;
   }
   optional State state = 1;
 
+  // UID associated with the package.
   optional int32 uid = 2;
-
-  optional string package_name = 1002;
-
-  optional int32 package_version = 3;
-  optional string package_version_string = 4;
 }

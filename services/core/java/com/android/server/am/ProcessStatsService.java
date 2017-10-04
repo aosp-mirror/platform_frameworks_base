@@ -23,11 +23,14 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.DumpUtils;
@@ -622,13 +625,17 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            dumpInner(fd, pw, args);
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                dumpProto(fd);
+            } else {
+                dumpInner(pw, args);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void dumpInner(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void dumpInner(PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 
         boolean isCheckin = false;
@@ -1037,5 +1044,45 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             }
         }
+    }
+
+    private void dumpAggregatedStats(ProtoOutputStream proto, int aggregateHours, long now) {
+        ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
+                - (ProcessStats.COMMIT_PERIOD/2));
+        if (pfd == null) {
+            return;
+        }
+        ProcessStats stats = new ProcessStats(false);
+        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        stats.read(stream);
+        if (stats.mReadError != null) {
+            return;
+        }
+        stats.toProto(proto, now);
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        // dump current procstats
+        long nowToken = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
+        long now;
+        synchronized (mAm) {
+            now = SystemClock.uptimeMillis();
+            mProcessStats.toProto(proto, now);
+        }
+        proto.end(nowToken);
+
+        // aggregated over last 3 hours procstats
+        long tokenOf3Hrs = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_OVER_3HRS);
+        dumpAggregatedStats(proto, 3, now);
+        proto.end(tokenOf3Hrs);
+
+        // aggregated over last 24 hours procstats
+        long tokenOf24Hrs = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS);
+        dumpAggregatedStats(proto, 24, now);
+        proto.end(tokenOf24Hrs);
+
+        proto.flush();
     }
 }

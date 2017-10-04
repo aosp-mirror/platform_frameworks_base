@@ -36,10 +36,13 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.RankingHelperProto;
+import android.service.notification.RankingHelperProto.RecordProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -915,8 +918,7 @@ public class RankingHelper implements RankingConfig {
                 pw.print("  ");
                 pw.println(mSignalExtractors[i]);
             }
-        }
-        if (filter == null) {
+
             pw.print(prefix);
             pw.println("per-package config:");
         }
@@ -926,6 +928,52 @@ public class RankingHelper implements RankingConfig {
         }
         pw.println("Restored without uid:");
         dumpRecords(pw, prefix, filter, mRestoredWithoutUids);
+    }
+
+    public void dump(ProtoOutputStream proto, NotificationManagerService.DumpFilter filter) {
+        final int N = mSignalExtractors.length;
+        for (int i = 0; i < N; i++) {
+            proto.write(RankingHelperProto.NOTIFICATION_SIGNAL_EXTRACTORS,
+                mSignalExtractors[i].getClass().getSimpleName());
+        }
+        synchronized (mRecords) {
+            dumpRecords(proto, RankingHelperProto.RECORDS, filter, mRecords);
+        }
+        dumpRecords(proto, RankingHelperProto.RECORDS_RESTORED_WITHOUT_UID, filter,
+            mRestoredWithoutUids);
+    }
+
+    private static void dumpRecords(ProtoOutputStream proto, long fieldId,
+            NotificationManagerService.DumpFilter filter, ArrayMap<String, Record> records) {
+        final int N = records.size();
+        long fToken;
+        for (int i = 0; i < N; i++) {
+            final Record r = records.valueAt(i);
+            if (filter == null || filter.matches(r.pkg)) {
+                fToken = proto.start(fieldId);
+
+                proto.write(RecordProto.PACKAGE, r.pkg);
+                proto.write(RecordProto.UID, r.uid);
+                proto.write(RecordProto.IMPORTANCE, r.importance);
+                proto.write(RecordProto.PRIORITY, r.priority);
+                proto.write(RecordProto.VISIBILITY, r.visibility);
+                proto.write(RecordProto.SHOW_BADGE, r.showBadge);
+
+                long token;
+                for (NotificationChannel channel : r.channels.values()) {
+                    token = proto.start(RecordProto.CHANNELS);
+                    channel.toProto(proto);
+                    proto.end(token);
+                }
+                for (NotificationChannelGroup group : r.groups.values()) {
+                    token = proto.start(RecordProto.CHANNEL_GROUPS);
+                    group.toProto(proto);
+                    proto.end(token);
+                }
+
+                proto.end(fToken);
+            }
+        }
     }
 
     private static void dumpRecords(PrintWriter pw, String prefix,

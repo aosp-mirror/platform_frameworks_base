@@ -2375,6 +2375,9 @@ public final class ProtoOutputStream {
         if (countString == null) {
             countString = "fieldCount=" + fieldCount;
         }
+        if (countString.length() > 0) {
+            countString += " ";
+        }
 
         final long fieldType = fieldId & FIELD_TYPE_MASK;
         String typeString = getFieldTypeString(fieldType);
@@ -2382,7 +2385,7 @@ public final class ProtoOutputStream {
             typeString = "fieldType=" + fieldType;
         }
 
-        return fieldCount + " " + typeString + " tag=" + ((int)fieldId)
+        return countString + typeString + " tag=" + ((int) fieldId)
                 + " fieldId=0x" + Long.toHexString(fieldId);
     }
 

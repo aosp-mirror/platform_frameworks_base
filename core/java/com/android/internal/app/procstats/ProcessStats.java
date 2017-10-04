@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.procstats.ProcessStatsSectionProto;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -30,6 +31,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.DurationsTable;
@@ -1706,6 +1708,46 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
+    public void toProto(ProtoOutputStream proto, long now) {
+        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+
+        proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
+        proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
+                mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
+        proto.write(ProcessStatsSectionProto.START_UPTIME_MS, mTimePeriodStartUptime);
+        proto.write(ProcessStatsSectionProto.END_UPTIME_MS, mTimePeriodEndUptime);
+        proto.write(ProcessStatsSectionProto.RUNTIME, mRuntime);
+        proto.write(ProcessStatsSectionProto.HAS_SWAPPED_PSS, mHasSwappedOutPss);
+        boolean partial = true;
+        if ((mFlags&FLAG_SHUTDOWN) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SHUTDOWN);
+            partial = false;
+        }
+        if ((mFlags&FLAG_SYSPROPS) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SYSPROPS);
+            partial = false;
+        }
+        if ((mFlags&FLAG_COMPLETE) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_COMPLETE);
+            partial = false;
+        }
+        if (partial) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
+        }
+
+        ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        for (int ip=0; ip<procMap.size(); ip++) {
+            String procName = procMap.keyAt(ip);
+            SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            for (int iu=0; iu<uids.size(); iu++) {
+                final int uid = uids.keyAt(iu);
+                final ProcessState procState = uids.valueAt(iu);
+                final long processStateToken = proto.start(ProcessStatsSectionProto.PROCESS_STATS);
+                procState.toProto(proto, procName, uid, now);
+                proto.end(processStateToken);
+            }
+        }
+    }
 
     final public static class ProcessStateHolder {
         public final int appVersion;

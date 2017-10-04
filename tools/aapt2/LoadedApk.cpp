@@ -20,10 +20,14 @@
 #include "ValueVisitor.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
+#include "flatten/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
 #include "io/Util.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
+
+using xml::XmlResource;
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
                                                       const android::StringPiece& path) {
@@ -52,6 +56,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
   if (!parser.Parse()) {
     return {};
   }
+
   return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
 }
 
@@ -63,7 +68,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
 
 bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table,
                                const TableFlattenerOptions& options, FilterChain* filters,
-                               IArchiveWriter* writer) {
+                               IArchiveWriter* writer, XmlResource* manifest) {
   std::set<std::string> referenced_resources;
   // List the files being referenced in the resource table.
   for (auto& pkg : split_table->packages) {
@@ -119,6 +124,20 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
 
+    } else if (manifest != nullptr && path == "AndroidManifest.xml") {
+      BigBuffer buffer(8192);
+      XmlFlattener xml_flattener(&buffer, {});
+      if (!xml_flattener.Consume(context, manifest)) {
+        context->GetDiagnostics()->Error(DiagMessage(path) << "flattening failed");
+        return false;
+      }
+
+      uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
+      io::BigBufferInputStream manifest_buffer_in(&buffer);
+      if (!io::CopyInputStreamToArchive(context, &manifest_buffer_in, path, compression_flags,
+                                        writer)) {
+        return false;
+      }
     } else {
       uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
       if (!io::CopyFileToArchive(context, file, path, compression_flags, writer)) {
@@ -129,4 +148,26 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
   return true;
 }
 
+std::unique_ptr<xml::XmlResource> LoadedApk::InflateManifest(IAaptContext* context) {
+  IDiagnostics* diag = context->GetDiagnostics();
+
+  io::IFile* manifest_file = GetFileCollection()->FindFile("AndroidManifest.xml");
+  if (manifest_file == nullptr) {
+    diag->Error(DiagMessage(source_) << "no AndroidManifest.xml found");
+    return {};
+  }
+
+  std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
+  if (manifest_data == nullptr) {
+    diag->Error(DiagMessage(manifest_file->GetSource()) << "could not open AndroidManifest.xml");
+    return {};
+  }
+
+  std::unique_ptr<xml::XmlResource> manifest =
+      xml::Inflate(manifest_data->data(), manifest_data->size(), diag, manifest_file->GetSource());
+  if (manifest == nullptr) {
+    diag->Error(DiagMessage() << "failed to read binary AndroidManifest.xml");
+  }
+  return manifest;
+}
 }  // namespace aapt

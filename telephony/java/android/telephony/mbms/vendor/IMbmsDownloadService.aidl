@@ -36,7 +36,8 @@ interface IMbmsDownloadService
 
     int download(in DownloadRequest downloadRequest);
 
-    int registerStateCallback(in DownloadRequest downloadRequest, IDownloadStateCallback listener);
+    int registerStateCallback(in DownloadRequest downloadRequest, IDownloadStateCallback listener,
+        int flags);
 
     int unregisterStateCallback(in DownloadRequest downloadRequest,
         IDownloadStateCallback listener);

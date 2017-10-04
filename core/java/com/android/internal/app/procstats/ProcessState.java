@@ -21,6 +21,8 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.pm.PackageProto;
+import android.service.procstats.ProcessStatsProto;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -29,6 +31,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ProcessStats.PackageState;
@@ -69,6 +73,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ProcessState {
@@ -1157,6 +1164,7 @@ public final class ProcessState {
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ProcessState{").append(Integer.toHexString(System.identityHashCode(this)))
@@ -1166,5 +1174,78 @@ public final class ProcessState {
         if (mCommonProcess != this) sb.append(" (sub)");
         sb.append("}");
         return sb.toString();
+    }
+
+    public void toProto(ProtoOutputStream proto, String procName, int uid, long now) {
+        proto.write(ProcessStatsProto.PROCESS, procName);
+        proto.write(ProcessStatsProto.UID, uid);
+        if (mNumExcessiveCpu > 0 || mNumCachedKill > 0 ) {
+            final long killToken = proto.start(ProcessStatsProto.KILL);
+            proto.write(ProcessStatsProto.Kill.WAKES, mNumExcessiveWake);
+            proto.write(ProcessStatsProto.Kill.CPU, mNumExcessiveCpu);
+            proto.write(ProcessStatsProto.Kill.CACHED, mNumCachedKill);
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.Kill.CACHED_PSS,
+                    mMinCachedKillPss, mAvgCachedKillPss, mMaxCachedKillPss);
+            proto.end(killToken);
+        }
+
+        // Group proc stats by type (screen state + mem state + process state)
+        Map<Integer, Long> durationByState = new HashMap<>();
+        boolean didCurState = false;
+        for (int i=0; i<mDurations.getKeyCount(); i++) {
+            final int key = mDurations.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            long time = mDurations.getValue(key);
+            if (mCurState == type) {
+                didCurState = true;
+                time += now - mStartTime;
+            }
+            durationByState.put(type, time);
+        }
+        if (!didCurState && mCurState != STATE_NOTHING) {
+            durationByState.put(mCurState, now - mStartTime);
+        }
+
+        for (int i=0; i<mPssTable.getKeyCount(); i++) {
+            final int key = mPssTable.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            if (!durationByState.containsKey(type)) {
+                // state without duration should not have stats!
+                continue;
+            }
+            final long stateToken = proto.start(ProcessStatsProto.STATES);
+            DumpUtils.printProcStateTagProto(proto,
+                    ProcessStatsProto.State.SCREEN_STATE,
+                    ProcessStatsProto.State.MEMORY_STATE,
+                    ProcessStatsProto.State.PROCESS_STATE,
+                    type);
+
+            long duration = durationByState.get(type);
+            durationByState.remove(type); // remove the key since it is already being dumped.
+            proto.write(ProcessStatsProto.State.DURATION_MS, duration);
+
+            proto.write(ProcessStatsProto.State.SAMPLE_SIZE, mPssTable.getValue(key, PSS_SAMPLE_COUNT));
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.PSS,
+                    mPssTable.getValue(key, PSS_MINIMUM),
+                    mPssTable.getValue(key, PSS_AVERAGE),
+                    mPssTable.getValue(key, PSS_MAXIMUM));
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.USS,
+                    mPssTable.getValue(key, PSS_USS_MINIMUM),
+                    mPssTable.getValue(key, PSS_USS_AVERAGE),
+                    mPssTable.getValue(key, PSS_USS_MAXIMUM));
+
+            proto.end(stateToken);
+        }
+
+        for (Map.Entry<Integer, Long> entry : durationByState.entrySet()) {
+            final long stateToken = proto.start(ProcessStatsProto.STATES);
+            DumpUtils.printProcStateTagProto(proto,
+                    ProcessStatsProto.State.SCREEN_STATE,
+                    ProcessStatsProto.State.MEMORY_STATE,
+                    ProcessStatsProto.State.PROCESS_STATE,
+                    entry.getKey());
+            proto.write(ProcessStatsProto.State.DURATION_MS, entry.getValue());
+            proto.end(stateToken);
+        }
     }
 }

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -294,5 +295,16 @@ public final class NotificationChannelGroup implements Parcelable {
                 + ", mBlocked=" + mBlocked
                 + ", mChannels=" + mChannels
                 + '}';
+    }
+
+    /** @hide */
+    public void toProto(ProtoOutputStream proto) {
+        proto.write(NotificationChannelGroupProto.ID, mId);
+        proto.write(NotificationChannelGroupProto.NAME, mName.toString());
+        proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
+        proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
+        for (NotificationChannel channel : mChannels) {
+            channel.toProto(proto);
+        }
     }
 }

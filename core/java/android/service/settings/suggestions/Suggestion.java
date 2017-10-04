@@ -16,11 +16,16 @@
 
 package android.service.settings.suggestions;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Data object that has information about a device suggestion.
@@ -30,9 +35,27 @@ import android.text.TextUtils;
 @SystemApi
 public final class Suggestion implements Parcelable {
 
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, value = {
+            FLAG_HAS_BUTTON,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {
+    }
+
+    /**
+     * Flag for suggestion type with a single button
+     */
+    public static final int FLAG_HAS_BUTTON = 1 << 0;
+
     private final String mId;
     private final CharSequence mTitle;
     private final CharSequence mSummary;
+    private final Icon mIcon;
+    @Flags
+    private final int mFlags;
     private final PendingIntent mPendingIntent;
 
     /**
@@ -57,6 +80,22 @@ public final class Suggestion implements Parcelable {
     }
 
     /**
+     * Optional icon for this suggestion.
+     */
+    public Icon getIcon() {
+        return mIcon;
+    }
+
+    /**
+     * Optional flags for this suggestion. This will influence UI when rendering suggestion in
+     * different style.
+     */
+    @Flags
+    public int getFlags() {
+        return mFlags;
+    }
+
+    /**
      * The Intent to launch when the suggestion is activated.
      */
     public PendingIntent getPendingIntent() {
@@ -67,6 +106,8 @@ public final class Suggestion implements Parcelable {
         mId = builder.mId;
         mTitle = builder.mTitle;
         mSummary = builder.mSummary;
+        mIcon = builder.mIcon;
+        mFlags = builder.mFlags;
         mPendingIntent = builder.mPendingIntent;
     }
 
@@ -74,6 +115,8 @@ public final class Suggestion implements Parcelable {
         mId = in.readString();
         mTitle = in.readCharSequence();
         mSummary = in.readCharSequence();
+        mIcon = in.readParcelable(Icon.class.getClassLoader());
+        mFlags = in.readInt();
         mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader());
     }
 
@@ -99,6 +142,8 @@ public final class Suggestion implements Parcelable {
         dest.writeString(mId);
         dest.writeCharSequence(mTitle);
         dest.writeCharSequence(mSummary);
+        dest.writeParcelable(mIcon, flags);
+        dest.writeInt(mFlags);
         dest.writeParcelable(mPendingIntent, flags);
     }
 
@@ -109,6 +154,9 @@ public final class Suggestion implements Parcelable {
         private final String mId;
         private CharSequence mTitle;
         private CharSequence mSummary;
+        private Icon mIcon;
+        @Flags
+        private int mFlags;
         private PendingIntent mPendingIntent;
 
         public Builder(String id) {
@@ -131,6 +179,23 @@ public final class Suggestion implements Parcelable {
          */
         public Builder setSummary(CharSequence summary) {
             mSummary = summary;
+            return this;
+        }
+
+        /**
+         * Sets icon for the suggestion.
+         */
+        public Builder setIcon(Icon icon) {
+            mIcon = icon;
+            return this;
+        }
+
+        /**
+         * Sets a UI type for this suggestion. This will influence UI when rendering suggestion in
+         * different style.
+         */
+        public Builder setFlags(@Flags int flags) {
+            mFlags = flags;
             return this;
         }
 

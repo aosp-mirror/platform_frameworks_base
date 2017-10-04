@@ -131,7 +131,7 @@ public class StorageStatsSource {
         }
 
         public long getTotalBytes() {
-            return mStats.getCacheBytes() + mStats.getCodeBytes() + mStats.getDataBytes();
+            return mStats.getAppBytes() + mStats.getDataBytes();
         }
     }
 }

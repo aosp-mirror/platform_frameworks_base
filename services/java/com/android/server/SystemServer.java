@@ -668,9 +668,11 @@ public final class SystemServer {
         traceEnd();
 
         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
-        traceBeginAndSlog("StartWebViewUpdateService");
-        mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
-        traceEnd();
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
+            traceBeginAndSlog("StartWebViewUpdateService");
+            mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
+            traceEnd();
+        }
     }
 
     /**
@@ -1091,6 +1093,14 @@ public final class SystemServer {
                     traceBeginAndSlog("StartWifiRtt");
                     mSystemServiceManager.startService("com.android.server.wifi.RttService");
                     traceEnd();
+
+                    if (context.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WIFI_RTT)) {
+                        traceBeginAndSlog("StartRttService");
+                        mSystemServiceManager.startService(
+                                "com.android.server.wifi.rtt.RttService");
+                        traceEnd();
+                    }
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
@@ -1098,8 +1108,6 @@ public final class SystemServer {
                     traceBeginAndSlog("StartWifiAware");
                     mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
                     traceEnd();
-                } else {
-                    Slog.i(TAG, "No Wi-Fi Aware Service (Aware support Not Present)");
                 }
 
                 if (context.getPackageManager().hasSystemFeature(
@@ -1687,10 +1695,10 @@ public final class SystemServer {
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should
-            // be completed before allowring 3rd party
+            // be completed before allowing 3rd party
             final String WEBVIEW_PREPARATION = "WebViewFactoryPreparation";
             Future<?> webviewPrep = null;
-            if (!mOnlyCore) {
+            if (!mOnlyCore && mWebViewUpdateService != null) {
                 webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
                     Slog.i(TAG, WEBVIEW_PREPARATION);
                     TimingsTraceLog traceLog = new TimingsTraceLog(

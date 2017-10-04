@@ -3286,6 +3286,10 @@ public class NotificationManagerService extends SystemService {
             long conditionsToken = proto.start(NotificationServiceDumpProto.CONDITION_PROVIDERS);
             mConditionProviders.dump(proto, filter);
             proto.end(conditionsToken);
+
+            long rankingToken = proto.start(NotificationServiceDumpProto.RANKING_CONFIG);
+            mRankingHelper.dump(proto, filter);
+            proto.end(rankingToken);
         }
 
         proto.flush();
@@ -3440,6 +3444,12 @@ public class NotificationManagerService extends SystemService {
      * The private API only accessible to the system process.
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
+        @Override
+        public NotificationChannel getNotificationChannel(String pkg, int uid, String
+                channelId) {
+            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, false);
+        }
+
         @Override
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
@@ -3807,6 +3817,8 @@ public class NotificationManagerService extends SystemService {
             MetricsLogger.action(r.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsEvent.TYPE_CLOSE)
+                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_SNOOZE_DURATION_MS,
+                            mDuration)
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
             boolean wasPosted = removeFromNotificationListsLocked(r);
@@ -5828,10 +5840,9 @@ public class NotificationManagerService extends SystemService {
             final DumpFilter filter = new DumpFilter();
             for (int ai = 0; ai < args.length; ai++) {
                 final String a = args[ai];
-                if ("--proto".equals(args[0])) {
+                if ("--proto".equals(a)) {
                     filter.proto = true;
-                }
-                if ("--noredact".equals(a) || "--reveal".equals(a)) {
+                } else if ("--noredact".equals(a) || "--reveal".equals(a)) {
                     filter.redact = false;
                 } else if ("p".equals(a) || "pkg".equals(a) || "--package".equals(a)) {
                     if (ai < args.length-1) {
