@@ -63,7 +63,9 @@ import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
 import java.io.ByteArrayInputStream;
@@ -3142,6 +3144,7 @@ public class DevicePolicyManager {
      */
     public static final int WIPE_EUICC = 0x0004;
 
+
     /**
      * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
      * other users will remain unaffected. Calling from the primary user will cause the device to
@@ -3157,10 +3160,47 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
-        throwIfParentInstance("wipeData");
+        final String wipeReasonForUser = mContext.getString(
+                R.string.work_profile_deleted_description_dpm_wipe);
+        wipeDataInternal(flags, wipeReasonForUser);
+    }
+
+    /**
+     * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
+     * other users will remain unaffected, the provided reason for wiping data can be shown to
+     * user. Calling from the primary user will cause the device to reboot, erasing all device data
+     * - including all the secondary users and their data - while booting up. In this case, we don't
+     * show the reason to the user since the device would be factory reset.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
+     * be able to call this method; if it has not, a security exception will be thrown.
+     *
+     * @param flags Bit mask of additional options: currently supported flags are
+     *            {@link #WIPE_EXTERNAL_STORAGE} and {@link #WIPE_RESET_PROTECTION_DATA}.
+     * @param reason a string that contains the reason for wiping data, which can be
+     *                          presented to the user.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
+     * @throws IllegalArgumentException if the input reason string is null or empty.
+     */
+    public void wipeDataWithReason(int flags, @NonNull CharSequence reason) {
+        Preconditions.checkNotNull(reason, "CharSequence is null");
+        wipeDataInternal(flags, reason.toString());
+    }
+
+    /**
+     * Internal function for both {@link #wipeData(int)} and
+     * {@link #wipeDataWithReason(int, CharSequence)} to call.
+     *
+     * @see #wipeData(int)
+     * @see #wipeDataWithReason(int, CharSequence)
+     * @hide
+     */
+    private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
+        throwIfParentInstance("wipeDataWithReason");
         if (mService != null) {
             try {
-                mService.wipeData(flags);
+                mService.wipeDataWithReason(flags, wipeReasonForUser);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

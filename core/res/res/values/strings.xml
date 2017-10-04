@@ -340,18 +340,19 @@
     <!-- Work profile deleted notification--> <skip />
     <!-- Shows up in the notification's title when the system deletes the work profile. [CHAR LIMIT=NONE] -->
     <string name="work_profile_deleted">Work profile deleted</string>
-    <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
-         i.e. "Work profile deleted". This says that the profile is deleted by the system as a result of
-         the current profile owner gone missing. [CHAR LIMIT=100]-->
+    <!-- Content text for a notification. The Title of the notification is "Work profile deleted".
+        This says that the profile is deleted by the system as a result of the current profile owner gone missing. [CHAR LIMIT=100]-->
     <string name="work_profile_deleted_description">Work profile deleted due to missing admin app</string>
-    <!-- Content text for an expanded notification. The Title of the notification is "work_profile_deleted",
-         i.e. "Work profile deleted". This further explains that the profile is deleted by the system
-         as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
+    <!-- Content text for an expanded notification. The Title of the notification is "Work profile deleted".
+        This further explains that the profile is deleted by the system as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_details">The work profile admin app is either missing or corrupted.
          As a result, your work profile and related data have been deleted. Contact your admin for assistance.</string>
-    <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
+    <!-- Content text for a notification. The Title of the notification is "Work profile deleted",
         This indicates that a work profile has been deleted. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_description_dpm_wipe">Your work profile is no longer available on this device</string>
+    <!-- Content text for a notification. The Title of the notification is "Work profile deleted",
+        This indicates that a work profile has been deleted because the maximum failed password attempts as been reached. [CHAR LIMIT=NONE]-->
+    <string name="work_profile_deleted_reason_maximum_password_failure">Too many password attempts</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
