@@ -88,17 +88,14 @@ message ProcessStatsProto {
 
     // Information about how often kills occurred
     message Kill {
-      // Count of excessive wakes kills
-      int32 wakes = 1;
-
       // Count of excessive CPU kills
-      int32 cpu = 2;
+      int32 cpu = 1;
 
       // Count of kills when cached
-      int32 cached = 3;
+      int32 cached = 2;
 
       // PSS stats during cached kill
-      android.util.AggStats cached_pss = 4;
+      android.util.AggStats cached_pss = 3;
     }
     Kill kill = 3;
 
