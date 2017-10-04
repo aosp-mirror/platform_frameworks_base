@@ -68,10 +68,10 @@ public final class IpSecTransform implements AutoCloseable {
     public @interface TransformDirection {}
 
     /** @hide */
-    public static final int MODE_TUNNEL = 0;
+    public static final int MODE_TRANSPORT = 0;
 
     /** @hide */
-    public static final int MODE_TRANSPORT = 1;
+    public static final int MODE_TUNNEL = 1;
 
     /** @hide */
     public static final int ENCAP_NONE = 0;
@@ -113,7 +113,11 @@ public final class IpSecTransform implements AutoCloseable {
         return IIpSecService.Stub.asInterface(b);
     }
 
-    private void checkResultStatusAndThrow(int status)
+    /**
+     * Checks the result status and throws an appropriate exception if
+     * the status is not Status.OK.
+     */
+    private void checkResultStatus(int status)
             throws IOException, IpSecManager.ResourceUnavailableException,
                     IpSecManager.SpiUnavailableException {
         switch (status) {
@@ -141,7 +145,7 @@ public final class IpSecTransform implements AutoCloseable {
                 IpSecTransformResponse result =
                         svc.createTransportModeTransform(mConfig, new Binder());
                 int status = result.status;
-                checkResultStatusAndThrow(status);
+                checkResultStatus(status);
                 mResourceId = result.resourceId;
 
                 /* Keepalive will silently fail if not needed by the config; but, if needed and
@@ -243,61 +247,20 @@ public final class IpSecTransform implements AutoCloseable {
 
     /* Package */
     void startKeepalive(Context c) {
-        // FIXME: NO_KEEPALIVE needs to be a constant
-        if (mConfig.getNattKeepaliveInterval() == 0) {
-            return;
-        }
-
-        ConnectivityManager cm =
-                (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (mKeepalive != null) {
-            Log.wtf(TAG, "Keepalive already started for this IpSecTransform.");
-            return;
-        }
-
-        synchronized (mKeepaliveSyncLock) {
-            mKeepalive =
-                    cm.startNattKeepalive(
-                            mConfig.getNetwork(),
-                            mConfig.getNattKeepaliveInterval(),
-                            mKeepaliveCallback,
-                            mConfig.getLocalAddress(),
-                            0x1234, /* FIXME: get the real port number again,
-                                    which we need to retrieve from the provided
-                                    EncapsulationSocket, and which isn't currently
-                                    stashed in IpSecConfig */
-                            mConfig.getRemoteAddress());
-            try {
-                // FIXME: this is still a horrible way to fudge the synchronous callback
-                mKeepaliveSyncLock.wait(2000);
-            } catch (InterruptedException e) {
-            }
-        }
-        if (mKeepaliveStatus != ConnectivityManager.PacketKeepalive.SUCCESS) {
-            throw new UnsupportedOperationException("Packet Keepalive cannot be started");
+        if (mConfig.getNattKeepaliveInterval() != 0) {
+            Log.wtf(TAG, "Keepalive not yet supported.");
         }
     }
 
-    /* Package */
-    int getResourceId() {
+    /** @hide */
+    @VisibleForTesting
+    public int getResourceId() {
         return mResourceId;
     }
 
     /* Package */
     void stopKeepalive() {
-        if (mKeepalive == null) {
-            return;
-        }
-        mKeepalive.stop();
-        synchronized (mKeepaliveSyncLock) {
-            if (mKeepaliveStatus == ConnectivityManager.PacketKeepalive.SUCCESS) {
-                try {
-                    mKeepaliveSyncLock.wait(2000);
-                } catch (InterruptedException e) {
-                }
-            }
-        }
+        return;
     }
 
     /**
@@ -323,7 +286,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform.Builder setEncryption(
                 @TransformDirection int direction, IpSecAlgorithm algo) {
-            mConfig.flow[direction].encryption = algo;
+            mConfig.setEncryption(direction, algo);
             return this;
         }
 
@@ -338,7 +301,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform.Builder setAuthentication(
                 @TransformDirection int direction, IpSecAlgorithm algo) {
-            mConfig.flow[direction].authentication = algo;
+            mConfig.setAuthentication(direction, algo);
             return this;
         }
 
@@ -361,9 +324,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform.Builder setSpi(
                 @TransformDirection int direction, IpSecManager.SecurityParameterIndex spi) {
-            // TODO: convert to using the resource Id of the SPI. Then build() can validate
-            // the owner in the IpSecService
-            mConfig.flow[direction].spiResourceId = spi.getResourceId();
+            mConfig.setSpiResourceId(direction, spi.getResourceId());
             return this;
         }
 
@@ -378,7 +339,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         @SystemApi
         public IpSecTransform.Builder setUnderlyingNetwork(Network net) {
-            mConfig.network = net;
+            mConfig.setNetwork(net);
             return this;
         }
 
@@ -395,10 +356,9 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform.Builder setIpv4Encapsulation(
                 IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
-            // TODO: check encap type is valid.
-            mConfig.encapType = ENCAP_ESPINUDP;
-            mConfig.encapLocalPortResourceId = localSocket.getResourceId();
-            mConfig.encapRemotePort = remotePort;
+            mConfig.setEncapType(ENCAP_ESPINUDP);
+            mConfig.setEncapSocketResourceId(localSocket.getResourceId());
+            mConfig.setEncapRemotePort(remotePort);
             return this;
         }
 
@@ -416,7 +376,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         @SystemApi
         public IpSecTransform.Builder setNattKeepalive(int intervalSeconds) {
-            mConfig.nattKeepaliveInterval = intervalSeconds;
+            mConfig.setNattKeepaliveInterval(intervalSeconds);
             return this;
         }
 
@@ -451,8 +411,8 @@ public final class IpSecTransform implements AutoCloseable {
                         IpSecManager.SpiUnavailableException, IOException {
             //FIXME: argument validation here
             //throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
-            mConfig.mode = MODE_TRANSPORT;
-            mConfig.remoteAddress = remoteAddress;
+            mConfig.setMode(MODE_TRANSPORT);
+            mConfig.setRemoteAddress(remoteAddress.getHostAddress());
             return new IpSecTransform(mContext, mConfig).activate();
         }
 
@@ -473,9 +433,9 @@ public final class IpSecTransform implements AutoCloseable {
                 InetAddress localAddress, InetAddress remoteAddress) {
             //FIXME: argument validation here
             //throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
-            mConfig.localAddress = localAddress;
-            mConfig.remoteAddress = remoteAddress;
-            mConfig.mode = MODE_TUNNEL;
+            mConfig.setLocalAddress(localAddress.getHostAddress());
+            mConfig.setRemoteAddress(remoteAddress.getHostAddress());
+            mConfig.setMode(MODE_TUNNEL);
             return new IpSecTransform(mContext, mConfig);
         }
 
@@ -488,15 +448,6 @@ public final class IpSecTransform implements AutoCloseable {
             Preconditions.checkNotNull(context);
             mContext = context;
             mConfig = new IpSecConfig();
-        }
-
-        /**
-         * Return an {@link IpSecConfig} object for testing purposes.
-         * @hide
-         */
-        @VisibleForTesting
-        public IpSecConfig getIpSecConfig() {
-            return mConfig;
         }
     }
 }
