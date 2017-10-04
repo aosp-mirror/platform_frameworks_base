@@ -119,6 +119,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
+import com.android.internal.widget.Magnifier;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -138,6 +139,9 @@ import java.util.List;
 public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
+    // Specifies whether to use or not the magnifier when pressing the insertion or selection
+    // handles.
+    private static final boolean FLAG_USE_MAGNIFIER = false;
 
     static final int BLINK = 500;
     private static final int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
@@ -161,6 +165,17 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
+    private static final float MAGNIFIER_ZOOM = 1.5f;
+    @IntDef({MagnifierHandleTrigger.SELECTION_START,
+            MagnifierHandleTrigger.SELECTION_END,
+            MagnifierHandleTrigger.INSERTION})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface MagnifierHandleTrigger {
+        int INSERTION = 0;
+        int SELECTION_START = 1;
+        int SELECTION_END = 2;
+    }
+
     // Each Editor manages its own undo stack.
     private final UndoManager mUndoManager = new UndoManager();
     private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
@@ -178,6 +193,8 @@ public class Editor {
     private boolean mSelectionControllerEnabled;
 
     private final boolean mHapticTextHandleEnabled;
+
+    private final Magnifier mMagnifier;
 
     // Used to highlight a word when it is corrected by the IME
     private CorrectionHighlighter mCorrectionHighlighter;
@@ -325,6 +342,8 @@ public class Editor {
         mProcessTextIntentActionsHandler = new ProcessTextIntentActionsHandler(this);
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
+
+        mMagnifier = FLAG_USE_MAGNIFIER ? new Magnifier(mTextView) : null;
     }
 
     ParcelableParcel saveInstanceState() {
@@ -4353,6 +4372,9 @@ public class Editor {
 
         protected abstract void updatePosition(float x, float y, boolean fromTouchScreen);
 
+        @MagnifierHandleTrigger
+        protected abstract int getMagnifierHandleTrigger();
+
         protected boolean isAtRtlRun(@NonNull Layout layout, int offset) {
             return layout.isRtlCharAt(offset);
         }
@@ -4490,6 +4512,53 @@ public class Editor {
             return 0;
         }
 
+        protected final void showMagnifier() {
+            if (mMagnifier == null) {
+                return;
+            }
+
+            final int trigger = getMagnifierHandleTrigger();
+            final int offset;
+            switch (trigger) {
+                case MagnifierHandleTrigger.INSERTION: // Fall through.
+                case MagnifierHandleTrigger.SELECTION_START:
+                    offset = mTextView.getSelectionStart();
+                    break;
+                case MagnifierHandleTrigger.SELECTION_END:
+                    offset = mTextView.getSelectionEnd();
+                    break;
+                default:
+                    offset = -1;
+                    break;
+            }
+
+            if (offset == -1) {
+                dismissMagnifier();
+            }
+
+            final Layout layout = mTextView.getLayout();
+            final int lineNumber = layout.getLineForOffset(offset);
+            // Horizontally snap to character offset.
+            final float xPosInView = getHorizontal(mTextView.getLayout(), offset);
+            // Vertically snap to middle of current line.
+            final float yPosInView = (mTextView.getLayout().getLineTop(lineNumber)
+                    + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f;
+            final int[] coordinatesOnScreen = new int[2];
+            mTextView.getLocationOnScreen(coordinatesOnScreen);
+            final float centerXOnScreen = xPosInView + mTextView.getTotalPaddingLeft()
+                    - mTextView.getScrollX() + coordinatesOnScreen[0];
+            final float centerYOnScreen = yPosInView + mTextView.getTotalPaddingTop()
+                    - mTextView.getScrollY() + coordinatesOnScreen[1];
+
+            mMagnifier.show(centerXOnScreen, centerYOnScreen, MAGNIFIER_ZOOM);
+        }
+
+        protected final void dismissMagnifier() {
+            if (mMagnifier != null) {
+                mMagnifier.dismiss();
+            }
+        }
+
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
             updateFloatingToolbarVisibility(ev);
@@ -4542,10 +4611,7 @@ public class Editor {
 
                 case MotionEvent.ACTION_UP:
                     filterOnTouchUp(ev.isFromSource(InputDevice.SOURCE_TOUCHSCREEN));
-                    mIsDragging = false;
-                    updateDrawable();
-                    break;
-
+                    // Fall through.
                 case MotionEvent.ACTION_CANCEL:
                     mIsDragging = false;
                     updateDrawable();
@@ -4671,6 +4737,11 @@ public class Editor {
                 case MotionEvent.ACTION_DOWN:
                     mDownPositionX = ev.getRawX();
                     mDownPositionY = ev.getRawY();
+                    showMagnifier();
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    showMagnifier();
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -4696,11 +4767,10 @@ public class Editor {
                             mTextActionMode.invalidateContentRect();
                         }
                     }
-                    hideAfterDelay();
-                    break;
-
+                    // Fall through.
                 case MotionEvent.ACTION_CANCEL:
                     hideAfterDelay();
+                    dismissMagnifier();
                     break;
 
                 default:
@@ -4750,6 +4820,12 @@ public class Editor {
         public void onDetached() {
             super.onDetached();
             removeHiderCallback();
+        }
+
+        @Override
+        @MagnifierHandleTrigger
+        protected int getMagnifierHandleTrigger() {
+            return MagnifierHandleTrigger.INSERTION;
         }
     }
 
@@ -5009,12 +5085,26 @@ public class Editor {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             boolean superResult = super.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                // Reset the touch word offset and x value when the user
-                // re-engages the handle.
-                mTouchWordDelta = 0.0f;
-                mPrevX = UNSET_X_VALUE;
+
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Reset the touch word offset and x value when the user
+                    // re-engages the handle.
+                    mTouchWordDelta = 0.0f;
+                    mPrevX = UNSET_X_VALUE;
+                    showMagnifier();
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    showMagnifier();
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    dismissMagnifier();
+                    break;
             }
+
             return superResult;
         }
 
@@ -5109,6 +5199,13 @@ public class Editor {
                 final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
                 return isRtlChar == isRtlParagraph ? primaryOffset : secondaryOffset;
             }
+        }
+
+        @MagnifierHandleTrigger
+        protected int getMagnifierHandleTrigger() {
+            return isStartHandle()
+                    ? MagnifierHandleTrigger.SELECTION_START
+                    : MagnifierHandleTrigger.SELECTION_END;
         }
     }
 
