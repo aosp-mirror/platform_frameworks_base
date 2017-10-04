@@ -80,7 +80,7 @@ class WebViewLibraryLoader {
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
-                    WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
+                    WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
