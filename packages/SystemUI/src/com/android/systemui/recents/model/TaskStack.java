@@ -18,8 +18,8 @@ package com.android.systemui.recents.model;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -115,7 +115,7 @@ class FilteredTaskList {
     /**
      * Moves the given task.
      */
-    public void moveTaskToStack(Task task, int insertIndex, int newStackId) {
+    public void setTaskWindowingMode(Task task, int insertIndex, int windowingMode) {
         int taskIndex = indexOf(task);
         if (taskIndex != insertIndex) {
             mTasks.remove(taskIndex);
@@ -127,7 +127,7 @@ class FilteredTaskList {
 
         // Update the stack id now, after we've moved the task, and before we update the
         // filtered tasks
-        task.setStackId(newStackId);
+        task.setWindowingMode(windowingMode);
         updateFilteredTasks();
     }
 
@@ -590,17 +590,15 @@ public class TaskStack {
         mCb = cb;
     }
 
-    /**
-     * Moves the given task to either the front of the freeform workspace or the stack.
-     */
-    public void moveTaskToStack(Task task, int newStackId) {
+    /** Sets the windowing mode for a given task. */
+    public void setTaskWindowingMode(Task task, int windowingMode) {
         // Find the index to insert into
         ArrayList<Task> taskList = mStackTaskList.getTasks();
         int taskCount = taskList.size();
-        if (!task.isFreeformTask() && (newStackId == FREEFORM_WORKSPACE_STACK_ID)) {
+        if (!task.isFreeformTask() && (windowingMode == WINDOWING_MODE_FREEFORM)) {
             // Insert freeform tasks at the front
-            mStackTaskList.moveTaskToStack(task, taskCount, newStackId);
-        } else if (task.isFreeformTask() && (newStackId == FULLSCREEN_WORKSPACE_STACK_ID)) {
+            mStackTaskList.setTaskWindowingMode(task, taskCount, windowingMode);
+        } else if (task.isFreeformTask() && (windowingMode == WINDOWING_MODE_FULLSCREEN)) {
             // Insert after the first stacked task
             int insertIndex = 0;
             for (int i = taskCount - 1; i >= 0; i--) {
@@ -609,7 +607,7 @@ public class TaskStack {
                     break;
                 }
             }
-            mStackTaskList.moveTaskToStack(task, insertIndex, newStackId);
+            mStackTaskList.setTaskWindowingMode(task, insertIndex, windowingMode);
         }
     }
 

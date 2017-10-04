@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.model;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -155,12 +157,13 @@ public class RecentsTaskLoadPlan {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
 
             // Compose the task key
-            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
+            final int windowingMode = t.configuration.windowConfiguration.getWindowingMode();
+            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, windowingMode, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
             // This task is only shown in the stack if it satisfies the historical time or min
             // number of tasks constraints. Freeform tasks are also always shown.
-            boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
+            boolean isFreeformTask = windowingMode == WINDOWING_MODE_FREEFORM;
             boolean isStackTask;
             if (Recents.getConfiguration().isGridEnabled) {
                 // When grid layout is enabled, we only show the first

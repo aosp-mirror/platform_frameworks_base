@@ -499,6 +499,18 @@ interface IActivityManager {
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
     boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             in Rect initialBounds);
+    /**
+     * Dismisses split-screen multi-window mode.
+     * {@param toTop} If true the current primary split-screen stack will be placed or left on top.
+     */
+    void dismissSplitScreenMode(boolean toTop);
+    /**
+     * Dismisses PiP
+     * @param animate True if the dismissal should be animated.
+     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
+     *                          default animation duration should be used.
+     */
+    void dismissPip(boolean animate, int animationDuration);
     void suppressResizeConfigChanges(boolean suppress);
     void moveTasksToFullscreenStack(int fromStackId, boolean onTop);
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);

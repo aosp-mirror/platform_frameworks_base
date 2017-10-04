@@ -647,7 +647,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     @Override
-    public void onTaskStackIdChanged() {
+    public void onTaskWindowingModeChanged() {
         // Force rebind the header, the thumbnail does not change due to stack changes
         mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
         mHeaderView.onTaskDataLoaded();

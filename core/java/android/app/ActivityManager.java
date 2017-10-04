@@ -16,10 +16,10 @@
 
 package android.app;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
@@ -1535,6 +1535,12 @@ public class ActivityManager {
          */
         public int resizeMode;
 
+        /**
+         * The current configuration this task is in.
+         * @hide
+         */
+        final public Configuration configuration = new Configuration();
+
         public RecentTaskInfo() {
         }
 
@@ -1580,6 +1586,7 @@ public class ActivityManager {
             }
             dest.writeInt(supportsSplitScreenMultiWindow ? 1 : 0);
             dest.writeInt(resizeMode);
+            configuration.writeToParcel(dest, flags);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1604,6 +1611,7 @@ public class ActivityManager {
                     Rect.CREATOR.createFromParcel(source) : null;
             supportsSplitScreenMultiWindow = source.readInt() == 1;
             resizeMode = source.readInt();
+            configuration.readFromParcel(source);
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -1802,7 +1810,7 @@ public class ActivityManager {
          * The full configuration the task is currently running in.
          * @hide
          */
-        public Configuration configuration = new Configuration();
+        final public Configuration configuration = new Configuration();
 
         public RunningTaskInfo() {
         }
@@ -2577,7 +2585,7 @@ public class ActivityManager {
          * The full configuration the stack is currently running in.
          * @hide
          */
-        public Configuration configuration = new Configuration();
+        final public Configuration configuration = new Configuration();
 
         @Override
         public int describeContents() {

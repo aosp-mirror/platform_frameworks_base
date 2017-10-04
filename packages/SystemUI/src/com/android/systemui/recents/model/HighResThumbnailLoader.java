@@ -187,7 +187,7 @@ public class HighResThumbnailLoader implements TaskCallbacks {
     }
 
     @Override
-    public void onTaskStackIdChanged() {
+    public void onTaskWindowingModeChanged() {
     }
 
     private final Runnable mLoader = new Runnable() {
