@@ -1980,8 +1980,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         final String[] domainStrs = domains == null ? new String[0] : domains.split(" ");
         final int[] params = { sampleValidity, successThreshold, minSamples, maxSamples };
+        final boolean useTls = false;
+        final String tlsHostname = "";
+        final String[] tlsFingerprints = new String[0];
         try {
-            mNetdService.setResolverConfiguration(netId, servers, domainStrs, params);
+            mNetdService.setResolverConfiguration(netId, servers, domainStrs, params,
+                    useTls, tlsHostname, tlsFingerprints);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
