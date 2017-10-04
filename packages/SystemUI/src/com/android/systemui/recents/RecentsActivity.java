@@ -358,6 +358,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+        if (Recents.getConfiguration().isLowRamDevice) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
 
         mLastConfig = new Configuration(Utilities.getAppConfiguration(this));
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
