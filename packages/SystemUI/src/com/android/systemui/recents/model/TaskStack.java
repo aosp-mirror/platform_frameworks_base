@@ -960,12 +960,6 @@ public class TaskStack {
             ArrayMap<Task.TaskKey, Task> taskMap = new ArrayMap<>();
             // Sort all tasks by increasing firstActiveTime of the task
             ArrayList<Task> tasks = mStackTaskList.getTasks();
-            Collections.sort(tasks, new Comparator<Task>() {
-                @Override
-                public int compare(Task task, Task task2) {
-                    return Long.compare(task.key.firstActiveTime, task2.key.firstActiveTime);
-                }
-            });
             // Create groups when sequential packages are the same
             NamedCounter counter = new NamedCounter("task-group", "");
             int taskCount = tasks.size();
@@ -1006,12 +1000,6 @@ public class TaskStack {
             int groupCount = mGroups.size();
             for (int i = 0; i < groupCount; i++) {
                 TaskGrouping group = mGroups.get(i);
-                Collections.sort(group.mTaskKeys, new Comparator<Task.TaskKey>() {
-                    @Override
-                    public int compare(Task.TaskKey taskKey, Task.TaskKey taskKey2) {
-                        return Long.compare(taskKey.firstActiveTime, taskKey2.firstActiveTime);
-                    }
-                });
                 ArrayList<Task.TaskKey> groupTasks = group.mTaskKeys;
                 int groupTaskCount = groupTasks.size();
                 for (int j = 0; j < groupTaskCount; j++) {

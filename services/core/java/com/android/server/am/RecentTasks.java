@@ -632,8 +632,23 @@ class RecentTasks {
 
         final ArrayList<ActivityManager.RecentTaskInfo> res = new ArrayList<>();
         final int size = mTasks.size();
+        int numVisibleTasks = 0;
         for (int i = 0; i < size; i++) {
             final TaskRecord tr = mTasks.get(i);
+
+            if (isVisibleRecentTask(tr)) {
+                numVisibleTasks++;
+                if (isInVisibleRange(tr, numVisibleTasks)) {
+                    // Fall through
+                } else {
+                    // Not in visible range
+                    continue;
+                }
+            } else {
+                // Not visible
+                continue;
+            }
+
             // Skip remaining tasks once we reach the requested size
             if (res.size() >= maxNum) {
                 continue;
@@ -1397,7 +1412,6 @@ class RecentTasks {
         rti.stackId = tr.getStackId();
         rti.userId = tr.userId;
         rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
-        rti.firstActiveTime = tr.firstActiveTime;
         rti.lastActiveTime = tr.lastActiveTime;
         rti.affiliatedTaskId = tr.mAffiliatedTaskId;
         rti.affiliatedTaskColor = tr.mAffiliatedTaskColor;

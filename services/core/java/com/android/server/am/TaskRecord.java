@@ -100,6 +100,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -153,8 +154,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private static final String ATTR_EFFECTIVE_UID = "effective_uid";
     @Deprecated
     private static final String ATTR_TASKTYPE = "task_type";
-    private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
-    private static final String ATTR_LASTACTIVETIME = "last_active_time";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
@@ -210,9 +209,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     ComponentName realActivity; // The actual activity component that started the task.
     boolean realActivitySuspended; // True if the actual activity component that started the
                                    // task is suspended.
-    long firstActiveTime;   // First time this task was active.
-    long lastActiveTime;    // Last time this task was active, including sleep.
     boolean inRecents;      // Actually in the recents list?
+    long lastActiveTime;    // Last time this task was active in the current device session,
+                            // including sleep. This time is initialized to the elapsed time when
+                            // restored from disk.
     boolean isAvailable;    // Is the activity available to be launched?
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
@@ -337,6 +337,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         taskId = _taskId;
+        lastActiveTime = SystemClock.elapsedRealtime();
         mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
@@ -357,6 +358,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         taskId = _taskId;
+        lastActiveTime = SystemClock.elapsedRealtime();
         mAffiliatedTaskId = _taskId;
         voiceSession = null;
         voiceInteractor = null;
@@ -383,12 +385,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
             int _effectiveUid, String _lastDescription, ArrayList<ActivityRecord> activities,
-            long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
-            boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
-            int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, int resizeMode, boolean supportsPictureInPicture,
-            boolean privileged, boolean _realActivitySuspended, boolean userSetupComplete,
-            int minWidth, int minHeight) {
+            long lastTimeMoved, boolean neverRelinquishIdentity,
+            TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
+            int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
+            int resizeMode, boolean supportsPictureInPicture, boolean privileged,
+            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth,
+            int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -410,8 +412,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         userId = _userId;
         mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
-        firstActiveTime = _firstActiveTime;
-        lastActiveTime = _lastActiveTime;
+        lastActiveTime = SystemClock.elapsedRealtime();
         lastDescription = _lastDescription;
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
@@ -789,14 +790,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void touchActiveTime() {
-        lastActiveTime = System.currentTimeMillis();
-        if (firstActiveTime == 0) {
-            firstActiveTime = lastActiveTime;
-        }
+        lastActiveTime = SystemClock.elapsedRealtime();
     }
 
     long getInactiveDuration() {
-        return System.currentTimeMillis() - lastActiveTime;
+        return SystemClock.elapsedRealtime() - lastActiveTime;
     }
 
     /** Sets the original intent, and the calling uid and package. */
@@ -1656,8 +1654,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
         out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
-        out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
-        out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
         out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
         if (lastDescription != null) {
@@ -1730,8 +1726,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         boolean userSetupComplete = true;
         int effectiveUid = -1;
         String lastDescription = null;
-        long firstActiveTime = -1;
-        long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
         int taskId = INVALID_TASK_ID;
@@ -1783,10 +1777,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 effectiveUid = Integer.parseInt(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.parseInt(attrValue);
-            } else if (ATTR_FIRSTACTIVETIME.equals(attrName)) {
-                firstActiveTime = Long.parseLong(attrValue);
-            } else if (ATTR_LASTACTIVETIME.equals(attrName)) {
-                lastActiveTime = Long.parseLong(attrValue);
             } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
                 lastDescription = attrValue;
             } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
@@ -1897,9 +1887,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
-                activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeMode, supportsPictureInPicture, privileged,
+                activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
+                taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
+                callingPackage, resizeMode, supportsPictureInPicture, privileged,
                 realActivitySuspended, userSetupComplete, minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
@@ -2229,7 +2219,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
                 pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
                 pw.print(" isResizeable=" + isResizeable());
-                pw.print(" firstActiveTime=" + firstActiveTime);
                 pw.print(" lastActiveTime=" + lastActiveTime);
                 pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }

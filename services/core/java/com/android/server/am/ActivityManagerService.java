@@ -9928,8 +9928,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (!mRecentTasks.addToBottom(task)) {
                     return INVALID_TASK_ID;
                 }
-
-                r.getStack().addTask(task, false, "addAppTask");
+                r.getStack().addTask(task, !ON_TOP, "addAppTask");
 
                 // TODO: Send the thumbnail to WM to store it.
 

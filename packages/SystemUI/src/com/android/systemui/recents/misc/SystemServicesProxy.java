@@ -68,7 +68,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.ArraySet;
@@ -391,7 +390,7 @@ public class SystemServicesProxy {
      *                                     visible.
      */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean includeFrontMostExcludedTask, ArraySet<Integer> quietProfileIds) {
+            boolean includeFrontMostExcludedTask) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
@@ -412,7 +411,7 @@ public class SystemServicesProxy {
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
-                rti.firstActiveTime = rti.lastActiveTime = i;
+                rti.lastActiveTime = i;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
                             Bitmap.createBitmap(mDummyIcon), null,
@@ -469,7 +468,6 @@ public class SystemServicesProxy {
             // are requested to include it
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-            isExcluded |= quietProfileIds.contains(t.userId);
             if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
                 iter.remove();
             }
@@ -1289,14 +1287,6 @@ public class SystemServicesProxy {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-        });
-    }
-
-    public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
-            int currentUserId) {
-        mUiOffloadThread.submit(() -> {
-            Settings.Secure.putLongForUser(mContext.getContentResolver(),
-                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
         });
     }
 

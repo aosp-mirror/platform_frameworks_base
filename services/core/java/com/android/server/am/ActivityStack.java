@@ -4894,7 +4894,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (focusedStack && topTask) {
                 // Give the latest time to ensure foreground task can be sorted
                 // at the first, because lastActiveTime of creating task is 0.
-                ci.lastActiveTime = System.currentTimeMillis();
+                ci.lastActiveTime = SystemClock.elapsedRealtime();
                 topTask = false;
             }
 

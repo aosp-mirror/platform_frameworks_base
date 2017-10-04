@@ -69,13 +69,11 @@ public class Task {
 
         private int mHashCode;
 
-        public TaskKey(int id, int windowingMode, Intent intent, int userId, long firstActiveTime,
-                long lastActiveTime) {
+        public TaskKey(int id, int windowingMode, Intent intent, int userId, long lastActiveTime) {
             this.id = id;
             this.windowingMode = windowingMode;
             this.baseIntent = intent;
             this.userId = userId;
-            this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
             updateHashCode();
         }

@@ -16,13 +16,6 @@
 
 package android.app;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1439,7 +1432,6 @@ public class ActivityManager {
             }
             dest.writeInt(stackId);
             dest.writeInt(userId);
-            dest.writeLong(firstActiveTime);
             dest.writeLong(lastActiveTime);
             dest.writeInt(affiliatedTaskId);
             dest.writeInt(affiliatedTaskColor);
@@ -1468,7 +1460,6 @@ public class ActivityManager {
                     TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
-            firstActiveTime = source.readLong();
             lastActiveTime = source.readLong();
             affiliatedTaskId = source.readInt();
             affiliatedTaskColor = source.readInt();

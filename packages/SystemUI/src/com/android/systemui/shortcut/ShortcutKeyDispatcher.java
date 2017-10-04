@@ -106,7 +106,7 @@ public class ShortcutKeyDispatcher extends SystemUI
                         : ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 List<ActivityManager.RecentTaskInfo> taskList =
                         SystemServicesProxy.getInstance(mContext).getRecentTasks(1,
-                                UserHandle.USER_CURRENT, false, new ArraySet<>());
+                                UserHandle.USER_CURRENT, false);
                 recents.showRecentApps(
                         false /* triggeredFromAltTab */,
                         false /* fromHome */);
