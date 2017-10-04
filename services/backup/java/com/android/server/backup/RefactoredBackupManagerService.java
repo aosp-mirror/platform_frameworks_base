@@ -653,7 +653,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Persistently track the need to do a full init
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    private ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
+    private final ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
 
     // Round-robin queue for scheduling full backup passes
     private static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
