@@ -12925,6 +12925,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
                         + bugreportType);
         }
+        // Always log caller, even if it does not have permission to dump.
+        String type = extraOptions == null ? "bugreport" : extraOptions;
+        Slog.i(TAG, type + " requested by UID " + Binder.getCallingUid());
+
         enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
         if (extraOptions != null) {
             SystemProperties.set("dumpstate.options", extraOptions);
