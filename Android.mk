@@ -642,32 +642,6 @@ $(framework_module): | $(dir $(framework_module))framework-res.apk
 
 framework_built := $(call java-lib-deps,framework)
 
-# HwBinder
-# =======================================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := \
-        core/java/android/os/HidlSupport.java \
-        core/java/android/annotation/NonNull.java \
-        core/java/android/os/HwBinder.java \
-        core/java/android/os/HwBlob.java \
-        core/java/android/os/HwParcel.java \
-        core/java/android/os/IHwBinder.java \
-        core/java/android/os/IHwInterface.java \
-        core/java/android/os/DeadObjectException.java \
-        core/java/android/os/DeadSystemException.java \
-        core/java/android/os/RemoteException.java \
-        core/java/android/util/AndroidException.java \
-
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := hwbinder
-
-LOCAL_DX_FLAGS := --core-library
-LOCAL_UNINSTALLABLE_MODULE := true
-include $(BUILD_JAVA_LIBRARY)
-
 # Copy AIDL files to be preprocessed and included in the SDK,
 # specified relative to the root of the build tree.
 # ============================================================

@@ -61,3 +61,25 @@ subdirs = [
 optional_subdirs = [
     "core/tests/utiltests/jni",
 ]
+
+java_library {
+    name: "hwbinder",
+    no_framework_libs: true,
+
+    srcs: [
+        "core/java/android/os/HidlSupport.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/os/HwBinder.java",
+        "core/java/android/os/HwBlob.java",
+        "core/java/android/os/HwParcel.java",
+        "core/java/android/os/IHwBinder.java",
+        "core/java/android/os/IHwInterface.java",
+        "core/java/android/os/DeadObjectException.java",
+        "core/java/android/os/DeadSystemException.java",
+        "core/java/android/os/RemoteException.java",
+        "core/java/android/util/AndroidException.java",
+    ],
+
+    dxflags: ["--core-library"],
+    installable: false,
+}
