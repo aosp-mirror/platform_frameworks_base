@@ -492,10 +492,15 @@ public final class WebViewFactory {
     /** @hide */
     public static IWebViewUpdateService getUpdateService() {
         if (isWebViewSupported()) {
-            return IWebViewUpdateService.Stub.asInterface(
-                    ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
+            return getUpdateServiceUnchecked();
         } else {
             return null;
         }
+    }
+
+    /** @hide */
+    static IWebViewUpdateService getUpdateServiceUnchecked() {
+        return IWebViewUpdateService.Stub.asInterface(
+                ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
     }
 }
