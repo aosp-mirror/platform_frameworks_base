@@ -674,16 +674,20 @@ public class ActivityManager {
          * @hide */
         private  static final int FIRST_STATIC_STACK_ID = 0;
 
-        /** ID of stack where fullscreen activities are normally launched into. */
+        /** ID of stack where fullscreen activities are normally launched into.
+         * @hide */
         public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
 
-        /** ID of stack where freeform/resized activities are normally launched into. */
+        /** ID of stack where freeform/resized activities are normally launched into.
+         * @hide */
         public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
 
-        /** ID of stack that occupies a dedicated region of the screen. */
+        /** ID of stack that occupies a dedicated region of the screen.
+         * @hide */
         public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
 
-        /** ID of stack that always on top (always visible) when it exist. */
+        /** ID of stack that always on top (always visible) when it exist.
+         * @hide */
         public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
 
         /** Last static stack stack ID.
@@ -2025,12 +2029,49 @@ public class ActivityManager {
     }
 
     /**
+     * Sets the windowing mode for a specific task. Only works on tasks of type
+     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}
+     * @param taskId The id of the task to set the windowing mode for.
+     * @param windowingMode The windowing mode to set for the task.
+     * @param toTop If the task should be moved to the top once the windowing mode changes.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop)
+            throws SecurityException {
+        try {
+            getService().setTaskWindowingMode(taskId, windowingMode, toTop);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resizes the input stack id to the given bounds.
+     * @param stackId Id of the stack to resize.
+     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void resizeStack(int stackId, Rect bounds) throws SecurityException {
+        try {
+            getService().resizeStack(stackId, bounds, false /* allowResizeInDockedMode */,
+                    false /* preserveWindows */, false /* animate */, -1 /* animationDuration */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Removes stacks in the windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      *
      * @hide
      */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void removeStacksInWindowingModes(int[] windowingModes) throws SecurityException {
         try {
             getService().removeStacksInWindowingModes(windowingModes);
@@ -2045,6 +2086,7 @@ public class ActivityManager {
      * @hide
      */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void removeStacksWithActivityTypes(int[] activityTypes) throws SecurityException {
         try {
             getService().removeStacksWithActivityTypes(activityTypes);

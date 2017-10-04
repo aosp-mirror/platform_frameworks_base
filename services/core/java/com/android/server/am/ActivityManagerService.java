@@ -38,6 +38,7 @@ import static android.app.ActivityManager.StackId.isStaticStack;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
@@ -3239,7 +3240,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (r.requestedVrComponent != null && r.getStackId() >= FIRST_DYNAMIC_STACK_ID) {
             Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
                     + " to main stack for VR");
-            moveTaskToStack(r.getTask().taskId, FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */);
+            setTaskWindowingMode(r.getTask().taskId,
+                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
         }
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
@@ -10601,6 +10603,42 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // TODO: Should just change windowing mode vs. re-parenting...
                 r.getTask().reparent(fullscreenStack, ON_TOP,
                         REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "exitFreeformMode");
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
+        synchronized (this) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
+                    return;
+                }
+
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "setTaskWindowingMode: moving task=" + taskId
+                        + " to windowingMode=" + windowingMode + " toTop=" + toTop);
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                    mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
+                            null /* initialBounds */);
+                }
+
+                if (!task.isActivityTypeStandardOrUndefined()) {
+                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move task "
+                            + taskId + " to non-standard windowin mode=" + windowingMode);
+                }
+                final ActivityDisplay display = task.getStack().getDisplay();
+                final ActivityStack stack = display.getOrCreateStack(windowingMode,
+                        task.getStack().getActivityType(), toTop);
+                // TODO: We should just change the windowing mode for the task vs. creating and
+                // moving it to a stack.
+                task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
+                        "moveTaskToStack");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

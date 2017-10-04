@@ -5089,7 +5089,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (isAttached()) {
                 getDisplay().positionChildAtBottom(this);
             }
-            if (!isHomeOrRecentsStack()) {
+            if (!isActivityTypeHome()) {
                 remove();
             }
         }
