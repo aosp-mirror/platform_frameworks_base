@@ -141,7 +141,7 @@ public class Editor {
     private static final boolean DEBUG_UNDO = false;
     // Specifies whether to use or not the magnifier when pressing the insertion or selection
     // handles.
-    private static final boolean FLAG_USE_MAGNIFIER = false;
+    private static final boolean FLAG_USE_MAGNIFIER = true;
 
     static final int BLINK = 500;
     private static final int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
