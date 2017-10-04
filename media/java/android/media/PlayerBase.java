@@ -127,8 +127,9 @@ public abstract class PlayerBase {
             Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
         }
         synchronized (mLock) {
+            boolean attributesChanged = (mAttributes != attr);
             mAttributes = attr;
-            updateAppOpsPlayAudio_sync();
+            updateAppOpsPlayAudio_sync(attributesChanged);
         }
     }
 
@@ -200,16 +201,13 @@ public abstract class PlayerBase {
     }
 
     void baseSetVolume(float leftVolume, float rightVolume) {
-        final boolean hasAppOpsPlayAudio;
+        final boolean isRestricted;
         synchronized (mLock) {
             mLeftVolume = leftVolume;
             mRightVolume = rightVolume;
-            hasAppOpsPlayAudio = mHasAppOpsPlayAudio;
-            if (isRestricted_sync()) {
-                return;
-            }
+            isRestricted = isRestricted_sync();
         }
-        playerSetVolume(!hasAppOpsPlayAudio/*muting*/,
+        playerSetVolume(isRestricted/*muting*/,
                 leftVolume * mPanMultiplierL, rightVolume * mPanMultiplierR);
     }
 
@@ -250,7 +248,7 @@ public abstract class PlayerBase {
 
     private void updateAppOpsPlayAudio() {
         synchronized (mLock) {
-            updateAppOpsPlayAudio_sync();
+            updateAppOpsPlayAudio_sync(false);
         }
     }
 
@@ -258,7 +256,7 @@ public abstract class PlayerBase {
      * To be called whenever a condition that might affect audibility of this player is updated.
      * Must be called synchronized on mLock.
      */
-    void updateAppOpsPlayAudio_sync() {
+    void updateAppOpsPlayAudio_sync(boolean attributesChanged) {
         boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
         try {
             int mode = AppOpsManager.MODE_IGNORED;
@@ -275,9 +273,10 @@ public abstract class PlayerBase {
         // AppsOps alters a player's volume; when the restriction changes, reflect it on the actual
         // volume used by the player
         try {
-            if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio) {
+            if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio ||
+                    attributesChanged) {
                 getService().playerHasOpPlayAudio(mPlayerIId, mHasAppOpsPlayAudio);
-                if (mHasAppOpsPlayAudio) {
+                if (!isRestricted_sync()) {
                     if (DEBUG_APP_OPS) {
                         Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
                                 + "/" + mRightVolume);
