@@ -354,18 +354,13 @@ public class PackageDexOptimizer {
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
                 + " target-filter=" + compilerFilter);
 
-        String classLoaderContext;
-        if (dexUseInfo.isUnknownClassLoaderContext() ||
-                dexUseInfo.isUnsupportedClassLoaderContext() ||
-                dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), unsupported (custom class loaders), or a
-            // variable class loader chain, compile without a context and mark the oat file with
-            // SKIP_SHARED_LIBRARY_CHECK. Note that his might lead to a incorrect compilation.
-            // TODO(calin): We should just extract in this case.
-            classLoaderContext = SKIP_SHARED_LIBRARY_CHECK;
-        } else {
-            classLoaderContext = dexUseInfo.getClassLoaderContext();
-        }
+        // TODO(calin): b/64530081 b/66984396. Use SKIP_SHARED_LIBRARY_CHECK for the context
+        // (instead of dexUseInfo.getClassLoaderContext()) in order to compile secondary dex files
+        // in isolation (and avoid to extract/verify the main apk if it's in the class path).
+        // Note this trades correctness for performance since the resulting slow down is
+        // unacceptable in some cases until b/64530081 is fixed.
+        String classLoaderContext = SKIP_SHARED_LIBRARY_CHECK;
+
         try {
             for (String isa : dexUseInfo.getLoaderIsas()) {
                 // Reuse the same dexopt path as for the primary apks. We don't need all the
