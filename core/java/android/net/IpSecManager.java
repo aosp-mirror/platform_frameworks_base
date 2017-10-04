@@ -26,6 +26,8 @@ import android.os.RemoteException;
 import android.util.AndroidException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
@@ -188,7 +190,8 @@ public final class IpSecManager {
         }
 
         /** @hide */
-        int getResourceId() {
+        @VisibleForTesting
+        public int getResourceId() {
             return mResourceId;
         }
     }
@@ -489,7 +492,8 @@ public final class IpSecManager {
         }
 
         /** @hide */
-        int getResourceId() {
+        @VisibleForTesting
+        public int getResourceId() {
             return mResourceId;
         }
     };
