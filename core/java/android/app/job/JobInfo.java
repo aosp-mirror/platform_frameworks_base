@@ -317,7 +317,8 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Whether this job needs the device to be plugged in.
+     * Whether this job requires that the device be charging (or be a non-battery-powered
+     * device connected to permanent power, such as Android TV devices).
      */
     public boolean isRequireCharging() {
         return (constraintFlags & CONSTRAINT_FLAG_CHARGING) != 0;
@@ -331,7 +332,10 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Whether this job needs the device to be in an Idle maintenance window.
+     * Whether this job requires that the user <em>not</em> be interacting with the device.
+     *
+     * <p class="note">This is <em>not</em> the same as "doze" or "device idle";
+     * it is purely about the user's direct interactions.</p>
      */
     public boolean isRequireDeviceIdle() {
         return (constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
@@ -918,9 +922,19 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that to run this job, the device needs to be plugged in. This defaults to
-         * false.
-         * @param requiresCharging Whether or not the device is plugged in.
+         * Specify that to run this job, the device must be charging (or be a
+         * non-battery-powered device connected to permanent power, such as Android TV
+         * devices). This defaults to {@code false}.
+         *
+         * <p class="note">For purposes of running jobs, a battery-powered device
+         * "charging" is not quite the same as simply being connected to power.  If the
+         * device is so busy that the battery is draining despite a power connection, jobs
+         * with this constraint will <em>not</em> run.  This can happen during some
+         * common use cases such as video chat, particularly if the device is plugged in
+         * to USB rather than to wall power.
+         *
+         * @param requiresCharging Pass {@code true} to require that the device be
+         *     charging in order to run the job.
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_CHARGING)
@@ -942,14 +956,22 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that to run, the job needs the device to be in idle mode. This defaults to
-         * false.
-         * <p>Idle mode is a loose definition provided by the system, which means that the device
-         * is not in use, and has not been in use for some time. As such, it is a good time to
-         * perform resource heavy jobs. Bear in mind that battery usage will still be attributed
-         * to your application, and surfaced to the user in battery stats.</p>
-         * @param requiresDeviceIdle Whether or not the device need be within an idle maintenance
-         *                           window.
+         * When set {@code true}, ensure that this job will not run if the device is in active use.
+         * The default state is {@code false}: that is, the for the job to be runnable even when
+         * someone is interacting with the device.
+         *
+         * <p>This state is a loose definition provided by the system. In general, it means that
+         * the device is not currently being used interactively, and has not been in use for some
+         * time. As such, it is a good time to perform resource heavy jobs. Bear in mind that
+         * battery usage will still be attributed to your application, and surfaced to the user in
+         * battery stats.</p>
+         *
+         * <p class="note">Despite the similar naming, this job constraint is <em>not</em>
+         * related to the system's "device idle" or "doze" states.  This constraint only
+         * determines whether a job is allowed to run while the device is directly in use.
+         *
+         * @param requiresDeviceIdle Pass {@code true} to prevent the job from running
+         *     while the device is being used interactively.
          */
         public Builder setRequiresDeviceIdle(boolean requiresDeviceIdle) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_DEVICE_IDLE)
