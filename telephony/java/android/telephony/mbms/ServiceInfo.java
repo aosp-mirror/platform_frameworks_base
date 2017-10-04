@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,12 +62,6 @@ public class ServiceInfo {
         }
         if (newLocales.size() > MAP_LIMIT) {
             throw new RuntimeException("bad locales length " + newLocales.size());
-        }
-
-        for (Locale l : newLocales) {
-            if (!newNames.containsKey(l)) {
-                throw new IllegalArgumentException("A name must be provided for each locale");
-            }
         }
 
         names = new HashMap(newNames.size());
@@ -128,7 +123,7 @@ public class ServiceInfo {
      * Get the user-displayable name for this cell-broadcast service corresponding to the
      * provided {@link Locale}.
      * @param locale The {@link Locale} in which you want the name of the service. This must be a
-     *               value from the list returned by {@link #getLocales()} -- an
+     *               value from the set returned by {@link #getNamedContentLocales()} -- an
      *               {@link java.util.NoSuchElementException} may be thrown otherwise.
      * @return The {@link CharSequence} providing the name of the service in the given
      *         {@link Locale}
@@ -138,6 +133,17 @@ public class ServiceInfo {
             throw new NoSuchElementException("Locale not supported");
         }
         return names.get(locale);
+    }
+
+    /**
+     * Return an unmodifiable set of the current {@link Locale}s that have a user-displayable name
+     * associated with them. The user-displayable name associated with any {@link Locale} in this
+     * set can be retrieved with {@link #getNameForLocale(Locale)}.
+     * @return An unmodifiable set of {@link Locale} objects corresponding to a user-displayable
+     * content name in that locale.
+     */
+    public @NonNull Set<Locale> getNamedContentLocales() {
+        return Collections.unmodifiableSet(names.keySet());
     }
 
     /**
