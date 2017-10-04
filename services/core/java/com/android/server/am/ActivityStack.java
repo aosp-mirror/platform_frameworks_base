@@ -193,10 +193,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // finished destroying itself.
     private static final int DESTROY_TIMEOUT = 10 * 1000;
 
-    // How long until we reset a task when the user returns to it.  Currently
-    // disabled.
-    private static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
-
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
     private static final boolean SHOW_APP_STARTING_PREVIEW = true;
@@ -3189,15 +3185,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
             ActivityRecord newActivity) {
-        boolean forceReset =
+        final boolean forceReset =
                 (newActivity.info.flags & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
-        if (ACTIVITY_INACTIVE_RESET_TIME > 0
-                && taskTop.getTask().getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
-            if ((newActivity.info.flags & ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) == 0) {
-                forceReset = true;
-            }
-        }
-
         final TaskRecord task = taskTop.getTask();
 
         /** False until we evaluate the TaskRecord associated with taskTop. Switches to true

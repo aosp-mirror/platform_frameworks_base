@@ -1502,31 +1502,6 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-     * Provides a list that contains recent tasks for all
-     * profiles of a user.
-     * @hide
-     */
-    public static final int RECENT_INCLUDE_PROFILES = 0x0004;
-
-    /**
-     * Ignores all tasks that are on the home stack.
-     * @hide
-     */
-    public static final int RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS = 0x0008;
-
-    /**
-     * Ignores the top task in the docked stack.
-     * @hide
-     */
-    public static final int RECENT_INGORE_DOCKED_STACK_TOP_TASK = 0x0010;
-
-    /**
-     * Ignores all tasks that are on the pinned stack.
-     * @hide
-     */
-    public static final int RECENT_INGORE_PINNED_STACK_TASKS = 0x0020;
-
-    /**
      * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
@@ -1561,33 +1536,7 @@ public class ActivityManager {
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
-            return getService().getRecentTasks(maxNum,
-                    flags, UserHandle.myUserId()).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Same as {@link #getRecentTasks(int, int)} but returns the recent tasks for a
-     * specific user. It requires holding
-     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
-     * @param maxNum The maximum number of entries to return in the list.  The
-     * actual number returned may be smaller, depending on how many tasks the
-     * user has started and the maximum number the system can remember.
-     * @param flags Information about what to return.  May be any combination
-     * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
-     *
-     * @return Returns a list of RecentTaskInfo records describing each of
-     * the recent tasks. Most recently activated tasks go first.
-     *
-     * @hide
-     */
-    public List<RecentTaskInfo> getRecentTasksForUser(int maxNum, int flags, int userId)
-            throws SecurityException {
-        try {
-            return getService().getRecentTasks(maxNum,
-                    flags, userId).getList();
+            return getService().getRecentTasks(maxNum, flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

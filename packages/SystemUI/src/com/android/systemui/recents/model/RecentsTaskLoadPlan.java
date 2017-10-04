@@ -84,11 +84,10 @@ public class RecentsTaskLoadPlan {
      *
      * Note: Do not lock, callers should synchronize on the loader before making this call.
      */
-    void preloadRawTasks(boolean includeFrontMostExcludedTask) {
+    void preloadRawTasks() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         int currentUserId = ssp.getCurrentUser();
-        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                currentUserId, includeFrontMostExcludedTask);
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(), currentUserId);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -106,12 +105,11 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
      */
-    void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
-            boolean includeFrontMostExcludedTask) {
+    void preloadPlan(RecentsTaskLoader loader, int runningTaskId) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks(includeFrontMostExcludedTask);
+            preloadRawTasks();
         }
 
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();

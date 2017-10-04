@@ -178,8 +178,8 @@ interface IActivityManager {
      * SIGUSR1 is delivered. All others are ignored.
      */
     void signalPersistentProcesses(int signal);
-    ParceledListSlice getRecentTasks(int maxNum,
-            int flags, int userId);
+
+    ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
     oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
     oneway void activityDestroyed(in IBinder token);
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,

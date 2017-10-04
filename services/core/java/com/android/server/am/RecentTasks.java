@@ -17,11 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.FLAG_AND_UNLOCKED;
-import static android.app.ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
-import static android.app.ActivityManager.RECENT_INCLUDE_PROFILES;
-import static android.app.ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK;
-import static android.app.ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -612,7 +608,6 @@ class RecentTasks {
      */
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
-        final boolean includeProfiles = (flags & RECENT_INCLUDE_PROFILES) != 0;
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
 
         if (!mService.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
@@ -621,13 +616,7 @@ class RecentTasks {
         }
         loadUserRecentsLocked(userId);
 
-
-        final Set<Integer> includedUsers;
-        if (includeProfiles) {
-            includedUsers = mUserController.getProfileIds(userId);
-        } else {
-            includedUsers = new HashSet<>();
-        }
+        final Set<Integer> includedUsers = mUserController.getProfileIds(userId);
         includedUsers.add(Integer.valueOf(userId));
 
         final ArrayList<ActivityManager.RecentTaskInfo> res = new ArrayList<>();
@@ -681,29 +670,6 @@ class RecentTasks {
                     // allow them to see a small subset of tasks -- their own and home.
                     if (!tr.isActivityTypeHome() && tr.effectiveUid != callingUid) {
                         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, not allowed: " + tr);
-                        continue;
-                    }
-                }
-                final ActivityStack stack = tr.getStack();
-                if ((flags & RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS) != 0) {
-                    if (stack != null && stack.isHomeOrRecentsStack()) {
-                        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                                "Skipping, home or recents stack task: " + tr);
-                        continue;
-                    }
-                }
-                if ((flags & RECENT_INGORE_DOCKED_STACK_TOP_TASK) != 0) {
-                    if (stack != null && stack.inSplitScreenPrimaryWindowingMode()
-                            && stack.topTask() == tr) {
-                        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                                "Skipping, top task in docked stack: " + tr);
-                        continue;
-                    }
-                }
-                if ((flags & RECENT_INGORE_PINNED_STACK_TASKS) != 0) {
-                    if (stack != null && stack.inPinnedWindowingMode()) {
-                        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                                "Skipping, pinned stack task: " + tr);
                         continue;
                     }
                 }

@@ -5881,8 +5881,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 List<ActivityManager.RecentTaskInfo> recentTask = null;
                 try {
                     recentTask = ActivityManager.getService().getRecentTasks(1,
-                            ActivityManager.RECENT_WITH_EXCLUDED
-                            | ActivityManager.RECENT_INCLUDE_PROFILES,
+                            ActivityManager.RECENT_WITH_EXCLUDED,
                             mCurrentUserId).getList();
                 } catch (RemoteException e) {
                     // Abandon hope activity manager not running.
