@@ -2098,7 +2098,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String[] VALID_SETTINGS = new String[] {
             LockPatternUtils.LOCKOUT_PERMANENT_KEY,
-            LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE,
             LockPatternUtils.PATTERN_EVER_CHOSEN_KEY,
             LockPatternUtils.PASSWORD_TYPE_KEY,
             LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
