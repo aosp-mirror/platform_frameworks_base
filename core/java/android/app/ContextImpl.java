@@ -74,6 +74,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.autofill.AutofillManager.AutofillClient;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -184,6 +185,8 @@ class ContextImpl extends Context {
 
     // The name of the split this Context is representing. May be null.
     private @Nullable String mSplitName = null;
+
+    private AutofillClient mAutofillClient = null;
 
     private final Object mSync = new Object();
 
@@ -2223,6 +2226,18 @@ class ContextImpl extends Context {
     @Override
     public int getUserId() {
         return mUser.getIdentifier();
+    }
+
+    /** @hide */
+    @Override
+    public AutofillClient getAutofillClient() {
+        return mAutofillClient;
+    }
+
+    /** @hide */
+    @Override
+    public void setAutofillClient(AutofillClient client) {
+        mAutofillClient = client;
     }
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
