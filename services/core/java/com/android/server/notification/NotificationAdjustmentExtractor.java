@@ -35,7 +35,6 @@ public class NotificationAdjustmentExtractor implements NotificationSignalExtrac
             if (DBG) Slog.d(TAG, "skipping empty notification");
             return null;
         }
-
         record.applyAdjustments();
 
         return null;

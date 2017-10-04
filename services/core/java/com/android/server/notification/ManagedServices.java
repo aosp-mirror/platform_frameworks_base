@@ -546,6 +546,17 @@ abstract public class ManagedServices {
         return null;
     }
 
+    protected boolean isServiceTokenValidLocked(IInterface service) {
+        if (service == null) {
+            return false;
+        }
+        ManagedServiceInfo info = getServiceFromTokenLocked(service);
+        if (info != null) {
+            return true;
+        }
+        return false;
+    }
+
     protected ManagedServiceInfo checkServiceTokenLocked(IInterface service) {
         checkNotNull(service);
         ManagedServiceInfo info = getServiceFromTokenLocked(service);
@@ -829,7 +840,12 @@ abstract public class ManagedServices {
                     ServiceInfo info = mPm.getServiceInfo(component,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userIds[i]);
-                    if (info == null || !mConfig.bindPermission.equals(info.permission)) {
+                    if (info == null) {
+                        Slog.w(TAG, "Not binding " + getCaption() + " service " + component
+                                + ": service not found");
+                        continue;
+                    }
+                    if (!mConfig.bindPermission.equals(info.permission)) {
                         Slog.w(TAG, "Not binding " + getCaption() + " service " + component
                                 + ": it does not require the permission " + mConfig.bindPermission);
                         continue;

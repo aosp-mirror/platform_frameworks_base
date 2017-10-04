@@ -16,6 +16,13 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_POSITIVE;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.NotificationChannel;
@@ -60,6 +67,7 @@ public class NotificationListenerServiceTest extends NotificationTestCase {
             assertEquals(getPeople(key, i), ranking.getAdditionalPeople());
             assertEquals(getSnoozeCriteria(key, i), ranking.getSnoozeCriteria());
             assertEquals(getShowBadge(i), ranking.canShowBadge());
+            assertEquals(getUserSentiment(i), ranking.getUserSentiment());
         }
     }
 
@@ -74,6 +82,7 @@ public class NotificationListenerServiceTest extends NotificationTestCase {
         Bundle snoozeCriteria = new Bundle();
         Bundle showBadge = new Bundle();
         int[] importance = new int[mKeys.length];
+        Bundle userSentiment = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -89,11 +98,12 @@ public class NotificationListenerServiceTest extends NotificationTestCase {
             overridePeople.putStringArrayList(key, getPeople(key, i));
             snoozeCriteria.putParcelableArrayList(key, getSnoozeCriteria(key, i));
             showBadge.putBoolean(key, getShowBadge(i));
+            userSentiment.putInt(key, getUserSentiment(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment);
         return update;
     }
 
@@ -127,6 +137,18 @@ public class NotificationListenerServiceTest extends NotificationTestCase {
 
     private boolean getShowBadge(int index) {
         return index % 3 == 0;
+    }
+
+    private int getUserSentiment(int index) {
+        switch(index % 3) {
+            case 0:
+                return USER_SENTIMENT_NEGATIVE;
+            case 1:
+                return USER_SENTIMENT_NEUTRAL;
+            case 2:
+                return USER_SENTIMENT_POSITIVE;
+        }
+        return USER_SENTIMENT_NEUTRAL;
     }
 
     private ArrayList<String> getPeople(String key, int index) {
