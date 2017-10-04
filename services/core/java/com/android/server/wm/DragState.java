@@ -22,6 +22,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.animation.Animator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
@@ -29,7 +33,9 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -44,16 +50,12 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
-import android.view.animation.TranslateAnimation;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
@@ -78,8 +80,20 @@ class DragState {
             View.DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION |
             View.DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION;
 
+    // Property names for animations
+    private static final String ANIMATED_PROPERTY_X = "x";
+    private static final String ANIMATED_PROPERTY_Y = "y";
+    private static final String ANIMATED_PROPERTY_ALPHA = "alpha";
+    private static final String ANIMATED_PROPERTY_SCALE = "scale";
+
+    // Messages for Handler.
+    private static final int MSG_ANIMATION_END = 0;
+
     final WindowManagerService mService;
     IBinder mToken;
+    /**
+     * Do not use the variable from the out of animation thread while mAnimator is not null.
+     */
     SurfaceControl mSurfaceControl;
     int mFlags;
     IBinder mLocalWin;
@@ -101,10 +115,10 @@ class DragState {
     boolean mDragInProgress;
     DisplayContent mDisplayContent;
 
-    private Animation mAnimation;
-    final Transformation mTransformation = new Transformation();
+    @Nullable private ValueAnimator mAnimator;
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
     private Point mDisplaySize = new Point();
+    private final Handler mHandler;
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
@@ -114,9 +128,14 @@ class DragState {
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
+        mHandler = new DragStateHandler(service.mH.getLooper());
     }
 
     void reset() {
+        if (mAnimator != null) {
+            Slog.wtf(TAG_WM,
+                    "Unexpectedly destroying mSurfaceControl while animation is running");
+        }
         if (mSurfaceControl != null) {
             mSurfaceControl.destroy();
         }
@@ -388,11 +407,11 @@ class DragState {
     }
 
     void endDragLw() {
-        if (mAnimation != null) {
+        if (mAnimator != null) {
             return;
         }
         if (!mDragResult) {
-            mAnimation = createReturnAnimationLocked();
+            mAnimator = createReturnAnimationLocked();
             mService.scheduleAnimationLocked();
             return;  // Will call cleanUpDragLw when the animation is done.
         }
@@ -400,11 +419,22 @@ class DragState {
     }
 
     void cancelDragLw() {
-        if (mAnimation != null) {
+        if (mAnimator != null) {
             return;
         }
-        mAnimation = createCancelAnimationLocked();
-        mService.scheduleAnimationLocked();
+        if (!mDragInProgress) {
+            // This can happen if an app invokes Session#cancelDragAndDrop before
+            // Session#performDrag. Reset the drag state:
+            // 1. without sending the end broadcast because the start broadcast has not been sent,
+            // and
+            // 2. without playing the cancel animation because H.DRAG_START_TIMEOUT may be sent to
+            //    WindowManagerService, which will cause DragState#reset() while playing the
+            //    cancel animation.
+            reset();
+            mService.mDragState = null;
+            return;
+        }
+        mAnimator = createCancelAnimationLocked();
     }
 
     private void cleanUpDragLw() {
@@ -422,7 +452,7 @@ class DragState {
     }
 
     void notifyMoveLw(float x, float y) {
-        if (mAnimation != null) {
+        if (mAnimator != null) {
             return;
         }
         mCurrentX = x;
@@ -491,7 +521,7 @@ class DragState {
     // dispatch the global drag-ended message, 'false' if we need to wait for a
     // result from the recipient.
     boolean notifyDropLw(float x, float y) {
-        if (mAnimation != null) {
+        if (mAnimator != null) {
             return false;
         }
         mCurrentX = x;
@@ -560,56 +590,52 @@ class DragState {
                 dragAndDropPermissions, result);
     }
 
-    boolean stepAnimationLocked(long currentTimeMs) {
-        if (mAnimation == null) {
-            return false;
-        }
+    private ValueAnimator createReturnAnimationLocked() {
+        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
+                PropertyValuesHolder.ofFloat(
+                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX,
+                        mOriginalX - mThumbOffsetX),
+                PropertyValuesHolder.ofFloat(
+                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
+                        mOriginalY - mThumbOffsetY),
+                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, 1, 1),
+                PropertyValuesHolder.ofFloat(
+                        ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
 
-        mTransformation.clear();
-        if (!mAnimation.getTransformation(currentTimeMs, mTransformation)) {
-            cleanUpDragLw();
-            return false;
-        }
-
-        mTransformation.getMatrix().postTranslate(
-                mCurrentX - mThumbOffsetX, mCurrentY - mThumbOffsetY);
-        final float tmpFloats[] = mService.mTmpFloats;
-        mTransformation.getMatrix().getValues(tmpFloats);
-        mSurfaceControl.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
-        mSurfaceControl.setAlpha(mTransformation.getAlpha());
-        mSurfaceControl.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
-                tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
-        return true;
-    }
-
-    private Animation createReturnAnimationLocked() {
-        final AnimationSet set = new AnimationSet(false);
         final float translateX = mOriginalX - mCurrentX;
         final float translateY = mOriginalY - mCurrentY;
-        set.addAnimation(new TranslateAnimation( 0, translateX, 0, translateY));
-        set.addAnimation(new AlphaAnimation(mOriginalAlpha, mOriginalAlpha / 2));
         // Adjust the duration to the travel distance.
         final double travelDistance = Math.sqrt(translateX * translateX + translateY * translateY);
         final double displayDiagonal =
                 Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
         final long duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
                 * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
-        set.setDuration(duration);
-        set.setInterpolator(mCubicEaseOutInterpolator);
-        set.initialize(0, 0, 0, 0);
-        set.start();  // Will start on the first call to getTransformation.
-        return set;
+        final AnimationListener listener = new AnimationListener();
+        animator.setDuration(duration);
+        animator.setInterpolator(mCubicEaseOutInterpolator);
+        animator.addListener(listener);
+        animator.addUpdateListener(listener);
+
+        mService.mAnimationHandler.post(() -> animator.start());
+        return animator;
     }
 
-    private Animation createCancelAnimationLocked() {
-        final AnimationSet set = new AnimationSet(false);
-        set.addAnimation(new ScaleAnimation(1, 0, 1, 0, mThumbOffsetX, mThumbOffsetY));
-        set.addAnimation(new AlphaAnimation(mOriginalAlpha, 0));
-        set.setDuration(MIN_ANIMATION_DURATION_MS);
-        set.setInterpolator(mCubicEaseOutInterpolator);
-        set.initialize(0, 0, 0, 0);
-        set.start();  // Will start on the first call to getTransformation.
-        return set;
+    private ValueAnimator createCancelAnimationLocked() {
+        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
+                PropertyValuesHolder.ofFloat(
+                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
+                PropertyValuesHolder.ofFloat(
+                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
+                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, 1, 0),
+                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+        final AnimationListener listener = new AnimationListener();
+        animator.setDuration(MIN_ANIMATION_DURATION_MS);
+        animator.setInterpolator(mCubicEaseOutInterpolator);
+        animator.addListener(listener);
+        animator.addUpdateListener(listener);
+
+        mService.mAnimationHandler.post(() -> animator.start());
+        return animator;
     }
 
     private boolean isFromSource(int source) {
@@ -620,6 +646,70 @@ class DragState {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
             InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
+        }
+    }
+
+    private class DragStateHandler extends Handler {
+        DragStateHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ANIMATION_END:
+                    synchronized (mService.mWindowMap) {
+                        if (mService.mDragState != DragState.this) {
+                            Slog.wtf(TAG_WM, "mDragState is updated unexpectedly while " +
+                                    "playing animation");
+                            return;
+                        }
+                        if (mAnimator == null) {
+                            Slog.wtf(TAG_WM, "Unexpected null mAnimator");
+                            return;
+                        }
+                        mAnimator = null;
+                        cleanUpDragLw();
+                    }
+                    break;
+            }
+        }
+    }
+
+    private class AnimationListener
+            implements ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            try (final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+                transaction.setPosition(
+                        mSurfaceControl,
+                        (float) mAnimator.getAnimatedValue(ANIMATED_PROPERTY_X),
+                        (float) mAnimator.getAnimatedValue(ANIMATED_PROPERTY_Y));
+                transaction.setAlpha(
+                        mSurfaceControl,
+                        (float) mAnimator.getAnimatedValue(ANIMATED_PROPERTY_ALPHA));
+                transaction.setMatrix(
+                        mSurfaceControl,
+                        (float) mAnimator.getAnimatedValue(ANIMATED_PROPERTY_SCALE), 0,
+                        0, (float) mAnimator.getAnimatedValue(ANIMATED_PROPERTY_SCALE));
+                transaction.apply();
+            }
+        }
+
+        @Override
+        public void onAnimationStart(Animator animator) {}
+
+        @Override
+        public void onAnimationCancel(Animator animator) {}
+
+        @Override
+        public void onAnimationRepeat(Animator animator) {}
+
+        @Override
+        public void onAnimationEnd(Animator animator) {
+            // Updating mDragState requires the WM lock so continues it on the out of
+            // AnimationThread.
+            mHandler.sendEmptyMessage(MSG_ANIMATION_END);
         }
     }
 }
