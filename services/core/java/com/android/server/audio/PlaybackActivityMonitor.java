@@ -114,7 +114,7 @@ public final class PlaybackActivityMonitor
             if (index >= 0) {
                 if (!disable) {
                     if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
-                        mEventLogger.log(new AudioEventLogger.StringEvent("unbanning uid:" + uid));
+                        sEventLogger.log(new AudioEventLogger.StringEvent("unbanning uid:" + uid));
                     }
                     mBannedUids.remove(index);
                     // nothing else to do, future playback requests from this uid are ok
@@ -125,7 +125,7 @@ public final class PlaybackActivityMonitor
                         checkBanPlayer(apc, uid);
                     }
                     if (DEBUG) { // hidden behind DEBUG, too noisy otherwise
-                        mEventLogger.log(new AudioEventLogger.StringEvent("banning uid:" + uid));
+                        sEventLogger.log(new AudioEventLogger.StringEvent("banning uid:" + uid));
                     }
                     mBannedUids.add(new Integer(uid));
                 } // no else to handle, uid already not in list, so enabling again is no-op
@@ -160,7 +160,7 @@ public final class PlaybackActivityMonitor
                 new AudioPlaybackConfiguration(pic, newPiid,
                         Binder.getCallingUid(), Binder.getCallingPid());
         apc.init();
-        mEventLogger.log(new NewPlayerEvent(apc));
+        sEventLogger.log(new NewPlayerEvent(apc));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
         }
@@ -172,7 +172,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
-                mEventLogger.log(new AudioAttrEvent(piid, attr));
+                sEventLogger.log(new AudioAttrEvent(piid, attr));
                 change = apc.handleAudioAttributesEvent(attr);
             } else {
                 Log.e(TAG, "Error updating audio attributes");
@@ -224,12 +224,12 @@ public final class PlaybackActivityMonitor
             if (apc == null) {
                 return;
             }
-            mEventLogger.log(new PlayerEvent(piid, event));
+            sEventLogger.log(new PlayerEvent(piid, event));
             if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
                         // player was banned, do not update its state
-                        mEventLogger.log(new AudioEventLogger.StringEvent(
+                        sEventLogger.log(new AudioEventLogger.StringEvent(
                                 "not starting piid:" + piid + " ,is banned"));
                         return;
                     }
@@ -258,7 +258,7 @@ public final class PlaybackActivityMonitor
 
     public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio, int binderUid) {
         // no check on UID yet because this is only for logging at the moment
-        mEventLogger.log(new PlayerOpPlayAudioEvent(piid, hasOpPlayAudio, binderUid));
+        sEventLogger.log(new PlayerOpPlayAudioEvent(piid, hasOpPlayAudio, binderUid));
     }
 
     public void releasePlayer(int piid, int binderUid) {
@@ -266,7 +266,7 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
-                mEventLogger.log(new AudioEventLogger.StringEvent(
+                sEventLogger.log(new AudioEventLogger.StringEvent(
                         "releasing player piid:" + piid));
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
@@ -321,7 +321,7 @@ public final class PlaybackActivityMonitor
             }
             pw.println("\n");
             // log
-            mEventLogger.dump(pw);
+            sEventLogger.dump(pw);
         }
     }
 
@@ -499,7 +499,8 @@ public final class PlaybackActivityMonitor
                 }
                 if (mute) {
                     try {
-                        Log.v(TAG, "call: muting player" + piid + " uid:" + apc.getClientUid());
+                        sEventLogger.log((new AudioEventLogger.StringEvent("call: muting piid:"
+                                + piid + " uid:" + apc.getClientUid())).printLog(TAG));
                         apc.getPlayerProxy().setVolume(0.0f);
                         mMutedPlayers.add(new Integer(piid));
                     } catch (Exception e) {
@@ -523,7 +524,8 @@ public final class PlaybackActivityMonitor
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
                 if (apc != null) {
                     try {
-                        Log.v(TAG, "call: unmuting player" + piid + " uid:" + apc.getClientUid());
+                        sEventLogger.log(new AudioEventLogger.StringEvent("call: unmuting piid:"
+                                + piid).printLog(TAG));
                         apc.getPlayerProxy().setVolume(1.0f);
                     } catch (Exception e) {
                         Log.e(TAG, "call: error unmuting player " + piid + " uid:"
@@ -712,8 +714,7 @@ public final class PlaybackActivityMonitor
                     return;
                 }
                 try {
-                    Log.v(TAG, "ducking (skipRamp=" + skipRamp + ") player piid:"
-                            + apc.getPlayerInterfaceId() + " uid:" + mUid);
+                    sEventLogger.log((new DuckEvent(apc, skipRamp)).printLog(TAG));
                     apc.getPlayerProxy().applyVolumeShaper(
                             DUCK_VSHAPE,
                             skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
@@ -728,7 +729,8 @@ public final class PlaybackActivityMonitor
                     final AudioPlaybackConfiguration apc = players.get(piid);
                     if (apc != null) {
                         try {
-                            Log.v(TAG, "unducking player " + piid + " uid:" + mUid);
+                            sEventLogger.log((new AudioEventLogger.StringEvent("unducking piid:"
+                                    + piid)).printLog(TAG));
                             apc.getPlayerProxy().applyVolumeShaper(
                                     DUCK_ID,
                                     VolumeShaper.Operation.REVERSE);
@@ -815,7 +817,28 @@ public final class PlaybackActivityMonitor
         }
     }
 
-    private final static class AudioAttrEvent extends AudioEventLogger.Event {
+    private static final class DuckEvent extends AudioEventLogger.Event {
+        private final int mPlayerIId;
+        private final boolean mSkipRamp;
+        private final int mClientUid;
+        private final int mClientPid;
+
+        DuckEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp) {
+            mPlayerIId = apc.getPlayerInterfaceId();
+            mSkipRamp = skipRamp;
+            mClientUid = apc.getClientUid();
+            mClientPid = apc.getClientPid();
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("ducking player piid:").append(mPlayerIId)
+                    .append(" uid/pid:").append(mClientUid).append("/").append(mClientPid)
+                    .append(" skip ramp:").append(mSkipRamp).toString();
+        }
+    }
+
+    private static final class AudioAttrEvent extends AudioEventLogger.Event {
         private final int mPlayerIId;
         private final AudioAttributes mPlayerAttr;
 
@@ -830,6 +853,6 @@ public final class PlaybackActivityMonitor
         }
     }
 
-    private final AudioEventLogger mEventLogger = new AudioEventLogger(100,
+    private static final AudioEventLogger sEventLogger = new AudioEventLogger(100,
             "playback activity as reported through PlayerBase");
 }
