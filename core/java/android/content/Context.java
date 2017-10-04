@@ -64,6 +64,7 @@ import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowManager;
+import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import java.io.File;
@@ -4784,6 +4785,19 @@ public abstract class Context {
      */
     public Handler getMainThreadHandler() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
+    public AutofillClient getAutofillClient() {
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAutofillClient(AutofillClient client) {
     }
 
     /**

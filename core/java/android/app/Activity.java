@@ -114,6 +114,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.AdapterView;
@@ -945,6 +946,18 @@ public class Activity extends ContextThemeWrapper
         }
 
         return mAutofillManager;
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        newBase.setAutofillClient(this);
+    }
+
+    /** @hide */
+    @Override
+    public final AutofillClient getAutofillClient() {
+        return this;
     }
 
     /**

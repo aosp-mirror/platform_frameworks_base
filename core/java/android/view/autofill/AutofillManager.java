@@ -937,10 +937,7 @@ public final class AutofillManager {
     }
 
     private AutofillClient getClientLocked() {
-        if (mContext instanceof AutofillClient) {
-            return (AutofillClient) mContext;
-        }
-        return null;
+        return mContext.getAutofillClient();
     }
 
     /** @hide */
