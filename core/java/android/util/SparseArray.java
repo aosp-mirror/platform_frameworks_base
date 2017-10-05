@@ -161,10 +161,14 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Removes the mapping at the specified index.
      *
-     * <p>For indices outside of the range <code>0...size()-1</code>,
-     * the behavior is undefined.</p>
+     * <p>{@code index} must be in range <code>0...size()-1</code>,
+     * an exception will be thrown otherwise.</p>
      */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
@@ -177,8 +181,9 @@ public class SparseArray<E> implements Cloneable {
      * @param index Index to begin at
      * @param size Number of mappings to remove
      *
-     * <p>For indices outside of the range <code>0...size()-1</code>,
-     * the behavior is undefined.</p>
+     * <p><code>index...index+size-1</code> subrange
+     * must be in range <code>0...size()-1</code>,
+     * an exception will be thrown otherwise.</p>
      */
     public void removeAtRange(int index, int size) {
         final int end = Math.min(mSize, index + size);
@@ -269,12 +274,16 @@ public class SparseArray<E> implements Cloneable {
      * smallest key and <code>keyAt(size()-1)</code> will return the largest
      * key.</p>
      *
-     * <p>For indices outside of the range <code>0...size()-1</code>,
-     * the behavior is undefined.</p>
+     * <p>{@code index} must be in range <code>0...size()-1</code>,
+     * an exception will be thrown otherwise.</p>
      */
     public int keyAt(int index) {
         if (mGarbage) {
             gc();
+        }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
         }
 
         return mKeys[index];
@@ -291,13 +300,17 @@ public class SparseArray<E> implements Cloneable {
      * smallest key and <code>valueAt(size()-1)</code> will return the value
      * associated with the largest key.</p>
      *
-     * <p>For indices outside of the range <code>0...size()-1</code>,
-     * the behavior is undefined.</p>
+     * <p>{@code index} must be in range <code>0...size()-1</code>,
+     * an exception will be thrown otherwise.</p>
      */
     @SuppressWarnings("unchecked")
     public E valueAt(int index) {
         if (mGarbage) {
             gc();
+        }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
         }
 
         return (E) mValues[index];
@@ -308,11 +321,16 @@ public class SparseArray<E> implements Cloneable {
      * value for the <code>index</code>th key-value mapping that this
      * SparseArray stores.
      *
-     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined.</p>
+     * <p>{@code index} must be in range <code>0...size()-1</code>,
+     * an exception will be thrown otherwise.</p>
      */
     public void setValueAt(int index, E value) {
         if (mGarbage) {
             gc();
+        }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
         }
 
         mValues[index] = value;
