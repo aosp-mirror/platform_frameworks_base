@@ -14,24 +14,36 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLER_H
-#define STATSD_STATSPULLER_H
+#ifndef STATSD_STATSPULLERMANAGER_H
+#define STATSD_STATSPULLERMANAGER_H
 
 #include <utils/String16.h>
+#include <unordered_map>
+#include "StatsPuller.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPuller {
+const static int KERNEL_WAKELOCKS = 1;
+
+class StatsPullerManager {
 public:
-    virtual ~StatsPuller(){};
-    // use string for now, until we figure out how to integrate into the aggregation path
-    virtual String16 pull() = 0;
+    // Enums of pulled data types (pullCodes)
+    // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
+    // TODO: pull the constant from stats_events.proto instead
+    const static int KERNEL_WAKELOCKS;
+    StatsPullerManager();
+
+    String16 pull(const int pullCode);
+
+private:
+    std::unordered_map<int, std::unique_ptr<StatsPuller>> mStatsPullers;
 };
+
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // STATSD_STATSPULLER_H
+#endif  // STATSD_STATSPULLERMANAGER_H

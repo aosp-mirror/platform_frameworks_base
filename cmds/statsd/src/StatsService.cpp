@@ -40,7 +40,7 @@ namespace os {
 namespace statsd {
 
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Change this based on the config
+    : mAnomalyMonitor(new AnomalyMonitor(2)), mStatsPullerManager()  // TODO: Change this based on the config
 {
     ALOGD("stats service constructed");
 }
@@ -177,9 +177,10 @@ Status StatsService::informPollAlarmFired() {
 
     if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
     // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
-    String16 output = StatsPuller::pull(StatsPuller::PULL_CODE_KERNEL_WAKELOCKS);
+    String16 output = mStatsPullerManager.pull(StatsPullerManager::KERNEL_WAKELOCKS);
     // TODO: do something useful with the output instead of writing a string to screen.
     ALOGD("%s", String8(output).string());
+    ALOGD("%d", int(output.size()));
 
     return Status::ok();
 }

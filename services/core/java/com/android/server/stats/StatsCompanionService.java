@@ -161,7 +161,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    // These values must be kept in sync with cmd/statsd/StatsPuller.h.
+    // These values must be kept in sync with cmd/statsd/StatsPullerManager.h.
     // TODO: pull the constant from stats_events.proto instead
     private static final int PULL_CODE_KERNEL_WAKELOCKS = 20;
 
