@@ -409,8 +409,6 @@ public final class IpSecTransform implements AutoCloseable {
         public IpSecTransform buildTransportModeTransform(InetAddress remoteAddress)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
-            //FIXME: argument validation here
-            //throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
             mConfig.setMode(MODE_TRANSPORT);
             mConfig.setRemoteAddress(remoteAddress.getHostAddress());
             return new IpSecTransform(mContext, mConfig).activate();
