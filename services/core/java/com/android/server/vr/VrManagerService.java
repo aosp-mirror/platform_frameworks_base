@@ -134,6 +134,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private int mVrAppProcessId;
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
+    private ManagedApplicationService mCurrentVrCompositorService;
     private ComponentName mDefaultVrService;
     private Context mContext;
     private ComponentName mCurrentVrModeComponent;
@@ -490,6 +491,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public void setAndBindCompositor(String componentName) {
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
+            VrManagerService.this.setAndBindCompositor(
+                (componentName == null) ? null : ComponentName.unflattenFromString(componentName));
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
@@ -497,6 +505,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             pw.println("VR mode is currently: " + ((mVrModeAllowed) ? "allowed" : "disallowed"));
             pw.println("Persistent VR mode is currently: " +
                     ((mPersistentVrModeEnabled) ? "enabled" : "disabled"));
+            pw.println("Currently bound VR compositor service: "
+                    + ((mCurrentVrCompositorService == null)
+                    ? "None" : mCurrentVrCompositorService.getComponent()));
             pw.println("Previous state transitions:\n");
             String tab = "  ";
             dumpStateTransitions(pw);
@@ -785,6 +796,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         + mCurrentVrService.getComponent() + " for user "
                         + mCurrentVrService.getUserId());
                     mCurrentVrService.disconnect();
+                    updateCompositorServiceLocked(UserHandle.USER_NULL, null);
                     mCurrentVrService = null;
                 } else {
                     nothingChanged = true;
@@ -798,6 +810,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         Slog.i(TAG, "VR mode component changed to " + component
                             + ", disconnecting " + mCurrentVrService.getComponent()
                             + " for user " + mCurrentVrService.getUserId());
+                        updateCompositorServiceLocked(UserHandle.USER_NULL, null);
                         createAndConnectService(component, userId);
                         sendUpdatedCaller = true;
                     } else {
@@ -1175,6 +1188,33 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
         Slog.w(TAG, "Vr2dDisplay is null!");
         return INVALID_DISPLAY;
+    }
+
+    private void setAndBindCompositor(ComponentName componentName) {
+        final int userId = UserHandle.getCallingUserId();
+        final long token = Binder.clearCallingIdentity();
+        synchronized (mLock) {
+            updateCompositorServiceLocked(userId, componentName);
+        }
+        Binder.restoreCallingIdentity(token);
+    }
+
+    private void updateCompositorServiceLocked(int userId, ComponentName componentName) {
+        if (mCurrentVrCompositorService != null
+                && mCurrentVrCompositorService.disconnectIfNotMatching(componentName, userId)) {
+            // Check if existing service matches the requested one, if not (or if the requested
+            // component is null) disconnect it.
+            mCurrentVrCompositorService = null;
+        }
+
+        if (componentName != null && mCurrentVrCompositorService == null) {
+            // We don't have an existing service matching the requested component, so attempt to
+            // connect one.
+            mCurrentVrCompositorService = ManagedApplicationService.build(mContext,
+                    componentName, userId, /*clientLabel*/0, /*settingsAction*/null,
+                    /*binderChecker*/null, /*isImportant*/true);
+            mCurrentVrCompositorService.connect();
+        }
     }
 
     private void setPersistentModeAndNotifyListenersLocked(boolean enabled) {

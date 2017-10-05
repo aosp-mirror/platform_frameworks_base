@@ -950,10 +950,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int lastOrientation = mLastOrientation;
         final boolean oldAltOrientation = mAltOrientation;
         int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
-        final boolean rotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
+        boolean mayRotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
                 rotation);
 
-        if (rotateSeamlessly) {
+        if (mayRotateSeamlessly) {
             final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
             if (seamlessRotated != null) {
                 // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
@@ -962,7 +962,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // window-removal.
                 return false;
             }
+
+            // In the presence of the PINNED stack or System Alert
+            // windows we unforuntately can not seamlessly rotate.
+            if (getStackById(PINNED_STACK_ID) != null) {
+                mayRotateSeamlessly = false;
+            }
+            for (int i = 0; i < mService.mSessions.size(); i++) {
+                if (mService.mSessions.valueAt(i).hasAlertWindowSurfaces()) {
+                    mayRotateSeamlessly = false;
+                    break;
+                }
+            }
         }
+        final boolean rotateSeamlessly = mayRotateSeamlessly;
 
         // TODO: Implement forced rotation changes.
         //       Set mAltOrientation to indicate that the application is receiving
