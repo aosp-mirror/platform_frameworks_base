@@ -17698,7 +17698,13 @@ public class PackageManagerService extends IPackageManager.Stub
         // TODO: Layering violation
         BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
 
-        startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
+        if (!instantApp) {
+            startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
+        } else {
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "Not verifying instant app install for app links: " + pkgName);
+            }
+        }
 
         try (PackageFreezer freezer = freezePackageForInstall(pkgName, installFlags,
                 "installPackageLI")) {
