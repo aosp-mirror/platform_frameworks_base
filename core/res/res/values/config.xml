@@ -3092,4 +3092,8 @@
          booted.  -->
     <integer name="config_stableDeviceDisplayWidth">-1</integer>
     <integer name="config_stableDeviceDisplayHeight">-1</integer>
+
+    <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
+         when SIM is unready. -->
+    <bool name="config_display_no_service_when_sim_unready">false</bool>
 </resources>
