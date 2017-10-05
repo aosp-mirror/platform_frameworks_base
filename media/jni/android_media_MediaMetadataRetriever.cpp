@@ -244,29 +244,9 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
     }
 }
 
-static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
-        JNIEnv *env, jobject thiz, jlong timeUs, jint option, jint dst_width, jint dst_height)
-{
-    ALOGV("getFrameAtTime: %lld us option: %d dst width: %d heigh: %d",
-            (long long)timeUs, option, dst_width, dst_height);
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
-    if (retriever == 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
-        return NULL;
-    }
-
-    // Call native method to retrieve a video frame
-    VideoFrame *videoFrame = NULL;
-    sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option);
-    if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
-        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
-    }
-    if (videoFrame == NULL) {
-        ALOGE("getFrameAtTime: videoFrame is a NULL pointer");
-        return NULL;
-    }
-
-    ALOGV("Dimension = %dx%d and bytes = %d",
+static jobject getBitmapFromVideoFrame(
+        JNIEnv *env, VideoFrame *videoFrame, jint dst_width, jint dst_height) {
+    ALOGV("getBitmapFromVideoFrame: dimension = %dx%d and bytes = %d",
             videoFrame->mDisplayWidth,
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
@@ -301,7 +281,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }
-        ALOGE("getFrameAtTime: create Bitmap failed!");
+        ALOGE("getBitmapFromVideoFrame: create Bitmap failed!");
         return NULL;
     }
 
@@ -338,6 +318,93 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
     }
 
     return jBitmap;
+}
+
+static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
+        JNIEnv *env, jobject thiz, jlong timeUs, jint option, jint dst_width, jint dst_height)
+{
+    ALOGV("getFrameAtTime: %lld us option: %d dst width: %d heigh: %d",
+            (long long)timeUs, option, dst_width, dst_height);
+    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
+        return NULL;
+    }
+
+    // Call native method to retrieve a video frame
+    VideoFrame *videoFrame = NULL;
+    sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option);
+    if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
+        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+    }
+    if (videoFrame == NULL) {
+        ALOGE("getFrameAtTime: videoFrame is a NULL pointer");
+        return NULL;
+    }
+
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height);
+}
+
+static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
+        JNIEnv *env, jobject thiz, jint index)
+{
+    ALOGV("getImageAtIndex: index %d", index);
+    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
+        return NULL;
+    }
+
+    // Call native method to retrieve an image
+    VideoFrame *videoFrame = NULL;
+    sp<IMemory> frameMemory = retriever->getImageAtIndex(index);
+    if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
+        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+    }
+    if (videoFrame == NULL) {
+        ALOGE("getImageAtIndex: videoFrame is a NULL pointer");
+        return NULL;
+    }
+
+    return getBitmapFromVideoFrame(env, videoFrame, -1, -1);
+}
+
+static jobjectArray android_media_MediaMetadataRetriever_getFrameAtIndex(
+        JNIEnv *env, jobject thiz, jint frameIndex, jint numFrames)
+{
+    ALOGV("getFrameAtIndex: frameIndex %d, numFrames %d", frameIndex, numFrames);
+    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env,
+                "java/lang/IllegalStateException", "No retriever available");
+        return NULL;
+    }
+
+    std::vector<sp<IMemory> > frames;
+    status_t err = retriever->getFrameAtIndex(&frames, frameIndex, numFrames);
+    if (err != OK || frames.size() == 0) {
+        ALOGE("failed to get frames from retriever, err=%d, size=%zu",
+                err, frames.size());
+        return NULL;
+    }
+
+    jobjectArray bitmapArrayObj = env->NewObjectArray(
+            frames.size(), fields.bitmapClazz, NULL);
+    if (bitmapArrayObj == NULL) {
+        ALOGE("can't create bitmap array object");
+        return NULL;
+    }
+
+    for (size_t i = 0; i < frames.size(); i++) {
+        if (frames[i] == NULL || frames[i]->pointer() == NULL) {
+            ALOGE("video frame at index %zu is a NULL pointer", frameIndex + i);
+            continue;
+        }
+        VideoFrame *videoFrame = static_cast<VideoFrame *>(frames[i]->pointer());
+        jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1);
+        env->SetObjectArrayElement(bitmapArrayObj, i, bitmapObj);
+    }
+    return bitmapArrayObj;
 }
 
 static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
@@ -485,6 +552,8 @@ static const JNINativeMethod nativeMethods[] = {
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_setDataSource",   "(Landroid/media/MediaDataSource;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
         {"_getFrameAtTime", "(JIII)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
+        {"_getImageAtIndex", "(I)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getImageAtIndex},
+        {"_getFrameAtIndex", "(II)[Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtIndex},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
         {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},

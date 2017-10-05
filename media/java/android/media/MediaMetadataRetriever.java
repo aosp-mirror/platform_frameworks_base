@@ -47,7 +47,7 @@ public class MediaMetadataRetriever
     // The field below is accessed by native methods
     @SuppressWarnings("unused")
     private long mNativeContext;
- 
+
     private static final int EMBEDDED_PICTURE_TYPE_ANY = 0xFFFF;
 
     public MediaMetadataRetriever() {
@@ -58,7 +58,7 @@ public class MediaMetadataRetriever
      * Sets the data source (file pathname) to use. Call this
      * method before the rest of the methods in this class. This method may be
      * time-consuming.
-     * 
+     *
      * @param path The path of the input media file.
      * @throws IllegalArgumentException If the path is invalid.
      */
@@ -113,7 +113,7 @@ public class MediaMetadataRetriever
      * responsibility to close the file descriptor. It is safe to do so as soon
      * as this call returns. Call this method before the rest of the methods in
      * this class. This method may be time-consuming.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts,
      * in bytes. It must be non-negative
@@ -123,13 +123,13 @@ public class MediaMetadataRetriever
      */
     public native void setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException;
-    
+
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's
      * responsibility to close the file descriptor. It is safe to do so as soon
      * as this call returns. Call this method before the rest of the methods in
      * this class. This method may be time-consuming.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @throws IllegalArgumentException if the FileDescriptor is invalid
      */
@@ -138,11 +138,11 @@ public class MediaMetadataRetriever
         // intentionally less than LONG_MAX
         setDataSource(fd, 0, 0x7ffffffffffffffL);
     }
-    
+
     /**
-     * Sets the data source as a content Uri. Call this method before 
+     * Sets the data source as a content Uri. Call this method before
      * the rest of the methods in this class. This method may be time-consuming.
-     * 
+     *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to play
      * @throws IllegalArgumentException if the Uri is invalid
@@ -154,7 +154,7 @@ public class MediaMetadataRetriever
         if (uri == null) {
             throw new IllegalArgumentException();
         }
-        
+
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
@@ -213,12 +213,12 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method retrieves the
      * meta data value associated with the keyCode.
-     * 
+     *
      * The keyCode currently supported is listed below as METADATA_XXX
      * constants. With any other value, it returns a null pointer.
-     * 
+     *
      * @param keyCode One of the constants listed below at the end of the class.
-     * @return The meta data value associate with the given keyCode on success; 
+     * @return The meta data value associate with the given keyCode on success;
      * null on failure.
      */
     public native String extractMetadata(int keyCode);
@@ -355,6 +355,109 @@ public class MediaMetadataRetriever
     }
 
     private native Bitmap _getFrameAtTime(long timeUs, int option, int width, int height);
+
+    /**
+     * This method retrieves a video frame by its index. It should only be called
+     * after {@link #setDataSource}.
+     *
+     * @param frameIndex 0-based index of the video frame. The frame index must be that of
+     *        a valid frame. The total number of frames available for retrieval can be queried
+     *        via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the requested frame index does not exist.
+     *
+     * @return A Bitmap containing the requested video frame, or null if the retrieval fails.
+     *
+     * @see #getFramesAtIndex(int, int)
+     */
+    public Bitmap getFrameAtIndex(int frameIndex) {
+        Bitmap[] bitmaps = getFramesAtIndex(frameIndex, 1);
+        if (bitmaps == null || bitmaps.length < 1) {
+            return null;
+        }
+        return bitmaps[0];
+    }
+
+    /**
+     * This method retrieves a consecutive set of video frames starting at the
+     * specified index. It should only be called after {@link #setDataSource}.
+     *
+     * If the caller intends to retrieve more than one consecutive video frames,
+     * this method is preferred over {@link #getFrameAtIndex(int)} for efficiency.
+     *
+     * @param frameIndex 0-based index of the first video frame to retrieve. The frame index
+     *        must be that of a valid frame. The total number of frames available for retrieval
+     *        can be queried via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     * @param numFrames number of consecutive video frames to retrieve. Must be a positive
+     *        value. The stream must contain at least numFrames frames starting at frameIndex.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the frameIndex or numFrames is invalid, or the
+     *         stream doesn't contain at least numFrames starting at frameIndex.
+
+     * @return An array of Bitmaps containing the requested video frames. The returned
+     *         array could contain less frames than requested if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int)
+     */
+    public Bitmap[] getFramesAtIndex(int frameIndex, int numFrames) {
+        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO))) {
+            throw new IllegalStateException("Does not contail video or image sequences");
+        }
+        int frameCount = Integer.parseInt(
+                extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT));
+        if (frameIndex < 0 || numFrames < 1
+                || frameIndex >= frameCount
+                || frameIndex > frameCount - numFrames) {
+            throw new IllegalArgumentException("Invalid frameIndex or numFrames: "
+                + frameIndex + ", " + numFrames);
+        }
+        return _getFrameAtIndex(frameIndex, numFrames);
+    }
+    private native Bitmap[] _getFrameAtIndex(int frameIndex, int numFrames);
+
+    /**
+     * This method retrieves a still image by its index. It should only be called
+     * after {@link #setDataSource}.
+     *
+     * @param imageIndex 0-based index of the image, with negative value indicating
+     *        the primary image.
+     * @throws IllegalStateException if the container doesn't contain still images.
+     * @throws IllegalArgumentException if the requested image does not exist.
+     *
+     * @return the requested still image, or null if the image cannot be retrieved.
+     *
+     * @see #getPrimaryImage
+     */
+    public Bitmap getImageAtIndex(int imageIndex) {
+        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
+            throw new IllegalStateException("Does not contail still images");
+        }
+
+        String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);
+        if (imageIndex >= Integer.parseInt(imageCount)) {
+            throw new IllegalArgumentException("Invalid image index: " + imageCount);
+        }
+
+        return _getImageAtIndex(imageIndex);
+    }
+
+    /**
+     * This method retrieves the primary image of the media content. It should only
+     * be called after {@link #setDataSource}.
+     *
+     * @return the primary image, or null if it cannot be retrieved.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     *
+     * @see #getImageAtIndex(int)
+     */
+    public Bitmap getPrimaryImage() {
+        return getImageAtIndex(-1);
+    }
+
+    private native Bitmap _getImageAtIndex(int imageIndex);
 
     /**
      * Call this method after setDataSource(). This method finds the optional
@@ -572,5 +675,40 @@ public class MediaMetadataRetriever
      * number.
      */
     public static final int METADATA_KEY_CAPTURE_FRAMERATE = 25;
+    /**
+     * If this key exists the media contains still image content.
+     */
+    public static final int METADATA_KEY_HAS_IMAGE       = 26;
+    /**
+     * If the media contains still images, this key retrieves the number
+     * of still images.
+     */
+    public static final int METADATA_KEY_IMAGE_COUNT     = 27;
+    /**
+     * If the media contains still images, this key retrieves the image
+     * index of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_PRIMARY   = 28;
+    /**
+     * If the media contains still images, this key retrieves the width
+     * of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_WIDTH     = 29;
+    /**
+     * If the media contains still images, this key retrieves the height
+     * of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_HEIGHT    = 30;
+    /**
+     * If the media contains still images, this key retrieves the rotation
+     * of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_ROTATION  = 31;
+    /**
+     * If the media contains video and this key exists, it retrieves the
+     * total number of frames in the video sequence.
+     */
+    public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
+
     // Add more here...
 }
