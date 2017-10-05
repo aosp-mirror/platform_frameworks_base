@@ -328,7 +328,7 @@
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the value from
+         If < 0, uses the skin temperature sensor shutdown value from
          HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
     <integer name="config_warningTemperature">-1</integer>
 
