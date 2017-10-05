@@ -719,4 +719,8 @@ public class Session extends IWindowSession.Stub
     public String toString() {
         return mStringName;
     }
+
+    boolean hasAlertWindowSurfaces() {
+        return !mAlertWindowSurfaces.isEmpty();
+    }
 }
