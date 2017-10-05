@@ -23310,7 +23310,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
         ipw.println("Dexopt state:");
         ipw.increaseIndent();
@@ -23337,7 +23337,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
         ipw.println("Compiler stats:");
         ipw.increaseIndent();
