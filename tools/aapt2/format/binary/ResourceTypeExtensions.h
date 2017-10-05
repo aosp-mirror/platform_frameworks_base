@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_RESOURCE_TYPE_EXTENSIONS_H
-#define AAPT_RESOURCE_TYPE_EXTENSIONS_H
+#ifndef AAPT_FORMAT_BINARY_RESOURCETYPEEXTENSIONS_H
+#define AAPT_FORMAT_BINARY_RESOURCETYPEEXTENSIONS_H
 
 #include "androidfw/ResourceTypes.h"
 
 namespace aapt {
 
-/**
- * An alternative struct to use instead of ResTable_map_entry. This one is a
- * standard_layout
- * struct.
- */
+// An alternative struct to use instead of ResTable_map_entry. This one is a standard_layout struct.
 struct ResTable_entry_ext {
   android::ResTable_entry entry;
   android::ResTable_ref parent;
@@ -34,4 +30,4 @@ struct ResTable_entry_ext {
 
 }  // namespace aapt
 
-#endif  // AAPT_RESOURCE_TYPE_EXTENSIONS_H
+#endif  // AAPT_FORMAT_BINARY_RESOURCETYPEEXTENSIONS_H

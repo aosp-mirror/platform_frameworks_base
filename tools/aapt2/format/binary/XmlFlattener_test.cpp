@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "flatten/XmlFlattener.h"
+#include "format/binary/XmlFlattener.h"
 
 #include "androidfw/ResourceTypes.h"
 
@@ -55,8 +55,7 @@ class XmlFlattenerTest : public ::testing::Test {
                    .Build();
   }
 
-  ::testing::AssertionResult Flatten(xml::XmlResource* doc,
-                                     android::ResXMLTree* out_tree,
+  ::testing::AssertionResult Flatten(xml::XmlResource* doc, android::ResXMLTree* out_tree,
                                      const XmlFlattenerOptions& options = {}) {
     using namespace android;  // For NO_ERROR on windows because it is a macro.
 

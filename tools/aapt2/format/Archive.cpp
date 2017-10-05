@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "flatten/Archive.h"
+#include "format/Archive.h"
 
 #include <cstdio>
 #include <memory>
@@ -106,9 +106,13 @@ class DirectoryWriter : public IArchiveWriter {
     return !in->HadError();
   }
 
-  bool HadError() const override { return !error_.empty(); }
+  bool HadError() const override {
+    return !error_.empty();
+  }
 
-  std::string GetError() const override { return error_; }
+  std::string GetError() const override {
+    return error_;
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DirectoryWriter);
@@ -221,9 +225,13 @@ class ZipFileWriter : public IArchiveWriter {
     }
   }
 
-  bool HadError() const override { return !error_.empty(); }
+  bool HadError() const override {
+    return !error_.empty();
+  }
 
-  std::string GetError() const override { return error_; }
+  std::string GetError() const override {
+    return error_;
+  }
 
   virtual ~ZipFileWriter() {
     if (writer_) {

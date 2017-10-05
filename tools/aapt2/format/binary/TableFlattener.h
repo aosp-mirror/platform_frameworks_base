@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FLATTEN_TABLEFLATTENER_H
-#define AAPT_FLATTEN_TABLEFLATTENER_H
+#ifndef AAPT_FORMAT_BINARY_TABLEFLATTENER_H
+#define AAPT_FORMAT_BINARY_TABLEFLATTENER_H
 
 #include "android-base/macros.h"
 
@@ -40,7 +40,8 @@ struct TableFlattenerOptions {
 class TableFlattener : public IResourceTableConsumer {
  public:
   explicit TableFlattener(const TableFlattenerOptions& options, BigBuffer* buffer)
-      : options_(options), buffer_(buffer) {}
+      : options_(options), buffer_(buffer) {
+  }
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
@@ -53,4 +54,4 @@ class TableFlattener : public IResourceTableConsumer {
 
 }  // namespace aapt
 
-#endif /* AAPT_FLATTEN_TABLEFLATTENER_H */
+#endif /* AAPT_FORMAT_BINARY_TABLEFLATTENER_H */

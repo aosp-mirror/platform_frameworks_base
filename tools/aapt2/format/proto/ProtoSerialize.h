@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_FLATTEN_TABLEPROTOSERIALIZER_H
-#define AAPT_FLATTEN_TABLEPROTOSERIALIZER_H
+#ifndef AAPT_FORMAT_PROTO_PROTOSERIALIZE_H
+#define AAPT_FORMAT_PROTO_PROTOSERIALIZE_H
 
 #include "android-base/macros.h"
 #include "google/protobuf/io/coded_stream.h"
@@ -86,4 +86,4 @@ class CompiledFileOutputStream {
 
 }  // namespace aapt
 
-#endif /* AAPT_FLATTEN_TABLEPROTOSERIALIZER_H */
+#endif /* AAPT_FORMAT_PROTO_PROTOSERIALIZE_H */

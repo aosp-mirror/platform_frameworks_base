@@ -21,7 +21,7 @@
 
 #include "google/protobuf/message_lite.h"
 
-#include "flatten/Archive.h"
+#include "format/Archive.h"
 #include "io/File.h"
 #include "io/Io.h"
 #include "process/IResourceTableConsumer.h"

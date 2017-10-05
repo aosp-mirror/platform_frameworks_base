@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "proto/ProtoSerialize.h"
+#include "format/proto/ProtoSerialize.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
 #include "ResourceUtils.h"
-#include "proto/ProtoDeserialize.h"
+#include "format/proto/ProtoDeserialize.h"
 #include "test/Test.h"
 
 using ::android::StringPiece;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "proto/ProtoDeserialize.h"
+#include "format/proto/ProtoDeserialize.h"
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
@@ -699,11 +699,11 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
       } break;
 
       default:
-        LOG(FATAL) << "unknown compound value: " << (int) pb_compound_value.value_case();
+        LOG(FATAL) << "unknown compound value: " << (int)pb_compound_value.value_case();
         break;
     }
   } else {
-    LOG(FATAL) << "unknown value: " << (int) pb_value.value_case();
+    LOG(FATAL) << "unknown value: " << (int)pb_value.value_case();
     return {};
   }
 
@@ -764,7 +764,7 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
     } break;
 
     default:
-      LOG(FATAL) << "unknown item: " << (int) pb_item.value_case();
+      LOG(FATAL) << "unknown item: " << (int)pb_item.value_case();
       break;
   }
   return {};
@@ -840,7 +840,7 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
       } break;
 
       default:
-        LOG(FATAL) << "unknown XmlNode " << (int) pb_child.node_case();
+        LOG(FATAL) << "unknown XmlNode " << (int)pb_child.node_case();
         break;
     }
   }
