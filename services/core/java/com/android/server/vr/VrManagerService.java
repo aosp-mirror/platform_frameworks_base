@@ -582,7 +582,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             pw.println("Persistent VR mode is currently: " +
                     ((mPersistentVrModeEnabled) ? "enabled" : "disabled"));
             pw.println("Currently bound VR listener service: "
-                    + ((mCurrentVrService == null)
+                    + ((mCurrentVrCompositorService == null)
                     ? "None" : mCurrentVrCompositorService.getComponent().flattenToString()));
             pw.println("Currently bound VR compositor service: "
                     + ((mCurrentVrCompositorService == null)
