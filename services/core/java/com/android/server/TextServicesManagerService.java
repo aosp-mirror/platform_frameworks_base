@@ -187,12 +187,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         SpellCheckerInfo sci = getCurrentSpellChecker(null);
         if (sci == null) {
             sci = findAvailSystemSpellCheckerLocked(null);
-            if (sci != null) {
-                // Set the current spell checker if there is one or more spell checkers
-                // available. In this case, "sci" is the first one in the available spell
-                // checkers.
-                setCurrentSpellCheckerLocked(sci);
-            }
+            // Set the current spell checker if there is one or more system spell checkers
+            // available. In this case, "sci" is the first one in the available spell
+            // checkers.
+            setCurrentSpellCheckerLocked(sci);
         }
     }
 
@@ -221,19 +219,28 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 SpellCheckerInfo sci = getCurrentSpellChecker(null);
                 buildSpellCheckerMapLocked(
                         mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
-                // If no spell checker is enabled, just return. The user should explicitly
+                // If spell checker is disabled, just return. The user should explicitly
                 // enable the spell checker.
-                if (sci == null) return;
-                final String packageName = sci.getPackageName();
-                final int change = isPackageDisappearing(packageName);
-                if (// Package disappearing
-                        change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
-                        // Package modified
-                        || isPackageModified(packageName)) {
-                    SpellCheckerInfo availSci = findAvailSystemSpellCheckerLocked(packageName);
-                    // Set the spell checker settings if different than before
-                    if (availSci != null && !availSci.getId().equals(sci.getId())) {
-                        setCurrentSpellCheckerLocked(availSci);
+                if (!isSpellCheckerEnabledLocked()) return;
+
+                if (sci == null) {
+                    sci = findAvailSystemSpellCheckerLocked(null);
+                    // Set the current spell checker if there is one or more system spell checkers
+                    // available. In this case, "sci" is the first one in the available spell
+                    // checkers.
+                    setCurrentSpellCheckerLocked(sci);
+                } else {
+                    final String packageName = sci.getPackageName();
+                    final int change = isPackageDisappearing(packageName);
+                    if (// Package disappearing
+                            change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
+                                    // Package modified
+                                    || isPackageModified(packageName)) {
+                        SpellCheckerInfo availSci = findAvailSystemSpellCheckerLocked(packageName);
+                        // Set the spell checker settings if different than before
+                        if (availSci != null && !availSci.getId().equals(sci.getId())) {
+                            setCurrentSpellCheckerLocked(availSci);
+                        }
                     }
                 }
             }
@@ -652,15 +659,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private void setCurrentSpellCheckerLocked(SpellCheckerInfo sci) {
-        final String sciId = sci.getId();
+    private void setCurrentSpellCheckerLocked(@Nullable SpellCheckerInfo sci) {
+        final String sciId = (sci != null) ? sci.getId() : "";
         if (DBG) {
             Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
         }
         final long ident = Binder.clearCallingIdentity();
         try {
             mSettings.putSelectedSpellChecker(sciId);
-            setCurrentSpellCheckerSubtypeLocked(0);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1106,13 +1112,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public void putSelectedSpellChecker(@Nullable String sciId) {
-            if (TextUtils.isEmpty(sciId)) {
-                // OK to coalesce to null, since getSelectedSpellChecker() can take care of the
-                // empty data scenario.
-                putString(Settings.Secure.SELECTED_SPELL_CHECKER, null);
-            } else {
-                putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
-            }
+            putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
         }
 
         public void putSelectedSpellCheckerSubtype(int hashCode) {
