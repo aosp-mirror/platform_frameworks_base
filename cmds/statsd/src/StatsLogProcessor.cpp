@@ -31,7 +31,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs") {
+StatsLogProcessor::StatsLogProcessor(const sp<UidMap> &uidMap)
+        : m_dropbox_writer("all-logs"), m_UidMap(uidMap)
+{
     // hardcoded config
     // this should be called from StatsService when it receives a statsd_config
     UpdateConfig(0, buildFakeConfig());

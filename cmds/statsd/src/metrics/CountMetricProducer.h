@@ -26,6 +26,8 @@
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
+using namespace std;
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -43,6 +45,9 @@ public:
     void finish() override;
 
     void onDumpReport() override;
+
+    // TODO: Implement this later.
+    virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override {};
 
 private:
     const CountMetric mMetric;

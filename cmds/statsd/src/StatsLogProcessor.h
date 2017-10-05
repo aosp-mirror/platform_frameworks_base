@@ -21,6 +21,7 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "metrics/MetricsManager.h"
 #include "stats_util.h"
+#include "UidMap.h"
 
 #include <log/logprint.h>
 #include <stdio.h>
@@ -32,7 +33,7 @@ namespace statsd {
 
 class StatsLogProcessor : public LogListener {
 public:
-    StatsLogProcessor();
+    StatsLogProcessor(const sp<UidMap> &uidMap);
     virtual ~StatsLogProcessor();
 
     virtual void OnLogEvent(const log_msg& msg);
@@ -44,6 +45,8 @@ private:
     DropboxWriter m_dropbox_writer;
 
     std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
+
+    sp<UidMap> m_UidMap; // Reference to the UidMap to lookup app name and version for each uid.
 };
 
 }  // namespace statsd

@@ -45,4 +45,20 @@ interface IStatsManager {
      * Two-way binder call so that caller's method (and corresponding wakelocks) will linger.
      */
     void informPollAlarmFired();
+
+    /**
+     * Inform statsd what the version and package are for each uid. Note that each array should
+     * have the same number of elements, and version[i] and package[i] correspond to uid[i].
+     */
+    oneway void informAllUidData(in int[] uid, in int[] version, in String[] app);
+
+    /**
+     * Inform statsd what the uid and version are for one app that was updated.
+     */
+    oneway void informOnePackage(in String app, in int uid, in int version);
+
+    /**
+     * Inform stats that an app was removed.
+     */
+    oneway void informOnePackageRemoved(in String app, in int uid);
 }
