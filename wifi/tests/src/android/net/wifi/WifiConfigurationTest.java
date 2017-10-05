@@ -18,6 +18,8 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import android.os.Parcel;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
@@ -97,5 +99,74 @@ public class WifiConfigurationTest {
         copy.readFromParcel(parcelR);
 
         assertEquals(networkSelectionStatus.isNotRecommended(), copy.isNotRecommended());
+    }
+
+    @Test
+    public void testIsOpenNetwork_IsOpen_NullWepKeys() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.clear();
+        config.wepKeys = null;
+
+        assertTrue(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testIsOpenNetwork_IsOpen_ZeroLengthWepKeysArray() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.clear();
+        config.wepKeys = new String[0];
+
+        assertTrue(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testIsOpenNetwork_IsOpen_NullWepKeysArray() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.clear();
+        config.wepKeys = new String[1];
+
+        assertTrue(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testIsOpenNetwork_NotOpen_HasWepKeys() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.clear();
+        config.wepKeys = new String[] {"test"};
+
+        assertFalse(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testIsOpenNetwork_NotOpen_HasNullWepKeyFollowedByNonNullKey() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.clear();
+        config.wepKeys = new String[] {null, null, "test"};
+
+        assertFalse(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testIsOpenNetwork_NotOpen_HasAuthType() {
+        for (int keyMgmt = 0; keyMgmt < WifiConfiguration.KeyMgmt.strings.length; keyMgmt++) {
+            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE) continue;
+            WifiConfiguration config = new WifiConfiguration();
+            config.allowedKeyManagement.clear();
+            config.allowedKeyManagement.set(keyMgmt);
+            config.wepKeys = null;
+
+            assertFalse("Open network reported when key mgmt was set to "
+                            + WifiConfiguration.KeyMgmt.strings[keyMgmt], config.isOpenNetwork());
+        }
+    }
+
+    @Test
+    public void testIsOpenNetwork_NotOpen_HasAuthTypeNoneAndMore() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+        config.wepKeys = null;
+
+        assertFalse(config.isOpenNetwork());
     }
 }
