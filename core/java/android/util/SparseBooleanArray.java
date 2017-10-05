@@ -119,6 +119,10 @@ public class SparseBooleanArray implements Cloneable {
 
     /** @hide */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
         System.arraycopy(mValues, index + 1, mValues, index, mSize - (index + 1));
         mSize--;
@@ -162,6 +166,10 @@ public class SparseBooleanArray implements Cloneable {
      * key.</p>
      */
     public int keyAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mKeys[index];
     }
 
@@ -177,16 +185,28 @@ public class SparseBooleanArray implements Cloneable {
      * associated with the largest key.</p>
      */
     public boolean valueAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mValues[index];
     }
 
     /** @hide */
     public void setValueAt(int index, boolean value) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         mValues[index] = value;
     }
 
     /** @hide */
     public void setKeyAt(int index, int key) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         mKeys[index] = key;
     }
 
