@@ -6849,6 +6849,11 @@ public class PackageParser {
             dest.writeParcelable(group, flags);
         }
 
+        /** @hide */
+        public boolean isAppOp() {
+            return info.isAppOp();
+        }
+
         private Permission(Parcel in) {
             super(in);
             final ClassLoader boot = Object.class.getClassLoader();
