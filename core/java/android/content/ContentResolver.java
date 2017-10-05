@@ -47,6 +47,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.slice.Slice;
+import android.slice.SliceProvider;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -178,6 +180,8 @@ public abstract class ContentResolver {
     public static final Intent ACTION_SYNC_CONN_STATUS_CHANGED =
             new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
 
+    /** @hide */
+    public static final String SCHEME_SLICE = "slice";
     public static final String SCHEME_CONTENT = "content";
     public static final String SCHEME_ANDROID_RESOURCE = "android.resource";
     public static final String SCHEME_FILE = "file";
@@ -1718,6 +1722,36 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Turns a slice Uri into slice content.
+     *
+     * @param uri The URI to a slice provider
+     * @return The Slice provided by the app or null if none is given.
+     * @see Slice
+     * @hide
+     */
+    public final @Nullable Slice bindSlice(@NonNull Uri uri) {
+        Preconditions.checkNotNull(uri, "uri");
+        IContentProvider provider = acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            final Bundle res = provider.call(mPackageName, SliceProvider.METHOD_SLICE, null,
+                    extras);
+            Bundle.setDefusable(res, true);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            releaseProvider(provider);
+        }
+    }
+
+    /**
      * Returns the content provider for the given content URI.
      *
      * @param uri The URI to a content provider
@@ -1725,7 +1759,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public final IContentProvider acquireProvider(Uri uri) {
-        if (!SCHEME_CONTENT.equals(uri.getScheme())) {
+        if (!SCHEME_CONTENT.equals(uri.getScheme()) && !SCHEME_SLICE.equals(uri.getScheme())) {
             return null;
         }
         final String auth = uri.getAuthority();
