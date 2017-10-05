@@ -124,6 +124,10 @@ public class LongSparseLongArray implements Cloneable {
      * Removes the mapping at the given index.
      */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
         System.arraycopy(mValues, index + 1, mValues, index, mSize - (index + 1));
         mSize--;
@@ -167,6 +171,10 @@ public class LongSparseLongArray implements Cloneable {
      * key.</p>
      */
     public long keyAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mKeys[index];
     }
 
@@ -182,7 +190,22 @@ public class LongSparseLongArray implements Cloneable {
      * associated with the largest key.</p>
      */
     public long valueAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mValues[index];
+    }
+    
+    /**
+     * Sets the value at the given {@code index}.
+     */
+    public void setValueAt(int index, long value) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
+        mValues[index] = value;
     }
 
     /**
