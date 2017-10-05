@@ -296,6 +296,7 @@ class Vr2dDisplay {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
             mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
                     DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
                     null /* surface */, flags, null /* callback */, null /* handler */,
