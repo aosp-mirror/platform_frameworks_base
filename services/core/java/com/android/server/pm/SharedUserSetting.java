@@ -16,12 +16,18 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
+import android.content.pm.PackageParser;
 import android.util.ArraySet;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Settings data for a particular shared user ID we know about.
  */
-final class SharedUserSetting extends SettingBase {
+public final class SharedUserSetting extends SettingBase {
     final String name;
 
     int userId;
@@ -72,5 +78,19 @@ final class SharedUserSetting extends SettingBase {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
         }
+    }
+
+    public @Nullable List<PackageParser.Package> getPackages() {
+        if (packages == null || packages.size() == 0) {
+            return null;
+        }
+        final ArrayList<PackageParser.Package> pkgList = new ArrayList<>(packages.size());
+        for (PackageSetting ps : packages) {
+            if (ps == null) {
+                continue;
+            }
+            pkgList.add(ps.pkg);
+        }
+        return pkgList;
     }
 }

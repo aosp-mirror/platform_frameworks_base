@@ -413,7 +413,7 @@ public abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).suspended = suspended;
     }
 
-    boolean getInstantApp(int userId) {
+    public boolean getInstantApp(int userId) {
         return readUserState(userId).instantApp;
     }
 

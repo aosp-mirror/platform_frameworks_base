@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm;
+package com.android.server.pm.permission;
 
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
@@ -24,7 +24,6 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.permission.BasePermission;
 
 import java.util.ArrayList;
 import java.util.Arrays;

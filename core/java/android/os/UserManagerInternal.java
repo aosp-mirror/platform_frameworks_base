@@ -154,9 +154,19 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserUnlocked(int userId);
 
     /**
-     * Return whether the given user is running
+     * Returns whether the given user is running
      */
     public abstract boolean isUserRunning(int userId);
+
+    /**
+     * Returns whether the given user is initialized
+     */
+    public abstract boolean isUserInitialized(int userId);
+
+    /**
+     * Returns whether the given user exists
+     */
+    public abstract boolean exists(int userId);
 
     /**
      * Set user's running state

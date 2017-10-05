@@ -30,6 +30,8 @@ import android.content.Intent;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.os.Debug;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
@@ -311,6 +313,20 @@ public class PackageManagerServiceUtils {
         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
             for (int i = 0; i < pkg.splitCodePaths.length; i++) {
                 logApkHasUncompressedCode(pkg.splitCodePaths[i]);
+            }
+        }
+    }
+
+    public static void enforceShellRestriction(String restriction, int callingUid, int userHandle) {
+        if (callingUid == Process.SHELL_UID) {
+            if (userHandle >= 0
+                    && PackageManagerService.sUserManager.hasUserRestriction(
+                            restriction, userHandle)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + userHandle);
+            } else if (userHandle < 0) {
+                Slog.e(PackageManagerService.TAG, "Unable to check shell permission for user "
+                        + userHandle + "\n\t" + Debug.getCallers(3));
             }
         }
     }
