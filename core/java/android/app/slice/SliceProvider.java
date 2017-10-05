@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.slice;
+package android.app.slice;
 
 import android.Manifest.permission;
 import android.content.ContentProvider;
@@ -26,6 +26,8 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StrictMode;
+import android.os.StrictMode.ThreadPolicy;
 import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
@@ -51,9 +53,14 @@ import java.util.concurrent.CountDownLatch;
  * </pre>
  *
  * @see Slice
- * @hide
  */
 public abstract class SliceProvider extends ContentProvider {
+
+    /**
+     * This is the Android platform's MIME type for a slice: URI
+     * containing a slice implemented through {@link SliceProvider}.
+     */
+    public static final String SLICE_TYPE = "vnd.android.slice";
 
     private static final String TAG = "SliceProvider";
     /**
@@ -73,8 +80,18 @@ public abstract class SliceProvider extends ContentProvider {
 
     /**
      * Implemented to create a slice. Will be called on the main thread.
+     * <p>
+     * onBindSlice should return as quickly as possible so that the UI tied
+     * to this slice can be responsive. No network or other IO will be allowed
+     * during onBindSlice. Any loading that needs to be done should happen
+     * off the main thread with a call to {@link ContentResolver#notifyChange(Uri, ContentObserver)}
+     * when the app is ready to provide the complete data in onBindSlice.
+     * <p>
+     *
      * @see {@link Slice}.
+     * @see {@link Slice#HINT_PARTIAL}
      */
+    // TODO: Provide alternate notifyChange that takes in the slice (i.e. notifyChange(Uri, Slice)).
     public abstract Slice onBindSlice(Uri sliceUri);
 
     @Override
@@ -120,11 +137,11 @@ public abstract class SliceProvider extends ContentProvider {
     @Override
     public final String getType(Uri uri) {
         if (DEBUG) Log.d(TAG, "getType " + uri);
-        return null;
+        return SLICE_TYPE;
     }
 
     @Override
-    public final Bundle call(String method, String arg, Bundle extras) {
+    public Bundle call(String method, String arg, Bundle extras) {
         if (method.equals(METHOD_SLICE)) {
             getContext().enforceCallingPermission(permission.BIND_SLICE,
                     "Slice binding requires the permission BIND_SLICE");
@@ -143,8 +160,17 @@ public abstract class SliceProvider extends ContentProvider {
         CountDownLatch latch = new CountDownLatch(1);
         Handler mainHandler = new Handler(Looper.getMainLooper());
         mainHandler.post(() -> {
-            output[0] = onBindSlice(sliceUri);
-            latch.countDown();
+            ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+            try {
+                StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                        .detectAll()
+                        .penaltyDeath()
+                        .build());
+                output[0] = onBindSlice(sliceUri);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+                latch.countDown();
+            }
         });
         try {
             latch.await();

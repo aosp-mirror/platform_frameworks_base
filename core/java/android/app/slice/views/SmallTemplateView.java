@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import android.app.PendingIntent.CanceledException;
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
+import android.app.slice.views.LargeSliceAdapter.SliceListView;
+import android.app.slice.views.SliceView.SliceModeView;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
-import android.slice.views.LargeSliceAdapter.SliceListView;
-import android.slice.views.SliceView.SliceModeView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,7 +34,6 @@ import com.android.internal.R;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -117,7 +116,7 @@ public class SmallTemplateView extends SliceModeView implements SliceListView {
         int itemCount = 0;
         boolean hasSummary = false;
         ArrayList<SliceItem> sliceItems = new ArrayList<SliceItem>(
-                Arrays.asList(slice.getSlice().getItems()));
+                slice.getSlice().getItems());
         for (int i = 0; i < sliceItems.size(); i++) {
             SliceItem item = sliceItems.get(i);
             if (!hasSummary && item.getType() == SliceItem.TYPE_TEXT
@@ -140,9 +139,9 @@ public class SmallTemplateView extends SliceModeView implements SliceListView {
                     mEndContainer.addView(tv);
                     itemCount++;
                 } else if (item.getType() == SliceItem.TYPE_SLICE) {
-                    SliceItem[] subItems = item.getSlice().getItems();
-                    for (int j = 0; j < subItems.length; j++) {
-                        sliceItems.add(subItems[j]);
+                    List<SliceItem> subItems = item.getSlice().getItems();
+                    for (int j = 0; j < subItems.size(); j++) {
+                        sliceItems.add(subItems.get(j));
                     }
                 }
             }
@@ -151,7 +150,8 @@ public class SmallTemplateView extends SliceModeView implements SliceListView {
 
     @Override
     public void setSlice(Slice slice) {
-        setSliceItem(new SliceItem(slice, SliceItem.TYPE_SLICE, slice.getHints()));
+        setSliceItem(new SliceItem(slice, SliceItem.TYPE_SLICE,
+                slice.getHints().toArray(new String[slice.getHints().size()])));
     }
 
     /**

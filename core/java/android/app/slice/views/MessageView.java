@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
+import android.app.slice.views.LargeSliceAdapter.SliceListView;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
-import android.slice.views.LargeSliceAdapter.SliceListView;
 import android.text.SpannableStringBuilder;
 import android.util.AttributeSet;
 import android.util.TypedValue;

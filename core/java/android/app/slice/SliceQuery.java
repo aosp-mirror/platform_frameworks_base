@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package android.slice;
+package android.app.slice;
 
-import static android.slice.SliceItem.TYPE_ACTION;
-import static android.slice.SliceItem.TYPE_SLICE;
-
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -114,7 +110,9 @@ public class SliceQuery {
      * @hide
      */
     public static SliceItem find(Slice s, int type, String[] hints, String[] nonHints) {
-        return find(new SliceItem(s, TYPE_SLICE, s.getHints()), type, hints, nonHints);
+        List<String> h = s.getHints();
+        return find(new SliceItem(s, SliceItem.TYPE_SLICE, h.toArray(new String[h.size()])), type,
+                hints, nonHints);
     }
 
     /**
@@ -140,8 +138,9 @@ public class SliceQuery {
             @Override
             public SliceItem next() {
                 SliceItem item = items.poll();
-                if (item.getType() == TYPE_SLICE || item.getType() == TYPE_ACTION) {
-                    items.addAll(Arrays.asList(item.getSlice().getItems()));
+                if (item.getType() == SliceItem.TYPE_SLICE
+                        || item.getType() == SliceItem.TYPE_ACTION) {
+                    items.addAll(item.getSlice().getItems());
                 }
                 return item;
             }

@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import android.annotation.StringDef;
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import java.util.List;
 
 /**
  * A view that can display a {@link Slice} in different {@link SliceMode}'s.
@@ -120,7 +122,7 @@ public class SliceView extends LinearLayout {
      */
     public void bindSlice(Uri sliceUri) {
         validate(sliceUri);
-        Slice s = mContext.getContentResolver().bindSlice(sliceUri);
+        Slice s = Slice.bindSlice(mContext.getContentResolver(), sliceUri);
         bindSlice(s);
     }
 
@@ -201,7 +203,7 @@ public class SliceView extends LinearLayout {
         }
         // TODO: Smarter mapping here from one state to the next.
         SliceItem color = SliceQuery.find(mCurrentSlice, SliceItem.TYPE_COLOR);
-        SliceItem[] items = mCurrentSlice.getItems();
+        List<SliceItem> items = mCurrentSlice.getItems();
         SliceItem actionRow = SliceQuery.find(mCurrentSlice, SliceItem.TYPE_SLICE,
                 Slice.HINT_ACTIONS,
                 Slice.HINT_ALT);
@@ -212,7 +214,7 @@ public class SliceView extends LinearLayout {
             addView(mCurrentView);
             addView(mActions);
         }
-        if (items.length > 1 || (items.length != 0 && items[0] != actionRow)) {
+        if (items.size() > 1 || (items.size() != 0 && items.get(0) != actionRow)) {
             mCurrentView.setVisibility(View.VISIBLE);
             mCurrentView.setSlice(mCurrentSlice);
         } else {
@@ -239,7 +241,7 @@ public class SliceView extends LinearLayout {
     }
 
     private static void validate(Uri sliceUri) {
-        if (!ContentResolver.SCHEME_SLICE.equals(sliceUri.getScheme())) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(sliceUri.getScheme())) {
             throw new RuntimeException("Invalid uri " + sliceUri);
         }
         if (sliceUri.getPathSegments().size() == 0) {

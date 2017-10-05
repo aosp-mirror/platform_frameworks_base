@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteInput;
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewParent;

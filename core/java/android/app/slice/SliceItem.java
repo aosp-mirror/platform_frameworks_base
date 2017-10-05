@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.slice;
+package android.app.slice;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -23,12 +23,14 @@ import android.app.RemoteInput;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.slice.Slice.SliceHint;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.widget.RemoteViews;
 
 import com.android.internal.util.ArrayUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -47,7 +49,6 @@ import com.android.internal.util.ArrayUtils;
  * The hints that a {@link SliceItem} are a set of strings which annotate
  * the content. The hints that are guaranteed to be understood by the system
  * are defined on {@link Slice}.
- * @hide
  */
 public final class SliceItem implements Parcelable {
 
@@ -97,14 +98,15 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    protected @SliceHint String[] mHints;
+    protected @Slice.SliceHint
+    String[] mHints;
     private final int mType;
     private final Object mObj;
 
     /**
      * @hide
      */
-    public SliceItem(Object obj, @SliceType int type, @SliceHint String[] hints) {
+    public SliceItem(Object obj, @SliceType int type, @Slice.SliceHint String[] hints) {
         mHints = hints;
         mType = type;
         mObj = obj;
@@ -113,7 +115,7 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    public SliceItem(PendingIntent intent, Slice slice, int type, @SliceHint String[] hints) {
+    public SliceItem(PendingIntent intent, Slice slice, int type, @Slice.SliceHint String[] hints) {
         this(new Pair<>(intent, slice), type, hints);
     }
 
@@ -121,14 +123,14 @@ public final class SliceItem implements Parcelable {
      * Gets all hints associated with this SliceItem.
      * @return Array of hints.
      */
-    public @NonNull @SliceHint String[] getHints() {
-        return mHints;
+    public @NonNull @Slice.SliceHint List<String> getHints() {
+        return Arrays.asList(mHints);
     }
 
     /**
      * @hide
      */
-    public void addHint(@SliceHint String hint) {
+    public void addHint(@Slice.SliceHint String hint) {
         mHints = ArrayUtils.appendElement(String.class, mHints, hint);
     }
 
@@ -206,7 +208,7 @@ public final class SliceItem implements Parcelable {
      * @param hint The hint to check for
      * @return true if this item contains the given hint
      */
-    public boolean hasHint(@SliceHint String hint) {
+    public boolean hasHint(@Slice.SliceHint String hint) {
         return ArrayUtils.contains(mHints, hint);
     }
 
@@ -234,7 +236,7 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    public boolean hasHints(@SliceHint String[] hints) {
+    public boolean hasHints(@Slice.SliceHint String[] hints) {
         if (hints == null) return true;
         for (String hint : hints) {
             if (!TextUtils.isEmpty(hint) && !ArrayUtils.contains(mHints, hint)) {
@@ -247,7 +249,7 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    public boolean hasAnyHints(@SliceHint String[] hints) {
+    public boolean hasAnyHints(@Slice.SliceHint String[] hints) {
         if (hints == null) return false;
         for (String hint : hints) {
             if (ArrayUtils.contains(mHints, hint)) {
