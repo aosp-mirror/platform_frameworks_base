@@ -122,6 +122,10 @@ public class SparseLongArray implements Cloneable {
      * Removes the mapping at the given index.
      */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         System.arraycopy(mKeys, index + 1, mKeys, index, mSize - (index + 1));
         System.arraycopy(mValues, index + 1, mValues, index, mSize - (index + 1));
         mSize--;
@@ -165,6 +169,10 @@ public class SparseLongArray implements Cloneable {
      * key.</p>
      */
     public int keyAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mKeys[index];
     }
 
@@ -180,7 +188,22 @@ public class SparseLongArray implements Cloneable {
      * associated with the largest key.</p>
      */
     public long valueAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         return mValues[index];
+    }
+    
+    /**
+     * Sets the {@code value} at the given {@code index}.
+     */
+    public void setValueAt(int index, long value) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
+        mValues[index] = value;
     }
 
     /**
