@@ -115,11 +115,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     /** Null set of sleep sleep flags. */
     private static final int FLAG_NONE = 0;
     /** Flag set when the device is not sleeping. */
-    private static final int FLAG_AWAKE = 1;
+    private static final int FLAG_AWAKE = 1 << 0;
     /** Flag set when the screen has been turned on. */
-    private static final int FLAG_SCREEN_ON = 2;
+    private static final int FLAG_SCREEN_ON = 1 << 1;
+    /** Flag set when the keyguard is not active. */
+    private static final int FLAG_KEYGUARD_UNLOCKED = 1 << 2;
     /** Flag indicating that all system sleep flags have been set.*/
-    private static final int FLAG_ALL = FLAG_AWAKE | FLAG_SCREEN_ON;
+    private static final int FLAG_ALL = FLAG_AWAKE | FLAG_SCREEN_ON | FLAG_KEYGUARD_UNLOCKED;
 
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
@@ -155,10 +157,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
     private INotificationManager mNotificationManager;
     /** Tracks the state of the screen and keyguard UI.*/
-    private int mSystemSleepFlags = FLAG_AWAKE;
+    private int mSystemSleepFlags = FLAG_AWAKE | FLAG_KEYGUARD_UNLOCKED;
     /**
      * Set when ACTION_USER_UNLOCKED is fired. We shouldn't try to bind to the
-     * vr service before then.
+     * vr service before then. This gets set only once the first time the user unlocks the device
+     * and stays true thereafter.
      */
     private boolean mUserUnlocked;
     private Vr2dDisplay mVr2dDisplay;
@@ -208,7 +211,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (mBootsToVr) {
                     setPersistentVrModeEnabled(true);
                 }
-                consumeAndApplyPendingStateLocked();
                 if (mBootsToVr && !mVrModeEnabled) {
                   setVrMode(true, mDefaultVrService, 0, -1, null);
                 }
@@ -230,27 +232,38 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     private void setSleepState(boolean isAsleep) {
-        synchronized(mLock) {
-
-            if (!isAsleep) {
-                mSystemSleepFlags |= FLAG_AWAKE;
-            } else {
-                mSystemSleepFlags &= ~FLAG_AWAKE;
-            }
-
-            updateVrModeAllowedLocked();
-        }
+        setSystemState(FLAG_AWAKE, !isAsleep);
     }
 
     private void setScreenOn(boolean isScreenOn) {
+        setSystemState(FLAG_SCREEN_ON, isScreenOn);
+    }
+
+    private void setKeyguardShowing(boolean isShowing) {
+        setSystemState(FLAG_KEYGUARD_UNLOCKED, !isShowing);
+    }
+
+    private void setSystemState(int flags, boolean isOn) {
         synchronized(mLock) {
-            if (isScreenOn) {
-                mSystemSleepFlags |= FLAG_SCREEN_ON;
+            int oldState = mSystemSleepFlags;
+            if (isOn) {
+                mSystemSleepFlags |= flags;
             } else {
-                mSystemSleepFlags &= ~FLAG_SCREEN_ON;
+                mSystemSleepFlags &= ~flags;
             }
-            updateVrModeAllowedLocked();
+            if (oldState != mSystemSleepFlags) {
+                if (DBG) Slog.d(TAG, "System state: " + getStateAsString());
+                updateVrModeAllowedLocked();
+            }
         }
+    }
+
+    private String getStateAsString() {
+        return new StringBuilder()
+                .append((mSystemSleepFlags & FLAG_AWAKE) != 0 ? "awake, " : "")
+                .append((mSystemSleepFlags & FLAG_SCREEN_ON) != 0 ? "screen_on, " : "")
+                .append((mSystemSleepFlags & FLAG_KEYGUARD_UNLOCKED) != 0 ? "keyguard_off" : "")
+                .toString();
     }
 
     private void setUserUnlocked() {
@@ -669,6 +682,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public void onScreenStateChanged(boolean isScreenOn) {
             VrManagerService.this.setScreenOn(isScreenOn);
+        }
+
+        @Override
+        public void onKeyguardStateChanged(boolean isShowing) {
+            VrManagerService.this.setKeyguardShowing(isShowing);
         }
 
         @Override
