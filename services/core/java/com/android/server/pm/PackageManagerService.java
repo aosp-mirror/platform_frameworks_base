@@ -21209,11 +21209,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         sUserManager.systemReady();
 
-        synchronized(mPackages) {
-            // If we upgraded grant all default permissions before kicking off.
-            for (int userId : grantPermissionsUserIds) {
-                mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
-            }
+        // If we upgraded grant all default permissions before kicking off.
+        for (int userId : grantPermissionsUserIds) {
+            mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
         }
 
         if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
