@@ -34,7 +34,7 @@ public final class IpSecConfig implements Parcelable {
     // Preventing this from being null simplifies Java->Native binder
     private String mRemoteAddress = "";
 
-    // The underlying network interface that represents the "gateway" Network
+    // The underlying Network that represents the "gateway" Network
     // for outbound packets. It may also be used to select packets.
     private Network mNetwork;
 
@@ -273,6 +273,7 @@ public final class IpSecConfig implements Parcelable {
             };
 
     @VisibleForTesting
+    /** Equals method used for testing */
     public static boolean equals(IpSecConfig lhs, IpSecConfig rhs) {
         if (lhs == null || rhs == null) return (lhs == rhs);
         return (lhs.mMode == rhs.mMode
