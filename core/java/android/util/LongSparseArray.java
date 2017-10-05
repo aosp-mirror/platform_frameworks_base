@@ -144,6 +144,10 @@ public class LongSparseArray<E> implements Cloneable {
      * Removes the mapping at the specified index.
      */
     public void removeAt(int index) {
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
@@ -236,6 +240,10 @@ public class LongSparseArray<E> implements Cloneable {
         if (mGarbage) {
             gc();
         }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
 
         return mKeys[index];
     }
@@ -256,6 +264,10 @@ public class LongSparseArray<E> implements Cloneable {
         if (mGarbage) {
             gc();
         }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
 
         return (E) mValues[index];
     }
@@ -268,6 +280,10 @@ public class LongSparseArray<E> implements Cloneable {
     public void setValueAt(int index, E value) {
         if (mGarbage) {
             gc();
+        }
+        
+        if (index >= mSize) {
+            throw new ArrayIndexOutOfBoundsException();
         }
 
         mValues[index] = value;
