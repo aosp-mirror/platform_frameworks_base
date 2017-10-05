@@ -25,6 +25,8 @@ import android.app.Activity;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -232,6 +234,8 @@ public final class SaveInfo implements Parcelable {
     private final int mFlags;
     private final CustomDescription mCustomDescription;
     private final InternalValidator mValidator;
+    private final InternalSanitizer[] mSanitizerKeys;
+    private final AutofillId[][] mSanitizerValues;
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -243,6 +247,18 @@ public final class SaveInfo implements Parcelable {
         mFlags = builder.mFlags;
         mCustomDescription = builder.mCustomDescription;
         mValidator = builder.mValidator;
+        if (builder.mSanitizers == null) {
+            mSanitizerKeys = null;
+            mSanitizerValues = null;
+        } else {
+            final int size = builder.mSanitizers.size();
+            mSanitizerKeys = new InternalSanitizer[size];
+            mSanitizerValues = new AutofillId[size][];
+            for (int i = 0; i < size; i++) {
+                mSanitizerKeys[i] = builder.mSanitizers.keyAt(i);
+                mSanitizerValues[i] = builder.mSanitizers.valueAt(i);
+            }
+        }
     }
 
     /** @hide */
@@ -292,6 +308,18 @@ public final class SaveInfo implements Parcelable {
         return mValidator;
     }
 
+    /** @hide */
+    @Nullable
+    public InternalSanitizer[] getSanitizerKeys() {
+        return mSanitizerKeys;
+    }
+
+    /** @hide */
+    @Nullable
+    public AutofillId[][] getSanitizerValues() {
+        return mSanitizerValues;
+    }
+
     /**
      * A builder for {@link SaveInfo} objects.
      */
@@ -307,6 +335,9 @@ public final class SaveInfo implements Parcelable {
         private int mFlags;
         private CustomDescription mCustomDescription;
         private InternalValidator mValidator;
+        private ArrayMap<InternalSanitizer, AutofillId[]> mSanitizers;
+        // Set used to validate against duplicate ids.
+        private ArraySet<AutofillId> mSanitizerIds;
 
         /**
          * Creates a new builder.
@@ -530,6 +561,61 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
+         * Adds a sanitizer for one or more field.
+         *
+         * <p>When a sanitizer is set for a field, the {@link AutofillValue} is sent to the
+         * sanitizer before a save request is <a href="#TriggeringSaveRequest">triggered</a>.
+         *
+         * <p>Typically used to avoid displaying the save UI for values that are autofilled but
+         * reformattedby the app. For example, to remove spaces between every 4 digits of a
+         * credit card number:
+         *
+         * <pre class="prettyprint">
+         * builder.addSanitizer(
+         *     new TextValueSanitizer(Pattern.compile("^(\\d{4}\s?\\d{4}\s?\\d{4}\s?\\d{4})$"),
+         *         "$1$2$3$4"), ccNumberId);
+         * </pre>
+         *
+         * <p>The same sanitizer can be reused to sanitize multiple fields. For example, to trim
+         * both the username and password fields:
+         *
+         * <pre class="prettyprint">
+         * builder.addSanitizer(
+         *     new TextValueSanitizer(Pattern.compile("^\\s*(.*)\\s*$"), "$1"),
+         *         usernameId, passwordId);
+         * </pre>
+         *
+         * @param sanitizer an implementation provided by the Android System.
+         * @param ids id of fields whose value will be sanitized.
+         * @return this builder.
+         *
+         * @throws IllegalArgumentException if a sanitizer for any of the {@code ids} has already
+         * been added or if {@code ids} is empty.
+         */
+        public @NonNull Builder addSanitizer(@NonNull Sanitizer sanitizer,
+                @NonNull AutofillId... ids) {
+            throwIfDestroyed();
+            Preconditions.checkArgument(!ArrayUtils.isEmpty(ids), "ids cannot be empty or null");
+            Preconditions.checkArgument((sanitizer instanceof InternalSanitizer),
+                    "not provided by Android System: " + sanitizer);
+
+            if (mSanitizers == null) {
+                mSanitizers = new ArrayMap<>();
+                mSanitizerIds = new ArraySet<>(ids.length);
+            }
+
+            // Check for duplicates first.
+            for (AutofillId id : ids) {
+                Preconditions.checkArgument(!mSanitizerIds.contains(id), "already added %s", id);
+                mSanitizerIds.add(id);
+            }
+
+            mSanitizers.put((InternalSanitizer) sanitizer, ids);
+
+            return this;
+        }
+
+        /**
          * Builds a new {@link SaveInfo} instance.
          *
          * @throws IllegalStateException if no
@@ -569,6 +655,10 @@ public final class SaveInfo implements Parcelable {
                 .append(", mFlags=").append(mFlags)
                 .append(", mCustomDescription=").append(mCustomDescription)
                 .append(", validation=").append(mValidator)
+                .append(", sanitizerKeys=")
+                    .append(mSanitizerKeys == null ? "N/A:" : mSanitizerKeys.length)
+                .append(", sanitizerValues=")
+                    .append(mSanitizerValues == null ? "N/A:" : mSanitizerValues.length)
                 .append("]").toString();
     }
 
@@ -591,6 +681,12 @@ public final class SaveInfo implements Parcelable {
         parcel.writeCharSequence(mDescription);
         parcel.writeParcelable(mCustomDescription, flags);
         parcel.writeParcelable(mValidator, flags);
+        parcel.writeParcelableArray(mSanitizerKeys, flags);
+        if (mSanitizerKeys != null) {
+            for (int i = 0; i < mSanitizerValues.length; i++) {
+                parcel.writeParcelableArray(mSanitizerValues[i], flags);
+            }
+        }
         parcel.writeInt(mFlags);
     }
 
@@ -620,6 +716,16 @@ public final class SaveInfo implements Parcelable {
             final InternalValidator validator = parcel.readParcelable(null);
             if (validator != null) {
                 builder.setValidator(validator);
+            }
+            final InternalSanitizer[] sanitizers =
+                    parcel.readParcelableArray(null, InternalSanitizer.class);
+            if (sanitizers != null) {
+                final int size = sanitizers.length;
+                for (int i = 0; i < size; i++) {
+                    final AutofillId[] autofillIds =
+                            parcel.readParcelableArray(null, AutofillId.class);
+                    builder.addSanitizer(sanitizers[i], autofillIds);
+                }
             }
             builder.setFlags(parcel.readInt());
             return builder.build();
