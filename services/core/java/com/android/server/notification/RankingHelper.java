@@ -231,7 +231,11 @@ public class RankingHelper implements RankingConfig {
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
                                             channelName, channelImportance);
-                                    channel.populateFromXml(parser);
+                                    if (forRestore) {
+                                        channel.populateFromXmlForRestore(parser, mContext);
+                                    } else {
+                                        channel.populateFromXml(parser);
+                                    }
                                     r.channels.put(id, channel);
                                 }
                             }
@@ -394,7 +398,11 @@ public class RankingHelper implements RankingConfig {
                     }
 
                     for (NotificationChannel channel : r.channels.values()) {
-                        if (!forBackup || (forBackup && !channel.isDeleted())) {
+                        if (forBackup) {
+                            if (!channel.isDeleted()) {
+                                channel.writeXmlForBackup(out, mContext);
+                            }
+                        } else {
                             channel.writeXml(out);
                         }
                     }
