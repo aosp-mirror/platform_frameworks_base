@@ -667,7 +667,7 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
-        if (mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
+        if (mBar.panelEnabled() && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
             mIsExpansionFromHeadsUp = true;
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);

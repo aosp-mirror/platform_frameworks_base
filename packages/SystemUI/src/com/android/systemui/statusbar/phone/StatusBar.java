@@ -479,7 +479,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
-    private boolean mUserSetup = false;
+    @VisibleForTesting
+    protected boolean mUserSetup = false;
     private final DeviceProvisionedListener mUserSetupObserver = new DeviceProvisionedListener() {
         @Override
         public void onUserSetupChanged() {
@@ -1978,6 +1979,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned()
                 && (mUserSetup || mUserSwitcherController == null
                         || !mUserSwitcherController.isSimpleUserSwitcher())
+                && ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0)
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
                 && !mDozing
                 && !ONLY_CORE_APPS);
@@ -2533,6 +2535,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_QUICK_SETTINGS))       ? '!' : ' ');
         flagdbg.append(0 != ((state2 & StatusBarManager.DISABLE2_SYSTEM_ICONS))         ? 'I' : 'i');
         flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_SYSTEM_ICONS))         ? '!' : ' ');
+        flagdbg.append(0 != ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE))   ? 'N' : 'n');
+        flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_NOTIFICATION_SHADE))   ? '!' : ' ');
         flagdbg.append('>');
         Log.d(TAG, flagdbg.toString());
 
@@ -2558,6 +2562,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if ((diff2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) {
             updateQsExpansionEnabled();
+        }
+
+        if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+            updateQsExpansionEnabled();
+            if ((state1 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+                animateCollapsePanels();
+            }
         }
     }
 
@@ -2915,7 +2926,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     boolean panelsEnabled() {
-        return (mDisabled1 & StatusBarManager.DISABLE_EXPAND) == 0 && !ONLY_CORE_APPS;
+        return (mDisabled1 & StatusBarManager.DISABLE_EXPAND) == 0
+                && (mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0
+                && !ONLY_CORE_APPS;
     }
 
     void makeExpandedVisible(boolean force) {
@@ -4844,6 +4857,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param expandView The view to expand after going to the shade.
      */
     public void goToLockedShade(View expandView) {
+        if ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+            return;
+        }
+
         int userId = mCurrentUserId;
         ExpandableNotificationRow row = null;
         if (expandView instanceof ExpandableNotificationRow) {
@@ -5732,6 +5749,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         private boolean handleRemoteInput(View view, PendingIntent pendingIntent) {
+            if ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+                // Skip remote input as doing so will expand the notification shade.
+                return true;
+            }
+
             Object tag = view.getTag(com.android.internal.R.id.remote_input_tag);
             RemoteInput[] inputs = null;
             if (tag instanceof RemoteInput[]) {

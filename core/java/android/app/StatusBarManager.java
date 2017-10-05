@@ -72,13 +72,16 @@ public class StatusBarManager {
      */
     public static final int DISABLE2_QUICK_SETTINGS = 1;
     public static final int DISABLE2_SYSTEM_ICONS = 1 << 1;
+    public static final int DISABLE2_NOTIFICATION_SHADE = 1 << 2;
 
     public static final int DISABLE2_NONE = 0x00000000;
 
-    public static final int DISABLE2_MASK = DISABLE2_QUICK_SETTINGS | DISABLE2_SYSTEM_ICONS;
+    public static final int DISABLE2_MASK = DISABLE2_QUICK_SETTINGS | DISABLE2_SYSTEM_ICONS
+            | DISABLE2_NOTIFICATION_SHADE;
 
     @IntDef(flag = true,
-            value = {DISABLE2_NONE, DISABLE2_MASK, DISABLE2_QUICK_SETTINGS, DISABLE2_SYSTEM_ICONS})
+            value = {DISABLE2_NONE, DISABLE2_MASK, DISABLE2_QUICK_SETTINGS, DISABLE2_SYSTEM_ICONS,
+                    DISABLE2_NOTIFICATION_SHADE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Disable2Flags {}
 
