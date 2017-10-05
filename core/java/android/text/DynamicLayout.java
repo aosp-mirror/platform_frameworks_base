@@ -299,7 +299,7 @@ public class DynamicLayout extends Layout
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
-        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<Builder>(3);
+        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
     }
 
     /**
@@ -440,7 +440,7 @@ public class DynamicLayout extends Layout
             mEllipsizeAt = null;
         }
 
-        mObjects = new PackedObjectVector<Directions>(1);
+        mObjects = new PackedObjectVector<>(1);
 
         // Initial state is a single line with 0 characters (0 to 0), with top at 0 and bottom at
         // whatever is natural, and undefined ellipsis.
@@ -1050,7 +1050,7 @@ public class DynamicLayout extends Layout
 
     private static class ChangeWatcher implements TextWatcher, SpanWatcher {
         public ChangeWatcher(DynamicLayout layout) {
-            mLayout = new WeakReference<DynamicLayout>(layout);
+            mLayout = new WeakReference<>(layout);
         }
 
         private void reflow(CharSequence s, int where, int before, int after) {

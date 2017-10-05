@@ -441,8 +441,6 @@ public class StaticLayout extends Layout {
 
         private Pair<String, long[]> getLocaleAndHyphenatorIfChanged(TextPaint paint) {
             final LocaleList locales = paint.getTextLocales();
-            final String languageTags;
-            long[] hyphenators;
             if (!locales.equals(mLocales)) {
                 mLocales = locales;
                 return new Pair(locales.toLanguageTags(), getHyphenators(locales));
@@ -521,7 +519,7 @@ public class StaticLayout extends Layout {
 
         private LocaleList mLocales;
 
-        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<Builder>(3);
+        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
     }
 
     public StaticLayout(CharSequence source, TextPaint paint,
@@ -947,10 +945,10 @@ public class StaticLayout extends Layout {
                     boolean moreChars = (endPos < bufEnd);
 
                     final int ascent = fallbackLineSpacing
-                            ? Math.min(fmAscent, (int) Math.round(ascents[breakIndex]))
+                            ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
                             : fmAscent;
                     final int descent = fallbackLineSpacing
-                            ? Math.max(fmDescent, (int) Math.round(descents[breakIndex]))
+                            ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
                     v = out(source, here, endPos,
                             ascent, descent, fmTop, fmBottom,
@@ -1177,7 +1175,7 @@ public class StaticLayout extends Layout {
         mWorkPaint.set(paint);
         do {
             final float ellipsizedWidth = guessEllipsis(text, lineStart, lineEnd, widths,
-                    widthStart, tempAvail, where, line, textWidth, mWorkPaint, forceEllipsis, dir);
+                    widthStart, tempAvail, where, line, mWorkPaint, forceEllipsis, dir);
             if (ellipsizedWidth <= avail) {
                 lineFits = true;
             } else {
@@ -1207,7 +1205,7 @@ public class StaticLayout extends Layout {
     // This method temporarily modifies the TextPaint passed to it, so the TextPaint passed to it
     // should not be accessed while the method is running.
     private float guessEllipsis(CharSequence text, int lineStart, int lineEnd, float[] widths,
-            int widthStart, float avail, TextUtils.TruncateAt where, int line, float textWidth,
+            int widthStart, float avail, TextUtils.TruncateAt where, int line,
             TextPaint paint, boolean forceEllipsis, int dir) {
         final int savedHyphenEdit = paint.getHyphenEdit();
         paint.setHyphenEdit(0);
