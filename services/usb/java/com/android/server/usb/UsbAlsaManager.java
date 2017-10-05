@@ -314,7 +314,11 @@ public final class UsbAlsaManager {
             return null;
         }
 
-        mDevicesParser.scan();
+        if (!mDevicesParser.scan()) {
+            Slog.e(TAG, "Error parsing ALSA devices file.");
+            return null;
+        }
+
         int device = mDevicesParser.getDefaultDeviceNum(card);
 
         boolean hasPlayback = mDevicesParser.hasPlaybackDevices(card);
