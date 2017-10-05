@@ -198,7 +198,6 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
@@ -752,6 +751,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
                 && !mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)
+                && !mUserController.hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
+                        mUserController.getCurrentUserId())
                 && !(UserManager.isDeviceInDemoMode(mContext)
                         && mUserController.getCurrentUser().isDemo());
     }
