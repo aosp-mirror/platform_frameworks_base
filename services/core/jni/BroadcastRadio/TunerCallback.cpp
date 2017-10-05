@@ -40,15 +40,19 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
+namespace V1_2 = hardware::broadcastradio::V1_2;
+namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
-using V1_1::ITunerCallback;
 using V1_1::ProgramInfo;
 using V1_1::ProgramListResult;
 using V1_1::ProgramSelector;
+using V1_1::VendorKeyValue;
+using V1_2::ITunerCallback;
+using utils::HalRevision;
 
 static JavaVM *gvm = nullptr;
 
@@ -117,6 +121,7 @@ public:
     virtual Return<void> backgroundScanComplete(ProgramListResult result);
     virtual Return<void> programListChanged();
     virtual Return<void> currentProgramInfoChanged(const ProgramInfo& info);
+    virtual Return<void> parametersUpdated(const hidl_vec<VendorKeyValue>& parameters);
 };
 
 struct TunerCallbackContext {
@@ -203,7 +208,7 @@ Return<void> NativeCallback::tuneComplete(Result result, const V1_0::ProgramInfo
         return {};
     }
 
-    auto selector = V1_1::utils::make_selector(mBand, info.channel, info.subChannel);
+    auto selector = utils::make_selector(mBand, info.channel, info.subChannel);
     return tuneComplete_1_1(result, selector);
 }
 
@@ -336,6 +341,14 @@ Return<void> NativeCallback::currentProgramInfoChanged(const ProgramInfo& info) 
     });
 
     return Return<void>();
+}
+
+Return<void> NativeCallback::parametersUpdated(const hidl_vec<VendorKeyValue>& parameters) {
+    ALOGV("%s", __func__);
+
+    // TODO(b/65862441): pass this callback to the front-end
+
+    return {};
 }
 
 static TunerCallbackContext& getNativeContext(jlong nativeContextHandle) {

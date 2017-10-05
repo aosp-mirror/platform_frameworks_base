@@ -92,6 +92,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.audio.common@2.0 \
     android.hardware.broadcastradio@1.0 \
     android.hardware.broadcastradio@1.1 \
+    android.hardware.broadcastradio@1.2 \
     android.hardware.contexthub@1.0 \
     android.hardware.gnss@1.0 \
     android.hardware.ir@1.0 \
@@ -109,5 +110,5 @@ LOCAL_SHARED_LIBRARIES += \
     android.frameworks.sensorservice@1.0 \
 
 LOCAL_STATIC_LIBRARIES += \
-    android.hardware.broadcastradio@1.1-utils-lib \
+    android.hardware.broadcastradio@common-utils-lib \
     libscrypt_static \

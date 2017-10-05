@@ -22,7 +22,7 @@
 #include "convert.h"
 #include "TunerCallback.h"
 
-#include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
+#include <android/hardware/broadcastradio/1.2/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
 #include <broadcastradio-utils/Utils.h>
 #include <core_jni_helpers.h>
@@ -44,13 +44,16 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
+namespace V1_2 = hardware::broadcastradio::V1_2;
+namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
-using V1_1::ITunerCallback;
+using V1_2::ITunerCallback;
 using V1_1::ProgramListResult;
+using utils::HalRevision;
 
 static mutex gContextMutex;
 
@@ -310,7 +313,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jS
         convert::ThrowIfFailed(env, halTuner11->tuneByProgramSelector(selector));
     } else {
         uint32_t channel, subChannel;
-        if (!V1_1::utils::getLegacyChannel(selector, &channel, &subChannel)) {
+        if (!utils::getLegacyChannel(selector, &channel, &subChannel)) {
             jniThrowException(env, "java/lang/IllegalArgumentException",
                     "Can't tune to non-AM/FM channel with HAL<1.1");
             return;
