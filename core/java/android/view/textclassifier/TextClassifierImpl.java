@@ -209,6 +209,32 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     @Override
+    public TextLinks generateLinks(
+            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
+        Preconditions.checkNotNull(text);
+        final String textString = text.toString();
+        final TextLinks.Builder builder = new TextLinks.Builder(textString);
+        try {
+            LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
+            final SmartSelection smartSelection = getSmartSelection(defaultLocales);
+            final SmartSelection.AnnotatedSpan[] annotations = smartSelection.annotate(textString);
+            for (SmartSelection.AnnotatedSpan span : annotations) {
+                final Map<String, Float> entityScores = new HashMap<>();
+                final SmartSelection.ClassificationResult[] results = span.getClassification();
+                for (int i = 0; i < results.length; i++) {
+                    entityScores.put(results[i].mCollection, results[i].mScore);
+                }
+                builder.addLink(new TextLinks.TextLink(
+                        textString, span.getStartIndex(), span.getEndIndex(), entityScores));
+            }
+        } catch (Throwable t) {
+            // Avoid throwing from this method. Log the error.
+            Log.e(LOG_TAG, "Error getting links info.", t);
+        }
+        return builder.build();
+    }
+
+    @Override
     public void logEvent(String source, String event) {
         if (LOG_TAG.equals(source)) {
             mMetricsLogger.count(event, 1);
@@ -680,8 +706,8 @@ final class TextClassifierImpl implements TextClassifier {
                     intents.add(new Intent(Intent.ACTION_SENDTO)
                             .setData(Uri.parse(String.format("mailto:%s", text))));
                     intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
+                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                            .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
                     break;
                 case TextClassifier.TYPE_PHONE:
                     intents.add(new Intent(Intent.ACTION_DIAL)
