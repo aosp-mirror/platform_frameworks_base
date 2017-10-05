@@ -344,7 +344,7 @@ public class IpSecService extends IIpSecService.Stub {
     private class ManagedResourceArray<T extends ManagedResource> {
         SparseArray<T> mArray = new SparseArray<>();
 
-        T get(int key) {
+        T getAndCheckOwner(int key) {
             T val = mArray.get(key);
             // The value should never be null unless the resource doesn't exist
             // (since we do not allow null resources to be added).
@@ -723,7 +723,7 @@ public class IpSecService extends IIpSecService.Stub {
             throws RemoteException {
         // We want to non-destructively get so that we can check credentials before removing
         // this from the records.
-        T record = resArray.get(resourceId);
+        T record = resArray.getAndCheckOwner(resourceId);
 
         if (record == null) {
             throw new IllegalArgumentException(
@@ -863,7 +863,8 @@ public class IpSecService extends IIpSecService.Stub {
                 break;
             case IpSecTransform.ENCAP_ESPINUDP:
             case IpSecTransform.ENCAP_ESPINUDP_NON_IKE:
-                if (mUdpSocketRecords.get(config.getEncapSocketResourceId()) == null) {
+                if (mUdpSocketRecords.getAndCheckOwner(
+                            config.getEncapSocketResourceId()) == null) {
                     throw new IllegalStateException(
                             "No Encapsulation socket for Resource Id: "
                                     + config.getEncapSocketResourceId());
@@ -885,7 +886,7 @@ public class IpSecService extends IIpSecService.Stub {
                 throw new IllegalArgumentException("Encryption and Authentication are both null");
             }
 
-            if (mSpiRecords.get(config.getSpiResourceId(direction)) == null) {
+            if (mSpiRecords.getAndCheckOwner(config.getSpiResourceId(direction)) == null) {
                 throw new IllegalStateException("No SPI for specified Resource Id");
             }
         }
@@ -913,7 +914,7 @@ public class IpSecService extends IIpSecService.Stub {
         UdpSocketRecord socketRecord = null;
         encapType = c.getEncapType();
         if (encapType != IpSecTransform.ENCAP_NONE) {
-            socketRecord = mUdpSocketRecords.get(c.getEncapSocketResourceId());
+            socketRecord = mUdpSocketRecords.getAndCheckOwner(c.getEncapSocketResourceId());
             encapLocalPort = socketRecord.getPort();
             encapRemotePort = c.getEncapRemotePort();
         }
@@ -922,7 +923,7 @@ public class IpSecService extends IIpSecService.Stub {
             IpSecAlgorithm auth = c.getAuthentication(direction);
             IpSecAlgorithm crypt = c.getEncryption(direction);
 
-            spis[direction] = mSpiRecords.get(c.getSpiResourceId(direction));
+            spis[direction] = mSpiRecords.getAndCheckOwner(c.getSpiResourceId(direction));
             int spi = spis[direction].getSpi();
             try {
                 mSrvConfig
@@ -976,7 +977,7 @@ public class IpSecService extends IIpSecService.Stub {
         // Synchronize liberally here because we are using ManagedResources in this block
         TransformRecord info;
         // FIXME: this code should be factored out into a security check + getter
-        info = mTransformRecords.get(resourceId);
+        info = mTransformRecords.getAndCheckOwner(resourceId);
 
         if (info == null) {
             throw new IllegalArgumentException("Transform " + resourceId + " is not active");
