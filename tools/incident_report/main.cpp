@@ -138,7 +138,6 @@ read_message(CodedInputStream* in, Descriptor const* descriptor, GenericMessage*
 static void
 print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& node)
 {
-    uint32_t val32;
     FieldDescriptor::Type type = field->type();
 
     switch (node.type) {
@@ -160,23 +159,25 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
             break;
         case GenericMessage::TYPE_VALUE64:
             switch (type) {
-                case FieldDescriptor::TYPE_FIXED64:
-                case FieldDescriptor::TYPE_SFIXED64:
                 case FieldDescriptor::TYPE_DOUBLE:
                     out->printf("%f", *(double*)&node.value64);
                     break;
+                // Int32s here were added with addInt64 from a WIRETYPE_VARINT,
+                // even if the definition is for a 32 bit int.
                 case FieldDescriptor::TYPE_SINT32:
                 case FieldDescriptor::TYPE_INT32:
-                    val32 = (uint32_t)node.value32;
-                    out->printf("%d", val32);
+                    out->printf("%d", node.value64);
                     break;
                 case FieldDescriptor::TYPE_INT64:
-                case FieldDescriptor::TYPE_UINT32:
-                    val32 = (uint32_t)node.value32;
-                    out->printf("%u", val32);
-                    break;
-                case FieldDescriptor::TYPE_UINT64:
                 case FieldDescriptor::TYPE_SINT64:
+                case FieldDescriptor::TYPE_SFIXED64:
+                    out->printf("%lld", node.value64);
+                    break;
+                case FieldDescriptor::TYPE_UINT32:
+                case FieldDescriptor::TYPE_UINT64:
+                case FieldDescriptor::TYPE_FIXED64:
+                    out->printf("%u", node.value64);
+                    break;
                 case FieldDescriptor::TYPE_BOOL:
                     if (node.value64) {
                         out->printf("true");
@@ -185,11 +186,15 @@ print_value(Out* out, FieldDescriptor const* field, GenericMessage::Node const& 
                     }
                     break;
                 case FieldDescriptor::TYPE_ENUM:
-                    out->printf("%s", field->enum_type()->FindValueByNumber((int)node.value64)
+                    if (field->enum_type()->FindValueByNumber((int)node.value64) == NULL) {
+                        out->printf("%lld", (int) node.value64);
+                    } else {
+                        out->printf("%s", field->enum_type()->FindValueByNumber((int)node.value64)
                             ->name().c_str());
+                    }
                     break;
                 default:
-                    out->printf("(unexpected value64 %ld (0x%x))", node.value64, node.value64);
+                    out->printf("(unexpected value64 %lld (0x%x))", node.value64, node.value64);
                     break;
             }
             break;
@@ -224,22 +229,13 @@ print_message(Out* out, Descriptor const* descriptor, GenericMessage const* mess
         out->printf("%s=", field->name().c_str());
         if (repeated) {
             if (it.first != it.second) {
-                out->printf("[");
-                if (type == FieldDescriptor::TYPE_MESSAGE
-                        || type == FieldDescriptor::TYPE_STRING
-                        || type == FieldDescriptor::TYPE_BYTES) {
-                    out->printf("\n");
-                }
+                out->printf("[\n");
                 out->indent();
 
                 for (GenericMessage::const_iterator_pair it = message->find(fieldId);
                         it.first != it.second; it.first++) {
                     print_value(out, field, it.first->second);
-                    if (type == FieldDescriptor::TYPE_MESSAGE
-                            || type == FieldDescriptor::TYPE_STRING
-                            || type == FieldDescriptor::TYPE_BYTES) {
-                        out->printf("\n");
-                    }
+                    out->printf("\n");
                 }
 
                 out->dedent();
@@ -335,7 +331,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
             }
             id = field->number();
         }
-        
+
         int pfd[2];
         if (pipe(pfd) != 0) {
             fprintf(stderr, "pipe failed: %s\n", strerror(errno));
