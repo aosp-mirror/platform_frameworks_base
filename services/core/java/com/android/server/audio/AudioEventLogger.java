@@ -49,9 +49,9 @@ public class AudioEventLogger {
         }
 
         /**
-         * Causes the string message for the event to appear in the verbose logcat.
+         * Causes the string message for the event to appear in the logcat.
          * Here is an example of how to create a new event (a StringEvent), adding it to the logger
-         * (an instance of AudioEventLogger) while also making it show in the verbose logcat:
+         * (an instance of AudioEventLogger) while also making it show in the logcat:
          * <pre>
          *     myLogger.log(
          *         (new StringEvent("something for logcat and logger")).printLog(MyClass.TAG) );
@@ -60,7 +60,7 @@ public class AudioEventLogger {
          * @return the same instance of the event
          */
         public Event printLog(String tag) {
-            Log.v(tag, eventToString());
+            Log.i(tag, eventToString());
             return this;
         }
 
