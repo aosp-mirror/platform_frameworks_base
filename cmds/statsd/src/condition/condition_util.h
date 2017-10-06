@@ -14,38 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef CONDITION_TRACKER_H
-#define CONDITION_TRACKER_H
+#ifndef CONDITION_UTIL_H
+#define CONDITION_UTIL_H
 
-#include <utils/RefBase.h>
-#include "../matchers/LogEntryMatcherManager.h"
+#include <vector>
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class ConditionTracker : public RefBase {
-public:
-    ConditionTracker();
-
-    ConditionTracker(const Condition& condition);
-
-    ~ConditionTracker();
-
-    void evaluateCondition(const LogEventWrapper& event);
-
-    bool isConditionMet() const;
-
-private:
-    // this is the definition of the Condition.
-    Condition mCondition;
-
-    bool mIsConditionMet;
+enum ConditionState {
+    kNotEvaluated = -2,
+    kUnknown = -1,
+    kFalse = 0,
+    kTrue = 1,
 };
 
+ConditionState evaluateCombinationCondition(const std::vector<int>& children,
+                                            const LogicalOperation& operation,
+                                            const std::vector<ConditionState>& conditionCache);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // CONDITION_TRACKER_H
+#endif  // CONDITION_UTIL_H

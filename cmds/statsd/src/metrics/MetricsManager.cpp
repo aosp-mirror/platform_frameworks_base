@@ -21,13 +21,17 @@
 #include "MetricsManager.h"
 #include <cutils/log.h>
 #include <log/logprint.h>
+#include "../condition/CombinationConditionTracker.h"
+#include "../condition/SimpleConditionTracker.h"
+#include "../matchers/CombinationLogMatchingTracker.h"
+#include "../matchers/SimpleLogMatchingTracker.h"
 #include "CountMetricProducer.h"
-#include "parse_util.h"
+#include "metrics_manager_util.h"
+#include "stats_util.h"
 
 using std::make_unique;
 using std::set;
 using std::string;
-using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
@@ -35,93 +39,90 @@ namespace android {
 namespace os {
 namespace statsd {
 
-MetricsManager::MetricsManager(const StatsdConfig& config) : mConfig(config), mLogMatchers() {
-    std::unordered_map<string, LogEntryMatcher> matcherMap;
-    std::unordered_map<string, sp<ConditionTracker>> conditionMap;
-
-    for (int i = 0; i < config.log_entry_matcher_size(); i++) {
-        const LogEntryMatcher& logMatcher = config.log_entry_matcher(i);
-        mMatchers.push_back(logMatcher);
-
-        matcherMap[config.log_entry_matcher(i).name()] = logMatcher;
-
-        mLogMatchers[logMatcher.name()] = vector<unique_ptr<MetricProducer>>();
-        // Collect all the tag ids that are interesting
-        set<int> tagIds = LogEntryMatcherManager::getTagIdsFromMatcher(logMatcher);
-
-        mTagIds.insert(tagIds.begin(), tagIds.end());
-    }
-
-    for (int i = 0; i < config.condition_size(); i++) {
-        const Condition& condition = config.condition(i);
-        conditionMap[condition.name()] = new ConditionTracker(condition);
-    }
-
-    // Build MetricProducers for each metric defined in config.
-    // (1) build CountMetricProducer
-    for (int i = 0; i < config.count_metric_size(); i++) {
-        const CountMetric& metric = config.count_metric(i);
-        auto it = mLogMatchers.find(metric.what());
-        if (it == mLogMatchers.end()) {
-            ALOGW("cannot find the LogEntryMatcher %s in config", metric.what().c_str());
-            continue;
-        }
-
-        if (metric.has_condition()) {
-            auto condition_it = conditionMap.find(metric.condition());
-            if (condition_it == conditionMap.end()) {
-                ALOGW("cannot find the Condition %s in the config", metric.condition().c_str());
-                continue;
-            }
-            it->second.push_back(make_unique<CountMetricProducer>(metric, condition_it->second));
-        } else {
-            it->second.push_back(make_unique<CountMetricProducer>(metric));
-        }
-    }
-
-    // TODO: build other types of metrics too.
+MetricsManager::MetricsManager(const StatsdConfig& config) {
+    mConfigValid = initStatsdConfig(config, mTagIds, mAllLogEntryMatchers, mAllConditionTrackers,
+                                    mAllMetricProducers, mConditionToMetricMap, mTrackerToMetricMap,
+                                    mTrackerToConditionMap);
 }
 
 MetricsManager::~MetricsManager() {
     VLOG("~MetricManager()");
 }
 
+bool MetricsManager::isConfigValid() const {
+    return mConfigValid;
+}
+
 void MetricsManager::finish() {
-    for (auto const& entryPair : mLogMatchers) {
-        for (auto const& metric : entryPair.second) {
-            metric->finish();
-        }
+    for (auto& metricProducer : mAllMetricProducers) {
+        metricProducer->finish();
     }
 }
 
 // Consume the stats log if it's interesting to this metric.
 void MetricsManager::onLogEvent(const log_msg& logMsg) {
+    if (!mConfigValid) {
+        return;
+    }
+
     int tagId = getTagId(logMsg);
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
     }
-    // Since at least one of the metrics is interested in this event, we parse it now.
-    LogEventWrapper event = LogEntryMatcherManager::parseLogEvent(logMsg);
 
-    // Evaluate the conditions. Order matters, this should happen
-    // before sending the event to metrics
-    for (auto& condition : mConditionTracker) {
-        condition->evaluateCondition(event);
+    // Since at least one of the metrics is interested in this event, we parse it now.
+    LogEventWrapper event = parseLogEvent(logMsg);
+    vector<MatchingState> matcherCache(mAllLogEntryMatchers.size(), MatchingState::kNotComputed);
+
+    for (auto& matcher : mAllLogEntryMatchers) {
+        matcher->onLogEvent(event, mAllLogEntryMatchers, matcherCache);
     }
 
-    // Now find out which LogMatcher matches this event, and let relevant metrics know.
-    for (auto matcher : mMatchers) {
-        if (LogEntryMatcherManager::matches(matcher, event)) {
-            auto it = mLogMatchers.find(matcher.name());
-            if (it != mLogMatchers.end()) {
-                for (auto const& it2 : it->second) {
-                    // Only metrics that matches this event get notified.
-                    it2->onMatchedLogEvent(event);
+    // A bitmap to see which ConditionTracker needs to be re-evaluated.
+    vector<bool> conditionToBeEvaluated(mAllConditionTrackers.size(), false);
+
+    for (const auto& pair : mTrackerToConditionMap) {
+        if (matcherCache[pair.first] == MatchingState::kMatched) {
+            const auto& conditionList = pair.second;
+            for (const int conditionIndex : conditionList) {
+                conditionToBeEvaluated[conditionIndex] = true;
+            }
+        }
+    }
+
+    vector<ConditionState> conditionCache(mAllConditionTrackers.size(),
+                                          ConditionState::kNotEvaluated);
+    // A bitmap to track if a condition has changed value.
+    vector<bool> changedCache(mAllConditionTrackers.size(), false);
+    for (size_t i = 0; i < mAllConditionTrackers.size(); i++) {
+        if (conditionToBeEvaluated[i] == false) {
+            continue;
+        }
+
+        sp<ConditionTracker>& condition = mAllConditionTrackers[i];
+        condition->evaluateCondition(event, matcherCache, mAllConditionTrackers, conditionCache,
+                                     changedCache);
+        if (changedCache[i]) {
+            auto pair = mConditionToMetricMap.find(i);
+            if (pair != mConditionToMetricMap.end()) {
+                auto& metricList = pair->second;
+                for (auto metricIndex : metricList) {
+                    mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i]);
                 }
-            } else {
-                // TODO: we should remove any redundant matchers that the config provides.
-                ALOGW("Matcher not used by any metrics.");
+            }
+        }
+    }
+
+    // For matched LogEntryMatchers, tell relevant metrics that a matched event has come.
+    for (size_t i = 0; i < mAllLogEntryMatchers.size(); i++) {
+        if (matcherCache[i] == MatchingState::kMatched) {
+            auto pair = mTrackerToMetricMap.find(i);
+            if (pair != mTrackerToMetricMap.end()) {
+                auto& metricList = pair->second;
+                for (const int metricIndex : metricList) {
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(event);
+                }
             }
         }
     }

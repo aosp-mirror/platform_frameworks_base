@@ -13,54 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef LOG_ENTRY_MATCHER_MANAGER_H
-#define LOG_ENTRY_MATCHER_MANAGER_H
+#ifndef COMBINATION_LOG_MATCHING_TRACKER_H
+#define COMBINATION_LOG_MATCHING_TRACKER_H
 
 #include <log/log_read.h>
 #include <log/logprint.h>
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include "LogMatchingTracker.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-
-using std::string;
-using std::unordered_map;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-typedef struct {
-    int tagId;
-    long timestamp_ns;
-    std::unordered_map<int, long> intMap;
-    std::unordered_map<int, std::string> strMap;
-    std::unordered_map<int, bool> boolMap;
-    std::unordered_map<int, float> floatMap;
-} LogEventWrapper;
-
-/**
- * Keeps track per log entry which simple log entry matchers match.
- */
-class LogEntryMatcherManager {
+// Represents a LogEntryMatcher_Combination in the StatsdConfig.
+class CombinationLogMatchingTracker : public virtual LogMatchingTracker {
 public:
-    LogEntryMatcherManager();
+    CombinationLogMatchingTracker(const std::string& name, const int index);
 
-    ~LogEntryMatcherManager(){};
+    bool init(const std::vector<LogEntryMatcher>& allLogMatchers,
+              const std::vector<sp<LogMatchingTracker>>& allTrackers,
+              const std::unordered_map<std::string, int>& matcherMap,
+              std::vector<bool>& stack);
 
-    static LogEventWrapper parseLogEvent(log_msg msg);
+    ~CombinationLogMatchingTracker();
 
-    static std::set<int> getTagIdsFromMatcher(const LogEntryMatcher& matcher);
+    void onLogEvent(const LogEventWrapper& event,
+                    const std::vector<sp<LogMatchingTracker>>& allTrackers,
+                    std::vector<MatchingState>& matcherResults) override;
 
-    static bool matches(const LogEntryMatcher& matcher, const LogEventWrapper& wrapper);
+private:
+    LogicalOperation mLogicalOperation;
 
-    static bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher,
-                              const LogEventWrapper& wrapper);
+    std::vector<int> mChildren;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-#endif  // LOG_ENTRY_MATCHER_MANAGER_H
+#endif  // COMBINATION_LOG_MATCHING_TRACKER_H

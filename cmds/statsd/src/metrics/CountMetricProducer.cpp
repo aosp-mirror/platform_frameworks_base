@@ -21,7 +21,6 @@
 
 #include "CountMetricProducer.h"
 #include "CountAnomalyTracker.h"
-#include "parse_util.h"
 
 #include <cutils/log.h>
 #include <limits.h>
@@ -33,15 +32,14 @@ namespace android {
 namespace os {
 namespace statsd {
 
-CountMetricProducer::CountMetricProducer(const CountMetric& metric,
-                                         const sp<ConditionTracker> condition)
+CountMetricProducer::CountMetricProducer(const CountMetric& metric, const bool hasCondition)
     : mMetric(metric),
-      mConditionTracker(condition),
-      mStartTime(std::time(nullptr)),
+      mStartTime(time(nullptr)),
       mCounter(0),
       mCurrentBucketStartTime(mStartTime),
       // TODO: read mAnomalyTracker parameters from config file.
-      mAnomalyTracker(6, 10) {
+      mAnomalyTracker(6, 10),
+      mCondition(hasCondition ? ConditionState::kUnknown : ConditionState::kTrue) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSize_sec = metric.bucket().bucket_size_millis() / 1000;
@@ -52,10 +50,6 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric,
     VLOG("created. bucket size %lu start_time: %lu", mBucketSize_sec, mStartTime);
 }
 
-CountMetricProducer::CountMetricProducer(const CountMetric& metric)
-    : CountMetricProducer(metric, new ConditionTracker()) {
-}
-
 CountMetricProducer::~CountMetricProducer() {
     VLOG("~CountMetricProducer() called");
 }
@@ -63,11 +57,15 @@ CountMetricProducer::~CountMetricProducer() {
 void CountMetricProducer::finish() {
     // TODO: write the StatsLogReport to dropbox using
     // DropboxWriter.
-    onDumpReport();
 }
 
 void CountMetricProducer::onDumpReport() {
     VLOG("dump report now...");
+}
+
+void CountMetricProducer::onConditionChanged(const bool conditionMet) {
+    VLOG("onConditionChanged");
+    mCondition = conditionMet;
 }
 
 void CountMetricProducer::onMatchedLogEvent(const LogEventWrapper& event) {
@@ -78,22 +76,24 @@ void CountMetricProducer::onMatchedLogEvent(const LogEventWrapper& event) {
         return;
     }
 
-    if (mConditionTracker->isConditionMet()) {
+    if (mCondition == ConditionState::kTrue) {
         flushCounterIfNeeded(eventTime);
         mCounter++;
         mAnomalyTracker.checkAnomaly(mCounter);
+        VLOG("metric %lld count %d", mMetric.metric_id(), mCounter);
     }
 }
 
-// When a new matched event comes in, we check if it falls into the current bucket. And flush the
-// counter to the StatsLogReport and adjust the bucket if needed.
+// When a new matched event comes in, we check if it falls into the current
+// bucket. And flush the counter to the StatsLogReport and adjust the bucket if
+// needed.
 void CountMetricProducer::flushCounterIfNeeded(const time_t& eventTime) {
     if (mCurrentBucketStartTime + mBucketSize_sec > eventTime) {
         return;
     }
 
     // TODO: add a KeyValuePair to StatsLogReport.
-    ALOGD("CountMetric: dump counter %d", mCounter);
+    ALOGD("%lld:  dump counter %d", mMetric.metric_id(), mCounter);
 
     // adjust the bucket start time
     time_t numBucketsForward = (eventTime - mCurrentBucketStartTime)
@@ -106,7 +106,7 @@ void CountMetricProducer::flushCounterIfNeeded(const time_t& eventTime) {
     mAnomalyTracker.addPastBucket(mCounter, numBucketsForward);
     mCounter = 0;
 
-    VLOG("new bucket start time: %lu", mCurrentBucketStartTime);
+    VLOG("%lld: new bucket start time: %lu", mMetric.metric_id(), mCurrentBucketStartTime);
 }
 
 }  // namespace statsd
