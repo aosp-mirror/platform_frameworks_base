@@ -187,7 +187,7 @@ import com.android.internal.os.SomeArgs;
  * protect a dataset that contains sensitive information by requiring dataset authentication
  * (see {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}), and to include
  * info about the "primary" field of the partition in the custom presentation for "secondary"
- * fields &mdash; that would prevent a malicious app from getting the "primary" fields without the
+ * fields&mdash;that would prevent a malicious app from getting the "primary" fields without the
  * user realizing they're being released (for example, a malicious app could have fields for a
  * credit card number, verification code, and expiration date crafted in a way that just the latter
  * is visible; by explicitly indicating the expiration date is related to a given credit card
