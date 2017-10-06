@@ -3033,6 +3033,7 @@
   <java-symbol type="string" name="notification_channel_alerts" />
   <java-symbol type="string" name="notification_channel_retail_mode" />
   <java-symbol type="string" name="notification_channel_usb" />
+  <java-symbol type="string" name="notification_channel_heavy_weight_app" />
   <java-symbol type="string" name="config_defaultAutofillService" />
 
   <java-symbol type="string" name="notification_channel_foreground_service" />

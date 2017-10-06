@@ -2109,7 +2109,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     String text = mContext.getString(R.string.heavy_weight_notification,
                             context.getApplicationInfo().loadLabel(context.getPackageManager()));
                     Notification notification =
-                            new Notification.Builder(context, SystemNotificationChannels.DEVELOPER)
+                            new Notification.Builder(context,
+                                    SystemNotificationChannels.HEAVY_WEIGHT_APP)
                             .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                             .setWhen(0)
                             .setOngoing(true)
@@ -2143,7 +2144,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 try {
                     inm.cancelNotificationWithTag("android", null,
-                            SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION,  msg.arg1);
+                            SystemMessage.NOTE_HEAVY_WEIGHT_NOTIFICATION, msg.arg1);
                 } catch (RuntimeException e) {
                     Slog.w(ActivityManagerService.TAG,
                             "Error canceling notification for service", e);
@@ -5076,11 +5077,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            if (mHeavyWeightProcess == null) {
+            final ProcessRecord proc = mHeavyWeightProcess;
+            if (proc == null) {
                 return;
             }
 
-            ArrayList<ActivityRecord> activities = new ArrayList<>(mHeavyWeightProcess.activities);
+            ArrayList<ActivityRecord> activities = new ArrayList<>(proc.activities);
             for (int i = 0; i < activities.size(); i++) {
                 ActivityRecord r = activities.get(i);
                 if (!r.finishing && r.isInStackLocked()) {
@@ -5090,7 +5092,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
-                    mHeavyWeightProcess.userId, 0));
+                    proc.userId, 0));
             mHeavyWeightProcess = null;
         }
     }

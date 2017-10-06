@@ -591,6 +591,11 @@
     <!-- Text shown when viewing channel settings for notifications related to a usb connection -->
     <string name="notification_channel_usb">USB connection</string>
 
+    <!-- Text shown when viewing channel settings for notification about a heavy-weight app
+         currently running.
+         [CHAR_LIMIT=NONE] -->
+    <string name="notification_channel_heavy_weight_app">App running</string>
+
     <!-- This is the label for the notification channel settings that controls the behavior
         of the notification about applications that are running in the background (that is,
         perhaps confusingly, running foreground services but not the foreground UI on the screen).

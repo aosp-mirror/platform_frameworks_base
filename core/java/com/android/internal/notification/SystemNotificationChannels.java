@@ -20,6 +20,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.media.AudioAttributes;
 import android.os.RemoteException;
 import android.provider.Settings;
 
@@ -47,6 +48,7 @@ public class SystemNotificationChannels {
     public static String RETAIL_MODE = "RETAIL_MODE";
     public static String USB = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
+    public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -138,6 +140,17 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_LOW);
         foregroundChannel.setBlockableSystem(true);
         channelsList.add(foregroundChannel);
+
+        NotificationChannel heavyWeightChannel = new NotificationChannel(
+                HEAVY_WEIGHT_APP,
+                context.getString(R.string.notification_channel_heavy_weight_app),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        heavyWeightChannel.setShowBadge(false);
+        heavyWeightChannel.setSound(null, new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .build());
+        channelsList.add(heavyWeightChannel);
 
         nm.createNotificationChannels(channelsList);
     }
