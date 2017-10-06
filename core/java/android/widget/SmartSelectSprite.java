@@ -206,7 +206,7 @@ final class SmartSelectSprite {
 
             if (mRectangleBorderType == RectangleBorderType.OVERSHOOT) {
                 mDrawRect.left -= cornerRadius / 2;
-                mDrawRect.right -= cornerRadius / 2;
+                mDrawRect.right += cornerRadius / 2;
             } else {
                 switch (mExpansionDirection) {
                     case ExpansionDirection.CENTER:
@@ -437,6 +437,7 @@ final class SmartSelectSprite {
         RectangleWithTextSelectionLayout centerRectangle = null;
 
         int startingOffset = 0;
+        int startingRectangleIndex = 0;
         for (int index = 0; index < rectangleCount; ++index) {
             final RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout =
                     destinationRectangles.get(index);
@@ -446,6 +447,7 @@ final class SmartSelectSprite {
                 break;
             }
             startingOffset += rectangle.width();
+            ++startingRectangleIndex;
         }
 
         if (centerRectangle == null) {
@@ -453,10 +455,6 @@ final class SmartSelectSprite {
         }
 
         startingOffset += start.x - centerRectangle.getRectangle().left;
-
-        final float centerRectangleHalfHeight = centerRectangle.getRectangle().height() / 2;
-        final float startingOffsetLeft = startingOffset - centerRectangleHalfHeight;
-        final float startingOffsetRight = startingOffset + centerRectangleHalfHeight;
 
         final @RoundedRectangleShape.ExpansionDirection int[] expansionDirections =
                 generateDirections(centerRectangle, destinationRectangles);
@@ -481,6 +479,30 @@ final class SmartSelectSprite {
 
         final RectangleList rectangleList = new RectangleList(shapes);
         final ShapeDrawable shapeDrawable = new ShapeDrawable(rectangleList);
+
+        final float startingOffsetLeft;
+        final float startingOffsetRight;
+
+        final RoundedRectangleShape startingRectangleShape = shapes.get(startingRectangleIndex);
+        final float cornerRadius = startingRectangleShape.getCornerRadius();
+        if (startingRectangleShape.mRectangleBorderType
+                == RoundedRectangleShape.RectangleBorderType.FIT) {
+            switch (startingRectangleShape.mExpansionDirection) {
+                case RoundedRectangleShape.ExpansionDirection.LEFT:
+                    startingOffsetLeft = startingOffsetRight = startingOffset - cornerRadius / 2;
+                    break;
+                case RoundedRectangleShape.ExpansionDirection.RIGHT:
+                    startingOffsetLeft = startingOffsetRight = startingOffset + cornerRadius / 2;
+                    break;
+                case RoundedRectangleShape.ExpansionDirection.CENTER:  // fall through
+                default:
+                    startingOffsetLeft = startingOffset - cornerRadius / 2;
+                    startingOffsetRight = startingOffset + cornerRadius / 2;
+                    break;
+            }
+        } else {
+            startingOffsetLeft = startingOffsetRight = startingOffset;
+        }
 
         final Paint paint = shapeDrawable.getPaint();
         paint.setColor(mStrokeColor);
