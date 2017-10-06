@@ -1730,9 +1730,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private boolean mUserIsMonkey;
 
-    /** Flag whether the device has a Recents UI */
-    boolean mHasRecents;
-
     /** The dimensions of the thumbnails in the Recents UI. */
     int mThumbnailWidth;
     int mThumbnailHeight;
@@ -2777,6 +2774,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
+        mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
 
         mProcessCpuThread = new Thread("CpuTracker") {
@@ -13911,7 +13909,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Load resources only after the current configuration has been set.
             final Resources res = mContext.getResources();
-            mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
             mThumbnailWidth = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(

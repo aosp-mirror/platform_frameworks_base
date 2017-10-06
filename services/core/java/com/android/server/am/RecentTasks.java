@@ -23,11 +23,16 @@ import static android.app.ActivityManager.RECENT_INCLUDE_PROFILES;
 import static android.app.ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK;
 import static android.app.ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
@@ -47,16 +52,19 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.MutableBoolean;
+import android.util.MutableInt;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -73,7 +81,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class for managing the recent tasks list. The list is ordered by most recent (index 0) to the
@@ -111,7 +119,7 @@ class RecentTasks {
         /**
          * Called when a task is removed from the recent tasks list.
          */
-        void onRecentTaskRemoved(TaskRecord task);
+        void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed);
     }
 
     /**
@@ -119,6 +127,7 @@ class RecentTasks {
      */
     private final TaskPersister mTaskPersister;
     private final ActivityManagerService mService;
+    private final UserController mUserController;
 
     /**
      * Mapping of user id -> whether recent tasks have been loaded for that user.
@@ -133,26 +142,83 @@ class RecentTasks {
     private final SparseArray<SparseBooleanArray> mPersistedTaskIds = new SparseArray<>(
             DEFAULT_INITIAL_CAPACITY);
 
-    // List of recent tasks
+    // List of all active recent tasks
     private final ArrayList<TaskRecord> mTasks = new ArrayList<>();
     private final ArrayList<Callbacks> mCallbacks = new ArrayList<>();
+
+    // These values are generally loaded from resources, but can be set dynamically in the tests
+    private boolean mHasVisibleRecentTasks;
+    private int mGlobalMaxNumTasks;
+    private int mMinNumVisibleTasks;
+    private int mMaxNumVisibleTasks;
+    private long mActiveTasksSessionDurationMs;
 
     // Mainly to avoid object recreation on multiple calls.
     private final ArrayList<TaskRecord> mTmpRecents = new ArrayList<>();
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
+    private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
 
     @VisibleForTesting
-    RecentTasks(ActivityManagerService service, TaskPersister taskPersister) {
+    RecentTasks(ActivityManagerService service, TaskPersister taskPersister,
+            UserController userController) {
         mService = service;
+        mUserController = userController;
         mTaskPersister = taskPersister;
+        mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
+        mHasVisibleRecentTasks = true;
     }
 
     RecentTasks(ActivityManagerService service, ActivityStackSupervisor stackSupervisor) {
-        File systemDir = Environment.getDataSystemDirectory();
+        final File systemDir = Environment.getDataSystemDirectory();
+        final Resources res = service.mContext.getResources();
         mService = service;
+        mUserController = service.mUserController;
         mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
-        stackSupervisor.setRecentTasks(this);
+        mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
+        mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
+        loadParametersFromResources(service.mContext.getResources());
+    }
+
+    @VisibleForTesting
+    void setParameters(int minNumVisibleTasks, int maxNumVisibleTasks,
+            long activeSessionDurationMs) {
+        mMinNumVisibleTasks = minNumVisibleTasks;
+        mMaxNumVisibleTasks = maxNumVisibleTasks;
+        mActiveTasksSessionDurationMs = activeSessionDurationMs;
+    }
+
+    @VisibleForTesting
+    void setGlobalMaxNumTasks(int globalMaxNumTasks) {
+        mGlobalMaxNumTasks = globalMaxNumTasks;
+    }
+
+    /**
+     * Loads the parameters from the system resources.
+     */
+    @VisibleForTesting
+    void loadParametersFromResources(Resources res) {
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            mMinNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_minNumVisibleRecentTasks_lowRam);
+            mMaxNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_maxNumVisibleRecentTasks_lowRam);
+        } else if (SystemProperties.getBoolean("ro.recents.grid", false)) {
+            mMinNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_minNumVisibleRecentTasks_grid);
+            mMaxNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_maxNumVisibleRecentTasks_grid);
+        } else {
+            mMinNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_minNumVisibleRecentTasks);
+            mMaxNumVisibleTasks = res.getInteger(
+                    com.android.internal.R.integer.config_maxNumVisibleRecentTasks);
+        }
+        final int sessionDurationHrs = res.getInteger(
+                com.android.internal.R.integer.config_activeTaskDurationHours);
+        mActiveTasksSessionDurationMs = (sessionDurationHrs > 0)
+                ? TimeUnit.HOURS.toMillis(sessionDurationHrs)
+                : -1;
     }
 
     void registerCallback(Callbacks callback) {
@@ -171,7 +237,7 @@ class RecentTasks {
 
     private void notifyTaskRemoved(TaskRecord task, boolean wasTrimmed) {
         for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onRecentTaskRemoved(task);
+            mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed);
         }
     }
 
@@ -558,7 +624,7 @@ class RecentTasks {
 
         final Set<Integer> includedUsers;
         if (includeProfiles) {
-            includedUsers = mService.mUserController.getProfileIds(userId);
+            includedUsers = mUserController.getProfileIds(userId);
         } else {
             includedUsers = new HashSet<>();
         }
@@ -677,6 +743,11 @@ class RecentTasks {
         }
     }
 
+    @VisibleForTesting
+    ArrayList<TaskRecord> getRawTasks() {
+        return mTasks;
+    }
+
     /**
      * @return the task in the task list with the given {@param id} if one exists.
      */
@@ -695,6 +766,8 @@ class RecentTasks {
      * Add a new task to the recent tasks list.
      */
     void add(TaskRecord task) {
+        if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "add: task=" + task);
+
         final boolean isAffiliated = task.mAffiliatedTaskId != task.taskId
                 || task.mNextAffiliateTaskId != INVALID_TASK_ID
                 || task.mPrevAffiliateTaskId != INVALID_TASK_ID;
@@ -756,7 +829,6 @@ class RecentTasks {
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: trimming tasks for " + task);
         trimForAddTask(task);
-        trimToMaxNumRecents();
 
         task.inRecents = true;
         if (!isAffiliated || needAffiliationFix) {
@@ -816,6 +888,9 @@ class RecentTasks {
             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: regrouping affiliations");
             cleanupLocked(task.userId);
         }
+
+        // Trim the set of tasks to the active set
+        trimInactiveRecentTasks();
     }
 
     /**
@@ -843,14 +918,166 @@ class RecentTasks {
     /**
      * Trims the recents task list to the global max number of recents.
      */
-    private void trimToMaxNumRecents() {
+    private void trimInactiveRecentTasks() {
         int recentsCount = mTasks.size();
-        final int maxNumRecents = ActivityManager.getMaxRecentTasksStatic();
-        while (recentsCount >= maxNumRecents) {
+
+        // Remove from the end of the list until we reach the max number of recents
+        while (recentsCount > mGlobalMaxNumTasks) {
             final TaskRecord tr = mTasks.remove(recentsCount - 1);
-            notifyTaskRemoved(tr, !TRIMMED);
+            notifyTaskRemoved(tr, TRIMMED);
             recentsCount--;
+            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming over max-recents task=" + tr
+                    + " max=" + mGlobalMaxNumTasks);
         }
+
+        // Remove any tasks that belong to currently quiet profiles
+        final int[] profileUserIds = mUserController.getCurrentProfileIds();
+        mTmpQuietProfileUserIds.clear();
+        for (int userId : profileUserIds) {
+            final UserInfo userInfo = mUserController.getUserInfo(userId);
+            if (userInfo.isManagedProfile() && userInfo.isQuietModeEnabled()) {
+                mTmpQuietProfileUserIds.put(userId, true);
+            }
+            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "User: " + userInfo
+                    + " quiet=" + mTmpQuietProfileUserIds.get(userId));
+        }
+
+        // Remove any inactive tasks, calculate the latest set of visible tasks
+        int numVisibleTasks = 0;
+        for (int i = 0; i < mTasks.size();) {
+            final TaskRecord task = mTasks.get(i);
+
+            if (isActiveRecentTask(task, mTmpQuietProfileUserIds)) {
+                if (!mHasVisibleRecentTasks) {
+                    // Keep all active tasks if visible recent tasks is not supported
+                    i++;
+                    continue;
+                }
+
+                if (!isVisibleRecentTask(task)) {
+                    // Keep all active-but-invisible tasks
+                    i++;
+                    continue;
+                } else {
+                    numVisibleTasks++;
+                    if (isInVisibleRange(task, numVisibleTasks)) {
+                        // Keep visible tasks in range
+                        i++;
+                        continue;
+                    } else {
+                        // Fall through to trim visible tasks that are no longer in range
+                        if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG,
+                                "Trimming out-of-range visible task=" + task);
+                    }
+                }
+            } else {
+                // Fall through to trim inactive tasks
+                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming inactive task=" + task);
+            }
+
+            // Task is no longer active, trim it from the list
+            mTasks.remove(task);
+            notifyTaskRemoved(task, TRIMMED);
+            notifyTaskPersisterLocked(task, false /* flush */);
+        }
+    }
+
+    /**
+     * @return whether the given task should be considered active.
+     */
+    private boolean isActiveRecentTask(TaskRecord task, SparseBooleanArray quietProfileUserIds) {
+        if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "isActiveRecentTask: task=" + task
+                + " globalMax=" + mGlobalMaxNumTasks);
+
+        if (quietProfileUserIds.get(task.userId)) {
+            // Quiet profile user's tasks are never active
+            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\tisQuietProfileTask=true");
+            return false;
+        }
+
+        if (task.mAffiliatedTaskId != INVALID_TASK_ID && task.mAffiliatedTaskId != task.taskId) {
+            // Keep the task active if its affiliated task is also active
+            final TaskRecord affiliatedTask = getTask(task.mAffiliatedTaskId);
+            if (affiliatedTask != null) {
+                if (!isActiveRecentTask(affiliatedTask, quietProfileUserIds)) {
+                    if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG,
+                            "\taffiliatedWithTask=" + affiliatedTask + " is not active");
+                    return false;
+                }
+            }
+        }
+
+        // All other tasks are considered active
+        return true;
+    }
+
+    /**
+     * @return whether the given active task should be presented to the user through SystemUI.
+     */
+    private boolean isVisibleRecentTask(TaskRecord task) {
+        if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "isVisibleRecentTask: task=" + task
+                + " minVis=" + mMinNumVisibleTasks + " maxVis=" + mMaxNumVisibleTasks
+                + " sessionDuration=" + mActiveTasksSessionDurationMs
+                + " inactiveDuration=" + task.getInactiveDuration()
+                + " activityType=" + task.getActivityType()
+                + " windowingMode=" + task.getWindowingMode());
+
+        // Ignore certain activity types completely
+        switch (task.getActivityType()) {
+            case ACTIVITY_TYPE_HOME:
+            case ACTIVITY_TYPE_RECENTS:
+                return false;
+        }
+
+        // Ignore certain windowing modes
+        switch (task.getWindowingMode()) {
+            case WINDOWING_MODE_PINNED:
+                return false;
+            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\ttop=" + task.getStack().topTask());
+                final ActivityStack stack = task.getStack();
+                if (stack != null && stack.topTask() == task) {
+                    // Only the non-top task of the primary split screen mode is visible
+                    return false;
+                }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return whether the given visible task is within the policy range.
+     */
+    private boolean isInVisibleRange(TaskRecord task, int numVisibleTasks) {
+        // Keep the last most task even if it is excluded from recents
+        final boolean isExcludeFromRecents =
+                (task.getBaseIntent().getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+        if (isExcludeFromRecents) {
+            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
+            return numVisibleTasks == 1;
+        }
+
+        if (mMinNumVisibleTasks >= 0 && numVisibleTasks <= mMinNumVisibleTasks) {
+            // Always keep up to the min number of recent tasks, after that fall through to the
+            // checks below
+            return true;
+        }
+
+        if (mMaxNumVisibleTasks >= 0) {
+            // Always keep up to the max number of recent tasks, but return false afterwards
+            return numVisibleTasks <= mMaxNumVisibleTasks;
+        }
+
+        if (mActiveTasksSessionDurationMs > 0) {
+            // Keep the task if the inactive time is within the session window, this check must come
+            // after the checks for the min/max visible task range
+            if (task.getInactiveDuration() <= mActiveTasksSessionDurationMs) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -864,11 +1091,16 @@ class RecentTasks {
             return;
         }
 
+        // There is a similar task that will be removed for the addition of {@param task}, but it
+        // can be the same task, and if so, the task will be re-added in add(), so skip the
+        // callbacks here.
         final TaskRecord removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
             notifyTaskRemoved(removedTask, TRIMMED);
+            if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming task=" + removedTask
+                    + " for addition of task=" + task);
         }
-        notifyTaskPersisterLocked(removedTask, false);
+        notifyTaskPersisterLocked(removedTask, false /* flush */);
     }
 
     /**
@@ -1004,7 +1236,7 @@ class RecentTasks {
             notifyTaskPersisterLocked(last, false);
         }
 
-        // Insert the group back into mRecentTasks at start.
+        // Insert the group back into mTmpTasks at start.
         mTasks.addAll(start, mTmpRecents);
         mTmpRecents.clear();
 

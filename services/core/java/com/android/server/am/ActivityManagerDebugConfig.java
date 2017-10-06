@@ -74,6 +74,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_PROVIDER = DEBUG_ALL || false;
     static final boolean DEBUG_PSS = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
+    static final boolean DEBUG_RECENTS_TRIM_TASKS = DEBUG_RECENTS || false;
     static final boolean DEBUG_RELEASE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_RESULTS = DEBUG_ALL || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;

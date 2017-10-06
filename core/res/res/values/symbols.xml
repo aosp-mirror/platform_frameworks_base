@@ -311,6 +311,13 @@
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_hasRecents" />
+  <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
+  <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
+  <java-symbol type="integer" name="config_minNumVisibleRecentTasks_grid" />
+  <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_grid" />
+  <java-symbol type="integer" name="config_minNumVisibleRecentTasks" />
+  <java-symbol type="integer" name="config_maxNumVisibleRecentTasks" />
+  <java-symbol type="integer" name="config_activeTaskDurationHours" />
   <java-symbol type="bool" name="config_windowShowCircularMask" />
   <java-symbol type="bool" name="config_windowEnableCircularEmulatorDisplayOverlay" />
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />

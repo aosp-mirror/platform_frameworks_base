@@ -103,11 +103,11 @@ public class ActivityTestsBase {
 
     protected static TaskRecord createTask(ActivityStackSupervisor supervisor,
             ComponentName component, ActivityStack stack) {
-        return createTask(supervisor, component, 0 /* flags */, stack);
+        return createTask(supervisor, component, 0 /* flags */, 0 /* taskId */, stack);
     }
 
     protected static TaskRecord createTask(ActivityStackSupervisor supervisor,
-            ComponentName component, int flags, ActivityStack stack) {
+            ComponentName component, int flags, int taskId, ActivityStack stack) {
         final ActivityInfo aInfo = new ActivityInfo();
         aInfo.applicationInfo = new ApplicationInfo();
         aInfo.applicationInfo.packageName = component.getPackageName();
@@ -116,8 +116,8 @@ public class ActivityTestsBase {
         intent.setComponent(component);
         intent.setFlags(flags);
 
-        final TaskRecord task = new TaskRecord(supervisor.mService, 0, aInfo, intent /*intent*/,
-                null /*_taskDescription*/);
+        final TaskRecord task = new TaskRecord(supervisor.mService, taskId, aInfo,
+                intent /*intent*/, null /*_taskDescription*/);
         supervisor.setFocusStackUnchecked("test", stack);
         stack.addTask(task, true, "creating test task");
         task.setStack(stack);
