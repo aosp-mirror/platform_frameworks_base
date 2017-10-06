@@ -433,7 +433,6 @@ public class StaticLayout extends Layout {
          *    + addStyleRun (a text run, to be measured in native code)
          *    + addReplacementRun (a replacement run, width is given)
          *
-         * After measurement, nGetWidths() is valid if the widths are needed (eg for ellipsis).
          * Run nComputeLineBreaks() to obtain line breaks for the paragraph.
          *
          * After all paragraphs, call finish() to release expensive buffers.
@@ -866,10 +865,9 @@ public class StaticLayout extends Layout {
                 spanEndCacheCount++;
             }
 
-            nGetWidths(b.mNativePtr, widths);
             int breakCount = nComputeLineBreaks(b.mNativePtr, lineBreaks, lineBreaks.breaks,
                     lineBreaks.widths, lineBreaks.ascents, lineBreaks.descents, lineBreaks.flags,
-                    lineBreaks.breaks.length);
+                    lineBreaks.breaks.length, widths);
 
             final int[] breaks = lineBreaks.breaks;
             final float[] lineWidths = lineBreaks.widths;
@@ -1551,16 +1549,17 @@ public class StaticLayout extends Layout {
             @FloatRange(from = 0.0f) float width, @Nullable String languageTags,
             @Nullable long[] hyphenators);
 
-    private static native void nGetWidths(long nativePtr, float[] widths);
-
     // populates LineBreaks and returns the number of breaks found
     //
     // the arrays inside the LineBreaks objects are passed in as well
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
+    // The individual character widths will be returned in charWidths. The length of charWidths must
+    // be at least the length of the text.
     private static native int nComputeLineBreaks(long nativePtr, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, float[] recycleAscents,
-            float[] recycleDescents, int[] recycleFlags, int recycleLength);
+            float[] recycleDescents, int[] recycleFlags, int recycleLength,
+            float[] charWidths);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
