@@ -596,9 +596,10 @@ public class OffloadController {
         }
 
         mNatUpdateCallbacksReceived++;
+        final String natDescription = String.format("%s (%s, %s) -> (%s, %s)",
+                protoName, srcAddr, srcPort, dstAddr, dstPort);
         if (DBG) {
-            mLog.log(String.format("NAT timeout update: %s (%s, %s) -> (%s, %s)",
-                     protoName, srcAddr, srcPort, dstAddr, dstPort));
+            mLog.log("NAT timeout update: " + natDescription);
         }
 
         final int timeoutSec = connectionTimeoutUpdateSecondsFor(proto);
@@ -609,7 +610,7 @@ public class OffloadController {
             NetlinkSocket.sendOneShotKernelMessage(OsConstants.NETLINK_NETFILTER, msg);
         } catch (ErrnoException e) {
             mNatUpdateNetlinkErrors++;
-            mLog.e("Error updating NAT conntrack entry: " + e
+            mLog.e("Error updating NAT conntrack entry >" + natDescription + "<: " + e
                     + ", msg: " + NetlinkConstants.hexify(msg));
             mLog.log("NAT timeout update callbacks received: " + mNatUpdateCallbacksReceived);
             mLog.log("NAT timeout update netlink errors: " + mNatUpdateNetlinkErrors);
