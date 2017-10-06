@@ -64,7 +64,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                 // again when the PUK locked SIM is re-entered.
                 case ABSENT: {
                     KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked(mSubId);
-                    mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                    // onSimStateChanged callback can fire when the SIM PIN lock is not currently
+                    // active and mCallback is null.
+                    if (mCallback != null) {
+                        mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                    }
                     break;
                 }
                 default:
