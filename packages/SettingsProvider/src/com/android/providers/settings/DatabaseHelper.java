@@ -1836,20 +1836,10 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion < 116) {
-            if (mUserHandle == UserHandle.USER_SYSTEM) {
-                db.beginTransaction();
-                SQLiteStatement stmt = null;
-                try {
-                    stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
-                            + " VALUES(?,?);");
-                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
-                            ImsConfig.FeatureValueConstants.ON);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    if (stmt != null) stmt.close();
-                }
-            }
+            /*
+             * To control the default value by carrier config manager, initializing
+             * ENHANCED_4G_MODE_ENABLED has been removed.
+             */
             upgradeVersion = 116;
         }
 
@@ -2632,9 +2622,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     R.integer.def_heads_up_enabled);
 
             loadSetting(stmt, Settings.Global.DEVICE_NAME, getDefaultDeviceName());
-
-            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
-                    ImsConfig.FeatureValueConstants.ON);
 
             /*
              * IMPORTANT: Do not add any more upgrade steps here as the global,
