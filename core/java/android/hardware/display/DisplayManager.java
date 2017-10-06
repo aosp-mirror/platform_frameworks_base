@@ -278,6 +278,15 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
 
+    /**
+     * Virtual display flag: Indicates that the contents will be destroyed once
+     * the display is removed.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;
