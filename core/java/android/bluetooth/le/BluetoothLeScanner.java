@@ -205,7 +205,8 @@ public final class BluetoothLeScanner {
         }
         synchronized (mLeScanClients) {
             if (callback != null && mLeScanClients.containsKey(callback)) {
-                postCallbackError(callback, ScanCallback.SCAN_FAILED_ALREADY_STARTED);
+                return postCallbackErrorOrReturn(callback,
+                            ScanCallback.SCAN_FAILED_ALREADY_STARTED);
             }
             IBluetoothGatt gatt;
             try {
