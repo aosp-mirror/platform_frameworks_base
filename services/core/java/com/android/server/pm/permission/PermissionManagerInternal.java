@@ -19,6 +19,7 @@ package com.android.server.pm.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageParser;
+import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager.PermissionInfoFlags;
@@ -89,6 +90,7 @@ public abstract class PermissionManagerInternal {
      * the permission settings.
      */
     public abstract void addAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
+    public abstract void addAllPermissionGroups(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
     public abstract boolean addDynamicPermission(@NonNull PermissionInfo info, boolean async,
             int callingUid, @Nullable PermissionCallback callback);
@@ -104,6 +106,16 @@ public abstract class PermissionManagerInternal {
 
     public abstract int getPermissionFlags(@NonNull String permName,
             @NonNull String packageName, int callingUid, int userId);
+    /**
+     * Retrieve all of the information we know about a particular group of permissions.
+     */
+    public abstract @Nullable PermissionGroupInfo getPermissionGroupInfo(
+            @NonNull String groupName, int flags, int callingUid);
+    /**
+     * Retrieve all of the known permission groups in the system.
+     */
+    public abstract @Nullable List<PermissionGroupInfo> getAllPermissionGroups(int flags,
+            int callingUid);
     /**
      * Retrieve all of the information we know about a particular permission.
      */
