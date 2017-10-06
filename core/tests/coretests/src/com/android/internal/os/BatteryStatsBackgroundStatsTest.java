@@ -22,6 +22,7 @@ import android.os.BatteryStats;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
 import android.util.ArrayMap;
+import android.view.Display;
 
 import junit.framework.TestCase;
 
@@ -44,7 +45,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // Off-battery, non-existent
         clocks.realtime = clocks.uptime = 10;
         cur = clocks.realtime * 1000;
-        bi.updateTimeBasesLocked(false, false, cur, cur); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, cur, cur); // off battery
         assertFalse(bgtb.isRunning());
         assertEquals(0, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
 
@@ -65,7 +66,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // On-battery, background
         clocks.realtime = clocks.uptime = 303;
         cur = clocks.realtime * 1000;
-        bi.updateTimeBasesLocked(true, false, cur, cur); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, cur, cur); // on battery
         // still in ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         assertTrue(bgtb.isRunning());
         assertEquals(0, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
@@ -73,7 +74,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // On-battery, background - but change screen state
         clocks.realtime = clocks.uptime = 409;
         cur = clocks.realtime * 1000;
-        bi.updateTimeBasesLocked(true, true, cur, cur); // on battery (again)
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, cur, cur); // on battery (again)
         assertTrue(bgtb.isRunning());
         assertEquals(106_000, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
 
@@ -87,7 +88,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // Off-battery, foreground
         clocks.realtime = clocks.uptime = 530;
         cur = clocks.realtime * 1000;
-        bi.updateTimeBasesLocked(false, false, cur, cur); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, cur, cur); // off battery
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
         assertFalse(bgtb.isRunning());
         assertEquals(227_000, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
@@ -112,17 +113,17 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // battery=off, screen=off, background=off
         cur = (clocks.realtime = clocks.uptime = 100) * 1000;
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
-        bi.updateTimeBasesLocked(false, false, cur, cur);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, cur, cur);
         assertFalse(bgtb.isRunning());
 
         // battery=on, screen=off, background=off
         cur = (clocks.realtime = clocks.uptime = 200) * 1000;
-        bi.updateTimeBasesLocked(true, false, cur, cur);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, cur, cur);
         assertFalse(bgtb.isRunning());
 
         // battery=on, screen=on, background=off
         cur = (clocks.realtime = clocks.uptime = 300) * 1000;
-        bi.updateTimeBasesLocked(true, true, cur, cur);
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, cur, cur);
         assertFalse(bgtb.isRunning());
 
         // battery=on, screen=on, background=on
@@ -133,12 +134,12 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // battery=on, screen=off, background=on
         cur = (clocks.realtime = clocks.uptime = 550) * 1000;
-        bi.updateTimeBasesLocked(true, false, cur, cur);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, cur, cur);
         assertFalse(bgtb.isRunning());
 
         // battery=off, screen=off, background=on
         cur = (clocks.realtime = clocks.uptime = 660) * 1000;
-        bi.updateTimeBasesLocked(false, false, cur, cur);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, cur, cur);
         assertFalse(bgtb.isRunning());
 
         // battery=off, screen=off, background=off
@@ -157,7 +158,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // On battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
         // App in foreground
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
@@ -171,7 +172,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Off battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr); // off battery
 
         // Stop timer
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
@@ -200,7 +201,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // On battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
 
         // App in foreground
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
@@ -215,7 +216,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Off battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr); // off battery
 
         // Start timer (unoptimized)
         curr = 1000 * (clocks.realtime = clocks.uptime = 1000);
@@ -223,7 +224,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // On battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 2001);
-        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
 
         // Move to foreground
         curr = 1000 * (clocks.realtime = clocks.uptime = 3004);
@@ -270,7 +271,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // On battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
         // App in foreground
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
@@ -292,7 +293,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Off battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr); // off battery
 
         // Stop timer
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
@@ -331,7 +332,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // On battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
         // App in foreground
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
@@ -353,7 +354,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Off battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr); // off battery
 
         // Stop timer
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
