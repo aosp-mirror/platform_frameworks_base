@@ -813,15 +813,16 @@ public class Location implements Parcelable {
     /**
      * Get the estimated vertical accuracy of this location, in meters.
      *
-     * <p>We define vertical accuracy as the radius of 68% confidence. In other
-     * words, if you draw a circle centered at this location's altitude, and with a radius
-     * equal to the vertical accuracy, then there is a 68% probability that the true altitude is
-     * inside the circle.
+     * <p>We define vertical accuracy at 68% confidence.  Specifically, as 1-side of the
+     * 2-sided range above and below the estimated altitude reported by {@link #getAltitude()},
+     * within which there is a 68% probability of finding the true altitude.
      *
-     * <p>In statistical terms, it is assumed that location errors
-     * are random with a normal distribution, so the 68% confidence circle
-     * represents one standard deviation. Note that in practice, location
-     * errors do not always follow such a simple distribution.
+     * <p>In the case where the underlying distribution is assumed Gaussian normal, this would be
+     * considered 1 standard deviation.
+     *
+     * <p>For example, if {@link #getAltitude()} returns 150, and
+     * {@link #getVerticalAccuracyMeters()} ()} returns 20 then there is a 68% probability
+     * of the true altitude being between 130 and 170 meters.
      *
      * <p>If this location does not have a vertical accuracy, then 0.0 is returned.
      */
@@ -866,14 +867,16 @@ public class Location implements Parcelable {
     /**
      * Get the estimated speed accuracy of this location, in meters per second.
      *
-     * <p>We define speed accuracy as a 1-standard-deviation value, i.e. as 1-side of the
-     * 2-sided range above and below the estimated
-     * speed reported by {@link #getSpeed()}, within which there is a 68% probability of
-     * finding the true speed.
+     * <p>We define speed accuracy at 68% confidence.  Specifically, as 1-side of the
+     * 2-sided range above and below the estimated speed reported by {@link #getSpeed()},
+     * within which there is a 68% probability of finding the true speed.
      *
-     * <p>For example, if {@link #getSpeed()} returns 5.0, and
-     * {@link #getSpeedAccuracyMetersPerSecond()} returns 1.0, then there is a 68% probably of the
-     * true speed being between 4.0 and 6.0 meters per second.
+     * <p>In the case where the underlying
+     * distribution is assumed Gaussian normal, this would be considered 1 standard deviation.
+     *
+     * <p>For example, if {@link #getSpeed()} returns 5, and
+     * {@link #getSpeedAccuracyMetersPerSecond()} returns 1, then there is a 68% probability of
+     * the true speed being between 4 and 6 meters per second.
      *
      * <p>Note that the speed and speed accuracy is often better than would be obtained simply from
      * differencing sequential positions, such as when the Doppler measurements from GNSS satellites
@@ -922,13 +925,16 @@ public class Location implements Parcelable {
     /**
      * Get the estimated bearing accuracy of this location, in degrees.
      *
-     * <p>We define bearing accuracy as a 1-standard-deviation value, i.e. as 1-side of the
+     * <p>We define bearing accuracy at 68% confidence.  Specifically, as 1-side of the
      * 2-sided range on each side of the estimated bearing reported by {@link #getBearing()},
      * within which there is a 68% probability of finding the true bearing.
      *
-     * <p>For example, if {@link #getBearing()} returns 60., and
-     * {@link #getBearingAccuracyDegrees()} ()} returns 10., then there is a 68% probably of the
-     * true bearing being between 50. and 70. degrees.
+     * <p>In the case where the underlying distribution is assumed Gaussian normal, this would be
+     * considered 1 standard deviation.
+     *
+     * <p>For example, if {@link #getBearing()} returns 60, and
+     * {@link #getBearingAccuracyDegrees()} ()} returns 10, then there is a 68% probability of the
+     * true bearing being between 50 and 70 degrees.
      *
      * <p>If this location does not have a bearing accuracy, then 0.0 is returned.
      */
