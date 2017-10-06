@@ -107,6 +107,20 @@ public final class NetworkConstants {
     public static final int RFC6177_MIN_PREFIX_LENGTH = 48;
 
     /**
+     * ICMP common (v4/v6) constants.
+     *
+     * See also:
+     *     - https://tools.ietf.org/html/rfc792
+     *     - https://tools.ietf.org/html/rfc4443
+     */
+    public static final int ICMP_HEADER_TYPE_OFFSET = 0;
+    public static final int ICMP_HEADER_CODE_OFFSET = 1;
+    public static final int ICMP_HEADER_CHECKSUM_OFFSET = 2;
+    public static final int ICMP_ECHO_IDENTIFIER_OFFSET = 4;
+    public static final int ICMP_ECHO_SEQUENCE_NUMBER_OFFSET = 6;
+    public static final int ICMP_ECHO_DATA_OFFSET = 8;
+
+    /**
      * ICMPv6 constants.
      *
      * See also:
