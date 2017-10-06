@@ -27,6 +27,7 @@
         <item>ar-DJ</item> <!-- Arabic (Djibouti) -->
         <item>ar-DZ</item> <!-- Arabic (Algeria) -->
         <item>ar-EG</item> <!-- Arabic (Egypt) -->
+        <item>ar-EG-u-nu-latn</item> <!-- Arabic (Egypt,Western Digits) -->
         <item>ar-EH</item> <!-- Arabic (Western Sahara) -->
         <item>ar-ER</item> <!-- Arabic (Eritrea) -->
         <item>ar-IL</item> <!-- Arabic (Israel) -->
@@ -48,6 +49,7 @@
         <item>ar-SY</item> <!-- Arabic (Syria) -->
         <item>ar-TD</item> <!-- Arabic (Chad) -->
         <item>ar-TN</item> <!-- Arabic (Tunisia) -->
+        <item>ar-TN-u-nu-arab</item> <!-- Arabic (Tunisia,Arabic-Indic Digits) -->
         <item>ar-XB</item> <!-- Right-to-left pseudolocale -->
         <item>ar-YE</item> <!-- Arabic (Yemen) -->
         <item>as-IN</item> <!-- Assamese (India) -->
@@ -366,6 +368,7 @@
         <item>ms-SG</item> <!-- Malay (Singapore) -->
         <item>mt-MT</item> <!-- Maltese (Malta) -->
         <item>my-MM</item> <!-- Burmese (Myanmar (Burma)) -->
+        <item>my-MM-u-nu-latn</item> <!-- Burmese (Myanmar (Burma), Western Digits) -->
         <item>mzn-IR</item> <!-- Mazanderani (Iran) -->
         <item>naq-NA</item> <!-- Nama (Namibia) -->
         <item>nb-NO</item> <!-- Norwegian Bokmål (Norway) -->
