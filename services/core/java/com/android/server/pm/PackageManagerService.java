@@ -8193,12 +8193,12 @@ Slog.e("TODD",
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg,
-            final @ParseFlags int parseFlags) throws PackageManagerException {
+            final @ParseFlags int parseFlags, boolean forceCollect) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
-        if (ps != null
+        if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
                 && !isCompatSignatureUpdateNeeded(pkg)
@@ -8221,7 +8221,8 @@ Slog.e("TODD",
             Slog.w(TAG, "PackageSetting for " + ps.name
                     + " is missing signatures.  Collecting certs again to recover them.");
         } else {
-            Slog.i(TAG, toString() + " changed; collecting certs");
+            Slog.i(TAG, pkg.codePath + " changed; collecting certs" +
+                    (forceCollect ? " (forced)" : ""));
         }
 
         try {
@@ -8530,8 +8531,11 @@ Slog.e("TODD",
                     + " better than this " + pkg.getLongVersionCode());
         }
 
-        // verify certificates against what was last scanned
-        collectCertificatesLI(pkgSetting, pkg, parseFlags);
+        // Verify certificates against what was last scanned. If it is an updated priv app, we will
+        // force the verification. Full apk verification will happen unless apk verity is set up for
+        // the file. In that case, only small part of the apk is verified upfront.
+        collectCertificatesLI(pkgSetting, pkg, parseFlags,
+                PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting));
 
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
@@ -9835,6 +9839,7 @@ Slog.e("TODD",
         final @ScanFlags int scanFlags = request.scanFlags;
         final PackageSetting oldPkgSetting = request.oldPkgSetting;
         final PackageSetting originalPkgSetting = request.originalPkgSetting;
+        final PackageSetting disabledPkgSetting = request.disabledPkgSetting;
         final UserHandle user = request.user;
         final String realPkgName = request.realPkgName;
         final PackageSetting pkgSetting = result.pkgSetting;
@@ -9917,7 +9922,7 @@ Slog.e("TODD",
             try {
                 final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
                 final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
-                final boolean compatMatch = verifySignatures(signatureCheckPs,
+                final boolean compatMatch = verifySignatures(signatureCheckPs, disabledPkgSetting,
                         pkg.mSigningDetails, compareCompat, compareRecover);
                 // The new KeySets will be re-added later in the scanning process.
                 if (compatMatch) {
@@ -16687,8 +16692,9 @@ Slog.e("TODD",
                     try {
                         final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
                         final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
+                        // We don't care about disabledPkgSetting on install for now.
                         final boolean compatMatch = verifySignatures(
-                                signatureCheckPs, pkg.mSigningDetails, compareCompat,
+                                signatureCheckPs, null, pkg.mSigningDetails, compareCompat,
                                 compareRecover);
                         // The new KeySets will be re-added later in the scanning process.
                         if (compatMatch) {
