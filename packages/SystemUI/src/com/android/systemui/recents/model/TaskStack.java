@@ -52,8 +52,6 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsDebugFlags;
-import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.views.AnimationProps;
@@ -67,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 
 /**
@@ -75,7 +72,7 @@ import java.util.Random;
  */
 interface TaskFilter {
     /** Returns whether the filter accepts the specified task */
-    public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index);
+    boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index);
 }
 
 /**
@@ -85,7 +82,7 @@ class FilteredTaskList {
 
     ArrayList<Task> mTasks = new ArrayList<>();
     ArrayList<Task> mFilteredTasks = new ArrayList<>();
-    ArrayMap<Task.TaskKey, Integer> mTaskIndices = new ArrayMap<>();
+    ArrayMap<Task.TaskKey, Integer> mFilteredTaskIndices = new ArrayMap<>();
     TaskFilter mFilter;
 
     /** Sets the task filter, saving the current touch state */
@@ -150,8 +147,8 @@ class FilteredTaskList {
 
     /** Returns the index of this task in the list of filtered tasks */
     int indexOf(Task t) {
-        if (t != null && mTaskIndices.containsKey(t.key)) {
-            return mTaskIndices.get(t.key);
+        if (t != null && mFilteredTaskIndices.containsKey(t.key)) {
+            return mFilteredTaskIndices.get(t.key);
         }
         return -1;
     }
@@ -163,7 +160,7 @@ class FilteredTaskList {
 
     /** Returns whether the filtered list contains this task */
     boolean contains(Task t) {
-        return mTaskIndices.containsKey(t.key);
+        return mFilteredTaskIndices.containsKey(t.key);
     }
 
     /** Updates the list of filtered tasks whenever the base task list changes */
@@ -193,16 +190,11 @@ class FilteredTaskList {
     /** Updates the mapping of tasks to indices. */
     private void updateFilteredTaskIndices() {
         int taskCount = mFilteredTasks.size();
-        mTaskIndices.clear();
+        mFilteredTaskIndices.clear();
         for (int i = 0; i < taskCount; i++) {
             Task t = mFilteredTasks.get(i);
-            mTaskIndices.put(t.key, i);
+            mFilteredTaskIndices.put(t.key, i);
         }
-    }
-
-    /** Returns whether this task list is filtered */
-    boolean hasFilter() {
-        return (mFilter != null);
     }
 
     /** Returns the list of filtered tasks */
@@ -554,32 +546,15 @@ public class TaskStack {
         }
     };
 
-
-    // The task offset to apply to a task id as a group affiliation
-    static final int IndividualTaskIdOffset = 1 << 16;
-
     ArrayList<Task> mRawTaskList = new ArrayList<>();
     FilteredTaskList mStackTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
-    ArrayList<TaskGrouping> mGroups = new ArrayList<>();
-    ArrayMap<Integer, TaskGrouping> mAffinitiesGroups = new ArrayMap<>();
-
     public TaskStack() {
-        // Ensure that we only show non-docked tasks
+        // Ensure that we only show stack tasks
         mStackTaskList.setFilter(new TaskFilter() {
             @Override
             public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
-                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
-                    if (t.isAffiliatedTask()) {
-                        // If this task is affiliated with another parent in the stack, then the
-                        // historical state of this task depends on the state of the parent task
-                        Task parentTask = taskIdMap.get(t.affiliationTaskId);
-                        if (parentTask != null) {
-                            t = parentTask;
-                        }
-                    }
-                }
                 return t.isStackTask;
             }
         });
@@ -611,20 +586,6 @@ public class TaskStack {
         }
     }
 
-    /** Does the actual work associated with removing the task. */
-    void removeTaskImpl(FilteredTaskList taskList, Task t) {
-        // Remove the task from the list
-        taskList.remove(t);
-        // Remove it from the group as well, and if it is empty, remove the group
-        TaskGrouping group = t.group;
-        if (group != null) {
-            group.removeTask(t);
-            if (group.getTaskCount() == 0) {
-                removeGroup(group);
-            }
-        }
-    }
-
     /**
      * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
      * how they should update themselves.
@@ -640,7 +601,7 @@ public class TaskStack {
     public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture,
             boolean dismissRecentsIfAllRemoved) {
         if (mStackTaskList.contains(t)) {
-            removeTaskImpl(mStackTaskList, t);
+            mStackTaskList.remove(t);
             Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
             if (mCb != null) {
                 // Notify that a task has been removed
@@ -658,7 +619,7 @@ public class TaskStack {
         ArrayList<Task> tasks = mStackTaskList.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task t = tasks.get(i);
-            removeTaskImpl(mStackTaskList, t);
+            mStackTaskList.remove(t);
             mRawTaskList.remove(t);
         }
         if (mCb != null && notifyStackChanges) {
@@ -669,10 +630,10 @@ public class TaskStack {
 
 
     /**
-     * @see #setTasks(Context, List, boolean, boolean)
+     * @see #setTasks(List, boolean)
      */
-    public void setTasks(Context context, TaskStack stack, boolean notifyStackChanges) {
-        setTasks(context, stack.mRawTaskList, notifyStackChanges);
+    public void setTasks(TaskStack stack, boolean notifyStackChanges) {
+        setTasks(stack.mRawTaskList, notifyStackChanges);
     }
 
     /**
@@ -681,7 +642,7 @@ public class TaskStack {
      * @param tasks the new set of tasks to replace the current set.
      * @param notifyStackChanges whether or not to callback on specific changes to the list of tasks.
      */
-    public void setTasks(Context context, List<Task> tasks, boolean notifyStackChanges) {
+    public void setTasks(List<Task> tasks, boolean notifyStackChanges) {
         // Compute a has set for each of the tasks
         ArrayMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
         ArrayMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
@@ -703,7 +664,6 @@ public class TaskStack {
                     removedTasks.add(task);
                 }
             }
-            task.setGroup(null);
         }
 
         // Add any new tasks
@@ -730,9 +690,6 @@ public class TaskStack {
 
         mStackTaskList.set(allTasks);
         mRawTaskList = allTasks;
-
-        // Update the affiliated groupings
-        createAffiliatedGroupings(context);
 
         // Only callback for the removed tasks after the stack has updated
         int removedTaskCount = removedTasks.size();
@@ -930,131 +887,7 @@ public class TaskStack {
         }
         return null;
     }
-
-    /******** Grouping ********/
-
-    /** Adds a group to the set */
-    public void addGroup(TaskGrouping group) {
-        mGroups.add(group);
-        mAffinitiesGroups.put(group.affiliation, group);
-    }
-
-    public void removeGroup(TaskGrouping group) {
-        mGroups.remove(group);
-        mAffinitiesGroups.remove(group.affiliation);
-    }
-
-    /** Returns the group with the specified affiliation. */
-    public TaskGrouping getGroupWithAffiliation(int affiliation) {
-        return mAffinitiesGroups.get(affiliation);
-    }
-
-    /**
-     * Temporary: This method will simulate affiliation groups
-     */
-    void createAffiliatedGroupings(Context context) {
-        mGroups.clear();
-        mAffinitiesGroups.clear();
-
-        if (RecentsDebugFlags.Static.EnableMockTaskGroups) {
-            ArrayMap<Task.TaskKey, Task> taskMap = new ArrayMap<>();
-            // Sort all tasks by increasing firstActiveTime of the task
-            ArrayList<Task> tasks = mStackTaskList.getTasks();
-            // Create groups when sequential packages are the same
-            NamedCounter counter = new NamedCounter("task-group", "");
-            int taskCount = tasks.size();
-            String prevPackage = "";
-            int prevAffiliation = -1;
-            Random r = new Random();
-            int groupCountDown = RecentsDebugFlags.Static.MockTaskGroupsTaskCount;
-            for (int i = 0; i < taskCount; i++) {
-                Task t = tasks.get(i);
-                String packageName = t.key.getComponent().getPackageName();
-                packageName = "pkg";
-                TaskGrouping group;
-                if (packageName.equals(prevPackage) && groupCountDown > 0) {
-                    group = getGroupWithAffiliation(prevAffiliation);
-                    groupCountDown--;
-                } else {
-                    int affiliation = IndividualTaskIdOffset + t.key.id;
-                    group = new TaskGrouping(affiliation);
-                    addGroup(group);
-                    prevAffiliation = affiliation;
-                    prevPackage = packageName;
-                    groupCountDown = RecentsDebugFlags.Static.MockTaskGroupsTaskCount;
-                }
-                group.addTask(t);
-                taskMap.put(t.key, t);
-            }
-            // Sort groups by increasing latestActiveTime of the group
-            Collections.sort(mGroups, new Comparator<TaskGrouping>() {
-                @Override
-                public int compare(TaskGrouping taskGrouping, TaskGrouping taskGrouping2) {
-                    return Long.compare(taskGrouping.latestActiveTimeInGroup,
-                            taskGrouping2.latestActiveTimeInGroup);
-                }
-            });
-            // Sort group tasks by increasing firstActiveTime of the task, and also build a new list
-            // of tasks
-            int taskIndex = 0;
-            int groupCount = mGroups.size();
-            for (int i = 0; i < groupCount; i++) {
-                TaskGrouping group = mGroups.get(i);
-                ArrayList<Task.TaskKey> groupTasks = group.mTaskKeys;
-                int groupTaskCount = groupTasks.size();
-                for (int j = 0; j < groupTaskCount; j++) {
-                    tasks.set(taskIndex, taskMap.get(groupTasks.get(j)));
-                    taskIndex++;
-                }
-            }
-            mStackTaskList.set(tasks);
-        } else {
-            // Create the task groups
-            ArrayMap<Task.TaskKey, Task> tasksMap = new ArrayMap<>();
-            ArrayList<Task> tasks = mStackTaskList.getTasks();
-            int taskCount = tasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                Task t = tasks.get(i);
-                TaskGrouping group;
-                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
-                    int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
-                            IndividualTaskIdOffset + t.key.id;
-                    if (mAffinitiesGroups.containsKey(affiliation)) {
-                        group = getGroupWithAffiliation(affiliation);
-                    } else {
-                        group = new TaskGrouping(affiliation);
-                        addGroup(group);
-                    }
-                } else {
-                    group = new TaskGrouping(t.key.id);
-                    addGroup(group);
-                }
-                group.addTask(t);
-                tasksMap.put(t.key, t);
-            }
-            // Update the task colors for each of the groups
-            float minAlpha = context.getResources().getFloat(
-                    R.dimen.recents_task_affiliation_color_min_alpha_percentage);
-            int taskGroupCount = mGroups.size();
-            for (int i = 0; i < taskGroupCount; i++) {
-                TaskGrouping group = mGroups.get(i);
-                taskCount = group.getTaskCount();
-                // Ignore the groups that only have one task
-                if (taskCount <= 1) continue;
-                // Calculate the group color distribution
-                int affiliationColor = tasksMap.get(group.mTaskKeys.get(0)).affiliationColor;
-                float alphaStep = (1f - minAlpha) / taskCount;
-                float alpha = 1f;
-                for (int j = 0; j < taskCount; j++) {
-                    Task t = tasksMap.get(group.mTaskKeys.get(j));
-                    t.colorPrimary = Utilities.getColorWithOverlay(affiliationColor, Color.WHITE,
-                            alpha);
-                    alpha -= alphaStep;
-                }
-            }
-        }
-    }
-
+    
     /**
      * Computes the components of tasks in this stack that have been removed as a result of a change
      * in the specified package.

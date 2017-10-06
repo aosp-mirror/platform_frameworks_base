@@ -188,20 +188,9 @@ public class RecentsTransitionHelper {
         } else {
             LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
                     screenPinningRequested);
-            if (task.group != null && !task.group.isFrontMostTask(task)) {
-                launchStartedEvent.addPostAnimationCallback(new Runnable() {
-                    @Override
-                    public void run() {
-                        startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                                windowingMode, activityType);
-                    }
-                });
-                EventBus.getDefault().send(launchStartedEvent);
-            } else {
-                EventBus.getDefault().send(launchStartedEvent);
-                startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                        windowingMode, activityType);
-            }
+            EventBus.getDefault().send(launchStartedEvent);
+            startTaskActivity(stack, task, taskView, opts, transitionFuture, windowingMode,
+                    activityType);
         }
         Recents.getSystemServices().sendCloseSystemWindows(
                 StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);

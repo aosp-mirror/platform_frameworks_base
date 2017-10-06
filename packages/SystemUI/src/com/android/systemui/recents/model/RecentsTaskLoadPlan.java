@@ -112,8 +112,6 @@ public class RecentsTaskLoadPlan {
             preloadRawTasks();
         }
 
-        SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
-        SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         SparseBooleanArray lockedUsers = new SparseBooleanArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
@@ -154,20 +152,18 @@ public class RecentsTaskLoadPlan {
             boolean isLocked = lockedUsers.get(t.userId);
 
             // Add the task to the stack
-            Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
+            Task task = new Task(taskKey, icon,
                     thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
                     activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
                     t.supportsSplitScreenMultiWindow, t.bounds, t.taskDescription, t.resizeMode,
                     t.topActivity, isLocked);
 
             allTasks.add(task);
-            affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
-            affiliatedTasks.put(taskKey.id, taskKey);
         }
 
         // Initialize the stacks
         mStack = new TaskStack();
-        mStack.setTasks(mContext, allTasks, false /* notifyStackChanges */);
+        mStack.setTasks(allTasks, false /* notifyStackChanges */);
     }
 
     /**

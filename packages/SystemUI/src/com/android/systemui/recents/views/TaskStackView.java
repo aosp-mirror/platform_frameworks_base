@@ -387,7 +387,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Only notify if we are already initialized, otherwise, everything will pick up all the
         // new and old tasks when we next layout
-        mStack.setTasks(getContext(), stack, allowNotifyStackChanges && isInitialized);
+        mStack.setTasks(stack, allowNotifyStackChanges && isInitialized);
     }
 
     /** Returns the task stack. */

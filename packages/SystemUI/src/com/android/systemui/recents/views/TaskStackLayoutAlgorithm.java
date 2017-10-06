@@ -855,32 +855,25 @@ public class TaskStackLayoutAlgorithm {
                 continue;
             }
 
-            boolean isFrontMostTaskInGroup = task.group == null || task.group.isFrontMostTask(task);
-            if (isFrontMostTaskInGroup) {
-                getStackTransform(taskProgress, taskProgress, mInitialScrollP, mFocusState,
-                        tmpTransform, null, false /* ignoreSingleTaskCase */,
-                        false /* forceUpdate */);
-                float screenY = tmpTransform.rect.top;
-                boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
-                if (hasVisibleThumbnail) {
-                    numVisibleThumbnails++;
-                    numVisibleTasks++;
-                    prevScreenY = screenY;
-                } else {
-                    // Once we hit the next front most task that does not have a visible thumbnail,
-                    // walk through remaining visible set
-                    for (int j = i; j >= 0; j--) {
-                        taskProgress = getStackScrollForTask(tasks.get(j));
-                        if (!currentRange.isInRange(taskProgress)) {
-                            break;
-                        }
-                        numVisibleTasks++;
-                    }
-                    break;
-                }
-            } else {
-                // Affiliated task, no thumbnail
+            getStackTransform(taskProgress, taskProgress, mInitialScrollP, mFocusState,
+                    tmpTransform, null, false /* ignoreSingleTaskCase */, false /* forceUpdate */);
+            float screenY = tmpTransform.rect.top;
+            boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
+            if (hasVisibleThumbnail) {
+                numVisibleThumbnails++;
                 numVisibleTasks++;
+                prevScreenY = screenY;
+            } else {
+                // Once we hit the next front most task that does not have a visible thumbnail,
+                // walk through remaining visible set
+                for (int j = i; j >= 0; j--) {
+                    taskProgress = getStackScrollForTask(tasks.get(j));
+                    if (!currentRange.isInRange(taskProgress)) {
+                        break;
+                    }
+                    numVisibleTasks++;
+                }
+                break;
             }
         }
         return new VisibilityReport(numVisibleTasks, numVisibleThumbnails);

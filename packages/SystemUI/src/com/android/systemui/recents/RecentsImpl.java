@@ -77,7 +77,6 @@ import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.Task.TaskKey;
-import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.views.RecentsTransitionHelper;
@@ -594,43 +593,38 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
-        int numAffiliatedTasks = 0;
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
             if (task.key.id == runningTask.id) {
-                TaskGrouping group = task.group;
-                Task.TaskKey toTaskKey;
                 if (showNextTask) {
-                    toTaskKey = group.getNextTaskInGroup(task);
-                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_next_affiliated_task_target,
-                            R.anim.recents_launch_next_affiliated_task_source);
+                    if ((i + 1) < taskCount) {
+                        toTask = tasks.get(i + 1);
+                        launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                                R.anim.recents_launch_next_affiliated_task_target,
+                                R.anim.recents_launch_next_affiliated_task_source);
+                    }
                 } else {
-                    toTaskKey = group.getPrevTaskInGroup(task);
-                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_prev_affiliated_task_target,
-                            R.anim.recents_launch_prev_affiliated_task_source);
+                    if ((i - 1) >= 0) {
+                        toTask = tasks.get(i - 1);
+                        launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                                R.anim.recents_launch_prev_affiliated_task_target,
+                                R.anim.recents_launch_prev_affiliated_task_source);
+                    }
                 }
-                if (toTaskKey != null) {
-                    toTask = focusedStack.findTaskWithId(toTaskKey.id);
-                }
-                numAffiliatedTasks = group.getTaskCount();
                 break;
             }
         }
 
         // Return early if there is no next task
         if (toTask == null) {
-            if (numAffiliatedTasks > 1) {
-                if (showNextTask) {
-                    ssp.startInPlaceAnimationOnFrontMostApplication(
-                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
-                                    R.anim.recents_launch_next_affiliated_task_bounce));
-                } else {
-                    ssp.startInPlaceAnimationOnFrontMostApplication(
-                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
-                                    R.anim.recents_launch_prev_affiliated_task_bounce));
-                }
+            if (showNextTask) {
+                ssp.startInPlaceAnimationOnFrontMostApplication(
+                        ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                R.anim.recents_launch_next_affiliated_task_bounce));
+            } else {
+                ssp.startInPlaceAnimationOnFrontMostApplication(
+                        ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                R.anim.recents_launch_prev_affiliated_task_bounce));
             }
             return;
         }
