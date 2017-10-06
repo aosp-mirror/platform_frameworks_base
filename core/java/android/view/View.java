@@ -15529,7 +15529,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code dirty}.
      *
      * @param dirty the rectangle representing the bounds of the dirty region
+     *
+     * @deprecated The switch to hardware accelerated rendering in API 14 reduced
+     * the importance of the dirty rectangle. In API 21 the given rectangle is
+     * ignored entirely in favor of an internally-calculated area instead.
+     * Because of this, clients are encouraged to just call {@link #invalidate()}.
      */
+    @Deprecated
     public void invalidate(Rect dirty) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
@@ -15550,7 +15556,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param t the top position of the dirty region
      * @param r the right position of the dirty region
      * @param b the bottom position of the dirty region
+     *
+     * @deprecated The switch to hardware accelerated rendering in API 14 reduced
+     * the importance of the dirty rectangle. In API 21 the given rectangle is
+     * ignored entirely in favor of an internally-calculated area instead.
+     * Because of this, clients are encouraged to just call {@link #invalidate()}.
      */
+    @Deprecated
     public void invalidate(int l, int t, int r, int b) {
         final int scrollX = mScrollX;
         final int scrollY = mScrollY;
