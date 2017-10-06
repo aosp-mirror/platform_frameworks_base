@@ -28,6 +28,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
 
 import libcore.util.Objects;
@@ -531,44 +532,54 @@ class ShortcutUser {
                 + " S=" + restoredShortcuts[0]);
     }
 
-    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
-        pw.print(prefix);
-        pw.print("User: ");
-        pw.print(mUserId);
-        pw.print("  Known locales: ");
-        pw.print(mKnownLocales);
-        pw.print("  Last app scan: [");
-        pw.print(mLastAppScanTime);
-        pw.print("] ");
-        pw.print(ShortcutService.formatTime(mLastAppScanTime));
-        pw.print("  Last app scan FP: ");
-        pw.print(mLastAppScanOsFingerprint);
-        pw.println();
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {
+        if (filter.shouldDumpDetails()) {
+            pw.print(prefix);
+            pw.print("User: ");
+            pw.print(mUserId);
+            pw.print("  Known locales: ");
+            pw.print(mKnownLocales);
+            pw.print("  Last app scan: [");
+            pw.print(mLastAppScanTime);
+            pw.print("] ");
+            pw.print(ShortcutService.formatTime(mLastAppScanTime));
+            pw.print("  Last app scan FP: ");
+            pw.print(mLastAppScanOsFingerprint);
+            pw.println();
 
-        prefix += prefix + "  ";
+            prefix += prefix + "  ";
 
-        pw.print(prefix);
-        pw.print("Cached launcher: ");
-        pw.print(mCachedLauncher);
-        pw.println();
+            pw.print(prefix);
+            pw.print("Cached launcher: ");
+            pw.print(mCachedLauncher);
+            pw.println();
 
-        pw.print(prefix);
-        pw.print("Last known launcher: ");
-        pw.print(mLastKnownLauncher);
-        pw.println();
+            pw.print(prefix);
+            pw.print("Last known launcher: ");
+            pw.print(mLastKnownLauncher);
+            pw.println();
+        }
 
         for (int i = 0; i < mLaunchers.size(); i++) {
-            mLaunchers.valueAt(i).dump(pw, prefix);
+            ShortcutLauncher launcher = mLaunchers.valueAt(i);
+            if (filter.isPackageMatch(launcher.getPackageName())) {
+                launcher.dump(pw, prefix, filter);
+            }
         }
 
         for (int i = 0; i < mPackages.size(); i++) {
-            mPackages.valueAt(i).dump(pw, prefix);
+            ShortcutPackage pkg = mPackages.valueAt(i);
+            if (filter.isPackageMatch(pkg.getPackageName())) {
+                pkg.dump(pw, prefix, filter);
+            }
         }
 
-        pw.println();
-        pw.print(prefix);
-        pw.println("Bitmap directories: ");
-        dumpDirectorySize(pw, prefix + "  ", mService.getUserBitmapFilePath(mUserId));
+        if (filter.shouldDumpDetails()) {
+            pw.println();
+            pw.print(prefix);
+            pw.println("Bitmap directories: ");
+            dumpDirectorySize(pw, prefix + "  ", mService.getUserBitmapFilePath(mUserId));
+        }
     }
 
     private void dumpDirectorySize(@NonNull PrintWriter pw,

@@ -2842,23 +2842,13 @@
        =============================================================== -->
     <eat-comment />
 
-    <public-group type="attr" first-id="0x01010569">
-        <public name="showWhenLocked"/>
-        <public name="turnScreenOn"/>
-        <public name="classLoader" />
-        <public name="windowLightNavigationBar" />
-        <public name="navigationBarDividerColor" />
-    </public-group>
+    <public type="attr" name="showWhenLocked" id="0x01010569" />
+    <public type="attr" name="turnScreenOn" id="0x0101056a" />
+    <public type="attr" name="classLoader" id="0x0101056b" />
+    <public type="attr" name="windowLightNavigationBar" id="0x0101056c" />
+    <public type="attr" name="navigationBarDividerColor" id="0x0101056d" />
 
-    <public-group type="style" first-id="0x010302e0">
-    </public-group>
-
-    <public-group type="id" first-id="0x01020044">
-    </public-group>
-
-    <public-group type="string" first-id="0x0104001a">
-      <public name="autofill"/>
-    </public-group>
+    <public type="string" name="autofill" id="0x0104001a"/>
 
     <!-- ===============================================================
          Resources added in version P of the platform
@@ -2876,6 +2866,18 @@
          the id value of 0x01010531.
          =============================================================== -->
     <eat-comment />
+
+    <public-group type="attr" first-id="0x0101056e">
+    </public-group>
+
+    <public-group type="style" first-id="0x010302e0">
+    </public-group>
+
+    <public-group type="id" first-id="0x01020044">
+    </public-group>
+
+    <public-group type="string" first-id="0x0104001b">
+    </public-group>
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

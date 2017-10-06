@@ -5780,7 +5780,7 @@ public final class ActivityThread {
                 final int preloadedFontsResource = info.metaData.getInt(
                         ApplicationInfo.METADATA_PRELOADED_FONTS, 0);
                 if (preloadedFontsResource != 0) {
-                    data.info.mResources.preloadFonts(preloadedFontsResource);
+                    data.info.getResources().preloadFonts(preloadedFontsResource);
                 }
             }
         } catch (RemoteException e) {

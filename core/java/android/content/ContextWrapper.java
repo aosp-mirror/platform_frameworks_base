@@ -37,6 +37,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.autofill.AutofillManager.AutofillClient;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -967,7 +968,24 @@ public class ContextWrapper extends Context {
     /**
      * @hide
      */
+    @Override
     public int getNextAutofillId() {
         return mBase.getNextAutofillId();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public AutofillClient getAutofillClient() {
+        return mBase.getAutofillClient();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setAutofillClient(AutofillClient client) {
+        mBase.setAutofillClient(client);
     }
 }

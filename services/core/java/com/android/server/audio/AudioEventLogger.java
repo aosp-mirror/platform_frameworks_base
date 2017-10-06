@@ -16,6 +16,8 @@
 
 package com.android.server.audio;
 
+import android.util.Log;
+
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,6 +46,22 @@ public class AudioEventLogger {
         public String toString() {
             return (new StringBuilder(sFormat.format(new Date(mTimestamp))))
                     .append(" ").append(eventToString()).toString();
+        }
+
+        /**
+         * Causes the string message for the event to appear in the verbose logcat.
+         * Here is an example of how to create a new event (a StringEvent), adding it to the logger
+         * (an instance of AudioEventLogger) while also making it show in the verbose logcat:
+         * <pre>
+         *     myLogger.log(
+         *         (new StringEvent("something for logcat and logger")).printLog(MyClass.TAG) );
+         * </pre>
+         * @param tag the tag for the android.util.Log.v
+         * @return the same instance of the event
+         */
+        public Event printLog(String tag) {
+            Log.v(tag, eventToString());
+            return this;
         }
 
         /**

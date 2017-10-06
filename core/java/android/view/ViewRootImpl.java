@@ -366,7 +366,7 @@ public final class ViewRootImpl implements ViewParent,
 
     // These can be accessed by any thread, must be protected with a lock.
     // Surface can never be reassigned or cleared (use Surface.clear()).
-    final Surface mSurface = new Surface();
+    public final Surface mSurface = new Surface();
 
     boolean mAdded;
     boolean mAddedTouchMode;
@@ -512,7 +512,7 @@ public final class ViewRootImpl implements ViewParent,
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
         if (!sCompatibilityDone) {
-            sAlwaysAssignFocus = true;
+            sAlwaysAssignFocus = mTargetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }

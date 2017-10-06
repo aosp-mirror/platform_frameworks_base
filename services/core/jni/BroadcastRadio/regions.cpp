@@ -27,7 +27,7 @@ namespace server {
 namespace BroadcastRadio {
 namespace regions {
 
-namespace utils = hardware::broadcastradio::V1_1::utils;
+namespace utils = hardware::broadcastradio::utils;
 
 using hardware::hidl_vec;
 

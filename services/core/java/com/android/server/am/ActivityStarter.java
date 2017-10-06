@@ -1799,15 +1799,8 @@ class ActivityStarter {
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                     mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
             addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
-            if (mLaunchBounds != null) {
-                final int stackId = mTargetStack.mStackId;
-                if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                    mService.resizeStack(
-                            stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
-                } else {
-                    mStartActivity.getTask().updateOverrideConfiguration(mLaunchBounds);
-                }
-            }
+            updateBounds(mStartActivity.getTask(), mLaunchBounds);
+
             if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                     + " in new task " + mStartActivity.getTask());
         } else {
@@ -1971,19 +1964,15 @@ class ActivityStarter {
         }
 
         if (mLaunchBounds != null) {
-            mInTask.updateOverrideConfiguration(mLaunchBounds);
             // TODO: Shouldn't we already know what stack to use by the time we get here?
             ActivityStack stack = mSupervisor.getLaunchStack(null, null, mInTask, ON_TOP);
             if (stack != mInTask.getStack()) {
                 mInTask.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
                         DEFER_RESUME, "inTaskToFront");
-                stack = mInTask.getStack();
                 mTargetStack = mInTask.getStack();
             }
-            if (StackId.resizeStackWithLaunchBounds(stack.mStackId)) {
-                mService.resizeStack(
-                        stack.mStackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
-            }
+
+            updateBounds(mInTask, mLaunchBounds);
         }
 
         mTargetStack.moveTaskToFrontLocked(
@@ -1994,6 +1983,19 @@ class ActivityStarter {
                 + " in explicit task " + mStartActivity.getTask());
 
         return START_SUCCESS;
+    }
+
+    void updateBounds(TaskRecord task, Rect bounds) {
+        if (bounds == null) {
+            return;
+        }
+
+        final int stackId = task.getStackId();
+        if (StackId.resizeStackWithLaunchBounds(stackId)) {
+            mService.resizeStack(stackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
+        } else {
+            task.updateOverrideConfiguration(bounds);
+        }
     }
 
     private void setTaskToCurrentTopOrCreateNewTask() {

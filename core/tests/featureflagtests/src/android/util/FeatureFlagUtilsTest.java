@@ -16,6 +16,7 @@
 
 package android.util;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -62,6 +63,18 @@ public class FeatureFlagUtilsTest {
         SystemProperties.set(FeatureFlagUtils.FFLAG_OVERRIDE_PREFIX + TEST_FEATURE_NAME, "true");
 
         assertTrue(FeatureFlagUtils.isEnabled(TEST_FEATURE_NAME));
+    }
+
+    @Test
+    public void testSetEnabled_shouldSetOverrideFlag() {
+        assertFalse(FeatureFlagUtils.isEnabled(TEST_FEATURE_NAME));
+
+        FeatureFlagUtils.setEnabled(TEST_FEATURE_NAME, true);
+
+        assertEquals(SystemProperties.get(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, null),
+                "");
+        assertTrue(Boolean.parseBoolean(SystemProperties.get(
+                FeatureFlagUtils.FFLAG_OVERRIDE_PREFIX + TEST_FEATURE_NAME, "")));
     }
 
     @Test

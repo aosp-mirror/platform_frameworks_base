@@ -880,8 +880,9 @@ class InstantAppRegistry {
         final long identity = Binder.clearCallingIdentity();
         try {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
-                BasePermission bp = mService.mSettings.mPermissions.get(grantedPermission);
-                if (bp != null && (bp.isRuntime() || bp.isDevelopment()) && bp.isInstant()) {
+                final boolean propagatePermission =
+                        mService.mSettings.canPropagatePermissionToInstantApp(grantedPermission);
+                if (propagatePermission) {
                     mService.grantRuntimePermission(packageName, grantedPermission, userId);
                 }
             }

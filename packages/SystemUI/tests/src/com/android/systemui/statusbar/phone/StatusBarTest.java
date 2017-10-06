@@ -34,8 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
-import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -50,21 +50,17 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
-import android.testing.LayoutInflaterBuilder;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
-import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
-import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
@@ -76,7 +72,6 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -496,6 +491,28 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDisableExpandStatusBar() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        mStatusBar.setUserSetupForTest(true);
+        when(mStatusBar.isDeviceProvisioned()).thenReturn(true);
+
+        mStatusBar.disable(StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
+        verify(mNotificationPanelView).setQsExpansionEnabled(false);
+        mStatusBar.animateExpandNotificationsPanel();
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
+        mStatusBar.animateExpandSettingsPanel(null);
+        verify(mNotificationPanelView, never()).expand(anyBoolean());
+
+        mStatusBar.disable(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE, false);
+        verify(mNotificationPanelView).setQsExpansionEnabled(true);
+        mStatusBar.animateExpandNotificationsPanel();
+        verify(mNotificationPanelView).expand(anyBoolean());
+        mStatusBar.animateExpandSettingsPanel(null);
+        verify(mNotificationPanelView).expand(anyBoolean());
+    }
+
+    @Test
     public void testDump_DoesNotCrash() {
         mStatusBar.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
     }
@@ -545,6 +562,10 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setBarStateForTest(int state) {
             mState = state;
+        }
+
+        public void setUserSetupForTest(boolean userSetup) {
+            mUserSetup = userSetup;
         }
     }
 }

@@ -520,6 +520,12 @@
     <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
     <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
 
+    <!-- Magnifier dimensions -->
+    <dimen name="magnifier_width">200dp</dimen>
+    <dimen name="magnifier_height">48dp</dimen>
+    <dimen name="magnifier_elevation">2dp</dimen>
+    <dimen name="magnifier_offset">42dp</dimen>
+
     <dimen name="chooser_grid_padding">0dp</dimen>
     <!-- Spacing around the background change frome service to non-service -->
     <dimen name="chooser_service_spacing">8dp</dimen>

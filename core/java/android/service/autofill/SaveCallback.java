@@ -34,8 +34,12 @@ public final class SaveCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} was successfully fulfilled
+     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} was successfully handled
      * by the service.
+     *
+     * <p>If the service could not handle the request right away&mdash;for example, because it must
+     * launch an activity asking the user to authenticate first or because the network is
+     * down&mdash;it should still call {@link #onSuccess()}.
      *
      * @throws RuntimeException if an error occurred while calling the Android System.
      */
@@ -51,8 +55,15 @@ public final class SaveCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} could not be fulfilled
+     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} could not be handled
      * by the service.
+     *
+     * <p>This method should only be called when the service could not handle the request right away
+     * and could not recover or retry it. If the service could retry or recover, it could keep
+     * the {@link SaveRequest} and call {@link #onSuccess()} instead.
+     *
+     * <p><b>Note:</b> The Android System displays an UI with the supplied error message; if
+     * you prefer to show your own message, call {@link #onSuccess()} instead.
      *
      * @param message error message to be displayed to the user.
      *

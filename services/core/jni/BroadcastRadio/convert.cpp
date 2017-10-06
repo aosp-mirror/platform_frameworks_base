@@ -31,7 +31,7 @@ namespace server {
 namespace BroadcastRadio {
 namespace convert {
 
-namespace utils = V1_1::utils;
+namespace utils = hardware::broadcastradio::utils;
 
 using hardware::Return;
 using hardware::hidl_vec;

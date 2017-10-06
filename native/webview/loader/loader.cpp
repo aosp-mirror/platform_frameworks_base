@@ -143,17 +143,7 @@ jboolean ReserveAddressSpace(JNIEnv*, jclass, jlong size) {
   return DoReserveAddressSpace(size);
 }
 
-jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib32, jstring lib64,
-                         jstring relro32, jstring relro64) {
-#ifdef __LP64__
-  jstring lib = lib64;
-  jstring relro = relro64;
-  (void)lib32; (void)relro32;
-#else
-  jstring lib = lib32;
-  jstring relro = relro32;
-  (void)lib64; (void)relro64;
-#endif
+jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro) {
   jboolean ret = JNI_FALSE;
   const char* lib_utf8 = env->GetStringUTFChars(lib, NULL);
   if (lib_utf8 != NULL) {
@@ -167,15 +157,8 @@ jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib32, jstring lib64,
   return ret;
 }
 
-jint LoadWithRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro32,
-                       jstring relro64, jobject clazzLoader) {
-#ifdef __LP64__
-  jstring relro = relro64;
-  (void)relro32;
-#else
-  jstring relro = relro32;
-  (void)relro64;
-#endif
+jint LoadWithRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro,
+                       jobject clazzLoader) {
   jint ret = LIBLOAD_FAILED_JNI_CALL;
   const char* lib_utf8 = env->GetStringUTFChars(lib, NULL);
   if (lib_utf8 != NULL) {
@@ -196,10 +179,10 @@ const JNINativeMethod kJniMethods[] = {
   { "nativeReserveAddressSpace", "(J)Z",
       reinterpret_cast<void*>(ReserveAddressSpace) },
   { "nativeCreateRelroFile",
-      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
+      "(Ljava/lang/String;Ljava/lang/String;)Z",
       reinterpret_cast<void*>(CreateRelroFile) },
   { "nativeLoadWithRelroFile",
-      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)I",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)I",
       reinterpret_cast<void*>(LoadWithRelroFile) },
 };
 

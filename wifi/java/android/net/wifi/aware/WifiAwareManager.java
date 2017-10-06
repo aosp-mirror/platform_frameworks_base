@@ -26,7 +26,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
-import android.net.wifi.RttManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,9 +34,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.SparseArray;
-
-import com.android.internal.annotations.GuardedBy;
 
 import libcore.util.HexEncoding;
 
@@ -45,7 +41,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -171,9 +166,6 @@ public class WifiAwareManager {
     private final IWifiAwareManager mService;
 
     private final Object mLock = new Object(); // lock access to the following vars
-
-    @GuardedBy("mLock")
-    private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
 
     /** @hide */
     public WifiAwareManager(Context context, IWifiAwareManager service) {
@@ -401,27 +393,6 @@ public class WifiAwareManager {
     }
 
     /** @hide */
-    public void startRanging(int clientId, int sessionId, RttManager.RttParams[] params,
-                             RttManager.RttListener listener) {
-        if (VDBG) {
-            Log.v(TAG, "startRanging: clientId=" + clientId + ", sessionId=" + sessionId + ", "
-                    + "params=" + Arrays.toString(params) + ", listener=" + listener);
-        }
-
-        int rangingKey = 0;
-        try {
-            rangingKey = mService.startRanging(clientId, sessionId,
-                    new RttManager.ParcelableRttParams(params));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        synchronized (mLock) {
-            mRangingListeners.put(rangingKey, listener);
-        }
-    }
-
-    /** @hide */
     public NetworkSpecifier createNetworkSpecifier(int clientId, int role, int sessionId,
             PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
@@ -500,28 +471,11 @@ public class WifiAwareManager {
         private static final int CALLBACK_CONNECT_SUCCESS = 0;
         private static final int CALLBACK_CONNECT_FAIL = 1;
         private static final int CALLBACK_IDENTITY_CHANGED = 2;
-        private static final int CALLBACK_RANGING_SUCCESS = 3;
-        private static final int CALLBACK_RANGING_FAILURE = 4;
-        private static final int CALLBACK_RANGING_ABORTED = 5;
 
         private final Handler mHandler;
         private final WeakReference<WifiAwareManager> mAwareManager;
         private final Binder mBinder;
         private final Looper mLooper;
-
-        RttManager.RttListener getAndRemoveRangingListener(int rangingId) {
-            WifiAwareManager mgr = mAwareManager.get();
-            if (mgr == null) {
-                Log.w(TAG, "getAndRemoveRangingListener: called post GC");
-                return null;
-            }
-
-            synchronized (mgr.mLock) {
-                RttManager.RttListener listener = mgr.mRangingListeners.get(rangingId);
-                mgr.mRangingListeners.delete(rangingId);
-                return listener;
-            }
-        }
 
         /**
          * Constructs a {@link AttachCallback} using the specified looper.
@@ -567,37 +521,6 @@ public class WifiAwareManager {
                                 identityChangedListener.onIdentityChanged((byte[]) msg.obj);
                             }
                             break;
-                        case CALLBACK_RANGING_SUCCESS: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onSuccess(
-                                        ((RttManager.ParcelableRttResults) msg.obj).mResults);
-                            }
-                            break;
-                        }
-                        case CALLBACK_RANGING_FAILURE: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onFailure(msg.arg2, (String) msg.obj);
-                            }
-                            break;
-                        }
-                        case CALLBACK_RANGING_ABORTED: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onAborted();
-                            }
-                            break;
-                        }
                     }
                 }
             };
@@ -628,43 +551,6 @@ public class WifiAwareManager {
             Message msg = mHandler.obtainMessage(CALLBACK_IDENTITY_CHANGED);
             msg.obj = mac;
             mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onRangingSuccess(int rangingId, RttManager.ParcelableRttResults results) {
-            if (VDBG) {
-                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", results=" + results);
-            }
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_SUCCESS);
-            msg.arg1 = rangingId;
-            msg.obj = results;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onRangingFailure(int rangingId, int reason, String description) {
-            if (VDBG) {
-                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", reason=" + reason
-                        + ", description=" + description);
-            }
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_FAILURE);
-            msg.arg1 = rangingId;
-            msg.arg2 = reason;
-            msg.obj = description;
-            mHandler.sendMessage(msg);
-
-        }
-
-        @Override
-        public void onRangingAborted(int rangingId) {
-            if (VDBG) Log.v(TAG, "onRangingAborted: rangingId=" + rangingId);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_ABORTED);
-            msg.arg1 = rangingId;
-            mHandler.sendMessage(msg);
-
         }
     }
 

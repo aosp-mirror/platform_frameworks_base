@@ -258,7 +258,7 @@ public class AlsaDevicesParser {
         return line.charAt(kIndex_CardDeviceField) == '[';
     }
 
-    public void scan() {
+    public boolean scan() {
         mDeviceRecords.clear();
 
         File devicesFile = new File(kDevicesFilePath);
@@ -274,11 +274,13 @@ public class AlsaDevicesParser {
                 }
             }
             reader.close();
+            return true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     //

@@ -25,6 +25,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.json.JSONException;
@@ -293,7 +294,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         return ret;
     }
 
-    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {
         pw.println();
 
         pw.print(prefix);

@@ -454,13 +454,13 @@ public final class WebViewFactory {
         // waiting on relro creation.
         if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
             if (DEBUG) Log.v(LOGTAG, "Create 32 bit relro");
-            WebViewLibraryLoader.createRelroFile(false /* is64Bit */, nativeLibraryPaths);
+            WebViewLibraryLoader.createRelroFile(false /* is64Bit */, nativeLibraryPaths[0]);
             numRelros++;
         }
 
         if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
             if (DEBUG) Log.v(LOGTAG, "Create 64 bit relro");
-            WebViewLibraryLoader.createRelroFile(true /* is64Bit */, nativeLibraryPaths);
+            WebViewLibraryLoader.createRelroFile(true /* is64Bit */, nativeLibraryPaths[1]);
             numRelros++;
         }
         return numRelros;
@@ -492,10 +492,15 @@ public final class WebViewFactory {
     /** @hide */
     public static IWebViewUpdateService getUpdateService() {
         if (isWebViewSupported()) {
-            return IWebViewUpdateService.Stub.asInterface(
-                    ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
+            return getUpdateServiceUnchecked();
         } else {
             return null;
         }
+    }
+
+    /** @hide */
+    static IWebViewUpdateService getUpdateServiceUnchecked() {
+        return IWebViewUpdateService.Stub.asInterface(
+                ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
     }
 }

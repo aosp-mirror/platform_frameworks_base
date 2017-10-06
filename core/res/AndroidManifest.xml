@@ -204,8 +204,8 @@
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
-    <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.pbapclient.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
     <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
@@ -3105,6 +3105,13 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.BIND_APPWIDGET"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to bind app's slices and get their
+         content. This content will be surfaced to the
+         user and not to leave the device.
+         <p>Not for use by third-party applications. @hide -->
+    <permission android:name="android.permission.BIND_SLICE"
+        android:protectionLevel="signature|privileged|development" />
 
     <!-- @SystemApi Private permission, to restrict who can bring up a dialog to add a new
          keyguard widget

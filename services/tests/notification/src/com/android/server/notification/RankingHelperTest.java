@@ -25,25 +25,13 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import com.android.internal.util.FastXmlSerializer;
-
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.app.Notification;
-import android.app.NotificationChannelGroup;
-import android.content.Context;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.content.ContentProvider;
+import android.content.Context;
+import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -52,13 +40,27 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
 import android.util.Xml;
+
+import com.android.internal.util.FastXmlSerializer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -76,6 +78,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -95,10 +98,17 @@ public class RankingHelperTest extends NotificationTestCase {
     private static final int UID2 = 1111;
     private static final UserHandle USER2 = UserHandle.of(10);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
+    private static final String TEST_AUTHORITY = "test";
+    private static final Uri SOUND_URI =
+            Uri.parse("content://" + TEST_AUTHORITY + "/internal/audio/media/10");
+    private static final Uri CANONICAL_SOUND_URI =
+            Uri.parse("content://" + TEST_AUTHORITY
+                    + "/internal/audio/media/10?title=Test&canonical=1");
 
     @Mock NotificationUsageStats mUsageStats;
     @Mock RankingHandler mHandler;
     @Mock PackageManager mPm;
+    @Mock IContentProvider mTestIContentProvider;
     @Mock Context mContext;
 
     private Notification mNotiGroupGSortA;
@@ -134,8 +144,21 @@ public class RankingHelperTest extends NotificationTestCase {
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getApplicationInfo()).thenReturn(legacy);
         // most tests assume badging is enabled
-        Secure.putIntForUser(getContext().getContentResolver(),
+        TestableContentResolver contentResolver = getContext().getContentResolver();
+        contentResolver.setFallbackToExisting(false);
+        Secure.putIntForUser(contentResolver,
                 Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID));
+
+        ContentProvider testContentProvider = mock(ContentProvider.class);
+        when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
+        contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
+
+        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI)))
+                .thenReturn(CANONICAL_SOUND_URI);
+        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(CANONICAL_SOUND_URI);
+        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(SOUND_URI);
 
         mHelper = new RankingHelper(getContext(), mPm, mHandler, mUsageStats,
                 new String[] {ImportanceExtractor.class.getName()});
@@ -214,9 +237,12 @@ public class RankingHelperTest extends NotificationTestCase {
     }
 
     private void loadStreamXml(ByteArrayOutputStream stream, boolean forRestore) throws Exception {
+        loadByteArrayXml(stream.toByteArray(), forRestore);
+    }
+
+    private void loadByteArrayXml(byte[] byteArray, boolean forRestore) throws Exception {
         XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(stream.toByteArray())),
-                null);
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(byteArray)), null);
         parser.nextTag();
         mHelper.readXml(parser, forRestore);
     }
@@ -377,7 +403,7 @@ public class RankingHelperTest extends NotificationTestCase {
         NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setDescription("descriptions for all");
-        channel2.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
+        channel2.setSound(SOUND_URI, mAudioAttributes);
         channel2.enableLights(true);
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
@@ -436,6 +462,109 @@ public class RankingHelperTest extends NotificationTestCase {
             }
         }
         assertTrue(foundChannel2Group);
+    }
+
+    @Test
+    public void testBackupXml_backupCanonicalizedSoundUri() throws Exception {
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG, UID, channel, true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel.getId());
+
+        // Testing that in restore we are given the canonical version
+        loadStreamXml(baos, true);
+        verify(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
+    }
+
+    @Test
+    public void testRestoreXml_withExistentCanonicalizedSoundUri() throws Exception {
+        Uri localUri = Uri.parse("content://" + TEST_AUTHORITY + "/local/url");
+        Uri canonicalBasedOnLocal = localUri.buildUpon()
+                .appendQueryParameter("title", "Test")
+                .appendQueryParameter("canonical", "1")
+                .build();
+        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(canonicalBasedOnLocal);
+        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(localUri);
+        when(mTestIContentProvider.uncanonicalize(any(), eq(canonicalBasedOnLocal)))
+                .thenReturn(localUri);
+
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG, UID, channel, true);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel.getId());
+
+        loadStreamXml(baos, true);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG, UID, channel.getId(), false);
+        assertEquals(localUri, actualChannel.getSound());
+    }
+
+    @Test
+    public void testRestoreXml_withNonExistentCanonicalizedSoundUri() throws Exception {
+        Thread.sleep(3000);
+        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(null);
+        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+                .thenReturn(null);
+
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG, UID, channel, true);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel.getId());
+
+        loadStreamXml(baos, true);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG, UID, channel.getId(), false);
+        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+    }
+
+
+    /**
+     * Although we don't make backups with uncanonicalized uris anymore, we used to, so we have to
+     * handle its restore properly.
+     */
+    @Test
+    public void testRestoreXml_withUncanonicalizedNonLocalSoundUri() throws Exception {
+        // Not a local uncanonicalized uri, simulating that it fails to exist locally
+        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI))).thenReturn(null);
+        String id = "id";
+        String backupWithUncanonicalizedSoundUri = "<ranking version=\"1\">\n"
+                + "<package name=\"com.android.server.notification\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "sound=\"" + SOUND_URI + "\" "
+                + "usage=\"6\" content_type=\"0\" flags=\"1\" show_badge=\"true\" />\n"
+                + "<channel id=\"miscellaneous\" name=\"Uncategorized\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(backupWithUncanonicalizedSoundUri.getBytes(), true);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(PKG, UID, id, false);
+        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+    }
+
+    @Test
+    public void testBackupRestoreXml_withNullSoundUri() throws Exception {
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(null, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG, UID, channel, true);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel.getId());
+
+        loadStreamXml(baos, true);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG, UID, channel.getId(), false);
+        assertEquals(null, actualChannel.getSound());
     }
 
     @Test

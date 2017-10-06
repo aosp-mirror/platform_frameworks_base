@@ -1055,7 +1055,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     /** Called by PackageManagerService */
     public boolean exists(int userId) {
-        return getUserInfoNoChecks(userId) != null;
+        return mLocalService.exists(userId);
     }
 
     @Override
@@ -3502,8 +3502,8 @@ public class UserManagerService extends IUserManager.Stub {
      * @param userId
      * @return whether the user has been initialized yet
      */
-    boolean isInitialized(int userId) {
-        return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
+    boolean isUserInitialized(int userId) {
+        return mLocalService.isUserInitialized(userId);
     }
 
     private class LocalService extends UserManagerInternal {
@@ -3714,6 +3714,16 @@ public class UserManagerService extends IUserManager.Stub {
                 return StorageManager.isUserKeyUnlocked(userId);
             }
             return state == UserState.STATE_RUNNING_UNLOCKED;
+        }
+
+        @Override
+        public boolean isUserInitialized(int userId) {
+            return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
+        }
+
+        @Override
+        public boolean exists(int userId) {
+            return getUserInfoNoChecks(userId) != null;
         }
     }
 

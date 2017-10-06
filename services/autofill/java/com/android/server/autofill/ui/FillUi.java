@@ -55,6 +55,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 final class FillUi {
     private static final String TAG = "FillUi";
@@ -164,15 +165,18 @@ final class FillUi {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
-                    final AutofillValue value = dataset.getFieldValues().get(index);
+                    final Pattern filter = dataset.getFilter(index);
                     String valueText = null;
-                    // If the dataset needs auth - don't add its text to allow guessing
-                    // its content based on how filtering behaves.
-                    if (value != null && value.isText() && dataset.getAuthentication() == null) {
-                        valueText = value.getTextValue().toString().toLowerCase();
+                    if (filter == null) {
+                        final AutofillValue value = dataset.getFieldValues().get(index);
+                        // If the dataset needs auth - don't add its text to allow guessing
+                        // its content based on how filtering behaves.
+                        if (value != null && value.isText() && dataset.getAuthentication() == null) {
+                            valueText = value.getTextValue().toString().toLowerCase();
+                        }
                     }
 
-                    items.add(new ViewItem(dataset, valueText, view));
+                    items.add(new ViewItem(dataset, filter, valueText, view));
                 }
             }
 
@@ -331,11 +335,17 @@ final class FillUi {
         private final String mValue;
         private final Dataset mDataset;
         private final View mView;
+        private final Pattern mFilter;
 
-        ViewItem(Dataset dataset, String value, View view) {
+        ViewItem(Dataset dataset, Pattern filter, String value, View view) {
             mDataset = dataset;
             mValue = value;
             mView = view;
+            mFilter = filter;
+        }
+
+        public Pattern getFilter() {
+            return mFilter;
         }
 
         public View getView() {
@@ -347,12 +357,6 @@ final class FillUi {
         }
 
         public String getValue() {
-            return mValue;
-        }
-
-        @Override
-        public String toString() {
-            // Used for filtering in the adapter
             return mValue;
         }
     }
@@ -516,10 +520,16 @@ final class FillUi {
                     for (int i = 0; i < itemCount; i++) {
                         final ViewItem item = mAllItems.get(i);
                         final String value = item.getValue();
-                        // No value, i.e. null, matches any filter
-                        if ((value == null && item.mDataset.getAuthentication() == null)
-                                || (value != null
-                                        && value.toLowerCase().startsWith(constraintLowerCase))) {
+                        final Pattern filter = item.getFilter();
+                        final boolean matches;
+                        if (filter != null) {
+                            matches = filter.matcher(constraintLowerCase).matches();
+                        } else {
+                            matches = (value == null)
+                                    ? (item.mDataset.getAuthentication() == null)
+                                    : value.toLowerCase().startsWith(constraintLowerCase);
+                        }
+                        if (matches) {
                             filteredItems.add(item);
                         }
                     }

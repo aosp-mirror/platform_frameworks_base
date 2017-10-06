@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "flatten/XmlFlattener.h"
+#include "format/binary/XmlFlattener.h"
 #include "io/StringInputStream.h"
 #include "test/Test.h"
 

@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 166 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 167 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -341,8 +341,8 @@ public class BatteryStatsImpl extends BatteryStats {
     protected final TimeBase mOnBatteryTimeBase = new TimeBase();
 
     // These are the objects that will want to do something when the device
-    // is unplugged from power *and* the screen is off.
-    final TimeBase mOnBatteryScreenOffTimeBase = new TimeBase();
+    // is unplugged from power *and* the screen is off or doze.
+    protected final TimeBase mOnBatteryScreenOffTimeBase = new TimeBase();
 
     // Set to true when we want to distribute CPU across wakelocks for the next
     // CPU update, even if we aren't currently running wake locks.
@@ -436,8 +436,12 @@ public class BatteryStatsImpl extends BatteryStats {
     public boolean mRecordAllHistory;
     boolean mNoAutoReset;
 
-    int mScreenState = Display.STATE_UNKNOWN;
-    StopwatchTimer mScreenOnTimer;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected int mScreenState = Display.STATE_UNKNOWN;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected StopwatchTimer mScreenOnTimer;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected StopwatchTimer mScreenDozeTimer;
 
     int mScreenBrightnessBin = -1;
     final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -583,12 +587,16 @@ public class BatteryStatsImpl extends BatteryStats {
     int mHighDischargeAmountSinceCharge;
     int mDischargeScreenOnUnplugLevel;
     int mDischargeScreenOffUnplugLevel;
+    int mDischargeScreenDozeUnplugLevel;
     int mDischargeAmountScreenOn;
     int mDischargeAmountScreenOnSinceCharge;
     int mDischargeAmountScreenOff;
     int mDischargeAmountScreenOffSinceCharge;
+    int mDischargeAmountScreenDoze;
+    int mDischargeAmountScreenDozeSinceCharge;
 
     private LongSamplingCounter mDischargeScreenOffCounter;
+    private LongSamplingCounter mDischargeScreenDozeCounter;
     private LongSamplingCounter mDischargeCounter;
 
     static final int MAX_LEVEL_STEPS = 200;
@@ -673,13 +681,18 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    public LongCounter getDischargeScreenOffCoulombCounter() {
-        return mDischargeScreenOffCounter;
+    public long getMahDischarge(int which) {
+        return mDischargeCounter.getCountLocked(which);
     }
 
     @Override
-    public LongCounter getDischargeCoulombCounter() {
-        return mDischargeCounter;
+    public long getMahDischargeScreenOff(int which) {
+        return mDischargeScreenOffCounter.getCountLocked(which);
+    }
+
+    @Override
+    public long getMahDischargeScreenDoze(int which) {
+        return mDischargeScreenDozeCounter.getCountLocked(which);
     }
 
     @Override
@@ -3573,8 +3586,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mActiveHistoryStates2 = 0xffffffff;
     }
 
-    public void updateTimeBasesLocked(boolean unplugged, boolean screenOff, long uptime,
+    public void updateTimeBasesLocked(boolean unplugged, int screenState, long uptime,
             long realtime) {
+        final boolean screenOff = isScreenOff(screenState) || isScreenDoze(screenState);
         final boolean updateOnBatteryTimeBase = unplugged != mOnBatteryTimeBase.isRunning();
         final boolean updateOnBatteryScreenOffTimeBase =
                 (unplugged && screenOff) != mOnBatteryScreenOffTimeBase.isRunning();
@@ -3591,20 +3605,22 @@ public class BatteryStatsImpl extends BatteryStats {
                 updateRpmStatsLocked(); // if either OnBattery or OnBatteryScreenOff timebase changes.
             }
             if (DEBUG_ENERGY_CPU) {
-                Slog.d(TAG, "Updating cpu time because screen is now " + (screenOff ? "off" : "on")
+                Slog.d(TAG, "Updating cpu time because screen is now "
+                        + Display.stateToString(screenState)
                         + " and battery is " + (unplugged ? "on" : "off"));
             }
             updateCpuTimeLocked();
 
             mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
-            mOnBatteryScreenOffTimeBase.setRunning(unplugged && screenOff, uptime, realtime);
-            for (int i = mUidStats.size() - 1; i >= 0; --i) {
-                final Uid u = mUidStats.valueAt(i);
-                if (updateOnBatteryTimeBase) {
-                    u.updateOnBatteryBgTimeBase(uptime, realtime);
+            if (updateOnBatteryTimeBase) {
+                for (int i = mUidStats.size() - 1; i >= 0; --i) {
+                    mUidStats.valueAt(i).updateOnBatteryBgTimeBase(uptime, realtime);
                 }
-                if (updateOnBatteryScreenOffTimeBase) {
-                    u.updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
+            }
+            if (updateOnBatteryScreenOffTimeBase) {
+                mOnBatteryScreenOffTimeBase.setRunning(unplugged && screenOff, uptime, realtime);
+                for (int i = mUidStats.size() - 1; i >= 0; --i) {
+                    mUidStats.valueAt(i).updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
                 }
             }
         }
@@ -3864,8 +3880,10 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void setPretendScreenOff(boolean pretendScreenOff) {
-        mPretendScreenOff = pretendScreenOff;
-        noteScreenStateLocked(pretendScreenOff ? Display.STATE_OFF : Display.STATE_ON);
+        if (mPretendScreenOff != pretendScreenOff) {
+            mPretendScreenOff = pretendScreenOff;
+            noteScreenStateLocked(pretendScreenOff ? Display.STATE_OFF : Display.STATE_ON);
+        }
     }
 
     private String mInitialAcquireWakeName;
@@ -4195,54 +4213,58 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            if (state == Display.STATE_ON) {
-                // Screen turning on.
-                final long elapsedRealtime = mClocks.elapsedRealtime();
-                final long uptime = mClocks.uptimeMillis();
+            final long elapsedRealtime = mClocks.elapsedRealtime();
+            final long uptime = mClocks.uptimeMillis();
+
+            boolean updateHistory = false;
+            if (isScreenDoze(state)) {
+                mHistoryCur.states |= HistoryItem.STATE_SCREEN_DOZE_FLAG;
+                mScreenDozeTimer.startRunningLocked(elapsedRealtime);
+                updateHistory = true;
+            } else if (isScreenDoze(oldState)) {
+                mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_DOZE_FLAG;
+                mScreenDozeTimer.stopRunningLocked(elapsedRealtime);
+                updateHistory = true;
+            }
+            if (isScreenOn(state)) {
                 mHistoryCur.states |= HistoryItem.STATE_SCREEN_ON_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
                         + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(elapsedRealtime, uptime);
                 mScreenOnTimer.startRunningLocked(elapsedRealtime);
                 if (mScreenBrightnessBin >= 0) {
                     mScreenBrightnessTimer[mScreenBrightnessBin].startRunningLocked(elapsedRealtime);
                 }
-
-                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), false,
-                        mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
-
-                // Fake a wake lock, so we consider the device waked as long
-                // as the screen is on.
-                noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
-                        elapsedRealtime, uptime);
-
-                // Update discharge amounts.
-                if (mOnBatteryInternal) {
-                    updateDischargeScreenLevelsLocked(false, true);
-                }
-            } else if (oldState == Display.STATE_ON) {
-                // Screen turning off or dozing.
-                final long elapsedRealtime = mClocks.elapsedRealtime();
-                final long uptime = mClocks.uptimeMillis();
+                updateHistory = true;
+            } else if (isScreenOn(oldState)) {
                 mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_ON_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Screen off to: "
                         + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(elapsedRealtime, uptime);
                 mScreenOnTimer.stopRunningLocked(elapsedRealtime);
                 if (mScreenBrightnessBin >= 0) {
                     mScreenBrightnessTimer[mScreenBrightnessBin].stopRunningLocked(elapsedRealtime);
                 }
-
+                updateHistory = true;
+            }
+            if (updateHistory) {
+                if (DEBUG_HISTORY) Slog.v(TAG, "Screen state to: "
+                        + Display.stateToString(state));
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+            }
+            if (isScreenOn(state)) {
+                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
+                        mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
+                // Fake a wake lock, so we consider the device waked as long as the screen is on.
+                noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
+                        elapsedRealtime, uptime);
+            } else if (isScreenOn(oldState)) {
                 noteStopWakeLocked(-1, -1, "screen", "screen", WAKE_TYPE_PARTIAL,
                         elapsedRealtime, uptime);
-
-                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), true,
+                updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
                         mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
-
-                // Update discharge amounts.
-                if (mOnBatteryInternal) {
-                    updateDischargeScreenLevelsLocked(true, false);
-                }
+            }
+            // Update discharge amounts.
+            if (mOnBatteryInternal) {
+                updateDischargeScreenLevelsLocked(oldState, state);
             }
         }
     }
@@ -5389,6 +5411,14 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getScreenOnCount(int which) {
         return mScreenOnTimer.getCountLocked(which);
+    }
+
+    @Override public long getScreenDozeTime(long elapsedRealtimeUs, int which) {
+        return mScreenDozeTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    }
+
+    @Override public int getScreenDozeCount(int which) {
+        return mScreenDozeTimer.getCountLocked(which);
     }
 
     @Override public long getScreenBrightnessTime(int brightnessBin,
@@ -8829,6 +8859,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
+        mScreenDozeTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(mClocks, null, -100-i, null,
                     mOnBatteryTimeBase);
@@ -8887,6 +8918,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer = new StopwatchTimer(mClocks, null, -13, null, mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         mDischargeScreenOffCounter = new LongSamplingCounter(mOnBatteryScreenOffTimeBase);
+        mDischargeScreenDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = mClocks.uptimeMillis() * 1000;
@@ -9430,8 +9462,16 @@ public class BatteryStatsImpl extends BatteryStats {
         return mCharging;
     }
 
-    public boolean isScreenOn() {
-        return mScreenState == Display.STATE_ON;
+    public boolean isScreenOn(int state) {
+        return state == Display.STATE_ON;
+    }
+
+    public boolean isScreenOff(int state) {
+        return state == Display.STATE_OFF;
+    }
+
+    public boolean isScreenDoze(int state) {
+        return state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND;
     }
 
     void initTimes(long uptime, long realtime) {
@@ -9451,9 +9491,12 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = 0;
         mDischargeAmountScreenOff = 0;
         mDischargeAmountScreenOffSinceCharge = 0;
+        mDischargeAmountScreenDoze = 0;
+        mDischargeAmountScreenDozeSinceCharge = 0;
         mDischargeStepTracker.init();
         mChargeStepTracker.init();
         mDischargeScreenOffCounter.reset(false);
+        mDischargeScreenDozeCounter.reset(false);
         mDischargeCounter.reset(false);
     }
 
@@ -9471,15 +9514,22 @@ public class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.reset(uptime, realtime);
         mOnBatteryScreenOffTimeBase.reset(uptime, realtime);
         if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) == 0) {
-            if (mScreenState == Display.STATE_ON) {
+            if (isScreenOn(mScreenState)) {
                 mDischargeScreenOnUnplugLevel = mHistoryCur.batteryLevel;
+                mDischargeScreenDozeUnplugLevel = 0;
+                mDischargeScreenOffUnplugLevel = 0;
+            } else if (isScreenDoze(mScreenState)) {
+                mDischargeScreenOnUnplugLevel = 0;
+                mDischargeScreenDozeUnplugLevel = mHistoryCur.batteryLevel;
                 mDischargeScreenOffUnplugLevel = 0;
             } else {
                 mDischargeScreenOnUnplugLevel = 0;
+                mDischargeScreenDozeUnplugLevel = 0;
                 mDischargeScreenOffUnplugLevel = mHistoryCur.batteryLevel;
             }
             mDischargeAmountScreenOn = 0;
             mDischargeAmountScreenOff = 0;
+            mDischargeAmountScreenDoze = 0;
         }
         initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
     }
@@ -9490,6 +9540,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mStartCount = 0;
         initTimes(uptimeMillis * 1000, elapsedRealtimeMillis * 1000);
         mScreenOnTimer.reset(false);
+        mScreenDozeTimer.reset(false);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false);
         }
@@ -9626,33 +9677,52 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void updateDischargeScreenLevelsLocked(boolean oldScreenOn, boolean newScreenOn) {
-        if (oldScreenOn) {
+    void updateDischargeScreenLevelsLocked(int oldState, int newState) {
+        updateOldDischargeScreenLevelLocked(oldState);
+        updateNewDischargeScreenLevelLocked(newState);
+    }
+
+    private void updateOldDischargeScreenLevelLocked(int state) {
+        if (isScreenOn(state)) {
             int diff = mDischargeScreenOnUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
                 mDischargeAmountScreenOn += diff;
                 mDischargeAmountScreenOnSinceCharge += diff;
             }
-        } else {
+        } else if (isScreenDoze(state)) {
+            int diff = mDischargeScreenDozeUnplugLevel - mDischargeCurrentLevel;
+            if (diff > 0) {
+                mDischargeAmountScreenDoze += diff;
+                mDischargeAmountScreenDozeSinceCharge += diff;
+            }
+        } else if (isScreenOff(state)){
             int diff = mDischargeScreenOffUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
                 mDischargeAmountScreenOff += diff;
                 mDischargeAmountScreenOffSinceCharge += diff;
             }
         }
-        if (newScreenOn) {
+    }
+
+    private void updateNewDischargeScreenLevelLocked(int state) {
+        if (isScreenOn(state)) {
             mDischargeScreenOnUnplugLevel = mDischargeCurrentLevel;
             mDischargeScreenOffUnplugLevel = 0;
-        } else {
+            mDischargeScreenDozeUnplugLevel = 0;
+        } else if (isScreenDoze(state)){
             mDischargeScreenOnUnplugLevel = 0;
+            mDischargeScreenDozeUnplugLevel = mDischargeCurrentLevel;
+            mDischargeScreenOffUnplugLevel = 0;
+        } else if (isScreenOff(state)) {
+            mDischargeScreenOnUnplugLevel = 0;
+            mDischargeScreenDozeUnplugLevel = 0;
             mDischargeScreenOffUnplugLevel = mDischargeCurrentLevel;
         }
     }
 
     public void pullPendingStateUpdatesLocked() {
         if (mOnBatteryInternal) {
-            final boolean screenOn = mScreenState == Display.STATE_ON;
-            updateDischargeScreenLevelsLocked(screenOn, screenOn);
+            updateDischargeScreenLevelsLocked(mScreenState, mScreenState);
         }
     }
 
@@ -10785,8 +10855,8 @@ public class BatteryStatsImpl extends BatteryStats {
         return false;
     }
 
-    void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime, final boolean onBattery,
-            final int oldStatus, final int level, final int chargeUAh) {
+    protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
+            final boolean onBattery, final int oldStatus, final int level, final int chargeUAh) {
         boolean doWrite = false;
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
         m.arg1 = onBattery ? 1 : 0;
@@ -10794,7 +10864,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         final long uptime = mSecUptime * 1000;
         final long realtime = mSecRealtime * 1000;
-        final boolean screenOn = mScreenState == Display.STATE_ON;
+        final int screenState = mScreenState;
         if (onBattery) {
             // We will reset our status if we are unplugging after the
             // battery was last full, or the level is at 100, or
@@ -10870,16 +10940,23 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             addHistoryRecordLocked(mSecRealtime, mSecUptime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
-            if (screenOn) {
+            if (isScreenOn(screenState)) {
                 mDischargeScreenOnUnplugLevel = level;
+                mDischargeScreenDozeUnplugLevel = 0;
+                mDischargeScreenOffUnplugLevel = 0;
+            } else if (isScreenDoze(screenState)) {
+                mDischargeScreenOnUnplugLevel = 0;
+                mDischargeScreenDozeUnplugLevel = level;
                 mDischargeScreenOffUnplugLevel = 0;
             } else {
                 mDischargeScreenOnUnplugLevel = 0;
+                mDischargeScreenDozeUnplugLevel = 0;
                 mDischargeScreenOffUnplugLevel = level;
             }
             mDischargeAmountScreenOn = 0;
+            mDischargeAmountScreenDoze = 0;
             mDischargeAmountScreenOff = 0;
-            updateTimeBasesLocked(true, !screenOn, uptime, realtime);
+            updateTimeBasesLocked(true, screenState, uptime, realtime);
         } else {
             mLastChargingStateLevel = level;
             mOnBattery = mOnBatteryInternal = false;
@@ -10894,8 +10971,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
                 mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
             }
-            updateDischargeScreenLevelsLocked(screenOn, screenOn);
-            updateTimeBasesLocked(false, !screenOn, uptime, realtime);
+            updateDischargeScreenLevelsLocked(screenState, screenState);
+            updateTimeBasesLocked(false, screenState, uptime, realtime);
             mChargeStepTracker.init();
             mLastChargeStepLevel = level;
             mMaxChargeStepLevel = level;
@@ -11012,6 +11089,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
                 mDischargeCounter.addCountLocked(chargeDiff);
                 mDischargeScreenOffCounter.addCountLocked(chargeDiff);
+                if (isScreenDoze(mScreenState)) {
+                    mDischargeScreenDozeCounter.addCountLocked(chargeDiff);
+                }
             }
             mHistoryCur.batteryChargeUAh = chargeUAh;
             setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level, chargeUAh);
@@ -11054,6 +11134,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
                     mDischargeCounter.addCountLocked(chargeDiff);
                     mDischargeScreenOffCounter.addCountLocked(chargeDiff);
+                    if (isScreenDoze(mScreenState)) {
+                        mDischargeScreenDozeCounter.addCountLocked(chargeDiff);
+                    }
                 }
                 mHistoryCur.batteryChargeUAh = chargeUAh;
                 changed = true;
@@ -11362,10 +11445,11 @@ public class BatteryStatsImpl extends BatteryStats {
         return dischargeAmount;
     }
 
+    @Override
     public int getDischargeAmountScreenOn() {
         synchronized(this) {
             int val = mDischargeAmountScreenOn;
-            if (mOnBattery && mScreenState == Display.STATE_ON
+            if (mOnBattery && isScreenOn(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -11373,10 +11457,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @Override
     public int getDischargeAmountScreenOnSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenOnSinceCharge;
-            if (mOnBattery && mScreenState == Display.STATE_ON
+            if (mOnBattery && isScreenOn(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -11384,23 +11469,51 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @Override
     public int getDischargeAmountScreenOff() {
         synchronized(this) {
             int val = mDischargeAmountScreenOff;
-            if (mOnBattery && mScreenState != Display.STATE_ON
+            if (mOnBattery && isScreenOff(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
                 val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
+            }
+            // For backward compatibility, doze discharge is counted into screen off.
+            return val + getDischargeAmountScreenDoze();
+        }
+    }
+
+    @Override
+    public int getDischargeAmountScreenOffSinceCharge() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenOffSinceCharge;
+            if (mOnBattery && isScreenOff(mScreenState)
+                    && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
+                val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
+            }
+            // For backward compatibility, doze discharge is counted into screen off.
+            return val + getDischargeAmountScreenDozeSinceCharge();
+        }
+    }
+
+    @Override
+    public int getDischargeAmountScreenDoze() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenDoze;
+            if (mOnBattery && isScreenDoze(mScreenState)
+                    && mDischargeCurrentLevel < mDischargeScreenDozeUnplugLevel) {
+                val += mDischargeScreenDozeUnplugLevel-mDischargeCurrentLevel;
             }
             return val;
         }
     }
 
-    public int getDischargeAmountScreenOffSinceCharge() {
+    @Override
+    public int getDischargeAmountScreenDozeSinceCharge() {
         synchronized(this) {
-            int val = mDischargeAmountScreenOffSinceCharge;
-            if (mOnBattery && mScreenState != Display.STATE_ON
-                    && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
-                val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
+            int val = mDischargeAmountScreenDozeSinceCharge;
+            if (mOnBattery && isScreenDoze(mScreenState)
+                    && mDischargeCurrentLevel < mDischargeScreenDozeUnplugLevel) {
+                val += mDischargeScreenDozeUnplugLevel-mDischargeCurrentLevel;
             }
             return val;
         }
@@ -11759,12 +11872,14 @@ public class BatteryStatsImpl extends BatteryStats {
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
+        mDischargeAmountScreenDozeSinceCharge = in.readInt();
         mDischargeStepTracker.readFromParcel(in);
         mChargeStepTracker.readFromParcel(in);
         mDailyDischargeStepTracker.readFromParcel(in);
         mDailyChargeStepTracker.readFromParcel(in);
         mDischargeCounter.readSummaryFromParcelLocked(in);
         mDischargeScreenOffCounter.readSummaryFromParcelLocked(in);
+        mDischargeScreenDozeCounter.readSummaryFromParcelLocked(in);
         int NPKG = in.readInt();
         if (NPKG > 0) {
             mDailyPackageChanges = new ArrayList<>(NPKG);
@@ -11787,6 +11902,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mScreenState = Display.STATE_UNKNOWN;
         mScreenOnTimer.readSummaryFromParcelLocked(in);
+        mScreenDozeTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].readSummaryFromParcelLocked(in);
         }
@@ -12180,12 +12296,14 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
         out.writeInt(getDischargeAmountScreenOffSinceCharge());
+        out.writeInt(getDischargeAmountScreenDozeSinceCharge());
         mDischargeStepTracker.writeToParcel(out);
         mChargeStepTracker.writeToParcel(out);
         mDailyDischargeStepTracker.writeToParcel(out);
         mDailyChargeStepTracker.writeToParcel(out);
         mDischargeCounter.writeSummaryFromParcelLocked(out);
         mDischargeScreenOffCounter.writeSummaryFromParcelLocked(out);
+        mDischargeScreenDozeCounter.writeSummaryFromParcelLocked(out);
         if (mDailyPackageChanges != null) {
             final int NPKG = mDailyPackageChanges.size();
             out.writeInt(NPKG);
@@ -12203,6 +12321,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mNextMaxDailyDeadline);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
@@ -12635,6 +12754,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mScreenState = Display.STATE_UNKNOWN;
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase, in);
+        mScreenDozeTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase, in);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(mClocks, null, -100-i, null,
                     mOnBatteryTimeBase, in);
@@ -12728,10 +12848,13 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOff = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
+        mDischargeAmountScreenDoze = in.readInt();
+        mDischargeAmountScreenDozeSinceCharge = in.readInt();
         mDischargeStepTracker.readFromParcel(in);
         mChargeStepTracker.readFromParcel(in);
         mDischargeCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
-        mDischargeScreenOffCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        mDischargeScreenOffCounter = new LongSamplingCounter(mOnBatteryScreenOffTimeBase, in);
+        mDischargeScreenDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mLastWriteTime = in.readLong();
 
         mRpmStats.clear();
@@ -12848,6 +12971,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mOnBatteryScreenOffTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
 
         mScreenOnTimer.writeToParcel(out, uSecRealtime);
+        mScreenDozeTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeToParcel(out, uSecRealtime);
         }
@@ -12910,10 +13034,13 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeAmountScreenOnSinceCharge);
         out.writeInt(mDischargeAmountScreenOff);
         out.writeInt(mDischargeAmountScreenOffSinceCharge);
+        out.writeInt(mDischargeAmountScreenDoze);
+        out.writeInt(mDischargeAmountScreenDozeSinceCharge);
         mDischargeStepTracker.writeToParcel(out);
         mChargeStepTracker.writeToParcel(out);
         mDischargeCounter.writeToParcel(out);
         mDischargeScreenOffCounter.writeToParcel(out);
+        mDischargeScreenDozeCounter.writeToParcel(out);
         out.writeLong(mLastWriteTime);
 
         out.writeInt(mRpmStats.size());
@@ -13020,8 +13147,10 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println("mOnBatteryScreenOffTimeBase:");
             mOnBatteryScreenOffTimeBase.dump(pw, "  ");
             Printer pr = new PrintWriterPrinter(pw);
-            pr.println("*** Screen timer:");
+            pr.println("*** Screen on timer:");
             mScreenOnTimer.logState(pr, "  ");
+            pr.println("*** Screen doze timer:");
+            mScreenDozeTimer.logState(pr, "  ");
             for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
                 pr.println("*** Screen brightness #" + i + ":");
                 mScreenBrightnessTimer[i].logState(pr, "  ");

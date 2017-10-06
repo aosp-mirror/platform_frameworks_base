@@ -529,7 +529,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
      */
     @Override
     public void disable2ForUser(int what, IBinder token, String pkg, int userId) {
-        enforceStatusBar();
+        enforceStatusBarService();
 
         synchronized (mLock) {
             disableLocked(userId, what, token, pkg, 2);

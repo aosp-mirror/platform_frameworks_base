@@ -23,6 +23,7 @@ import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.server.backup.RefactoredBackupManagerService;
@@ -38,19 +39,22 @@ public class RunInitializeReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
             synchronized (backupManagerService.getQueueLock()) {
+                final ArraySet<String> pendingInits = backupManagerService.getPendingInits();
                 if (DEBUG) {
-                    Slog.v(TAG, "Running a device init");
+                    Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
                 }
 
-                String[] pendingInits = (String[]) backupManagerService.getPendingInits().toArray();
-                backupManagerService.clearPendingInits();
-                PerformInitializeTask initTask = new PerformInitializeTask(backupManagerService,
-                        pendingInits, null);
+                if (pendingInits.size() > 0) {
+                    final String[] transports = pendingInits.toArray(new String[pendingInits.size()]);
+                    PerformInitializeTask initTask = new PerformInitializeTask(backupManagerService,
+                            transports, null);
 
-                // Acquire the wakelock and pass it to the init thread.  it will
-                // be released once init concludes.
-                backupManagerService.getWakelock().acquire();
-                backupManagerService.getBackupHandler().post(initTask);
+                    // Acquire the wakelock and pass it to the init thread.  it will
+                    // be released once init concludes.
+                    backupManagerService.clearPendingInits();
+                    backupManagerService.getWakelock().acquire();
+                    backupManagerService.getBackupHandler().post(initTask);
+                }
             }
         }
     }

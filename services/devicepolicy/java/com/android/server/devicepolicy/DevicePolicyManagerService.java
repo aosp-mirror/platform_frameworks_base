@@ -97,8 +97,8 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
@@ -5350,7 +5350,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void forceWipeUser(int userId) {
+    private void forceWipeUser(int userId, String wipeReasonForUser) {
         try {
             IActivityManager am = mInjector.getIActivityManager();
             if (am.getCurrentUser().id == userId) {
@@ -5361,7 +5361,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!userRemoved) {
                 Slog.w(LOG_TAG, "Couldn't remove user " + userId);
             } else if (isManagedProfile(userId)) {
-                sendWipeProfileNotification();
+                sendWipeProfileNotification(wipeReasonForUser);
             }
         } catch (RemoteException re) {
             // Shouldn't happen
@@ -5369,23 +5369,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void wipeData(int flags) {
+    public void wipeDataWithReason(int flags, String wipeReasonForUser) {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkStringNotEmpty(wipeReasonForUser, "wipeReasonForUser is null or empty");
         enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
         final ActiveAdmin admin;
         synchronized (this) {
             admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
-        String reason = "DevicePolicyManager.wipeData() from "
+        String internalReason = "DevicePolicyManager.wipeDataWithReason() from "
                 + admin.info.getComponent().flattenToShortString();
         wipeDataNoLock(
-                admin.info.getComponent(), flags, reason, admin.getUserHandle().getIdentifier());
+                admin.info.getComponent(), flags, internalReason, wipeReasonForUser,
+                admin.getUserHandle().getIdentifier());
     }
 
-    private void wipeDataNoLock(ComponentName admin, int flags, String reason, int userId) {
+    private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
+                                String wipeReasonForUser, int userId) {
         wtfIfInLock();
 
         long ident = mInjector.binderClearCallingIdentity();
@@ -5420,25 +5423,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // (rather than system), we should probably trigger factory reset. Current code just
             // removes that user (but still clears FRP...)
             if (userId == UserHandle.USER_SYSTEM) {
-                forceWipeDeviceNoLock(/*wipeExtRequested=*/ (flags & WIPE_EXTERNAL_STORAGE) != 0,
-                        reason, /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
+                forceWipeDeviceNoLock(/*wipeExtRequested=*/ (
+                        flags & WIPE_EXTERNAL_STORAGE) != 0,
+                        internalReason,
+                        /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
             } else {
-                forceWipeUser(userId);
+                forceWipeUser(userId, wipeReasonForUser);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
-    private void sendWipeProfileNotification() {
-        String contentText = mContext.getString(R.string.work_profile_deleted_description_dpm_wipe);
+    private void sendWipeProfileNotification(String wipeReasonForUser) {
         Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setContentTitle(mContext.getString(R.string.work_profile_deleted))
-                        .setContentText(contentText)
+                        .setContentText(wipeReasonForUser)
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                        .setStyle(new Notification.BigTextStyle().bigText(contentText))
+                        .setStyle(new Notification.BigTextStyle().bigText(wipeReasonForUser))
                         .build();
         mInjector.getNotificationManager().notify(SystemMessage.NOTE_PROFILE_WIPED, notification);
     }
@@ -5610,9 +5614,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // able to do so).
             // IMPORTANT: Call without holding the lock to prevent deadlock.
             try {
+                String wipeReasonForUser = mContext.getString(
+                        R.string.work_profile_deleted_reason_maximum_password_failure);
                 wipeDataNoLock(strictestAdmin.info.getComponent(),
                         /*flags=*/ 0,
                         /*reason=*/ "reportFailedPasswordAttempt()",
+                        wipeReasonForUser,
                         userId);
             } catch (SecurityException e) {
                 Slog.w(LOG_TAG, "Failed to wipe user " + userId
@@ -5621,7 +5628,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (mInjector.securityLogIsLoggingEnabled()) {
-            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0,
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
+                    /*result*/ 0,
                     /*method strength*/ 1);
         }
     }
