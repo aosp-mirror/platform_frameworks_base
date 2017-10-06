@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 
 import org.mockito.invocation.InvocationOnMock;
 
@@ -38,8 +39,8 @@ import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.StackWindowController;
-
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowTestUtils;
@@ -71,8 +72,8 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        final ActivityManagerService service = new TestActivityManagerService(mContext);
-        service.mWindowManager = WindowTestUtils.getMockWindowManagerService();
+        final ActivityManagerService service = spy(new TestActivityManagerService(mContext));
+        service.mWindowManager = prepareMockWindowManager();
         return service;
     }
 
@@ -237,6 +238,12 @@ public class ActivityTestsBase {
                     Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                         return new Rect(50, 50, 100, 100);
                     }
+
+                    @Override
+                    PinnedStackWindowController createStackWindowController(int displayId,
+                            boolean onTop, Rect outBounds) {
+                        return mock(PinnedStackWindowController.class);
+                    }
                 };
             } else {
                 return (T) new TestActivityStack(
@@ -246,7 +253,7 @@ public class ActivityTestsBase {
     }
 
     private static WindowManagerService prepareMockWindowManager() {
-        final WindowManagerService service = mock(WindowManagerService.class);
+        final WindowManagerService service = WindowTestUtils.getMockWindowManagerService();
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
@@ -264,7 +271,7 @@ public class ActivityTestsBase {
     }
 
     /**
-     * Override of {@link ActivityStack} that tracks test metrics, such as the number of times a
+     * Overrided of {@link ActivityStack} that tracks test metrics, such as the number of times a
      * method is called. Note that its functionality depends on the implementations of the
      * construction arguments.
      */
