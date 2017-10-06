@@ -72,15 +72,23 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             textureMatrixInv = textureMatrix;
         }
 
-        SkMatrix matrix = SkMatrix::Concat(textureMatrixInv, layerTransform);
+        SkMatrix matrix = SkMatrix::Concat(layerTransform, textureMatrixInv);
 
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(sk_ref_sp(layer->getColorFilter()));
-        // draw image with a shader to avoid save/restore of the matrix
-        paint.setShader(layerImage->makeShader(&matrix));
-        canvas->drawRect(SkRect::MakeWH(layerWidth, layerHeight), paint);
+
+        const bool nonIdentityMatrix = !matrix.isIdentity();
+        if (nonIdentityMatrix) {
+            canvas->save();
+            canvas->concat(matrix);
+        }
+        canvas->drawImage(layerImage.get(), 0, 0, &paint);
+        // restore the original matrix
+        if (nonIdentityMatrix) {
+            canvas->restore();
+        }
     }
 
     return layerImage;
