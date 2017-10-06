@@ -132,7 +132,9 @@ public final class UsbAlsaManager {
         mHasMidiFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI);
 
         // initial scan
-        mCardsParser.scan();
+        if (mCardsParser.scan() != AlsaCardsParser.SCANSTATUS_SUCCESS) {
+            Slog.e(TAG, "Error scanning ASLA cards file.");
+        }
     }
 
     public void systemReady() {
@@ -314,7 +316,7 @@ public final class UsbAlsaManager {
             return null;
         }
 
-        if (!mDevicesParser.scan()) {
+        if (mDevicesParser.scan() != AlsaDevicesParser.SCANSTATUS_SUCCESS) {
             Slog.e(TAG, "Error parsing ALSA devices file.");
             return null;
         }
@@ -530,6 +532,9 @@ public final class UsbAlsaManager {
     //
     // called by UsbService.dump
     public void dump(IndentingPrintWriter pw) {
+        pw.println("Parsers Scan Status:");
+        pw.println("  Cards Parser: " + mCardsParser.getScanStatus());
+        pw.println("  Devices Parser: " + mDevicesParser.getScanStatus());
         pw.println("USB Audio Devices:");
         for (UsbDevice device : mAudioDevices.keySet()) {
             pw.println("  " + device.getDeviceName() + ": " + mAudioDevices.get(device));
