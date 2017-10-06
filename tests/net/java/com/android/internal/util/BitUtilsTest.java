@@ -56,6 +56,25 @@ public class BitUtilsTest {
     }
 
     @Test
+    public void testUnsignedShortComposition() {
+        byte b0 = 0;
+        byte b1 = 1;
+        byte b2 = 2;
+        byte b10 = 10;
+        byte b16 = 16;
+        byte b128 = -128;
+        byte b224 = -32;
+        byte b255 = -1;
+        assertEquals(0x0000, uint16(b0, b0));
+        assertEquals(0xffff, uint16(b255, b255));
+        assertEquals(0x0a01, uint16(b10, b1));
+        assertEquals(0x8002, uint16(b128, b2));
+        assertEquals(0x01ff, uint16(b1, b255));
+        assertEquals(0x80ff, uint16(b128, b255));
+        assertEquals(0xe010, uint16(b224, b16));
+    }
+
+    @Test
     public void testUnsignedIntWideningConversions() {
         assertEquals(0, uint32(0));
         assertEquals(1, uint32(1));
