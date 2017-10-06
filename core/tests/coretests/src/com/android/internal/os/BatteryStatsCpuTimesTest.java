@@ -39,6 +39,7 @@ import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseLongArray;
+import android.view.Display;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -179,7 +180,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testUpdateClusterSpeedTimes() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final long[][] clusterSpeedTimesMs = {{20, 30}, {40, 50, 60}};
         initKernelCpuSpeedReaders(clusterSpeedTimesMs.length);
         for (int i = 0; i < clusterSpeedTimesMs.length; ++i) {
@@ -224,7 +225,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuTimesLocked() {
         //PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         final int[] testUids = getUids(testUserId, new int[] {
@@ -295,7 +296,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuTimesLocked_isolatedUid() {
         //PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         final int isolatedAppId = FIRST_ISOLATED_UID + 27;
@@ -382,7 +383,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuTimesLocked_invalidUid() {
         //PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         final int invalidUserId = 15;
         final int invalidUid = UserHandle.getUid(invalidUserId, FIRST_APPLICATION_UID + 99);
@@ -427,7 +428,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuTimesLocked_withPartialTimers() {
         //PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         final int[] testUids = getUids(testUserId, new int[] {
@@ -509,7 +510,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuFreqTimesLocked() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
@@ -550,7 +551,7 @@ public class BatteryStatsCpuTimesTest {
         // Repeat the test when the screen is off.
 
         // PRECONDITIONS
-        updateTimeBasesLocked(true, true, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         final long[][] deltasMs = {
                 {3, 12, 55, 100, 32},
                 {3248327490475l, 232349349845043l, 123, 2398, 0},
@@ -584,7 +585,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuFreqTimesLocked_perClusterTimesAvailable() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
@@ -644,7 +645,7 @@ public class BatteryStatsCpuTimesTest {
         // Repeat the test when the screen is off.
 
         // PRECONDITIONS
-        updateTimeBasesLocked(true, true, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         final long[][] deltasMs = {
                 {3, 12, 55, 100, 32},
                 {3248327490475l, 232349349845043l, 123, 2398, 0},
@@ -688,7 +689,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuFreqTimesLocked_partialTimers() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
@@ -792,7 +793,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuFreqTimesLocked_freqsChanged() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
@@ -833,7 +834,7 @@ public class BatteryStatsCpuTimesTest {
         // Repeat the test with the freqs from proc file changed.
 
         // PRECONDITIONS
-        updateTimeBasesLocked(true, true, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         final long[][] deltasMs = {
                 {3, 12, 55, 100, 32, 34984, 27983},
                 {3248327490475l, 232349349845043l, 123, 2398, 0, 398, 0},
@@ -867,7 +868,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUidCpuFreqTimesLocked_isolatedUid() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
@@ -961,7 +962,7 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testReadKernelUiidCpuFreqTimesLocked_invalidUid() {
         // PRECONDITIONS
-        updateTimeBasesLocked(true, false, 0, 0);
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         final int testUserId = 11;
         final int invalidUserId = 15;
@@ -1008,12 +1009,12 @@ public class BatteryStatsCpuTimesTest {
         verify(mKernelUidCpuFreqTimeReader).removeUid(invalidUid);
     }
 
-    private void updateTimeBasesLocked(boolean unplugged, boolean screenOff,
+    private void updateTimeBasesLocked(boolean unplugged, int screenState,
             long upTime, long realTime) {
         // Set PowerProfile=null before calling updateTimeBasesLocked to avoid execution of
         // BatteryStatsImpl.updateCpuTimeLocked
         mBatteryStatsImpl.setPowerProfile(null);
-        mBatteryStatsImpl.updateTimeBasesLocked(unplugged, screenOff, upTime, realTime);
+        mBatteryStatsImpl.updateTimeBasesLocked(unplugged, screenState, upTime, realTime);
         mBatteryStatsImpl.setPowerProfile(mPowerProfile);
     }
 
