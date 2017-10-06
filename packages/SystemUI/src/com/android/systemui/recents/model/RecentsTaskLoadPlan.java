@@ -100,7 +100,6 @@ public class RecentsTaskLoadPlan {
      *
      * The tasks will be ordered by:
      * - least-recent to most-recent stack tasks
-     * - least-recent to most-recent freeform tasks
      *
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
@@ -155,7 +154,7 @@ public class RecentsTaskLoadPlan {
             Task task = new Task(taskKey, icon,
                     thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
                     activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
-                    t.supportsSplitScreenMultiWindow, t.bounds, t.taskDescription, t.resizeMode,
+                    t.supportsSplitScreenMultiWindow, t.taskDescription, t.resizeMode,
                     t.topActivity, isLocked);
 
             allTasks.add(task);

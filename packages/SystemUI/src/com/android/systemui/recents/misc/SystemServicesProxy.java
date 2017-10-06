@@ -26,7 +26,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,7 +45,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -143,7 +141,6 @@ public class SystemServicesProxy {
     private int mCurrentUserId;
 
     boolean mIsSafeMode;
-    boolean mHasFreeformWorkspaceSupport;
 
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
@@ -318,10 +315,6 @@ public class SystemServicesProxy {
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport =
-                mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT) ||
-                        Settings.Global.getInt(context.getContentResolver(),
-                                DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
         mIsSafeMode = mPm.isSafeMode();
         mCurrentUserId = mAm.getCurrentUser();
 
@@ -527,13 +520,6 @@ public class SystemServicesProxy {
             stackVisibleNotOccluded &= !isFullscreenStackOccludingg;
         }
         return stackVisibleNotOccluded;
-    }
-
-    /**
-     * Returns whether this device has freeform workspaces.
-     */
-    public boolean hasFreeformWorkspaceSupport() {
-        return mHasFreeformWorkspaceSupport;
     }
 
     /**

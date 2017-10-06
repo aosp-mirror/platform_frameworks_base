@@ -403,18 +403,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return;
         }
 
-        // If tapping on the freeform workspace background, just launch the first freeform task
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.hasFreeformWorkspaceSupport()) {
-            Rect freeformRect = mSv.mLayoutAlgorithm.mFreeformRect;
-            if (freeformRect.top <= y && y <= freeformRect.bottom) {
-                if (mSv.launchFreeformTasks()) {
-                    // TODO: Animate Recents away as we launch the freeform tasks
-                    return;
-                }
-            }
-        }
-
         // The user intentionally tapped on the background, which is like a tap on the "desktop".
         // Hide recents and transition to the launcher.
         EventBus.getDefault().send(new HideRecentsEvent(false, true));

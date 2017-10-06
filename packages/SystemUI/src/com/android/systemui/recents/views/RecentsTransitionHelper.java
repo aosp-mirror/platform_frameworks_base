@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -318,7 +317,6 @@ public class RecentsTransitionHelper {
 
         // If this is a full screen stack, the transition will be towards the single, full screen
         // task. We only need the transition spec for this task.
-        List<AppTransitionAnimationSpec> specs = new ArrayList<>();
 
         // TODO: Sometimes targetStackId is not initialized after reboot, so we also have to
         // check for INVALID_STACK_ID (now WINDOWING_MODE_UNDEFINED)
@@ -327,6 +325,7 @@ public class RecentsTransitionHelper {
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                 || activityType == ACTIVITY_TYPE_ASSISTANT
                 || windowingMode == WINDOWING_MODE_UNDEFINED) {
+            List<AppTransitionAnimationSpec> specs = new ArrayList<>();
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
@@ -340,34 +339,7 @@ public class RecentsTransitionHelper {
             }
             return specs;
         }
-
-        // Otherwise, for freeform tasks, create a new animation spec for each task we have to
-        // launch
-        TaskStack stack = stackView.getStack();
-        ArrayList<Task> tasks = stack.getStackTasks();
-        int taskCount = tasks.size();
-        for (int i = taskCount - 1; i >= 0; i--) {
-            Task t = tasks.get(i);
-            if (t.isFreeformTask() || windowingMode == WINDOWING_MODE_FREEFORM) {
-                TaskView tv = stackView.getChildViewForTask(t);
-                if (tv == null) {
-                    // TODO: Create a different animation task rect for this case (though it should
-                    //       never happen)
-                    specs.add(composeOffscreenAnimationSpec(t, offscreenTaskRect));
-                } else {
-                    mTmpTransform.fillIn(taskView);
-                    stackLayout.transformToScreenCoordinates(mTmpTransform,
-                            null /* windowOverrideRect */);
-                    AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, tv,
-                            mTmpTransform, true /* addHeaderBitmap */);
-                    if (spec != null) {
-                        specs.add(spec);
-                    }
-                }
-            }
-        }
-
-        return specs;
+        return Collections.emptyList();
     }
 
     /**
@@ -451,7 +423,7 @@ public class RecentsTransitionHelper {
         // force the task thumbnail to full stackView height immediately causing the transition
         // jarring.
         if (!Recents.getConfiguration().isLowRamDevice && taskView.getTask() !=
-                stackView.getStack().getStackFrontMostTask(false /* includeFreeformTasks */)) {
+                stackView.getStack().getStackFrontMostTask()) {
             taskRect.bottom = taskRect.top + stackView.getMeasuredHeight();
         }
         return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);

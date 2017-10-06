@@ -59,7 +59,7 @@ public class TaskViewTransform {
 
     public boolean visible = false;
 
-    // This is a window-space rect used for positioning the task in the stack and freeform workspace
+    // This is a window-space rect used for positioning the task in the stack
     public RectF rect = new RectF();
 
     /**

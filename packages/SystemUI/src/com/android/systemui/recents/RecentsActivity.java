@@ -79,7 +79,6 @@ import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
-import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
@@ -714,15 +713,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
-        EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(true));
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
         mRecentsView.invalidate();
     }
 
     public final void onBusEvent(ExitRecentsWindowFirstAnimationFrameEvent event) {
-        if (mRecentsView.isLastTaskLaunchedFreeform()) {
-            EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(false));
-        }
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
         mRecentsView.invalidate();
     }
