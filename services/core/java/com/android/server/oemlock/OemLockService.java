@@ -31,6 +31,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.service.oemlock.IOemLockService;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -98,6 +99,7 @@ public class OemLockService extends SystemService {
                         !newRestrictions.getBoolean(UserManager.DISALLOW_FACTORY_RESET);
                 if (!unlockAllowedByAdmin) {
                     mOemLock.setOemUnlockAllowedByDevice(false);
+                    setPersistentDataBlockOemUnlockAllowedBit(false);
                 }
             }
         }
@@ -158,6 +160,7 @@ public class OemLockService extends SystemService {
                 }
 
                 mOemLock.setOemUnlockAllowedByDevice(allowedByUser);
+                setPersistentDataBlockOemUnlockAllowedBit(allowedByUser);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -201,6 +204,20 @@ public class OemLockService extends SystemService {
             }
         }
     };
+
+    /**
+     * Always synchronize the OemUnlockAllowed bit to the FRP partition, which
+     * is used to erase FRP information on a unlockable device.
+     */
+    private void setPersistentDataBlockOemUnlockAllowedBit(boolean allowed) {
+        final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
+                mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        // if mOemLock is PersistentDataBlockLock, then the bit should have already been set
+        if (pdbm != null && !(mOemLock instanceof PersistentDataBlockLock)) {
+            Slog.i(TAG, "Update OEM Unlock bit in pst partition to " + allowed);
+            pdbm.setOemUnlockEnabled(allowed);
+        }
+    }
 
     private boolean isOemUnlockAllowedByAdmin() {
         return !UserManager.get(mContext)
