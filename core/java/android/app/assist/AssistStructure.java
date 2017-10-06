@@ -616,6 +616,9 @@ public class AssistStructure implements Parcelable {
         CharSequence[] mAutofillOptions;
         boolean mSanitized;
         HtmlInfo mHtmlInfo;
+        int mMinEms = -1;
+        int mMaxEms = -1;
+        int mMaxLength = -1;
 
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
@@ -712,6 +715,9 @@ public class AssistStructure implements Parcelable {
                 if (p instanceof HtmlInfo) {
                     mHtmlInfo = (HtmlInfo) p;
                 }
+                mMinEms = in.readInt();
+                mMaxEms = in.readInt();
+                mMaxLength = in.readInt();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -874,6 +880,9 @@ public class AssistStructure implements Parcelable {
                 } else {
                     out.writeParcelable(null, 0);
                 }
+                out.writeInt(mMinEms);
+                out.writeInt(mMaxEms);
+                out.writeInt(mMaxLength);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -1428,6 +1437,39 @@ public class AssistStructure implements Parcelable {
         public ViewNode getChildAt(int index) {
             return mChildren[index];
         }
+
+        /**
+         * Returns the minimum width in ems of the text associated with this node, or {@code -1}
+         * if not supported by the node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMinTextEms() {
+            return mMinEms;
+        }
+
+        /**
+         * Returns the maximum width in ems of the text associated with this node, or {@code -1}
+         * if not supported by the node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMaxTextEms() {
+            return mMaxEms;
+        }
+
+        /**
+         * Returns the maximum length of the text associated with this node node, or {@code -1}
+         * if not supported by the node or not set.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMaxTextLength() {
+            return mMaxLength;
+        }
     }
 
     /**
@@ -1757,6 +1799,21 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setInputType(int inputType) {
             mNode.mInputType = inputType;
+        }
+
+        @Override
+        public void setMinTextEms(int minEms) {
+            mNode.mMinEms = minEms;
+        }
+
+        @Override
+        public void setMaxTextEms(int maxEms) {
+            mNode.mMaxEms = maxEms;
+        }
+
+        @Override
+        public void setMaxTextLength(int maxLength) {
+            mNode.mMaxLength = maxLength;
         }
 
         @Override
