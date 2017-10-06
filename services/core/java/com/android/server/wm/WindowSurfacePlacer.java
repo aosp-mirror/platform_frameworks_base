@@ -342,10 +342,7 @@ class WindowSurfacePlacer {
         mTmpLayerAndToken.token = null;
         handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
         final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
-        final int topClosingLayer = mTmpLayerAndToken.layer;
-
-        final AppWindowToken topOpeningApp = handleOpeningApps(transit,
-                animLp, voiceInteraction, topClosingLayer);
+        final AppWindowToken topOpeningApp = handleOpeningApps(transit, animLp, voiceInteraction);
 
         mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
 
@@ -387,8 +384,9 @@ class WindowSurfacePlacer {
     }
 
     private AppWindowToken handleOpeningApps(int transit, LayoutParams animLp,
-            boolean voiceInteraction, int topClosingLayer) {
+            boolean voiceInteraction) {
         AppWindowToken topOpeningApp = null;
+        int topOpeningLayer = Integer.MIN_VALUE;
         final int appsCount = mService.mOpeningApps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
@@ -422,7 +420,6 @@ class WindowSurfacePlacer {
             }
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
-            int topOpeningLayer = 0;
             if (animLp != null) {
                 final int layer = wtoken.getHighestAnimLayer();
                 if (topOpeningApp == null || layer > topOpeningLayer) {
@@ -431,7 +428,7 @@ class WindowSurfacePlacer {
                 }
             }
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
-                createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+                createThumbnailAppAnimator(transit, wtoken);
             }
         }
         return topOpeningApp;
@@ -473,7 +470,7 @@ class WindowSurfacePlacer {
                 }
             }
             if (mService.mAppTransition.isNextAppTransitionThumbnailDown()) {
-                createThumbnailAppAnimator(transit, wtoken, 0, layerAndToken.layer);
+                createThumbnailAppAnimator(transit, wtoken);
             }
         }
     }
@@ -666,8 +663,7 @@ class WindowSurfacePlacer {
         }
     }
 
-    private void createThumbnailAppAnimator(int transit, AppWindowToken appToken,
-            int openingLayer, int closingLayer) {
+    private void createThumbnailAppAnimator(int transit, AppWindowToken appToken) {
         AppWindowAnimator openingAppAnimator = (appToken == null) ? null : appToken.mAppAnimator;
         if (openingAppAnimator == null || openingAppAnimator.animation == null) {
             return;
@@ -724,7 +720,6 @@ class WindowSurfacePlacer {
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
                         insets, thumbnailHeader, taskId, displayConfig.uiMode,
                         displayConfig.orientation);
-                openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();
             } else {
@@ -734,8 +729,8 @@ class WindowSurfacePlacer {
             anim.restrictDuration(MAX_ANIMATION_DURATION);
             anim.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
 
+            openingAppAnimator.updateThumbnailLayer();
             openingAppAnimator.thumbnail = surfaceControl;
-            openingAppAnimator.thumbnailLayer = openingLayer;
             openingAppAnimator.thumbnailAnimation = anim;
             mService.mAppTransition.getNextAppTransitionStartRect(taskId, mTmpStartRect);
         } catch (Surface.OutOfResourcesException e) {
