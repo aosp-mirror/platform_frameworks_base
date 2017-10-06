@@ -110,6 +110,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -352,6 +353,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect2 = new Rect();
+    private final Point mTmpSize = new Point();
 
     /** Run all ActivityStacks through this */
     protected final ActivityStackSupervisor mStackSupervisor;
@@ -503,7 +505,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mBounds = bounds != null ? new Rect(bounds) : null;
         mFullscreen = mBounds == null;
         if (mTaskPositioner != null) {
-            mTaskPositioner.setDisplay(activityDisplay.mDisplay);
+            activityDisplay.mDisplay.getSize(mTmpSize);
+            mTaskPositioner.setDisplaySize(mTmpSize);
             mTaskPositioner.configure(mBounds);
         }
         onParentChanged();
