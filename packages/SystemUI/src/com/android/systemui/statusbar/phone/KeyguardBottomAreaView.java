@@ -397,24 +397,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 && pm.resolveActivity(PHONE_INTENT, 0) != null;
     }
 
-    private boolean isCameraDisabledByDpm() {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null && mStatusBar != null) {
-            try {
-                final int userId = ActivityManager.getService().getCurrentUser().id;
-                final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
-                final  boolean disabledBecauseKeyguardSecure =
-                        (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                                && mStatusBar.isKeyguardSecure();
-                return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Can't get userId", e);
-            }
-        }
-        return false;
-    }
-
     private void watchForCameraPolicyChanges() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
@@ -865,7 +847,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public IconState getIcon() {
             ResolveInfo resolved = resolveCameraIntent();
-            mIconState.isVisible = !isCameraDisabledByDpm() && resolved != null
+            boolean isCameraDisabled = (mStatusBar != null) && !mStatusBar.isCameraAllowedByAdmin();
+            mIconState.isVisible = !isCameraDisabled && resolved != null
                     && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
                     && mUserSetupComplete;
             mIconState.drawable = mContext.getDrawable(R.drawable.ic_camera_alt_24dp);
