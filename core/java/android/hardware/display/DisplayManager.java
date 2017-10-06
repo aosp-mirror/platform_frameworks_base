@@ -282,6 +282,10 @@ public final class DisplayManager {
      * Virtual display flag: Indicates that the contents will be destroyed once
      * the display is removed.
      *
+     * Public virtual displays without this flag will move their content to main display
+     * stack once they're removed. Private vistual displays will always destroy their
+     * content on removal even without this flag.
+     *
      * @see #createVirtualDisplay
      * @hide
      */
