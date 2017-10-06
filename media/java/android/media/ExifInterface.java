@@ -2583,22 +2583,21 @@ public class ExifInterface {
                             ExifAttribute.createUShort(Integer.parseInt(height), mExifByteOrder));
                 }
 
-                // Note that the rotation angle from MediaMetadataRetriever for heif images
-                // are CCW, while rotation in ExifInterface orientations are CW.
                 String rotation = retriever.extractMetadata(
                         MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
                 if (rotation != null) {
                     int orientation = ExifInterface.ORIENTATION_NORMAL;
 
+                    // all rotation angles in CW
                     switch (Integer.parseInt(rotation)) {
                         case 90:
-                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
+                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
                             break;
                         case 180:
                             orientation = ExifInterface.ORIENTATION_ROTATE_180;
                             break;
                         case 270:
-                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
+                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
                             break;
                     }
 
