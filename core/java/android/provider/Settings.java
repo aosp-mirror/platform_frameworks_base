@@ -9349,9 +9349,12 @@ public final class Settings {
 
         /**
          * Battery anomaly detection specific settings
-         * This is encoded as a key=value list, separated by commas. Ex:
+         * This is encoded as a key=value list, separated by commas.
+         * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via
+         * {@link Uri#encode(String)}, separated by colons. Ex:
          *
-         * "anomaly_detection_enabled=true,wakelock_threshold=2000"
+         * "anomaly_detection_enabled=true,wakelock_threshold=2000,wakeup_alarm_enabled=true,"
+         * "wakeup_alarm_threshold=10,wakeup_blacklisted_tags=tag1:tag2:with%2Ccomma:with%3Acolon"
          *
          * The following keys are supported:
          *
@@ -9359,6 +9362,11 @@ public final class Settings {
          * anomaly_detection_enabled       (boolean)
          * wakelock_enabled                (boolean)
          * wakelock_threshold              (long)
+         * wakeup_alarm_enabled            (boolean)
+         * wakeup_alarm_threshold          (long)
+         * wakeup_blacklisted_tags         (string)
+         * bluetooth_scan_enabled          (boolean)
+         * bluetooth_scan_threshold        (long)
          * </pre>
          * @hide
          */
