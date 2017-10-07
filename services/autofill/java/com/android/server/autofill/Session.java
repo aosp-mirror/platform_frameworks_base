@@ -56,9 +56,11 @@ import android.service.autofill.Dataset;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
+import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
+import android.service.autofill.Transformation;
 import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -856,6 +858,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return true;
         }
 
+        final ArrayMap<AutofillId, InternalSanitizer> sanitizers = createSanitizers(saveInfo);
+
         // Cache used to make sure changed fields do not belong to a dataset.
         final ArrayMap<AutofillId, AutofillValue> currentValues = new ArrayMap<>();
         final ArraySet<AutofillId> allIds = new ArraySet<>();
@@ -895,6 +899,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         break;
                     }
                 }
+                value = getSanitizedValue(sanitizers, id, value);
                 currentValues.put(id, value);
                 final AutofillValue filledValue = viewState.getAutofilledValue();
 
@@ -1037,6 +1042,48 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return true;
     }
 
+    @Nullable
+    private ArrayMap<AutofillId, InternalSanitizer> createSanitizers(@Nullable SaveInfo saveInfo) {
+        if (saveInfo == null) return null;
+
+        final InternalSanitizer[] sanitizerKeys = saveInfo.getSanitizerKeys();
+        if (sanitizerKeys == null) return null;
+
+        final int size = sanitizerKeys.length ;
+        final ArrayMap<AutofillId, InternalSanitizer> sanitizers = new ArrayMap<>(size);
+        if (sDebug) Slog.d(TAG, "Service provided " + size + " sanitizers");
+        final AutofillId[][] sanitizerValues = saveInfo.getSanitizerValues();
+        for (int i = 0; i < size; i++) {
+            final InternalSanitizer sanitizer = sanitizerKeys[i];
+            final AutofillId[] ids = sanitizerValues[i];
+            if (sDebug) {
+                Slog.d(TAG, "sanitizer #" + i + " (" + sanitizer + ") for ids "
+                        + Arrays.toString(ids));
+            }
+            for (AutofillId id : ids) {
+                sanitizers.put(id, sanitizer);
+            }
+        }
+        return sanitizers;
+    }
+
+    @NonNull
+    private AutofillValue getSanitizedValue(
+            @Nullable ArrayMap<AutofillId, InternalSanitizer> sanitizers,
+            @NonNull AutofillId id,
+            @NonNull AutofillValue value) {
+        if (sanitizers == null) return value;
+
+        final InternalSanitizer sanitizer = sanitizers.get(id);
+        if (sanitizer == null) {
+            return value;
+        }
+
+        final AutofillValue sanitized = sanitizer.sanitize(value);
+        if (sDebug) Slog.d(TAG, "Value for " + id + "(" + value + ") sanitized to " + sanitized);
+        return sanitized;
+    }
+
     /**
      * Returns whether the session is currently showing the save UI
      */
@@ -1100,6 +1147,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        final ArrayMap<AutofillId, InternalSanitizer> sanitizers =
+                createSanitizers(getSaveInfoLocked());
+
         final int numContexts = mContexts.size();
 
         for (int contextNum = 0; contextNum < numContexts; contextNum++) {
@@ -1126,7 +1176,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + id + " to " + value);
 
-                node.updateAutofillValue(value);
+                final AutofillValue sanitizedValue = getSanitizedValue(sanitizers, id, value);
+
+                node.updateAutofillValue(sanitizedValue);
             }
 
             // Sanitize structure before it's sent to service.

@@ -220,7 +220,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         // Shutdown the thread we made.
         mWorker.shutdown();
     }
-    
+
     public static IBatteryStats getService() {
         if (sService != null) {
             return sService;
@@ -611,21 +611,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.notePhoneOnLocked();
         }
     }
-    
+
     public void notePhoneOff() {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.notePhoneOffLocked();
         }
     }
-    
+
     public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.notePhoneSignalStrengthLocked(signalStrength);
         }
     }
-    
+
     public void notePhoneDataConnectionState(int dataType, boolean hasData) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -647,7 +647,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.noteWifiOnLocked();
         }
     }
-    
+
     public void noteWifiOff() {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -806,7 +806,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.noteFullWifiLockAcquiredLocked(uid);
         }
     }
-    
+
     public void noteFullWifiLockReleased(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -1043,7 +1043,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             });
         });
     }
-    
+
     public long getAwakeTimeBattery() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
@@ -1186,6 +1186,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         int flags = 0;
         boolean useCheckinFormat = false;
+        boolean toProto = false;
         boolean isRealCheckin = false;
         boolean noOutput = false;
         boolean writeData = false;
@@ -1212,6 +1213,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("-c".equals(arg)) {
                     useCheckinFormat = true;
                     flags |= BatteryStats.DUMP_INCLUDE_HISTORY;
+                } else if ("--proto".equals(arg)) {
+                    toProto = true;
                 } else if ("--charged".equals(arg)) {
                     flags |= BatteryStats.DUMP_CHARGED_ONLY;
                 } else if ("--daily".equals(arg)) {
@@ -1304,7 +1307,45 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
         }
 
-        if (useCheckinFormat) {
+        if (toProto) {
+            List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
+                    PackageManager.MATCH_ANY_USER | PackageManager.MATCH_ALL);
+            if (isRealCheckin) {
+                // For a real checkin, first we want to prefer to use the last complete checkin
+                // file if there is one.
+                synchronized (mStats.mCheckinFile) {
+                    if (mStats.mCheckinFile.exists()) {
+                        try {
+                            byte[] raw = mStats.mCheckinFile.readFully();
+                            if (raw != null) {
+                                Parcel in = Parcel.obtain();
+                                in.unmarshall(raw, 0, raw.length);
+                                in.setDataPosition(0);
+                                BatteryStatsImpl checkinStats = new BatteryStatsImpl(
+                                        null, mStats.mHandler, null, mUserManagerUserInfoProvider);
+                                checkinStats.readSummaryFromParcel(in);
+                                in.recycle();
+                                checkinStats.dumpProtoLocked(mContext, fd, apps, flags,
+                                        historyStart);
+                                mStats.mCheckinFile.delete();
+                                return;
+                            }
+                        } catch (IOException | ParcelFormatException e) {
+                            Slog.w(TAG, "Failure reading checkin file "
+                                    + mStats.mCheckinFile.getBaseFile(), e);
+                        }
+                    }
+                }
+            }
+            if (DBG) Slog.d(TAG, "begin dumpProtoLocked from UID " + Binder.getCallingUid());
+            synchronized (mStats) {
+                mStats.dumpProtoLocked(mContext, fd, apps, flags, historyStart);
+                if (writeData) {
+                    mStats.writeAsyncLocked();
+                }
+            }
+            if (DBG) Slog.d(TAG, "end dumpProtoLocked");
+        } else if (useCheckinFormat) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
                     PackageManager.MATCH_ANY_USER | PackageManager.MATCH_ALL);
             if (isRealCheckin) {

@@ -21,9 +21,11 @@ import static org.mockito.Mockito.verify;
 
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.app.NightDisplayController;
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.SysuiTestCase;
@@ -45,6 +47,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mDependency.injectTestDependency(Dependency.BG_LOOPER,
+                TestableLooper.get(this).getLooper());
         Prefs.putBoolean(mContext, Key.QS_NIGHTDISPLAY_ADDED, false);
         mQsTileHost = Mockito.mock(QSTileHost.class);
         mAutoTileManager = new AutoTileManager(mContext, mQsTileHost);

@@ -41,7 +41,6 @@ class RippleForeground extends RippleComponent {
 
     // Pixel-based accelerations and velocities.
     private static final float WAVE_TOUCH_DOWN_ACCELERATION = 1024;
-    private static final float WAVE_TOUCH_UP_ACCELERATION = 3400;
     private static final float WAVE_OPACITY_DECAY_VELOCITY = 3;
 
     // Bounded ripple animation properties.
@@ -83,6 +82,11 @@ class RippleForeground extends RippleComponent {
     /** Whether this ripple has finished its exit animation. */
     private boolean mHasFinishedExit;
 
+    /**
+     * If we have a bound, don't start from 0. Start from 60% of the max out of width and height.
+     */
+    private float mStartRadius = 0;
+
     public RippleForeground(RippleDrawable owner, Rect bounds, float startingX, float startingY,
             boolean isBounded, boolean forceSoftware) {
         super(owner, bounds, forceSoftware);
@@ -96,6 +100,8 @@ class RippleForeground extends RippleComponent {
         } else {
             mBoundedRadius = 0;
         }
+        // Take 60% of the maximum of the width and height, then divided half to get the radius.
+        mStartRadius = Math.max(bounds.width(), bounds.height()) * 0.3f;
     }
 
     @Override
@@ -158,8 +164,7 @@ class RippleForeground extends RippleComponent {
 
     @Override
     protected Animator createSoftwareEnter(boolean fast) {
-        final int duration = (int)
-                (1000 * Math.sqrt(mTargetRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensityScale) + 0.5);
+        final int duration = getRadiusDuration();
 
         final ObjectAnimator tweenRadius = ObjectAnimator.ofFloat(this, TWEEN_RADIUS, 1);
         tweenRadius.setAutoCancel(true);
@@ -192,14 +197,14 @@ class RippleForeground extends RippleComponent {
         return MathUtils.lerp(mClampedStartingY - mBounds.exactCenterY(), mTargetY, mTweenY);
     }
 
-    private int getRadiusExitDuration() {
+    private int getRadiusDuration() {
         final float remainingRadius = mTargetRadius - getCurrentRadius();
-        return (int) (1000 * Math.sqrt(remainingRadius / (WAVE_TOUCH_UP_ACCELERATION
-                + WAVE_TOUCH_DOWN_ACCELERATION) * mDensityScale) + 0.5);
+        return (int) (1000 * Math.sqrt(remainingRadius / WAVE_TOUCH_DOWN_ACCELERATION *
+                mDensityScale) + 0.5);
     }
 
     private float getCurrentRadius() {
-        return MathUtils.lerp(0, mTargetRadius, mTweenRadius);
+        return MathUtils.lerp(mStartRadius, mTargetRadius, mTweenRadius);
     }
 
     private int getOpacityExitDuration() {
@@ -212,7 +217,7 @@ class RippleForeground extends RippleComponent {
         final int originDuration;
         final int opacityDuration;
 
-        radiusDuration = getRadiusExitDuration();
+        radiusDuration = getRadiusDuration();
         originDuration = radiusDuration;
         opacityDuration = getOpacityExitDuration();
 
@@ -244,7 +249,7 @@ class RippleForeground extends RippleComponent {
         final int originDuration;
         final int opacityDuration;
 
-        radiusDuration = getRadiusExitDuration();
+        radiusDuration = getRadiusDuration();
         originDuration = radiusDuration;
         opacityDuration = getOpacityExitDuration();
 

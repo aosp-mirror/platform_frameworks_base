@@ -796,6 +796,24 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
+    /**
+     * This method returns the drawing rect for the view which is different from the regular
+     * drawing rect, since we layout all children at position 0 and usually the translation is
+     * neglected. The standard implementation doesn't account for translation.
+     *
+     * @param outRect The (scrolled) drawing bounds of the view.
+     */
+    @Override
+    public void getDrawingRect(Rect outRect) {
+        super.getDrawingRect(outRect);
+        float translationX = getTranslationX();
+        float translationY = getTranslationY();
+        outRect.left += translationX;
+        outRect.right += translationX;
+        outRect.top += translationY;
+        outRect.bottom += translationY;
+    }
+
     public void setIsInShelf(boolean isInShelf) {
         mIsInShelf = isInShelf;
     }

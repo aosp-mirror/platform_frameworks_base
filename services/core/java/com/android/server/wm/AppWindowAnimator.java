@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -78,11 +78,8 @@ public class AppWindowAnimator {
     // requires that the duration of the two animations are the same.
     SurfaceControl thumbnail;
     int thumbnailTransactionSeq;
-    // TODO(b/62029108): combine both members into a private one. Create a member function to set
-    // the thumbnail layer to +1 to the highest layer position and replace all setter instances
-    // with this function. Remove all unnecessary calls to both variables in other classes.
-    int thumbnailLayer;
-    int thumbnailForceAboveLayer;
+    private int mThumbnailLayer;
+
     Animation thumbnailAnimation;
     final Transformation thumbnailTransformation = new Transformation();
     // This flag indicates that the destruction of the thumbnail surface is synchronized with
@@ -256,7 +253,7 @@ public class AppWindowAnimator {
 
     private void updateLayers() {
         mAppToken.getDisplayContent().assignWindowLayers(false /* relayoutNeeded */);
-        thumbnailLayer = mAppToken.getHighestAnimLayer();
+        updateThumbnailLayer();
     }
 
     private void stepThumbnailAnimation(long currentTime) {
@@ -280,23 +277,32 @@ public class AppWindowAnimator {
         thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
-                + " layer=" + thumbnailLayer
+                + " layer=" + mThumbnailLayer
                 + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
                 + "," + tmpFloats[Matrix.MSKEW_Y]
                 + "][" + tmpFloats[Matrix.MSKEW_X]
                 + "," + tmpFloats[Matrix.MSCALE_Y] + "]");
         thumbnail.setAlpha(thumbnailTransformation.getAlpha());
-        if (thumbnailForceAboveLayer > 0) {
-            thumbnail.setLayer(thumbnailForceAboveLayer + 1);
-        } else {
-            // The thumbnail is layered below the window immediately above this
-            // token's anim layer.
-            thumbnail.setLayer(thumbnailLayer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
-                    - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
-        }
+        updateThumbnailLayer();
         thumbnail.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
         thumbnail.setWindowCrop(thumbnailTransformation.getClipRect());
+    }
+
+    /**
+     * Updates the thumbnail layer z order to just above the highest animation layer if changed
+     */
+    void updateThumbnailLayer() {
+        if (thumbnail != null) {
+            final int layer = mAppToken.getHighestAnimLayer();
+            if (layer != mThumbnailLayer) {
+                if (DEBUG_LAYERS) Slog.v(TAG,
+                        "Setting thumbnail layer " + mAppToken + ": layer=" + layer);
+                thumbnail.setLayer(layer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
+                        - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
+                mThumbnailLayer = layer;
+            }
+        }
     }
 
     /**
@@ -473,7 +479,7 @@ public class AppWindowAnimator {
         }
         if (thumbnail != null) {
             pw.print(prefix); pw.print("thumbnail="); pw.print(thumbnail);
-                    pw.print(" layer="); pw.println(thumbnailLayer);
+                    pw.print(" layer="); pw.println(mThumbnailLayer);
             pw.print(prefix); pw.print("thumbnailAnimation="); pw.println(thumbnailAnimation);
             pw.print(prefix); pw.print("thumbnailTransformation=");
                     pw.println(thumbnailTransformation.toShortString());

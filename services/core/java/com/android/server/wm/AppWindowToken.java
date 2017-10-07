@@ -1170,7 +1170,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 wAppAnimator.thumbnail.destroy();
             }
             wAppAnimator.thumbnail = tAppAnimator.thumbnail;
-            wAppAnimator.thumbnailLayer = tAppAnimator.thumbnailLayer;
             wAppAnimator.thumbnailAnimation = tAppAnimator.thumbnailAnimation;
             tAppAnimator.thumbnail = null;
         }
