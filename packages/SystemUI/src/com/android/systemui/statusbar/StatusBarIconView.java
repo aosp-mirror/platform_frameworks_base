@@ -43,6 +43,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -142,6 +143,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
     private boolean mIsInShelf;
+    private Runnable mLayoutRunnable;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -820,6 +822,19 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public boolean isInShelf() {
         return mIsInShelf;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mLayoutRunnable != null) {
+            mLayoutRunnable.run();
+            mLayoutRunnable = null;
+        }
+    }
+
+    public void executeOnLayout(Runnable runnable) {
+        mLayoutRunnable = runnable;
     }
 
     public interface OnVisibilityChangedListener {
