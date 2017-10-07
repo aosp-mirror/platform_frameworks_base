@@ -154,25 +154,6 @@ public final class Slice implements Parcelable {
         return Arrays.asList(mHints);
     }
 
-    /**
-     * @hide
-     */
-    public SliceItem getPrimaryIcon() {
-        for (SliceItem item : getItems()) {
-            if (item.getType() == SliceItem.TYPE_IMAGE) {
-                return item;
-            }
-            if (!(item.getType() == SliceItem.TYPE_SLICE && item.hasHint(Slice.HINT_LIST))
-                    && !item.hasHint(Slice.HINT_ACTIONS)
-                    && !item.hasHint(Slice.HINT_LIST_ITEM)
-                    && (item.getType() != SliceItem.TYPE_ACTION)) {
-                SliceItem icon = SliceQuery.find(item, SliceItem.TYPE_IMAGE);
-                if (icon != null) return icon;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(mHints);
@@ -405,6 +386,9 @@ public final class Slice implements Parcelable {
             final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
                     null, extras);
             Bundle.setDefusable(res, true);
+            if (res == null) {
+                return null;
+            }
             return res.getParcelable(SliceProvider.EXTRA_SLICE);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity

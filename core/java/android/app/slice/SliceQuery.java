@@ -35,6 +35,27 @@ public class SliceQuery {
     /**
      * @hide
      */
+    public static SliceItem getPrimaryIcon(Slice slice) {
+        for (SliceItem item : slice.getItems()) {
+            if (item.getType() == SliceItem.TYPE_IMAGE) {
+                return item;
+            }
+            if (!(item.getType() == SliceItem.TYPE_SLICE && item.hasHint(Slice.HINT_LIST))
+                    && !item.hasHint(Slice.HINT_ACTIONS)
+                    && !item.hasHint(Slice.HINT_LIST_ITEM)
+                    && (item.getType() != SliceItem.TYPE_ACTION)) {
+                SliceItem icon = SliceQuery.find(item, SliceItem.TYPE_IMAGE);
+                if (icon != null) {
+                    return icon;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
     public static SliceItem findNotContaining(SliceItem container, List<SliceItem> list) {
         SliceItem ret = null;
         while (ret == null && list.size() != 0) {
