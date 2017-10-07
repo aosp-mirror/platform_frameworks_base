@@ -23,6 +23,7 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
+import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/fingerprint.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
@@ -82,6 +83,11 @@ message IncidentProto {
     android.service.notification.NotificationServiceDumpProto notification = 3004 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "notification --proto"
+    ];
+
+    android.service.batterystats.BatteryStatsServiceDumpProto batterystats = 3005 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "batterystats --proto"
     ];
 
     android.service.battery.BatteryServiceDumpProto battery = 3006 [

@@ -143,6 +143,9 @@ public class BatteryStatsHelper {
     public static boolean checkWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return false;
+        }
         return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
