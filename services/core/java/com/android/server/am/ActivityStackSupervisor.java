@@ -2625,38 +2625,41 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // the picture-in-picture mode.
             final boolean schedulePictureInPictureModeChange = inPinnedWindowingMode;
             final ArrayList<TaskRecord> tasks = fromStack.getAllTasks();
-            final int size = tasks.size();
-            final ActivityStack fullscreenStack = toDisplay.getOrCreateStack(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, onTop);
 
-            if (onTop) {
-                final int returnToType =
-                        toDisplay.getTopVisibleStackActivityType(WINDOWING_MODE_PINNED);
-                for (int i = 0; i < size; i++) {
-                    final TaskRecord task = tasks.get(i);
-                    final boolean isTopTask = i == (size - 1);
-                    if (inPinnedWindowingMode) {
-                        // Update the return-to to reflect where the pinned stack task was moved
-                        // from so that we retain the stack that was previously visible if the
-                        // pinned stack is recreated. See moveActivityToPinnedStackLocked().
-                        task.setTaskToReturnTo(returnToType);
+            if (!tasks.isEmpty()) {
+                final int size = tasks.size();
+                final ActivityStack fullscreenStack = toDisplay.getOrCreateStack(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, onTop);
+
+                if (onTop) {
+                    final int returnToType =
+                            toDisplay.getTopVisibleStackActivityType(WINDOWING_MODE_PINNED);
+                    for (int i = 0; i < size; i++) {
+                        final TaskRecord task = tasks.get(i);
+                        final boolean isTopTask = i == (size - 1);
+                        if (inPinnedWindowingMode) {
+                            // Update the return-to to reflect where the pinned stack task was moved
+                            // from so that we retain the stack that was previously visible if the
+                            // pinned stack is recreated. See moveActivityToPinnedStackLocked().
+                            task.setTaskToReturnTo(returnToType);
+                        }
+                        // Defer resume until all the tasks have been moved to the fullscreen stack
+                        task.reparent(fullscreenStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
+                                isTopTask /* animate */, DEFER_RESUME,
+                                schedulePictureInPictureModeChange,
+                                "moveTasksToFullscreenStack - onTop");
                     }
-                    // Defer resume until all the tasks have been moved to the fullscreen stack
-                    task.reparent(fullscreenStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
-                            isTopTask /* animate */, DEFER_RESUME,
-                            schedulePictureInPictureModeChange,
-                            "moveTasksToFullscreenStack - onTop");
-                }
-            } else {
-                for (int i = 0; i < size; i++) {
-                    final TaskRecord task = tasks.get(i);
-                    // Position the tasks in the fullscreen stack in order at the bottom of the
-                    // stack. Also defer resume until all the tasks have been moved to the
-                    // fullscreen stack.
-                    task.reparent(fullscreenStack, i /* position */,
-                            REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME,
-                            schedulePictureInPictureModeChange,
-                            "moveTasksToFullscreenStack - NOT_onTop");
+                } else {
+                    for (int i = 0; i < size; i++) {
+                        final TaskRecord task = tasks.get(i);
+                        // Position the tasks in the fullscreen stack in order at the bottom of the
+                        // stack. Also defer resume until all the tasks have been moved to the
+                        // fullscreen stack.
+                        task.reparent(fullscreenStack, i /* position */,
+                                REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE, DEFER_RESUME,
+                                schedulePictureInPictureModeChange,
+                                "moveTasksToFullscreenStack - NOT_onTop");
+                    }
                 }
             }
 
