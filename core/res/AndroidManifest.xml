@@ -1368,6 +1368,18 @@
         android:description="@string/permdesc_useBiometric"
         android:protectionLevel="normal" />
 
+    <permission-group android:name="android.permission-group.OTHER_SENSORS"
+        android:icon="@drawable/perm_group_location"
+        android:label="@string/permgrouplab_otherSensors"
+        android:description="@string/permgroupdesc_otherSensors"
+        android:priority="1000" />
+
+    <permission android:name="android.permission.OTHER_SENSORS"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_otherSensors"
+        android:description="@string/permdesc_otherSensors"
+        android:protectionLevel="dangerous" />
+
     <!-- ====================================================================== -->
     <!-- REMOVED PERMISSIONS                                                    -->
     <!-- ====================================================================== -->

@@ -2553,7 +2553,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     public static boolean isSpecialRuntimePermission(final String permission) {
-        return Manifest.permission.INTERNET.equals(permission);
+        return Manifest.permission.INTERNET.equals(permission) || Manifest.permission.OTHER_SENSORS.equals(permission);
     }
 
     /**
