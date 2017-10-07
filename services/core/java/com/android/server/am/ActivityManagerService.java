@@ -1691,6 +1691,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
     static final int TOP_APP_KILLED_BY_LMK_MSG = 73;
+    static final int NOTIFY_VR_KEYGUARD_MSG = 74;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2425,6 +2426,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case NOTIFY_VR_SLEEPING_MSG: {
                 notifyVrManagerOfSleepState(msg.arg1 != 0);
+            } break;
+            case NOTIFY_VR_KEYGUARD_MSG: {
+                notifyVrManagerOfKeyguardState(msg.arg1 != 0);
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -3279,6 +3283,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
         vrService.onSleepStateChanged(isSleeping);
+    }
+
+    private void sendNotifyVrManagerOfKeyguardState(boolean isShowing) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(NOTIFY_VR_KEYGUARD_MSG, isShowing ? 1 : 0, 0));
+    }
+
+    private void notifyVrManagerOfKeyguardState(boolean isShowing) {
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+        if (vrService == null) {
+            return;
+        }
+        vrService.onKeyguardStateChanged(isShowing);
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -12659,6 +12676,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        sendNotifyVrManagerOfKeyguardState(showing);
     }
 
     @Override
