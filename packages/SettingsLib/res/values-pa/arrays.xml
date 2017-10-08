@@ -50,7 +50,7 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"ਕਦੇ ਵੀ ਜਾਂਚ ਨਾ ਕਰੋ"</item>
-    <item msgid="6042769699089883931">"ਕੇਵਲ DRM ਸਮੱਗਰੀ ਲਈ ਜਾਂਚ ਕਰੋ"</item>
+    <item msgid="6042769699089883931">"ਸਿਰਫ਼ DRM ਸਮੱਗਰੀ ਲਈ ਜਾਂਚ ਕਰੋ"</item>
     <item msgid="9174900380056846820">"ਹਮੇਸ਼ਾਂ ਜਾਂਚ ਕਰੋ"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
@@ -204,7 +204,7 @@
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"ਬੰਦ"</item>
     <item msgid="675719912558941285">"ਨੀਲੇ ਵਿੱਚ ਗ਼ੈਰ-ਆਇਤਾਕਾਰ ਕਲਿਪ ਖੇਤਰ ਡ੍ਰਾ ਕਰੋ"</item>
-    <item msgid="1064373276095698656">"ਹਾਈਲਾਈਟ ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਹਨ"</item>
+    <item msgid="1064373276095698656">"ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਉਜਾਗਰ ਕਰੋ"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"ਬੰਦ"</item>
@@ -231,7 +231,7 @@
   <string-array name="usb_configuration_titles">
     <item msgid="488237561639712799">"ਚਾਰਜਿੰਗ"</item>
     <item msgid="5220695614993094977">"MTP (ਮੀਡੀਆ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
-    <item msgid="2086000968159047375">"PTP (ਤਸਵੀਰ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
+    <item msgid="2086000968159047375">"PTP (ਪਿਕਚਰ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB ਈਥਰਨੈਟ)"</item>
     <item msgid="1718924214939774352">" ਆਡੀਓ  ਸਰੋਤ"</item>
     <item msgid="8126315616613006284">"MIDI"</item>

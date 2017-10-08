@@ -155,31 +155,31 @@
     <item msgid="8489661142527693381">"endast buffert av kernellogg"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
-    <item msgid="8134156599370824081">"Animering avstängd"</item>
-    <item msgid="6624864048416710414">"Animering i skala 0,5x"</item>
-    <item msgid="2219332261255416635">"Animering i skala 1x"</item>
-    <item msgid="3544428804137048509">"Animering i skala 1,5x"</item>
-    <item msgid="3110710404225974514">"Animering i skala 2x"</item>
-    <item msgid="4402738611528318731">"Animering i skala 5x"</item>
-    <item msgid="6189539267968330656">"Animering i skala 10x"</item>
+    <item msgid="8134156599370824081">"Animation avstängd"</item>
+    <item msgid="6624864048416710414">"Animation i skala 0,5x"</item>
+    <item msgid="2219332261255416635">"Animation i skala 1x"</item>
+    <item msgid="3544428804137048509">"Animation i skala 1,5x"</item>
+    <item msgid="3110710404225974514">"Animation i skala 2x"</item>
+    <item msgid="4402738611528318731">"Animation i skala 5x"</item>
+    <item msgid="6189539267968330656">"Animation i skala 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
-    <item msgid="8464255836173039442">"Animering avstängd"</item>
-    <item msgid="3375781541913316411">"Animering i skala 0,5x"</item>
-    <item msgid="1991041427801869945">"Animering i skala 1x"</item>
-    <item msgid="4012689927622382874">"Animering i skala 1,5x"</item>
-    <item msgid="3289156759925947169">"Animering i skala 2x"</item>
-    <item msgid="7705857441213621835">"Animering i skala 5x"</item>
-    <item msgid="6660750935954853365">"Animering i skala 10x"</item>
+    <item msgid="8464255836173039442">"Animation avstängd"</item>
+    <item msgid="3375781541913316411">"Animation i skala 0,5x"</item>
+    <item msgid="1991041427801869945">"Animation i skala 1x"</item>
+    <item msgid="4012689927622382874">"Animation i skala 1,5x"</item>
+    <item msgid="3289156759925947169">"Animation i skala 2x"</item>
+    <item msgid="7705857441213621835">"Animation i skala 5x"</item>
+    <item msgid="6660750935954853365">"Animation i skala 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
-    <item msgid="6039901060648228241">"Animering avstängd"</item>
-    <item msgid="1138649021950863198">"Animering i skala 0,5x"</item>
-    <item msgid="4394388961370833040">"Animering i skala 1x"</item>
-    <item msgid="8125427921655194973">"Animering i skala 1,5x"</item>
-    <item msgid="3334024790739189573">"Animering i skala 2x"</item>
-    <item msgid="3170120558236848008">"Animering i skala 5x"</item>
-    <item msgid="1069584980746680398">"Animering i skala 10x"</item>
+    <item msgid="6039901060648228241">"Animation avstängd"</item>
+    <item msgid="1138649021950863198">"Animation i skala 0,5x"</item>
+    <item msgid="4394388961370833040">"Animation i skala 1x"</item>
+    <item msgid="8125427921655194973">"Animation i skala 1,5x"</item>
+    <item msgid="3334024790739189573">"Animation i skala 2x"</item>
+    <item msgid="3170120558236848008">"Animation i skala 5x"</item>
+    <item msgid="1069584980746680398">"Animation i skala 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Inga"</item>
