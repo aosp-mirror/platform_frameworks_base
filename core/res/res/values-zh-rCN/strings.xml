@@ -1141,7 +1141,7 @@
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"点按即可查看相关设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"邀请已发送"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"已发出邀请"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"连接邀请"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"发件人："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>

@@ -267,7 +267,7 @@
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> applications sollicitent la pile"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Mode sans échec"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Passer au profil professionnel"</string>

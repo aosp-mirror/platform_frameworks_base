@@ -1030,7 +1030,7 @@
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> നിലയ്ക്കുന്നത് തുടരുന്നു"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ആപ്പ് വീണ്ടും തുറക്കുക"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ഫീഡ്‌ബാക്ക് അയയ്‌ക്കുക"</string>
-    <string name="aerr_close" msgid="2991640326563991340">"അടയ്‌ക്കുക"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"അവസാനിപ്പിക്കുക"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ഉപകരണം പുനഃരാരംഭിക്കുന്നത് വരെ മ്യൂട്ടുചെയ്യുക"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"കാത്തിരിക്കുക"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ആപ്പ് അടയ്‌ക്കുക"</string>
@@ -1193,7 +1193,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"അനലോഗ് ഓഡിയോ ആക്‌സസറി കണ്ടെത്തി"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"അറ്റാച്ചുചെയ്‌ത ഉപകരണം ഈ ഫോണിന് അനുയോജ്യമല്ല. കൂടുതലറിയാൻ ടാപ്പുചെയ്യുക."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നു…"</string>
@@ -1695,7 +1695,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതൽ‍ ഓപ്ഷനുകള്‍"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"വലുതാക്കുക"</string>
-    <string name="close_button_text" msgid="3937902162644062866">"അടയ്‌ക്കുക"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>

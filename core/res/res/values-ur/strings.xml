@@ -1307,7 +1307,7 @@
     <string name="submit" msgid="1602335572089911941">"جمع کرائیں"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"کار وضع فعال ہے"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"کار موڈ سے خارج ہونے کیلئے تھپتھپائیں۔"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ٹیتھرنگ یا ہاٹ اسپاٹ فعال"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ٹیدرنگ یا ہاٹ اسپاٹ فعال"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"سیٹ اپ کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="back_button_label" msgid="2300470004503343439">"واپس جائیں"</string>
     <string name="next_button_label" msgid="1080555104677992408">"اگلا"</string>
