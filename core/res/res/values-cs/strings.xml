@@ -1109,7 +1109,7 @@
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Než spustíte novou aplikaci, je třeba zastavit jinou spuštěnou aplikaci."</string>
     <string name="old_app_action" msgid="493129172238566282">"Návrat do aplikace <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="2082094275580358049">"Nespouštět novou aplikaci."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"Spustit aplikaci <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Do aplikace <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Zastavit starou aplikaci bez uložení."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> překročil limit paměti"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Byl shromážděn výpis haldy, klepnutím jej můžete sdílet"</string>

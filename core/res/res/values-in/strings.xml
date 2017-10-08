@@ -163,7 +163,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Laman ini berisi terlalu banyak pengalihan server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol tidak didukung."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Tidak dapat membuat sambungan aman."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Tidak dapat membuka laman karena URL tidak valid."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Tidak dapat membuka halaman karena URL tidak valid."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Tidak dapat mengakses file."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Tidak dapat menemukan file yang diminta."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Terlalu banyak permintaan yang diproses. Coba lagi nanti."</string>
@@ -810,7 +810,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Konfirmasi Navigasi"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Keluar dari Laman ini"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Tetap di Laman ini"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari laman ini?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari halaman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"IsiOtomatis"</string>
@@ -847,7 +847,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka laman ini."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka halaman ini."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke papan klip."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
@@ -1313,7 +1313,7 @@
     <string name="next_button_label" msgid="1080555104677992408">"Selanjutnya"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Lewati"</string>
     <string name="no_matches" msgid="8129421908915840737">"Tidak ada kecocokan"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Temukan pada laman"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Temukan pada halaman"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> dari <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 kecocokan</item>
@@ -1439,7 +1439,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Tidak tersedia"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Sedang digunakan"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Bawaan"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Layar HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
@@ -1606,7 +1606,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Melihat layar penuh"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, gesek ke bawah dari atas."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, geser layar ke bawah dari atas."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Mengerti"</string>
     <string name="done_label" msgid="2093726099505892398">"Selesai"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Penggeser putar jam"</string>

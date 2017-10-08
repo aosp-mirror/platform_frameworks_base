@@ -1759,10 +1759,10 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> ինքնալցման առաջարկ</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> ինքնալցման առաջարկ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Պահե՞լ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>-ը և <xliff:g id="TYPE_1">%2$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;-ում:"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>-ը, <xliff:g id="TYPE_1">%2$s</xliff:g>-ը և <xliff:g id="TYPE_2">%3$s</xliff:g>-ը &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;-ում:"</string>
+    <string name="autofill_save_title" msgid="3345527308992082601">"Պահե՞լ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Պահե՞լ <xliff:g id="TYPE">%1$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>ն ու <xliff:g id="TYPE_1">%2$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
+    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Պահե՞լ <xliff:g id="TYPE_0">%1$s</xliff:g>ը, <xliff:g id="TYPE_1">%2$s</xliff:g>ն ու <xliff:g id="TYPE_2">%3$s</xliff:g>ը &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ծառայությունում"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Պահել"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ոչ"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"գաղտնաբառ"</string>

@@ -972,7 +972,7 @@
     <string name="delete" msgid="6098684844021697789">"Жою"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL мекенжайын көшіру"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Мәтінді бөлектеу"</string>
-    <string name="undo" msgid="7905788502491742328">"Кері қайтару"</string>
+    <string name="undo" msgid="7905788502491742328">"Қайтару"</string>
     <string name="redo" msgid="7759464876566803888">"Қайтару"</string>
     <string name="autofill" msgid="3035779615680565188">"Aвтотолтыру"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Мәтін таңдау"</string>

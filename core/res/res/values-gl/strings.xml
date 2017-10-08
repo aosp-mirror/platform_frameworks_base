@@ -68,8 +68,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"ID de chamada entrante"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"ID de chamada saínte"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Identificador de chamada entrante"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Identificador de chamada saínte"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID de liña conectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restrición de ID de liña conectada"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Desvío de chamadas"</string>
@@ -83,22 +83,22 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Rexeitamento de chamadas molestas non desexadas"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Entrega de número de chamada entrante"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Non molestar"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"De forma predeterminada, restrínxese o ID de chamada. Próxima chamada: restrinxido."</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"De forma predeterminada, restrínxese o ID de chamada. Próxima chamada: non restrinxido."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"De forma predeterminada, non se restrinxe o ID de chamada. Próxima chamada: restrinxido."</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"De forma predeterminada, non se restrinxe o ID de chamada. Próxima chamada: non restrinxido."</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: restrinxido"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"O valor predeterminado do identificador de chamada é non restrinxido. Próxima chamada: restrinxido"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Servizo non ofrecido."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Non podes cambiar a configuración do ID de chamada."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Non podes cambiar a configuración do identificador de chamada."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Non hai servizo de datos"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Non se poden realizar chamadas de emerxencia"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Non se poden realizar chamadas de urxencia"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Non hai servizo de chamadas de voz"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Non hai servizo de chamadas de emerxencia nin de voz"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Non hai servizo de chamadas de urxencia nin de voz"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"A rede de telefonía móbil non ofrece o servizo na túa localización temporalmente"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Non se pode conectar coa rede"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mellorar a recepción, proba a cambiar o tipo seleccionado en Sistema &gt; Rede e Internet &gt; Redes de telefonía móbil &gt; Tipo de rede preferido."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de chamadas"</string>
-    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de chamadas de emerxencia"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de chamadas de urxencia"</string>
     <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertas de datos móbiles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensaxes SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensaxes de correo de voz"</string>
@@ -202,7 +202,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Timbre desactivado"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Timbre en vibración"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Timbre activado"</string>
-    <string name="reboot_to_update_title" msgid="6212636802536823850">"Actualización do sistema de Android"</string>
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Actualización do sistema Android"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Preparando para actualizar…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Procesando paquete de actualización…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Reiniciando..."</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcións de teléfono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Emerxencias"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Urxencias"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de erros"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de erros"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Este informe recompilará información acerca do estado actual do teu dispositivo para enviala en forma de mensaxe de correo electrónico. O informe de erros tardará un pouco en completarse desde o seu inicio ata que estea preparado para enviarse, polo que che recomendamos que teñas paciencia."</string>
@@ -320,7 +320,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensaxes de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite á aplicación recibir e procesar mensaxes MMS. Isto significa que a aplicación pode supervisar ou eliminar mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensaxes de difusión móbil"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de urxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de urxencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite á aplicación obter detalles acerca dos feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e consultar mensaxes de SMS"</string>
@@ -406,7 +406,7 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar a vibración"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite á aplicación controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chamar directamente aos números de teléfono"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite á aplicación chamar a números de teléfono sen a túa intervención. Esta acción pode implicar chamadas ou custos inesperados. Ten en conta que isto non permite á aplicación chamar a números de emerxencia. É posible que aplicacións maliciosas che custen diñeiro debido á realización de chamadas sen a túa confirmación."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite á aplicación chamar a números de teléfono sen a túa intervención. Esta acción pode implicar chamadas ou custos inesperados. Ten en conta que isto non permite á aplicación chamar a números de urxencia. É posible que aplicacións maliciosas che custen diñeiro debido á realización de chamadas sen a túa confirmación."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"acceso ao servizo de chamadas de IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que a aplicación use o servizo de IMS para facer chamadas sen a túa intervención."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler o estado e a identidade do teléfono"</string>
@@ -707,13 +707,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Escribe o PIN para desbloquear"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, preme Menú e, a continuación, 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emerxencia"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de urxencia"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Sen servizo"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de emerxencia."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de urxencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Preme Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Crea o padrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Emerxencia"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Urxencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Volver á chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Téntao de novo"</string>
@@ -735,7 +735,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Deter"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Rebobinar"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Avance rápido"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de emerxencia"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de urxencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada pola rede"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A tarxeta SIM está bloqueada con código PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulta a guía do usuario ou ponte en contacto co servizo de asistencia ao cliente."</string>
@@ -1773,7 +1773,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén a calma e busca refuxio cerca."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandona de inmediato rexións costeiras e situadas na beira de ríos para dirixirte a un lugar máis seguro, como un terreo elevado."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén a calma e busca refuxio cerca."</string>
-    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de emerxencia"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de urxencia"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Non se admite a tarxeta SIM"</string>

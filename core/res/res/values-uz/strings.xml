@@ -1006,9 +1006,9 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Tahrirlash"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Baham ko‘rish"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"“%1$s” orqali ulashish"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Baham ko‘rish"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Ulashish"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ilovani tanlang"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s orqali yuborish"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Yuborish"</string>
@@ -1412,7 +1412,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 barmoq izi:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Barchasini ko‘rish"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Harakat turini tanlang"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Baham ko‘rish"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ulashish"</string>
     <string name="sending" msgid="3245653681008218030">"Jo‘natilmoqda…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Brauzer ishga tushirilsinmi?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Qo‘ng‘iroqni qabul qilasizmi?"</string>
