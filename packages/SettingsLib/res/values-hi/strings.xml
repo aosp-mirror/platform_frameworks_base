@@ -45,7 +45,7 @@
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"अत्‍यधिक धीमी"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"धीमी"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"ठीक"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"ठीक है"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"मध्यम"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"तेज़"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"अत्‍यधिक तेज़"</string>
@@ -289,7 +289,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"संक्रमण एनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"एनिमेटर अवधि स्केल"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"द्वितीयक डिस्प्ले अनुरूपित करें"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"ऐप्स"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"ऐप"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"गतिविधियों को न रखें"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"उपयोगकर्ता के छोड़ते ही हर गतिविधि को खत्म करें"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
