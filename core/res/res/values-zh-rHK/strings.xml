@@ -1595,7 +1595,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"開啟全螢幕"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"由上往下刷退出。"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"由頂部向下快速滑動即可退出。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小時環形滑桿"</string>
