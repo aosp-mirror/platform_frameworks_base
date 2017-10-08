@@ -349,11 +349,14 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">
-        <permission name="android.permission.DVB_DEVICE" />
-        <permission name="android.permission.GLOBAL_SEARCH" />
-        <permission name="android.permission.MODIFY_PARENTAL_CONTROLS" />
-        <permission name="com.android.providers.tv.permission.ACCESS_ALL_EPG_DATA" />
-        <permission name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
+        <permission name="android.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE"/>
+        <permission name="android.permission.DVB_DEVICE"/>
+        <permission name="android.permission.GLOBAL_SEARCH"/>
+        <permission name="android.permission.HDMI_CEC"/>
+        <permission name="android.permission.MODIFY_PARENTAL_CONTROLS"/>
+        <permission name="android.permission.READ_CONTENT_RATING_SYSTEMS"/>
+        <permission name="com.android.providers.tv.permission.ACCESS_ALL_EPG_DATA"/>
+        <permission name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.vpndialogs">
