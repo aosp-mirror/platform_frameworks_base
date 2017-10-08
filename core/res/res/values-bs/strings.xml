@@ -128,7 +128,7 @@
     <item msgid="4397097370387921767">"Wi-Fi pozivanje preko operatera %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Isključeno"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednost ima Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferira se Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferira se mobilna mreža"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Samo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nije proslijeđen"</string>
@@ -341,7 +341,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Dozvoljava aplikaciji da jednim dijelom trajno ostaje u memoriji. Time se ostalim aplikacijama dostupna memorija može ograničiti te usporiti rad TV-a."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti telefon."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mjerenje prostora kojeg aplikacije zauzimaju u pohrani"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Dozvoljava aplikaciji preuzimanje svog kôda, podataka i veličine keš memorije"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Dozvoljava aplikaciji preuzimanje svog koda, podataka i veličine keš memorije"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"izmjena postavki sistema"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Dozvoljava aplikaciji izmijenu postavki sistema. Zlonamjerne aplikacije mogu oštetiti konfiguraciju sistema."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"pokrenuti pri pokretanju"</string>
@@ -543,7 +543,7 @@
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"pristup opciji Ne ometaj"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućava aplikaciji da čita i upisuje konfiguraciju opcije Ne ometaj."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavljanje pravila za lozinke"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN kodovima."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Prati pokušaje otključavanja ekrana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Prati broj pogrešno unijetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše sve podatke s njega ukoliko se previše puta unese pogrešna lozinka."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Prati koliko puta je lozinka neispravno otkucana prilikom otključavanja ekrana i zaključaj TV ili izbriši sve podatke s TV-a ako se lozinka neispravno ukuca previše puta."</string>
@@ -1468,14 +1468,14 @@
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Unesite PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Unesite lozinku"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM je sada onemogućen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Unesite željeni PIN kôd"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdi željeni PIN kôd"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Unesite željeni PIN"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdi željeni PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Otključavanje SIM kartice…"</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Pogrešan PIN kôd."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Pogrešan PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Unesite PIN koji sadrži od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kôd bi trebao imati 8 brojeva."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodovi se ne poklapaju"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Previše pokušaja otključavanja pomoću uzorka"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Da otključate, prijavite se sa svojim Google računom."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Korisničko ime (adresa e-pošte)"</string>
@@ -1605,7 +1605,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Usluga štampanja nije omogućena."</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Usluga <xliff:g id="NAME">%s</xliff:g> je instalirana"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Dodirnite da omogućite"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Upišite PIN kôd administratora"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Upišite PIN administratora"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Unesite PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Netačno"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Trenutni PIN"</string>
