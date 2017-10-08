@@ -16,9 +16,9 @@
 
 package com.android.systemui.recents;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.View.MeasureSpec;
 
 import android.app.ActivityManager;
@@ -173,7 +173,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         @Override
-        public void onActivityPinned(String packageName, int userId, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             // Check this is for the right user
             if (!checkCurrentUserId(mContext, false /* debug */)) {
                 return;
@@ -873,7 +873,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo runningTask,
                     Rect windowOverrideRect) {
         final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
-        if (runningTask != null && runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
+        if (runningTask != null
+                && runningTask.configuration.windowConfiguration.getWindowingMode()
+                == WINDOWING_MODE_FREEFORM) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             ArrayList<Task> tasks = mDummyStackView.getStack().getStackTasks();
             TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();

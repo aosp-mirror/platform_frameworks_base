@@ -4900,7 +4900,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             ci.numRunning = numRunning;
             ci.supportsSplitScreenMultiWindow = task.supportsSplitScreenWindowingMode();
             ci.resizeMode = task.mResizeMode;
-            ci.configuration = task.getConfiguration();
+            ci.configuration.setTo(task.getConfiguration());
             list.add(ci);
         }
     }

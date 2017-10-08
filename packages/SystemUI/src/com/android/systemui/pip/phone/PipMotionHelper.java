@@ -16,7 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -161,13 +161,7 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                if (skipAnimation) {
-                    mActivityManager.moveTasksToFullscreenStack(PINNED_STACK_ID, true /* onTop */);
-                } else {
-                    mActivityManager.resizeStack(PINNED_STACK_ID, null /* bounds */,
-                            true /* allowResizeInDockedMode */, true /* preserveWindows */,
-                            true /* animate */, EXPAND_STACK_TO_FULLSCREEN_DURATION);
-                }
+                mActivityManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error expanding PiP activity", e);
             }
@@ -185,7 +179,7 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.removeStack(PINNED_STACK_ID);
+                mActivityManager.removeStacksInWindowingModes(new int[]{ WINDOWING_MODE_PINNED });
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to remove PiP", e);
             }
@@ -540,7 +534,7 @@ public class PipMotionHelper implements Handler.Callback {
                         return true;
                     }
 
-                    mActivityManager.resizeStack(PINNED_STACK_ID, toBounds,
+                    mActivityManager.resizeStack(stackInfo.stackId, toBounds,
                             false /* allowResizeInDockedMode */, true /* preserveWindows */,
                             true /* animate */, duration);
                     mBounds.set(toBounds);

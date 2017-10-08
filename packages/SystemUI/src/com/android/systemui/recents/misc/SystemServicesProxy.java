@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.misc;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -177,7 +175,7 @@ public class SystemServicesProxy {
         public void onTaskStackChangedBackground() { }
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
-        public void onActivityPinned(String packageName, int userId, int taskId) { }
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
         public void onActivityUnpinned() { }
         public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
         public void onPinnedStackAnimationStarted() { }
@@ -232,10 +230,11 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onActivityPinned(String packageName, int userId, int taskId)
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
                 throws RemoteException {
             mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
-            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, userId, taskId, packageName).sendToTarget();
+            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED,
+                    new PinnedActivityInfo(packageName, userId, taskId, stackId)).sendToTarget();
         }
 
         @Override
@@ -618,13 +617,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns whether the given stack id is the freeform workspace stack id.
-     */
-    public static boolean isFreeformStack(int stackId) {
-        return stackId == FREEFORM_WORKSPACE_STACK_ID;
-    }
-
-    /**
      * @return whether there are any docked tasks for the current user.
      */
     public boolean hasDockedTask() {
@@ -734,14 +726,12 @@ public class SystemServicesProxy {
         }
     }
 
-    /**
-     * Moves a task into another stack.
-     */
-    public void moveTaskToStack(int taskId, int stackId) {
+    /** Set the task's windowing mode. */
+    public void setTaskWindowingMode(int taskId, int windowingMode) {
         if (mIam == null) return;
 
         try {
-            mIam.positionTaskInStack(taskId, stackId, 0);
+            mIam.setTaskWindowingMode(taskId, windowingMode, false /* onTop */);
         } catch (RemoteException | IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -1132,7 +1122,7 @@ public class SystemServicesProxy {
         if (mIam == null) {
             return;
         }
-        if (taskKey.stackId == DOCKED_STACK_ID) {
+        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             // We show non-visible docked tasks in Recents, but we always want to launch
             // them in the fullscreen stack.
             if (options == null) {
@@ -1314,6 +1304,20 @@ public class SystemServicesProxy {
         void onStartActivityResult(boolean succeeded);
     }
 
+    private class PinnedActivityInfo {
+        final String mPackageName;
+        final int mUserId;
+        final int mTaskId;
+        final int mStackId;
+
+        PinnedActivityInfo(String packageName, int userId, int taskId, int stackId) {
+            mPackageName = packageName;
+            mUserId = userId;
+            mTaskId = taskId;
+            mStackId = stackId;
+        }
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -1349,9 +1353,10 @@ public class SystemServicesProxy {
                         break;
                     }
                     case ON_ACTIVITY_PINNED: {
+                        final PinnedActivityInfo info = (PinnedActivityInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj, msg.arg1,
-                                    msg.arg2);
+                            mTaskStackListeners.get(i).onActivityPinned(
+                                    info.mPackageName, info.mUserId, info.mTaskId, info.mStackId);
                         }
                         break;
                     }
