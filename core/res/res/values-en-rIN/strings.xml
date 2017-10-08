@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Work profile deleted due to missing admin app"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"The work profile admin app is either missing or corrupted. As a result, your work profile and related data have been deleted. Contact your admin for assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Your work profile is no longer available on this device"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Too many password attempts"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Device is managed"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Your organisation manages this device and may monitor network traffic. Tap for details."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Your device will be erased"</string>
@@ -980,10 +981,8 @@
     <string name="dial" msgid="4204975095406423102">"Phone"</string>
     <string name="map" msgid="6068210738233985748">"Maps"</string>
     <string name="browse" msgid="6993590095938149861">"Browser"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"Contact"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Storage space running out"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Some system functions may not work"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Not enough storage for the system. Make sure that you have 250 MB of free space and restart."</string>
