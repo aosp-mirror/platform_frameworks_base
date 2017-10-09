@@ -150,6 +150,12 @@ public final class AutofillManager {
      * service authentication will contain the Bundle set by
      * {@link android.service.autofill.FillResponse.Builder#setClientState(Bundle)} on this extra.
      *
+     * <p>On Android {@link android.os.Build.VERSION_CODES#P} and higher, the autofill service
+     * can also add this bundle to the {@link Intent} set as the
+     * {@link android.app.Activity#setResult(int, Intent) result} for an authentication request,
+     * so the bundle can be recovered later on
+     * {@link android.service.autofill.SaveRequest#getClientState()}.
+     *
      * <p>
      * Type: {@link android.os.Bundle}
      */
@@ -959,6 +965,10 @@ public final class AutofillManager {
             final Parcelable result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
             final Bundle responseData = new Bundle();
             responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
+            final Bundle newClientState = data.getBundleExtra(EXTRA_CLIENT_STATE);
+            if (newClientState != null) {
+                responseData.putBundle(EXTRA_CLIENT_STATE, newClientState);
+            }
             try {
                 mService.setAuthenticationResult(responseData, mSessionId, authenticationId,
                         mContext.getUserId());

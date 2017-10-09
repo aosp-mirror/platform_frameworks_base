@@ -19,7 +19,6 @@ package android.service.autofill;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -60,9 +59,14 @@ public final class SaveRequest implements Parcelable {
     }
 
     /**
-     * Gets the extra client state returned from the last {@link
-     * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)}
-     * fill request}.
+     * Gets the latest client state extra returned from the service.
+     *
+     * <p><b>Note:</b> Prior to Android {@link android.os.Build.VERSION_CODES#P}, only client state
+     * bundles set by {@link FillResponse.Builder#setClientState(Bundle)} where considered. On
+     * Android {@link android.os.Build.VERSION_CODES#P} and higher, bundles set in the result of
+     * an authenticated request through the
+     * {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE} extra are
+     * also considered (and take precedence when set).
      *
      * @return The client state.
      */
