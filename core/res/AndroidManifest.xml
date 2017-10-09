@@ -963,7 +963,7 @@
         android:permissionGroup="android.permission-group.MICROPHONE"
         android:label="@string/permlab_recordAudio"
         android:description="@string/permdesc_recordAudio"
-        android:protectionLevel="dangerous"/>
+        android:protectionLevel="dangerous|instant"/>
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the UCE Service                              -->
