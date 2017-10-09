@@ -681,17 +681,17 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
-    public long getMahDischarge(int which) {
+    public long getUahDischarge(int which) {
         return mDischargeCounter.getCountLocked(which);
     }
 
     @Override
-    public long getMahDischargeScreenOff(int which) {
+    public long getUahDischargeScreenOff(int which) {
         return mDischargeScreenOffCounter.getCountLocked(which);
     }
 
     @Override
-    public long getMahDischargeScreenDoze(int which) {
+    public long getUahDischargeScreenDoze(int which) {
         return mDischargeScreenDozeCounter.getCountLocked(which);
     }
 
@@ -5427,6 +5427,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 elapsedRealtimeUs, which);
     }
 
+    @Override public Timer getScreenBrightnessTimer(int brightnessBin) {
+        return mScreenBrightnessTimer[brightnessBin];
+    }
+
     @Override public long getInteractiveTime(long elapsedRealtimeUs, int which) {
         return mInteractiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -5520,8 +5524,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 elapsedRealtimeUs, which);
     }
 
+    @Override public Timer getPhoneSignalScanningTimer() {
+        return mPhoneSignalScanningTimer;
+    }
+
     @Override public int getPhoneSignalStrengthCount(int strengthBin, int which) {
         return mPhoneSignalStrengthsTimer[strengthBin].getCountLocked(which);
+    }
+
+    @Override public Timer getPhoneSignalStrengthTimer(int strengthBin) {
+        return mPhoneSignalStrengthsTimer[strengthBin];
     }
 
     @Override public long getPhoneDataConnectionTime(int dataType,
@@ -5532,6 +5544,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getPhoneDataConnectionCount(int dataType, int which) {
         return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
+    }
+
+    @Override public Timer getPhoneDataConnectionTimer(int dataType) {
+        return mPhoneDataConnectionsTimer[dataType];
     }
 
     @Override public long getMobileRadioActiveTime(long elapsedRealtimeUs, int which) {
@@ -5572,6 +5588,10 @@ public class BatteryStatsImpl extends BatteryStats {
         return mWifiStateTimer[wifiState].getCountLocked(which);
     }
 
+    @Override public Timer getWifiStateTimer(int wifiState) {
+        return mWifiStateTimer[wifiState];
+    }
+
     @Override public long getWifiSupplStateTime(int state,
             long elapsedRealtimeUs, int which) {
         return mWifiSupplStateTimer[state].getTotalTimeLocked(
@@ -5582,6 +5602,10 @@ public class BatteryStatsImpl extends BatteryStats {
         return mWifiSupplStateTimer[state].getCountLocked(which);
     }
 
+    @Override public Timer getWifiSupplStateTimer(int state) {
+        return mWifiSupplStateTimer[state];
+    }
+
     @Override public long getWifiSignalStrengthTime(int strengthBin,
             long elapsedRealtimeUs, int which) {
         return mWifiSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
@@ -5590,6 +5614,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getWifiSignalStrengthCount(int strengthBin, int which) {
         return mWifiSignalStrengthsTimer[strengthBin].getCountLocked(which);
+    }
+
+    @Override public Timer getWifiSignalStrengthTimer(int strengthBin) {
+        return mWifiSignalStrengthsTimer[strengthBin];
     }
 
     @Override
@@ -12791,7 +12819,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mMobileRadioActiveTimer = new StopwatchTimer(mClocks, null, -400, null,
                 mOnBatteryTimeBase, in);
-        mMobileRadioActivePerAppTimer = new StopwatchTimer(mClocks, null, -401, null, 
+        mMobileRadioActivePerAppTimer = new StopwatchTimer(mClocks, null, -401, null,
                 mOnBatteryTimeBase, in);
         mMobileRadioActiveAdjustedTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
