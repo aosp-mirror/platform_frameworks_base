@@ -53,7 +53,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
-import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
@@ -61,7 +60,6 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
-import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
@@ -85,7 +83,6 @@ import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
-import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -132,7 +129,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     // The trigger to automatically launch the current task
     private int mFocusTimerDuration;
-    private DozeTrigger mIterateTrigger;
     private final UserInteractionEvent mUserInteractionEvent = new UserInteractionEvent();
 
     // Theme and colors
@@ -327,13 +323,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         }
 
         mLastConfig = new Configuration(Utilities.getAppConfiguration(this));
-        mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
-        mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
-            @Override
-            public void run() {
-                dismissRecentsToFocusedTask(MetricsEvent.OVERVIEW_SELECT_TIMEOUT);
-            }
-        });
 
         // Set the window background
         mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode());
@@ -502,7 +491,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         super.onPause();
 
         mIgnoreAltTabRelease = false;
-        mIterateTrigger.stopDozing();
     }
 
     @Override
@@ -605,8 +593,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                     if (backward) {
                         EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
                     } else {
-                        EventBus.getDefault().send(
-                                new FocusNextTaskViewEvent(0 /* timerIndicatorDuration */));
+                        EventBus.getDefault().send(new FocusNextTaskViewEvent());
                     }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
 
@@ -664,36 +651,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         }
     }
 
-    public final void onBusEvent(IterateRecentsEvent event) {
-        final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-
-        // Start dozing after the recents button is clicked
-        int timerIndicatorDuration = 0;
-        if (debugFlags.isFastToggleRecentsEnabled()) {
-            timerIndicatorDuration = getResources().getInteger(
-                    R.integer.recents_subsequent_auto_advance_duration);
-
-            mIterateTrigger.setDozeDuration(timerIndicatorDuration);
-            if (!mIterateTrigger.isDozing()) {
-                mIterateTrigger.startDozing();
-            } else {
-                mIterateTrigger.poke();
-            }
-        }
-
-        // Focus the next task
-        EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
-
-        MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
-    }
-
     public final void onBusEvent(RecentsActivityStartingEvent event) {
         mRecentsStartRequested = true;
-    }
-
-    public final void onBusEvent(UserInteractionEvent event) {
-        // Stop the fast-toggle dozer
-        mIterateTrigger.stopDozing();
     }
 
     public final void onBusEvent(HideRecentsEvent event) {
@@ -815,11 +774,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(ScreenPinningRequestEvent event) {
         MetricsLogger.count(this, "overview_screen_pinned", 1);
-    }
-
-    public final void onBusEvent(DebugFlagsChangedEvent event) {
-        // Just finish recents so that we can reload the flags anew on the next instantiation
-        finish();
     }
 
     public final void onBusEvent(StackViewScrolledEvent event) {

@@ -408,22 +408,17 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
-                    // Has the user tapped quickly?
-                    boolean isQuickTap = elapsedTime < ViewConfiguration.getDoubleTapTimeout();
                     if (Recents.getConfiguration().isGridEnabled) {
+                        // Has the user tapped quickly?
+                        boolean isQuickTap = elapsedTime < ViewConfiguration.getDoubleTapTimeout();
                         if (isQuickTap) {
                             EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
                         } else {
                             EventBus.getDefault().post(new LaunchMostRecentTaskRequestEvent());
                         }
                     } else {
-                        if (!debugFlags.isPagingEnabled() || isQuickTap) {
-                            // Launch the next focused task
-                            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
-                        } else {
-                            // Notify recents to move onto the next task
-                            EventBus.getDefault().post(new IterateRecentsEvent());
-                        }
+                        // Launch the next focused task
+                        EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
                     }
                 } else {
                     // If the user has toggled it too quickly, then just eat up the event here (it's

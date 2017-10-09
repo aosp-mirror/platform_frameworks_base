@@ -295,8 +295,6 @@ public class RecentsTaskLoader {
                 context.getColor(R.color.recents_task_view_default_background_color);
         mMaxThumbnailCacheSize = res.getInteger(R.integer.config_recents_max_thumbnail_count);
         mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
-        int iconCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
-                mMaxIconCacheSize;
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
@@ -308,7 +306,7 @@ public class RecentsTaskLoader {
         mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
                 Looper.getMainLooper(), Recents.getConfiguration().isLowRamDevice);
         mLoadQueue = new TaskResourceLoadQueue();
-        mIconCache = new TaskKeyLruCache<>(iconCacheSize, mClearActivityInfoOnEviction);
+        mIconCache = new TaskKeyLruCache<>(mMaxIconCacheSize, mClearActivityInfoOnEviction);
         mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);

@@ -66,14 +66,6 @@
         android:alpha="0"
         android:visibility="gone" />
 
-    <!-- The progress indicator shows if auto-paging is enabled -->
-    <ViewStub android:id="@+id/focus_timer_indicator_stub"
-               android:inflatedId="@+id/focus_timer_indicator"
-               android:layout="@layout/recents_task_view_header_progress_bar"
-               android:layout_width="match_parent"
-               android:layout_height="5dp"
-               android:layout_gravity="bottom" />
-
     <!-- The app overlay shows as the user long-presses on the app icon -->
     <ViewStub android:id="@+id/app_overlay_stub"
                android:inflatedId="@+id/app_overlay"

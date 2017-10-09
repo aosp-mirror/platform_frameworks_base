@@ -60,12 +60,6 @@ public class RecentsActivityLaunchState {
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (launchedFromApp) {
-            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
-                // If fast toggling, focus the front most task so that the next tap will launch the
-                // task
-                return numTasks - 1;
-            }
-
             if (launchState.launchedFromBlacklistedApp) {
                 // If we are launching from a blacklisted app, focus the front most task so that the
                 // next tap will launch the task
@@ -80,12 +74,6 @@ public class RecentsActivityLaunchState {
             // If coming from another app, focus the next task
             return Math.max(0, numTasks - 2);
         } else {
-            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
-                // If fast toggling, defer focusing until the next tap (which will automatically
-                // focus the front most task)
-                return -1;
-            }
-
             // If coming from home, focus the front most task
             return numTasks - 1;
         }

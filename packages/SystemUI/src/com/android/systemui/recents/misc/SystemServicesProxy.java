@@ -90,6 +90,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
+import com.android.systemui.recents.RecentsDebugFlags.Static;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
@@ -337,12 +338,6 @@ public class SystemServicesProxy {
         UserInfoController userInfoController = Dependency.get(UserInfoController.class);
         userInfoController.addCallback(mOnUserInfoChangedListener);
 
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            // Create a dummy icon
-            mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            mDummyIcon.eraseColor(0xFF999999);
-        }
-
         Collections.addAll(sRecentsBlacklist,
                 res.getStringArray(R.array.recents_blacklist_array));
     }
@@ -377,39 +372,6 @@ public class SystemServicesProxy {
      */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         if (mAm == null) return null;
-
-        // If we are mocking, then create some recent tasks
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            ArrayList<ActivityManager.RecentTaskInfo> tasks =
-                    new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numTasks, RecentsDebugFlags.Static.MockTaskCount);
-            for (int i = 0; i < count; i++) {
-                // Create a dummy component name
-                int packageIndex = i % RecentsDebugFlags.Static.MockTasksPackageCount;
-                ComponentName cn = new ComponentName("com.android.test" + packageIndex,
-                        "com.android.test" + i + ".Activity");
-                String description = "" + i + " - " +
-                        Long.toString(Math.abs(new Random().nextLong()), 36);
-                // Create the recent task info
-                ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-                rti.id = rti.persistentId = rti.affiliatedTaskId = i;
-                rti.baseIntent = new Intent();
-                rti.baseIntent.setComponent(cn);
-                rti.description = description;
-                rti.lastActiveTime = i;
-                if (i % 2 == 0) {
-                    rti.taskDescription = new ActivityManager.TaskDescription(description,
-                            Bitmap.createBitmap(mDummyIcon), null,
-                            0xFF000000 | (0xFFFFFF & new Random().nextInt()),
-                            0xFF000000 | (0xFFFFFF & new Random().nextInt()),
-                            0, 0);
-                } else {
-                    rti.taskDescription = new ActivityManager.TaskDescription();
-                }
-                tasks.add(rti);
-            }
-            return tasks;
-        }
 
         try {
             List<ActivityManager.RecentTaskInfo> tasks = mIam.getRecentTasks(numTasks,
@@ -638,7 +600,7 @@ public class SystemServicesProxy {
         if (mAm == null) return null;
 
         // If we are mocking, then just return a dummy thumbnail
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
+        if (Static.EnableTransitionThumbnailDebugMode) {
             ThumbnailData thumbnailData = new ThumbnailData();
             thumbnailData.thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth,
                     mDummyThumbnailHeight, Bitmap.Config.ARGB_8888);
@@ -684,7 +646,6 @@ public class SystemServicesProxy {
     /** Removes the task */
     public void removeTask(final int taskId) {
         if (mAm == null) return;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return;
 
         // Remove the task.
         mUiOffloadThread.submit(() -> {
@@ -712,7 +673,6 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
         if (mIpm == null) return null;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return new ActivityInfo();
 
         try {
             return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
@@ -729,7 +689,6 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn) {
         if (mPm == null) return null;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return new ActivityInfo();
 
         try {
             return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
@@ -745,11 +704,6 @@ public class SystemServicesProxy {
     public String getBadgedActivityLabel(ActivityInfo info, int userId) {
         if (mPm == null) return null;
 
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return "Recent Task: " + userId;
-        }
-
         return getBadgedLabel(info.loadLabel(mPm).toString(), userId);
     }
 
@@ -758,11 +712,6 @@ public class SystemServicesProxy {
      */
     public String getBadgedApplicationLabel(ApplicationInfo appInfo, int userId) {
         if (mPm == null) return null;
-
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return "Recent Task App: " + userId;
-        }
 
         return getBadgedLabel(appInfo.loadLabel(mPm).toString(), userId);
     }
@@ -773,11 +722,6 @@ public class SystemServicesProxy {
      */
     public String getBadgedContentDescription(ActivityInfo info, int userId,
             ActivityManager.TaskDescription td, Resources res) {
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return "Recent Task Content Description: " + userId;
-        }
-
         String activityLabel;
         if (td != null && td.getLabel() != null) {
             activityLabel = td.getLabel();
@@ -798,11 +742,6 @@ public class SystemServicesProxy {
     public Drawable getBadgedActivityIcon(ActivityInfo info, int userId) {
         if (mPm == null) return null;
 
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
-
         return mDrawableFactory.getBadgedIcon(info, info.applicationInfo, userId);
     }
 
@@ -813,11 +752,6 @@ public class SystemServicesProxy {
     public Drawable getBadgedApplicationIcon(ApplicationInfo appInfo, int userId) {
         if (mPm == null) return null;
 
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
-
         return mDrawableFactory.getBadgedIcon(appInfo, userId);
     }
 
@@ -826,12 +760,6 @@ public class SystemServicesProxy {
      */
     public Drawable getBadgedTaskDescriptionIcon(ActivityManager.TaskDescription taskDescription,
             int userId, Resources res) {
-
-        // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
-
         Bitmap tdIcon = taskDescription.getInMemoryIcon();
         if (tdIcon == null) {
             tdIcon = ActivityManager.TaskDescription.loadTaskDescriptionIcon(
@@ -866,11 +794,6 @@ public class SystemServicesProxy {
      */
     public Drawable getActivityBanner(ActivityInfo info) {
         if (mPm == null) return null;
-
-        // If we are mocking, then return a mock banner
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
 
         Drawable banner = info.loadBanner(mPm);
         return banner;

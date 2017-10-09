@@ -160,22 +160,20 @@ public class RecentsView extends FrameLayout {
         mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
 
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            if (mStackActionButton != null) {
-                removeView(mStackActionButton);
-            }
-            mStackActionButton = (TextView) inflater.inflate(Recents.getConfiguration()
-                            .isLowRamDevice
-                        ? R.layout.recents_low_ram_stack_action_button
-                        : R.layout.recents_stack_action_button,
-                    this, false);
-
-            mStackButtonShadowRadius = mStackActionButton.getShadowRadius();
-            mStackButtonShadowDistance = new PointF(mStackActionButton.getShadowDx(),
-                    mStackActionButton.getShadowDy());
-            mStackButtonShadowColor = mStackActionButton.getShadowColor();
-            addView(mStackActionButton);
+        if (mStackActionButton != null) {
+            removeView(mStackActionButton);
         }
+        mStackActionButton = (TextView) inflater.inflate(Recents.getConfiguration()
+                        .isLowRamDevice
+                    ? R.layout.recents_low_ram_stack_action_button
+                    : R.layout.recents_stack_action_button,
+                this, false);
+
+        mStackButtonShadowRadius = mStackActionButton.getShadowRadius();
+        mStackButtonShadowDistance = new PointF(mStackActionButton.getShadowDx(),
+                mStackActionButton.getShadowDy());
+        mStackButtonShadowColor = mStackActionButton.getShadowColor();
+        addView(mStackActionButton);
 
         reevaluateStyles();
     }
@@ -358,9 +356,7 @@ public class RecentsView extends FrameLayout {
         mEmptyView.setText(msgResId);
         mEmptyView.setVisibility(View.VISIBLE);
         mEmptyView.bringToFront();
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButton.bringToFront();
-        }
+        mStackActionButton.bringToFront();
     }
 
     /**
@@ -370,9 +366,7 @@ public class RecentsView extends FrameLayout {
         mEmptyView.setVisibility(View.INVISIBLE);
         mTaskStackView.setVisibility(View.VISIBLE);
         mTaskStackView.bringToFront();
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButton.bringToFront();
-        }
+        mStackActionButton.bringToFront();
     }
 
     /**
@@ -420,13 +414,11 @@ public class RecentsView extends FrameLayout {
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
         }
 
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            // Measure the stack action button within the constraints of the space above the stack
-            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect();
-            measureChild(mStackActionButton,
-                    MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
-                    MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
-        }
+        // Measure the stack action button within the constraints of the space above the stack
+        Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect();
+        measureChild(mStackActionButton,
+                MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
 
         setMeasuredDimension(width, height);
     }
@@ -460,13 +452,11 @@ public class RecentsView extends FrameLayout {
         mBackgroundScrim.setBounds(left, top, right, bottom);
         mMultiWindowBackgroundScrim.setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
 
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            // Layout the stack action button such that its drawable is start-aligned with the
-            // stack, vertically centered in the available space above the stack
-            Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
-            mStackActionButton.layout(buttonBounds.left, buttonBounds.top, buttonBounds.right,
-                    buttonBounds.bottom);
-        }
+        // Layout the stack action button such that its drawable is start-aligned with the
+        // stack, vertically centered in the available space above the stack
+        Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+        mStackActionButton.layout(buttonBounds.left, buttonBounds.top, buttonBounds.right,
+                buttonBounds.bottom);
 
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
@@ -539,10 +529,8 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            // Hide the stack action button
-            EventBus.getDefault().send(new HideStackActionButtonEvent());
-        }
+        // Hide the stack action button
+        EventBus.getDefault().send(new HideStackActionButtonEvent());
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
 
         if (Recents.getConfiguration().isLowRamDevice) {
@@ -717,18 +705,10 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(ShowStackActionButtonEvent event) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
-            return;
-        }
-
         showStackActionButton(SHOW_STACK_ACTION_BUTTON_DURATION, event.translate);
     }
 
     public final void onBusEvent(HideStackActionButtonEvent event) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
-            return;
-        }
-
         hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
     }
 
@@ -744,10 +724,6 @@ public class RecentsView extends FrameLayout {
      * Shows the stack action button.
      */
     private void showStackActionButton(final int duration, final boolean translate) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
-            return;
-        }
-
         final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         if (mStackActionButton.getVisibility() == View.INVISIBLE) {
             mStackActionButton.setVisibility(View.VISIBLE);
@@ -780,10 +756,6 @@ public class RecentsView extends FrameLayout {
      * Hides the stack action button.
      */
     private void hideStackActionButton(int duration, boolean translate) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
-            return;
-        }
-
         final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         hideStackActionButton(duration, translate, postAnimationTrigger);
         postAnimationTrigger.flushLastDecrementRunnables();
@@ -794,10 +766,6 @@ public class RecentsView extends FrameLayout {
      */
     private void hideStackActionButton(int duration, boolean translate,
                                        final ReferenceCountedTrigger postAnimationTrigger) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
-            return;
-        }
-
         if (mStackActionButton.getVisibility() == View.VISIBLE) {
             if (translate) {
                 mStackActionButton.animate().translationY(mStackActionButton.getMeasuredHeight()
