@@ -31,7 +31,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
-import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -55,15 +54,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.Message;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -89,7 +86,6 @@ import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsDebugFlags.Static;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
@@ -100,7 +96,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -139,17 +134,17 @@ public class SystemServicesProxy {
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
+    private TaskStackChangeListeners mTaskStackChangeListeners;
     private int mCurrentUserId;
 
     boolean mIsSafeMode;
 
-    Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
 
-    private final Handler mHandler = new H();
+    private final Handler mHandler = new Handler();
     private final Runnable mGcRunnable = new Runnable() {
         @Override
         public void run() {
@@ -160,143 +155,9 @@ public class SystemServicesProxy {
 
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
-    /**
-     * An abstract class to track task stack changes.
-     * Classes should implement this instead of {@link android.app.ITaskStackListener}
-     * to reduce IPC calls from system services. These callbacks will be called on the main thread.
-     */
-    public abstract static class TaskStackListener {
-        /**
-         * NOTE: This call is made of the thread that the binder call comes in on.
-         */
-        public void onTaskStackChangedBackground() { }
-        public void onTaskStackChanged() { }
-        public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
-        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
-        public void onActivityUnpinned() { }
-        public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
-        public void onPinnedStackAnimationStarted() { }
-        public void onPinnedStackAnimationEnded() { }
-        public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
-        public void onActivityDismissingDockedStack() { }
-        public void onActivityLaunchOnSecondaryDisplayFailed() { }
-        public void onTaskProfileLocked(int taskId, int userId) { }
-
-        /**
-         * Checks that the current user matches the user's SystemUI process. Since
-         * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
-         * TaskStackListener should make this call to verify that we don't act on events from other
-         * user's processes.
-         */
-        protected final boolean checkCurrentUserId(Context context, boolean debug) {
-            int processUserId = UserHandle.myUserId();
-            int currentUserId = SystemServicesProxy.getInstance(context).getCurrentUser();
-            if (processUserId != currentUserId) {
-                if (debug) {
-                    Log.d(TAG, "UID mismatch. SystemUI is running uid=" + processUserId
-                            + " and the current user is uid=" + currentUserId);
-                }
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Implementation of {@link android.app.ITaskStackListener} to listen task stack changes from
-     * ActivityManagerService.
-     * This simply passes callbacks to listeners through {@link H}.
-     * */
-    private android.app.TaskStackListener mTaskStackListener = new android.app.TaskStackListener() {
-
-        private final List<SystemServicesProxy.TaskStackListener> mTmpListeners = new ArrayList<>();
-
-        @Override
-        public void onTaskStackChanged() throws RemoteException {
-            // Call the task changed callback for the non-ui thread listeners first
-            synchronized (mTaskStackListeners) {
-                mTmpListeners.clear();
-                mTmpListeners.addAll(mTaskStackListeners);
-            }
-            for (int i = mTmpListeners.size() - 1; i >= 0; i--) {
-                mTmpListeners.get(i).onTaskStackChangedBackground();
-            }
-
-            mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);
-            mHandler.sendEmptyMessage(H.ON_TASK_STACK_CHANGED);
-        }
-
-        @Override
-        public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
-                throws RemoteException {
-            mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
-            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED,
-                    new PinnedActivityInfo(packageName, userId, taskId, stackId)).sendToTarget();
-        }
-
-        @Override
-        public void onActivityUnpinned() throws RemoteException {
-            mHandler.removeMessages(H.ON_ACTIVITY_UNPINNED);
-            mHandler.sendEmptyMessage(H.ON_ACTIVITY_UNPINNED);
-        }
-
-        @Override
-        public void onPinnedActivityRestartAttempt(boolean clearedTask)
-                throws RemoteException{
-            mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, clearedTask ? 1 : 0, 0)
-                    .sendToTarget();
-        }
-
-        @Override
-        public void onPinnedStackAnimationStarted() throws RemoteException {
-            mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_STARTED);
-            mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_STARTED);
-        }
-
-        @Override
-        public void onPinnedStackAnimationEnded() throws RemoteException {
-            mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_ENDED);
-            mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_ENDED);
-        }
-
-        @Override
-        public void onActivityForcedResizable(String packageName, int taskId, int reason)
-                throws RemoteException {
-            mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, reason, packageName)
-                    .sendToTarget();
-        }
-
-        @Override
-        public void onActivityDismissingDockedStack() throws RemoteException {
-            mHandler.sendEmptyMessage(H.ON_ACTIVITY_DISMISSING_DOCKED_STACK);
-        }
-
-        @Override
-        public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
-            mHandler.sendEmptyMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED);
-        }
-
-        @Override
-        public void onTaskProfileLocked(int taskId, int userId) {
-            mHandler.obtainMessage(H.ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
-        }
-
-        @Override
-        public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot)
-                throws RemoteException {
-            mHandler.obtainMessage(H.ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
-        }
-    };
-
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             (String name, Drawable picture, String userAccount) ->
                     mCurrentUserId = mAm.getCurrentUser();
-
-    /**
-     * List of {@link TaskStackListener} registered from {@link #registerTaskStackListener}.
-     */
-    private List<TaskStackListener> mTaskStackListeners = new ArrayList<>();
 
     /** Private constructor */
     private SystemServicesProxy(Context context) {
@@ -318,6 +179,7 @@ public class SystemServicesProxy {
         mRecentsPackage = context.getPackageName();
         mIsSafeMode = mPm.isSafeMode();
         mCurrentUserId = mAm.getCurrentUser();
+        mTaskStackChangeListeners = new TaskStackChangeListeners(Looper.getMainLooper());
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -649,7 +511,11 @@ public class SystemServicesProxy {
 
         // Remove the task.
         mUiOffloadThread.submit(() -> {
-            mAm.removeTask(taskId);
+            try {
+                mIam.removeTask(taskId);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -1007,19 +873,11 @@ public class SystemServicesProxy {
      * Registers a task stack listener with the system.
      * This should be called on the main thread.
      */
-    public void registerTaskStackListener(TaskStackListener listener) {
+    public void registerTaskStackListener(TaskStackChangeListener listener) {
         if (mIam == null) return;
 
-        synchronized (mTaskStackListeners) {
-            mTaskStackListeners.add(listener);
-            if (mTaskStackListeners.size() == 1) {
-                // Register mTaskStackListener to IActivityManager only once if needed.
-                try {
-                    mIam.registerTaskStackListener(mTaskStackListener);
-                } catch (Exception e) {
-                    Log.w(TAG, "Failed to call registerTaskStackListener", e);
-                }
-            }
+        synchronized (mTaskStackChangeListeners) {
+            mTaskStackChangeListeners.addListener(mIam, listener);
         }
     }
 
@@ -1084,23 +942,27 @@ public class SystemServicesProxy {
     /**
      * Updates the visibility of recents.
      */
-    public void setRecentsVisibility(boolean visible) {
-        try {
-            mIwm.setRecentsVisibility(visible);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to reach window manager", e);
-        }
+    public void setRecentsVisibility(final boolean visible) {
+        mUiOffloadThread.submit(() -> {
+            try {
+                mIwm.setRecentsVisibility(visible);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to reach window manager", e);
+            }
+        });
     }
 
     /**
      * Updates the visibility of the picture-in-picture.
      */
-    public void setPipVisibility(boolean visible) {
-        try {
-            mIwm.setPipVisibility(visible);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to reach window manager", e);
-        }
+    public void setPipVisibility(final boolean visible) {
+        mUiOffloadThread.submit(() -> {
+            try {
+                mIwm.setPipVisibility(visible);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to reach window manager", e);
+            }
+        });
     }
 
     public boolean isDreaming() {
@@ -1124,116 +986,5 @@ public class SystemServicesProxy {
 
     public interface StartActivityFromRecentsResultListener {
         void onStartActivityResult(boolean succeeded);
-    }
-
-    private class PinnedActivityInfo {
-        final String mPackageName;
-        final int mUserId;
-        final int mTaskId;
-        final int mStackId;
-
-        PinnedActivityInfo(String packageName, int userId, int taskId, int stackId) {
-            mPackageName = packageName;
-            mUserId = userId;
-            mTaskId = taskId;
-            mStackId = stackId;
-        }
-    }
-
-    private final class H extends Handler {
-        private static final int ON_TASK_STACK_CHANGED = 1;
-        private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
-        private static final int ON_ACTIVITY_PINNED = 3;
-        private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 4;
-        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 5;
-        private static final int ON_ACTIVITY_FORCED_RESIZABLE = 6;
-        private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
-        private static final int ON_TASK_PROFILE_LOCKED = 8;
-        private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
-        private static final int ON_ACTIVITY_UNPINNED = 10;
-        private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED = 11;
-
-        @Override
-        public void handleMessage(Message msg) {
-            synchronized (mTaskStackListeners) {
-                switch (msg.what) {
-                    case ON_TASK_STACK_CHANGED: {
-                    Trace.beginSection("onTaskStackChanged");
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskStackChanged();
-                        }
-                    Trace.endSection();
-                        break;
-                    }
-                    case ON_TASK_SNAPSHOT_CHANGED: {
-                    Trace.beginSection("onTaskSnapshotChanged");
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                    (TaskSnapshot) msg.obj);
-                        }
-                    Trace.endSection();
-                        break;
-                    }
-                    case ON_ACTIVITY_PINNED: {
-                        final PinnedActivityInfo info = (PinnedActivityInfo) msg.obj;
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityPinned(
-                                    info.mPackageName, info.mUserId, info.mTaskId, info.mStackId);
-                        }
-                        break;
-                    }
-                    case ON_ACTIVITY_UNPINNED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityUnpinned();
-                        }
-                        break;
-                    }
-                    case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
-                                    msg.arg1 != 0);
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_STARTED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_ENDED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
-                        }
-                        break;
-                    }
-                    case ON_ACTIVITY_FORCED_RESIZABLE: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityForcedResizable(
-                                    (String) msg.obj, msg.arg1, msg.arg2);
-                        }
-                        break;
-                    }
-                    case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityDismissingDockedStack();
-                        }
-                        break;
-                    }
-                    case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityLaunchOnSecondaryDisplayFailed();
-                        }
-                        break;
-                    }
-                    case ON_TASK_PROFILE_LOCKED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
     }
 }

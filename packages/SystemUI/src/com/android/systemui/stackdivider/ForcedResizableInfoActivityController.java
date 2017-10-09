@@ -32,7 +32,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+import com.android.systemui.recents.misc.TaskStackChangeListener;
 import com.android.systemui.stackdivider.events.StartedDragingEvent;
 import com.android.systemui.stackdivider.events.StoppedDragingEvent;
 
@@ -76,7 +76,7 @@ public class ForcedResizableInfoActivityController {
         mContext = context;
         EventBus.getDefault().register(this);
         SystemServicesProxy.getInstance(context).registerTaskStackListener(
-                new TaskStackListener() {
+                new TaskStackChangeListener() {
                     @Override
                     public void onActivityForcedResizable(String packageName, int taskId,
                             int reason) {
