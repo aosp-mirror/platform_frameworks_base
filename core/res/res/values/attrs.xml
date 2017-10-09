@@ -2546,16 +2546,24 @@
         <attr name="filterTouchesWhenObscured" format="boolean" />
 
         <!-- Defines the quality of translucent drawing caches. This property is used
-             only when the drawing cache is enabled and translucent. The default value is auto. -->
+             only when the drawing cache is enabled and translucent. The default value is auto.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="drawingCacheQuality">
             <!-- Lets the framework decide what quality level should be used
-                 for the drawing cache. -->
+                 for the drawing cache.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="auto" value="0" />
             <!-- Low quality. When set to low quality, the drawing cache uses a lower color
-                 depth, thus losing precision in rendering gradients, but uses less memory. -->
+                 depth, thus losing precision in rendering gradients, but uses less memory.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="low" value="1" />
             <!-- High quality. When set to high quality, the drawing cache uses a higher
-                 color depth but uses more memory. -->
+                 color depth but uses more memory.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="high" value="2" />
         </attr>
 
@@ -3060,7 +3068,9 @@
              instance during a scrolling.) This property lets you persist the cache
              in memory after its initial usage. Persisting the cache consumes more
              memory but may prevent frequent garbage collection is the cache is created
-             over and over again. By default the persistence is set to scrolling. -->
+             over and over again. By default the persistence is set to scrolling.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="persistentDrawingCache">
             <!-- The drawing cache is not persisted after use. -->
             <flag name="none" value="0x0" />
@@ -3072,7 +3082,9 @@
             <flag name="all" value="0x3" />
         </attr>
         <!-- Defines whether the ViewGroup should always draw its children using their
-             drawing cache or not. The default value is true. -->
+             drawing cache or not. The default value is true.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="alwaysDrawnWithCache" format="boolean" />
         <!-- Sets whether this ViewGroup's drawable states also include
              its children's drawable states.  This is used, for example, to
