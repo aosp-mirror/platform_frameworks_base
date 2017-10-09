@@ -161,6 +161,9 @@ static void readEvents(JNIEnv* env, int loggerMode, jlong startTime, jobject out
         env->CallBooleanMethod(out, gCollectionAddID, event);
         env->DeleteLocalRef(event);
         env->DeleteLocalRef(array);
+        if (env->ExceptionCheck() == JNI_TRUE) {
+            break;
+        }
     }
 
     android_logger_list_close(logger_list);
