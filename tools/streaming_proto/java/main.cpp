@@ -12,7 +12,7 @@
 #include <sstream>
 #include <map>
 
-using namespace android::javastream_proto;
+using namespace android::stream_proto;
 using namespace google::protobuf;
 using namespace google::protobuf::compiler;
 using namespace google::protobuf::io;
