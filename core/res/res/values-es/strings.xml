@@ -128,7 +128,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferencia a datos móviles"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Se ha eliminado el perfil de trabajo porque falta la aplicación de administración"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Falta la aplicación de administración del perfil de trabajo o está dañada. Por ello, se han eliminado tu perfil de trabajo y los datos relacionados. Ponte en contacto con el administrador para obtener ayuda."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Tu perfil de trabajo ya no está disponible en este dispositivo"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Has fallado demasiadas veces al introducir la contraseña"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"El dispositivo está administrado"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Tu organización administra este dispositivo y puede supervisar el tráfico de red. Toca la notificación para obtener más información."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tu dispositivo se borrará"</string>
@@ -980,10 +981,8 @@
     <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
     <string name="map" msgid="6068210738233985748">"Mapas"</string>
     <string name="browse" msgid="6993590095938149861">"Navegador"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"Contacto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>

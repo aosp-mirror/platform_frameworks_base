@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Admin tətbiqi olmadığından iş profili silindi"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"İş profili admin tətbiqi ya yoxdur, ya da korlanıb. Nəticədə iş profili və onunla bağlı data silinib. Kömək üçün admin ilə əlaqə saxlayın."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"İş profili artıq bu cihazda əlçatan deyil"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Həddindən çox parol cəhdi"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Cihaz idarə olunur"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Təşkilat bu cihazı idarə edir və şəbəkənin ötürülməsinə nəzarət edə bilər. Detallar üçün klikləyin."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız təmizlənəcəkdir"</string>
@@ -980,10 +981,8 @@
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="6068210738233985748">"Xəritə"</string>
     <string name="browse" msgid="6993590095938149861">"Brauzer"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"Kontakt"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Yaddaş yeri bitir"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bəzi sistem funksiyaları işləməyə bilər"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistem üçün yetərincə yaddaş ehtiyatı yoxdur. 250 MB yaddaş ehtiyatının olmasına əmin olun və yenidən başladın."</string>
