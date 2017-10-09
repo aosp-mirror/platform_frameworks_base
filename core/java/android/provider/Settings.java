@@ -9369,16 +9369,6 @@ public final class Settings {
         public static final String DEVICE_IDLE_CONSTANTS = "device_idle_constants";
 
         /**
-         * Device Idle (Doze) specific settings for watches. See {@code #DEVICE_IDLE_CONSTANTS}
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.DeviceIdleController.Constants
-         */
-        public static final String DEVICE_IDLE_CONSTANTS_WATCH = "device_idle_constants_watch";
-
-        /**
          * Battery Saver specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *
