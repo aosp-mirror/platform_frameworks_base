@@ -24,7 +24,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ClipData;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 
@@ -40,16 +39,18 @@ import java.util.List;
  * and how to construct them. You will construct these JobInfo objects and pass them to the
  * JobScheduler with {@link #schedule(JobInfo)}. When the criteria declared are met, the
  * system will execute this job on your application's {@link android.app.job.JobService}.
- * You identify which JobService is meant to execute the logic for your job when you create the
- * JobInfo with
+ * You identify the service component that implements the logic for your job when you
+ * construct the JobInfo using
  * {@link android.app.job.JobInfo.Builder#JobInfo.Builder(int,android.content.ComponentName)}.
  * </p>
  * <p>
- * The framework will be intelligent about when you receive your callbacks, and attempt to batch
- * and defer them as much as possible. Typically if you don't specify a deadline on your job, it
- * can be run at any moment depending on the current state of the JobScheduler's internal queue,
- * however it might be deferred as long as until the next time the device is connected to a power
- * source.
+ * The framework will be intelligent about when it executes jobs, and attempt to batch
+ * and defer them as much as possible. Typically if you don't specify a deadline on a job, it
+ * can be run at any moment depending on the current state of the JobScheduler's internal queue.
+ * <p>
+ * While a job is running, the system holds a wakelock on behalf of your app.  For this reason,
+ * you do not need to take any action to guarantee that the device stays awake for the
+ * duration of the job.
  * </p>
  * <p>You do not
  * instantiate this class directly; instead, retrieve it through
@@ -141,30 +142,34 @@ public abstract class JobScheduler {
             int userId, String tag);
 
     /**
-     * Cancel a job that is pending in the JobScheduler.
-     * @param jobId unique identifier for this job. Obtain this value from the jobs returned by
-     * {@link #getAllPendingJobs()}.
+     * Cancel the specified job.  If the job is currently executing, it is stopped
+     * immediately and the return value from its {@link JobService#onStopJob(JobParameters)}
+     * method is ignored.
+     *
+     * @param jobId unique identifier for the job to be canceled, as supplied to
+     *     {@link JobInfo.Builder#JobInfo.Builder(int, android.content.ComponentName)
+     *     JobInfo.Builder(int, android.content.ComponentName)}.
      */
     public abstract void cancel(int jobId);
 
     /**
-     * Cancel all jobs that have been registered with the JobScheduler by this package.
+     * Cancel <em>all</em> jobs that have been scheduled by the calling application.
      */
     public abstract void cancelAll();
 
     /**
-     * Retrieve all jobs for this package that are pending in the JobScheduler.
+     * Retrieve all jobs that have been scheduled by the calling application.
      *
-     * @return a list of all the jobs registered by this package that have not
-     *         yet been executed.
+     * @return a list of all of the app's scheduled jobs.  This includes jobs that are
+     *     currently started as well as those that are still waiting to run.
      */
     public abstract @NonNull List<JobInfo> getAllPendingJobs();
 
     /**
-     * Retrieve a specific job for this package that is pending in the
-     * JobScheduler.
+     * Look up the description of a scheduled job.
      *
-     * @return job registered by this package that has not yet been executed.
+     * @return The {@link JobInfo} description of the given scheduled job, or {@code null}
+     *     if the supplied job ID does not correspond to any job.
      */
     public abstract @Nullable JobInfo getPendingJob(int jobId);
 }
