@@ -19,7 +19,7 @@
 
 #include "AnomalyMonitor.h"
 #include "StatsLogProcessor.h"
-#include "StatsPuller.h"
+#include "StatsPullerManager.h"
 
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
@@ -74,7 +74,7 @@ public:
     /** Fetches and returns the StatsCompanionService. */
     static sp<IStatsCompanionService> getStatsCompanionService();
 
- private:
+private:
     sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
 
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
@@ -82,6 +82,8 @@ public:
     void printCmdHelp(FILE* out);
 
     status_t doLoadConfig(FILE* in);
+
+    StatsPullerManager mStatsPullerManager;
 };
 
 // --- StatsdDeathRecipient ---

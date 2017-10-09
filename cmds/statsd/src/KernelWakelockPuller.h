@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLER_H
-#define STATSD_STATSPULLER_H
+#ifndef STATSD_KERNELWAKELOCKPULLER_H
+#define STATSD_KERNELWAKELOCKPULLER_H
 
 #include <utils/String16.h>
+#include "StatsPuller.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPuller {
+class KernelWakelockPuller : public StatsPuller {
 public:
-    virtual ~StatsPuller(){};
-    // use string for now, until we figure out how to integrate into the aggregation path
-    virtual String16 pull() = 0;
+    // a number of stats need to be pulled from StatsCompanionService
+    //
+    const static int PULL_CODE_KERNEL_WAKELOCKS;
+    String16 pull() override;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // STATSD_STATSPULLER_H
+#endif  // STATSD_KERNELWAKELOCKPULLER_H

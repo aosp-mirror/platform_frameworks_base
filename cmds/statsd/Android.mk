@@ -44,7 +44,6 @@ LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
     src/AnomalyMonitor.cpp \
-    src/StatsPuller.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
     src/main.cpp \
@@ -53,6 +52,8 @@ LOCAL_SRC_FILES := \
     src/StatsLogProcessor.cpp \
     src/stats_log.proto \
     src/statsd_config.proto \
+    src/StatsPullerManager.cpp \
+    src/KernelWakelockPuller.cpp \
     src/DropboxReader.cpp \
     src/matchers/LogEntryMatcherManager.cpp \
     src/metrics/CountMetricProducer.cpp \
