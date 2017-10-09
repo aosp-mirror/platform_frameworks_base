@@ -71,7 +71,7 @@
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Dijeljenje kontakta"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Koristi za dijeljenje kontakta"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Dijeljenje internet veze"</string>
-    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tekstualne poruke"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"SMS-ovi"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Pristup SIM-u"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD audio"</string>
