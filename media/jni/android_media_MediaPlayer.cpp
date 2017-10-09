@@ -24,7 +24,7 @@
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/MediaAnalyticsItem.h>
-#include <media/stagefright/Utils.h>            // for FOURCC definition
+#include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
