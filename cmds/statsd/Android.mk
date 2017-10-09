@@ -112,6 +112,7 @@ LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
+    src/AnomalyMonitor.cpp \
     src/stats_util.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \

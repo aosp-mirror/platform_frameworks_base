@@ -182,6 +182,40 @@ TEST(indexed_priority_queue, nulls) {
     EXPECT_FALSE(ipq.contains(nullptr));
 }
 
+TEST(indexed_priority_queue, pop) {
+    indexed_priority_queue<AATest, AATest::Smaller> ipq;
+    sp<const AATest> a = new AATest{1};
+    sp<const AATest> b = new AATest{2};
+    sp<const AATest> c = new AATest{3};
+
+    ipq.push(c);
+    ipq.push(b);
+    ipq.push(a);
+    EXPECT_EQ(3u, ipq.size());
+
+    ipq.pop();
+    EXPECT_EQ(2u, ipq.size());
+    EXPECT_FALSE(ipq.contains(a));
+    EXPECT_TRUE(ipq.contains(b));
+    EXPECT_TRUE(ipq.contains(c));
+
+    ipq.pop();
+    EXPECT_EQ(1u, ipq.size());
+    EXPECT_FALSE(ipq.contains(a));
+    EXPECT_FALSE(ipq.contains(b));
+    EXPECT_TRUE(ipq.contains(c));
+
+    ipq.pop();
+    EXPECT_EQ(0u, ipq.size());
+    EXPECT_FALSE(ipq.contains(a));
+    EXPECT_FALSE(ipq.contains(b));
+    EXPECT_FALSE(ipq.contains(c));
+    EXPECT_TRUE(ipq.empty());
+
+    ipq.pop(); // pop an empty queue
+    EXPECT_TRUE(ipq.empty());
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

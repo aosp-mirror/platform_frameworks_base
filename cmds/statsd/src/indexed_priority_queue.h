@@ -55,6 +55,8 @@ public:
     void push(sp<const AA> a);
     /** Removes a from the priority queue. If not present or a==nullptr, does nothing. */
     void remove(sp<const AA> a);
+    /** Removes the top element, if there is one. */
+    void pop();
     /** Removes all elements. */
     void clear();
     /** Returns whether priority queue contains a (not just a copy of a, but a itself). */
@@ -125,6 +127,28 @@ void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
     // get the heap back in order (since the element at idx is not in order)
     sift_up(idx);
     sift_down(idx);
+}
+
+// The same as, but slightly more efficient than, remove(top()).
+template <class AA, class Comparator>
+void indexed_priority_queue<AA, Comparator>::pop() {
+  sp<const AA> a = top();
+  if (a == nullptr) return;
+  const size_t idx = 1;
+  if (idx == size()) {  // if a is the last element
+    pq.pop_back();
+    indices.erase(a);
+    return;
+  }
+  // move last element (guaranteed not to be at idx) to idx, then delete a
+  sp<const AA> last_a = pq.back();
+  pq[idx] = last_a;
+  pq.pop_back();
+  indices[last_a] = idx;
+  indices.erase(a);
+
+  // get the heap back in order (since the element at idx is not in order)
+  sift_down(idx);
 }
 
 template <class AA, class Comparator>
