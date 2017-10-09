@@ -21,6 +21,7 @@
 #include <thread>
 #include <unordered_map>
 #include "../matchers/LogEntryMatcherManager.h"
+#include "CountAnomalyTracker.h"
 #include "ConditionTracker.h"
 #include "DropboxWriter.h"
 #include "MetricProducer.h"
@@ -52,11 +53,14 @@ private:
 
     const time_t mStartTime;
     // TODO: Add dimensions.
+    // Counter value for the current bucket.
     int mCounter;
 
     time_t mCurrentBucketStartTime;
 
     long mBucketSize_sec;
+
+    CountAnomalyTracker mAnomalyTracker;
 
     void flushCounterIfNeeded(const time_t& newEventTime);
 };

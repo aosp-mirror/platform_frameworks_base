@@ -58,7 +58,7 @@ LOCAL_SRC_FILES := \
     src/metrics/CountMetricProducer.cpp \
     src/metrics/ConditionTracker.cpp \
     src/metrics/MetricsManager.cpp \
-
+    src/metrics/CountAnomalyTracker.cpp \
 
 LOCAL_CFLAGS += \
     -Wall \
