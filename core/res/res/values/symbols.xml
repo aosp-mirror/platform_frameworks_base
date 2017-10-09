@@ -3100,4 +3100,19 @@
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
   <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
+
+  <java-symbol type="layout" name="slice_grid" />
+  <java-symbol type="layout" name="slice_message_local" />
+  <java-symbol type="layout" name="slice_message" />
+  <java-symbol type="layout" name="slice_title" />
+  <java-symbol type="layout" name="slice_secondary_text" />
+  <java-symbol type="layout" name="slice_remote_input" />
+  <java-symbol type="layout" name="slice_small_template" />
+  <java-symbol type="id" name="remote_input_progress" />
+  <java-symbol type="id" name="remote_input_send" />
+  <java-symbol type="id" name="remote_input" />
+  <java-symbol type="dimen" name="slice_shortcut_size" />
+  <java-symbol type="dimen" name="slice_icon_size" />
+  <java-symbol type="dimen" name="slice_padding" />
+  <java-symbol type="string" name="slice_more_content" />
 </resources>

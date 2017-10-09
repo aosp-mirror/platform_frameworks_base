@@ -2099,7 +2099,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     public static Uri maybeAddUserId(Uri uri, int userId) {
         if (uri == null) return null;
         if (userId != UserHandle.USER_CURRENT
-                && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                && (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
+                        || ContentResolver.SCHEME_SLICE.equals(uri.getScheme()))) {
             if (!uriHasUserId(uri)) {
                 //We don't add the user Id if there's already one
                 Uri.Builder builder = uri.buildUpon();

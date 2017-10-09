@@ -35,6 +35,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.RemoteViews;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -136,7 +138,7 @@ public final class Slice implements Parcelable {
     }
 
     /**
-     * @return The Uri that this slice represents.
+     * @return The Uri that this Slice represents.
      */
     public Uri getUri() {
         return mUri;
@@ -188,6 +190,13 @@ public final class Slice implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasHint(@SliceHint String hint) {
+        return ArrayUtils.contains(mHints, hint);
     }
 
     /**
@@ -308,4 +317,31 @@ public final class Slice implements Parcelable {
             return new Slice[size];
         }
     };
+
+    /**
+     * @hide
+     * @return A string representation of this slice.
+     */
+    public String getString() {
+        return getString("");
+    }
+
+    private String getString(String indent) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mItems.length; i++) {
+            sb.append(indent);
+            if (mItems[i].getType() == TYPE_SLICE) {
+                sb.append("slice:\n");
+                sb.append(mItems[i].getSlice().getString(indent + "   "));
+            } else if (mItems[i].getType() == TYPE_TEXT) {
+                sb.append("text: ");
+                sb.append(mItems[i].getText());
+                sb.append("\n");
+            } else {
+                sb.append(SliceItem.typeToString(mItems[i].getType()));
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
 }
