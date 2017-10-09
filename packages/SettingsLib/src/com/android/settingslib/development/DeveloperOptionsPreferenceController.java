@@ -17,7 +17,6 @@
 package com.android.settingslib.development;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.android.settingslib.core.AbstractPreferenceController;
 
@@ -65,11 +64,13 @@ public abstract class DeveloperOptionsPreferenceController extends
     /**
      * Called when developer options is enabled and the preference is available
      */
-    protected abstract void onDeveloperOptionsSwitchEnabled();
+    protected void onDeveloperOptionsSwitchEnabled() {
+    }
 
     /**
      * Called when developer options is disabled and the preference is available
      */
-    protected abstract void onDeveloperOptionsSwitchDisabled();
+    protected void onDeveloperOptionsSwitchDisabled() {
+    }
 
 }
