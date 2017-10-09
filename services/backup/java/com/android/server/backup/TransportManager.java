@@ -316,9 +316,9 @@ public class TransportManager {
     private class TransportConnection implements ServiceConnection {
 
         // Hold mTransportsLock to access these fields so as to provide a consistent view of them.
-        private IBackupTransport mBinder;
+        private volatile IBackupTransport mBinder;
         private final List<SelectBackupTransportCallback> mListeners = new ArrayList<>();
-        private String mTransportName;
+        private volatile String mTransportName;
 
         private final ComponentName mTransportComponent;
 
@@ -401,25 +401,24 @@ public class TransportManager {
                     + rebindTimeout + "ms");
         }
 
+        // Intentionally not synchronized -- the variable is volatile and changes to its value
+        // are inside synchronized blocks, providing a memory sync barrier; and this method
+        // does not touch any other state protected by that lock.
         private IBackupTransport getBinder() {
-            synchronized (mTransportLock) {
-                return mBinder;
-            }
+            return mBinder;
         }
 
+        // Intentionally not synchronized; same as getBinder()
         private String getName() {
-            synchronized (mTransportLock) {
-                return mTransportName;
-            }
+            return mTransportName;
         }
 
+        // Intentionally not synchronized; same as getBinder()
         private void bindIfUnbound() {
-            synchronized (mTransportLock) {
-                if (mBinder == null) {
-                    Slog.d(TAG,
-                            "Rebinding to transport " + mTransportComponent.flattenToShortString());
-                    bindToTransport(mTransportComponent, this);
-                }
+            if (mBinder == null) {
+                Slog.d(TAG,
+                        "Rebinding to transport " + mTransportComponent.flattenToShortString());
+                bindToTransport(mTransportComponent, this);
             }
         }
 

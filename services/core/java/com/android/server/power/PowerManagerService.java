@@ -636,12 +636,6 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSendPowerHint(int hintId, int data);
     private static native void nativeSetFeature(int featureId, int data);
 
-    private static native void nativeSetPowerHintMask(int featureIdMask);
-
-    public static void setPowerHintMask(int featureIdMask) {
-        nativeSetPowerHintMask(featureIdMask);
-    }
-
     public PowerManagerService(Context context) {
         super(context);
         mContext = context;
@@ -651,7 +645,7 @@ public final class PowerManagerService extends SystemService
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
-        mBatterySaverPolicy = new BatterySaverPolicy(mContext, mHandler);
+        mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
@@ -1020,7 +1014,6 @@ public final class PowerManagerService extends SystemService
                         final PowerSaveState result =
                                 mBatterySaverPolicy.getBatterySaverPolicy(
                                         listener.getServiceType(), lowPowerModeEnabled);
-// XXX
                         listener.onLowPowerModeChanged(result);
                     }
                     intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
@@ -1031,12 +1024,6 @@ public final class PowerManagerService extends SystemService
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             Manifest.permission.DEVICE_POWER);
-
-                    if (mLowPowerModeEnabled) {
-                        mBatterySaverPolicy.startSaver();
-                    } else {
-                        mBatterySaverPolicy.stopSaver();
-                    }
                 }
             });
         }

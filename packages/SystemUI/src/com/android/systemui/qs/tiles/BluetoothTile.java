@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
@@ -34,10 +35,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
-import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.R.drawable;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -135,11 +134,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 if (lastDevice != null) {
                     int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        BluetoothDeviceLayerDrawable drawable = createLayerDrawable(mContext,
-                                R.drawable.ic_qs_bluetooth_connected, batteryLevel,
-                                mContext.getResources().getFraction(
-                                        R.fraction.bt_battery_scale_fraction, 1, 1));
-                        state.icon = new DrawableIcon(drawable);
+                        state.icon = new BluetoothBatteryDrawable(batteryLevel);
                     }
                 }
                 state.contentDescription = mContext.getString(
@@ -213,6 +208,22 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     @Override
     protected DetailAdapter createDetailAdapter() {
         return new BluetoothDetailAdapter();
+    }
+
+    private class BluetoothBatteryDrawable extends Icon {
+        private int mLevel;
+
+        BluetoothBatteryDrawable(int level) {
+            mLevel = level;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return createLayerDrawable(context,
+                    R.drawable.ic_qs_bluetooth_connected, mLevel,
+                    context.getResources().getFraction(
+                            R.fraction.bt_battery_scale_fraction, 1, 1));
+        }
     }
 
     protected class BluetoothDetailAdapter implements DetailAdapter, QSDetailItems.Callback {

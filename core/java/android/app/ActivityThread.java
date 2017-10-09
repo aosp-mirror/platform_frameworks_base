@@ -5267,7 +5267,7 @@ public final class ActivityThread {
                                 final ApplicationInfo aInfo =
                                         sPackageManager.getApplicationInfo(
                                                 packageName,
-                                                0 /*flags*/,
+                                                PackageManager.GET_SHARED_LIBRARY_FILES,
                                                 UserHandle.myUserId());
 
                                 if (mActivities.size() > 0) {
@@ -5766,7 +5766,7 @@ public final class ActivityThread {
                 final int preloadedFontsResource = info.metaData.getInt(
                         ApplicationInfo.METADATA_PRELOADED_FONTS, 0);
                 if (preloadedFontsResource != 0) {
-                    data.info.mResources.preloadFonts(preloadedFontsResource);
+                    data.info.getResources().preloadFonts(preloadedFontsResource);
                 }
             }
         } catch (RemoteException e) {

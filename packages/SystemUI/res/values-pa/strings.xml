@@ -184,10 +184,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ਸੂਚਨਾ ਰੱਦ ਕੀਤੀ।"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ਸੂਚਨਾ ਸ਼ੇਡ।"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ।"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ਲੌਕ ਸਕ੍ਰੀਨ।"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">" ਲਾਕ  ਸਕ੍ਰੀਨ।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ਰੂਪ-ਰੇਖਾ।"</string>
-    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"ਕਾਰਜ-ਸਥਾਨ ਲੌਕ ਸਕ੍ਰੀਨ"</string>
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"ਕਾਰਜ-ਸਥਾਨ  ਲਾਕ  ਸਕ੍ਰੀਨ"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"ਬੰਦ ਕਰੋ"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi ਬੰਦ ਕੀਤਾ।"</string>
@@ -258,11 +258,11 @@
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ਸਕ੍ਰੀਨ ਆਟੋਮੈਟਿਕਲੀ ਰੋਟੇਟ ਕਰੇਗੀ।"</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ਸਕ੍ਰੀਨ ਲੈਂਡਸਕੇਪ ਅਨੁਕੂਲਨ ਵਿੱਚ ਲੌਕ ਕੀਤੀ ਹੈ।"</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ਸਕ੍ਰੀਨ ਪੋਰਟਰੇਟ ਅਨੁਕੂਲਨ ਵਿੱਚ ਲੌਕ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ਸਕ੍ਰੀਨ ਲੈਂਡਸਕੇਪ ਅਨੁਕੂਲਨ ਵਿੱਚ  ਲਾਕ  ਕੀਤੀ ਹੈ।"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ਸਕ੍ਰੀਨ ਪੋਰਟਰੇਟ ਅਨੁਕੂਲਨ ਵਿੱਚ  ਲਾਕ  ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ਸਕ੍ਰੀਨ ਹੁਣ ਆਟੋਮੈਟਿਕਲੀ ਰੋਟੇਟ ਕਰੇਗੀ।"</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ਸਕ੍ਰੀਨ ਹੁਣ ਲੈਂਡਸਕੇਪ ਅਨੁਕੂਲਨ ਵਿੱਚ ਲੌਕ ਕੀਤੀ ਗਈ ਹੈ।"</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ਸਕ੍ਰੀਨ ਹੁਣ ਪੋਰਟਰੇਟ ਅਨੁਕੂਲਨ ਵਿੱਚ ਲੌਕ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ਸਕ੍ਰੀਨ ਹੁਣ ਲੈਂਡਸਕੇਪ ਅਨੁਕੂਲਨ ਵਿੱਚ  ਲਾਕ  ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ਸਕ੍ਰੀਨ ਹੁਣ ਪੋਰਟਰੇਟ ਅਨੁਕੂਲਨ ਵਿੱਚ  ਲਾਕ  ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="dessert_case" msgid="1295161776223959221">"ਡੈਜ਼ਰਟ ਕੇਸ"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ਸਕ੍ਰੀਨ ਸੇਵਰ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ਈਥਰਨੈਟ"</string>
@@ -278,7 +278,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ਆਟੋ-ਰੋਟੇਟ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ਸਕ੍ਰੀਨ ਨੂੰ ਆਪਣੇ ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> ਮੋਡ"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ਰੋਟੇਸ਼ਨ ਲੌਕ ਕੀਤੀ"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ਰੋਟੇਸ਼ਨ  ਲਾਕ  ਕੀਤੀ"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ਪੋਰਟਰੇਟ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ਲੈਂਡਸਕੇਪ"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"ਇਨਪੁੱਟ ਵਿਧੀ"</string>
@@ -468,7 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਹ ਪ੍ਰੋਫਾਈਲ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਕਾਰਜ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਪ੍ਰੋਫਾਈਲ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਕਾਰਜ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋਂ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> ਲਈ ਅਨਲੌਕ ਕੀਤੀ ਗਈ"</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> ਲਈ ਅਣਲਾਕ ਕੀਤੀ ਗਈ"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ਚੱਲ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ਡੀਵਾਈਸ ਲਾਕ ਰਹੇਗਾ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਮੈਨੂਅਲੀ ਅਣਲਾਕ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -587,7 +587,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="battery_detail_switch_title" msgid="8763441006881907058">"ਬੈਟਰੀ ਸੇਵਰ"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਡੈਟੇ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ  ਡਾਟੇ  ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ਬਟਨ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Back"</string>
@@ -721,7 +721,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ।"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ਸੈਟਿੰਗਾਂ ਦੇ ਕ੍ਰਮ ਦਾ ਸੰਪਾਦਨ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"ਲੌਕ ਸਕ੍ਰੀਨ"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">" ਲਾਕ  ਸਕ੍ਰੀਨ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ਛੋਟਾ ਕਰੋ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ਬੰਦ ਕਰੋ"</string>

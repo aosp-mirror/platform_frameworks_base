@@ -24,6 +24,8 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
+import static android.hardware.display.DisplayManager
+        .VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 
 import android.content.Context;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -362,6 +364,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL) != 0) {
+                  mInfo.flags |= DisplayDeviceInfo.FLAG_DESTROY_CONTENT_ON_REMOVAL;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

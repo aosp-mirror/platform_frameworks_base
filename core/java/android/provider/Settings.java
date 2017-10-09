@@ -71,7 +71,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -1848,13 +1847,6 @@ public final class Settings {
                 if (makeDefault) {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
-
-                // Log all EBS relevant config changes.
-                if (Global.LOW_POWER_MODE_TRIGGER_LEVEL.equals(name)
-                        || name.startsWith(Settings.Global.BATTERY_SAVER_CONSTANTS)) {
-                    Slog.w("XXX", "Detected write: " + mCallSetCommand + ", " + name + ", args=" + arg, new RuntimeException("HERE"));
-                }
-
                 IContentProvider cp = mProviderHolder.getProvider(cr);
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
@@ -9355,14 +9347,14 @@ public final class Settings {
          */
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 
-        /** @hide */
-        public static final String BATTERY_SAVER_USE_RED_BAR = "battery_saver_use_red_bar";
-
         /**
          * Battery anomaly detection specific settings
-         * This is encoded as a key=value list, separated by commas. Ex:
+         * This is encoded as a key=value list, separated by commas.
+         * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via
+         * {@link Uri#encode(String)}, separated by colons. Ex:
          *
-         * "anomaly_detection_enabled=true,wakelock_threshold=2000"
+         * "anomaly_detection_enabled=true,wakelock_threshold=2000,wakeup_alarm_enabled=true,"
+         * "wakeup_alarm_threshold=10,wakeup_blacklisted_tags=tag1:tag2:with%2Ccomma:with%3Acolon"
          *
          * The following keys are supported:
          *
@@ -9370,6 +9362,11 @@ public final class Settings {
          * anomaly_detection_enabled       (boolean)
          * wakelock_enabled                (boolean)
          * wakelock_threshold              (long)
+         * wakeup_alarm_enabled            (boolean)
+         * wakeup_alarm_threshold          (long)
+         * wakeup_blacklisted_tags         (string)
+         * bluetooth_scan_enabled          (boolean)
+         * bluetooth_scan_threshold        (long)
          * </pre>
          * @hide
          */
@@ -10850,6 +10847,26 @@ public final class Settings {
          */
         public static final String ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE =
                 "enable_deletion_helper_no_threshold_toggle";
+
+        /**
+         * The list of snooze options for notifications
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "default=60,options_array=15:30:60:120"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * default               (int)
+         * options_array         (string)
+         * </pre>
+         *
+         * All delays in integer minutes. Array order is respected.
+         * Options will be used in order up to the maximum allowed by the UI.
+         * @hide
+         */
+        public static final String NOTIFICATION_SNOOZE_OPTIONS =
+                "notification_snooze_options";
     }
 
     /**

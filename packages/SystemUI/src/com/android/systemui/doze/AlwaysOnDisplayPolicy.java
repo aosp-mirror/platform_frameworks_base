@@ -16,8 +16,13 @@
 
 package com.android.systemui.doze;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.KeyValueListParser;
@@ -34,6 +39,10 @@ import java.util.Arrays;
 public class AlwaysOnDisplayPolicy {
     public static final String TAG = "AlwaysOnDisplayPolicy";
 
+    private static final long DEFAULT_PROX_SCREEN_OFF_DELAY_MS = 10 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DEFAULT_PROX_COOLDOWN_TRIGGER_MS = 2 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DEFAULT_PROX_COOLDOWN_PERIOD_MS = 5 * DateUtils.SECOND_IN_MILLIS;
+
     static final String KEY_SCREEN_BRIGHTNESS_ARRAY = "screen_brightness_array";
     static final String KEY_DIMMING_SCRIM_ARRAY = "dimming_scrim_array";
     static final String KEY_PROX_SCREEN_OFF_DELAY_MS = "prox_screen_off_delay";
@@ -46,7 +55,7 @@ public class AlwaysOnDisplayPolicy {
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
      * @see #KEY_SCREEN_BRIGHTNESS_ARRAY
      */
-    public final int[] screenBrightnessArray;
+    public int[] screenBrightnessArray;
 
     /**
      * Integer array to map ambient brightness type to dimming scrim.
@@ -54,7 +63,7 @@ public class AlwaysOnDisplayPolicy {
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
      * @see #KEY_DIMMING_SCRIM_ARRAY
      */
-    public final int[] dimmingScrimArray;
+    public int[] dimmingScrimArray;
 
     /**
      * Delay time(ms) from covering the prox to turning off the screen.
@@ -62,7 +71,7 @@ public class AlwaysOnDisplayPolicy {
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
      * @see #KEY_PROX_SCREEN_OFF_DELAY_MS
      */
-    public final long proxScreenOffDelayMs;
+    public long proxScreenOffDelayMs;
 
     /**
      * The threshold time(ms) to trigger the cooldown timer, which will
@@ -71,7 +80,7 @@ public class AlwaysOnDisplayPolicy {
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
      * @see #KEY_PROX_COOLDOWN_TRIGGER_MS
      */
-    public final long proxCooldownTriggerMs;
+    public long proxCooldownTriggerMs;
 
     /**
      * The period(ms) to turning off the prox sensor if
@@ -80,43 +89,78 @@ public class AlwaysOnDisplayPolicy {
      * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
      * @see #KEY_PROX_COOLDOWN_PERIOD_MS
      */
-    public final long proxCooldownPeriodMs;
+    public long proxCooldownPeriodMs;
 
     private final KeyValueListParser mParser;
+    private final Context mContext;
+    private SettingsObserver mSettingsObserver;
 
     public AlwaysOnDisplayPolicy(Context context) {
-        final Resources resources = context.getResources();
+        mContext = context;
         mParser = new KeyValueListParser(',');
-
-        final String value = Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS);
-
-        try {
-            mParser.setString(value);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Bad AOD constants");
-        }
-
-        proxScreenOffDelayMs = mParser.getLong(KEY_PROX_SCREEN_OFF_DELAY_MS,
-                10 * DateUtils.SECOND_IN_MILLIS);
-        proxCooldownTriggerMs = mParser.getLong(KEY_PROX_COOLDOWN_TRIGGER_MS,
-                2 * DateUtils.SECOND_IN_MILLIS);
-        proxCooldownPeriodMs = mParser.getLong(KEY_PROX_COOLDOWN_PERIOD_MS,
-                5 * DateUtils.SECOND_IN_MILLIS);
-        screenBrightnessArray = parseIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
-                resources.getIntArray(R.array.config_doze_brightness_sensor_to_brightness));
-        dimmingScrimArray = parseIntArray(KEY_DIMMING_SCRIM_ARRAY,
-                resources.getIntArray(R.array.config_doze_brightness_sensor_to_scrim_opacity));
+        mSettingsObserver = new SettingsObserver(context.getMainThreadHandler());
+        mSettingsObserver.observe();
     }
 
     private int[] parseIntArray(final String key, final int[] defaultArray) {
         final String value = mParser.getString(key, null);
         if (value != null) {
-            return Arrays.stream(value.split(":")).map(String::trim).mapToInt(
-                    Integer::parseInt).toArray();
+            try {
+                return Arrays.stream(value.split(":")).map(String::trim).mapToInt(
+                        Integer::parseInt).toArray();
+            } catch (NumberFormatException e) {
+                return defaultArray;
+            }
         } else {
             return defaultArray;
         }
     }
 
+    private final class SettingsObserver extends ContentObserver {
+        private final Uri ALWAYS_ON_DISPLAY_CONSTANTS_URI
+                = Settings.Global.getUriFor(Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS);
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(ALWAYS_ON_DISPLAY_CONSTANTS_URI,
+                    false, this, UserHandle.USER_ALL);
+            update(null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            update(uri);
+        }
+
+        public void update(Uri uri) {
+            if (uri == null || ALWAYS_ON_DISPLAY_CONSTANTS_URI.equals(uri)) {
+                final Resources resources = mContext.getResources();
+                final String value = Settings.Global.getString(mContext.getContentResolver(),
+                        Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS);
+
+                try {
+                    mParser.setString(value);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Bad AOD constants");
+                }
+
+                proxScreenOffDelayMs = mParser.getLong(KEY_PROX_SCREEN_OFF_DELAY_MS,
+                        DEFAULT_PROX_SCREEN_OFF_DELAY_MS);
+                proxCooldownTriggerMs = mParser.getLong(KEY_PROX_COOLDOWN_TRIGGER_MS,
+                        DEFAULT_PROX_COOLDOWN_TRIGGER_MS);
+                proxCooldownPeriodMs = mParser.getLong(KEY_PROX_COOLDOWN_PERIOD_MS,
+                        DEFAULT_PROX_COOLDOWN_PERIOD_MS);
+                screenBrightnessArray = parseIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
+                        resources.getIntArray(
+                                R.array.config_doze_brightness_sensor_to_brightness));
+                dimmingScrimArray = parseIntArray(KEY_DIMMING_SCRIM_ARRAY,
+                        resources.getIntArray(
+                                R.array.config_doze_brightness_sensor_to_scrim_opacity));
+            }
+        }
+    }
 }

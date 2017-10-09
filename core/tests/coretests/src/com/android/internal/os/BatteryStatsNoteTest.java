@@ -19,9 +19,11 @@ import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
 import android.app.ActivityManager;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
+import android.view.Display;
 
 import junit.framework.TestCase;
 
@@ -50,7 +52,7 @@ public class BatteryStatsNoteTest extends TestCase{
     @SmallTest
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
-        bi.updateTimeBasesLocked(true, true, 0, 0);
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
 
         bi.noteBluetoothScanResultsFromSourceLocked(WS, 1);
@@ -82,7 +84,7 @@ public class BatteryStatsNoteTest extends TestCase{
         int pid = 10;
         String name = "name";
 
-        bi.updateTimeBasesLocked(true, true, 0, 0);
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
         bi.getUidStatsLocked(UID).noteStartWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
 
@@ -124,7 +126,7 @@ public class BatteryStatsNoteTest extends TestCase{
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT, 5309);
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_CACHED_EMPTY, 42);
 
-        bi.updateTimeBasesLocked(true, false, 0, 0);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
         for (Map.Entry<Integer, Integer> entry : stateRuntimeMap.entrySet()) {
             bi.noteUidProcessStateLocked(UID, entry.getKey());
@@ -189,4 +191,46 @@ public class BatteryStatsNoteTest extends TestCase{
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
     }
+
+    /** Test BatteryStatsImpl.updateTimeBasesLocked. */
+    @SmallTest
+    public void testUpdateTimeBasesLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        bi.updateTimeBasesLocked(false, Display.STATE_OFF, 0, 0);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+        bi.updateTimeBasesLocked(false, Display.STATE_DOZE, 10, 10);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, 20, 20);
+        assertFalse(bi.getOnBatteryTimeBase().isRunning());
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 30, 30);
+        assertTrue(bi.getOnBatteryTimeBase().isRunning());
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        bi.updateTimeBasesLocked(true, Display.STATE_DOZE, 40, 40);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 40, 40);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+    }
+
+    /** Test BatteryStatsImpl.noteScreenStateLocked. */
+    @SmallTest
+    public void testNoteScreenStateLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_DOZE);
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        assertFalse(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_ON);
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
+        assertEquals(bi.getScreenState(), Display.STATE_OFF);
+    }
+
 }

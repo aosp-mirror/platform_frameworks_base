@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
     <string name="yes" msgid="5362982303337969312">"సరే"</string>
     <string name="no" msgid="5141531044935541497">"రద్దు చేయి"</string>
+    <string name="close" msgid="2318214661230355730">"మూసివేయండి"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"గమనిక"</string>
     <string name="loading" msgid="7933681260296021180">"లోడ్ చేస్తోంది…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ఆన్‌లో ఉంది"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ప్రమాణం"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ఎల్లప్పుడూ చూపు"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేసినవిలో దీన్ని పునఃప్రారంభించండి."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"యాప్ ప్రతిస్పందించలేదు"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> చాలా ఎక్కువ మెమరీని ఉపయోగించుకోవచ్చు."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుత ప్రదర్శన పరిమాణ సెట్టింగ్‌కు మద్దతు ఇవ్వదు, దీని వలన ఊహించని సమస్యలు తలెత్తవచ్చు."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ఎల్లప్పుడూ చూపు"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>

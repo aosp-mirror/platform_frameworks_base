@@ -979,6 +979,7 @@
     <string name="cancel" msgid="6442560571259935130">"Avbryt"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Avbryt"</string>
+    <string name="close" msgid="2318214661230355730">"STÄNG"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Obs!"</string>
     <string name="loading" msgid="7933681260296021180">"Läser in …"</string>
     <string name="capital_on" msgid="1544682755514494298">"PÅ"</string>
@@ -1035,6 +1036,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Anpassning"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Visa alltid"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivera detta igen i Systeminställningar &gt; Appar &gt; Hämtat."</string>
+    <string name="top_app_killed_title" msgid="6814231368167994497">"Appen svarar inte"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> kanske använder för mycket minne."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för den nuvarande inställningen för skärmstorlek och kanske inte fungerar som förväntat."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Visa alltid"</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (processen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutit mot sin egen StrictMode-policy."</string>
