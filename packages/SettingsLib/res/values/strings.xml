@@ -289,7 +289,8 @@
     <string name="launch_defaults_some">Some defaults set</string>
     <!-- Launch defaults preference summary with none set [CHAR LIMIT=40] -->
     <string name="launch_defaults_none">No defaults set</string>
-
+    <!-- DO NOT TRANSLATE Empty summary for dynamic preferences -->
+    <string name="summary_empty" translatable="false"></string>
     <!-- Text-To-Speech (TTS) settings --><skip />
     <!-- Name of the TTS package as listed by the package manager. -->
     <string name="tts_settings">Text-to-speech settings</string>
