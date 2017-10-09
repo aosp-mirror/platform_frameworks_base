@@ -15,7 +15,7 @@
  */
 
 #include <android/bitmap.h>
-#include <Bitmap.h>
+#include <android/graphics/Bitmap.h>
 
 int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
                           AndroidBitmapInfo* info) {
@@ -56,4 +56,3 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
     }
     return ANDROID_BITMAP_RESULT_SUCCESS;
 }
-
