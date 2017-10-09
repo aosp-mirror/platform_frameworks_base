@@ -42,8 +42,8 @@ import java.util.StringJoiner;
  * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}.
  * <p>
  * The ranging request is a batch request - specifying a set of devices (specified using
- * {@link RangingRequest.Builder#addAp(ScanResult)} and
- * {@link RangingRequest.Builder#addAps(List)}).
+ * {@link RangingRequest.Builder#addAccessPoint(ScanResult)} and
+ * {@link RangingRequest.Builder#addAccessPoints(List)}).
  *
  * @hide RTT_API
  */
@@ -53,8 +53,8 @@ public final class RangingRequest implements Parcelable {
     /**
      * Returns the maximum number of peers to range which can be specified in a single {@code
      * RangingRequest}. The limit applies no matter how the peers are added to the request, e.g.
-     * through {@link RangingRequest.Builder#addAp(ScanResult)} or
-     * {@link RangingRequest.Builder#addAps(List)}.
+     * through {@link RangingRequest.Builder#addAccessPoint(ScanResult)} or
+     * {@link RangingRequest.Builder#addAccessPoints(List)}.
      *
      * @return Maximum number of peers.
      */
@@ -148,7 +148,7 @@ public final class RangingRequest implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addAp(ScanResult apInfo) {
+        public Builder addAccessPoint(ScanResult apInfo) {
             if (apInfo == null) {
                 throw new IllegalArgumentException("Null ScanResult!");
             }
@@ -165,12 +165,12 @@ public final class RangingRequest implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addAps(List<ScanResult> apInfos) {
+        public Builder addAccessPoints(List<ScanResult> apInfos) {
             if (apInfos == null) {
                 throw new IllegalArgumentException("Null list of ScanResults!");
             }
             for (ScanResult scanResult : apInfos) {
-                addAp(scanResult);
+                addAccessPoint(scanResult);
             }
             return this;
         }

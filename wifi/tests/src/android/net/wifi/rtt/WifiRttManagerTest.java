@@ -139,8 +139,8 @@ public class WifiRttManagerTest {
         PeerHandle peerHandle1 = new PeerHandle(12);
 
         RangingRequest.Builder builder = new RangingRequest.Builder();
-        builder.addAp(scanResult1);
-        builder.addAps(scanResults2and3);
+        builder.addAccessPoint(scanResult1);
+        builder.addAccessPoints(scanResults2and3);
         builder.addWifiAwarePeer(mac1);
         builder.addWifiAwarePeer(peerHandle1);
         RangingRequest request = builder.build();
@@ -173,9 +173,9 @@ public class WifiRttManagerTest {
 
         // create request
         RangingRequest.Builder builder = new RangingRequest.Builder();
-        builder.addAp(scanResult);
-        builder.addAps(scanResultList);
-        builder.addAp(scanResult);
+        builder.addAccessPoint(scanResult);
+        builder.addAccessPoints(scanResultList);
+        builder.addAccessPoint(scanResult);
         builder.addWifiAwarePeer(mac1);
         RangingRequest request = builder.build();
 
@@ -197,9 +197,9 @@ public class WifiRttManagerTest {
 
         // create request
         RangingRequest.Builder builder = new RangingRequest.Builder();
-        builder.addAp(scanResult);
-        builder.addAps(scanResultList);
-        builder.addAp(scanResult);
+        builder.addAccessPoint(scanResult);
+        builder.addAccessPoints(scanResultList);
+        builder.addAccessPoint(scanResult);
         builder.addWifiAwarePeer(mac1);
         RangingRequest request = builder.build();
 

@@ -148,11 +148,11 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The timestamp (in us) at which the ranging operation was performed
+     * @return The timestamp, in us since boot, at which the ranging operation was performed.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link RangingResultCallback#STATUS_SUCCESS}.
      */
-    public long getRangingTimestamp() {
+    public long getRangingTimestampUs() {
         return mTimestamp;
     }
 
