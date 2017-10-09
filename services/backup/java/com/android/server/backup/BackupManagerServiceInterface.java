@@ -39,6 +39,8 @@ import java.io.PrintWriter;
  */
 public interface BackupManagerServiceInterface {
 
+  void unlockSystemUser();
+
   // Utility: build a new random integer token
   int generateRandomIntegerToken();
 
