@@ -70,6 +70,7 @@ public final class ThreadedRenderer {
      * Name of the file that holds the shaders cache.
      */
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
+    private static final String CACHE_PATH_SKIASHADERS = "com.android.skia.shaders_cache";
 
     /**
      * System property used to enable or disable threaded rendering profiling.
@@ -272,7 +273,9 @@ public final class ThreadedRenderer {
      * @hide
      */
     public static void setupDiskCache(File cacheDir) {
-        ThreadedRenderer.setupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
+        ThreadedRenderer.setupShadersDiskCache(
+                new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath(),
+                new File(cacheDir, CACHE_PATH_SKIASHADERS).getAbsolutePath());
     }
 
     /**
@@ -1007,7 +1010,7 @@ public final class ThreadedRenderer {
     /** Not actually public - internal use only. This doc to make lint happy */
     public static native void disableVsync();
 
-    static native void setupShadersDiskCache(String cacheFile);
+    static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
 
     private static native void nRotateProcessStatsBuffer();
     private static native void nSetProcessStatsBuffer(int fd);

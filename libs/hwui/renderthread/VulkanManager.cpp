@@ -107,8 +107,11 @@ void VulkanManager::initialize() {
 
     mGetDeviceQueue(mBackendContext->fDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
+    GrContextOptions options;
+    options.fDisableDistanceFieldPaths = true;
+    mRenderThread.cacheManager().configureContext(&options);
     mRenderThread.setGrContext(
-            GrContext::Create(kVulkan_GrBackend, (GrBackendContext)mBackendContext.get()));
+            GrContext::Create(kVulkan_GrBackend, (GrBackendContext)mBackendContext.get(), options));
     DeviceInfo::initialize(mRenderThread.getGrContext()->caps()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
