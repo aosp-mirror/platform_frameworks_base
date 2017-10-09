@@ -384,7 +384,7 @@ public class DozeScrimController {
             if (mDozeParameters.getAlwaysOn()) {
                 // Setting power states can happen after we push out the frame. Make sure we
                 // stay fully opaque until the power state request reaches the lower levels.
-                setDozeInFrontAlphaDelayed(mAodFrontScrimOpacity, 30);
+                setDozeInFrontAlphaDelayed(mAodFrontScrimOpacity, 100);
             }
         }
     };
