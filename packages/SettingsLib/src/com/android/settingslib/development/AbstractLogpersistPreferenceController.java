@@ -30,16 +30,15 @@ import android.support.v7.preference.PreferenceScreen;
 import android.text.TextUtils;
 
 import com.android.settingslib.R;
-import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.ConfirmationDialogController;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.core.lifecycle.LifecycleObserver;
 import com.android.settingslib.core.lifecycle.events.OnCreate;
 import com.android.settingslib.core.lifecycle.events.OnDestroy;
 
-public abstract class AbstractLogpersistPreferenceController extends AbstractPreferenceController
-        implements Preference.OnPreferenceChangeListener, LifecycleObserver, OnCreate, OnDestroy,
-        ConfirmationDialogController {
+public abstract class AbstractLogpersistPreferenceController extends
+        DeveloperOptionsPreferenceController implements Preference.OnPreferenceChangeListener,
+        LifecycleObserver, OnCreate, OnDestroy, ConfirmationDialogController {
 
     private static final String SELECT_LOGPERSIST_KEY = "select_logpersist";
     private static final String SELECT_LOGPERSIST_PROPERTY = "persist.logd.logpersistd";

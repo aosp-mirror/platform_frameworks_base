@@ -26,10 +26,9 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 
 import com.android.settingslib.R;
-import com.android.settingslib.core.AbstractPreferenceController;
 
-public abstract class AbstractLogdSizePreferenceController extends AbstractPreferenceController
-        implements Preference.OnPreferenceChangeListener {
+public abstract class AbstractLogdSizePreferenceController extends
+        DeveloperOptionsPreferenceController implements Preference.OnPreferenceChangeListener {
     public static final String ACTION_LOGD_SIZE_UPDATED = "com.android.settingslib.development."
             + "AbstractLogdSizePreferenceController.LOGD_SIZE_UPDATED";
     public static final String EXTRA_CURRENT_LOGD_VALUE = "CURRENT_LOGD_VALUE";
@@ -54,11 +53,6 @@ public abstract class AbstractLogdSizePreferenceController extends AbstractPrefe
 
     public AbstractLogdSizePreferenceController(Context context) {
         super(context);
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
     }
 
     @Override
