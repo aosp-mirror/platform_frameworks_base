@@ -30,14 +30,14 @@ using namespace android;
 
 static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandle, jint style) {
     Typeface* family = reinterpret_cast<Typeface*>(familyHandle);
-    Typeface* face = Typeface::createRelative(family, (SkTypeface::Style)style);
+    Typeface* face = Typeface::createRelative(family, (Typeface::Style)style);
     // TODO: the following logic shouldn't be necessary, the above should always succeed.
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
-        face = Typeface::createRelative(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
+        face = Typeface::createRelative(family, (Typeface::Style)(style ^ Typeface::kItalic));
     }
     for (int i = 0; NULL == face && i < 4; i++) {
-        face = Typeface::createRelative(family, (SkTypeface::Style)i);
+        face = Typeface::createRelative(family, (Typeface::Style)i);
     }
     return reinterpret_cast<jlong>(face);
 }
@@ -78,7 +78,7 @@ static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
 
 static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
-    return face->fSkiaStyle;
+    return face->fAPIStyle;
 }
 
 static jint Typeface_getWeight(JNIEnv* env, jobject obj, jlong faceHandle) {

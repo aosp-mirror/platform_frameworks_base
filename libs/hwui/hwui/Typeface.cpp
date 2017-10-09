@@ -34,12 +34,12 @@
 
 namespace android {
 
-static SkTypeface::Style computeSkiaStyle(int weight, bool italic) {
+static Typeface::Style computeAPIStyle(int weight, bool italic) {
     // This bold detection comes from SkTypeface.h
     if (weight >= SkFontStyle::kSemiBold_Weight) {
-        return italic ? SkTypeface::kBoldItalic : SkTypeface::kBold;
+        return italic ? Typeface::kBoldItalic : Typeface::kBold;
     } else {
-        return italic ? SkTypeface::kItalic : SkTypeface::kNormal;
+        return italic ? Typeface::kItalic : Typeface::kNormal;
     }
 }
 
@@ -50,12 +50,12 @@ static minikin::FontStyle computeMinikinStyle(int weight, bool italic) {
 }
 
 // Resolve the relative weight from the baseWeight and target style.
-static minikin::FontStyle computeRelativeStyle(int baseWeight, SkTypeface::Style relativeStyle) {
+static minikin::FontStyle computeRelativeStyle(int baseWeight, Typeface::Style relativeStyle) {
     int weight = baseWeight;
-    if ((relativeStyle & SkTypeface::kBold) != 0) {
+    if ((relativeStyle & Typeface::kBold) != 0) {
         weight += 300;
     }
-    bool italic = (relativeStyle & SkTypeface::kItalic) != 0;
+    bool italic = (relativeStyle & Typeface::kItalic) != 0;
     return computeMinikinStyle(weight, italic);
 }
 
@@ -66,13 +66,13 @@ const Typeface* Typeface::resolveDefault(const Typeface* src) {
     return src == nullptr ? gDefaultTypeface : src;
 }
 
-Typeface* Typeface::createRelative(Typeface* src, SkTypeface::Style style) {
+Typeface* Typeface::createRelative(Typeface* src, Typeface::Style style) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface;
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fSkiaStyle = style;
+        result->fAPIStyle = style;
         result->fStyle = computeRelativeStyle(result->fBaseWeight, style);
     }
     return result;
@@ -84,7 +84,7 @@ Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fSkiaStyle = computeSkiaStyle(weight, italic);
+        result->fAPIStyle = computeAPIStyle(weight, italic);
         result->fStyle = computeMinikinStyle(weight, italic);
     }
     return result;
@@ -105,7 +105,7 @@ Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
         // Do not update styles.
         // TODO: We may want to update base weight if the 'wght' is specified.
         result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fSkiaStyle = resolvedFace->fSkiaStyle;
+        result->fAPIStyle = resolvedFace->fAPIStyle;
         result->fStyle = resolvedFace->fStyle;
     }
     return result;
@@ -117,8 +117,8 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
     if (result != nullptr) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fBaseWeight = weight;
-        result->fSkiaStyle = resolvedFace->fSkiaStyle;
-        result->fStyle = computeRelativeStyle(weight, result->fSkiaStyle);
+        result->fAPIStyle = resolvedFace->fAPIStyle;
+        result->fStyle = computeRelativeStyle(weight, result->fAPIStyle);
     }
     return result;
 }
@@ -161,7 +161,7 @@ Typeface* Typeface::createFromFamilies(
     }
 
     result->fBaseWeight = weight;
-    result->fSkiaStyle = computeSkiaStyle(weight, italic);
+    result->fAPIStyle = computeAPIStyle(weight, italic);
     result->fStyle = computeMinikinStyle(weight, italic);
     return result;
 }
@@ -191,7 +191,7 @@ void Typeface::setRobotoTypefaceForTest() {
 
     Typeface* hwTypeface = new Typeface();
     hwTypeface->fFontCollection = collection;
-    hwTypeface->fSkiaStyle = SkTypeface::kNormal;
+    hwTypeface->fAPIStyle = Typeface::kNormal;
     hwTypeface->fBaseWeight = SkFontStyle::kNormal_Weight;
     hwTypeface->fStyle = minikin::FontStyle(4 /* weight */, false /* italic */);
 
