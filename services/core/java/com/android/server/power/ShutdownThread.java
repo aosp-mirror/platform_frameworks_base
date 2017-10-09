@@ -457,8 +457,7 @@ public final class ShutdownThread extends Thread {
         // First send the high-level shut down broadcast.
         mActionDone = false;
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendOrderedBroadcastAsUser(intent,
                 UserHandle.ALL, null, br, mHandler, 0, null, null);
 
