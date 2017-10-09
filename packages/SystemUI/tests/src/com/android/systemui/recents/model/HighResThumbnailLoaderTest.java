@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.model;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyBoolean;
@@ -59,7 +60,7 @@ public class HighResThumbnailLoaderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mLoader = new HighResThumbnailLoader(mMockSystemServicesProxy, Looper.getMainLooper(),
                 false);
-        mTask.key = new TaskKey(0, 0, null, 0, 0, 0);
+        mTask.key = new TaskKey(0, WINDOWING_MODE_UNDEFINED, null, 0, 0, 0);
         when(mMockSystemServicesProxy.getTaskThumbnail(anyInt(), anyBoolean()))
                 .thenReturn(mThumbnailData);
         mLoader.setVisible(true);

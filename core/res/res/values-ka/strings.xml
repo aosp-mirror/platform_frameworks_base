@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"სამსახურის პროფილი წაიშალა ადმინისტრატორის აპის არქონის გამო"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"სამსახურის პროფილის ადმინისტრატორის აპი მიუწვდომელია ან დაზიანებულია. ამის გამო, თქვენი სამსახურის პროფილი და დაკავშირებული მონაცემები წაიშალა. დახმარებისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"თქვენი სამსახურის პროფილი აღარ არის ხელმისაწვდომი ამ მოწყობილობაზე"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"დაფიქსირდა პაროლის შეყვანის ზედმეტად ბევრი მცდელობა"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"მოწყობილობა მართულია"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ამ მოწყობილობას თქვენი ორგანიზაცია მართავს და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია. შეეხეთ დამატებითი დეტალებისთვის."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"თქვენი მოწყობილობა წაიშლება"</string>
@@ -980,10 +981,8 @@
     <string name="dial" msgid="4204975095406423102">"ტელეფონი"</string>
     <string name="map" msgid="6068210738233985748">"Maps"</string>
     <string name="browse" msgid="6993590095938149861">"ბრაუზერი"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"კონტაქტი"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"თავისუფალი ადგილი იწურება"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"სისტემის ზოგიერთმა ფუნქციამ შესაძლოა არ იმუშავოს"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"სისტემისათვის საკმარისი საცავი არ არის. დარწმუნდით, რომ იქონიოთ სულ მცირე 250 მბაიტი თავისუფალი სივრცე და დაიწყეთ ხელახლა."</string>
@@ -993,8 +992,7 @@
     <string name="cancel" msgid="6442560571259935130">"გაუქმება"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"გაუქმება"</string>
-    <!-- no translation found for close (2318214661230355730) -->
-    <skip />
+    <string name="close" msgid="2318214661230355730">"დახურვა"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ყურადღება"</string>
     <string name="loading" msgid="7933681260296021180">"ჩატვირთვა…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ჩართ."</string>
@@ -1051,10 +1049,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"მასშტაბი"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ყოველთვის ჩვენება"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ხელახალი გააქტიურება განყოფილებაში: სისტემის პარამეტრები &gt; აპები &gt; ჩამოტვირთულები."</string>
-    <!-- no translation found for top_app_killed_title (6814231368167994497) -->
-    <skip />
-    <!-- no translation found for top_app_killed_message (3487519022191609844) -->
-    <skip />
+    <string name="top_app_killed_title" msgid="6814231368167994497">"აპი არ რეაგირებს"</string>
+    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> შესაძლოა მეხსიერებას გადამეტებით იყენებდეს."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის მიერ ეკრანის ამჟამინდელი პარამეტრები მხარდაუჭერელია და შეიძლება არასათანადოდ იმუშაოს."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ყოველთვის ჩვენება"</string>
     <string name="smv_application" msgid="3307209192155442829">"აპმა <xliff:g id="APPLICATION">%1$s</xliff:g> (პროცესი <xliff:g id="PROCESS">%2$s</xliff:g>) დაარღვია საკუთარი StrictMode დებულება."</string>

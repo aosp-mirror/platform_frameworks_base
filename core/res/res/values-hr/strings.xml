@@ -174,6 +174,8 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Radni je profil izbrisan jer nedostaje administratorska aplikacija"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Vaš radni profil više nije dostupan na ovom uređaju"</string>
+    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Uređaj je upravljan"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Vaša organizacija upravlja ovim uređajem i može nadzirati mrežni promet. Dodirnite za pojedinosti."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
@@ -1000,10 +1002,8 @@
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="6068210738233985748">"Karte"</string>
     <string name="browse" msgid="6993590095938149861">"Preglednik"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"Kontakt"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke sistemske funkcije možda neće raditi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno pohrane za sustav. Oslobodite 250 MB prostora i pokrenite uređaj ponovo."</string>

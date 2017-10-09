@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Jobbprofilen har raderats eftersom det saknas en administratörsapp"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Jobbprofilen är inte längre tillgänglig på enheten"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"För många försök med lösenord"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
@@ -980,10 +981,8 @@
     <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="6068210738233985748">"Kartor"</string>
     <string name="browse" msgid="6993590095938149861">"Webbläsare"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"Sms"</string>
+    <string name="add_contact" msgid="7990645816259405444">"Kontakt"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>

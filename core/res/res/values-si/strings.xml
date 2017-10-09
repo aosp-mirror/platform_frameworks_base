@@ -172,6 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"පරිපාලක යෙදුමක් නොමැති වීමෙන් කාර්යාල පැතිකඩ මකා දමන ලදි"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ඔබේ කාර්යාල පැතිකඩ මෙම උපාංගය මත තවදුරටත් ලබා ගැනීමට නොහැකිය"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"මුරපද උත්සාහ කිරීම් ඉතා වැඩි ගණනකි"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"උපාංගය කළමනාකරණය කෙරේ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ඔබගේ ආයතනය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
@@ -982,10 +983,8 @@
     <string name="dial" msgid="4204975095406423102">"දුරකථනය"</string>
     <string name="map" msgid="6068210738233985748">"සිතියම්"</string>
     <string name="browse" msgid="6993590095938149861">"බ්‍රවුසරය"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"සම්බන්ධතා"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>

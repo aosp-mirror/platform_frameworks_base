@@ -53,7 +53,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -123,6 +123,7 @@ public class PipManager implements BasePipManager {
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
+    private int mPinnedStackId = INVALID_STACK_ID;
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
@@ -338,9 +339,11 @@ public class PipManager implements BasePipManager {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
-                mActivityManager.removeStack(PINNED_STACK_ID);
+                mActivityManager.removeStack(mPinnedStackId);
             } catch (RemoteException e) {
                 Log.e(TAG, "removeStack failed", e);
+            } finally {
+                mPinnedStackId = INVALID_STACK_ID;
             }
         }
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -426,7 +429,7 @@ public class PipManager implements BasePipManager {
         }
         try {
             int animationDurationMs = -1;
-            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
+            mActivityManager.resizeStack(mPinnedStackId, mCurrentPipBounds,
                     true, true, true, animationDurationMs);
         } catch (RemoteException e) {
             Log.e(TAG, "resizeStack failed", e);
@@ -657,7 +660,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onActivityPinned(String packageName, int userId, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
             if (!checkCurrentUserId(mContext, DEBUG)) {
                 return;
@@ -668,6 +671,7 @@ public class PipManager implements BasePipManager {
                 return;
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
+            mPinnedStackId = stackInfo.stackId;
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             mPipComponentName = ComponentName.unflattenFromString(
                     stackInfo.taskNames[stackInfo.taskNames.length - 1]);

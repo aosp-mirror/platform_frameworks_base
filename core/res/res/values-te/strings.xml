@@ -172,6 +172,8 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"నిర్వాహక యాప్ లేనందున కార్యాలయ ప్రొఫైల్ తొలగించబడింది"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"కార్యాలయ ప్రొఫైల్ నిర్వాహక యాప్ లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు"</string>
+    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="6399790108123704477">"పరికరం నిర్వహించబడింది"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
@@ -980,10 +982,8 @@
     <string name="dial" msgid="4204975095406423102">"ఫోన్"</string>
     <string name="map" msgid="6068210738233985748">"మ్యాప్స్"</string>
     <string name="browse" msgid="6993590095938149861">"బ్రౌజర్"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"పరిచయం"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>

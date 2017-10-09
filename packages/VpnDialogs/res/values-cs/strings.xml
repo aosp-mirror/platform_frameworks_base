@@ -31,6 +31,6 @@
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Změnit nastavení VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurovat"</string>
     <string name="disconnect" msgid="971412338304200056">"Odpojit"</string>
-    <string name="open_app" msgid="3717639178595958667">"Spustit aplikaci"</string>
+    <string name="open_app" msgid="3717639178595958667">"Do aplikace"</string>
     <string name="dismiss" msgid="6192859333764711227">"Zavřít"</string>
 </resources>

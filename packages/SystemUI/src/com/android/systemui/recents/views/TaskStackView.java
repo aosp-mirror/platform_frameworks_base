@@ -16,9 +16,8 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -2094,18 +2093,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         boolean isFreeformTask = event.task.isFreeformTask();
-        boolean hasChangedStacks =
+        boolean hasChangedWindowingMode =
                 (!isFreeformTask && event.dropTarget == mFreeformWorkspaceDropTarget) ||
                         (isFreeformTask && event.dropTarget == mStackDropTarget);
 
-        if (hasChangedStacks) {
+        if (hasChangedWindowingMode) {
             // Move the task to the right position in the stack (ie. the front of the stack if
             // freeform or the front of the stack if fullscreen). Note, we MUST move the tasks
             // before we update their stack ids, otherwise, the keys will have changed.
             if (event.dropTarget == mFreeformWorkspaceDropTarget) {
-                mStack.moveTaskToStack(event.task, FREEFORM_WORKSPACE_STACK_ID);
+                mStack.setTaskWindowingMode(event.task, WINDOWING_MODE_FREEFORM);
             } else if (event.dropTarget == mStackDropTarget) {
-                mStack.moveTaskToStack(event.task, FULLSCREEN_WORKSPACE_STACK_ID);
+                mStack.setTaskWindowingMode(event.task, WINDOWING_MODE_FULLSCREEN);
             }
             updateLayoutAlgorithm(true /* boundScroll */);
 
@@ -2114,7 +2113,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 @Override
                 public void run() {
                     SystemServicesProxy ssp = Recents.getSystemServices();
-                    ssp.moveTaskToStack(event.task.key.id, event.task.key.stackId);
+                    ssp.setTaskWindowingMode(event.task.key.id, event.task.key.windowingMode);
                 }
             });
         }

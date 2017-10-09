@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.model;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -46,8 +48,8 @@ public class Task {
         public void onTaskDataLoaded(Task task, ThumbnailData thumbnailData);
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
-        /* Notifies when a task's stack id has changed. */
-        public void onTaskStackIdChanged();
+        /* Notifies when a task's windowing mode has changed. */
+        public void onTaskWindowingModeChanged();
     }
 
     /* The Task Key represents the unique primary key for the task */
@@ -55,7 +57,7 @@ public class Task {
         @ViewDebug.ExportedProperty(category="recents")
         public final int id;
         @ViewDebug.ExportedProperty(category="recents")
-        public int stackId;
+        public int windowingMode;
         @ViewDebug.ExportedProperty(category="recents")
         public final Intent baseIntent;
         @ViewDebug.ExportedProperty(category="recents")
@@ -67,10 +69,10 @@ public class Task {
 
         private int mHashCode;
 
-        public TaskKey(int id, int stackId, Intent intent, int userId, long firstActiveTime,
+        public TaskKey(int id, int windowingMode, Intent intent, int userId, long firstActiveTime,
                 long lastActiveTime) {
             this.id = id;
-            this.stackId = stackId;
+            this.windowingMode = windowingMode;
             this.baseIntent = intent;
             this.userId = userId;
             this.firstActiveTime = firstActiveTime;
@@ -78,8 +80,8 @@ public class Task {
             updateHashCode();
         }
 
-        public void setStackId(int stackId) {
-            this.stackId = stackId;
+        public void setWindowingMode(int windowingMode) {
+            this.windowingMode = windowingMode;
             updateHashCode();
         }
 
@@ -93,7 +95,9 @@ public class Task {
                 return false;
             }
             TaskKey otherKey = (TaskKey) o;
-            return id == otherKey.id && stackId == otherKey.stackId && userId == otherKey.userId;
+            return id == otherKey.id
+                    && windowingMode == otherKey.windowingMode
+                    && userId == otherKey.userId;
         }
 
         @Override
@@ -103,12 +107,12 @@ public class Task {
 
         @Override
         public String toString() {
-            return "id=" + id + " stackId=" + stackId + " user=" + userId + " lastActiveTime=" +
-                    lastActiveTime;
+            return "id=" + id + " windowingMode=" + windowingMode + " user=" + userId
+                    + " lastActiveTime=" + lastActiveTime;
         }
 
         private void updateHashCode() {
-            mHashCode = Objects.hash(id, stackId, userId);
+            mHashCode = Objects.hash(id, windowingMode, userId);
         }
     }
 
@@ -277,14 +281,12 @@ public class Task {
         this.group = group;
     }
 
-    /**
-     * Updates the stack id of this task.
-     */
-    public void setStackId(int stackId) {
-        key.setStackId(stackId);
+    /** Updates the task's windowing mode. */
+    public void setWindowingMode(int windowingMode) {
+        key.setWindowingMode(windowingMode);
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
-            mCallbacks.get(i).onTaskStackIdChanged();
+            mCallbacks.get(i).onTaskWindowingModeChanged();
         }
     }
 
@@ -293,7 +295,7 @@ public class Task {
      */
     public boolean isFreeformTask() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        return ssp.hasFreeformWorkspaceSupport() && ssp.isFreeformStack(key.stackId);
+        return ssp.hasFreeformWorkspaceSupport() && key.windowingMode == WINDOWING_MODE_FREEFORM;
     }
 
     /** Notifies the callback listeners that this task has been loaded */

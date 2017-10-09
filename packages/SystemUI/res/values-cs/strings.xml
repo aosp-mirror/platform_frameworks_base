@@ -758,7 +758,7 @@
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Zkratka vlevo také odemyká"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Zkratka vpravo také odemyká"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Žádné"</string>
-    <string name="tuner_launch_app" msgid="1527264114781925348">"Spustit aplikaci <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Do aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Další aplikace"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Kruh"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>

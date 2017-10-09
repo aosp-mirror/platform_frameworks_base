@@ -16,7 +16,6 @@
 
 package com.android.systemui.stackdivider;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.DOCKED_INVALID;
 
 import android.app.ActivityManager;
@@ -88,8 +87,7 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManager.getService().moveTasksToFullscreenStack(
-                        DOCKED_STACK_ID, false /* onTop */);
+                ActivityManager.getService().dismissSplitScreenMode(false /* onTop */);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to remove stack: " + e);
             }
@@ -100,8 +98,7 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManager.getService().resizeStack(
-                        DOCKED_STACK_ID, null, true, true, false, -1);
+                ActivityManager.getService().dismissSplitScreenMode(true /* onTop */);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }

@@ -172,6 +172,8 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"അഡ്‌മിൻ ആപ്പ് വിട്ടുപോയിരിക്കുന്നതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ ആപ്പ് വിട്ടുപോയിരിക്കുന്നു അല്ലെങ്കിൽ കേടായിരിക്കുന്നു. ഫലമായി, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരങ്ങളും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല"</string>
+    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
@@ -980,10 +982,8 @@
     <string name="dial" msgid="4204975095406423102">"ഫോണ്‍"</string>
     <string name="map" msgid="6068210738233985748">"മാപ്‌സ്"</string>
     <string name="browse" msgid="6993590095938149861">"ബ്രൗസർ"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS"</string>
+    <string name="add_contact" msgid="7990645816259405444">"കോണ്‍‌ടാക്റ്റ്"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>

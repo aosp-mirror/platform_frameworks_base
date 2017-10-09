@@ -9879,6 +9879,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         rti.supportsSplitScreenMultiWindow = tr.supportsSplitScreenWindowingMode();
         rti.resizeMode = tr.mResizeMode;
+        rti.configuration.setTo(tr.getConfiguration());
 
         ActivityRecord base = null;
         ActivityRecord top = null;
@@ -10752,6 +10753,66 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    /**
+     * Dismisses split-screen multi-window mode.
+     * @param toTop If true the current primary split-screen stack will be placed or left on top.
+     */
+    @Override
+    public void dismissSplitScreenMode(boolean toTop) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "dismissSplitScreenMode()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityStack stack =
+                        mStackSupervisor.getDefaultDisplay().getSplitScreenStack();
+                if (toTop) {
+                    mStackSupervisor.resizeStackLocked(stack.mStackId, null /* destBounds */,
+                            null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                            true /* preserveWindows */, true /* allowResizeInDockedMode */,
+                            !DEFER_RESUME);
+                } else {
+                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, false /* onTop */);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Dismisses Pip
+     * @param animate True if the dismissal should be animated.
+     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
+     *                          default animation duration should be used.
+     */
+    @Override
+    public void dismissPip(boolean animate, int animationDuration) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "dismissPip()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final PinnedActivityStack stack =
+                        mStackSupervisor.getDefaultDisplay().getPinnedStack();
+
+                if (stack == null) {
+                    return;
+                }
+                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    throw new IllegalArgumentException("Stack: " + stack
+                            + " doesn't support animated resize.");
+                }
+                if (animate) {
+                    stack.animateResizePinnedStack(null /* sourceHintBounds */,
+                            null /* destBounds */, animationDuration, false /* fromFullscreen */);
+                } else {
+                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, true /* onTop */);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

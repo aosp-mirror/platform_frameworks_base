@@ -172,6 +172,8 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"စီမံခန့်ခွဲရန် အက်ပ်မရှိသောကြောင့် အလုပ်ပရိုဖိုင်ကို ဖျက်လိုက်ခြင်းဖြစ်သည်"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"အလုပ်ပရိုဖိုင် စီမံခန့်ခွဲရန်အက်ပ် မရှိပါ သို့မဟုတ် ပျက်စီးနေပါသည်။ ထို့ကြောင့် သင်၏ အလုပ်ပရိုဖိုင်နှင့် ဆက်စပ်နေသော ဒေတာများကို ဖျက်လိုက်ပါပြီ။ အကူအညီရယူရန် သင်၏စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ဤစက်ပစ္စည်းတွင် သင်၏ အလုပ်ပရိုဖိုင်မရှိတော့ပါ"</string>
+    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="6399790108123704477">"စက်ပစ္စည်းကို စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ဤစက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံပြီး ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နိုင်ပါသည်။ ထပ်မံလေ့လာရန် တို့ပါ။"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
@@ -980,10 +982,8 @@
     <string name="dial" msgid="4204975095406423102">"ဖုန်း"</string>
     <string name="map" msgid="6068210738233985748">"Maps"</string>
     <string name="browse" msgid="6993590095938149861">"ဘရောင်ဇာ"</string>
-    <!-- no translation found for sms (8250353543787396737) -->
-    <skip />
-    <!-- no translation found for add_contact (7990645816259405444) -->
-    <skip />
+    <string name="sms" msgid="8250353543787396737">"SMS စာတိုစနစ်"</string>
+    <string name="add_contact" msgid="7990645816259405444">"အဆက်အသွယ်"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
@@ -1187,7 +1187,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"ခွင့်ပြုချက်မလိုအပ်ပါ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"သင့်အတွက် ပိုက်ဆံကုန်ကျနိုင်ပါသည်"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"အိုကေ"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB ဖြင့်ဤစက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"ဤစက်ကို USB ဖြင့် အားသွင်းနေသည်"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို USB မှတစ်ဆင့် အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ဖိုင်လွှဲပြောင်းရန်အတွက် USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ဓာတ်ပုံလွှဲပြောင်းရန်အတွက် USB"</string>
@@ -1196,8 +1196,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ဆက်သွယ်ရေးစနစ်ကို ပိတ်ရန် တို့ပါ။"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားရှာပြင်စနစ် ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB အမှားရှာပြင်စနစ် ပိတ်ရန် တို့ပါ။"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
