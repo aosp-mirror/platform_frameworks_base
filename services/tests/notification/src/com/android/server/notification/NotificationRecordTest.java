@@ -15,6 +15,11 @@
  */
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEUTRAL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -38,8 +43,10 @@ import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -481,5 +488,64 @@ public class NotificationRecordTest extends NotificationTestCase {
                 record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
     }
 
+    @Test
+    public void testNotificationStats() throws Exception {
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
+        assertFalse(record.getStats().hasSeen());
+        assertFalse(record.isSeen());
+        assertFalse(record.getStats().hasDirectReplied());
+        assertFalse(record.getStats().hasExpanded());
+        assertFalse(record.getStats().hasInteracted());
+        assertFalse(record.getStats().hasViewedSettings());
+        assertFalse(record.getStats().hasSnoozed());
+
+        record.setSeen();
+        assertTrue(record.getStats().hasSeen());
+        assertTrue(record.isSeen());
+        assertFalse(record.getStats().hasDirectReplied());
+        assertFalse(record.getStats().hasExpanded());
+        assertFalse(record.getStats().hasInteracted());
+        assertFalse(record.getStats().hasViewedSettings());
+        assertFalse(record.getStats().hasSnoozed());
+
+        record.recordViewedSettings();
+        assertFalse(record.getStats().hasDirectReplied());
+        assertFalse(record.getStats().hasExpanded());
+        assertTrue(record.getStats().hasViewedSettings());
+        assertFalse(record.getStats().hasSnoozed());
+
+        record.recordSnoozed();
+        assertFalse(record.getStats().hasDirectReplied());
+        assertFalse(record.getStats().hasExpanded());
+        assertTrue(record.getStats().hasSnoozed());
+
+        record.recordExpanded();
+        assertFalse(record.getStats().hasDirectReplied());
+        assertTrue(record.getStats().hasExpanded());
+
+        record.recordDirectReplied();
+        assertTrue(record.getStats().hasDirectReplied());
+    }
+
+    @Test
+    public void testUserSentiment() throws Exception {
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(USER_SENTIMENT_NEUTRAL, record.getUserSentiment());
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
+        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertEquals(USER_SENTIMENT_NEGATIVE, record.getUserSentiment());
+    }
 }

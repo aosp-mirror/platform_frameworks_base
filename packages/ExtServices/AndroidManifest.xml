@@ -42,6 +42,15 @@
             </intent-filter>
         </service>
 
+        <service android:name=".notification.Assistant"
+                 android:label="@string/notification_assistant"
+                 android:permission="android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationAssistantService" />
+            </intent-filter>
+        </service>
+
         <library android:name="android.ext.services"/>
     </application>
 

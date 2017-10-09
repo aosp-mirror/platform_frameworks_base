@@ -102,6 +102,7 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
+import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -1818,7 +1819,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int id = n.getId();
         final int userId = n.getUserId();
         try {
-            mBarService.onNotificationClear(pkg, tag, id, userId);
+            // TODO: record actual dismissal surface
+            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(),
+                    NotificationStats.DISMISSAL_OTHER);
             if (FORCE_REMOTE_INPUT_HISTORY
                     && mKeysKeptForRemoteInput.contains(n.getKey())) {
                 mKeysKeptForRemoteInput.remove(n.getKey());

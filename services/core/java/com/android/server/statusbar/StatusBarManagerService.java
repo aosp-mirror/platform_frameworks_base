@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -943,13 +944,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void onNotificationClear(String pkg, String tag, int id, int userId) {
+    public void onNotificationClear(String pkg, String tag, int id, int userId, String key,
+            @NotificationStats.DismissalSurface int dismissalSurface) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClear(callingUid, callingPid, pkg, tag, id, userId);
+            mNotificationDelegate.onNotificationClear(
+                    callingUid, callingPid, pkg, tag, id, userId, key, dismissalSurface);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -977,6 +980,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         try {
             mNotificationDelegate.onNotificationExpansionChanged(
                     key, userAction, expanded);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onNotificationDirectReplied(String key) throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationDirectReplied(key);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onNotificationSettingsViewed(String key) throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationSettingsViewed(key);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

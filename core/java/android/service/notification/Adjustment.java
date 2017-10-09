@@ -56,6 +56,15 @@ public final class Adjustment implements Parcelable {
     public static final String KEY_GROUP_KEY = "key_group_key";
 
     /**
+     * Data type: int, one of {@link NotificationListenerService.Ranking#USER_SENTIMENT_POSITIVE},
+     * {@link NotificationListenerService.Ranking#USER_SENTIMENT_NEUTRAL},
+     * {@link NotificationListenerService.Ranking#USER_SENTIMENT_NEGATIVE}. Used to express how
+     * a user feels about notifications in the same {@link android.app.NotificationChannel} as
+     * the notification represented by {@link #getKey()}.
+     */
+    public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
+
+    /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.

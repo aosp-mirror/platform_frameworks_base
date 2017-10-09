@@ -58,10 +58,12 @@ interface IStatusBarService
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
-    void onNotificationClear(String pkg, String tag, int id, int userId);
+    void onNotificationClear(String pkg, String tag, int id, int userId, String key, int dismissalSurface);
     void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
             in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
+    void onNotificationDirectReplied(String key);
+    void onNotificationSettingsViewed(String key);
     void setSystemUiVisibility(int vis, int mask, String cause);
 
     void onGlobalActionsShown();

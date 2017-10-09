@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -265,7 +266,10 @@ public abstract class NotificationListenerService extends Service {
     @GuardedBy("mLock")
     private RankingMap mRankingMap;
 
-    private INotificationManager mNoMan;
+    /**
+     * @hide
+     */
+    protected INotificationManager mNoMan;
 
     /**
      * Only valid after a successful call to (@link registerAsService}.
@@ -386,6 +390,18 @@ public abstract class NotificationListenerService extends Service {
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
             int reason) {
         onNotificationRemoved(sbn, rankingMap);
+    }
+
+    /**
+     * NotificationStats are not populated for notification listeners, so fall back to
+     * {@link #onNotificationRemoved(StatusBarNotification, RankingMap, int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
+            NotificationStats stats, int reason) {
+        onNotificationRemoved(sbn, rankingMap, reason);
     }
 
     /**
@@ -1200,7 +1216,7 @@ public abstract class NotificationListenerService extends Service {
 
         @Override
         public void onNotificationRemoved(IStatusBarNotificationHolder sbnHolder,
-                NotificationRankingUpdate update, int reason) {
+                NotificationRankingUpdate update, NotificationStats stats, int reason) {
             StatusBarNotification sbn;
             try {
                 sbn = sbnHolder.get();
@@ -1215,6 +1231,7 @@ public abstract class NotificationListenerService extends Service {
                 args.arg1 = sbn;
                 args.arg2 = mRankingMap;
                 args.arg3 = reason;
+                args.arg4 = stats;
                 mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_REMOVED,
                         args).sendToTarget();
             }
@@ -1324,6 +1341,26 @@ public abstract class NotificationListenerService extends Service {
          * @hide */
         public static final int VISIBILITY_NO_OVERRIDE = NotificationManager.VISIBILITY_NO_OVERRIDE;
 
+        /**
+         * The user is likely to have a negative reaction to this notification.
+         */
+        public static final int USER_SENTIMENT_NEGATIVE = -1;
+        /**
+         * It is not known how the user will react to this notification.
+         */
+        public static final int USER_SENTIMENT_NEUTRAL = 0;
+        /**
+         * The user is likely to have a positive reaction to this notification.
+         */
+        public static final int USER_SENTIMENT_POSITIVE = 1;
+
+        /** @hide */
+        @IntDef(prefix = { "USER_SENTIMENT_" }, value = {
+                USER_SENTIMENT_NEGATIVE, USER_SENTIMENT_NEUTRAL, USER_SENTIMENT_POSITIVE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface UserSentiment {}
+
         private String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
@@ -1341,6 +1378,7 @@ public abstract class NotificationListenerService extends Service {
         // Notification assistant snooze criteria.
         private ArrayList<SnoozeCriterion> mSnoozeCriteria;
         private boolean mShowBadge;
+        private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
 
         public Ranking() {}
 
@@ -1436,6 +1474,17 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns how the system thinks the user feels about notifications from the
+         * channel provided by {@link #getChannel()}. You can use this information to expose
+         * controls to help the user block this channel's notifications, if the sentiment is
+         * {@link #USER_SENTIMENT_NEGATIVE}, or emphasize this notification if the sentiment is
+         * {@link #USER_SENTIMENT_POSITIVE}.
+         */
+        public int getUserSentiment() {
+            return mUserSentiment;
+        }
+
+        /**
          * If the {@link NotificationAssistantService} has added people to this notification, then
          * this will be non-null.
          * @hide
@@ -1471,7 +1520,8 @@ public abstract class NotificationListenerService extends Service {
                 int visibilityOverride, int suppressedVisualEffects, int importance,
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
-                ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge) {
+                ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
+                int userSentiment) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1485,6 +1535,7 @@ public abstract class NotificationListenerService extends Service {
             mOverridePeople = overridePeople;
             mSnoozeCriteria = snoozeCriteria;
             mShowBadge = showBadge;
+            mUserSentiment = userSentiment;
         }
 
         /**
@@ -1532,6 +1583,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, ArrayList<String>> mOverridePeople;
         private ArrayMap<String, ArrayList<SnoozeCriterion>> mSnoozeCriteria;
         private ArrayMap<String, Boolean> mShowBadge;
+        private ArrayMap<String, Integer> mUserSentiment;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1560,7 +1612,7 @@ public abstract class NotificationListenerService extends Service {
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key));
+                    getShowBadge(key), getUserSentiment(key));
             return rank >= 0;
         }
 
@@ -1677,6 +1729,17 @@ public abstract class NotificationListenerService extends Service {
             return showBadge == null ? false : showBadge.booleanValue();
         }
 
+        private int getUserSentiment(String key) {
+            synchronized (this) {
+                if (mUserSentiment == null) {
+                    buildUserSentimentLocked();
+                }
+            }
+            Integer userSentiment = mUserSentiment.get(key);
+            return userSentiment == null
+                    ? Ranking.USER_SENTIMENT_NEUTRAL : userSentiment.intValue();
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1776,6 +1839,15 @@ public abstract class NotificationListenerService extends Service {
             }
         }
 
+        // Locked by 'this'
+        private void buildUserSentimentLocked() {
+            Bundle userSentiment = mRankingUpdate.getUserSentiment();
+            mUserSentiment = new ArrayMap<>(userSentiment.size());
+            for (String key : userSentiment.keySet()) {
+                mUserSentiment.put(key, userSentiment.getInt(key));
+            }
+        }
+
         // ----------- Parcelable
 
         @Override
@@ -1835,8 +1907,9 @@ public abstract class NotificationListenerService extends Service {
                     StatusBarNotification sbn = (StatusBarNotification) args.arg1;
                     RankingMap rankingMap = (RankingMap) args.arg2;
                     int reason = (int) args.arg3;
+                    NotificationStats stats = (NotificationStats) args.arg4;
                     args.recycle();
-                    onNotificationRemoved(sbn, rankingMap, reason);
+                    onNotificationRemoved(sbn, rankingMap, stats, reason);
                 } break;
 
                 case MSG_ON_LISTENER_CONNECTED: {
