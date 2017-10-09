@@ -41,8 +41,10 @@ import android.hidl.manager.V1_0.IServiceNotification;
 import android.hardware.health.V2_0.HealthInfo;
 import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.IHealth;
+import android.hardware.health.V2_0.Result;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
+import android.os.BatteryProperty;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -58,6 +60,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.battery.BatteryServiceDumpProto;
 import android.util.EventLog;
+import android.util.MutableInt;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -170,6 +173,7 @@ public final class BatteryService extends SystemService {
 
     private HealthServiceWrapper mHealthServiceWrapper;
     private HealthHalCallback mHealthHalCallback;
+    private BatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
 
     public BatteryService(Context context) {
         super(context);
@@ -213,6 +217,8 @@ public final class BatteryService extends SystemService {
 
         mBinderService = new BinderService();
         publishBinderService("battery", mBinderService);
+        mBatteryPropertiesRegistrar = new BatteryPropertiesRegistrar();
+        publishBinderService("batteryproperties", mBatteryPropertiesRegistrar);
         publishLocalService(BatteryManagerInternal.class, new LocalService());
     }
 
@@ -1043,6 +1049,63 @@ public final class BatteryService extends SystemService {
         }
     }
 
+    // Reduced IBatteryPropertiesRegistrar that only implements getProperty for usage
+    // in BatteryManager.
+    private final class BatteryPropertiesRegistrar extends IBatteryPropertiesRegistrar.Stub {
+        public void registerListener(IBatteryPropertiesListener listener) {
+            Slog.e(TAG, "health: must not call registerListener on battery properties");
+        }
+        public void unregisterListener(IBatteryPropertiesListener listener) {
+            Slog.e(TAG, "health: must not call unregisterListener on battery properties");
+        }
+        public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
+            IHealth service = mHealthServiceWrapper.getLastService();
+            final MutableInt outResult = new MutableInt(Result.NOT_SUPPORTED);
+            switch(id) {
+                case BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER:
+                    service.getChargeCounter((int result, int value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_CURRENT_NOW:
+                    service.getCurrentNow((int result, int value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE:
+                    service.getCurrentAverage((int result, int value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_CAPACITY:
+                    service.getCapacity((int result, int value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_STATUS:
+                    service.getChargeStatus((int result, int value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER:
+                    service.getEnergyCounter((int result, long value) -> {
+                        outResult.value = result;
+                        if (result == Result.SUCCESS) prop.setLong(value);
+                    });
+                    break;
+            }
+            return outResult.value;
+        }
+        public void scheduleUpdate() {
+            Slog.e(TAG, "health: must not call scheduleUpdate on battery properties");
+        }
+    }
+
     private final class LocalService extends BatteryManagerInternal {
         @Override
         public boolean isPowered(int plugTypeSet) {
@@ -1115,6 +1178,10 @@ public final class BatteryService extends SystemService {
          * constructor.
          */
         HealthServiceWrapper() {
+        }
+
+        IHealth getLastService() {
+            return mLastService.get();
         }
 
         /**
