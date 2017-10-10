@@ -16,6 +16,8 @@
 
 package com.android.server.statusbar;
 
+import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
+
 import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
@@ -359,6 +361,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                             statusBarAnimationsStartTime, statusBarAnimationsDuration);
                 } catch (RemoteException ex) {}
             }
+        }
+
+        @Override
+        public boolean isGlobalActionsDisabled() {
+            return (mDisabled2 & DISABLE2_GLOBAL_ACTIONS) != 0;
         }
 
         @Override

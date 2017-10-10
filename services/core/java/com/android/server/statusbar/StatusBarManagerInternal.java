@@ -77,6 +77,7 @@ public interface StatusBarManagerInternal {
 
     void setCurrentUser(int newUserId);
 
+    boolean isGlobalActionsDisabled();
     void setGlobalActionsListener(GlobalActionsListener listener);
     void showGlobalActions();
 

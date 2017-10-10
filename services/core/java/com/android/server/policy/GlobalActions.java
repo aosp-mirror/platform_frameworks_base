@@ -58,6 +58,9 @@ class GlobalActions implements GlobalActionsListener {
 
     public void showDialog(boolean keyguardShowing, boolean deviceProvisioned) {
         if (DEBUG) Slog.d(TAG, "showDialog " + keyguardShowing + " " + deviceProvisioned);
+        if (mStatusBarInternal.isGlobalActionsDisabled()) {
+            return;
+        }
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = deviceProvisioned;
         mShowing = true;

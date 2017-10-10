@@ -16,27 +16,6 @@ package com.android.systemui.globalactions;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
-import com.android.internal.R;
-import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
-import com.android.systemui.HardwareUiLayout;
-import com.android.systemui.Interpolators;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
-import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
-import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
-
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.WallpaperManager;
@@ -69,7 +48,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.MathUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,7 +64,23 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.R;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.GradientDrawable;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
+import com.android.systemui.HardwareUiLayout;
+import com.android.systemui.Interpolators;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +90,8 @@ import java.util.List;
  * may show depending on whether the keyguard is showing, and whether the device
  * is provisioned.
  */
-class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
+class GlobalActionsDialog implements DialogInterface.OnDismissListener,
+        DialogInterface.OnClickListener {
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -193,6 +188,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         } else {
             handleShow();
         }
+    }
+
+    /**
+     * Dismiss the global actions dialog, if it's currently shown
+     */
+    public void dismissDialog() {
+        mHandler.removeMessages(MESSAGE_DISMISS);
+        mHandler.sendEmptyMessage(MESSAGE_DISMISS);
     }
 
     private void awakenIfNecessary() {
