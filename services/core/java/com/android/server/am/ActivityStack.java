@@ -107,7 +107,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -346,7 +345,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
     private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
     private final Rect mTmpRect2 = new Rect();
-    private final Point mTmpSize = new Point();
 
     /** Run all ActivityStacks through this */
     protected final ActivityStackSupervisor mStackSupervisor;
@@ -5123,22 +5121,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.mKeyguardController
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
-        if (!layoutTaskInStack(task, info.windowLayout) && mBounds != null && task.isResizeable()
-                && !isLockscreenShown) {
+        if (!mStackSupervisor.getLaunchingBoundsController().layoutTask(task, info.windowLayout)
+                && mBounds != null && task.isResizeable() && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
         }
         task.createWindowContainer(toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         return task;
-    }
-
-    boolean layoutTaskInStack(TaskRecord task, ActivityInfo.WindowLayout windowLayout) {
-        if (!task.inFreeformWindowingMode()) {
-            return false;
-        }
-        mStackSupervisor.getLaunchingTaskPositioner()
-                .updateDefaultBounds(task, mTaskHistory, windowLayout);
-
-        return true;
     }
 
     ArrayList<TaskRecord> getAllTasks() {
