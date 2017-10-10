@@ -215,6 +215,9 @@ static void readEvents(JNIEnv* env, int loggerMode, jintArray tags, jlong startT
             env->CallBooleanMethod(out, gCollectionAddID, event);
             env->DeleteLocalRef(event);
             env->DeleteLocalRef(array);
+            if (env->ExceptionCheck() == JNI_TRUE) {
+                break;
+            }
         }
     }
 
