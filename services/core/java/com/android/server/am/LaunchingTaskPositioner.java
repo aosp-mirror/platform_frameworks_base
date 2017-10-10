@@ -64,22 +64,11 @@ class LaunchingTaskPositioner {
     private static final int SHIFT_POLICY_HORIZONTAL_RIGHT = 2;
     private static final int SHIFT_POLICY_HORIZONTAL_LEFT = 3;
 
-    private boolean mDefaultStartBoundsConfigurationSet = false;
     private final Rect mAvailableRect = new Rect();
     private final Rect mTmpProposal = new Rect();
     private final Rect mTmpOriginal = new Rect();
 
-    private int mDefaultFreeformStartX;
-    private int mDefaultFreeformStartY;
-    private int mDefaultFreeformWidth;
-    private int mDefaultFreeformHeight;
-    private int mDefaultFreeformStepHorizontal;
-    private int mDefaultFreeformStepVertical;
     private final Point mDisplaySize = new Point();
-
-    void setDisplaySize(Point size) {
-        mDisplaySize.set(size.x, size.y);
-    }
 
     /**
      * Tries to set task's bound in a way that it won't collide with any other task. By colliding
@@ -93,52 +82,47 @@ class LaunchingTaskPositioner {
      */
     void updateDefaultBounds(TaskRecord task, ArrayList<TaskRecord> tasks,
             @Nullable ActivityInfo.WindowLayout windowLayout) {
-        if (!mDefaultStartBoundsConfigurationSet) {
-            return;
-        }
+        updateAvailableRect(task, mAvailableRect);
+
         if (windowLayout == null) {
-            positionCenter(task, tasks, mDefaultFreeformWidth, mDefaultFreeformHeight);
+            positionCenter(task, tasks, mAvailableRect, getFreeformWidth(mAvailableRect),
+                    getFreeformHeight(mAvailableRect));
             return;
         }
-        int width = getFinalWidth(windowLayout);
-        int height = getFinalHeight(windowLayout);
+        int width = getFinalWidth(windowLayout, mAvailableRect);
+        int height = getFinalHeight(windowLayout, mAvailableRect);
         int verticalGravity = windowLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
         int horizontalGravity = windowLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (verticalGravity == Gravity.TOP) {
             if (horizontalGravity == Gravity.RIGHT) {
-                positionTopRight(task, tasks, width, height);
+                positionTopRight(task, tasks, mAvailableRect, width, height);
             } else {
-                positionTopLeft(task, tasks, width, height);
+                positionTopLeft(task, tasks, mAvailableRect, width, height);
             }
         } else if (verticalGravity == Gravity.BOTTOM) {
             if (horizontalGravity == Gravity.RIGHT) {
-                positionBottomRight(task, tasks, width, height);
+                positionBottomRight(task, tasks, mAvailableRect, width, height);
             } else {
-                positionBottomLeft(task, tasks, width, height);
+                positionBottomLeft(task, tasks, mAvailableRect, width, height);
             }
         } else {
             // Some fancy gravity setting that we don't support yet. We just put the activity in the
             // center.
             Slog.w(TAG, "Received unsupported gravity: " + windowLayout.gravity
                     + ", positioning in the center instead.");
-            positionCenter(task, tasks, width, height);
+            positionCenter(task, tasks, mAvailableRect, width, height);
         }
     }
 
-    void configure(Rect availableSpace) {
-        if (availableSpace == null) {
-            mAvailableRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        } else {
-            mAvailableRect.set(availableSpace);
-        }
+    private void updateAvailableRect(TaskRecord task, Rect availableRect) {
+        final Rect stackBounds = task.getStack().mBounds;
 
-        mDefaultFreeformStartX = getFreeformStartLeft(mAvailableRect);
-        mDefaultFreeformStartY = getFreeformStartTop(mAvailableRect);
-        mDefaultFreeformWidth = getFreeformWidth(mAvailableRect);
-        mDefaultFreeformHeight = getFreeformHeight(mAvailableRect);
-        mDefaultFreeformStepHorizontal = getHorizontalStep(mAvailableRect);
-        mDefaultFreeformStepVertical = getVerticalStep(mAvailableRect);
-        mDefaultStartBoundsConfigurationSet = true;
+        if (stackBounds != null) {
+            availableRect.set(stackBounds);
+        } else {
+            task.getStack().getDisplay().mDisplay.getSize(mDisplaySize);
+            availableRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
+        }
     }
 
     @VisibleForTesting
@@ -173,72 +157,79 @@ class LaunchingTaskPositioner {
 
 
 
-    private int getFinalWidth(ActivityInfo.WindowLayout windowLayout) {
-        int width = mDefaultFreeformWidth;
+    private int getFinalWidth(ActivityInfo.WindowLayout windowLayout, Rect availableRect) {
+        int width = getFreeformWidth(availableRect);
         if (windowLayout.width > 0) {
             width = windowLayout.width;
         }
         if (windowLayout.widthFraction > 0) {
-            width = (int) (mAvailableRect.width() * windowLayout.widthFraction);
+            width = (int) (availableRect.width() * windowLayout.widthFraction);
         }
         return width;
     }
 
-    private int getFinalHeight(ActivityInfo.WindowLayout windowLayout) {
-        int height = mDefaultFreeformHeight;
+    private int getFinalHeight(ActivityInfo.WindowLayout windowLayout, Rect availableRect) {
+        int height = getFreeformHeight(availableRect);
         if (windowLayout.height > 0) {
             height = windowLayout.height;
         }
         if (windowLayout.heightFraction > 0) {
-            height = (int) (mAvailableRect.height() * windowLayout.heightFraction);
+            height = (int) (availableRect.height() * windowLayout.heightFraction);
         }
         return height;
     }
 
-    private void positionBottomLeft(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
-            int height) {
-        mTmpProposal.set(mAvailableRect.left, mAvailableRect.bottom - height,
-                mAvailableRect.left + width, mAvailableRect.bottom);
-        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_RIGHT);
+    private void positionBottomLeft(TaskRecord task, ArrayList<TaskRecord> tasks,
+            Rect availableRect, int width, int height) {
+        mTmpProposal.set(availableRect.left, availableRect.bottom - height,
+                availableRect.left + width, availableRect.bottom);
+        position(task, tasks, availableRect, mTmpProposal, !ALLOW_RESTART,
+                SHIFT_POLICY_HORIZONTAL_RIGHT);
     }
 
-    private void positionBottomRight(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
-            int height) {
-        mTmpProposal.set(mAvailableRect.right - width, mAvailableRect.bottom - height,
-                mAvailableRect.right, mAvailableRect.bottom);
-        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_LEFT);
+    private void positionBottomRight(TaskRecord task, ArrayList<TaskRecord> tasks,
+            Rect availableRect, int width, int height) {
+        mTmpProposal.set(availableRect.right - width, availableRect.bottom - height,
+                availableRect.right, availableRect.bottom);
+        position(task, tasks, availableRect, mTmpProposal, !ALLOW_RESTART,
+                SHIFT_POLICY_HORIZONTAL_LEFT);
     }
 
-    private void positionTopLeft(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
-            int height) {
-        mTmpProposal.set(mAvailableRect.left, mAvailableRect.top,
-                mAvailableRect.left + width, mAvailableRect.top + height);
-        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_RIGHT);
+    private void positionTopLeft(TaskRecord task, ArrayList<TaskRecord> tasks,
+            Rect availableRect, int width, int height) {
+        mTmpProposal.set(availableRect.left, availableRect.top,
+                availableRect.left + width, availableRect.top + height);
+        position(task, tasks, availableRect, mTmpProposal, !ALLOW_RESTART,
+                SHIFT_POLICY_HORIZONTAL_RIGHT);
     }
 
-    private void positionTopRight(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
-            int height) {
-        mTmpProposal.set(mAvailableRect.right - width, mAvailableRect.top,
-                mAvailableRect.right, mAvailableRect.top + height);
-        position(task, tasks, mTmpProposal, !ALLOW_RESTART, SHIFT_POLICY_HORIZONTAL_LEFT);
+    private void positionTopRight(TaskRecord task, ArrayList<TaskRecord> tasks,
+            Rect availableRect, int width, int height) {
+        mTmpProposal.set(availableRect.right - width, availableRect.top,
+                availableRect.right, availableRect.top + height);
+        position(task, tasks, availableRect, mTmpProposal, !ALLOW_RESTART,
+                SHIFT_POLICY_HORIZONTAL_LEFT);
     }
 
-    private void positionCenter(TaskRecord task, ArrayList<TaskRecord> tasks, int width,
-            int height) {
-        mTmpProposal.set(mDefaultFreeformStartX, mDefaultFreeformStartY,
-                mDefaultFreeformStartX + width, mDefaultFreeformStartY + height);
-        position(task, tasks, mTmpProposal, ALLOW_RESTART, SHIFT_POLICY_DIAGONAL_DOWN);
+    private void positionCenter(TaskRecord task, ArrayList<TaskRecord> tasks,
+            Rect availableRect, int width, int height) {
+        final int defaultFreeformLeft = getFreeformStartLeft(availableRect);
+        final int defaultFreeformTop = getFreeformStartTop(availableRect);
+        mTmpProposal.set(defaultFreeformLeft, defaultFreeformTop,
+                defaultFreeformLeft + width, defaultFreeformTop + height);
+        position(task, tasks, availableRect, mTmpProposal, ALLOW_RESTART,
+                SHIFT_POLICY_DIAGONAL_DOWN);
     }
 
-    private void position(TaskRecord task, ArrayList<TaskRecord> tasks, Rect proposal,
-            boolean allowRestart, int shiftPolicy) {
+    private void position(TaskRecord task, ArrayList<TaskRecord> tasks, Rect availableRect,
+            Rect proposal, boolean allowRestart, int shiftPolicy) {
         mTmpOriginal.set(proposal);
         boolean restarted = false;
         while (boundsConflict(proposal, tasks)) {
             // Unfortunately there is already a task at that spot, so we need to look for some
             // other place.
-            shiftStartingPoint(proposal, shiftPolicy);
-            if (shiftedTooFar(proposal, shiftPolicy)) {
+            shiftStartingPoint(proposal, availableRect, shiftPolicy);
+            if (shiftedTooFar(proposal, availableRect, shiftPolicy)) {
                 // We don't want the task to go outside of the stack, because it won't look
                 // nice. Depending on the starting point we either restart, or immediately give up.
                 if (!allowRestart) {
@@ -247,13 +238,13 @@ class LaunchingTaskPositioner {
                 }
                 // We must have started not from the top. Let's restart from there because there
                 // might be some space there.
-                proposal.set(mAvailableRect.left, mAvailableRect.top,
-                        mAvailableRect.left + proposal.width(),
-                        mAvailableRect.top + proposal.height());
+                proposal.set(availableRect.left, availableRect.top,
+                        availableRect.left + proposal.width(),
+                        availableRect.top + proposal.height());
                 restarted = true;
             }
-            if (restarted && (proposal.left > mDefaultFreeformStartX
-                    || proposal.top > mDefaultFreeformStartY)) {
+            if (restarted && (proposal.left > getFreeformStartLeft(availableRect)
+                    || proposal.top > getFreeformStartTop(availableRect))) {
                 // If we restarted and crossed the initial position, let's not struggle anymore.
                 // The user already must have ton of tasks visible, we can just smack the new
                 // one in the center.
@@ -264,27 +255,30 @@ class LaunchingTaskPositioner {
         task.updateOverrideConfiguration(proposal);
     }
 
-    private boolean shiftedTooFar(Rect start, int shiftPolicy) {
+    private boolean shiftedTooFar(Rect start, Rect availableRect, int shiftPolicy) {
         switch (shiftPolicy) {
             case SHIFT_POLICY_HORIZONTAL_LEFT:
-                return start.left < mAvailableRect.left;
+                return start.left < availableRect.left;
             case SHIFT_POLICY_HORIZONTAL_RIGHT:
-                return start.right > mAvailableRect.right;
+                return start.right > availableRect.right;
             default: // SHIFT_POLICY_DIAGONAL_DOWN
-                return start.right > mAvailableRect.right || start.bottom > mAvailableRect.bottom;
+                return start.right > availableRect.right || start.bottom > availableRect.bottom;
         }
     }
 
-    private void shiftStartingPoint(Rect posposal, int shiftPolicy) {
+    private void shiftStartingPoint(Rect posposal, Rect availableRect, int shiftPolicy) {
+        final int defaultFreeformStepHorizontal = getHorizontalStep(availableRect);
+        final int defaultFreeformStepVertical = getVerticalStep(availableRect);
+
         switch (shiftPolicy) {
             case SHIFT_POLICY_HORIZONTAL_LEFT:
-                posposal.offset(-mDefaultFreeformStepHorizontal, 0);
+                posposal.offset(-defaultFreeformStepHorizontal, 0);
                 break;
             case SHIFT_POLICY_HORIZONTAL_RIGHT:
-                posposal.offset(mDefaultFreeformStepHorizontal, 0);
+                posposal.offset(defaultFreeformStepHorizontal, 0);
                 break;
             default: // SHIFT_POLICY_DIAGONAL_DOWN:
-                posposal.offset(mDefaultFreeformStepHorizontal, mDefaultFreeformStepVertical);
+                posposal.offset(defaultFreeformStepHorizontal, defaultFreeformStepVertical);
                 break;
         }
     }
@@ -322,9 +316,5 @@ class LaunchingTaskPositioner {
     private static final boolean closeRightBottomCorner(Rect first, Rect second) {
         return Math.abs(first.right - second.right) < BOUNDS_CONFLICT_MIN_DISTANCE
                 && Math.abs(first.bottom - second.bottom) < BOUNDS_CONFLICT_MIN_DISTANCE;
-    }
-
-    void reset() {
-        mDefaultStartBoundsConfigurationSet = false;
     }
 }

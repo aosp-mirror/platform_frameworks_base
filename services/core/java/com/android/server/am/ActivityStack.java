@@ -358,8 +358,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** Run all ActivityStacks through this */
     protected final ActivityStackSupervisor mStackSupervisor;
 
-    private final LaunchingTaskPositioner mTaskPositioner;
-
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
 
@@ -462,8 +460,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mWindowManager = mService.mWindowManager;
         mStackId = stackId;
         mCurrentUser = mService.mUserController.getCurrentUserId();
-        mTaskPositioner = windowingMode == WINDOWING_MODE_FREEFORM
-                ? new LaunchingTaskPositioner() : null;
         mTmpRect2.setEmpty();
         setWindowingMode(windowingMode);
         setActivityType(activityType);
@@ -504,11 +500,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mDisplayId = activityDisplay.mDisplayId;
         mBounds = bounds != null ? new Rect(bounds) : null;
         mFullscreen = mBounds == null;
-        if (mTaskPositioner != null) {
-            activityDisplay.mDisplay.getSize(mTmpSize);
-            mTaskPositioner.setDisplaySize(mTmpSize);
-            mTaskPositioner.configure(mBounds);
-        }
+
         onParentChanged();
 
         activityDisplay.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
@@ -536,9 +528,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             display.removeChild(this);
         }
         mDisplayId = INVALID_DISPLAY;
-        if (mTaskPositioner != null) {
-            mTaskPositioner.reset();
-        }
     }
 
     /** Removes the stack completely. Also calls WindowManager to do the same on its side. */
@@ -642,9 +631,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     void setBounds(Rect bounds) {
         mBounds = mFullscreen ? null : new Rect(bounds);
-        if (mTaskPositioner != null) {
-            mTaskPositioner.configure(bounds);
-        }
     }
 
     ActivityRecord topRunningActivityLocked() {
@@ -5137,10 +5123,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean layoutTaskInStack(TaskRecord task, ActivityInfo.WindowLayout windowLayout) {
-        if (mTaskPositioner == null) {
+        if (!task.inFreeformWindowingMode()) {
             return false;
         }
-        mTaskPositioner.updateDefaultBounds(task, mTaskHistory, windowLayout);
+        mStackSupervisor.getLaunchingTaskPositioner()
+                .updateDefaultBounds(task, mTaskHistory, windowLayout);
+
         return true;
     }
 
