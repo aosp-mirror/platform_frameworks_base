@@ -542,9 +542,9 @@ import java.util.List;
  * <ul>
  *     <li> <p>When creating a new document, the backing database entry or file for
  *             it is created immediately.  For example, if the user chooses to write
- *             a new e-mail, a new entry for that e-mail is created as soon as they
+ *             a new email, a new entry for that email is created as soon as they
  *             start entering data, so that if they go to any other activity after
- *             that point this e-mail will now appear in the list of drafts.</p>
+ *             that point this email will now appear in the list of drafts.</p>
  *     <li> <p>When an activity's <code>onPause()</code> method is called, it should
  *             commit to the backing content provider or file any changes the user
  *             has made.  This ensures that those changes will be seen by any other
