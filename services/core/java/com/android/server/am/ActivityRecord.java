@@ -2732,6 +2732,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void setShowWhenLocked(boolean showWhenLocked) {
         mShowWhenLocked = showWhenLocked;
+        mStackSupervisor.ensureActivitiesVisibleLocked(null, 0 /* configChanges */,
+                false /* preserveWindows */);
     }
 
     /**
