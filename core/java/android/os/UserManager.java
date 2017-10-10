@@ -140,6 +140,18 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_WIFI = "no_config_wifi";
 
     /**
+     * Specifies if a user is disallowed from changing the device
+     * language. The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_LOCALE = "no_config_locale";
+
+    /**
      * Specifies if a user is disallowed from installing applications.
      * The default value is <code>false</code>.
      *
