@@ -683,9 +683,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4Address() {
         for (LinkAddress address : mLinkAddresses) {
-          if (address.getAddress() instanceof Inet4Address) {
-            return true;
-          }
+            if (address.getAddress() instanceof Inet4Address) {
+                return true;
+            }
         }
         return false;
     }
@@ -725,9 +725,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4DefaultRoute() {
         for (RouteInfo r : mRoutes) {
-          if (r.isIPv4Default()) {
-            return true;
-          }
+            if (r.isIPv4Default()) {
+                return true;
+            }
         }
         return false;
     }
@@ -740,9 +740,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv6DefaultRoute() {
         for (RouteInfo r : mRoutes) {
-          if (r.isIPv6Default()) {
-            return true;
-          }
+            if (r.isIPv6Default()) {
+                return true;
+            }
         }
         return false;
     }
@@ -755,9 +755,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv4DnsServer() {
         for (InetAddress ia : mDnses) {
-          if (ia instanceof Inet4Address) {
-            return true;
-          }
+            if (ia instanceof Inet4Address) {
+                return true;
+            }
         }
         return false;
     }
@@ -770,9 +770,9 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean hasIPv6DnsServer() {
         for (InetAddress ia : mDnses) {
-          if (ia instanceof Inet6Address) {
-            return true;
-          }
+            if (ia instanceof Inet6Address) {
+                return true;
+            }
         }
         return false;
     }
