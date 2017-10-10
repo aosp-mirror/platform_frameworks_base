@@ -169,13 +169,13 @@ class RippleForeground extends RippleComponent {
         final ObjectAnimator tweenRadius = ObjectAnimator.ofFloat(this, TWEEN_RADIUS, 1);
         tweenRadius.setAutoCancel(true);
         tweenRadius.setDuration(duration);
-        tweenRadius.setInterpolator(LINEAR_INTERPOLATOR);
+        tweenRadius.setInterpolator(DECELERATE_INTERPOLATOR);
         tweenRadius.setStartDelay(RIPPLE_ENTER_DELAY);
 
         final ObjectAnimator tweenOrigin = ObjectAnimator.ofFloat(this, TWEEN_ORIGIN, 1);
         tweenOrigin.setAutoCancel(true);
         tweenOrigin.setDuration(duration);
-        tweenOrigin.setInterpolator(LINEAR_INTERPOLATOR);
+        tweenOrigin.setInterpolator(DECELERATE_INTERPOLATOR);
         tweenOrigin.setStartDelay(RIPPLE_ENTER_DELAY);
 
         final ObjectAnimator opacity = ObjectAnimator.ofFloat(this, OPACITY, 1);
