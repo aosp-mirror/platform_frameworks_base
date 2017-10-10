@@ -4665,6 +4665,9 @@ message MetricsEvent {
     // OS: P
     DIALOG_CLEAR_ADB_KEYS = 1223;
 
+    // Open: Settings > Developer options > Quick setting tile config
+    DEVELOPMENT_QS_TILE_CONFIG = 1224;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
