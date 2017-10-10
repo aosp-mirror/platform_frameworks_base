@@ -21289,9 +21289,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
         if (mPrivappPermissionsViolations != null) {
-            Slog.wtf(TAG,"Signature|privileged permissions not in "
+            throw new IllegalStateException("Signature|privileged permissions not in "
                     + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
-            mPrivappPermissionsViolations = null;
         }
     }
 

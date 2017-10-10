@@ -1640,11 +1640,7 @@ public final class SystemServer {
         traceEnd();
 
         traceBeginAndSlog("MakePackageManagerServiceReady");
-        try {
-            mPackageManagerService.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Package Manager Service ready", e);
-        }
+        mPackageManagerService.systemReady();
         traceEnd();
 
         traceBeginAndSlog("MakeDisplayManagerServiceReady");
