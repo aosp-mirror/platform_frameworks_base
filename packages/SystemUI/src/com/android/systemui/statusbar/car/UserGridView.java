@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.car;
 
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -29,13 +26,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -47,44 +42,21 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  * One of the uses of this is for the lock screen in auto.
  */
 public class UserGridView extends ViewPager {
-    private static final int EXPAND_ANIMATION_TIME_MS = 200;
-    private static final int HIDE_ANIMATION_TIME_MS = 133;
-
     private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
     private UserSelectionListener mUserSelectionListener;
-    private ValueAnimator mHeightAnimator;
-    private int mTargetHeight;
-    private int mHeightChildren;
-    private boolean mShowing;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController,
-            boolean showInitially) {
+    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController) {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);
         addOnLayoutChangeListener(mAdapter);
         setAdapter(mAdapter);
-        mShowing = showInitially;
-    }
-
-    public boolean isShowing() {
-        return mShowing;
-    }
-
-    public void show() {
-        mShowing = true;
-        animateHeightChange(getMeasuredHeight(), mHeightChildren);
-    }
-
-    public void hide() {
-        mShowing = false;
-        animateHeightChange(getMeasuredHeight(), 0);
     }
 
     public void onUserSwitched(int newUserId) {
@@ -115,13 +87,6 @@ public class UserGridView extends ViewPager {
                 height = Math.max(child.getMeasuredHeight(), height);
             }
 
-            mHeightChildren = height;
-
-            // Override the height if it's not showing.
-            if (!mShowing) {
-                height = 0;
-            }
-
             // Respect the AT_MOST request from parent.
             if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
                 height = Math.min(MeasureSpec.getSize(heightMeasureSpec), height);
@@ -130,58 +95,6 @@ public class UserGridView extends ViewPager {
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    private void animateHeightChange(int oldHeight, int newHeight) {
-        // If there is no change in height or an animation is already in progress towards the
-        // desired height, then there's no need to make any changes.
-        if (oldHeight == newHeight || newHeight == mTargetHeight) {
-            return;
-        }
-
-        // Animation in progress is not going towards the new target, so cancel it.
-        if (mHeightAnimator != null){
-            mHeightAnimator.cancel();
-        }
-
-        mTargetHeight = newHeight;
-        mHeightAnimator = ValueAnimator.ofInt(oldHeight, mTargetHeight);
-        mHeightAnimator.addUpdateListener(valueAnimator -> {
-            ViewGroup.LayoutParams layoutParams = getLayoutParams();
-            layoutParams.height = (Integer) valueAnimator.getAnimatedValue();
-            requestLayout();
-        });
-        mHeightAnimator.addListener(new AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {}
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                // ValueAnimator does not guarantee that the update listener will get an update
-                // to the final value, so here, the final value is set.  Though the final calculated
-                // height (mTargetHeight) could be set, WRAP_CONTENT is more appropriate.
-                ViewGroup.LayoutParams layoutParams = getLayoutParams();
-                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                requestLayout();
-                mHeightAnimator = null;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {}
-        });
-
-        mHeightAnimator.setInterpolator(new FastOutSlowInInterpolator());
-        if (oldHeight < newHeight) {
-            // Expanding
-            mHeightAnimator.setDuration(EXPAND_ANIMATION_TIME_MS);
-        } else {
-            // Hiding
-            mHeightAnimator.setDuration(HIDE_ANIMATION_TIME_MS);
-        }
-        mHeightAnimator.start();
     }
 
     /**
@@ -245,8 +158,8 @@ public class UserGridView extends ViewPager {
                 // to work for whatever reason.  Instead, set a right margin on the pod if it's not
                 // the right-most pod and there is more than one pod in the container.
                 if (i < limit - 1 && limit > 1) {
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    ViewGroup.MarginLayoutParams params =
+                            (ViewGroup.MarginLayoutParams) v.getLayoutParams();
                     params.setMargins(0, 0, mPodMarginBetween, 0);
                     v.setLayoutParams(params);
                 }

@@ -54,13 +54,13 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/car_margin"
             android:layout_marginRight="@dimen/car_margin"
+            android:layout_marginBottom="@dimen/car_user_grid_margin_bottom"
             android:layout_centerInParent="true" />
 
         <com.android.systemui.statusbar.car.PageIndicator
             android:id="@+id/user_switcher_page_indicator"
             android:layout_width="match_parent"
             android:layout_height="@dimen/car_page_indicator_dot_diameter"
-            android:layout_marginTop="@dimen/car_page_indicator_margin_top"
             android:layout_below="@+id/user_grid" />
 
         <Button

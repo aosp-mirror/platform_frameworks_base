@@ -13,6 +13,10 @@
  */
 package com.android.systemui.qs.car;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,6 +30,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
+import com.android.systemui.statusbar.car.PageIndicator;
 import com.android.systemui.statusbar.car.UserGridView;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -36,8 +41,11 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  */
 public class CarQSFragment extends Fragment implements QS {
     private View mHeader;
+    private View mUserSwitcherContainer;
     private CarQSFooter mFooter;
     private UserGridView mUserGridView;
+    private PageIndicator mPageIndicator;
+    private ValueAnimator mHeightAnimator;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -51,11 +59,17 @@ public class CarQSFragment extends Fragment implements QS {
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
 
-        mUserGridView = view.findViewById(R.id.user_grid);
-        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
-                false /* showInitially */);
+        mUserSwitcherContainer = view.findViewById(R.id.user_switcher_container);
 
-        mFooter.setUserGridView(mUserGridView);
+        updateUserSwitcherHeight(0);
+
+        mUserGridView = view.findViewById(R.id.user_grid);
+        mUserGridView.init(null, Dependency.get(UserSwitcherController.class));
+
+        mPageIndicator = view.findViewById(R.id.user_switcher_page_indicator);
+        mPageIndicator.setupWithViewPager(mUserGridView);
+
+        mFooter.setUserSwitchCallback(new UserSwitchCallback());
     }
 
     @Override
@@ -170,5 +184,50 @@ public class CarQSFragment extends Fragment implements QS {
     @Override
     public void setExpandClickListener(OnClickListener onClickListener) {
         // No ability to expand the quick settings.
+    }
+
+    public class UserSwitchCallback {
+        private boolean mShowing;
+
+        public boolean isShowing() {
+            return mShowing;
+        }
+
+        public void show() {
+            mShowing = true;
+            animateHeightChange(true /* opening */);
+        }
+
+        public void hide() {
+            mShowing = false;
+            animateHeightChange(false /* opening */);
+        }
+    }
+
+    private void updateUserSwitcherHeight(int height) {
+        ViewGroup.LayoutParams layoutParams = mUserSwitcherContainer.getLayoutParams();
+        layoutParams.height = height;
+        mUserSwitcherContainer.requestLayout();
+    }
+
+    private void animateHeightChange(boolean opening) {
+        // Animation in progress; cancel it to avoid contention.
+        if (mHeightAnimator != null){
+            mHeightAnimator.cancel();
+        }
+
+        mHeightAnimator = (ValueAnimator) AnimatorInflater.loadAnimator(getContext(),
+                opening ? R.anim.car_user_switcher_open_animation
+                        : R.anim.car_user_switcher_close_animation);
+        mHeightAnimator.addUpdateListener(valueAnimator -> {
+            updateUserSwitcherHeight((Integer)valueAnimator.getAnimatedValue());
+        });
+        mHeightAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mHeightAnimator = null;
+            }
+        });
+        mHeightAnimator.start();
     }
 }
