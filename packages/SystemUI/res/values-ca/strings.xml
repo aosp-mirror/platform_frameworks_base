@@ -492,8 +492,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"L\'aplicació no està instal·lada al dispositiu"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostra els segons del rellotge"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra els segons del rellotge a la barra d\'estat. Això pot afectar la durada de la bateria."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"Reorganitza Configuració ràpida"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a Configuració ràpida"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Reorganitza la configuració ràpida"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a configuració ràpida"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
@@ -637,7 +637,7 @@
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha afegit a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha suprimit"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha mogut a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de la configuració ràpida."</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de configuració ràpida."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificació de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"L\'aplicació no admet la pantalla dividida."</string>
