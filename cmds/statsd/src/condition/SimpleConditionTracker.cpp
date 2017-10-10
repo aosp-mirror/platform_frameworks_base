@@ -58,7 +58,7 @@ SimpleConditionTracker::SimpleConditionTracker(
             return;
         }
         mStopLogMatcherIndex = pair->second;
-        mTrackerIndex.insert(mStartLogMatcherIndex);
+        mTrackerIndex.insert(mStopLogMatcherIndex);
     } else {
         mStopLogMatcherIndex = -1;
     }
