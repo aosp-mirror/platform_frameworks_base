@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.net.wifi.aware.ConfigRequest;
 import android.net.wifi.aware.IWifiAwareDiscoverySessionCallback;
 import android.net.wifi.aware.IWifiAwareEventCallback;
+import android.net.wifi.aware.IWifiAwareMacAddressProvider;
 import android.net.wifi.aware.PublishConfig;
 import android.net.wifi.aware.SubscribeConfig;
 import android.net.wifi.aware.Characteristics;
@@ -52,4 +53,7 @@ interface IWifiAwareManager
     void sendMessage(int clientId, int discoverySessionId, int peerId, in byte[] message,
         int messageId, int retryCount);
     void terminateSession(int clientId, int discoverySessionId);
+
+    // internal APIs: intended to be used between System Services (restricted permissions)
+    void requestMacAddresses(int uid, in List peerIds, in IWifiAwareMacAddressProvider callback);
 }

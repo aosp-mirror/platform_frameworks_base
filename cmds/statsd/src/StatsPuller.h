@@ -25,19 +25,13 @@ namespace statsd {
 
 class StatsPuller {
 public:
-    // Enums of pulled data types (pullCodes)
-    // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
-    // TODO: pull the constant from stats_events.proto instead
-    const static int PULL_CODE_KERNEL_WAKELOCKS = 20;
-
-    StatsPuller();
-    ~StatsPuller();
-
-    static String16 pull(int pullCode);
+    virtual ~StatsPuller(){};
+    // use string for now, until we figure out how to integrate into the aggregation path
+    virtual String16 pull() = 0;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif //STATSD_STATSPULLER_H
+#endif  // STATSD_STATSPULLER_H

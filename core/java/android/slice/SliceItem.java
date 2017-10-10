@@ -132,6 +132,13 @@ public final class SliceItem implements Parcelable {
         mHints = ArrayUtils.appendElement(String.class, mHints, hint);
     }
 
+    /**
+     * @hide
+     */
+    public void removeHint(String hint) {
+        ArrayUtils.removeElement(String.class, mHints, hint);
+    }
+
     public @SliceType int getType() {
         return mType;
     }
@@ -230,7 +237,7 @@ public final class SliceItem implements Parcelable {
     public boolean hasHints(@SliceHint String[] hints) {
         if (hints == null) return true;
         for (String hint : hints) {
-            if (!ArrayUtils.contains(mHints, hint)) {
+            if (!TextUtils.isEmpty(hint) && !ArrayUtils.contains(mHints, hint)) {
                 return false;
             }
         }
@@ -241,7 +248,7 @@ public final class SliceItem implements Parcelable {
      * @hide
      */
     public boolean hasAnyHints(@SliceHint String[] hints) {
-        if (hints == null) return true;
+        if (hints == null) return false;
         for (String hint : hints) {
             if (ArrayUtils.contains(mHints, hint)) {
                 return true;
@@ -309,4 +316,29 @@ public final class SliceItem implements Parcelable {
             return new SliceItem[size];
         }
     };
+
+    /**
+     * @hide
+     */
+    public static String typeToString(int type) {
+        switch (type) {
+            case TYPE_SLICE:
+                return "Slice";
+            case TYPE_TEXT:
+                return "Text";
+            case TYPE_IMAGE:
+                return "Image";
+            case TYPE_ACTION:
+                return "Action";
+            case TYPE_REMOTE_VIEW:
+                return "RemoteView";
+            case TYPE_COLOR:
+                return "Color";
+            case TYPE_TIMESTAMP:
+                return "Timestamp";
+            case TYPE_REMOTE_INPUT:
+                return "RemoteInput";
+        }
+        return "Unrecognized type: " + type;
+    }
 }

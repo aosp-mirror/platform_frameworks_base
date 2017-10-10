@@ -20,6 +20,8 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEUTRAL;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -41,6 +43,7 @@ import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRecordProto;
+import android.service.notification.NotificationStats;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -84,8 +87,6 @@ public final class NotificationRecord {
 
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
-    /** Whether the notification was seen by the user via one of the notification listeners. */
-    boolean mIsSeen;
 
     // These members are used by NotificationSignalExtractors
     // to communicate with the ranking module.
@@ -136,6 +137,8 @@ public final class NotificationRecord {
     private String mChannelIdLogTag;
 
     private final List<Adjustment> mAdjustments;
+    private final NotificationStats mStats;
+    private int mUserSentiment;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -156,6 +159,7 @@ public final class NotificationRecord {
         mImportance = calculateImportance();
         mLight = calculateLights();
         mAdjustments = new ArrayList<>();
+        mStats = new NotificationStats();
     }
 
     private boolean isPreChannelsNotification() {
@@ -395,7 +399,7 @@ public final class NotificationRecord {
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + sbn.getKey());
-        pw.println(prefix + "seen=" + mIsSeen);
+        pw.println(prefix + "seen=" + mStats.hasSeen());
         pw.println(prefix + "groupKey=" + getGroupKey());
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
@@ -572,6 +576,10 @@ public final class NotificationRecord {
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
                 }
+                if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
+                    setUserSentiment(adjustment.getSignals().getInt(
+                            Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                }
             }
         }
     }
@@ -740,6 +748,7 @@ public final class NotificationRecord {
                 .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
         if (visible) {
+            setSeen();
             MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
         }
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
@@ -777,12 +786,12 @@ public final class NotificationRecord {
 
     /** Check if any of the listeners have marked this notification as seen by the user. */
     public boolean isSeen() {
-        return mIsSeen;
+        return mStats.hasSeen();
     }
 
     /** Mark the notification as seen by the user. */
     public void setSeen() {
-        mIsSeen = true;
+        mStats.setSeen();
     }
 
     public void setAuthoritativeRank(int authoritativeRank) {
@@ -881,6 +890,38 @@ public final class NotificationRecord {
 
     protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
         mSnoozeCriteria = snoozeCriteria;
+    }
+
+    private void setUserSentiment(int userSentiment) {
+        mUserSentiment = userSentiment;
+    }
+
+    public int getUserSentiment() {
+        return mUserSentiment;
+    }
+
+    public NotificationStats getStats() {
+        return mStats;
+    }
+
+    public void recordExpanded() {
+        mStats.setExpanded();
+    }
+
+    public void recordDirectReplied() {
+        mStats.setDirectReplied();
+    }
+
+    public void recordDismissalSurface(@NotificationStats.DismissalSurface int surface) {
+        mStats.setDismissalSurface(surface);
+    }
+
+    public void recordSnoozed() {
+        mStats.setSnoozed();
+    }
+
+    public void recordViewedSettings() {
+        mStats.setViewedSettings();
     }
 
     public LogMaker getLogMaker(long now) {

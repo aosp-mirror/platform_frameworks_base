@@ -32,4 +32,24 @@ public class PeerHandle {
 
     /** @hide */
     public int peerId;
+
+    /** @hide RTT_API */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof PeerHandle)) {
+            return false;
+        }
+
+        return peerId == ((PeerHandle) o).peerId;
+    }
+
+    /** @hide RTT_API */
+    @Override
+    public int hashCode() {
+        return peerId;
+    }
 }

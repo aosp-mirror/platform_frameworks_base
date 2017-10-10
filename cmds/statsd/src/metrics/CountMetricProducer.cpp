@@ -20,6 +20,7 @@
     if (DEBUG) ALOGD(__VA_ARGS__);
 
 #include "CountMetricProducer.h"
+#include "CountAnomalyTracker.h"
 #include "parse_util.h"
 
 #include <cutils/log.h>
@@ -38,7 +39,9 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric,
       mConditionTracker(condition),
       mStartTime(std::time(nullptr)),
       mCounter(0),
-      mCurrentBucketStartTime(mStartTime) {
+      mCurrentBucketStartTime(mStartTime),
+      // TODO: read mAnomalyTracker parameters from config file.
+      mAnomalyTracker(6, 10) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSize_sec = metric.bucket().bucket_size_millis() / 1000;
@@ -78,6 +81,7 @@ void CountMetricProducer::onMatchedLogEvent(const LogEventWrapper& event) {
     if (mConditionTracker->isConditionMet()) {
         flushCounterIfNeeded(eventTime);
         mCounter++;
+        mAnomalyTracker.checkAnomaly(mCounter);
     }
 }
 
@@ -91,13 +95,16 @@ void CountMetricProducer::flushCounterIfNeeded(const time_t& eventTime) {
     // TODO: add a KeyValuePair to StatsLogReport.
     ALOGD("CountMetric: dump counter %d", mCounter);
 
-    // reset counter
-    mCounter = 0;
-
     // adjust the bucket start time
-    mCurrentBucketStartTime =
-            mCurrentBucketStartTime +
-            ((eventTime - mCurrentBucketStartTime) / mBucketSize_sec) * mBucketSize_sec;
+    time_t numBucketsForward = (eventTime - mCurrentBucketStartTime)
+            / mBucketSize_sec;
+
+    mCurrentBucketStartTime = mCurrentBucketStartTime +
+            (numBucketsForward) * mBucketSize_sec;
+
+    // reset counter
+    mAnomalyTracker.addPastBucket(mCounter, numBucketsForward);
+    mCounter = 0;
 
     VLOG("new bucket start time: %lu", mCurrentBucketStartTime);
 }

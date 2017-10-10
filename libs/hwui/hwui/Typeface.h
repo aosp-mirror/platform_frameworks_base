@@ -38,8 +38,14 @@ struct ANDROID_API Typeface {
     // resolved style actually used for rendering
     minikin::FontStyle fStyle;
 
-    // style used for constructing and querying Typeface objects
-    SkTypeface::Style fSkiaStyle;
+    // style used in the API
+    enum Style : uint8_t {
+        kNormal = 0,
+        kBold   = 0x01,
+        kItalic = 0x02,
+        kBoldItalic = 0x03
+    };
+    Style fAPIStyle;
 
     static const Typeface* resolveDefault(const Typeface* src);
 
@@ -68,7 +74,7 @@ struct ANDROID_API Typeface {
     //
     //   Typeface* black = createAbsolute(base, 900, false);  // Rendered with a weight of 900.
     static Typeface* createWithDifferentBaseWeight(Typeface* src, int baseweight);
-    static Typeface* createRelative(Typeface* src, SkTypeface::Style desiredStyle);
+    static Typeface* createRelative(Typeface* src, Style desiredStyle);
     static Typeface* createAbsolute(Typeface* base, int weight, bool italic);
 
     static Typeface* createFromTypefaceWithVariation(Typeface* src,

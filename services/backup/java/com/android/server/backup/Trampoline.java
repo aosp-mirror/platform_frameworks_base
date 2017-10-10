@@ -139,6 +139,13 @@ public class Trampoline extends IBackupManager.Stub {
         }
     }
 
+    void unlockSystemUser() {
+        BackupManagerServiceInterface svc = mService;
+        if (svc != null) {
+            svc.unlockSystemUser();
+        }
+    }
+
     public void setBackupServiceActive(final int userHandle, boolean makeActive) {
         // Only the DPM should be changing the active state of backup
         final int caller = binderGetCallingUid();

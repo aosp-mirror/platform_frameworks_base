@@ -38,6 +38,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,10 +62,13 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
+import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -72,6 +77,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
@@ -81,8 +87,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.stubbing.Answer;
 
 import java.io.BufferedInputStream;
@@ -101,7 +106,7 @@ import java.util.Map;
 public class NotificationManagerServiceTest extends NotificationTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int mUid = Binder.getCallingUid();
-    private NotificationManagerService mNotificationManagerService;
+    private NotificationManagerService mService;
     private INotificationManager mBinderService;
     private NotificationManagerInternal mInternalService;
     @Mock
@@ -163,11 +168,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 Secure.NOTIFICATION_BADGING, 1,
                 UserHandle.getUserHandleForUid(mUid).getIdentifier());
 
-        mNotificationManagerService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
-        mHandler = mNotificationManagerService.new WorkerHandler(mTestableLooper.getLooper());
+        mHandler = mService.new WorkerHandler(mTestableLooper.getLooper());
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = mUid;
@@ -204,7 +209,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mConditionProviders.getConfig()).thenReturn(dndConfig);
 
         try {
-            mNotificationManagerService.init(mTestableLooper.getLooper(),
+            mService.init(mTestableLooper.getLooper(),
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
@@ -214,11 +219,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 throw e;
             }
         }
-        mNotificationManagerService.setAudioManager(mAudioManager);
+        mService.setAudioManager(mAudioManager);
 
         // Tests call directly into the Binder.
-        mBinderService = mNotificationManagerService.getBinderService();
-        mInternalService = mNotificationManagerService.getInternalService();
+        mBinderService = mService.getBinderService();
+        mInternalService = mService.getInternalService();
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
@@ -417,7 +422,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         NotificationChannel channel = new NotificationChannel("id", "name",
                 IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        assertTrue(mService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerSuspendedByAdmin(eq(r));
     }
 
@@ -428,7 +433,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        assertTrue(mService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerBlocked(eq(r));
 
         mBinderService.createNotificationChannels(
@@ -457,7 +462,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
         assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertEquals(IMPORTANCE_LOW,
-                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+                mService.getNotificationRecord(sbn.getKey()).getImportance());
         assertEquals(IMPORTANCE_LOW,
                 mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
     }
@@ -485,7 +490,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
-        assertNull(mNotificationManagerService.getNotificationRecord(sbn.getKey()));
+        assertNull(mService.getNotificationRecord(sbn.getKey()));
         assertEquals(IMPORTANCE_NONE,
                 mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
     }
@@ -493,14 +498,14 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testBlockedNotifications_blockedChannelGroup() throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.isGroupBlocked(anyString(), anyInt(), anyString())).thenReturn(true);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setGroup("something");
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        assertTrue(mService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerBlocked(eq(r));
     }
 
@@ -529,7 +534,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
-        assertNull(mNotificationManagerService.getNotificationRecord(sbn.getKey()));
+        assertNull(mService.getNotificationRecord(sbn.getKey()));
     }
 
     @Test
@@ -539,7 +544,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
         StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
-        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(1, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -551,7 +556,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -566,12 +571,16 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
+        ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
+        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
+        assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
     }
 
     @Test
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
-        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        NotificationRecord r = generateNotificationRecord(null);
+        final StatusBarNotification sbn = r.sbn;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelNotificationsFromListener(null, null);
@@ -579,7 +588,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -592,7 +601,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -604,13 +613,16 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 n.sbn.getId(), n.sbn.getNotification(), n.sbn.getUserId());
         waitForIdle();
 
-        mNotificationManagerService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
                 n.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(n.sbn.getPackageName());
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
+        ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
+        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
+        assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
     }
 
     @Test
@@ -628,7 +640,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         mBinderService.cancelAllNotifications(PKG, parent.sbn.getUserId());
         waitForIdle();
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -641,7 +653,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
 
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -669,7 +681,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 parentAsChild.sbn.getUserId());
         waitForIdle();
 
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -683,7 +695,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
-        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(1, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -697,7 +709,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
-        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(1, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -710,7 +722,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -724,7 +736,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
-        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(1, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -745,8 +757,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final NotificationRecord notif = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
-        mNotificationManagerService.addNotification(notif);
-        mNotificationManagerService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
+        mService.addNotification(notif);
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
                 notif.getUserId(), 0, null);
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -759,9 +771,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final NotificationRecord notif = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
-        mNotificationManagerService.addNotification(notif);
+        mService.addNotification(notif);
 
-        mNotificationManagerService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
                 notif.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -780,11 +792,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
         final NotificationRecord newGroup = generateNotificationRecord(
                 mTestNotificationChannel, 4, "group2", false);
-        mNotificationManagerService.addNotification(parent);
-        mNotificationManagerService.addNotification(child);
-        mNotificationManagerService.addNotification(child2);
-        mNotificationManagerService.addNotification(newGroup);
-        mNotificationManagerService.getBinderService().cancelNotificationsFromListener(null, null);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(parent.sbn.getPackageName());
@@ -802,11 +814,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
         final NotificationRecord newGroup = generateNotificationRecord(
                 mTestNotificationChannel, 4, "group2", false);
-        mNotificationManagerService.addNotification(parent);
-        mNotificationManagerService.addNotification(child);
-        mNotificationManagerService.addNotification(child2);
-        mNotificationManagerService.addNotification(newGroup);
-        mNotificationManagerService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
                 parent.getUserId());
         waitForIdle();
         StatusBarNotification[] notifs =
@@ -841,7 +853,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
-        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -849,8 +861,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         // make sure the same notification can be found in both lists and returned
         final NotificationRecord group1 = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group1", true);
-        mNotificationManagerService.addEnqueuedNotification(group1);
-        mNotificationManagerService.addNotification(group1);
+        mService.addEnqueuedNotification(group1);
+        mService.addNotification(group1);
 
         // should not be returned
         final NotificationRecord group2 = generateNotificationRecord(
@@ -874,7 +886,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
 
         List<NotificationRecord> inGroup1 =
-                mNotificationManagerService.findGroupNotificationsLocked(PKG, group1.getGroupKey(),
+                mService.findGroupNotificationsLocked(PKG, group1.getGroupKey(),
                         group1.sbn.getUserId());
         assertEquals(3, inGroup1.size());
         for (NotificationRecord record : inGroup1) {
@@ -885,8 +897,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testTvExtenderChannelOverride_onTv() throws Exception {
-        mNotificationManagerService.setIsTelevision(true);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setIsTelevision(true);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
                         new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
@@ -900,8 +912,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testTvExtenderChannelOverride_notOnTv() throws Exception {
-        mNotificationManagerService.setIsTelevision(false);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setIsTelevision(false);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(
                 anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
                 mTestNotificationChannel);
@@ -918,7 +930,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
@@ -943,7 +955,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         NotificationChannelGroup group1 = new NotificationChannelGroup("a", "b");
         NotificationChannelGroup group2 = new NotificationChannelGroup("n", "m");
 
@@ -963,7 +975,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         mTestNotificationChannel.setLightColor(Color.CYAN);
         when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
@@ -981,7 +993,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
@@ -998,7 +1010,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
         NotificationChannelGroup ncg = new NotificationChannelGroup("a", "b/c");
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannelGroup(eq(ncg.getId()), eq(PKG), anyInt()))
                 .thenReturn(ncg);
         reset(mListeners);
@@ -1010,7 +1022,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_success() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
@@ -1028,7 +1040,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
 
@@ -1050,7 +1062,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testUpdateNotificationChannelFromPrivilegedListener_badUser() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
@@ -1077,7 +1089,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_success() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
@@ -1091,7 +1103,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
 
@@ -1109,7 +1121,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelFromPrivilegedListener_badUser() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
@@ -1131,7 +1143,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_success() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
@@ -1144,7 +1156,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_noAccess() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
 
@@ -1161,7 +1173,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testGetNotificationChannelGroupsFromPrivilegedListener_badUser() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
@@ -1183,14 +1195,14 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     public void testHasCompanionDevice_failure() throws Exception {
         when(mCompanionMgr.getAssociations(anyString(), anyInt())).thenThrow(
                 new IllegalArgumentException());
-        mNotificationManagerService.hasCompanionDevice(mListener);
+        mService.hasCompanionDevice(mListener);
     }
 
     @Test
     public void testHasCompanionDevice_noService() throws Exception {
-        mNotificationManagerService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext);
 
-        assertFalse(mNotificationManagerService.hasCompanionDevice(mListener));
+        assertFalse(mService.hasCompanionDevice(mListener));
     }
 
     @Test
@@ -1199,16 +1211,17 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 mTestNotificationChannel, 1, null, false);
         final NotificationRecord grouped = generateNotificationRecord(
                 mTestNotificationChannel, 2, "group", false);
-        mNotificationManagerService.addNotification(grouped);
-        mNotificationManagerService.addNotification(nonGrouped);
+        mService.addNotification(grouped);
+        mService.addNotification(nonGrouped);
 
         NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
-                mNotificationManagerService.new SnoozeNotificationRunnable(
+                mService.new SnoozeNotificationRunnable(
                         nonGrouped.getKey(), 100, null);
         snoozeNotificationRunnable.run();
 
         // only snooze the one notification
         verify(mSnoozeHelper, times(1)).snooze(any(NotificationRecord.class), anyLong());
+        assertTrue(nonGrouped.getStats().hasSnoozed());
     }
 
     @Test
@@ -1219,12 +1232,12 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 mTestNotificationChannel, 2, "group", false);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, "group", false);
-        mNotificationManagerService.addNotification(parent);
-        mNotificationManagerService.addNotification(child);
-        mNotificationManagerService.addNotification(child2);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
 
         NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
-                mNotificationManagerService.new SnoozeNotificationRunnable(
+                mService.new SnoozeNotificationRunnable(
                         parent.getKey(), 100, null);
         snoozeNotificationRunnable.run();
 
@@ -1240,12 +1253,12 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 mTestNotificationChannel, 2, "group", false);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, "group", false);
-        mNotificationManagerService.addNotification(parent);
-        mNotificationManagerService.addNotification(child);
-        mNotificationManagerService.addNotification(child2);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
 
         NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
-                mNotificationManagerService.new SnoozeNotificationRunnable(
+                mService.new SnoozeNotificationRunnable(
                         child2.getKey(), 100, null);
         snoozeNotificationRunnable.run();
 
@@ -1260,11 +1273,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         assertTrue(parent.sbn.getNotification().isGroupSummary());
         final NotificationRecord child = generateNotificationRecord(
                 mTestNotificationChannel, 2, "group", false);
-        mNotificationManagerService.addNotification(parent);
-        mNotificationManagerService.addNotification(child);
+        mService.addNotification(parent);
+        mService.addNotification(child);
 
         NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
-                mNotificationManagerService.new SnoozeNotificationRunnable(
+                mService.new SnoozeNotificationRunnable(
                         child.getKey(), 100, null);
         snoozeNotificationRunnable.run();
 
@@ -1276,10 +1289,10 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     public void testSnoozeRunnable_snoozeGroupChild_noOthersInGroup() throws Exception {
         final NotificationRecord child = generateNotificationRecord(
                 mTestNotificationChannel, 2, "group", false);
-        mNotificationManagerService.addNotification(child);
+        mService.addNotification(child);
 
         NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
-                mNotificationManagerService.new SnoozeNotificationRunnable(
+                mService.new SnoozeNotificationRunnable(
                         child.getKey(), 100, null);
         snoozeNotificationRunnable.run();
 
@@ -1427,9 +1440,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testOnlyAutogroupIfGroupChanged_noPriorNoti_autogroups() throws Exception {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
-        mNotificationManagerService.addEnqueuedNotification(r);
+        mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey());
         runnable.run();
         waitForIdle();
 
@@ -1441,12 +1454,12 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             throws Exception {
         NotificationRecord r =
                 generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
-        mNotificationManagerService.addNotification(r);
+        mService.addNotification(r);
 
         r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
-        mNotificationManagerService.addEnqueuedNotification(r);
+        mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey());
         runnable.run();
         waitForIdle();
 
@@ -1458,11 +1471,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             throws Exception {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group",
                 false);
-        mNotificationManagerService.addNotification(r);
-        mNotificationManagerService.addEnqueuedNotification(r);
+        mService.addNotification(r);
+        mService.addEnqueuedNotification(r);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey());
         runnable.run();
         waitForIdle();
 
@@ -1486,7 +1499,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
         waitForIdle();
 
-        NotificationRecord posted = mNotificationManagerService.findNotificationLocked(
+        NotificationRecord posted = mService.findNotificationLocked(
                 PKG, null, nr.sbn.getId(), nr.sbn.getUserId());
 
         assertFalse(posted.getNotification().isColorized());
@@ -1497,12 +1510,12 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         for (int i = 0; i < 20; i++) {
             NotificationRecord r =
                     generateNotificationRecord(mTestNotificationChannel, i, null, false);
-            mNotificationManagerService.addEnqueuedNotification(r);
+            mService.addEnqueuedNotification(r);
         }
         for (int i = 0; i < 20; i++) {
             NotificationRecord r =
                     generateNotificationRecord(mTestNotificationChannel, i, null, false);
-            mNotificationManagerService.addNotification(r);
+            mService.addNotification(r);
         }
 
         // another package
@@ -1515,31 +1528,31 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 n, new UserHandle(mUid), null, 0);
         NotificationRecord otherPackage =
                 new NotificationRecord(mContext, sbn, mTestNotificationChannel);
-        mNotificationManagerService.addEnqueuedNotification(otherPackage);
-        mNotificationManagerService.addNotification(otherPackage);
+        mService.addEnqueuedNotification(otherPackage);
+        mService.addNotification(otherPackage);
 
         // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
         int userId = new UserHandle(mUid).getIdentifier();
         assertEquals(40,
-                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, null));
+                mService.getNotificationCountLocked(PKG, userId, 0, null));
         assertEquals(40,
-                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
+                mService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
         assertEquals(2,
-                mNotificationManagerService.getNotificationCountLocked("a", userId, 0, "banana"));
+                mService.getNotificationCountLocked("a", userId, 0, "banana"));
 
         // exclude a known notification - it's excluded from only the posted list, not enqueued
         assertEquals(39,
-                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag"));
+                mService.getNotificationCountLocked(PKG, userId, 0, "tag"));
     }
 
     @Test
     public void testAddAutogroup_requestsSort() throws Exception {
         RankingHandler rh = mock(RankingHandler.class);
-        mNotificationManagerService.setRankingHandler(rh);
+        mService.setRankingHandler(rh);
 
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
-        mNotificationManagerService.addNotification(r);
-        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+        mService.addNotification(r);
+        mService.addAutogroupKeyLocked(r.getKey());
 
         verify(rh, times(1)).requestSort();
     }
@@ -1547,12 +1560,12 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testRemoveAutogroup_requestsSort() throws Exception {
         RankingHandler rh = mock(RankingHandler.class);
-        mNotificationManagerService.setRankingHandler(rh);
+        mService.setRankingHandler(rh);
 
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.setOverrideGroupKey("TEST");
-        mNotificationManagerService.addNotification(r);
-        mNotificationManagerService.removeAutogroupKeyLocked(r.getKey());
+        mService.addNotification(r);
+        mService.removeAutogroupKeyLocked(r.getKey());
 
         verify(rh, times(1)).requestSort();
     }
@@ -1560,47 +1573,47 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testReaddAutogroup_noSort() throws Exception {
         RankingHandler rh = mock(RankingHandler.class);
-        mNotificationManagerService.setRankingHandler(rh);
+        mService.setRankingHandler(rh);
 
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.setOverrideGroupKey("TEST");
-        mNotificationManagerService.addNotification(r);
-        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+        mService.addNotification(r);
+        mService.addAutogroupKeyLocked(r.getKey());
 
         verify(rh, never()).requestSort();
     }
 
     @Test
     public void testHandleRankingSort_sendsUpdateOnSignalExtractorChange() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
-        mNotificationManagerService.setHandler(handler);
+        mService.setHandler(handler);
 
         Map<String, Answer> answers = getSignalExtractorSideEffects();
         for (String message : answers.keySet()) {
-            mNotificationManagerService.clearNotifications();
+            mService.clearNotifications();
             final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
-            mNotificationManagerService.addNotification(r);
+            mService.addNotification(r);
 
             doAnswer(answers.get(message)).when(mRankingHelper).extractSignals(r);
 
-            mNotificationManagerService.handleRankingSort();
+            mService.handleRankingSort();
         }
         verify(handler, times(answers.size())).scheduleSendRankingUpdate();
     }
 
     @Test
     public void testHandleRankingSort_noUpdateWhenNoSignalChange() throws Exception {
-        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        mService.setRankingHelper(mRankingHelper);
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
-        mNotificationManagerService.setHandler(handler);
+        mService.setHandler(handler);
 
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
-        mNotificationManagerService.addNotification(r);
+        mService.addNotification(r);
 
-        mNotificationManagerService.handleRankingSort();
+        mService.handleRankingSort();
         verify(handler, never()).scheduleSendRankingUpdate();
     }
 
@@ -1619,7 +1632,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        mNotificationManagerService.readPolicyXml(
+        mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
         verify(mListeners, times(1)).readXml(any());
         verify(mConditionProviders, times(1)).readXml(any());
@@ -1637,7 +1650,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "</notification-policy>";
-        mNotificationManagerService.readPolicyXml(
+        mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
         verify(mListeners, never()).readXml(any());
         verify(mConditionProviders, never()).readXml(any());
@@ -1653,8 +1666,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testLocaleChangedCallsUpdateDefaultZenModeRules() throws Exception {
         ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
-        mNotificationManagerService.mZenModeHelper = mZenModeHelper;
-        mNotificationManagerService.mLocaleChangeReceiver.onReceive(mContext,
+        mService.mZenModeHelper = mZenModeHelper;
+        mService.mLocaleChangeReceiver.onReceive(mContext,
                 new Intent(Intent.ACTION_LOCALE_CHANGED));
 
         verify(mZenModeHelper, times(1)).updateDefaultZenRules();
@@ -1685,7 +1698,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(IMPORTANCE_LOW,
-                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+                mService.getNotificationRecord(sbn.getKey()).getImportance());
 
         nb = new Notification.Builder(mContext)
                 .setContentTitle("foo")
@@ -1700,10 +1713,85 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(IMPORTANCE_LOW,
-                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+                mService.getNotificationRecord(sbn.getKey()).getImportance());
 
         NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
                 preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
         assertEquals(IMPORTANCE_UNSPECIFIED, defaultChannel.getImportance());
+    }
+
+    @Test
+    public void testStats_updatedOnDirectReply() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied());
+    }
+
+    @Test
+    public void testStats_updatedOnExpansion() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true);
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+        mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false);
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
+    }
+
+    @Test
+    public void testStats_updatedOnViewSettings() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationSettingsViewed(r.getKey());
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasViewedSettings());
+    }
+
+    @Test
+    public void testStats_updatedOnVisibilityChanged() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, true);
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(
+                new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(
+                new NotificationVisibility[] {}, new NotificationVisibility[]{nv});
+        assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
+    }
+
+    @Test
+    public void testStats_dismissalSurface() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationClear(mUid, 0, PKG, r.sbn.getTag(),
+                r.sbn.getId(), r.getUserId(), r.getKey(), NotificationStats.DISMISSAL_AOD);
+        waitForIdle();
+
+        assertEquals(NotificationStats.DISMISSAL_AOD, r.getStats().getDismissalSurface());
+    }
+
+    @Test
+    public void testUserSentimentChangeTriggersUpdate() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT,
+                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+
+        waitForIdle();
+
+        verify(handler, timeout(300).times(1)).scheduleSendRankingUpdate();
     }
 }

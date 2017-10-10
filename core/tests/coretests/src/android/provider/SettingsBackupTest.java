@@ -168,7 +168,6 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
-                    Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.DEFAULT_SM_DP_PLUS,
                     Settings.Global.DEVICE_NAME,

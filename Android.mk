@@ -548,9 +548,10 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	telephony/java/com/android/internal/telephony/euicc/IEuiccController.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl \
-	wifi/java/android/net/wifi/aware/IWifiAwareManager.aidl \
 	wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareMacAddressProvider.aidl \
+	wifi/java/android/net/wifi/aware/IWifiAwareManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	wifi/java/android/net/wifi/rtt/IRttCallback.aidl \
 	wifi/java/android/net/wifi/rtt/IWifiRttManager.aidl \
@@ -1030,6 +1031,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/24.txt 24 \
     -since $(SRC_API_DIR)/25.txt 25 \
     -since $(SRC_API_DIR)/26.txt 26 \
+    -since $(SRC_API_DIR)/27.txt 27 \
     -werror -lerror -hide 111 -hide 113 -hide 121 -hide 125 -hide 126 -hide 127 -hide 128 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 

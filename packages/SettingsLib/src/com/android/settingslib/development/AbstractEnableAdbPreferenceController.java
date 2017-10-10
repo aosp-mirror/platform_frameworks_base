@@ -28,17 +28,20 @@ import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.TwoStatePreference;
 import android.text.TextUtils;
 
-import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.ConfirmationDialogController;
 
-public abstract class AbstractEnableAdbPreferenceController extends AbstractPreferenceController
-        implements ConfirmationDialogController {
+public abstract class AbstractEnableAdbPreferenceController extends
+        DeveloperOptionsPreferenceController implements ConfirmationDialogController {
     private static final String KEY_ENABLE_ADB = "enable_adb";
     public static final String ACTION_ENABLE_ADB_STATE_CHANGED =
             "com.android.settingslib.development.AbstractEnableAdbController."
                     + "ENABLE_ADB_STATE_CHANGED";
 
-    private SwitchPreference mPreference;
+    public static final int ADB_SETTING_ON = 1;
+    public static final int ADB_SETTING_OFF = 0;
+
+
+    protected SwitchPreference mPreference;
 
     public AbstractEnableAdbPreferenceController(Context context) {
         super(context);
@@ -64,12 +67,13 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     private boolean isAdbEnabled() {
         final ContentResolver cr = mContext.getContentResolver();
-        return Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) != 0;
+        return Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, ADB_SETTING_OFF)
+                != ADB_SETTING_OFF;
     }
 
     @Override
     public void updateState(Preference preference) {
-        ((TwoStatePreference)preference).setChecked(isAdbEnabled());
+        ((TwoStatePreference) preference).setChecked(isAdbEnabled());
     }
 
     public void enablePreference(boolean enabled) {
@@ -105,7 +109,7 @@ public abstract class AbstractEnableAdbPreferenceController extends AbstractPref
 
     protected void writeAdbSetting(boolean enabled) {
         Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.ADB_ENABLED, enabled ? 1 : 0);
+                Settings.Global.ADB_ENABLED, enabled ? ADB_SETTING_ON : ADB_SETTING_OFF);
         notifyStateChanged();
     }
 

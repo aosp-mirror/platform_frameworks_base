@@ -134,6 +134,7 @@ import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationServiceProto;
+import android.service.notification.NotificationStats;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -678,7 +679,14 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationClear(int callingUid, int callingPid,
-                String pkg, String tag, int id, int userId) {
+                String pkg, String tag, int id, int userId, String key,
+                @NotificationStats.DismissalSurface int dismissalSurface) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    r.recordDismissalSurface(dismissalSurface);
+                }
+            }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                     Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
                     true, userId, REASON_CANCEL, null);
@@ -764,9 +772,32 @@ public class NotificationManagerService extends SystemService {
                                 .setType(expanded ? MetricsEvent.TYPE_DETAIL
                                         : MetricsEvent.TYPE_COLLAPSE));
                     }
+                    if (expanded) {
+                        r.recordExpanded();
+                    }
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
                             r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationDirectReplied(String key) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    r.recordDirectReplied();
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationSettingsViewed(String key) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    r.recordViewedSettings();
                 }
             }
         }
@@ -3830,6 +3861,7 @@ public class NotificationManagerService extends SystemService {
             } else {
                 mSnoozeHelper.snooze(r, mDuration);
             }
+            r.recordSnoozed();
             savePolicyFile();
         }
     }
@@ -3969,7 +4001,7 @@ public class NotificationManagerService extends SystemService {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
                             mListeners.notifyRemovedLocked(n,
-                                    NotificationListenerService.REASON_ERROR);
+                                    NotificationListenerService.REASON_ERROR, null);
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -4462,6 +4494,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<String> groupKeyBefore = new ArrayList<>(N);
             ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
             ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
+            ArrayList<Integer> userSentimentBefore = new ArrayList<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
@@ -4471,6 +4504,7 @@ public class NotificationManagerService extends SystemService {
                 groupKeyBefore.add(r.getGroupKey());
                 overridePeopleBefore.add(r.getPeopleOverride());
                 snoozeCriteriaBefore.add(r.getSnoozeCriteria());
+                userSentimentBefore.add(r.getUserSentiment());
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -4482,7 +4516,8 @@ public class NotificationManagerService extends SystemService {
                         || !Objects.equals(channelBefore.get(i), r.getChannel())
                         || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
                         || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
-                        || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())) {
+                        || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())
+                        || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())) {
                     mHandler.scheduleSendRankingUpdate();
                     return;
                 }
@@ -4675,6 +4710,10 @@ public class NotificationManagerService extends SystemService {
         // Record caller.
         recordCallerLocked(r);
 
+        if (r.getStats().getDismissalSurface() == NotificationStats.DISMISSAL_NOT_DISMISSED) {
+            r.recordDismissalSurface(NotificationStats.DISMISSAL_OTHER);
+        }
+
         // tell the app
         if (sendDelete) {
             if (r.getNotification().deleteIntent != null) {
@@ -4695,7 +4734,7 @@ public class NotificationManagerService extends SystemService {
                 if (reason != REASON_SNOOZED) {
                     r.isCanceled = true;
                 }
-                mListeners.notifyRemovedLocked(r.sbn, reason);
+                mListeners.notifyRemovedLocked(r.sbn, reason, r.getStats());
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -5289,6 +5328,7 @@ public class NotificationManagerService extends SystemService {
         Bundle overridePeople = new Bundle();
         Bundle snoozeCriteria = new Bundle();
         Bundle showBadge = new Bundle();
+        Bundle userSentiment = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -5314,6 +5354,7 @@ public class NotificationManagerService extends SystemService {
             overridePeople.putStringArrayList(key, record.getPeopleOverride());
             snoozeCriteria.putParcelableArrayList(key, record.getSnoozeCriteria());
             showBadge.putBoolean(key, record.canShowBadge());
+            userSentiment.putInt(key, record.getUserSentiment());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -5324,7 +5365,7 @@ public class NotificationManagerService extends SystemService {
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {
@@ -5413,7 +5454,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         protected Config getConfig() {
             Config c = new Config();
-            c.caption = "notification assistant service";
+            c.caption = "notification assistant";
             c.serviceInterface = NotificationAssistantService.SERVICE_INTERFACE;
             c.xmlTag = TAG_ENABLED_NOTIFICATION_ASSISTANTS;
             c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT;
@@ -5456,8 +5497,6 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
 
-                final int importance = r.getImportance();
-                final boolean fromUser = r.isImportanceFromUser();
                 final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
                 mHandler.post(new Runnable() {
                     @Override
@@ -5488,6 +5527,10 @@ public class NotificationManagerService extends SystemService {
                 final String snoozeCriterionId) {
             TrimCache trimCache = new TrimCache(sbn);
             for (final ManagedServiceInfo info : getServices()) {
+                boolean sbnVisible = isVisibleToListener(sbn, info);
+                if (!sbnVisible) {
+                    continue;
+                }
                 final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
                 mHandler.post(new Runnable() {
                     @Override
@@ -5609,7 +5652,8 @@ public class NotificationManagerService extends SystemService {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyRemoved(info, oldSbnLightClone, update, REASON_USER_STOPPED);
+                            notifyRemoved(
+                                    info, oldSbnLightClone, update, null, REASON_USER_STOPPED);
                         }
                     });
                     continue;
@@ -5629,7 +5673,8 @@ public class NotificationManagerService extends SystemService {
          * asynchronously notify all listeners about a removed notification
          */
         @GuardedBy("mNotificationLock")
-        public void notifyRemovedLocked(StatusBarNotification sbn, int reason) {
+        public void notifyRemovedLocked(StatusBarNotification sbn, int reason,
+                NotificationStats notificationStats) {
             // make a copy in case changes are made to the underlying Notification object
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
@@ -5638,11 +5683,14 @@ public class NotificationManagerService extends SystemService {
                 if (!isVisibleToListener(sbn, info)) {
                     continue;
                 }
+                // Only assistants can get stats
+                final NotificationStats stats = mAssistants.isServiceTokenValidLocked(info.service)
+                        ? notificationStats : null;
                 final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyRemoved(info, sbnLight, update, reason);
+                        notifyRemoved(info, sbnLight, update, stats, reason);
                     }
                 });
             }
@@ -5747,14 +5795,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void notifyRemoved(ManagedServiceInfo info, StatusBarNotification sbn,
-                NotificationRankingUpdate rankingUpdate, int reason) {
+                NotificationRankingUpdate rankingUpdate, NotificationStats stats, int reason) {
             if (!info.enabledAndUserMatches(sbn.getUserId())) {
                 return;
             }
             final INotificationListener listener = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                listener.onNotificationRemoved(sbnHolder, rankingUpdate, reason);
+                listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }

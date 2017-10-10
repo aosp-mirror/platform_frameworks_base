@@ -617,4 +617,10 @@
     -->
     <dimen name="autofill_save_icon_max_size">300dp</dimen>
 
+    <!-- Size of a slice shortcut view -->
+    <dimen name="slice_shortcut_size">56dp</dimen>
+    <!-- Size of action icons in a slice -->
+    <dimen name="slice_icon_size">24dp</dimen>
+    <!-- Standard padding used in a slice view -->
+    <dimen name="slice_padding">16dp</dimen>
 </resources>

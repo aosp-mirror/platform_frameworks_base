@@ -4727,4 +4727,7 @@
 
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>
+
+    <!-- Format string for indicating there is more content in a slice view -->
+    <string name="slice_more_content">+ <xliff:g id="number" example="5">%1$d</xliff:g></string>
 </resources>
