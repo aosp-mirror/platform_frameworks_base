@@ -3365,7 +3365,9 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean isUpgrade() {
         // allow instant applications
-        return mIsUpgrade;
+        // The system property allows testing ota flow when upgraded to the same image.
+        return mIsUpgrade || SystemProperties.getBoolean(
+                "persist.pm.mock-upgrade", false /* default */);
     }
 
     private @Nullable String getRequiredButNotReallyRequiredVerifierLPr() {
