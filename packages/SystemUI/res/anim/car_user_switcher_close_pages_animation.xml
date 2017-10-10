@@ -12,9 +12,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<animator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="200"
-    android:valueType="intType"
-    android:valueFrom="0"
-    android:valueTo="@dimen/car_user_switcher_container_height"
-    android:interpolator="@android:interpolator/fast_out_slow_in" />
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <objectAnimator
+        android:duration="83"
+        android:propertyName="alpha"
+        android:valueType="floatType"
+        android:valueFrom="1"
+        android:valueTo="0" />
+</set>

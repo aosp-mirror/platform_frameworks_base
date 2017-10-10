@@ -19,4 +19,5 @@
     <integer name="car_user_switcher_timeout_ms">15000</integer>
     <!-- This values less than ProgressBar.PROGRESS_ANIM_DURATION for a smooth animation. -->
     <integer name="car_user_switcher_anim_update_ms">60</integer>
+    <integer name="car_user_switcher_anim_cascade_delay_ms">27</integer>
 </resources>

@@ -29,12 +29,14 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/user_switcher_container"
+        android:clipChildren="false"
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_user_switcher_container_height"
         android:layout_gravity="center_horizontal" >
 
         <com.android.systemui.statusbar.car.UserGridView
             android:id="@+id/user_grid"
+            android:clipChildren="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/car_margin"
