@@ -18,8 +18,11 @@ package com.android.settingslib.suggestions;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.robolectric.RuntimeEnvironment.application;
+import static org.robolectric.shadow.api.Shadow.extract;
+
+import android.app.ApplicationPackageManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
@@ -34,22 +37,21 @@ import com.android.settingslib.drawer.TileUtilsTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.res.ResourceLoader;
-import org.robolectric.res.builder.DefaultPackageManager;
-import org.robolectric.res.builder.RobolectricPackageManager;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowApplicationPackageManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
+        shadows = SuggestionParserTest.TestPackageManager.class)
 public class SuggestionParserTest {
 
-    private Context mContext;
-    private RobolectricPackageManager mPackageManager;
+    private TestPackageManager mPackageManager;
     private SuggestionParser mSuggestionParser;
     private SuggestionCategory mMultipleCategory;
     private SuggestionCategory mExclusiveCategory;
@@ -61,11 +63,8 @@ public class SuggestionParserTest {
 
     @Before
     public void setUp() {
-        RuntimeEnvironment.setRobolectricPackageManager(
-                new TestPackageManager(RuntimeEnvironment.getAppResourceLoader()));
-        mContext = RuntimeEnvironment.application;
-        mPackageManager = RuntimeEnvironment.getRobolectricPackageManager();
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mPackageManager = extract(application.getPackageManager());
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(application);
         mSuggestion = new Tile();
         mSuggestion.intent = new Intent("action");
         mSuggestion.intent.setComponent(new ComponentName("pkg", "cls"));
@@ -81,7 +80,7 @@ public class SuggestionParserTest {
         mExpiredExclusiveCategory.exclusive = true;
         mExpiredExclusiveCategory.exclusiveExpireDaysInMillis = 0;
 
-        mSuggestionParser = new SuggestionParser(mContext, mPrefs,
+        mSuggestionParser = new SuggestionParser(application, mPrefs,
                 Arrays.asList(mMultipleCategory, mExclusiveCategory, mExpiredExclusiveCategory),
                 "0");
 
@@ -199,7 +198,7 @@ public class SuggestionParserTest {
 
         final Tile suggestion = mSuggestionsBeforeDismiss.get(0);
         if (mSuggestionParser.dismissSuggestion(suggestion)) {
-            RuntimeEnvironment.getRobolectricPackageManager().removeResolveInfosForIntent(
+            mPackageManager.removeResolveInfosForIntent(
                     new Intent(Intent.ACTION_MAIN).addCategory(mMultipleCategory.category),
                     suggestion.intent.getComponent().getPackageName());
         }
@@ -207,13 +206,10 @@ public class SuggestionParserTest {
                 mMultipleCategory, mSuggestionsAfterDismiss, isSmartSuggestionEnabled);
     }
 
-    private static class TestPackageManager extends DefaultPackageManager {
+    @Implements(ApplicationPackageManager.class)
+    public static class TestPackageManager extends ShadowApplicationPackageManager {
 
-        TestPackageManager(ResourceLoader appResourceLoader) {
-            super(appResourceLoader);
-        }
-
-        @Override
+        @Implementation
         public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
             return super.queryIntentActivities(intent, flags);
         }

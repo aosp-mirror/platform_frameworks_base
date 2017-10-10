@@ -29,6 +29,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
+import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -66,7 +67,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +79,6 @@ import java.util.Map;
         shadows = {TileUtilsTest.TileUtilsShadowRemoteViews.class})
 public class TileUtilsTest {
 
-    @Mock
     private Context mContext;
     @Mock
     private PackageManager mPackageManager;
@@ -97,6 +96,7 @@ public class TileUtilsTest {
 
     @Before
     public void setUp() throws NameNotFoundException {
+        mContext = spy(application);
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
@@ -456,8 +456,7 @@ public class TileUtilsTest {
         assertThat(tile.remoteViews).isNotNull();
         assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
         // Make sure the summary TextView got a new text string.
-        TileUtilsShadowRemoteViews shadowRemoteViews =
-                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
         assertThat(shadowRemoteViews.overrideViewId).isEqualTo(android.R.id.summary);
         assertThat(shadowRemoteViews.overrideText).isEqualTo("new summary text");
     }
@@ -494,8 +493,7 @@ public class TileUtilsTest {
         assertThat(tile.remoteViews).isNotNull();
         assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
         // Make sure the summary TextView didn't get any text view updates.
-        TileUtilsShadowRemoteViews shadowRemoteViews =
-                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
         assertThat(shadowRemoteViews.overrideViewId).isNull();
         assertThat(shadowRemoteViews.overrideText).isNull();
     }

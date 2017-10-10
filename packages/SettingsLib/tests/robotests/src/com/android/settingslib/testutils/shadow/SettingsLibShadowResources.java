@@ -16,7 +16,7 @@
 
 package com.android.settingslib.testutils.shadow;
 
-import static org.robolectric.internal.Shadow.directlyOn;
+import static org.robolectric.shadow.api.Shadow.directlyOn;
 
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
