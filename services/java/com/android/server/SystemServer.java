@@ -1656,6 +1656,25 @@ public final class SystemServer {
 
         mSystemServiceManager.setSafeMode(safeMode);
 
+        // Start device specific services
+        traceBeginAndSlog("StartDeviceSpecificServices");
+        final String[] classes = mSystemContext.getResources().getStringArray(
+                R.array.config_deviceSpecificSystemServices);
+        for (final String className : classes) {
+            traceBeginAndSlog("StartDeviceSpecificServices " + className);
+            try {
+                mSystemServiceManager.startService(className);
+            } catch (Throwable e) {
+                reportWtf("starting " + className, e);
+            }
+            traceEnd();
+        }
+        traceEnd();
+
+        traceBeginAndSlog("StartBootPhaseDeviceSpecificServicesReady");
+        mSystemServiceManager.startBootPhase(SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
+        traceEnd();
+
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
