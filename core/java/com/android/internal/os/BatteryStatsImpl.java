@@ -63,6 +63,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
@@ -4030,6 +4031,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_START,
                 historyName, uid);
+        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 1);
     }
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
@@ -4045,6 +4047,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH,
                 historyName, uid);
+        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 0);
     }
 
     void aggregateLastWakeupUptimeLocked(long uptimeMs) {
@@ -4403,6 +4406,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mPowerSaveModeEnabledTimer.stopRunningLocked(elapsedRealtime);
             }
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            StatsLog.write(StatsLog.BATTERY_SAVER_MODE_STATE_CHANGED, enabled ? 1 : 0);
         }
     }
 
@@ -6180,17 +6184,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
             createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            StatsLog.write(StatsLog.AUDIO_STATE_CHANGED, getUid(), 1);
         }
 
         public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mAudioTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.AUDIO_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
         public void noteResetAudioLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.AUDIO_STATE_CHANGED, getUid(), 0);
             }
         }
 
@@ -6204,17 +6216,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
             createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            StatsLog.write(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), 1);
         }
 
         public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mVideoTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), 0);
+                }
             }
         }
 
         public void noteResetVideoLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), 0);
             }
         }
 
@@ -6228,17 +6248,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteFlashlightTurnedOnLocked(long elapsedRealtimeMs) {
             createFlashlightTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            StatsLog.write(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), 1);
         }
 
         public void noteFlashlightTurnedOffLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mFlashlightTurnedOnTimer.isRunningLocked()) {
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
         public void noteResetFlashlightLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), 0);
             }
         }
 
@@ -6252,17 +6280,25 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteCameraTurnedOnLocked(long elapsedRealtimeMs) {
             createCameraTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            StatsLog.write(StatsLog.CAMERA_STATE_CHANGED, getUid(), 1);
         }
 
         public void noteCameraTurnedOffLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mCameraTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.CAMERA_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
         public void noteResetCameraLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.CAMERA_STATE_CHANGED, getUid(), 0);
             }
         }
 
@@ -6311,26 +6347,42 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteBluetoothScanStartedLocked(long elapsedRealtimeMs, boolean isUnoptimized) {
             createBluetoothScanTimerLocked().startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 1);
             if (isUnoptimized) {
                 createBluetoothUnoptimizedScanTimerLocked().startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 1);
             }
         }
 
         public void noteBluetoothScanStoppedLocked(long elapsedRealtimeMs, boolean isUnoptimized) {
             if (mBluetoothScanTimer != null) {
                 mBluetoothScanTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mBluetoothScanTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 0);
+                }
             }
             if (isUnoptimized && mBluetoothUnoptimizedScanTimer != null) {
                 mBluetoothUnoptimizedScanTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mBluetoothUnoptimizedScanTimer.isRunningLocked()) {
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
         public void noteResetBluetoothScanLocked(long elapsedRealtimeMs) {
             if (mBluetoothScanTimer != null) {
                 mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 0);
             }
             if (mBluetoothUnoptimizedScanTimer != null) {
                 mBluetoothUnoptimizedScanTimer.stopAllRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 0);
             }
         }
 
@@ -6352,6 +6404,9 @@ public class BatteryStatsImpl extends BatteryStats {
             createBluetoothScanResultCounterLocked().addAtomic(numNewResults);
             // Uses background timebase, so the count will only be incremented if uid in background.
             createBluetoothScanResultBgCounterLocked().addAtomic(numNewResults);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            // TODO(statsd): This could be in AppScanStats instead, if desired.
+            StatsLog.write(StatsLog.BLE_SCAN_RESULT_RECEIVED, getUid(), numNewResults);
         }
 
         @Override
@@ -8712,6 +8767,8 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.SYNC_STATE_CHANGED, getUid(), name, 1);
             }
         }
 
@@ -8719,6 +8776,10 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
+                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.SYNC_STATE_CHANGED, getUid(), name, 0);
+                }
             }
         }
 
@@ -8726,6 +8787,8 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), name, 1);
             }
         }
 
@@ -8733,6 +8796,10 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
+                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), name, 0);
+                }
             }
             if (mBsi.mOnBatteryTimeBase.isRunning()) {
                 SparseIntArray types = mJobCompletions.get(name);
@@ -8799,6 +8866,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.UID_WAKELOCK_STATE_CHANGED, getUid(), type, 1);
                 if (pid >= 0) {
                     Pid p = getPidStatsLocked(pid);
                     if (p.mWakeNesting++ == 0) {
@@ -8816,6 +8885,11 @@ public class BatteryStatsImpl extends BatteryStats {
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
                     mAggregatedPartialWakelockTimer.stopRunningLocked(elapsedRealtimeMs);
+                    if (!mAggregatedPartialWakelockTimer.isRunningLocked()) {
+                        // TODO(statsd): Possibly use a worksource instead of a uid.
+                        StatsLog.write(StatsLog.UID_WAKELOCK_STATE_CHANGED, getUid(), type,
+                                0);
+                    }
                 }
                 if (pid >= 0) {
                     Pid p = mPids.get(pid);
@@ -8839,6 +8913,12 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
             DualTimer t = getSensorTimerLocked(sensor, /* create= */ true);
             t.startRunningLocked(elapsedRealtimeMs);
+            // TODO(statsd): Possibly use a worksource instead of a uid.
+            if (sensor == Sensor.GPS) {
+                StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED, getUid(), 1);
+            } else {
+                StatsLog.write(StatsLog.SENSOR_STATE_CHANGED, getUid(), sensor, 1);
+            }
         }
 
         public void noteStopSensor(int sensor, long elapsedRealtimeMs) {
@@ -8846,6 +8926,14 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = getSensorTimerLocked(sensor, false);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
+                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    if (sensor == Sensor.GPS) {
+                        StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED, getUid(), 0);
+                    } else {
+                        StatsLog.write(StatsLog.SENSOR_STATE_CHANGED, getUid(), sensor, 0);
+                    }
+                }
             }
         }
 
