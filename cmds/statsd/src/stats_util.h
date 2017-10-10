@@ -20,6 +20,7 @@
 #include "LogReader.h"
 
 #include <log/logprint.h>
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
@@ -28,6 +29,8 @@ namespace statsd {
 EventMetricData parse(log_msg msg);
 
 int getTagId(log_msg msg);
+
+StatsdConfig buildFakeConfig();
 
 }  // namespace statsd
 }  // namespace os

@@ -65,7 +65,8 @@ message LogEntryMatcher {
 
   message Combination {
     optional LogicalOperation operation = 1;
-    repeated LogEntryMatcher matcher = 2;
+
+    repeated string matcher = 2;
   }
   oneof contents {
     SimpleLogEntryMatcher simple_log_entry_matcher = 2;
@@ -116,6 +117,24 @@ message CountMetric {
   optional string what = 2;
 
   optional string condition = 3;
+
+  repeated KeyMatcher dimension = 4;
+
+  optional Bucket bucket = 5;
+}
+
+message DurationMetric {
+  optional int64 metric_id = 1;
+
+  enum AggregationType {
+    DURATION_SUM = 1;
+
+    DURATION_MAX_SPARSE = 2;
+    DURATION_MIN_SPARSE = 3;
+  }
+  optional AggregationType type = 2;
+
+  optional string predicate = 3;
 
   repeated KeyMatcher dimension = 4;
 

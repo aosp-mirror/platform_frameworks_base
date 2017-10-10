@@ -16,11 +16,11 @@
 #ifndef STATS_LOG_PROCESSOR_H
 #define STATS_LOG_PROCESSOR_H
 
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "DropboxWriter.h"
 #include "LogReader.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "metrics/MetricsManager.h"
-#include "parse_util.h"
+#include "stats_util.h"
 
 #include <log/logprint.h>
 #include <stdio.h>
@@ -44,8 +44,6 @@ private:
     DropboxWriter m_dropbox_writer;
 
     std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
-
-    static StatsdConfig buildFakeConfig();
 };
 
 }  // namespace statsd

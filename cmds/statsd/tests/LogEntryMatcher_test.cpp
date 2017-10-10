@@ -18,14 +18,15 @@
 #include <log/log_event_list.h>
 #include <log/log_read.h>
 #include <log/logprint.h>
-#include "../src/matchers/LogEntryMatcherManager.h"
-#include "../src/parse_util.h"
+#include "../src/matchers/matcher_util.h"
+#include "../src/stats_util.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 #include <stdio.h>
 
 using namespace android::os::statsd;
 using std::unordered_map;
+using std::vector;
 
 const int kTagIdWakelock = 123;
 const int kKeyIdState = 45;
@@ -41,7 +42,7 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     LogEventWrapper wrapper;
     wrapper.tagId = kTagIdWakelock;
 
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 TEST(LogEntryMatcherTest, TestBoolMatcher) {
@@ -57,13 +58,13 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
 
     keyValue->set_eq_bool(true);
     wrapper.boolMap[kKeyIdState] = true;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 
     keyValue->set_eq_bool(false);
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
 
-    wrapper.boolMap[kTagIdWakelock] = false;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    wrapper.boolMap[kKeyIdState] = false;
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 TEST(LogEntryMatcherTest, TestStringMatcher) {
@@ -80,7 +81,7 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
 
     wrapper.strMap[kKeyIdState] = "wakelock_name";
 
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
@@ -96,19 +97,19 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
 
     keyValue->set_lt_int(10);
     wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 
     keyValue->set_gt_int(10);
     wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 TEST(LogEntryMatcherTest, TestIntWithEqualityComparisonMatcher) {
@@ -124,19 +125,19 @@ TEST(LogEntryMatcherTest, TestIntWithEqualityComparisonMatcher) {
 
     keyValue->set_lte_int(10);
     wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 
     keyValue->set_gte_int(10);
     wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
@@ -152,15 +153,15 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
 
     keyValue->set_lt_float(10.0);
     wrapper.floatMap[kKeyIdState] = 10.1;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.floatMap[kKeyIdState] = 9.9;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
 
     keyValue->set_gt_float(10.0);
     wrapper.floatMap[kKeyIdState] = 10.1;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
     wrapper.floatMap[kKeyIdState] = 9.9;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
 }
 
 // Helper for the composite matchers.
@@ -173,141 +174,117 @@ void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, in
 
 TEST(LogEntryMatcherTest, TestAndMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto combination = matcher.mutable_combination();
-    combination->set_operation(LogicalOperation::AND);
+    LogicalOperation operation = LogicalOperation::AND;
 
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-                     kTagIdWakelock, kKeyIdState, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-                     kTagIdWakelock, kKeyIdPackageVersion, 4);
+    vector<int> children;
+    children.push_back(0);
+    children.push_back(1);
+    children.push_back(2);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    vector<MatchingState> matcherResults;
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kMatched);
 
-    wrapper.intMap[1003] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap.clear();
-    wrapper.intMap[1] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap.clear();
-    wrapper.intMap[1] = 3;
-    wrapper.intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
+
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kMatched);
+
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
 }
 
 TEST(LogEntryMatcherTest, TestOrMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto combination = matcher.mutable_combination();
-    combination->set_operation(LogicalOperation::OR);
+    LogicalOperation operation = LogicalOperation::OR;
 
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdState, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdPackageVersion, 4);
+    vector<int> children;
+    children.push_back(0);
+    children.push_back(1);
+    children.push_back(2);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    vector<MatchingState> matcherResults;
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kMatched);
 
-    // Don't set any key-value pairs.
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap.clear();
-    wrapper.intMap[1] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap.clear();
-    wrapper.intMap[1] = 3;
-    wrapper.intMap[1003] = 4;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
+
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
 
 TEST(LogEntryMatcherTest, TestNotMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto combination = matcher.mutable_combination();
-    combination->set_operation(LogicalOperation::NOT);
+    LogicalOperation operation = LogicalOperation::NOT;
 
-    // Define first simpleMatcher
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdState, 3);
+    vector<int> children;
+    children.push_back(0);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    vector<MatchingState> matcherResults;
+    matcherResults.push_back(MatchingState::kMatched);
 
-    // Don't set any key-value pairs.
-    wrapper.intMap[kKeyIdState] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
+
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kNotMatched);
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestNANDMatcher) {
+TEST(LogEntryMatcherTest, TestNandMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto combination = matcher.mutable_combination();
-    combination->set_operation(LogicalOperation::NAND);
+    LogicalOperation operation = LogicalOperation::NAND;
 
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdState, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdPackageVersion, 4);
+    vector<int> children;
+    children.push_back(0);
+    children.push_back(1);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    vector<MatchingState> matcherResults;
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
 
-    // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdPackageVersion] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
+
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
+
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kMatched);
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestNORMatcher) {
+TEST(LogEntryMatcherTest, TestNorMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto combination = matcher.mutable_combination();
-    combination->set_operation(LogicalOperation::NOR);
+    LogicalOperation operation = LogicalOperation::NOR;
 
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdState, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdPackageVersion, 4);
+    vector<int> children;
+    children.push_back(0);
+    children.push_back(1);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    vector<MatchingState> matcherResults;
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
 
-    // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 3;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdPackageVersion] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
-}
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 
-// Tests that a NOT on top of AND is the same as NAND
-TEST(LogEntryMatcherTest, TestMultipleLayerMatcher) {
-    LogEntryMatcher matcher;
-    auto not_combination = matcher.mutable_combination();
-    not_combination->set_operation(LogicalOperation::NOT);
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kNotMatched);
+    matcherResults.push_back(MatchingState::kNotMatched);
+    EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
 
-    // Now add the AND
-    auto combination = not_combination->add_matcher()->mutable_combination();
-    combination->set_operation(LogicalOperation::AND);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdState, 3);
-    addSimpleMatcher(combination->add_matcher()->mutable_simple_log_entry_matcher(),
-        kTagIdWakelock, kKeyIdPackageVersion, 4);
-
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
-
-    // Don't set any key-value pairs.
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 3;
-    EXPECT_TRUE(LogEntryMatcherManager::matches(matcher, wrapper));
-    wrapper.intMap[kKeyIdPackageVersion] = 4;
-    EXPECT_FALSE(LogEntryMatcherManager::matches(matcher, wrapper));
+    matcherResults.clear();
+    matcherResults.push_back(MatchingState::kMatched);
+    matcherResults.push_back(MatchingState::kMatched);
+    EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
 
 #else
