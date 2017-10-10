@@ -43,18 +43,20 @@ public abstract class AbstractConnectivityPreferenceController
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (ArrayUtils.contains(getConnectivityIntents(), action)) {
-                mHandler.sendEmptyMessage(EVENT_UPDATE_CONNECTIVITY);
+                getHandler().sendEmptyMessage(EVENT_UPDATE_CONNECTIVITY);
             }
         }
     };
 
     private static final int EVENT_UPDATE_CONNECTIVITY = 600;
 
-    private final Handler mHandler = new ConnectivityEventHandler(this);
+    private Handler mHandler;
 
     public AbstractConnectivityPreferenceController(Context context, Lifecycle lifecycle) {
         super(context);
-        lifecycle.addObserver(this);
+        if (lifecycle != null) {
+            lifecycle.addObserver(this);
+        }
     }
 
     @Override
@@ -77,6 +79,13 @@ public abstract class AbstractConnectivityPreferenceController
     protected abstract String[] getConnectivityIntents();
 
     protected abstract void updateConnectivity();
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new ConnectivityEventHandler(this);
+        }
+        return mHandler;
+    }
 
     private static class ConnectivityEventHandler extends Handler {
         private WeakReference<AbstractConnectivityPreferenceController> mPreferenceController;

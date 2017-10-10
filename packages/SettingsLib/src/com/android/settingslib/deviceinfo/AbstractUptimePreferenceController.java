@@ -44,21 +44,23 @@ public abstract class AbstractUptimePreferenceController extends AbstractPrefere
     private static final int EVENT_UPDATE_STATS = 500;
 
     private Preference mUptime;
-    private final Handler mHandler = new MyHandler(this);
+    private Handler mHandler;
 
     public AbstractUptimePreferenceController(Context context, Lifecycle lifecycle) {
         super(context);
-        lifecycle.addObserver(this);
+        if (lifecycle != null) {
+            lifecycle.addObserver(this);
+        }
     }
 
     @Override
     public void onStart() {
-        mHandler.sendEmptyMessage(EVENT_UPDATE_STATS);
+        getHandler().sendEmptyMessage(EVENT_UPDATE_STATS);
     }
 
     @Override
     public void onStop() {
-        mHandler.removeMessages(EVENT_UPDATE_STATS);
+        getHandler().removeMessages(EVENT_UPDATE_STATS);
     }
 
     @Override
@@ -76,6 +78,13 @@ public abstract class AbstractUptimePreferenceController extends AbstractPrefere
         super.displayPreference(screen);
         mUptime = screen.findPreference(KEY_UPTIME);
         updateTimes();
+    }
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new MyHandler(this);
+        }
+        return mHandler;
     }
 
     private void updateTimes() {
