@@ -753,9 +753,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
 
-    // System configuration read by SystemConfig.
-    final int[] mGlobalGids;
-    final SparseArray<ArraySet<String>> mSystemPermissions;
     @GuardedBy("mAvailableFeatures")
     final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
@@ -2430,8 +2427,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
-        mGlobalGids = systemConfig.getGlobalGids();
-        mSystemPermissions = systemConfig.getSystemPermissions();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
@@ -5112,59 +5107,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkUidPermission(String permName, int uid) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
-        final boolean isUidInstantApp = getInstantAppPackageName(uid) != null;
-        final int userId = UserHandle.getUserId(uid);
-        if (!sUserManager.exists(userId)) {
-            return PackageManager.PERMISSION_DENIED;
-        }
-
-        synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-            if (obj != null) {
-                if (obj instanceof SharedUserSetting) {
-                    if (isCallerInstantApp) {
-                        return PackageManager.PERMISSION_DENIED;
-                    }
-                } else if (obj instanceof PackageSetting) {
-                    final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
-                        return PackageManager.PERMISSION_DENIED;
-                    }
-                }
-                final SettingBase settingBase = (SettingBase) obj;
-                final PermissionsState permissionsState = settingBase.getPermissionsState();
-                if (permissionsState.hasPermission(permName, userId)) {
-                    if (isUidInstantApp) {
-                        if (mSettings.mPermissions.isPermissionInstant(permName)) {
-                            return PackageManager.PERMISSION_GRANTED;
-                        }
-                    } else {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                }
-                // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
-                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
-                        .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            } else {
-                ArraySet<String> perms = mSystemPermissions.get(uid);
-                if (perms != null) {
-                    if (perms.contains(permName)) {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                    if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && perms
-                            .contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                }
-            }
-        }
-
-        return PackageManager.PERMISSION_DENIED;
+        return mPermissionManager.checkUidPermission(permName, uid, getCallingUid());
     }
 
     @Override
@@ -12042,7 +11985,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        permissionsState.setGlobalGids(mGlobalGids);
+        permissionsState.setGlobalGids(mPermissionManager.getGlobalGidsTEMP());
 
         final int N = pkg.requestedPermissions.size();
         for (int i=0; i<N; i++) {
