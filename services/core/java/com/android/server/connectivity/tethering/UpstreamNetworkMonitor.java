@@ -95,7 +95,10 @@ public class UpstreamNetworkMonitor {
     private NetworkCallback mDefaultNetworkCallback;
     private NetworkCallback mMobileNetworkCallback;
     private boolean mDunRequired;
-    private Network mCurrentDefault;
+    // The current system default network (not really used yet).
+    private Network mDefaultInternetNetwork;
+    // The current upstream network used for tethering.
+    private Network mTetheringUpstreamNetwork;
 
     public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, SharedLog log, int what) {
         mContext = ctx;
@@ -130,10 +133,12 @@ public class UpstreamNetworkMonitor {
 
         releaseCallback(mDefaultNetworkCallback);
         mDefaultNetworkCallback = null;
+        mDefaultInternetNetwork = null;
 
         releaseCallback(mListenAllCallback);
         mListenAllCallback = null;
 
+        mTetheringUpstreamNetwork = null;
         mNetworkMap.clear();
     }
 
@@ -207,7 +212,7 @@ public class UpstreamNetworkMonitor {
                 break;
             default:
                 /* If we've found an active upstream connection that's not DUN/HIPRI
-                 * we should stop any outstanding DUN/HIPRI start requests.
+                 * we should stop any outstanding DUN/HIPRI requests.
                  *
                  * If we found NONE we don't want to do this as we want any previous
                  * requests to keep trying to bring up something we can use.
@@ -217,6 +222,10 @@ public class UpstreamNetworkMonitor {
         }
 
         return typeStatePair.ns;
+    }
+
+    public void setCurrentUpstream(Network upstream) {
+        mTetheringUpstreamNetwork = upstream;
     }
 
     public Set<IpPrefix> getLocalPrefixes() {
@@ -250,7 +259,7 @@ public class UpstreamNetworkMonitor {
                     // These request*() calls can be deleted post oag/339444.
                     return;
                 }
-                mCurrentDefault = network;
+                mDefaultInternetNetwork = network;
                 break;
 
             case CALLBACK_MOBILE_REQUEST:
@@ -302,6 +311,13 @@ public class UpstreamNetworkMonitor {
                     network, newNc));
         }
 
+        // Log changes in upstream network signal strength, if available.
+        if (network.equals(mTetheringUpstreamNetwork) && newNc.hasSignalStrength()) {
+            final int newSignal = newNc.getSignalStrength();
+            final String prevSignal = getSignalStrength(prev.networkCapabilities);
+            mLog.logf("upstream network signal strength: %s -> %s", prevSignal, newSignal);
+        }
+
         mNetworkMap.put(network, new NetworkState(
                 null, prev.linkProperties, newNc, network, null, null));
         // TODO: If sufficient information is available to select a more
@@ -330,9 +346,21 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LINKPROPERTIES, network);
     }
 
+    private void handleSuspended(int callbackType, Network network) {
+        if (callbackType != CALLBACK_LISTEN_ALL) return;
+        if (!network.equals(mTetheringUpstreamNetwork)) return;
+        mLog.log("SUSPENDED current upstream: " + network);
+    }
+
+    private void handleResumed(int callbackType, Network network) {
+        if (callbackType != CALLBACK_LISTEN_ALL) return;
+        if (!network.equals(mTetheringUpstreamNetwork)) return;
+        mLog.log("RESUMED current upstream: " + network);
+    }
+
     private void handleLost(int callbackType, Network network) {
         if (callbackType == CALLBACK_TRACK_DEFAULT) {
-            mCurrentDefault = null;
+            mDefaultInternetNetwork = null;
             // Receiving onLost() for a default network does not necessarily
             // mean the network is gone.  We wait for a separate notification
             // on either the LISTEN_ALL or MOBILE_REQUEST callbacks before
@@ -401,8 +429,15 @@ public class UpstreamNetworkMonitor {
             recomputeLocalPrefixes();
         }
 
-        // TODO: Handle onNetworkSuspended();
-        // TODO: Handle onNetworkResumed();
+        @Override
+        public void onNetworkSuspended(Network network) {
+            handleSuspended(mCallbackType, network);
+        }
+
+        @Override
+        public void onNetworkResumed(Network network) {
+            handleResumed(mCallbackType, network);
+        }
 
         @Override
         public void onLost(Network network) {
@@ -466,5 +501,10 @@ public class UpstreamNetworkMonitor {
         }
 
         return prefixSet;
+    }
+
+    private static String getSignalStrength(NetworkCapabilities nc) {
+        if (nc == null || !nc.hasSignalStrength()) return "unknown";
+        return Integer.toString(nc.getSignalStrength());
     }
 }
