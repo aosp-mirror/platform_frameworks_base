@@ -378,10 +378,6 @@ public final class Settings {
     private final ArrayMap<Long, Integer> mKeySetRefs =
             new ArrayMap<Long, Integer>();
 
-    // Mapping from permission tree names to info about them.
-    final ArrayMap<String, BasePermission> mPermissionTrees =
-            new ArrayMap<String, BasePermission>();
-
     // Packages that have been uninstalled and still need their external
     // storage data deleted.
     final ArrayList<PackageCleanItem> mPackagesToBeCleaned = new ArrayList<PackageCleanItem>();
@@ -416,7 +412,7 @@ public final class Settings {
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
     /** Settings and other information about permissions */
-    private final PermissionSettings mPermissions;
+    final PermissionSettings mPermissions;
 
     Settings(PermissionSettings permissions, Object lock) {
         this(Environment.getDataDirectory(), permissions, lock);
@@ -622,6 +618,10 @@ public final class Settings {
         return null;
     }
 
+    void addAppOpPackage(String permName, String packageName) {
+        mPermissions.addAppOpPackage(permName, packageName);
+    }
+
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
@@ -663,13 +663,6 @@ public final class Settings {
         for (int i = 0; i < removeStage.size(); i++) {
             mSharedUsers.remove(removeStage.get(i));
         }
-    }
-
-    /**
-     * Transfers ownership of permissions from one package to another.
-     */
-    void transferPermissionsLPw(String origPackageName, String newPackageName) {
-        mPermissions.transferPermissions(origPackageName, newPackageName, mPermissionTrees);
     }
 
     /**
@@ -2496,9 +2489,7 @@ public final class Settings {
             }
 
             serializer.startTag(null, "permission-trees");
-            for (BasePermission bp : mPermissionTrees.values()) {
-                writePermissionLPr(serializer, bp);
-            }
+            mPermissions.writePermissionTrees(serializer);
             serializer.endTag(null, "permission-trees");
 
             serializer.startTag(null, "permissions");
@@ -3042,7 +3033,7 @@ public final class Settings {
                 } else if (tagName.equals("permissions")) {
                     mPermissions.readPermissions(parser);
                 } else if (tagName.equals("permission-trees")) {
-                    PermissionSettings.readPermissions(mPermissionTrees, parser);
+                    mPermissions.readPermissionTrees(parser);
                 } else if (tagName.equals("shared-user")) {
                     readSharedUserLPw(parser);
                 } else if (tagName.equals("preferred-packages")) {

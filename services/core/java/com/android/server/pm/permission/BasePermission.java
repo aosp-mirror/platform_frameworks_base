@@ -48,6 +48,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -77,7 +78,7 @@ public final class BasePermission {
 
     final String name;
 
-    @PermissionType final int type;
+    final @PermissionType int type;
 
     String sourcePackageName;
 
@@ -252,12 +253,12 @@ public final class BasePermission {
         return changed;
     }
 
-    public void updateDynamicPermission(Map<String, BasePermission> permissionTrees) {
+    public void updateDynamicPermission(Collection<BasePermission> permissionTrees) {
         if (PackageManagerService.DEBUG_SETTINGS) Log.v(TAG, "Dynamic permission: name="
                 + getName() + " pkg=" + getSourcePackageName()
                 + " info=" + pendingPermissionInfo);
         if (sourcePackageSetting == null && pendingPermissionInfo != null) {
-            final BasePermission tree = findPermissionTreeLP(permissionTrees, name);
+            final BasePermission tree = findPermissionTree(permissionTrees, name);
             if (tree != null && tree.perm != null) {
                 sourcePackageSetting = tree.sourcePackageSetting;
                 perm = new PackageParser.Permission(tree.perm.owner,
@@ -269,8 +270,8 @@ public final class BasePermission {
         }
     }
 
-    public static BasePermission createOrUpdate(@Nullable BasePermission bp, @NonNull Permission p,
-            @NonNull PackageParser.Package pkg, Map<String, BasePermission> permissionTrees,
+    static BasePermission createOrUpdate(@Nullable BasePermission bp, @NonNull Permission p,
+            @NonNull PackageParser.Package pkg, Collection<BasePermission> permissionTrees,
             boolean chatty) {
         final PackageSettingBase pkgSetting = (PackageSettingBase) pkg.mExtras;
         // Allow system apps to redefine non-system permissions
@@ -300,7 +301,7 @@ public final class BasePermission {
         if (bp.perm == null) {
             if (bp.sourcePackageName == null
                     || bp.sourcePackageName.equals(p.info.packageName)) {
-                final BasePermission tree = findPermissionTreeLP(permissionTrees, p.info.name);
+                final BasePermission tree = findPermissionTree(permissionTrees, p.info.name);
                 if (tree == null
                         || tree.sourcePackageName.equals(p.info.packageName)) {
                     bp.sourcePackageSetting = pkgSetting;
@@ -345,12 +346,12 @@ public final class BasePermission {
         return bp;
     }
 
-    public static BasePermission enforcePermissionTreeLP(
-            Map<String, BasePermission> permissionTrees, String permName, int callingUid) {
+    static BasePermission enforcePermissionTree(
+            Collection<BasePermission> permissionTrees, String permName, int callingUid) {
         if (permName != null) {
-            BasePermission bp = findPermissionTreeLP(permissionTrees, permName);
+            BasePermission bp = findPermissionTree(permissionTrees, permName);
             if (bp != null) {
-                if (bp.uid == UserHandle.getAppId(callingUid)) {//UserHandle.getAppId(Binder.getCallingUid())) {
+                if (bp.uid == UserHandle.getAppId(callingUid)) {
                     return bp;
                 }
                 throw new SecurityException("Calling uid " + callingUid
@@ -373,9 +374,9 @@ public final class BasePermission {
         }
     }
 
-    private static BasePermission findPermissionTreeLP(
-            Map<String, BasePermission> permissionTrees, String permName) {
-        for (BasePermission bp : permissionTrees.values()) {
+    private static BasePermission findPermissionTree(
+            Collection<BasePermission> permissionTrees, String permName) {
+        for (BasePermission bp : permissionTrees) {
             if (permName.startsWith(bp.name) &&
                     permName.length() > bp.name.length() &&
                     permName.charAt(bp.name.length()) == '.') {

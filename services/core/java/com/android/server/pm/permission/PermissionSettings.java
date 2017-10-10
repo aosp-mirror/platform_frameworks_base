@@ -24,6 +24,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
@@ -35,6 +36,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Permissions and other related data. This class is not meant for
@@ -49,8 +51,25 @@ public class PermissionSettings {
      * All of the permissions known to the system. The mapping is from permission
      * name to permission object.
      */
-    private final ArrayMap<String, BasePermission> mPermissions =
+    @GuardedBy("mLock")
+    final ArrayMap<String, BasePermission> mPermissions =
             new ArrayMap<String, BasePermission>();
+
+    /**
+     * All permission trees known to the system. The mapping is from permission tree
+     * name to permission object.
+     */
+    @GuardedBy("mLock")
+    final ArrayMap<String, BasePermission> mPermissionTrees =
+            new ArrayMap<String, BasePermission>();
+
+    /**
+     * Set of packages that request a particular app op. The mapping is from permission
+     * name to package names.
+     */
+    @GuardedBy("mLock")
+    final ArrayMap<String, ArraySet<String>> mAppOpPermissionPackages = new ArrayMap<>();
+
     private final Object mLock;
 
     PermissionSettings(@NonNull Context context, @NonNull Object lock) {
@@ -65,15 +84,23 @@ public class PermissionSettings {
         }
     }
 
+    public void addAppOpPackage(String permName, String packageName) {
+        ArraySet<String> pkgs = mAppOpPermissionPackages.get(permName);
+        if (pkgs == null) {
+            pkgs = new ArraySet<>();
+            mAppOpPermissionPackages.put(permName, pkgs);
+        }
+        pkgs.add(packageName);
+    }
+
     /**
      * Transfers ownership of permissions from one package to another.
      */
-    public void transferPermissions(String origPackageName, String newPackageName,
-            ArrayMap<String, BasePermission> permissionTrees) {
+    public void transferPermissions(String origPackageName, String newPackageName) {
         synchronized (mLock) {
             for (int i=0; i<2; i++) {
                 ArrayMap<String, BasePermission> permissions =
-                        i == 0 ? permissionTrees : mPermissions;
+                        i == 0 ? mPermissionTrees : mPermissions;
                 for (BasePermission bp : permissions.values()) {
                     bp.transfer(origPackageName, newPackageName);
                 }
@@ -94,9 +121,26 @@ public class PermissionSettings {
         }
     }
 
+    public void readPermissionTrees(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        synchronized (mLock) {
+            readPermissions(mPermissionTrees, parser);
+        }
+    }
+
     public void writePermissions(XmlSerializer serializer) throws IOException {
-        for (BasePermission bp : mPermissions.values()) {
-            bp.writeLPr(serializer);
+        synchronized (mLock) {
+            for (BasePermission bp : mPermissions.values()) {
+                bp.writeLPr(serializer);
+            }
+        }
+    }
+
+    public void writePermissionTrees(XmlSerializer serializer) throws IOException {
+        synchronized (mLock) {
+            for (BasePermission bp : mPermissionTrees.values()) {
+                bp.writeLPr(serializer);
+            }
         }
     }
 
@@ -128,6 +172,22 @@ public class PermissionSettings {
                 printedSomething = bp.dumpPermissionsLPr(pw, packageName, permissionNames,
                         externalStorageEnforced, printedSomething, dumpState);
             }
+            if (packageName == null && permissionNames == null) {
+                for (int iperm = 0; iperm<mAppOpPermissionPackages.size(); iperm++) {
+                    if (iperm == 0) {
+                        if (dumpState.onTitlePrinted())
+                            pw.println();
+                        pw.println("AppOp Permissions:");
+                    }
+                    pw.print("  AppOp Permission ");
+                    pw.print(mAppOpPermissionPackages.keyAt(iperm));
+                    pw.println(":");
+                    ArraySet<String> pkgs = mAppOpPermissionPackages.valueAt(iperm);
+                    for (int ipkg=0; ipkg<pkgs.size(); ipkg++) {
+                        pw.print("    "); pw.println(pkgs.valueAt(ipkg));
+                    }
+                }
+            }
         }
     }
 
@@ -135,15 +195,58 @@ public class PermissionSettings {
         return mPermissions.get(permName);
     }
 
+    @Nullable BasePermission getPermissionTreeLocked(@NonNull String permName) {
+        return mPermissionTrees.get(permName);
+    }
+
     void putPermissionLocked(@NonNull String permName, @NonNull BasePermission permission) {
         mPermissions.put(permName, permission);
+    }
+
+    void putPermissionTreeLocked(@NonNull String permName, @NonNull BasePermission permission) {
+        mPermissionTrees.put(permName, permission);
     }
 
     void removePermissionLocked(@NonNull String permName) {
         mPermissions.remove(permName);
     }
 
-    Collection<BasePermission> getAllPermissionsLocked() {
+    void removePermissionTreeLocked(@NonNull String permName) {
+        mPermissionTrees.remove(permName);
+    }
+
+    @NonNull Collection<BasePermission> getAllPermissionsLocked() {
         return mPermissions.values();
     }
+
+    @NonNull Collection<BasePermission> getAllPermissionTreesLocked() {
+        return mPermissionTrees.values();
+    }
+
+    /**
+     * Returns the permission tree for the given permission.
+     * @throws SecurityException If the calling UID is not allowed to add permissions to the
+     * found permission tree.
+     */
+    @Nullable BasePermission enforcePermissionTree(@NonNull String permName, int callingUid) {
+        synchronized (mLock) {
+            return BasePermission.enforcePermissionTree(
+                    mPermissionTrees.values(), permName, callingUid);
+        }
+    }
+
+    public boolean isPermissionInstant(String permName) {
+        synchronized (mLock) {
+            final BasePermission bp = mPermissions.get(permName);
+            return (bp != null && bp.isInstant());
+        }
+    }
+
+    boolean isPermissionAppOp(String permName) {
+        synchronized (mLock) {
+            final BasePermission bp = mPermissions.get(permName);
+            return (bp != null && bp.isAppOp());
+        }
+    }
+
 }
