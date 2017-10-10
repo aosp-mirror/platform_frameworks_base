@@ -225,9 +225,6 @@ public abstract class WindowManagerInternal {
      */
     public abstract boolean isKeyguardLocked();
 
-    /** @return {@code true} if the keyguard is going away. */
-    public abstract boolean isKeyguardGoingAway();
-
     /**
     * @return Whether the keyguard is showing and not occluded.
     */

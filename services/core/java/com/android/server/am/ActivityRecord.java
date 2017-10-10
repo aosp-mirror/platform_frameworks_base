@@ -2249,26 +2249,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
         if (mTmpBounds.equals(mBounds)) {
-            final ActivityStack stack = getStack();
-            if (!mBounds.isEmpty() || task == null || stack == null || !task.mFullscreen) {
-                // We don't want to influence the override configuration here if our task is in
-                // multi-window mode or there is a bounds specified to calculate the override
-                // config. In both of this cases the app should be compatible with whatever the
-                // current configuration is or will be.
-                return;
-            }
-
-            // Currently limited to the top activity for now to avoid situations where non-top
-            // visible activity and top might have conflicting requests putting the non-top activity
-            // windows in an odd state.
-            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
-            final Configuration parentConfig = getParent().getConfiguration();
-            if (top != this || isConfigurationCompatible(parentConfig)) {
-                onOverrideConfigurationChanged(mTmpConfig);
-            } else if (isConfigurationCompatible(
-                    mLastReportedConfiguration.getMergedConfiguration())) {
-                onOverrideConfigurationChanged(mLastReportedConfiguration.getMergedConfiguration());
-            }
             return;
         }
 
