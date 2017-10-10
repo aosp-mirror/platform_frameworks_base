@@ -72,7 +72,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                 // move into the READY state and the PUK lock keyguard should be removed.
                 case READY: {
                     KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked(mSubId);
-                    mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                    // mCallback can be null if onSimStateChanged callback is called when keyguard
+                    // isn't active.
+                    if (mCallback != null) {
+                        mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                    }
                     break;
                 }
                 default:
