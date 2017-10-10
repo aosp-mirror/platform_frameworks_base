@@ -20,6 +20,8 @@
 #include "AnomalyMonitor.h"
 #include "StatsLogProcessor.h"
 #include "StatsPullerManager.h"
+#include "StatsPuller.h"
+#include "UidMap.h"
 
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
@@ -60,6 +62,11 @@ public:
 
     virtual Status informPollAlarmFired();
 
+    virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
+                                    const vector<String16>& app);
+    virtual Status informOnePackage(const String16& app, int32_t uid, int32_t version);
+    virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
+
     virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
 
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
@@ -71,10 +78,16 @@ public:
     // TODO: Should be private. Temporarily public for testing purposes only.
     const sp<AnomalyMonitor> mAnomalyMonitor;
 
+    sp<UidMap> getUidMap() {
+        return m_UidMap;
+    }
+
     /** Fetches and returns the StatsCompanionService. */
     static sp<IStatsCompanionService> getStatsCompanionService();
 
 private:
+    sp<UidMap> m_UidMap; // Reference to the UID map needed for translating UID to app name/version.
+
     sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
 
     status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
@@ -84,6 +97,8 @@ private:
     status_t doLoadConfig(FILE* in);
 
     StatsPullerManager mStatsPullerManager;
+
+    status_t doPrintUidMap(FILE* out);
 };
 
 // --- StatsdDeathRecipient ---

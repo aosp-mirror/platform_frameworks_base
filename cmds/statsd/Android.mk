@@ -124,6 +124,7 @@ LOCAL_SRC_FILES := \
     src/metrics/CountMetricProducer.cpp \
     src/metrics/CountAnomalyTracker.cpp \
     src/condition/condition_util.cpp \
+    src/UidMap.cpp \
     $(call all-cpp-files-under, tests) \
 
 LOCAL_STATIC_LIBRARIES := \

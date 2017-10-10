@@ -20,14 +20,17 @@
 #include <log/logprint.h>
 #include <utils/RefBase.h>
 #include "../matchers/matcher_util.h"
+#include "PackageInfoListener.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
-// writing the report to dropbox.
-class MetricProducer : public virtual RefBase {
+// writing the report to dropbox. MetricProducers should respond to package changes as required in
+// PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
+// be a no-op.
+class MetricProducer : public virtual RefBase, public virtual PackageInfoListener {
 public:
     virtual ~MetricProducer(){};
 
