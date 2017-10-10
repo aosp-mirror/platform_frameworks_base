@@ -166,7 +166,7 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
                                jobject recycle, jintArray recycleBreaks,
                                jfloatArray recycleWidths, jfloatArray recycleAscents,
                                jfloatArray recycleDescents, jintArray recycleFlags,
-                               jint recycleLength) {
+                               jint recycleLength, jfloatArray charWidths) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
 
     size_t nBreaks = b->computeBreaks();
@@ -174,6 +174,8 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
             recycleFlags, recycleLength, nBreaks, b->getBreaks(), b->getWidths(), b->getAscents(),
             b->getDescents(), b->getFlags());
+
+    env->SetFloatArrayRegion(charWidths, 0, b->size(), b->charWidths());
 
     b->finish();
 
@@ -256,11 +258,6 @@ static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
     b->addReplacement(start, end, width, langTagsString.get(), makeHyphenators(env, hyphenators));
 }
 
-static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths) {
-    minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
-    env->SetFloatArrayRegion(widths, 0, b->size(), b->charWidths());
-}
-
 static const JNINativeMethod gMethods[] = {
     // TODO performance: many of these are candidates for fast jni, awaiting guidance
     {"nNewBuilder", "()J", (void*) nNewBuilder},
@@ -269,8 +266,7 @@ static const JNINativeMethod gMethods[] = {
     {"nSetupParagraph", "(J[CIFIF[IIIIZ[I[I[II)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJIIZLjava/lang/String;[J)V", (void*) nAddStyleRun},
     {"nAddReplacementRun", "(JIIFLjava/lang/String;[J)V", (void*) nAddReplacementRun},
-    {"nGetWidths", "(J[F)V", (void*) nGetWidths},
-    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[F[F[II)I",
+    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[F[F[II[F)I",
         (void*) nComputeLineBreaks}
 };
 
