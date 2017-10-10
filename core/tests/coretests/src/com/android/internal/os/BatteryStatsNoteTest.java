@@ -214,7 +214,7 @@ public class BatteryStatsNoteTest extends TestCase{
         assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
     }
 
-    /** Test BatteryStatsImpl.noteScreenStateLocked. */
+    /** Test BatteryStatsImpl.noteScreenStateLocked sets timebases and screen states correctly. */
     @SmallTest
     public void testNoteScreenStateLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
@@ -231,6 +231,54 @@ public class BatteryStatsNoteTest extends TestCase{
         bi.noteScreenStateLocked(Display.STATE_OFF);
         assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
         assertEquals(bi.getScreenState(), Display.STATE_OFF);
+    }
+
+    /** Test BatteryStatsImpl.noteScreenStateLocked updates timers correctly.
+     *
+     *  Unknown and doze should both be subset of off state
+     *
+     *  Timeline 0----100----200----310----400------------1000
+     *  Unknown         -------
+     *  On                     -------
+     *  Off             -------       ----------------------
+     *  Doze                                ----------------
+     */
+    @SmallTest
+    public void testNoteScreenStateTimersLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        clocks.realtime = clocks.uptime = 100;
+        // Device startup, setOnBatteryLocked calls updateTimebases
+        bi.updateTimeBasesLocked(true, Display.STATE_UNKNOWN, 100_000, 100_000);
+        // Turn on display at 200us
+        clocks.realtime = clocks.uptime = 200;
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        assertEquals(150_000, bi.computeBatteryRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.computeBatteryScreenOffRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(50_000, bi.getScreenOnTime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(250_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 310;
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertEquals(250_000, bi.computeBatteryRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(140_000, bi.computeBatteryScreenOffRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(350_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 400;
+        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        assertEquals(400_000, bi.computeBatteryRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(290_000, bi.computeBatteryScreenOffRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.getScreenDozeTime(500_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 1000;
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertEquals(1400_000, bi.computeBatteryRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(1290_000, bi.computeBatteryScreenOffRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(600_000, bi.getScreenDozeTime(1500_000, STATS_SINCE_CHARGED));
     }
 
 }

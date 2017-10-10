@@ -3588,7 +3588,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void updateTimeBasesLocked(boolean unplugged, int screenState, long uptime,
             long realtime) {
-        final boolean screenOff = isScreenOff(screenState) || isScreenDoze(screenState);
+        final boolean screenOff = !isScreenOn(screenState);
         final boolean updateOnBatteryTimeBase = unplugged != mOnBatteryTimeBase.isRunning();
         final boolean updateOnBatteryScreenOffTimeBase =
                 (unplugged && screenOff) != mOnBatteryScreenOffTimeBase.isRunning();
@@ -9463,7 +9463,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public boolean isScreenOn(int state) {
-        return state == Display.STATE_ON;
+        return state == Display.STATE_ON || state == Display.STATE_VR;
     }
 
     public boolean isScreenOff(int state) {
