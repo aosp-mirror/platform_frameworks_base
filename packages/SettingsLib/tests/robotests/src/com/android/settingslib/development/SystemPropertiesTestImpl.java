@@ -54,4 +54,8 @@ public class SystemPropertiesTestImpl extends ShadowSystemProperties {
     public static void set(String key, String val) {
         sProperties.put(key, val);
     }
+
+    public static synchronized void clear() {
+        sProperties.clear();
+    }
 }
