@@ -28,12 +28,15 @@ import java.nio.charset.CodingErrorAction;
 import java.util.Formatter;
 import java.util.Locale;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * A print stream which logs output line by line.
  *
  * {@hide}
  */
-abstract class LoggingPrintStream extends PrintStream {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public abstract class LoggingPrintStream extends PrintStream {
 
     private final StringBuilder builder = new StringBuilder();
 
