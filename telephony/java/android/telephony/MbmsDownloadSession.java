@@ -77,8 +77,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      * Integer extra that Android will attach to the intent supplied via
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
      * Indicates the result code of the download. One of
-     * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, {@link #RESULT_CANCELLED}, or
-     * {@link #RESULT_IO_ERROR}.
+     * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, {@link #RESULT_CANCELLED},
+     * {@link #RESULT_IO_ERROR}, {@link #RESULT_DOWNLOAD_FAILURE}, {@link #RESULT_OUT_OF_STORAGE},
+     * {@link #RESULT_SERVICE_ID_NOT_DEFINED}, or {@link #RESULT_FILE_ROOT_UNREACHABLE}.
      *
      * This extra may also be used by the middleware when it is sending intents to the app.
      */
@@ -142,11 +143,41 @@ public class MbmsDownloadSession implements AutoCloseable {
 
     /**
      * Indicates that the download will not be completed due to an I/O error incurred while
-     * writing to temp files. This commonly indicates that the device is out of storage space,
-     * but may indicate other conditions as well (such as an SD card being removed).
+     * writing to temp files.
+     *
+     * This is likely a transient error and another {@link DownloadRequest} should be sent to try
+     * the download again.
      */
     public static final int RESULT_IO_ERROR = 4;
-    // TODO - more results!
+
+    /**
+     * Indicates that the Service ID specified in the {@link DownloadRequest} is incorrect due to
+     * the Id being incorrect, stale, expired, or similar.
+     */
+    public static final int RESULT_SERVICE_ID_NOT_DEFINED = 5;
+
+    /**
+     * Indicates that there was an error while processing downloaded files, such as a file repair or
+     * file decoding error and is not due to a file I/O error.
+     *
+     * This is likely a transient error and another {@link DownloadRequest} should be sent to try
+     * the download again.
+     */
+    public static final int RESULT_DOWNLOAD_FAILURE = 6;
+
+    /**
+     * Indicates that the file system is full and the {@link DownloadRequest} can not complete.
+     * Either space must be made on the current file system or the temp file root location must be
+     * changed to a location that is not full to download the temp files.
+     */
+    public static final int RESULT_OUT_OF_STORAGE = 7;
+
+    /**
+     * Indicates that the file root that was set is currently unreachable. This can happen if the
+     * temp files are set to be stored on external storage and the SD card was removed, for example.
+     * The temp file root should be changed before sending another DownloadRequest.
+     */
+    public static final int RESULT_FILE_ROOT_UNREACHABLE = 8;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
