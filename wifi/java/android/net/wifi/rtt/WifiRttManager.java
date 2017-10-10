@@ -83,17 +83,18 @@ public class WifiRttManager {
         }
 
         @Override
-        public void onRangingResults(int status, List<RangingResult> results) throws RemoteException {
-            if (VDBG) {
-                Log.v(TAG, "RttCallbackProxy: onRanginResults: status=" + status + ", results="
-                        + results);
-            }
+        public void onRangingFailure(int status) throws RemoteException {
+            if (VDBG) Log.v(TAG, "RttCallbackProxy: onRangingFailure: status=" + status);
             mHandler.post(() -> {
-               if (status == RangingResultCallback.STATUS_SUCCESS) {
-                   mCallback.onRangingResults(results);
-               } else {
-                   mCallback.onRangingFailure();
-               }
+               mCallback.onRangingFailure(status);
+            });
+        }
+
+        @Override
+        public void onRangingResults(List<RangingResult> results) throws RemoteException {
+            if (VDBG) Log.v(TAG, "RttCallbackProxy: onRanginResults: results=" + results);
+            mHandler.post(() -> {
+               mCallback.onRangingResults(results);
             });
         }
     }
