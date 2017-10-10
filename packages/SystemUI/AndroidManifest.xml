@@ -120,6 +120,7 @@
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT" />
+    <uses-permission android:name="android.permission.BIND_SLICE" />
 
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
@@ -222,7 +223,7 @@
              -->
         <service android:name="SystemUIService"
             android:exported="true"
-            />
+        />
 
         <!-- Recents depends on every user having their own SystemUI process, so on user switch,
              ensure that the process is created by starting this service.
@@ -566,6 +567,11 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/fileprovider" />
+        </provider>
+
+        <provider android:name=".keyguard.KeyguardSliceProvider"
+                  android:authorities="com.android.systemui.keyguard"
+                  android:exported="true">
         </provider>
 
         <receiver
