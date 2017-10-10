@@ -35,9 +35,9 @@ import com.android.settingslib.core.lifecycle.events.OnStop;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.android.controller.ActivityController;
+import org.robolectric.android.controller.FragmentController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
-import org.robolectric.util.FragmentController;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -168,7 +168,7 @@ public class LifecycleTest {
                 Robolectric.buildFragment(TestDialogFragment.class);
         TestDialogFragment fragment = fragmentController.get();
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
@@ -192,7 +192,7 @@ public class LifecycleTest {
                 Robolectric.buildFragment(TestFragment.class);
         TestFragment fragment = fragmentController.get();
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
@@ -235,7 +235,7 @@ public class LifecycleTest {
         OptionItemAccepter accepter = new OptionItemAccepter();
         fragment.getLifecycle().addObserver(accepter);
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);

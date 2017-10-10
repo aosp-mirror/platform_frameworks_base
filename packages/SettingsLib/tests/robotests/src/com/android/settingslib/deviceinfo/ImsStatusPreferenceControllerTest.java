@@ -16,11 +16,18 @@
 
 package com.android.settingslib.deviceinfo;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
+import android.os.PersistableBundle;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
@@ -32,6 +39,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -53,12 +62,6 @@ public class ImsStatusPreferenceControllerTest {
     }
 
     @Test
-    public void dummyTest() {
-        // do nothing
-    }
-
-    /* TODO: need robolectric with API >24 support for this to work
-    @Test
     @Config(shadows = ShadowSubscriptionManager.class)
     public void testIsAvailable() {
         CarrierConfigManager carrierConfigManager = mock(CarrierConfigManager.class);
@@ -71,23 +74,23 @@ public class ImsStatusPreferenceControllerTest {
         final AbstractImsStatusPreferenceController imsStatusPreferenceController =
                 new ConcreteImsStatusPreferenceController(mContext, mLifecycle);
 
-        assertTrue("Should be available when IMS registration is true",
-                imsStatusPreferenceController.isAvailable());
+        assertWithMessage("Should be available when IMS registration is true").that(
+                imsStatusPreferenceController.isAvailable()).isTrue();
 
         config.putBoolean(CarrierConfigManager.KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
 
-        assertFalse("Should not be available when IMS registration is false",
-                imsStatusPreferenceController.isAvailable());
+        assertWithMessage("Should not be available when IMS registration is false")
+                .that(imsStatusPreferenceController.isAvailable()).isFalse();
 
         doReturn(null).when(carrierConfigManager).getConfigForSubId(anyInt());
 
-        assertFalse("Should not be available when config is null",
-                imsStatusPreferenceController.isAvailable());
+        assertWithMessage("Should not be available when IMS registration is false")
+                .that(imsStatusPreferenceController.isAvailable()).isFalse();
 
         doReturn(null).when(mContext).getSystemService(CarrierConfigManager.class);
 
-        assertFalse("Should not be available when CarrierConfigManager service is null",
-                imsStatusPreferenceController.isAvailable());
+        assertWithMessage("Should not be available when CarrierConfigManager service is null")
+                .that(imsStatusPreferenceController.isAvailable()).isFalse();
     }
 
     @Implements(SubscriptionManager.class)
@@ -97,7 +100,6 @@ public class ImsStatusPreferenceControllerTest {
             return 1234;
         }
     }
-    */
 
     private static class ConcreteImsStatusPreferenceController
             extends AbstractImsStatusPreferenceController {
