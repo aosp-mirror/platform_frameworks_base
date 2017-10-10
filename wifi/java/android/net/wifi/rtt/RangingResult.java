@@ -44,31 +44,31 @@ public final class RangingResult implements Parcelable {
     private final int mStatus;
     private final byte[] mMac;
     private final PeerHandle mPeerHandle;
-    private final int mDistanceCm;
-    private final int mDistanceStdDevCm;
+    private final int mDistanceMm;
+    private final int mDistanceStdDevMm;
     private final int mRssi;
     private final long mTimestamp;
 
     /** @hide */
-    public RangingResult(int status, byte[] mac, int distanceCm, int distanceStdDevCm, int rssi,
+    public RangingResult(int status, byte[] mac, int distanceMm, int distanceStdDevMm, int rssi,
             long timestamp) {
         mStatus = status;
         mMac = mac;
         mPeerHandle = null;
-        mDistanceCm = distanceCm;
-        mDistanceStdDevCm = distanceStdDevCm;
+        mDistanceMm = distanceMm;
+        mDistanceStdDevMm = distanceStdDevMm;
         mRssi = rssi;
         mTimestamp = timestamp;
     }
 
     /** @hide */
-    public RangingResult(int status, PeerHandle peerHandle, int distanceCm, int distanceStdDevCm,
+    public RangingResult(int status, PeerHandle peerHandle, int distanceMm, int distanceStdDevMm,
             int rssi, long timestamp) {
         mStatus = status;
         mMac = null;
         mPeerHandle = peerHandle;
-        mDistanceCm = distanceCm;
-        mDistanceStdDevCm = distanceStdDevCm;
+        mDistanceMm = distanceMm;
+        mDistanceStdDevMm = distanceStdDevMm;
         mRssi = rssi;
         mTimestamp = timestamp;
     }
@@ -109,29 +109,30 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The distance (in cm) to the device specified by {@link #getMacAddress()}.
+     * @return The distance (in mm) to the device specified by {@link #getMacAddress()} or
+     * {@link #getPeerHandle()}.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link RangingResultCallback#STATUS_SUCCESS}.
      */
-    public int getDistanceCm() {
+    public int getDistanceMm() {
         if (mStatus != RangingResultCallback.STATUS_SUCCESS) {
-            Log.e(TAG, "getDistanceCm(): invalid value retrieved");
+            Log.e(TAG, "getDistanceMm(): invalid value retrieved");
         }
-        return mDistanceCm;
+        return mDistanceMm;
     }
 
     /**
-     * @return The standard deviation of the measured distance (in cm) to the device specified by
-     * {@link #getMacAddress()}. The standard deviation is calculated over the measurements
-     * executed in a single RTT burst.
+     * @return The standard deviation of the measured distance (in mm) to the device specified by
+     * {@link #getMacAddress()} or {@link #getPeerHandle()}. The standard deviation is calculated
+     * over the measurements executed in a single RTT burst.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link RangingResultCallback#STATUS_SUCCESS}.
      */
-    public int getDistanceStdDevCm() {
+    public int getDistanceStdDevMm() {
         if (mStatus != RangingResultCallback.STATUS_SUCCESS) {
-            Log.e(TAG, "getDistanceStdDevCm(): invalid value retrieved");
+            Log.e(TAG, "getDistanceStdDevMm(): invalid value retrieved");
         }
-        return mDistanceStdDevCm;
+        return mDistanceStdDevMm;
     }
 
     /**
@@ -173,8 +174,8 @@ public final class RangingResult implements Parcelable {
             dest.writeBoolean(true);
             dest.writeInt(mPeerHandle.peerId);
         }
-        dest.writeInt(mDistanceCm);
-        dest.writeInt(mDistanceStdDevCm);
+        dest.writeInt(mDistanceMm);
+        dest.writeInt(mDistanceStdDevMm);
         dest.writeInt(mRssi);
         dest.writeLong(mTimestamp);
     }
@@ -195,15 +196,15 @@ public final class RangingResult implements Parcelable {
             if (peerHandlePresent) {
                 peerHandle = new PeerHandle(in.readInt());
             }
-            int distanceCm = in.readInt();
-            int distanceStdDevCm = in.readInt();
+            int distanceMm = in.readInt();
+            int distanceStdDevMm = in.readInt();
             int rssi = in.readInt();
             long timestamp = in.readLong();
             if (peerHandlePresent) {
-                return new RangingResult(status, peerHandle, distanceCm, distanceStdDevCm, rssi,
+                return new RangingResult(status, peerHandle, distanceMm, distanceStdDevMm, rssi,
                         timestamp);
             } else {
-                return new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
+                return new RangingResult(status, mac, distanceMm, distanceStdDevMm, rssi,
                         timestamp);
             }
         }
@@ -215,8 +216,8 @@ public final class RangingResult implements Parcelable {
         return new StringBuilder("RangingResult: [status=").append(mStatus).append(", mac=").append(
                 mMac == null ? "<null>" : new String(HexEncoding.encodeToString(mMac))).append(
                 ", peerHandle=").append(mPeerHandle == null ? "<null>" : mPeerHandle.peerId).append(
-                ", distanceCm=").append(mDistanceCm).append(", distanceStdDevCm=").append(
-                mDistanceStdDevCm).append(", rssi=").append(mRssi).append(", timestamp=").append(
+                ", distanceMm=").append(mDistanceMm).append(", distanceStdDevMm=").append(
+                mDistanceStdDevMm).append(", rssi=").append(mRssi).append(", timestamp=").append(
                 mTimestamp).append("]").toString();
     }
 
@@ -233,14 +234,14 @@ public final class RangingResult implements Parcelable {
         RangingResult lhs = (RangingResult) o;
 
         return mStatus == lhs.mStatus && Arrays.equals(mMac, lhs.mMac) && Objects.equals(
-                mPeerHandle, lhs.mPeerHandle) && mDistanceCm == lhs.mDistanceCm
-                && mDistanceStdDevCm == lhs.mDistanceStdDevCm && mRssi == lhs.mRssi
+                mPeerHandle, lhs.mPeerHandle) && mDistanceMm == lhs.mDistanceMm
+                && mDistanceStdDevMm == lhs.mDistanceStdDevMm && mRssi == lhs.mRssi
                 && mTimestamp == lhs.mTimestamp;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mMac, mPeerHandle, mDistanceCm, mDistanceStdDevCm, mRssi,
+        return Objects.hash(mStatus, mMac, mPeerHandle, mDistanceMm, mDistanceStdDevMm, mRssi,
                 mTimestamp);
     }
 }
