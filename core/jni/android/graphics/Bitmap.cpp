@@ -1051,7 +1051,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     // Read the bitmap blob.
-    size_t size = bitmap->getSize();
+    size_t size = bitmap->computeByteSize();
     android::Parcel::ReadableBlob blob;
     android::status_t status = p->readBlob(size, &blob);
     if (status) {
@@ -1188,7 +1188,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
             p->allowFds() ? "allowed" : "forbidden");
 #endif
 
-    size_t size = bitmap.getSize();
+    size_t size = bitmap.computeByteSize();
     android::Parcel::WritableBlob blob;
     status = p->writeBlob(size, mutableCopy, &blob);
     if (status) {
@@ -1411,7 +1411,7 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
         android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
 
         // the java side has already checked that buffer is large enough
-        memcpy(abp.pointer(), src, bitmap.getSize());
+        memcpy(abp.pointer(), src, bitmap.computeByteSize());
     }
 }
 
@@ -1424,7 +1424,7 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
     if (NULL != dst) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_FALSE);
         // the java side has already checked that buffer is large enough
-        memcpy(dst, abp.pointer(), bitmap.getSize());
+        memcpy(dst, abp.pointer(), bitmap.computeByteSize());
         bitmap.notifyPixelsChanged();
     }
 }

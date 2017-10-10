@@ -174,13 +174,12 @@ public:
             return false;
         }
 
-        const int64_t size64 = info.getSafeSize64(bitmap->rowBytes());
-        if (!sk_64_isS32(size64)) {
+        const size_t size = info.computeByteSize(bitmap->rowBytes());
+        if (size > SK_MaxS32) {
             ALOGW("bitmap is too large");
             return false;
         }
 
-        const size_t size = sk_64_asS32(size64);
         if (size > mSize) {
             ALOGW("bitmap marked for reuse (%u bytes) can't fit new bitmap "
                   "(%zu bytes)", mSize, size);
