@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.text.format.DateUtils;
 import android.util.EventLog;
 import android.util.MathUtils;
@@ -304,6 +305,7 @@ class AutomaticBrightnessController {
     }
 
     private void handleLightSensorEvent(long time, float lux) {
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "ALS", (int) lux);
         mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
 
         if (mAmbientLightRingBuffer.size() == 0) {
