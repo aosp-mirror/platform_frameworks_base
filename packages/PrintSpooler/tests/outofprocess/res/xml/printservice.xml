@@ -17,4 +17,4 @@
   -->
 
 <print-service  xmlns:android="http://schemas.android.com/apk/res/android"
-        android:addPrintersActivity="com.android.printspooler.outofprocess.tests.mockservice.AddPrintersActivity" />
+        android:addPrintersActivity="android.print.test.services.AddPrintersActivity" />

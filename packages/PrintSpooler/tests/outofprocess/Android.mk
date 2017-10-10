@@ -21,7 +21,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test ub-uiautomator mockito-target-minus-junit4
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test ub-uiautomator mockito-target-minus-junit4 print-test-util-lib
 
 LOCAL_PACKAGE_NAME := PrintSpoolerOutOfProcessTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
