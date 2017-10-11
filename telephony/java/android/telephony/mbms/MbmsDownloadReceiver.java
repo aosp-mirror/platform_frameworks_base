@@ -287,7 +287,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             return;
         }
 
-        List<Uri> tempFiles = intent.getParcelableExtra(VendorUtils.EXTRA_TEMP_LIST);
+        List<Uri> tempFiles = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_LIST);
         if (tempFiles == null) {
             return;
         }
@@ -309,7 +309,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             return;
         }
         int fdCount = intent.getIntExtra(VendorUtils.EXTRA_FD_COUNT, 0);
-        List<Uri> pausedList = intent.getParcelableExtra(VendorUtils.EXTRA_PAUSED_LIST);
+        List<Uri> pausedList = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_PAUSED_LIST);
 
         if (fdCount == 0 && (pausedList == null || pausedList.size() == 0)) {
             Log.i(LOG_TAG, "No temp files actually requested. Ending.");
@@ -492,9 +492,14 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("Package manager couldn't find " + context.getPackageName());
         }
+        if (appInfo.metaData == null) {
+            throw new RuntimeException("App must declare the file provider authority as metadata " +
+                    "in the manifest.");
+        }
         String authority = appInfo.metaData.getString(MBMS_FILE_PROVIDER_META_DATA_KEY);
         if (authority == null) {
-            throw new RuntimeException("Must declare the file provider authority as meta data");
+            throw new RuntimeException("App must declare the file provider authority as metadata " +
+                    "in the manifest.");
         }
         return authority;
     }
