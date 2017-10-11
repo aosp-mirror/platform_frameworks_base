@@ -98,14 +98,14 @@ public class BatteryServiceTest extends AndroidTestCase {
     public void testWrapPreferVendor() throws Exception {
         initForInstances(VENDOR, HEALTHD);
         mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
-        verify(mCallback).onRegistration(same(mMockedHal), eq(VENDOR));
+        verify(mCallback).onRegistration(same(null), same(mMockedHal), eq(VENDOR));
     }
 
     @SmallTest
     public void testUseHealthd() throws Exception {
         initForInstances(HEALTHD);
         mWrapper.init(mCallback, mManagerSupplier, mHealthServiceSupplier);
-        verify(mCallback).onRegistration(same(mMockedHal), eq(HEALTHD));
+        verify(mCallback).onRegistration(same(null), same(mMockedHal), eq(HEALTHD));
     }
 
     @SmallTest

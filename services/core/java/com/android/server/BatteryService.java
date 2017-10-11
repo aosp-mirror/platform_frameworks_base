@@ -39,10 +39,10 @@ import android.content.pm.PackageManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.hardware.health.V2_0.HealthInfo;
+import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.IHealth;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
-import android.os.BatteryProperties;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -70,6 +70,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * <p>BatteryService monitors the charging status, and charge level of the device
@@ -107,6 +108,8 @@ public final class BatteryService extends SystemService {
     private static final boolean DEBUG = false;
 
     private static final int BATTERY_SCALE = 100;    // battery capacity is a percentage
+
+    private static final long HEALTH_HAL_WAIT_MS = 1000;
 
     // Used locally for determining when to make a last ditch effort to log
     // discharge stats before the device dies.
@@ -165,6 +168,9 @@ public final class BatteryService extends SystemService {
 
     private ActivityManagerInternal mActivityManagerInternal;
 
+    private HealthServiceWrapper mHealthServiceWrapper;
+    private HealthHalCallback mHealthHalCallback;
+
     public BatteryService(Context context) {
         super(context);
 
@@ -203,14 +209,7 @@ public final class BatteryService extends SystemService {
 
     @Override
     public void onStart() {
-        IBinder b = ServiceManager.getService("batteryproperties");
-        final IBatteryPropertiesRegistrar batteryPropertiesRegistrar =
-                IBatteryPropertiesRegistrar.Stub.asInterface(b);
-        try {
-            batteryPropertiesRegistrar.registerListener(new BatteryListener());
-        } catch (RemoteException e) {
-            // Should never happen.
-        }
+        registerHealthCallback();
 
         mBinderService = new BinderService();
         publishBinderService("battery", mBinderService);
@@ -236,6 +235,49 @@ public final class BatteryService extends SystemService {
                         false, obs, UserHandle.USER_ALL);
                 updateBatteryWarningLevelLocked();
             }
+        }
+    }
+
+    private void registerHealthCallback() {
+        mHealthServiceWrapper = new HealthServiceWrapper();
+        mHealthHalCallback = new HealthHalCallback();
+        // IHealth is lazily retrieved.
+        try {
+            mHealthServiceWrapper.init(mHealthHalCallback,
+                    new HealthServiceWrapper.IServiceManagerSupplier() {},
+                    new HealthServiceWrapper.IHealthSupplier() {});
+        } catch (RemoteException | NoSuchElementException ex) {
+            Slog.w(TAG, "health: cannot register callback. "
+                        + "BatteryService will be started with dummy values. Reason: "
+                        + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+            update(new HealthInfo());
+            return;
+        }
+
+        // init register for new service notifications, and IServiceManager should return the
+        // existing service in a near future. Wait for this.update() to instantiate
+        // the initial mHealthInfo.
+        long timeWaited = 0;
+        synchronized (mLock) {
+            long beforeWait = SystemClock.uptimeMillis();
+            while (mHealthInfo == null &&
+                    (timeWaited = SystemClock.uptimeMillis() - beforeWait) < HEALTH_HAL_WAIT_MS) {
+                try {
+                    mLock.wait(HEALTH_HAL_WAIT_MS - timeWaited);
+                } catch (InterruptedException ex) {
+                    break;
+                }
+            }
+            if (mHealthInfo == null) {
+                Slog.w(TAG, "health: Waited " + timeWaited + "ms for callbacks but received "
+                        + "nothing. BatteryService will be started with dummy values.");
+                update(new HealthInfo());
+                return;
+            }
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "health: Waited " + timeWaited + "ms and received the update.");
         }
     }
 
@@ -331,15 +373,15 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private void update(BatteryProperties props) {
+    private void update(HealthInfo info) {
         synchronized (mLock) {
             if (!mUpdatesStopped) {
-                mHealthInfo = new HealthInfo();
-                copy(mHealthInfo, props);
+                mHealthInfo = info;
                 // Process the new values.
                 processValuesLocked(false);
+                mLock.notifyAll(); // for any waiters on new info
             } else {
-                copy(mLastHealthInfo, props);
+                copy(mLastHealthInfo, info);
             }
         }
     }
@@ -364,24 +406,6 @@ public final class BatteryService extends SystemService {
         dst.batteryCurrentAverage = src.batteryCurrentAverage;
         dst.batteryCapacity = src.batteryCapacity;
         dst.energyCounter = src.energyCounter;
-    }
-
-    // TODO(b/62229583): remove this function when BatteryProperties are completely replaced.
-    private static void copy(HealthInfo dst, BatteryProperties src) {
-        dst.legacy.chargerAcOnline = src.chargerAcOnline;
-        dst.legacy.chargerUsbOnline = src.chargerUsbOnline;
-        dst.legacy.chargerWirelessOnline = src.chargerWirelessOnline;
-        dst.legacy.maxChargingCurrent = src.maxChargingCurrent;
-        dst.legacy.maxChargingVoltage = src.maxChargingVoltage;
-        dst.legacy.batteryStatus = src.batteryStatus;
-        dst.legacy.batteryHealth = src.batteryHealth;
-        dst.legacy.batteryPresent = src.batteryPresent;
-        dst.legacy.batteryLevel = src.batteryLevel;
-        dst.legacy.batteryVoltage = src.batteryVoltage;
-        dst.legacy.batteryTemperature = src.batteryTemperature;
-        dst.legacy.batteryFullCharge = src.batteryFullCharge;
-        dst.legacy.batteryChargeCounter = src.batteryChargeCounter;
-        dst.legacy.batteryTechnology = src.batteryTechnology;
     }
 
     private void processValuesLocked(boolean force) {
@@ -962,15 +986,43 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private final class BatteryListener extends IBatteryPropertiesListener.Stub {
-        @Override public void batteryPropertiesChanged(BatteryProperties props) {
-            final long identity = Binder.clearCallingIdentity();
+    private final class HealthHalCallback extends IHealthInfoCallback.Stub
+            implements HealthServiceWrapper.Callback {
+        @Override public void healthInfoChanged(HealthInfo props) {
+            BatteryService.this.update(props);
+        }
+        // on new service registered
+        @Override public void onRegistration(IHealth oldService, IHealth newService,
+                String instance) {
+            if (newService == null) return;
+
             try {
-                BatteryService.this.update(props);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                if (oldService != null) {
+                    int r = oldService.unregisterCallback(this);
+                    if (r != Result.SUCCESS) {
+                        Slog.w(TAG, "health: cannot unregister previous callback: " +
+                                Result.toString(r));
+                    }
+                }
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "health: cannot unregister previous callback (transaction error): "
+                            + ex.getMessage());
             }
-       }
+
+            try {
+                int r = newService.registerCallback(this);
+                if (r != Result.SUCCESS) {
+                    Slog.w(TAG, "health: cannot register callback: " + Result.toString(r));
+                    return;
+                }
+                // registerCallback does NOT guarantee that update is called
+                // immediately, so request a manual update here.
+                newService.update();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "health: cannot register callback (transaction error): "
+                        + ex.getMessage());
+            }
+        }
     }
 
     private final class BinderService extends Binder {
@@ -1053,6 +1105,11 @@ public final class BatteryService extends SystemService {
         private Callback mCallback;
         private IHealthSupplier mHealthSupplier;
 
+        private final Object mLastServiceSetLock = new Object();
+        // Last IHealth service received.
+        // set must be also be guarded with mLastServiceSetLock to ensure ordering.
+        private final AtomicReference<IHealth> mLastService = new AtomicReference<>();
+
         /**
          * init should be called after constructor. For testing purposes, init is not called by
          * constructor.
@@ -1109,7 +1166,7 @@ public final class BatteryService extends SystemService {
              * into service.
              * @param instance instance name.
              */
-            void onRegistration(IHealth service, String instance);
+            void onRegistration(IHealth oldService, IHealth newService, String instance);
         }
 
         /**
@@ -1117,14 +1174,18 @@ public final class BatteryService extends SystemService {
          * Must not return null; throw {@link NoSuchElementException} if a service is not available.
          */
         interface IServiceManagerSupplier {
-            IServiceManager get() throws NoSuchElementException, RemoteException;
+            default IServiceManager get() throws NoSuchElementException, RemoteException {
+                return IServiceManager.getService();
+            }
         }
         /**
          * Supplier of services.
          * Must not return null; throw {@link NoSuchElementException} if a service is not available.
          */
         interface IHealthSupplier {
-            IHealth get(String instanceName) throws NoSuchElementException, RemoteException;
+            default IHealth get(String name) throws NoSuchElementException, RemoteException {
+                return IHealth.getService(name);
+            }
         }
 
         private class Notification extends IServiceNotification.Stub {
@@ -1134,9 +1195,13 @@ public final class BatteryService extends SystemService {
                 if (!IHealth.kInterfaceName.equals(interfaceName)) return;
                 if (!sAllInstances.contains(instanceName)) return;
                 try {
-                    IHealth service = mHealthSupplier.get(instanceName);
-                    Slog.i(TAG, "health: new instance registered " + instanceName);
-                    mCallback.onRegistration(service, instanceName);
+                    // ensures the order of multiple onRegistration on different threads.
+                    synchronized (mLastServiceSetLock) {
+                        IHealth newService = mHealthSupplier.get(instanceName);
+                        IHealth oldService = mLastService.getAndSet(newService);
+                        Slog.i(TAG, "health: new instance registered " + instanceName);
+                        mCallback.onRegistration(oldService, newService, instanceName);
+                    }
                 } catch (NoSuchElementException | RemoteException ex) {
                     Slog.e(TAG, "health: Cannot get instance '" + instanceName + "': " +
                            ex.getMessage() + ". Perhaps no permission?");
