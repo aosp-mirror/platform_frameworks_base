@@ -232,6 +232,14 @@ class AssetManager2 {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
+  template <typename Func>
+  void ForEachPackage(Func func) {
+    for (const PackageGroup& package_group : package_groups_) {
+      func(package_group.packages_.front()->GetPackageName(),
+           package_group.dynamic_ref_table.mAssignedPackageId);
+    }
+  }
+
   void DumpToLog() const;
 
  private:
