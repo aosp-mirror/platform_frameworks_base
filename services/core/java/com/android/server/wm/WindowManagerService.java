@@ -2384,7 +2384,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Rect insets = new Rect();
             final Rect stableInsets = new Rect();
             Rect surfaceInsets = null;
-            final boolean freeform = win != null && win.inFreeformWorkspace();
+            final boolean freeform = win != null && win.inFreeformWindowingMode();
             if (win != null) {
                 // Containing frame will usually cover the whole screen, including dialog windows.
                 // For freeform workspace windows it will not cover the whole screen and it also
@@ -2794,7 +2794,7 @@ public class WindowManagerService extends IWindowManager.Stub
         for (final WindowState win : mWindowMap.values()) {
             final Task task = win.getTask();
             if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1
-                    && task.inFreeformWorkspace()) {
+                    && task.inFreeformWindowingMode()) {
                 final AppWindowToken appToken = win.mAppToken;
                 if (appToken != null && appToken.mAppAnimator != null) {
                     appToken.mAppAnimator.startProlongAnimation(scaleUp ?
@@ -7604,10 +7604,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isStackVisible(int stackId) {
+        public boolean isStackVisible(int windowingMode) {
             synchronized (mWindowMap) {
                 final DisplayContent dc = getDefaultDisplayContentLocked();
-                return dc.isStackVisible(stackId);
+                return dc.isStackVisible(windowingMode);
             }
         }
 

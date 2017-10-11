@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import com.android.internal.util.ToBooleanFunction;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -447,7 +447,7 @@ class WallpaperController {
 
     private void findWallpaperTarget(DisplayContent dc) {
         mFindResults.reset();
-        if (dc.isStackVisible(FREEFORM_WORKSPACE_STACK_ID)) {
+        if (dc.isStackVisible(WINDOWING_MODE_FREEFORM)) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
             // additional window to make it visible.
             mFindResults.setUseTopWallpaperAsTarget(true);

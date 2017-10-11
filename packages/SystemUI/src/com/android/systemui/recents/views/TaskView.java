@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;

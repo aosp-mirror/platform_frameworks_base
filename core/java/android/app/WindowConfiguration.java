@@ -511,7 +511,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return windowingMode != WINDOWING_MODE_FREEFORM && windowingMode != WINDOWING_MODE_PINNED;
     }
 
-    private static String windowingModeToString(@WindowingMode int windowingMode) {
+    /** @hide */
+    public static String windowingModeToString(@WindowingMode int windowingMode) {
         switch (windowingMode) {
             case WINDOWING_MODE_UNDEFINED: return "undefined";
             case WINDOWING_MODE_FULLSCREEN: return "fullscreen";

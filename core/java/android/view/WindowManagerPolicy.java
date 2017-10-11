@@ -467,11 +467,8 @@ public interface WindowManagerPolicy {
          */
         public boolean isDimming();
 
-        /**
-         * @return the stack id this windows belongs to, or {@link StackId#INVALID_STACK_ID} if
-         *         not attached to any stack.
-         */
-        int getStackId();
+        /** @return the current windowing mode of this window. */
+        int getWindowingMode();
 
         /**
          * Returns true if the window is current in multi-windowing mode. i.e. it shares the

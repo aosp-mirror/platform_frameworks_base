@@ -27,14 +27,7 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.getWindowingModeForStackId;
-import static android.app.ActivityManager.StackId.isStaticStack;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -3243,11 +3236,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         // stack implementation changes in the future, keep in mind that the use of the fullscreen
         // stack is a means to move the activity to the main display and a moveActivityToDisplay()
         // option would be a better choice here.
-        if (r.requestedVrComponent != null && r.getStackId() >= FIRST_DYNAMIC_STACK_ID) {
+        if (r.requestedVrComponent != null && r.getDisplayId() != DEFAULT_DISPLAY) {
             Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
                     + " to main stack for VR");
-            setTaskWindowingMode(r.getTask().taskId,
-                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
+            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getOrCreateStack(
+                    WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
+            moveTaskToStack(r.getTask().taskId, stack.mStackId, true /* toTop */);
         }
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
@@ -8087,8 +8081,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isInPictureInPictureMode(ActivityRecord r) {
-        if (r == null || r.getStack() == null || !r.getStack().isPinnedStack() ||
-                r.getStack().isInStackLocked(r) == null) {
+        if (r == null || r.getStack() == null || !r.inPinnedWindowingMode()
+                || r.getStack().isInStackLocked(r) == null) {
             return false;
         }
 
@@ -8182,7 +8176,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Only update the saved args from the args that are set
                 r.pictureInPictureArgs.copyOnlySet(params);
-                if (r.getStack().getStackId() == PINNED_STACK_ID) {
+                if (r.inPinnedWindowingMode()) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP
@@ -10008,14 +10002,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     if ((flags & ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK) != 0) {
-                        if (stack != null && stack.isDockedStack() && stack.topTask() == tr) {
+                        if (stack != null && stack.inSplitScreenPrimaryWindowingMode()
+                                && stack.topTask() == tr) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                                     "Skipping, top task in docked stack: " + tr);
                             continue;
                         }
                     }
                     if ((flags & ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS) != 0) {
-                        if (stack != null && stack.isPinnedStack()) {
+                        if (stack != null && stack.inPinnedWindowingMode()) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                                     "Skipping, pinned stack task: " + tr);
                             continue;
@@ -10612,7 +10607,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 final ActivityStack stack = r.getStack();
-                if (stack == null || stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+                if (stack == null || !stack.inFreeformWindowingMode()) {
                     throw new IllegalStateException(
                             "exitFreeformMode: You can only go fullscreen from freeform.");
                 }
@@ -10680,26 +10675,19 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
-                if (stackId == DOCKED_STACK_ID) {
-                    mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                            null /* initialBounds */);
-                }
 
-                ActivityStack stack = mStackSupervisor.getStack(stackId);
+                final ActivityStack stack = mStackSupervisor.getStack(stackId);
                 if (stack == null) {
-                    if (!isStaticStack(stackId)) {
-                        throw new IllegalStateException(
-                                "moveTaskToStack: No stack for stackId=" + stackId);
-                    }
-                    final ActivityDisplay display = task.getStack().getDisplay();
-                    final int windowingMode =
-                            getWindowingModeForStackId(stackId, display.hasSplitScreenStack());
-                    stack = display.getOrCreateStack(windowingMode,
-                            task.getStack().getActivityType(), toTop);
+                    throw new IllegalStateException(
+                            "moveTaskToStack: No stack for stackId=" + stackId);
                 }
                 if (!stack.isActivityTypeStandardOrUndefined()) {
                     throw new IllegalArgumentException("moveTaskToStack: Attempt to move task "
                             + taskId + " to stack " + stackId);
+                }
+                if (stack.inSplitScreenPrimaryWindowingMode()) {
+                    mWindowManager.setDockedStackCreateState(
+                            DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
                 }
                 task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
                         "moveTaskToStack");
@@ -10772,7 +10760,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ActivityStack stack =
                         mStackSupervisor.getDefaultDisplay().getSplitScreenStack();
                 if (toTop) {
-                    mStackSupervisor.resizeStackLocked(stack.mStackId, null /* destBounds */,
+                    mStackSupervisor.resizeStackLocked(stack, null /* destBounds */,
                             null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                             true /* preserveWindows */, true /* allowResizeInDockedMode */,
                             !DEFER_RESUME);
@@ -10865,7 +10853,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
                             animationDuration, false /* fromFullscreen */);
                 } else {
-                    mStackSupervisor.resizeStackLocked(stackId, destBounds, null /* tempTaskBounds */,
+                    final ActivityStack stack = mStackSupervisor.getStack(stackId);
+                    if (stack == null) {
+                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
+                        return;
+                    }
+                    mStackSupervisor.resizeStackLocked(stack, destBounds, null /* tempTaskBounds */,
                             null /* tempTaskInsetBounds */, preserveWindows,
                             allowResizeInDockedMode, !DEFER_RESUME);
                 }
@@ -20704,9 +20697,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** Helper method that requests bounds from WM and applies them to stack. */
     private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
         final Rect newStackBounds = new Rect();
-        mStackSupervisor.getStack(stackId).getBoundsForNewConfiguration(newStackBounds);
+        final ActivityStack stack = mStackSupervisor.getStack(stackId);
+        stack.getBoundsForNewConfiguration(newStackBounds);
         mStackSupervisor.resizeStackLocked(
-                stackId, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
+                stack, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
                 null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                 false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);
     }

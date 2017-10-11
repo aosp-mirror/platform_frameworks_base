@@ -18,13 +18,14 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Context.DISPLAY_SERVICE;
@@ -2848,7 +2849,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean keyguardLocked = isKeyguardLocked();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
-                && !mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
+                && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
                 || hideDockDivider;
     }
@@ -5449,7 +5450,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                 && attrs.type < FIRST_SYSTEM_WINDOW;
-        final int stackId = win.getStackId();
+        final int windowingMode = win.getWindowingMode();
+        final boolean inFullScreenOrSplitScreenSecondaryWindowingMode =
+                windowingMode == WINDOWING_MODE_FULLSCREEN
+                        || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
         if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
@@ -5468,7 +5472,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // represent should be hidden or if we should hide the lockscreen. For attached app
             // windows we defer the decision to the window it is attached to.
             if (appWindow && attached == null) {
-                if (attrs.isFullscreen() && StackId.normallyFullscreenWindows(stackId)) {
+                if (attrs.isFullscreen() && inFullScreenOrSplitScreenSecondaryWindowingMode) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
                     if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -5499,7 +5503,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Keep track of the window if it's dimming but not necessarily fullscreen.
         if (mTopFullscreenOpaqueOrDimmingWindowState == null && affectsSystemUi
-                && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
+                && win.isDimming() && inFullScreenOrSplitScreenSecondaryWindowingMode) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
 
@@ -5507,7 +5511,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // separately, because both the "real fullscreen" opaque window and the one for the docked
         // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
         if (mTopDockedOpaqueWindowState == null && affectsSystemUi && appWindow && attached == null
-                && attrs.isFullscreen() && stackId == DOCKED_STACK_ID) {
+                && attrs.isFullscreen() && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueWindowState = win;
             if (mTopDockedOpaqueOrDimmingWindowState == null) {
                 mTopDockedOpaqueOrDimmingWindowState = win;
@@ -5517,7 +5521,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
         // docked stack.
         if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
-                && stackId == DOCKED_STACK_ID) {
+                && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueOrDimmingWindowState = win;
         }
 
@@ -5612,8 +5616,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
                 } else if (topIsFullscreen
-                        && !mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID)
-                        && !mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID)) {
+                        && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_FREEFORM)
+                        && !mWindowManagerInternal.isStackVisible(
+                                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** HIDING status bar");
                     if (mStatusBarController.setBarShowingLw(false)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -8013,9 +8018,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
-        final boolean dockedStackVisible = mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
+        final boolean dockedStackVisible =
+                mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final boolean freeformStackVisible =
-                mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID);
+                mWindowManagerInternal.isStackVisible(WINDOWING_MODE_FREEFORM);
         final boolean resizing = mWindowManagerInternal.isDockedDividerResizing();
 
         // We need to force system bars when the docked stack is visible, when the freeform stack

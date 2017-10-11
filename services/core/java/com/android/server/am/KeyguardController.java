@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
