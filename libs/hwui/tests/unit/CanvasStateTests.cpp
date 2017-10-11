@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 #include <SkPath.h>
-#include <SkRegion.h>
+#include <SkClipOp.h>
 
 namespace android {
 namespace uirenderer {
@@ -68,13 +68,13 @@ TEST(CanvasState, simpleClipping) {
     state.initializeSaveStack(200, 200,
             0, 0, 200, 200, Vector3());
 
-    state.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
+    state.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(100, 100));
 
-    state.clipRect(10, 10, 200, 200, SkRegion::kIntersect_Op);
+    state.clipRect(10, 10, 200, 200, SkClipOp::kIntersect);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10, 100, 100));
 
-    state.clipRect(50, 50, 150, 150, SkRegion::kReplace_Op);
+    state.clipRect(50, 50, 150, 150, SkClipOp::kReplace_deprecated);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(50, 50, 150, 150));
 }
 
@@ -88,7 +88,7 @@ TEST(CanvasState, complexClipping) {
         // rotated clip causes complex clip
         state.rotate(10);
         EXPECT_TRUE(state.clipIsSimple());
-        state.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
+        state.clipRect(0, 0, 200, 200, SkClipOp::kIntersect);
         EXPECT_FALSE(state.clipIsSimple());
     }
     state.restore();
@@ -97,7 +97,7 @@ TEST(CanvasState, complexClipping) {
     {
         // subtracted clip causes complex clip
         EXPECT_TRUE(state.clipIsSimple());
-        state.clipRect(50, 50, 150, 150, SkRegion::kDifference_Op);
+        state.clipRect(50, 50, 150, 150, SkClipOp::kDifference);
         EXPECT_FALSE(state.clipIsSimple());
     }
     state.restore();
@@ -108,7 +108,7 @@ TEST(CanvasState, complexClipping) {
         SkPath path;
         path.addOval(SkRect::MakeWH(200, 200));
         EXPECT_TRUE(state.clipIsSimple());
-        state.clipPath(&path, SkRegion::kDifference_Op);
+        state.clipPath(&path, SkClipOp::kDifference);
         EXPECT_FALSE(state.clipIsSimple());
     }
     state.restore();
@@ -121,7 +121,7 @@ TEST(CanvasState, saveAndRestore) {
 
     state.save(SaveFlags::Clip);
     {
-        state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
+        state.clipRect(0, 0, 10, 10, SkClipOp::kIntersect);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();
@@ -145,7 +145,7 @@ TEST(CanvasState, saveAndRestoreButNotTooMuch) {
 
     state.save(SaveFlags::Matrix); // NOTE: clip not saved
     {
-        state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
+        state.clipRect(0, 0, 10, 10, SkClipOp::kIntersect);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();

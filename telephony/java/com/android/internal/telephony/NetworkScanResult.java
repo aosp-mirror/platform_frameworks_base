@@ -22,6 +22,7 @@ import android.telephony.CellInfo;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the incremental network scan result.
@@ -35,10 +36,10 @@ import java.util.List;
 public final class NetworkScanResult implements Parcelable {
 
     // Contains only part of the scan result and more are coming.
-    public static final int SCAN_STATUS_PARTIAL = 0;
+    public static final int SCAN_STATUS_PARTIAL = 1;
 
     // Contains the last part of the scan result and the scan is now complete.
-    public static final int SCAN_STATUS_COMPLETE = 1;
+    public static final int SCAN_STATUS_COMPLETE = 2;
 
     // The status of the scan, only valid when scanError = SUCCESS.
     public int scanStatus;
@@ -111,7 +112,7 @@ public final class NetworkScanResult implements Parcelable {
     public int hashCode () {
         return ((scanStatus * 31)
                 + (scanError * 23)
-                + (networkInfos.hashCode() * 37));
+                + (Objects.hashCode(networkInfos) * 37));
     }
 
     public static final Creator<NetworkScanResult> CREATOR =

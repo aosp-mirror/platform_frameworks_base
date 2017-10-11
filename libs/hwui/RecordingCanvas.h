@@ -22,10 +22,10 @@
 #include "ResourceCache.h"
 #include "SkiaCanvasProxy.h"
 #include "Snapshot.h"
+#include "hwui/Bitmap.h"
 #include "hwui/Canvas.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Macros.h"
-#include "utils/NinePatch.h"
 
 #include <SkDrawFilter.h>
 #include <SkPaint.h>
@@ -50,7 +50,7 @@ public:
     RecordingCanvas(size_t width, size_t height);
     virtual ~RecordingCanvas();
 
-    virtual void resetRecording(int width, int height) override;
+    virtual void resetRecording(int width, int height, RenderNode* node = nullptr) override;
     virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE
@@ -131,9 +131,9 @@ public:
     virtual bool quickRejectRect(float left, float top, float right, float bottom) const override;
     virtual bool quickRejectPath(const SkPath& path) const override;
 
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) override;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
+    virtual bool clipRect(float left, float top, float right, float bottom,
+            SkClipOp op) override;
+    virtual bool clipPath(const SkPath* path, SkClipOp op) override;
 
     // Misc
     virtual SkDrawFilter* getDrawFilter() override { return mDrawFilter.get(); }
@@ -144,7 +144,7 @@ public:
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual void drawColor(int color, SkXfermode::Mode mode) override;
+    virtual void drawColor(int color, SkBlendMode mode) override;
     virtual void drawPaint(const SkPaint& paint) override;
 
     // Geometry
@@ -176,15 +176,14 @@ public:
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
-                            const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) override;
-    virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+    virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
-    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+    virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) override;
 
@@ -196,15 +195,15 @@ protected:
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) override;
+    virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+            const SkPaint& paint, const SkPath& path, size_t start, size_t end) override;
 
 private:
     const ClipBase* getRecordedClip() {
         return mState.writableSnapshot()->mutateClipArea().serializeClip(alloc());
     }
 
-    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    void drawBitmap(Bitmap& bitmap, const SkPaint* paint);
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);
 
 
@@ -286,14 +285,17 @@ private:
         return cachedRegion;
     }
 
-    inline const SkBitmap* refBitmap(const SkBitmap& bitmap) {
+    inline Bitmap* refBitmap(Bitmap& bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        SkBitmap* localBitmap = alloc().create<SkBitmap>(bitmap);
-        mDisplayList->bitmapResources.push_back(localBitmap);
-        return localBitmap;
+
+        // this is required because sk_sp's ctor adopts the pointer,
+        // but does not increment the refcount,
+        bitmap.ref();
+        mDisplayList->bitmapResources.emplace_back(&bitmap);
+        return &bitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
@@ -313,7 +315,7 @@ private:
     const ClipBase* mDeferredBarrierClip = nullptr;
     DisplayList* mDisplayList = nullptr;
     bool mHighContrastText = false;
-    SkAutoTUnref<SkDrawFilter> mDrawFilter;
+    sk_sp<SkDrawFilter> mDrawFilter;
 }; // class RecordingCanvas
 
 }; // namespace uirenderer

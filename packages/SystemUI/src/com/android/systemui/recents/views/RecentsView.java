@@ -24,26 +24,23 @@ import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.AppTransitionAnimationSpec;
-import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -58,7 +55,9 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.ShowEmptyViewEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
@@ -73,10 +72,10 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -253,6 +252,12 @@ public class RecentsView extends FrameLayout {
 
     /** Launches the task that recents was launched from if possible */
     public boolean launchPreviousTask() {
+        if (Recents.getConfiguration().getLaunchState().launchedFromPipApp) {
+            // If the app auto-entered PiP on the way to Recents, then just re-expand it
+            EventBus.getDefault().send(new ExpandPipEvent());
+            return true;
+        }
+
         if (mTaskStackView != null) {
             Task task = getStack().getLaunchTarget();
             if (task != null) {
@@ -440,8 +445,7 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(LaunchTaskEvent event) {
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
-                event.taskView, event.screenPinningRequested, event.targetTaskBounds,
-                event.targetTaskStack);
+                event.taskView, event.screenPinningRequested, event.targetTaskStack);
     }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
@@ -454,7 +458,7 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(DragStartEvent event) {
-        updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+        updateVisibleDockRegions(Recents.getConfiguration().getDockStatesForCurrentOrientation(),
                 true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
                 TaskStack.DockState.NONE.viewState.hintTextAlpha,
                 true /* animateAlpha */, false /* animateBounds */);
@@ -471,7 +475,8 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
         if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
-            updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+            updateVisibleDockRegions(
+                    Recents.getConfiguration().getDockStatesForCurrentOrientation(),
                     true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
                     TaskStack.DockState.NONE.viewState.hintTextAlpha,
                     true /* animateAlpha */, true /* animateBounds */);
@@ -522,7 +527,7 @@ public class RecentsView extends FrameLayout {
                 };
 
                 final Rect taskRect = getTaskRect(event.taskView);
-                IAppTransitionAnimationSpecsFuture future =
+                AppTransitionAnimationSpecsFuture future =
                         mTransitionHelper.getAppTransitionFuture(
                                 new AnimationSpecComposer() {
                                     @Override
@@ -531,7 +536,7 @@ public class RecentsView extends FrameLayout {
                                                 event.taskView, taskRect);
                                     }
                                 });
-                ssp.overridePendingAppTransitionMultiThumbFuture(future,
+                ssp.overridePendingAppTransitionMultiThumbFuture(future.getFuture(),
                         mTransitionHelper.wrapStartedListener(startedListener),
                         true /* scaleUp */);
 
@@ -636,6 +641,10 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         updateStack(event.stack, false /* setStackViewTasks */);
+    }
+
+    public final void onBusEvent(ShowEmptyViewEvent event) {
+        showEmptyView(R.string.recents_empty_message);
     }
 
     /**

@@ -22,18 +22,24 @@ import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.android.settingslib.drawer.SettingsDrawerActivity;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.fragments.FragmentService;
 
 public class TunerActivity extends SettingsDrawerActivity implements
         PreferenceFragment.OnPreferenceStartFragmentCallback,
         PreferenceFragment.OnPreferenceStartScreenCallback {
 
+    static final String ACTIVITY_ALIAS_NAME = "com.android.systemui.tuner.TunerSettingLink";
+
     private static final String TAG_TUNER = "tuner";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Dependency.initDependencies(this);
 
         if (getFragmentManager().findFragmentByTag(TAG_TUNER) == null) {
             final String action = getIntent().getAction();
@@ -44,6 +50,22 @@ public class TunerActivity extends SettingsDrawerActivity implements
             getFragmentManager().beginTransaction().replace(R.id.content_frame,
                     fragment, TAG_TUNER).commit();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Dependency.destroy(FragmentService.class, s -> s.destroyAll());
+        Dependency.clearDependencies();
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
     }
 
     @Override
@@ -58,6 +80,9 @@ public class TunerActivity extends SettingsDrawerActivity implements
         try {
             Class<?> cls = Class.forName(pref.getFragment());
             Fragment fragment = (Fragment) cls.newInstance();
+            final Bundle b = new Bundle(1);
+            b.putString(PreferenceFragment.ARG_PREFERENCE_ROOT, pref.getKey());
+            fragment.setArguments(b);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             setTitle(pref.getTitle());
             transaction.replace(R.id.content_frame, fragment);
@@ -85,10 +110,35 @@ public class TunerActivity extends SettingsDrawerActivity implements
     }
 
     public static class SubSettingsFragment extends PreferenceFragment {
+        private PreferenceScreen mParentScreen;
+
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferenceScreen((PreferenceScreen) ((PreferenceFragment) getTargetFragment())
-                    .getPreferenceScreen().findPreference(rootKey));
+            mParentScreen =
+                    (PreferenceScreen) ((PreferenceFragment) getTargetFragment())
+                            .getPreferenceScreen().findPreference(rootKey);
+            PreferenceScreen screen =
+                    getPreferenceManager().createPreferenceScreen(
+                            getPreferenceManager().getContext());
+            setPreferenceScreen(screen);
+            // Copy all the preferences over to this screen so they go into the attached state.
+            while (mParentScreen.getPreferenceCount() > 0) {
+                Preference p = mParentScreen.getPreference(0);
+                mParentScreen.removePreference(p);
+                screen.addPreference(p);
+            }
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            // Copy all the preferences back so we don't lose them.
+            PreferenceScreen screen = getPreferenceScreen();
+            while (screen.getPreferenceCount() > 0) {
+                Preference p = screen.getPreference(0);
+                screen.removePreference(p);
+                mParentScreen.addPreference(p);
+            }
         }
     }
 

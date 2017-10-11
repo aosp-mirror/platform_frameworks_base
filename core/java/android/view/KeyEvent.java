@@ -21,7 +21,6 @@ import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.KeyData;
 
 /**
@@ -495,7 +494,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * On TV remotes, switches to viewing live TV. */
     public static final int KEYCODE_TV              = 170;
     /** Key code constant: Window key.
-     * On TV remotes, toggles picture-in-picture mode or other windowing functions. */
+     * On TV remotes, toggles picture-in-picture mode or other windowing functions.
+     * On Android Wear devices, triggers a display offset. */
     public static final int KEYCODE_WINDOW          = 171;
     /** Key code constant: Guide key.
      * On TV remotes, shows a programming guide. */

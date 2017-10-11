@@ -40,7 +40,7 @@ public class LoginActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
         mLoginScene = Scene.getSceneForLayout(mSceneRoot, R.layout.activity_login, this);

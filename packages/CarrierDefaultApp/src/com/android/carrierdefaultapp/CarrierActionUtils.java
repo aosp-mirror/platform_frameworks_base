@@ -16,6 +16,7 @@
 package com.android.carrierdefaultapp;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -35,6 +36,7 @@ public class CarrierActionUtils {
 
     private static final String PORTAL_NOTIFICATION_TAG = "CarrierDefault.Portal.Notification";
     private static final String NO_DATA_NOTIFICATION_TAG = "CarrierDefault.NoData.Notification";
+    private static final String NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS = "mobile_data_status";
     private static final int PORTAL_NOTIFICATION_ID = 0;
     private static final int NO_DATA_NOTIFICATION_ID = 1;
     private static boolean ENABLE = true;
@@ -110,8 +112,6 @@ public class CarrierActionUtils {
 
     private static void onShowCaptivePortalNotification(Intent intent, Context context) {
         logd("onShowCaptivePortalNotification");
-        final NotificationManager notificationMgr = context.getSystemService(
-                NotificationManager.class);
         Intent portalIntent = new Intent(context, CaptivePortalLoginActivity.class);
         portalIntent.putExtras(intent);
         portalIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
@@ -121,7 +121,8 @@ public class CarrierActionUtils {
         Notification notification = getNotification(context, R.string.portal_notification_id,
                 R.string.portal_notification_detail, pendingIntent);
         try {
-            notificationMgr.notify(PORTAL_NOTIFICATION_TAG, PORTAL_NOTIFICATION_ID, notification);
+            context.getSystemService(NotificationManager.class)
+                    .notify(PORTAL_NOTIFICATION_TAG, PORTAL_NOTIFICATION_ID, notification);
         } catch (NullPointerException npe) {
             loge("setNotificationVisible: " + npe);
         }
@@ -129,12 +130,11 @@ public class CarrierActionUtils {
 
     private static void onShowNoDataServiceNotification(Context context) {
         logd("onShowNoDataServiceNotification");
-        final NotificationManager notificationMgr = context.getSystemService(
-                NotificationManager.class);
         Notification notification = getNotification(context, R.string.no_data_notification_id,
                 R.string.no_data_notification_detail, null);
         try {
-            notificationMgr.notify(NO_DATA_NOTIFICATION_TAG, NO_DATA_NOTIFICATION_ID, notification);
+            context.getSystemService(NotificationManager.class)
+                    .notify(NO_DATA_NOTIFICATION_TAG, NO_DATA_NOTIFICATION_ID, notification);
         } catch (NullPointerException npe) {
             loge("setNotificationVisible: " + npe);
         }
@@ -142,9 +142,7 @@ public class CarrierActionUtils {
 
     private static void onCancelAllNotifications(Context context) {
         logd("onCancelAllNotifications");
-        final NotificationManager notificationMgr = context.getSystemService(
-                NotificationManager.class);
-        notificationMgr.cancelAll();
+        context.getSystemService(NotificationManager.class).cancelAll();
     }
 
     private static Notification getNotification(Context context, int titleId, int textId,
@@ -153,6 +151,7 @@ public class CarrierActionUtils {
         final Resources resources = context.getResources();
         final Bundle extras = Bundle.forPair(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 resources.getString(R.string.android_system_label));
+        createNotificationChannels(context);
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentTitle(resources.getString(titleId))
                 .setContentText(String.format(resources.getString(textId),
@@ -167,12 +166,26 @@ public class CarrierActionUtils {
                 .setLocalOnly(true)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(false)
-                .setExtras(extras);
+                .setExtras(extras)
+                .setChannel(NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS);
 
         if (pendingIntent != null) {
             builder.setContentIntent(pendingIntent);
         }
         return builder.build();
+    }
+
+    /**
+     * Creates the notification channel and registers it with NotificationManager. Also used to
+     * update an existing channel's name.
+     */
+    static void createNotificationChannels(Context context) {
+        context.getSystemService(NotificationManager.class)
+                .createNotificationChannel(new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID_MOBILE_DATA_STATUS,
+                context.getResources().getString(
+                        R.string.mobile_data_status_notification_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT));
     }
 
     private static void logd(String s) {

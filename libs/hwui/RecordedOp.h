@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_RECORDED_OP_H
-#define ANDROID_HWUI_RECORDED_OP_H
+#pragma once
 
-#include "RecordedOp.h"
 #include "font/FontUtil.h"
+#include "GlLayer.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
 #include "TessellationCache.h"
 #include "utils/LinearAllocator.h"
+#include "utils/PaintUtils.h"
 #include "Vector.h"
 
 #include <androidfw/ResourceTypes.h>
-#include <SkXfermode.h>
 
 class SkBitmap;
 class SkPaint;
@@ -38,6 +37,8 @@ namespace uirenderer {
 struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
+class DeferredLayerUpdater;
+
 struct Vertex;
 
 namespace VectorDrawable {
@@ -213,15 +214,14 @@ struct ArcOp : RecordedOp {
 };
 
 struct BitmapOp : RecordedOp {
-    BitmapOp(BASE_PARAMS, const SkBitmap* bitmap)
+    BitmapOp(BASE_PARAMS, Bitmap* bitmap)
             : SUPER(BitmapOp)
             , bitmap(bitmap) {}
-    const SkBitmap* bitmap;
-    // TODO: asset atlas/texture id lookup?
+    Bitmap* bitmap;
 };
 
 struct BitmapMeshOp : RecordedOp {
-    BitmapMeshOp(BASE_PARAMS, const SkBitmap* bitmap, int meshWidth, int meshHeight,
+    BitmapMeshOp(BASE_PARAMS, Bitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors)
             : SUPER(BitmapMeshOp)
             , bitmap(bitmap)
@@ -229,7 +229,7 @@ struct BitmapMeshOp : RecordedOp {
             , meshHeight(meshHeight)
             , vertices(vertices)
             , colors(colors) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const int meshWidth;
     const int meshHeight;
     const float* vertices;
@@ -237,11 +237,11 @@ struct BitmapMeshOp : RecordedOp {
 };
 
 struct BitmapRectOp : RecordedOp {
-    BitmapRectOp(BASE_PARAMS, const SkBitmap* bitmap, const Rect& src)
+    BitmapRectOp(BASE_PARAMS, Bitmap* bitmap, const Rect& src)
             : SUPER(BitmapRectOp)
             , bitmap(bitmap)
             , src(src) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const Rect src;
 };
 
@@ -259,12 +259,12 @@ struct CirclePropsOp : RecordedOp {
 
 struct ColorOp : RecordedOp {
     // Note: unbounded op that will fillclip, so no bounds/matrix needed
-    ColorOp(const ClipBase* localClip, int color, SkXfermode::Mode mode)
+    ColorOp(const ClipBase* localClip, int color, SkBlendMode mode)
             : RecordedOp(RecordedOpId::ColorOp, Rect(), Matrix4::identity(), localClip, nullptr)
             , color(color)
             , mode(mode) {}
     const int color;
-    const SkXfermode::Mode mode;
+    const SkBlendMode mode;
 };
 
 struct FunctorOp : RecordedOp {
@@ -291,11 +291,11 @@ struct OvalOp : RecordedOp {
 };
 
 struct PatchOp : RecordedOp {
-    PatchOp(BASE_PARAMS, const SkBitmap* bitmap, const Res_png_9patch* patch)
+    PatchOp(BASE_PARAMS, Bitmap* bitmap, const Res_png_9patch* patch)
             : SUPER(PatchOp)
             , bitmap(bitmap)
             , patch(patch) {}
-    const SkBitmap* bitmap;
+    Bitmap* bitmap;
     const Res_png_9patch* patch;
 };
 
@@ -416,18 +416,18 @@ struct TextOnPathOp : RecordedOp {
 };
 
 struct TextureLayerOp : RecordedOp {
-    TextureLayerOp(BASE_PARAMS_PAINTLESS, Layer* layer)
+    TextureLayerOp(BASE_PARAMS_PAINTLESS, DeferredLayerUpdater* layer)
             : SUPER_PAINTLESS(TextureLayerOp)
-            , layer(layer) {}
+            , layerHandle(layer) {}
 
     // Copy an existing TextureLayerOp, replacing the underlying matrix
     TextureLayerOp(const TextureLayerOp& op, const Matrix4& replacementMatrix)
             : RecordedOp(RecordedOpId::TextureLayerOp, op.unmappedBounds, replacementMatrix,
                     op.localClip, op.paint)
-            , layer(op.layer) {
+            , layerHandle(op.layerHandle) {
 
     }
-    Layer* layer;
+    DeferredLayerUpdater* layerHandle;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -506,7 +506,7 @@ struct LayerOp : RecordedOp {
             : SUPER_PAINTLESS(LayerOp)
             , layerHandle(layerHandle)
             , alpha(paint ? paint->getAlpha() / 255.0f : 1.0f)
-            , mode(PaintUtils::getXfermodeDirect(paint))
+            , mode(PaintUtils::getBlendModeDirect(paint))
             , colorFilter(paint ? paint->getColorFilter() : nullptr) {}
 
     explicit LayerOp(RenderNode& node)
@@ -520,7 +520,7 @@ struct LayerOp : RecordedOp {
     // constructed until after this operation is constructed.
     OffscreenBuffer** layerHandle;
     const float alpha;
-    const SkXfermode::Mode mode;
+    const SkBlendMode mode;
 
     // pointer to object owned by either LayerProperties, or a recorded Paint object in a
     // BeginLayerOp. Lives longer than LayerOp in either case, so no skia ref counting is used.
@@ -529,5 +529,3 @@ struct LayerOp : RecordedOp {
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_RECORDED_OP_H

@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.MainThread;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -40,6 +41,10 @@ import android.util.Log;
  * {@link android.service.carrier.CarrierMessagingService} precedes the VisualVoicemailService in
  * the SMS filtering chain and may intercept the visual voicemail SMS before it reaches this
  * service.
+ * <p>
+ * To extend this class, The service must be declared in the manifest file with
+ * the {@link android.Manifest.permission#BIND_VISUAL_VOICEMAIL_SERVICE} permission and include an
+ * intent filter with the {@link #SERVICE_INTERFACE} action.
  * <p>
  * Below is an example manifest registration for a {@code VisualVoicemailService}.
  * <pre>
@@ -195,7 +200,8 @@ public abstract class VisualVoicemailService extends Service {
 
     /**
      * Called when a SMS matching the {@link VisualVoicemailSmsFilterSettings} set by
-     * {@link #setSmsFilterSettings(Context, PhoneAccountHandle, VisualVoicemailSmsFilterSettings)}
+     * {@link TelephonyManager#setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings)
+     * }
      * is received.
      *
      * @param task The task representing this event. {@link VisualVoicemailTask#finish()} must be
@@ -236,8 +242,11 @@ public abstract class VisualVoicemailService extends Service {
      *
      * @param phoneAccountHandle The account to apply the settings to.
      * @param settings The settings for the filter, or {@code null} to disable the filter.
+     *
+     * @hide
      */
-    public final static void setSmsFilterSettings(Context context,
+    @SystemApi
+    public static final void setSmsFilterSettings(Context context,
             PhoneAccountHandle phoneAccountHandle,
             VisualVoicemailSmsFilterSettings settings) {
         TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);
@@ -260,10 +269,16 @@ public abstract class VisualVoicemailService extends Service {
      * @param port The destination port for data SMS, or 0 for text SMS.
      * @param text The message content. For data sms, it will be encoded as a UTF-8 byte stream.
      * @param sentIntent The sent intent passed to the {@link SmsManager}
+     *
+     * @throws SecurityException if the caller is not the current default dialer
+     *
      * @see SmsManager#sendDataMessage(String, String, short, byte[], PendingIntent, PendingIntent)
      * @see SmsManager#sendTextMessage(String, String, String, PendingIntent, PendingIntent)
+     *
+     * @hide
      */
-    public final static void sendVisualVoicemailSms(Context context,
+    @SystemApi
+    public static final void sendVisualVoicemailSms(Context context,
             PhoneAccountHandle phoneAccountHandle, String number,
             short port, String text, PendingIntent sentIntent) {
         TelephonyManager telephonyManager = context.getSystemService(TelephonyManager.class);

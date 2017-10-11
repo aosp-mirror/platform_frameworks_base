@@ -16,6 +16,7 @@
 
 package com.android.server.statusbar;
 
+import android.app.ActivityThread;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,26 +26,28 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.KeyEvent;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
+import com.android.server.power.ShutdownThread;
+import com.android.server.statusbar.StatusBarManagerInternal.GlobalActionsListener;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +62,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private static final boolean SPEW = false;
 
     private final Context mContext;
+
     private final WindowManagerService mWindowManager;
     private Handler mHandler = new Handler();
     private NotificationDelegate mNotificationDelegate;
@@ -67,6 +71,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
+    private GlobalActionsListener mGlobalActionListener;
     private IBinder mSysUiVisToken = new Binder();
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
@@ -119,40 +124,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         @Override
         public void setNotificationDelegate(NotificationDelegate delegate) {
             mNotificationDelegate = delegate;
-        }
-
-        @Override
-        public void buzzBeepBlinked() {
-            if (mBar != null) {
-                try {
-                    mBar.buzzBeepBlinked();
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-
-        @Override
-        public void notificationLightPulse(int argb, int onMillis, int offMillis) {
-            mNotificationLightOn = true;
-            if (mBar != null) {
-                try {
-                    mBar.notificationLightPulse(argb, onMillis, offMillis);
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-
-        @Override
-        public void notificationLightOff() {
-            if (mNotificationLightOn) {
-                mNotificationLightOn = false;
-                if (mBar != null) {
-                    try {
-                        mBar.notificationLightOff();
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
         }
 
         @Override
@@ -298,10 +269,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void showTvPictureInPictureMenu() {
+        public void showPictureInPictureMenu() {
             if (mBar != null) {
                 try {
-                    mBar.showTvPictureInPictureMenu();
+                    mBar.showPictureInPictureMenu();
                 } catch (RemoteException ex) {}
             }
         }
@@ -340,6 +311,21 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 try {
                     mBar.appTransitionStarting(
                             statusBarAnimationsStartTime, statusBarAnimationsDuration);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void setGlobalActionsListener(GlobalActionsListener listener) {
+            mGlobalActionListener = listener;
+            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
+        }
+
+        @Override
+        public void showGlobalActions() {
+            if (mBar != null) {
+                try {
+                    mBar.showGlobalActionsMenu();
                 } catch (RemoteException ex) {}
             }
         }
@@ -692,6 +678,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
+        try {
+            mBar.asBinder().linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    mBar = null;
+                    notifyBarAttachChanged();
+                }
+            }, 0);
+        } catch (RemoteException e) {
+        }
+        notifyBarAttachChanged();
         synchronized (mIcons) {
             for (String slot : mIcons.keySet()) {
                 iconSlots.add(slot);
@@ -712,6 +709,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             fullscreenStackBounds.set(mFullscreenStackBounds);
             dockedStackBounds.set(mDockedStackBounds);
         }
+    }
+
+    private void notifyBarAttachChanged() {
+        mHandler.post(() -> {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
+        });
     }
 
     /**
@@ -746,6 +750,69 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onPanelHidden();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Allows the status bar to shutdown the device.
+     */
+    @Override
+    public void shutdown() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // ShutdownThread displays UI, so give it a UI context.
+            mHandler.post(() ->
+                    ShutdownThread.shutdown(getUiContext(),
+                        PowerManager.SHUTDOWN_USER_REQUESTED, false));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Allows the status bar to reboot the device.
+     */
+    @Override
+    public void reboot(boolean safeMode) {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mHandler.post(() -> {
+                // ShutdownThread displays UI, so give it a UI context.
+                if (safeMode) {
+                    ShutdownThread.rebootSafeMode(getUiContext(), false);
+                } else {
+                    ShutdownThread.reboot(getUiContext(),
+                            PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                }
+            });
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onGlobalActionsShown() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onGlobalActionsShown();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onGlobalActionsHidden() {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            if (mGlobalActionListener == null) return;
+            mGlobalActionListener.onGlobalActionsDismissed();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -849,9 +916,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new StatusBarShellCommand(this)).exec(
-                this, in, out, err, args, resultReceiver);
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     // ================================================================================
@@ -921,13 +988,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // ================================================================================
 
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump StatusBar from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         synchronized (mLock) {
             pw.println("  mDisabled1=0x" + Integer.toHexString(mDisabled1));
@@ -958,5 +1019,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 pw.println();
             }
         }
+    }
+
+    private static final Context getUiContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 }

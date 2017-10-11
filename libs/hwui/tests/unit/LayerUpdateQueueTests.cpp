@@ -48,11 +48,11 @@ TEST(LayerUpdateQueue, enqueueSimple) {
 
     EXPECT_EQ(3u, queue.entries().size());
 
-    EXPECT_EQ(a.get(), queue.entries()[0].renderNode);
+    EXPECT_EQ(a.get(), queue.entries()[0].renderNode.get());
     EXPECT_EQ(Rect(25, 25, 75, 75), queue.entries()[0].damage);
-    EXPECT_EQ(b.get(), queue.entries()[1].renderNode);
+    EXPECT_EQ(b.get(), queue.entries()[1].renderNode.get());
     EXPECT_EQ(Rect(100, 100, 200, 200), queue.entries()[1].damage); // clipped to bounds
-    EXPECT_EQ(c.get(), queue.entries()[2].renderNode);
+    EXPECT_EQ(c.get(), queue.entries()[2].renderNode.get());
     EXPECT_EQ(Rect(0, 0, 1, 1), queue.entries()[2].damage); // rounded out
 }
 
@@ -65,7 +65,7 @@ TEST(LayerUpdateQueue, enqueueUnion) {
 
     EXPECT_EQ(1u, queue.entries().size());
 
-    EXPECT_EQ(a.get(), queue.entries()[0].renderNode);
+    EXPECT_EQ(a.get(), queue.entries()[0].renderNode.get());
     EXPECT_EQ(Rect(10, 10, 40, 40), queue.entries()[0].damage);
 }
 

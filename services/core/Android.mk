@@ -4,11 +4,13 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := services.core
 
-LOCAL_AIDL_INCLUDES := system/netd/server/binder
+LOCAL_AIDL_INCLUDES := \
+    frameworks/native/aidl/binder \
+    system/netd/server/binder
+
 
 LOCAL_SRC_FILES += \
     $(call all-java-files-under,java) \
-    $(call all-proto-files-under, proto) \
     java/com/android/server/EventLogTags.logtags \
     java/com/android/server/am/EventLogTags.logtags \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
@@ -18,17 +20,20 @@ LOCAL_SRC_FILES += \
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
 
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-
 LOCAL_JAVA_LIBRARIES := \
     services.net \
-    android.hidl.manager-V1.0-java \
+    android.hardware.light-V2.0-java \
+    android.hardware.power-V1.0-java \
+    android.hardware.tv.cec-V1.0-java \
+    android.hidl.manager-V1.0-java
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    tzdata_shared2 \
-    tzdata_update2 \
-    android.hidl.base-V1.0-java-static \
-    android.hardware.tetheroffload.control-V1.0-java-static \
+    time_zone_distro \
+    time_zone_distro_installer \
+    android.hidl.base-V1.0-java \
+    android.hardware.biometrics.fingerprint-V2.1-java \
+    android.hardware.tetheroffload.control-V1.0-java \
+    android.hardware.vibrator-V1.0-java \
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
@@ -37,8 +42,20 @@ endif
 
 LOCAL_JACK_FLAGS := \
  -D jack.transformations.boost-locked-region-priority=true \
- -D jack.transformations.boost-locked-region-priority.classname=com.android.server.am.ActivityManagerService \
- -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection \
- -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection
+ -D jack.transformations.boost-locked-region-priority.classname=com.android.server.am.ActivityManagerService,com.android.server.wm.WindowHashMap \
+ -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection,com.android.server.wm.WindowManagerService\#boostPriorityForLockedSection \
+ -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection,com.android.server.wm.WindowManagerService\#resetPriorityAfterLockedSection
+
+LOCAL_JAR_PROCESSOR := lockedregioncodeinjection
+# Use = instead of := to delay evaluation of ${in} and ${out}
+LOCAL_JAR_PROCESSOR_ARGS = \
+ --targets \
+  "Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;" \
+ --pre \
+  "com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection" \
+ --post \
+  "com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection" \
+ -o ${out} \
+ -i ${in}
 
 include $(BUILD_STATIC_JAVA_LIBRARY)

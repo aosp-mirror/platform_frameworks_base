@@ -155,7 +155,7 @@ public class DiskStatsFileLoggerTest extends AndroidTestCase {
     }
 
     @Test
-    public void testDuplicatePackageNameIsMergedAcrossMultipleUsers() throws Exception {
+    public void testDuplicatePackageNameIsNotMergedAcrossMultipleUsers() throws Exception {
         PackageStats app = new PackageStats("com.test.app");
         app.dataSize = 1000;
         app.externalDataSize = 1000;
@@ -175,19 +175,19 @@ public class DiskStatsFileLoggerTest extends AndroidTestCase {
         logger.dumpToFile(mOutputFile);
 
         JSONObject output = getOutputFileAsJson();
-        assertThat(output.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY)).isEqualTo(2200);
-        assertThat(output.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY)).isEqualTo(22);
+        assertThat(output.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY)).isEqualTo(2000);
+        assertThat(output.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY)).isEqualTo(20);
         JSONArray packageNames = output.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
         assertThat(packageNames.length()).isEqualTo(1);
         assertThat(packageNames.getString(0)).isEqualTo("com.test.app");
 
         JSONArray appSizes = output.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
         assertThat(appSizes.length()).isEqualTo(1);
-        assertThat(appSizes.getLong(0)).isEqualTo(2200);
+        assertThat(appSizes.getLong(0)).isEqualTo(2000);
 
         JSONArray cacheSizes = output.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
         assertThat(cacheSizes.length()).isEqualTo(1);
-        assertThat(cacheSizes.getLong(0)).isEqualTo(22);
+        assertThat(cacheSizes.getLong(0)).isEqualTo(20);
     }
 
     private JSONObject getOutputFileAsJson() throws Exception {

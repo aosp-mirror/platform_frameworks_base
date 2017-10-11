@@ -198,7 +198,8 @@ class ObjectPool {
     CObjMap objects_;
     FlagMap owns_;
 
-    DISALLOW_COPY_AND_ASSIGN(ObjectPool);
+    ObjectPool(const ObjectPool&) = delete;
+    ObjectPool& operator=(const ObjectPool&) = delete;
 };
 
 template<typename T> ObjectPool<T>* ObjectPool<T>::instance_ = NULL;

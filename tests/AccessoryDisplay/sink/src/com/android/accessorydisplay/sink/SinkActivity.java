@@ -95,13 +95,13 @@ public class SinkActivity extends Activity {
 
         setContentView(R.layout.sink_activity);
 
-        mLogTextView = (TextView) findViewById(R.id.logTextView);
+        mLogTextView = findViewById(R.id.logTextView);
         mLogTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
         mLogger = new TextLogger();
 
-        mFpsTextView = (TextView) findViewById(R.id.fpsTextView);
+        mFpsTextView = findViewById(R.id.fpsTextView);
 
-        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        mSurfaceView = findViewById(R.id.surfaceView);
         mSurfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

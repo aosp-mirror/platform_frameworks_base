@@ -17,6 +17,7 @@
 package android.service.textservice;
 
 import com.android.internal.textservice.ISpellCheckerService;
+import com.android.internal.textservice.ISpellCheckerServiceCallback;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 
@@ -311,16 +312,39 @@ public abstract class SpellCheckerService extends Service {
             mInternalServiceRef = new WeakReference<SpellCheckerService>(service);
         }
 
+        /**
+         * Called from the system when an application is requesting a new spell checker session.
+         *
+         * <p>Note: This is an internal protocol used by the system to establish spell checker
+         * sessions, which is not guaranteed to be stable and is subject to change.</p>
+         *
+         * @param locale locale to be returned from {@link Session#getLocale()}
+         * @param listener IPC channel object to be used to implement
+         *                 {@link Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)} and
+         *                 {@link Session#onGetSuggestions(TextInfo, int)}
+         * @param bundle bundle to be returned from {@link Session#getBundle()}
+         * @param callback IPC channel to return the result to the caller in an asynchronous manner
+         */
         @Override
-        public ISpellCheckerSession getISpellCheckerSession(
-                String locale, ISpellCheckerSessionListener listener, Bundle bundle) {
+        public void getISpellCheckerSession(
+                String locale, ISpellCheckerSessionListener listener, Bundle bundle,
+                ISpellCheckerServiceCallback callback) {
             final SpellCheckerService service = mInternalServiceRef.get();
-            if (service == null) return null;
-            final Session session = service.createSession();
-            final InternalISpellCheckerSession internalSession =
-                    new InternalISpellCheckerSession(locale, listener, bundle, session);
-            session.onCreate();
-            return internalSession;
+            final InternalISpellCheckerSession internalSession;
+            if (service == null) {
+                // If the owner SpellCheckerService object was already destroyed and got GC-ed,
+                // the weak-reference returns null and we should just ignore this request.
+                internalSession = null;
+            } else {
+                final Session session = service.createSession();
+                internalSession =
+                        new InternalISpellCheckerSession(locale, listener, bundle, session);
+                session.onCreate();
+            }
+            try {
+                callback.onSessionCreated(internalSession);
+            } catch (RemoteException e) {
+            }
         }
     }
 

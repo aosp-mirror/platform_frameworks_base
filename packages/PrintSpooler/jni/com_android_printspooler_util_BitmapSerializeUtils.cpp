@@ -17,7 +17,7 @@
 #define LOG_TAG "BitmapSerializeUtils"
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <android/bitmap.h>
 #include <android/log.h>

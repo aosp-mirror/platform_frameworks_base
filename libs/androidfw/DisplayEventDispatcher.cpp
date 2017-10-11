@@ -33,8 +33,9 @@ namespace android {
 // using just a few large reads.
 static const size_t EVENT_BUFFER_SIZE = 100;
 
-DisplayEventDispatcher::DisplayEventDispatcher(const sp<Looper>& looper) :
-        mLooper(looper), mWaitingForVsync(false) {
+DisplayEventDispatcher::DisplayEventDispatcher(const sp<Looper>& looper,
+        ISurfaceComposer::VsyncSource vsyncSource) :
+        mLooper(looper), mReceiver(vsyncSource), mWaitingForVsync(false) {
     ALOGV("dispatcher %p ~ Initializing display event dispatcher.", this);
 }
 

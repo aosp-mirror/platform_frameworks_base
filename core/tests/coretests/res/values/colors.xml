@@ -23,4 +23,7 @@
     <drawable name="blue">#ff0000ff</drawable>
     <drawable name="green">#ff00ff00</drawable>
     <drawable name="yellow">#ffffff00</drawable>
+    <color name="testcolor1">#ff00ff00</color>
+    <color name="testcolor2">#ffff0000</color>
+    <color name="failColor">#ff0000ff</color>
 </resources>

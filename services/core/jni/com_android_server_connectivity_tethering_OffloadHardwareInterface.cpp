@@ -18,7 +18,7 @@
 #include <error.h>
 #include <hidl/HidlSupport.h>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netlink.h>
 #include <sys/socket.h>
@@ -71,19 +71,18 @@ int conntrackSocket(unsigned groups) {
 // auto-close it (otherwise there would be double-close problems).
 //
 // Rely upon the compiler to eliminate the constexprs used for clarity.
-hidl_handle&& handleFromFileDescriptor(base::unique_fd fd) {
+hidl_handle handleFromFileDescriptor(base::unique_fd fd) {
     hidl_handle h;
 
-    NATIVE_HANDLE_DECLARE_STORAGE(storage, 0, 0);
     static constexpr int kNumFds = 1;
     static constexpr int kNumInts = 0;
-    native_handle_t *nh = native_handle_init(storage, kNumFds, kNumInts);
+    native_handle_t *nh = native_handle_create(kNumFds, kNumInts);
     nh->data[0] = fd.release();
 
     static constexpr bool kTakeOwnership = true;
     h.setTo(nh, kTakeOwnership);
 
-    return std::move(h);
+    return h;
 }
 
 }  // namespace
@@ -114,15 +113,18 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     hidl_handle h1(handleFromFileDescriptor(std::move(fd1))),
                 h2(handleFromFileDescriptor(std::move(fd2)));
 
-    bool rval;
+    bool rval(false);
     hidl_string msg;
-    configInterface->setHandles(h1, h2,
+    const auto status = configInterface->setHandles(h1, h2,
             [&rval, &msg](bool success, const hidl_string& errMsg) {
                 rval = success;
                 msg = errMsg;
             });
-    if (!rval) {
-        ALOGE("IOffloadConfig::setHandles() error: %s", msg.c_str());
+    if (!status.isOk() || !rval) {
+        ALOGE("IOffloadConfig::setHandles() error: '%s' / '%s'",
+              status.description().c_str(), msg.c_str());
+        // If status is somehow not ok, make sure rval captures this too.
+        rval = false;
     }
 
     return rval;

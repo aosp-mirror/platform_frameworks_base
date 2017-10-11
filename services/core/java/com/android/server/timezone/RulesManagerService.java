@@ -17,7 +17,13 @@
 package com.android.server.timezone;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.EventLogTags;
 import com.android.server.SystemService;
+import com.android.timezone.distro.DistroException;
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
 import android.app.timezone.Callback;
 import android.app.timezone.DistroFormatVersion;
@@ -32,18 +38,25 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import libcore.tzdata.shared2.DistroException;
-import libcore.tzdata.shared2.DistroVersion;
-import libcore.tzdata.shared2.StagedDistroOperation;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
+import libcore.icu.ICU;
+import libcore.util.ZoneInfoDB;
 
-// TODO(nfuller) Add EventLog calls where useful in the system server.
-// TODO(nfuller) Check logging best practices in the system server.
-// TODO(nfuller) Check error handling best practices in the system server.
+import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
+import static android.app.timezone.RulesState.DISTRO_STATUS_NONE;
+import static android.app.timezone.RulesState.DISTRO_STATUS_UNKNOWN;
+import static android.app.timezone.RulesState.STAGED_OPERATION_INSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
+
 public final class RulesManagerService extends IRulesManager.Stub {
 
     private static final String TAG = "timezone.RulesManagerService";
@@ -56,18 +69,22 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     DistroVersion.CURRENT_FORMAT_MINOR_VERSION);
 
     public static class Lifecycle extends SystemService {
-        private RulesManagerService mService;
-
         public Lifecycle(Context context) {
             super(context);
         }
 
         @Override
         public void onStart() {
-            mService = RulesManagerService.create(getContext());
-            mService.start();
+            RulesManagerService service = RulesManagerService.create(getContext());
+            service.start();
 
-            publishBinderService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, mService);
+            // Publish the binder service so it can be accessed from other (appropriately
+            // permissioned) processes.
+            publishBinderService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, service);
+
+            // Publish the service instance locally so we can use it directly from within the system
+            // server from TimeZoneUpdateIdler.
+            publishLocalService(RulesManagerService.class, service);
         }
     }
 
@@ -82,26 +99,22 @@ public final class RulesManagerService extends IRulesManager.Stub {
     private final PackageTracker mPackageTracker;
     private final Executor mExecutor;
     private final TimeZoneDistroInstaller mInstaller;
-    private final FileDescriptorHelper mFileDescriptorHelper;
 
     private static RulesManagerService create(Context context) {
         RulesManagerServiceHelperImpl helper = new RulesManagerServiceHelperImpl(context);
         return new RulesManagerService(
                 helper /* permissionHelper */,
                 helper /* executor */,
-                helper /* fileDescriptorHelper */,
                 PackageTracker.create(context),
                 new TimeZoneDistroInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
     RulesManagerService(PermissionHelper permissionHelper,
-            Executor executor,
-            FileDescriptorHelper fileDescriptorHelper, PackageTracker packageTracker,
+            Executor executor, PackageTracker packageTracker,
             TimeZoneDistroInstaller timeZoneDistroInstaller) {
         mPermissionHelper = permissionHelper;
         mExecutor = executor;
-        mFileDescriptorHelper = fileDescriptorHelper;
         mPackageTracker = packageTracker;
         mInstaller = timeZoneDistroInstaller;
     }
@@ -114,6 +127,11 @@ public final class RulesManagerService extends IRulesManager.Stub {
     public RulesState getRulesState() {
         mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
 
+        return getRulesStateInternal();
+    }
+
+    /** Like {@link #getRulesState()} without the permission check. */
+    private RulesState getRulesStateInternal() {
         synchronized(this) {
             String systemRulesVersion;
             try {
@@ -127,18 +145,18 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
             // Determine the staged operation status, if possible.
             DistroRulesVersion stagedDistroRulesVersion = null;
-            int stagedOperationStatus = RulesState.STAGED_OPERATION_UNKNOWN;
+            int stagedOperationStatus = STAGED_OPERATION_UNKNOWN;
             if (!operationInProgress) {
                 StagedDistroOperation stagedDistroOperation;
                 try {
                     stagedDistroOperation = mInstaller.getStagedDistroOperation();
                     if (stagedDistroOperation == null) {
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_NONE;
+                        stagedOperationStatus = STAGED_OPERATION_NONE;
                     } else if (stagedDistroOperation.isUninstall) {
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_UNINSTALL;
+                        stagedOperationStatus = STAGED_OPERATION_UNINSTALL;
                     } else {
                         // Must be an install.
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_INSTALL;
+                        stagedOperationStatus = STAGED_OPERATION_INSTALL;
                         DistroVersion stagedDistroVersion = stagedDistroOperation.distroVersion;
                         stagedDistroRulesVersion = new DistroRulesVersion(
                                 stagedDistroVersion.rulesVersion,
@@ -151,16 +169,16 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
             // Determine the installed distro state, if possible.
             DistroVersion installedDistroVersion;
-            int distroStatus = RulesState.DISTRO_STATUS_UNKNOWN;
+            int distroStatus = DISTRO_STATUS_UNKNOWN;
             DistroRulesVersion installedDistroRulesVersion = null;
             if (!operationInProgress) {
                 try {
                     installedDistroVersion = mInstaller.getInstalledDistroVersion();
                     if (installedDistroVersion == null) {
-                        distroStatus = RulesState.DISTRO_STATUS_NONE;
+                        distroStatus = DISTRO_STATUS_NONE;
                         installedDistroRulesVersion = null;
                     } else {
-                        distroStatus = RulesState.DISTRO_STATUS_INSTALLED;
+                        distroStatus = DISTRO_STATUS_INSTALLED;
                         installedDistroRulesVersion = new DistroRulesVersion(
                                 installedDistroVersion.rulesVersion,
                                 installedDistroVersion.revision);
@@ -176,56 +194,84 @@ public final class RulesManagerService extends IRulesManager.Stub {
     }
 
     @Override
-    public int requestInstall(
-            ParcelFileDescriptor timeZoneDistro, byte[] checkTokenBytes, ICallback callback) {
-        mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
+    public int requestInstall(ParcelFileDescriptor distroParcelFileDescriptor,
+            byte[] checkTokenBytes, ICallback callback) {
 
-        CheckToken checkToken = null;
-        if (checkTokenBytes != null) {
-            checkToken = createCheckTokenOrThrow(checkTokenBytes);
-        }
-        synchronized (this) {
-            if (timeZoneDistro == null) {
-                throw new NullPointerException("timeZoneDistro == null");
-            }
-            if (callback == null) {
-                throw new NullPointerException("observer == null");
-            }
-            if (mOperationInProgress.get()) {
-                return RulesManager.ERROR_OPERATION_IN_PROGRESS;
-            }
-            mOperationInProgress.set(true);
+        boolean closeParcelFileDescriptorOnExit = true;
+        try {
+            mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
 
-            // Execute the install asynchronously.
-            mExecutor.execute(new InstallRunnable(timeZoneDistro, checkToken, callback));
+            CheckToken checkToken = null;
+            if (checkTokenBytes != null) {
+                checkToken = createCheckTokenOrThrow(checkTokenBytes);
+            }
+            EventLogTags.writeTimezoneRequestInstall(toStringOrNull(checkToken));
 
-            return RulesManager.SUCCESS;
+            synchronized (this) {
+                if (distroParcelFileDescriptor == null) {
+                    throw new NullPointerException("distroParcelFileDescriptor == null");
+                }
+                if (callback == null) {
+                    throw new NullPointerException("observer == null");
+                }
+                if (mOperationInProgress.get()) {
+                    return RulesManager.ERROR_OPERATION_IN_PROGRESS;
+                }
+                mOperationInProgress.set(true);
+
+                // Execute the install asynchronously.
+                mExecutor.execute(
+                        new InstallRunnable(distroParcelFileDescriptor, checkToken, callback));
+
+                // The InstallRunnable now owns the ParcelFileDescriptor, so it will close it after
+                // it executes (and we do not have to).
+                closeParcelFileDescriptorOnExit = false;
+
+                return RulesManager.SUCCESS;
+            }
+        } finally {
+            // We should close() the local ParcelFileDescriptor we were passed if it hasn't been
+            // passed to another thread to handle.
+            if (distroParcelFileDescriptor != null && closeParcelFileDescriptorOnExit) {
+                try {
+                    distroParcelFileDescriptor.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to close distroParcelFileDescriptor", e);
+                }
+            }
         }
     }
 
     private class InstallRunnable implements Runnable {
 
-        private final ParcelFileDescriptor mTimeZoneDistro;
+        private final ParcelFileDescriptor mDistroParcelFileDescriptor;
         private final CheckToken mCheckToken;
         private final ICallback mCallback;
 
-        InstallRunnable(
-                ParcelFileDescriptor timeZoneDistro, CheckToken checkToken, ICallback callback) {
-            mTimeZoneDistro = timeZoneDistro;
+        InstallRunnable(ParcelFileDescriptor distroParcelFileDescriptor, CheckToken checkToken,
+                ICallback callback) {
+            mDistroParcelFileDescriptor = distroParcelFileDescriptor;
             mCheckToken = checkToken;
             mCallback = callback;
         }
 
         @Override
         public void run() {
+            EventLogTags.writeTimezoneInstallStarted(toStringOrNull(mCheckToken));
+
+            boolean success = false;
             // Adopt the ParcelFileDescriptor into this try-with-resources so it is closed
             // when we are done.
-            boolean success = false;
-            try {
-                byte[] distroBytes =
-                        RulesManagerService.this.mFileDescriptorHelper.readFully(mTimeZoneDistro);
-                int installerResult = mInstaller.stageInstallWithErrorCode(distroBytes);
+            try (ParcelFileDescriptor pfd = mDistroParcelFileDescriptor) {
+                // The ParcelFileDescriptor owns the underlying FileDescriptor and we'll close
+                // it at the end of the try-with-resources.
+                final boolean isFdOwner = false;
+                InputStream is = new FileInputStream(pfd.getFileDescriptor(), isFdOwner);
+
+                TimeZoneDistro distro = new TimeZoneDistro(is);
+                int installerResult = mInstaller.stageInstallWithErrorCode(distro);
                 int resultCode = mapInstallerResultToApiCode(installerResult);
+                EventLogTags.writeTimezoneInstallComplete(toStringOrNull(mCheckToken), resultCode);
                 sendFinishedStatus(mCallback, resultCode);
 
                 // All the installer failure modes are currently non-recoverable and won't be
@@ -233,6 +279,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 success = true;
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to install distro.", e);
+                EventLogTags.writeTimezoneInstallComplete(
+                        toStringOrNull(mCheckToken), Callback.ERROR_UNKNOWN_FAILURE);
                 sendFinishedStatus(mCallback, Callback.ERROR_UNKNOWN_FAILURE);
             } finally {
                 // Notify the package tracker that the operation is now complete.
@@ -268,6 +316,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
         if (checkTokenBytes != null) {
             checkToken = createCheckTokenOrThrow(checkTokenBytes);
         }
+        EventLogTags.writeTimezoneRequestUninstall(toStringOrNull(checkToken));
         synchronized(this) {
             if (callback == null) {
                 throw new NullPointerException("callback == null");
@@ -290,27 +339,36 @@ public final class RulesManagerService extends IRulesManager.Stub {
         private final CheckToken mCheckToken;
         private final ICallback mCallback;
 
-        public UninstallRunnable(CheckToken checkToken, ICallback callback) {
+        UninstallRunnable(CheckToken checkToken, ICallback callback) {
             mCheckToken = checkToken;
             mCallback = callback;
         }
 
         @Override
         public void run() {
-            boolean success = false;
+            EventLogTags.writeTimezoneUninstallStarted(toStringOrNull(mCheckToken));
+            boolean packageTrackerStatus = false;
             try {
-                success = mInstaller.stageUninstall();
-                // Right now we just have success (0) / failure (1). All clients should be checking
-                // against SUCCESS. More granular failures may be added in future.
-                int resultCode = success ? Callback.SUCCESS
-                        : Callback.ERROR_UNKNOWN_FAILURE;
-                sendFinishedStatus(mCallback, resultCode);
+                int uninstallResult = mInstaller.stageUninstall();
+                packageTrackerStatus = (uninstallResult == TimeZoneDistroInstaller.UNINSTALL_SUCCESS
+                        || uninstallResult == TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED);
+
+                // Right now we just have Callback.SUCCESS / Callback.ERROR_UNKNOWN_FAILURE for
+                // uninstall. All clients should be checking against SUCCESS. More granular failures
+                // may be added in future.
+                int callbackResultCode =
+                        packageTrackerStatus ? Callback.SUCCESS : Callback.ERROR_UNKNOWN_FAILURE;
+                EventLogTags.writeTimezoneUninstallComplete(
+                        toStringOrNull(mCheckToken), callbackResultCode);
+                sendFinishedStatus(mCallback, callbackResultCode);
             } catch (Exception e) {
+                EventLogTags.writeTimezoneUninstallComplete(
+                        toStringOrNull(mCheckToken), Callback.ERROR_UNKNOWN_FAILURE);
                 Slog.w(TAG, "Failed to uninstall distro.", e);
                 sendFinishedStatus(mCallback, Callback.ERROR_UNKNOWN_FAILURE);
             } finally {
                 // Notify the package tracker that the operation is now complete.
-                mPackageTracker.recordCheckResult(mCheckToken, success);
+                mPackageTracker.recordCheckResult(mCheckToken, packageTrackerStatus);
 
                 mOperationInProgress.set(false);
             }
@@ -332,7 +390,131 @@ public final class RulesManagerService extends IRulesManager.Stub {
         if (checkTokenBytes != null) {
             checkToken = createCheckTokenOrThrow(checkTokenBytes);
         }
+        EventLogTags.writeTimezoneRequestNothing(toStringOrNull(checkToken));
         mPackageTracker.recordCheckResult(checkToken, success);
+        EventLogTags.writeTimezoneNothingComplete(toStringOrNull(checkToken));
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!mPermissionHelper.checkDumpPermission(TAG, pw)) {
+            return;
+        }
+
+        RulesState rulesState = getRulesStateInternal();
+        if (args != null && args.length == 2) {
+            // Formatting options used for automated tests. The format is less free-form than
+            // the -format options, which are intended to be easier to parse.
+            if ("-format_state".equals(args[0]) && args[1] != null) {
+                for (char c : args[1].toCharArray()) {
+                    switch (c) {
+                        case 'p': {
+                            // Report operation in progress
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = Boolean.toString(rulesState.isOperationInProgress());
+                            }
+                            pw.println("Operation in progress: " + value);
+                            break;
+                        }
+                        case 's': {
+                            // Report system image rules version
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = rulesState.getSystemRulesVersion();
+                            }
+                            pw.println("System rules version: " + value);
+                            break;
+                        }
+                        case 'c': {
+                            // Report current installation state
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                value = distroStatusToString(rulesState.getDistroStatus());
+                            }
+                            pw.println("Current install state: " + value);
+                            break;
+                        }
+                        case 'i': {
+                            // Report currently installed version
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                DistroRulesVersion installedRulesVersion =
+                                        rulesState.getInstalledDistroRulesVersion();
+                                if (installedRulesVersion == null) {
+                                    value = "<None>";
+                                } else {
+                                    value = installedRulesVersion.toDumpString();
+                                }
+                            }
+                            pw.println("Installed rules version: " + value);
+                            break;
+                        }
+                        case 'o': {
+                            // Report staged operation type
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                int stagedOperationType = rulesState.getStagedOperationType();
+                                value = stagedOperationToString(stagedOperationType);
+                            }
+                            pw.println("Staged operation: " + value);
+                            break;
+                        }
+                        case 't': {
+                            // Report staged version (i.e. the one that will be installed next boot
+                            // if the staged operation is an install).
+                            String value = "Unknown";
+                            if (rulesState != null) {
+                                DistroRulesVersion stagedDistroRulesVersion =
+                                        rulesState.getStagedDistroRulesVersion();
+                                if (stagedDistroRulesVersion == null) {
+                                    value = "<None>";
+                                } else {
+                                    value = stagedDistroRulesVersion.toDumpString();
+                                }
+                            }
+                            pw.println("Staged rules version: " + value);
+                            break;
+                        }
+                        case 'a': {
+                            // Report the active rules version (i.e. the rules in use by the current
+                            // process).
+                            pw.println("Active rules version (ICU, libcore): "
+                                    + ICU.getTZDataVersion() + ","
+                                    + ZoneInfoDB.getInstance().getVersion());
+                            break;
+                        }
+                        default: {
+                            pw.println("Unknown option: " + c);
+                        }
+                    }
+                }
+                return;
+            }
+        }
+
+        pw.println("RulesManagerService state: " + toString());
+        pw.println("Active rules version (ICU, libcore): " + ICU.getTZDataVersion() + ","
+                + ZoneInfoDB.getInstance().getVersion());
+        pw.println("Distro state: " + rulesState.toString());
+        mPackageTracker.dump(pw);
+    }
+
+    /**
+     * Called when the device is considered idle.
+     */
+    void notifyIdle() {
+        // No package has changed: we are just triggering because the device is idle and there
+        // *might* be work to do.
+        final boolean packageChanged = false;
+        mPackageTracker.triggerUpdateIfNeeded(packageChanged);
+    }
+
+    @Override
+    public String toString() {
+        return "RulesManagerService{" +
+                "mOperationInProgress=" + mOperationInProgress +
+                '}';
     }
 
     private static CheckToken createCheckTokenOrThrow(byte[] checkTokenBytes) {
@@ -344,5 +526,35 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     + Arrays.toString(checkTokenBytes), e);
         }
         return checkToken;
+    }
+
+    private static String distroStatusToString(int distroStatus) {
+        switch(distroStatus) {
+            case DISTRO_STATUS_NONE:
+                return "None";
+            case DISTRO_STATUS_INSTALLED:
+                return "Installed";
+            case DISTRO_STATUS_UNKNOWN:
+            default:
+                return "Unknown";
+        }
+    }
+
+    private static String stagedOperationToString(int stagedOperationType) {
+        switch(stagedOperationType) {
+            case STAGED_OPERATION_NONE:
+                return "None";
+            case STAGED_OPERATION_UNINSTALL:
+                return "Uninstall";
+            case STAGED_OPERATION_INSTALL:
+                return "Install";
+            case STAGED_OPERATION_UNKNOWN:
+            default:
+                return "Unknown";
+        }
+    }
+
+    private static String toStringOrNull(Object obj) {
+        return obj == null ? null : obj.toString();
     }
 }

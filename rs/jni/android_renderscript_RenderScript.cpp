@@ -27,9 +27,10 @@
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <android-base/macros.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_util_AssetManager.h"
@@ -47,9 +48,6 @@
 static constexpr bool kLogApi = false;
 
 using namespace android;
-
-template <typename... T>
-void UNUSED(T... t) {}
 
 #define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
     jint len = 0;                                                                       \
@@ -1285,7 +1283,9 @@ nAllocationSetSurface(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobje
 
     ANativeWindow *anw = nullptr;
     if (sur != 0) {
+        // Connect the native window handle to buffer queue.
         anw = ANativeWindow_fromSurface(_env, sur);
+        native_window_api_connect(anw, NATIVE_WINDOW_API_CPU);
     }
 
     rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc, anw);

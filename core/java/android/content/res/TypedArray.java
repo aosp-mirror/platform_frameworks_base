@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
@@ -29,6 +30,8 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
+
+import dalvik.system.VMRuntime;
 
 import java.util.Arrays;
 
@@ -44,32 +47,22 @@ import java.util.Arrays;
 public class TypedArray {
 
     static TypedArray obtain(Resources res, int len) {
-        final TypedArray attrs = res.mTypedArrayPool.acquire();
-        if (attrs != null) {
-            attrs.mLength = len;
-            attrs.mRecycled = false;
-
-            // Reset the assets, which may have changed due to configuration changes
-            // or further resource loading.
-            attrs.mAssets = res.getAssets();
-
-            final int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
-            if (attrs.mData.length >= fullLen) {
-                return attrs;
-            }
-
-            attrs.mData = new int[fullLen];
-            attrs.mIndices = new int[1 + len];
-            return attrs;
+        TypedArray attrs = res.mTypedArrayPool.acquire();
+        if (attrs == null) {
+            attrs = new TypedArray(res);
         }
 
-        return new TypedArray(res,
-                new int[len*AssetManager.STYLE_NUM_ENTRIES],
-                new int[1+len], len);
+        attrs.mRecycled = false;
+        // Reset the assets, which may have changed due to configuration changes
+        // or further resource loading.
+        attrs.mAssets = res.getAssets();
+        attrs.mMetrics = res.getDisplayMetrics();
+        attrs.resize(len);
+        return attrs;
     }
 
     private final Resources mResources;
-    private final DisplayMetrics mMetrics;
+    private DisplayMetrics mMetrics;
     private AssetManager mAssets;
 
     private boolean mRecycled;
@@ -77,9 +70,24 @@ public class TypedArray {
     /*package*/ XmlBlock.Parser mXml;
     /*package*/ Resources.Theme mTheme;
     /*package*/ int[] mData;
+    /*package*/ long mDataAddress;
     /*package*/ int[] mIndices;
+    /*package*/ long mIndicesAddress;
     /*package*/ int mLength;
     /*package*/ TypedValue mValue = new TypedValue();
+
+    private void resize(int len) {
+        mLength = len;
+        final int dataLen = len * AssetManager.STYLE_NUM_ENTRIES;
+        final int indicesLen = len + 1;
+        final VMRuntime runtime = VMRuntime.getRuntime();
+        if (mDataAddress == 0 || mData.length < dataLen) {
+            mData = (int[]) runtime.newNonMovableArray(int.class, dataLen);
+            mDataAddress = runtime.addressOf(mData);
+            mIndices = (int[]) runtime.newNonMovableArray(int.class, indicesLen);
+            mIndicesAddress = runtime.addressOf(mIndices);
+        }
+    }
 
     /**
      * Returns the number of values in this array.
@@ -95,7 +103,8 @@ public class TypedArray {
     }
 
     /**
-     * Return the number of indices in the array that actually have data.
+     * Returns the number of indices in the array that actually have data. Attributes with a value
+     * of @empty are included, as this is an explicit indicator.
      *
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
@@ -108,7 +117,8 @@ public class TypedArray {
     }
 
     /**
-     * Returns an index in the array that has data.
+     * Returns an index in the array that has data. Attributes with a value of @empty are included,
+     * as this is an explicit indicator.
      *
      * @param at The index you would like to returned, ranging from 0 to
      *           {@link #getIndexCount()}.
@@ -915,6 +925,15 @@ public class TypedArray {
      */
     @Nullable
     public Drawable getDrawable(@StyleableRes int index) {
+        return getDrawableForDensity(index, 0);
+    }
+
+    /**
+     * Version of {@link #getDrawable(int)} that accepts an override density.
+     * @hide
+     */
+    @Nullable
+    public Drawable getDrawableForDensity(@StyleableRes int index, int density) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -925,7 +944,43 @@ public class TypedArray {
                 throw new UnsupportedOperationException(
                         "Failed to resolve attribute at index " + index + ": " + value);
             }
-            return mResources.loadDrawable(value, value.resourceId, mTheme);
+
+            if (density > 0) {
+                // If the density is overridden, the value in the TypedArray will not reflect this.
+                // Do a separate lookup of the resourceId with the density override.
+                mResources.getValueForDensity(value.resourceId, density, value, true);
+            }
+            return mResources.loadDrawable(value, value.resourceId, density, mTheme);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the Typeface for the attribute at <var>index</var>.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a font.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return Typeface for the attribute, or {@code null} if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a font resource.
+     */
+    @Nullable
+    public Typeface getFont(@StyleableRes int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        final TypedValue value = mValue;
+        if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
+            }
+            return mResources.getFont(value, value.resourceId);
         }
         return null;
     }
@@ -964,7 +1019,7 @@ public class TypedArray {
      * @param outValue TypedValue object in which to place the attribute's
      *                 data.
      *
-     * @return {@code true} if the value was retrieved, false otherwise.
+     * @return {@code true} if the value was retrieved and not @empty, {@code false} otherwise.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean getValue(@StyleableRes int index, TypedValue outValue) {
@@ -1217,13 +1272,11 @@ public class TypedArray {
         return mAssets.getPooledStringForCookie(cookie, data[index+AssetManager.STYLE_DATA]);
     }
 
-    /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
+    /** @hide */
+    protected TypedArray(Resources resources) {
         mResources = resources;
         mMetrics = mResources.getDisplayMetrics();
         mAssets = mResources.getAssets();
-        mData = data;
-        mIndices = indices;
-        mLength = len;
     }
 
     @Override

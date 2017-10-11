@@ -16,6 +16,7 @@
 
 package android.telephony.mbms;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,16 +27,19 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * A Parcelable class Cell-Broadcast downloadable file information.
- * @hide
+ * Describes a file service available from the carrier from which files can be downloaded via
+ * cell-broadcast.
  */
-public class FileServiceInfo extends ServiceInfo implements Parcelable {
-    public List<FileInfo> files;
+public final class FileServiceInfo extends ServiceInfo implements Parcelable {
+    private final List<FileInfo> files;
 
-    public FileServiceInfo(Map<Locale, String> newNames, String newClassName, Locale newLocale,
-            String newServiceId, Date start, Date end, List<FileInfo> newFiles) {
-        super(newNames, newClassName, newLocale, newServiceId, start, end);
-        files = new ArrayList(newFiles);
+    /** @hide */
+    @SystemApi
+    public FileServiceInfo(Map<Locale, String> newNames, String newClassName,
+            List<Locale> newLocales, String newServiceId, Date start, Date end,
+            List<FileInfo> newFiles) {
+        super(newNames, newClassName, newLocales, newServiceId, start, end);
+        files = new ArrayList<>(newFiles);
     }
 
     public static final Parcelable.Creator<FileServiceInfo> CREATOR =
@@ -54,7 +58,7 @@ public class FileServiceInfo extends ServiceInfo implements Parcelable {
     FileServiceInfo(Parcel in) {
         super(in);
         files = new ArrayList<FileInfo>();
-        in.readList(files, null);
+        in.readList(files, FileInfo.class.getClassLoader());
     }
 
     @Override
@@ -66,5 +70,14 @@ public class FileServiceInfo extends ServiceInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @return A list of files available from this service. Note that this list may not be
+     * exhaustive -- the middleware may not have information on all files that are available.
+     * Consult the carrier for an authoritative and exhaustive list.
+     */
+    public List<FileInfo> getFiles() {
+        return files;
     }
 }

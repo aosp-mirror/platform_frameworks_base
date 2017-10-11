@@ -18,12 +18,12 @@ package com.android.layoutlib.bridge.android;
 
 import com.android.internal.os.IResultReceiver;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.MergedConfiguration;
 import android.view.DragEvent;
 import android.view.IWindow;
 
@@ -50,7 +50,7 @@ public final class BridgeWindow implements IWindow {
 
     @Override
     public void resized(Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5, Rect rect6,
-            boolean b, Configuration configuration, Rect rect7, boolean b2, boolean b3)
+            boolean b, MergedConfiguration mergedConfig, Rect rect7, boolean b2, boolean b3, int i0)
             throws RemoteException {
         // pass for now.
     }
@@ -105,6 +105,10 @@ public final class BridgeWindow implements IWindow {
     @Override
     public void requestAppKeyboardShortcuts(
             IResultReceiver receiver, int deviceId) throws RemoteException {
+    }
+
+    @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
     }
 
     @Override

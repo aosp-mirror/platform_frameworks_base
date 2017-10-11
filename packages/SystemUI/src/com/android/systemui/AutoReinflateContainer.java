@@ -72,9 +72,13 @@ public class AutoReinflateContainer extends FrameLayout {
         }
     }
 
-    private void inflateLayout() {
-        removeAllViews();
+    protected void inflateLayoutImpl() {
         LayoutInflater.from(getContext()).inflate(mLayout, this);
+    }
+
+    protected void inflateLayout() {
+        removeAllViews();
+        inflateLayoutImpl();
         final int N = mInflateListeners.size();
         for (int i = 0; i < N; i++) {
             mInflateListeners.get(i).onInflated(getChildAt(0));

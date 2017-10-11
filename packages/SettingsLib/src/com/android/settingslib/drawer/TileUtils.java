@@ -17,14 +17,18 @@ package com.android.settingslib.drawer;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
@@ -65,6 +69,13 @@ public class TileUtils {
             "com.android.settings.action.EXTRA_SETTINGS";
 
     /**
+     * @See {@link #EXTRA_SETTINGS_ACTION}.
+     */
+    private static final String IA_SETTINGS_ACTION =
+            "com.android.settings.action.IA_SETTINGS";
+
+
+    /**
      * Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities.
      */
     private static final String SETTINGS_ACTION =
@@ -94,6 +105,18 @@ public class TileUtils {
     private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
     /**
+     * The key used to get the package name of the icon resource for the preference.
+     */
+    private static final String EXTRA_PREFERENCE_ICON_PACKAGE =
+        "com.android.settings.icon_package";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the key that should be used for the preference.
+     */
+    public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
+
+    /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the icon that should be displayed for the preference.
      */
@@ -101,9 +124,26 @@ public class TileUtils {
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the content provider providing the icon that should be displayed for
+     * the preference.
+     *
+     * Icon provided by the content provider overrides any static icon.
+     */
+    public static final String META_DATA_PREFERENCE_ICON_URI = "com.android.settings.icon_uri";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the title that should be displayed for the preference.
      */
+    @Deprecated
     public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the title that should be displayed for the preference.
+     */
+    public static final String META_DATA_PREFERENCE_TITLE_RES_ID =
+            "com.android.settings.title.resid";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -111,34 +151,84 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_SUMMARY = "com.android.settings.summary";
 
-    private static final String SETTING_PKG = "com.android.settings";
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the content provider providing the summary text that should be displayed for the
+     * preference.
+     *
+     * Summary provided by the content provider overrides any static summary.
+     */
+    public static final String META_DATA_PREFERENCE_SUMMARY_URI =
+            "com.android.settings.summary_uri";
 
+    public static final String SETTING_PKG = "com.android.settings";
+
+    /**
+     * Build a list of DashboardCategory. Each category must be defined in manifest.
+     * eg: .Settings$DeviceSettings
+     * @deprecated
+     */
+    @Deprecated
     public static List<DashboardCategory> getCategories(Context context,
-            HashMap<Pair<String, String>, Tile> cache) {
+            Map<Pair<String, String>, Tile> cache) {
+        return getCategories(context, cache, true /*categoryDefinedInManifest*/);
+    }
+
+    /**
+     * Build a list of DashboardCategory.
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     */
+    public static List<DashboardCategory> getCategories(Context context,
+            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest) {
+        return getCategories(context, cache, categoryDefinedInManifest, null, SETTING_PKG);
+    }
+
+    /**
+     * Build a list of DashboardCategory.
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     * @param extraAction additional intent filter action to be usetileutild to build the dashboard
+     * categories
+     */
+    public static List<DashboardCategory> getCategories(Context context,
+            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest,
+            String extraAction, String settingPkg) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
         ArrayList<Tile> tiles = new ArrayList<>();
-        UserManager userManager = UserManager.get(context);
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         for (UserHandle user : userManager.getUserProfiles()) {
             // TODO: Needs much optimization, too many PM queries going on here.
             if (user.getIdentifier() == ActivityManager.getCurrentUser()) {
                 // Only add Settings for this user.
-                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
+                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true,
+                        settingPkg);
                 getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
-                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true);
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true);
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
             }
             if (setup) {
-                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false,
+                        settingPkg);
+                if (!categoryDefinedInManifest) {
+                    getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
+                            settingPkg);
+                    if (extraAction != null) {
+                        getTilesForAction(context, user, extraAction, cache, null, tiles, false,
+                                settingPkg);
+                    }
+                }
             }
         }
+
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
         for (Tile tile : tiles) {
             DashboardCategory category = categoryMap.get(tile.category);
             if (category == null) {
-                category = createCategory(context, tile.category);
+                category = createCategory(context, tile.category, categoryDefinedInManifest);
                 if (category == null) {
                     Log.w(LOG_TAG, "Couldn't find category " + tile.category);
                     continue;
@@ -157,9 +247,21 @@ public class TileUtils {
         return categories;
     }
 
-    private static DashboardCategory createCategory(Context context, String categoryKey) {
+    /**
+     * Create a new DashboardCategory from key.
+     *
+     * @param context Context to query intent
+     * @param categoryKey The category key
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     */
+    private static DashboardCategory createCategory(Context context, String categoryKey,
+            boolean categoryDefinedInManifest) {
         DashboardCategory category = new DashboardCategory();
         category.key = categoryKey;
+        if (!categoryDefinedInManifest) {
+            return category;
+        }
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivities(new Intent(categoryKey), 0);
         if (results.size() == 0) {
@@ -181,18 +283,19 @@ public class TileUtils {
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
-            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
+            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
+            String settingPkg) {
         getTilesForAction(context, user, action, addedCache, defaultCategory, outTiles,
-                requireSettings, requireSettings);
+                requireSettings, requireSettings, settingPkg);
     }
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
-            boolean usePriority) {
+            boolean usePriority, String settingPkg) {
         Intent intent = new Intent(action);
         if (requireSettings) {
-            intent.setPackage(SETTING_PKG);
+            intent.setPackage(settingPkg);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
                 usePriority, true);
@@ -212,6 +315,8 @@ public class TileUtils {
             ActivityInfo activityInfo = resolved.activityInfo;
             Bundle metaData = activityInfo.metaData;
             String categoryKey = defaultCategory;
+
+            // Load category
             if (checkCategory && ((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
                     && categoryKey == null) {
                 Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for intent "
@@ -221,6 +326,7 @@ public class TileUtils {
             } else {
                 categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
             }
+
             Pair<String, String> key = new Pair<String, String>(activityInfo.packageName,
                     activityInfo.name);
             Tile tile = addedCache.get(key);
@@ -246,22 +352,15 @@ public class TileUtils {
         }
     }
 
-    private static DashboardCategory getCategory(List<DashboardCategory> target,
-            String categoryKey) {
-        for (DashboardCategory category : target) {
-            if (categoryKey.equals(category.key)) {
-                return category;
-            }
-        }
-        return null;
-    }
-
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
             int icon = 0;
+            Pair<String, Integer> iconFromUri = null;
             CharSequence title = null;
             String summary = null;
+            String keyHint = null;
+            Uri uri = null;
 
             // Get the activity's meta-data
             try {
@@ -273,7 +372,16 @@ public class TileUtils {
                     if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
-                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+                    int resId = 0;
+                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE_RES_ID)) {
+                        resId = metaData.getInt(META_DATA_PREFERENCE_TITLE_RES_ID);
+                        if (resId != 0) {
+                            title = res.getString(resId);
+                        }
+                    }
+                    // Fallback to legacy title extraction if we couldn't get the title through
+                    // res id.
+                    if ((resId == 0) && metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                         if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                             title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
                         } else {
@@ -287,6 +395,13 @@ public class TileUtils {
                             summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
                         }
                     }
+                    if (metaData.containsKey(META_DATA_PREFERENCE_KEYHINT)) {
+                        if (metaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
+                            keyHint = res.getString(metaData.getInt(META_DATA_PREFERENCE_KEYHINT));
+                        } else {
+                            keyHint = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
+                        }
+                    }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
@@ -297,22 +412,122 @@ public class TileUtils {
             if (TextUtils.isEmpty(title)) {
                 title = activityInfo.loadLabel(pm).toString();
             }
-            if (icon == 0) {
-                icon = activityInfo.icon;
+
+            // Set the icon
+            if (iconFromUri != null) {
+                tile.icon = Icon.createWithResource(iconFromUri.first, iconFromUri.second);
+            } else {
+                if (icon == 0) {
+                    icon = activityInfo.icon;
+                }
+                tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
             }
 
-            // Set icon, title and summary for the preference
-            tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
+            // Set title and summary for the preference
             tile.title = title;
             tile.summary = summary;
             // Replace the intent with this specific activity
             tile.intent = new Intent().setClassName(activityInfo.packageName,
                     activityInfo.name);
+            // Suggest a key for this tile
+            tile.key = keyHint;
 
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Gets the icon package name and resource id from content provider.
+     * @param Context context
+     * @param packageName package name of the target activity
+     * @param uriString URI for the content provider
+     * @param providerMap Maps URI authorities to providers
+     * @return package name and resource id of the icon specified
+     */
+    public static Pair<String, Integer> getIconFromUri(Context context, String packageName,
+            String uriString, Map<String, IContentProvider> providerMap) {
+        Bundle bundle = getBundleFromUri(context, uriString, providerMap);
+        if (bundle == null) {
+            return null;
+        }
+        String iconPackageName = bundle.getString(EXTRA_PREFERENCE_ICON_PACKAGE);
+        if (TextUtils.isEmpty(iconPackageName)) {
+            return null;
+        }
+        int resId = bundle.getInt(META_DATA_PREFERENCE_ICON, 0);
+        if (resId == 0) {
+            return null;
+        }
+        // Icon can either come from the target package or from the Settings app.
+        if (iconPackageName.equals(packageName)
+                || iconPackageName.equals(context.getPackageName())) {
+            return Pair.create(iconPackageName, bundle.getInt(META_DATA_PREFERENCE_ICON, 0));
+        }
+        return null;
+    }
+
+    /**
+     * Gets text associated with the input key from the content provider.
+     * @param Context context
+     * @param uriString URI for the content provider
+     * @param providerMap Maps URI authorities to providers
+     * @param key Key mapping to the text in bundle returned by the content provider
+     * @return Text associated with the key, if returned by the content provider
+     */
+    public static String getTextFromUri(Context context, String uriString,
+            Map<String, IContentProvider> providerMap, String key) {
+        Bundle bundle = getBundleFromUri(context, uriString, providerMap);
+        return (bundle != null) ? bundle.getString(key) : null;
+    }
+
+    private static Bundle getBundleFromUri(Context context, String uriString,
+            Map<String, IContentProvider> providerMap) {
+        if (TextUtils.isEmpty(uriString)) {
+            return null;
+        }
+        Uri uri = Uri.parse(uriString);
+        String method = getMethodFromUri(uri);
+        if (TextUtils.isEmpty(method)) {
+            return null;
+        }
+        IContentProvider provider = getProviderFromUri(context, uri, providerMap);
+        if (provider == null) {
+            return null;
+        }
+        try {
+            return provider.call(context.getPackageName(), method, uriString, null);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    private static IContentProvider getProviderFromUri(Context context, Uri uri,
+            Map<String, IContentProvider> providerMap) {
+        if (uri == null) {
+            return null;
+        }
+        String authority = uri.getAuthority();
+        if (TextUtils.isEmpty(authority)) {
+            return null;
+        }
+        if (!providerMap.containsKey(authority)) {
+            providerMap.put(authority, context.getContentResolver().acquireUnstableProvider(uri));
+        }
+        return providerMap.get(authority);
+    }
+
+    /** Returns the first path segment of the uri if it exists as the method, otherwise null. */
+    static String getMethodFromUri(Uri uri) {
+        if (uri == null) {
+            return null;
+        }
+        List<String> pathSegments = uri.getPathSegments();
+        if ((pathSegments == null) || pathSegments.isEmpty()) {
+            return null;
+        }
+        return pathSegments.get(0);
     }
 
     public static final Comparator<Tile> TILE_COMPARATOR =

@@ -18,10 +18,14 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -29,6 +33,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -44,6 +49,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +82,6 @@ import java.util.Objects;
  * to the {@link #cancel(int)} or {@link #cancel(String, int)} method to clear
  * this notification.
  *
- * <p>
- * You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService}.
- *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For a guide to creating notifications, read the
@@ -88,10 +90,9 @@ import java.util.Objects;
  * </div>
  *
  * @see android.app.Notification
- * @see android.content.Context#getSystemService
  */
-public class NotificationManager
-{
+@SystemService(Context.NOTIFICATION_SERVICE)
+public class NotificationManager {
     private static String TAG = "NotificationManager";
     private static boolean localLOGV = false;
 
@@ -140,8 +141,10 @@ public class NotificationManager
             = "android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL";
 
     /** @hide */
-    @IntDef({INTERRUPTION_FILTER_NONE, INTERRUPTION_FILTER_PRIORITY, INTERRUPTION_FILTER_ALARMS,
-            INTERRUPTION_FILTER_ALL, INTERRUPTION_FILTER_UNKNOWN})
+    @IntDef(prefix = { "INTERRUPTION_FILTER_" }, value = {
+            INTERRUPTION_FILTER_NONE, INTERRUPTION_FILTER_PRIORITY, INTERRUPTION_FILTER_ALARMS,
+            INTERRUPTION_FILTER_ALL, INTERRUPTION_FILTER_UNKNOWN
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InterruptionFilter {}
 
@@ -181,15 +184,17 @@ public class NotificationManager
     public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
 
     /** @hide */
-    @IntDef({VISIBILITY_NO_OVERRIDE, IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
-            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH,
-            IMPORTANCE_MAX})
+    @IntDef(prefix = { "IMPORTANCE_" }, value = {
+            IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
+            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
 
     /** Value signifying that the user has not expressed a per-app visibility override value.
      * @hide */
     public static final int VISIBILITY_NO_OVERRIDE = -1000;
+
     /**
      * Value signifying that the user has not expressed an importance.
      *
@@ -199,7 +204,7 @@ public class NotificationManager
     public static final int IMPORTANCE_UNSPECIFIED = -1000;
 
     /**
-     * A notification with no importance: shows nowhere, is blocked.
+     * A notification with no importance: does not show in the shade.
      */
     public static final int IMPORTANCE_NONE = 0;
 
@@ -214,19 +219,19 @@ public class NotificationManager
     public static final int IMPORTANCE_LOW = 2;
 
     /**
-     * Default notification importance: shows everywhere, allowed to makes noise,
-     * but does not visually intrude.
+     * Default notification importance: shows everywhere, makes noise, but does not visually
+     * intrude.
      */
     public static final int IMPORTANCE_DEFAULT = 3;
 
     /**
-     * Higher notification importance: shows everywhere, allowed to makes noise and peek.
+     * Higher notification importance: shows everywhere, makes noise and peeks. May use full screen
+     * intents.
      */
     public static final int IMPORTANCE_HIGH = 4;
 
     /**
-     * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
-     * use full screen intents.
+     * Unused.
      */
     public static final int IMPORTANCE_MAX = 5;
 
@@ -289,7 +294,6 @@ public class NotificationManager
      */
     public void notifyAsUser(String tag, int id, Notification notification, UserHandle user)
     {
-        int[] idOut = new int[1];
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         // Fix the notification as best we can.
@@ -311,10 +315,7 @@ public class NotificationManager
         final Notification copy = Builder.maybeCloneStrippedForDelivery(notification);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
-                    copy, idOut, user.getIdentifier());
-            if (localLOGV && id != idOut[0]) {
-                Log.v(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
-            }
+                    copy, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -378,8 +379,148 @@ public class NotificationManager
     }
 
     /**
+     * Creates a group container for {@link NotificationChannel} objects.
+     *
+     * This can be used to rename an existing group.
+     * <p>
+     *     Group information is only used for presentation, not for behavior. Groups are optional
+     *     for channels, and you can have a mix of channels that belong to groups and channels
+     *     that do not.
+     * </p>
+     * <p>
+     *     For example, if your application supports multiple accounts, and those accounts will
+     *     have similar channels, you can create a group for each account with account specific
+     *     labels instead of appending account information to each channel's label.
+     * </p>
+     *
+     * @param group The group to create
+     */
+    public void createNotificationChannelGroup(@NonNull NotificationChannelGroup group) {
+        createNotificationChannelGroups(Arrays.asList(group));
+    }
+
+    /**
+     * Creates multiple notification channel groups.
+     *
+     * @param groups The list of groups to create
+     */
+    public void createNotificationChannelGroups(@NonNull List<NotificationChannelGroup> groups) {
+        INotificationManager service = getService();
+        try {
+            service.createNotificationChannelGroups(mContext.getPackageName(),
+                    new ParceledListSlice(groups));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a notification channel that notifications can be posted to.
+     *
+     * This can also be used to restore a deleted channel and to update an existing channel's
+     * name and description.
+     *
+     * <p>The name and description should only be changed if the locale changes
+     * or in response to the user renaming this channel. For example, if a user has a channel
+     * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
+     * to 'John Smith,' the channel can be renamed to match.
+     * All other fields are ignored for channels that already exist.
+     *
+     * @param channel  the channel to create.  Note that the created channel may differ from this
+     *                 value. If the provided channel is malformed, a RemoteException will be
+     *                 thrown.
+     */
+    public void createNotificationChannel(@NonNull NotificationChannel channel) {
+        createNotificationChannels(Arrays.asList(channel));
+    }
+
+    /**
+     * Creates multiple notification channels that different notifications can be posted to. See
+     * {@link #createNotificationChannel(NotificationChannel)}.
+     *
+     * @param channels the list of channels to attempt to create.
+     */
+    public void createNotificationChannels(@NonNull List<NotificationChannel> channels) {
+        INotificationManager service = getService();
+        try {
+            service.createNotificationChannels(mContext.getPackageName(),
+                    new ParceledListSlice(channels));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the notification channel settings for a given channel id.
+     *
+     * The channel must belong to your package, or it will not be returned.
+     */
+    public NotificationChannel getNotificationChannel(String channelId) {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannel(mContext.getPackageName(), channelId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all notification channels belonging to the calling package.
+     */
+    public List<NotificationChannel> getNotificationChannels() {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannels(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the given notification channel.
+     *
+     * <p>If you {@link #createNotificationChannel(NotificationChannel) create} a new channel with
+     * this same id, the deleted channel will be un-deleted with all of the same settings it
+     * had before it was deleted.
+     */
+    public void deleteNotificationChannel(String channelId) {
+        INotificationManager service = getService();
+        try {
+            service.deleteNotificationChannel(mContext.getPackageName(), channelId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all notification channel groups belonging to the calling app.
+     */
+    public List<NotificationChannelGroup> getNotificationChannelGroups() {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannelGroups(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the given notification channel group, and all notification channels that
+     * belong to it.
+     */
+    public void deleteNotificationChannelGroup(String groupId) {
+        INotificationManager service = getService();
+        try {
+            service.deleteNotificationChannelGroup(mContext.getPackageName(), groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
+    @TestApi
     public ComponentName getEffectsSuppressor() {
         INotificationManager service = getService();
         try {
@@ -533,7 +674,7 @@ public class NotificationManager
      * <p>
      * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
      * @param id The id of the rule to update
-     * @param automaticZenRule the rule to update. 
+     * @param automaticZenRule the rule to update.
      * @return Whether the rule was successfully updated.
      */
     public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
@@ -581,9 +722,8 @@ public class NotificationManager
     }
 
     /**
-     * Returns the user specified importance for notifications from the calling package.
-     *
-     * @return An importance level, such as {@link #IMPORTANCE_DEFAULT}.
+     * Returns the user specified importance for notifications from the calling
+     * package.
      */
     public @Importance int getImportance() {
         INotificationManager service = getService();
@@ -959,12 +1099,10 @@ public class NotificationManager
 
     /**
      * Gets the current notification interruption filter.
-     *
      * <p>
-     * The interruption filter defines which notifications are allowed to interrupt the user
-     * (e.g. via sound &amp; vibration) and is applied globally.
-     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
-     * unavailable.
+     * The interruption filter defines which notifications are allowed to
+     * interrupt the user (e.g. via sound &amp; vibration) and is applied
+     * globally.
      */
     public final @InterruptionFilter int getCurrentInterruptionFilter() {
         final INotificationManager service = getService();
@@ -977,18 +1115,15 @@ public class NotificationManager
 
     /**
      * Sets the current notification interruption filter.
-     *
      * <p>
-     * The interruption filter defines which notifications are allowed to interrupt the user
-     * (e.g. via sound &amp; vibration) and is applied globally.
-     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
-     * unavailable.
-     *
+     * The interruption filter defines which notifications are allowed to
+     * interrupt the user (e.g. via sound &amp; vibration) and is applied
+     * globally.
      * <p>
-     * Only available if policy access is granted to this package.
-     * See {@link #isNotificationPolicyAccessGranted}.
+     * Only available if policy access is granted to this package. See
+     * {@link #isNotificationPolicyAccessGranted}.
      */
-    public final void setInterruptionFilter(int interruptionFilter) {
+    public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         final INotificationManager service = getService();
         try {
             service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter);
@@ -1018,4 +1153,5 @@ public class NotificationManager
             default: return defValue;
         }
     }
+
 }

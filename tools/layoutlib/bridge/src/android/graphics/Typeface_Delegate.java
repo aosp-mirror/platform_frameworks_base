@@ -16,11 +16,15 @@
 
 package android.graphics;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.NonNull;
 import android.graphics.FontFamily_Delegate.FontVariant;
+import android.graphics.fonts.FontVariationAxis;
+import android.text.FontConfig;
 
 import java.awt.Font;
 import java.io.File;
@@ -159,6 +163,24 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static synchronized long nativeCreateFromTypefaceWithVariation(long native_instance,
+            List<FontVariationAxis> axes) {
+        long newInstance = nativeCreateFromTypeface(native_instance, 0);
+
+        if (newInstance != 0) {
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                    "nativeCreateFromTypefaceWithVariation is not supported", null, null);
+        }
+        return newInstance;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static synchronized int[] nativeGetSupportedAxes(long native_instance) {
+        // nativeCreateFromTypefaceWithVariation is not supported so we do not keep the axes
+        return null;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static long nativeCreateWeightAlias(long native_instance, int weight) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
@@ -208,13 +230,15 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static FontFamily makeFamilyFromParsed(FontListParser.Family family,
+    /*package*/ static FontFamily makeFamilyFromParsed(FontConfig.Family family,
             Map<String, ByteBuffer> bufferForPath) {
-        FontFamily fontFamily = new FontFamily(family.lang, family.variant);
-        for (FontListParser.Font font : family.fonts) {
-            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.fontName, font.weight,
-                    font.isItalic);
+        FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
+        for (FontConfig.Font font : family.getFonts()) {
+            String fullPathName = "/system/fonts/" + font.getFontName();
+            FontFamily_Delegate.addFont(fontFamily.mBuilderPtr, fullPathName,
+                    font.getWeight(), font.isItalic());
         }
+        fontFamily.freeze();
         return fontFamily;
     }
 

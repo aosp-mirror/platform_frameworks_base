@@ -18,7 +18,6 @@ package android.media.midi;
 
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
@@ -28,13 +27,20 @@ import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.IOException;
+
+import java.util.HashSet;
 
 /**
  * This class is used for sending and receiving data to and from a MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
  */
 public final class MidiDevice implements Closeable {
+    static {
+        System.loadLibrary("media_jni");
+    }
+
     private static final String TAG = "MidiDevice";
 
     private final MidiDeviceInfo mDeviceInfo;
@@ -43,6 +49,18 @@ public final class MidiDevice implements Closeable {
     private final IBinder mClientToken;
     private final IBinder mDeviceToken;
     private boolean mIsDeviceClosed;
+
+    // Native API Helpers
+    /**
+     * Keep a static list of MidiDevice objects that are mirrorToNative()'d so they
+     * don't get inadvertantly garbage collected.
+     */
+    private static HashSet<MidiDevice> mMirroredDevices = new HashSet<MidiDevice>();
+
+    /**
+     * If this device is mirrorToNatived(), this is the native device handler.
+     */
+    private long mNativeHandle;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -129,11 +147,11 @@ public final class MidiDevice implements Closeable {
         }
         try {
             IBinder token = new Binder();
-            ParcelFileDescriptor pfd = mDeviceServer.openInputPort(token, portNumber);
-            if (pfd == null) {
+            FileDescriptor fd = mDeviceServer.openInputPort(token, portNumber);
+            if (fd == null) {
                 return null;
             }
-            return new MidiInputPort(mDeviceServer, token, pfd, portNumber);
+            return new MidiInputPort(mDeviceServer, token, fd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openInputPort");
             return null;
@@ -155,11 +173,11 @@ public final class MidiDevice implements Closeable {
         }
         try {
             IBinder token = new Binder();
-            ParcelFileDescriptor pfd = mDeviceServer.openOutputPort(token, portNumber);
-            if (pfd == null) {
+            FileDescriptor fd = mDeviceServer.openOutputPort(token, portNumber);
+            if (fd == null) {
                 return null;
             }
-            return new MidiOutputPort(mDeviceServer, token, pfd, portNumber);
+            return new MidiOutputPort(mDeviceServer, token, fd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openOutputPort");
             return null;
@@ -186,20 +204,20 @@ public final class MidiDevice implements Closeable {
             return null;
         }
 
-        ParcelFileDescriptor pfd = inputPort.claimFileDescriptor();
-        if (pfd == null) {
+        FileDescriptor fd = inputPort.claimFileDescriptor();
+        if (fd == null) {
             return null;
         }
         try {
             IBinder token = new Binder();
-            int calleePid = mDeviceServer.connectPorts(token, pfd, outputPortNumber);
-            // If the service is a different Process then it will duplicate the pfd
+            int calleePid = mDeviceServer.connectPorts(token, fd, outputPortNumber);
+            // If the service is a different Process then it will duplicate the fd
             // and we can safely close this one.
-            // But if the service is in the same Process then closing the pfd will
+            // But if the service is in the same Process then closing the fd will
             // kill the connection. So don't do that.
             if (calleePid != Process.myPid()) {
                 // close our copy of the file descriptor
-                IoUtils.closeQuietly(pfd);
+                IoUtils.closeQuietly(fd);
             }
 
             return new MidiConnection(token, inputPort);
@@ -209,10 +227,50 @@ public final class MidiDevice implements Closeable {
         }
     }
 
+    /**
+     * Makes Midi Device available to the Native API
+     * @hide
+     */
+    public long mirrorToNative() throws IOException {
+        if (mIsDeviceClosed || mNativeHandle != 0) {
+            return 0;
+        }
+
+        mNativeHandle = native_mirrorToNative(mDeviceServer.asBinder(), mDeviceInfo.getId());
+        if (mNativeHandle == 0) {
+            throw new IOException("Failed mirroring to native");
+        }
+
+        synchronized (mMirroredDevices) {
+            mMirroredDevices.add(this);
+        }
+        return mNativeHandle;
+    }
+
+    /**
+     * Makes Midi Device no longer available to the Native API
+     * @hide
+     */
+    public void removeFromNative() {
+        if (mNativeHandle == 0) {
+            return;
+        }
+
+        synchronized (mGuard) {
+            native_removeFromNative(mNativeHandle);
+            mNativeHandle = 0;
+        }
+
+        synchronized (mMirroredDevices) {
+            mMirroredDevices.remove(this);
+        }
+    }
+
     @Override
     public void close() throws IOException {
         synchronized (mGuard) {
             if (!mIsDeviceClosed) {
+                removeFromNative();
                 mGuard.close();
                 mIsDeviceClosed = true;
                 try {
@@ -238,4 +296,7 @@ public final class MidiDevice implements Closeable {
     public String toString() {
         return ("MidiDevice: " + mDeviceInfo.toString());
     }
+
+    private native long native_mirrorToNative(IBinder deviceServerBinder, int id);
+    private native void native_removeFromNative(long deviceHandle);
 }

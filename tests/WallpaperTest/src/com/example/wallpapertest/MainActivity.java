@@ -58,28 +58,28 @@ public class MainActivity extends Activity {
         mWallpaperManager = (WallpaperManager)getSystemService(Context.WALLPAPER_SERVICE);
         mWindowManager = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
-        mDimenWidthView = (TextView) findViewById(R.id.dimen_width);
+        mDimenWidthView = findViewById(R.id.dimen_width);
         mDimenWidthView.addTextChangedListener(mTextWatcher);
-        mDimenHeightView = (TextView) findViewById(R.id.dimen_height);
+        mDimenHeightView = findViewById(R.id.dimen_height);
         mDimenHeightView.addTextChangedListener(mTextWatcher);
 
-        mWallOffXView = (TextView) findViewById(R.id.walloff_x);
+        mWallOffXView = findViewById(R.id.walloff_x);
         mWallOffXView.addTextChangedListener(mTextWatcher);
-        mWallOffYView = (TextView) findViewById(R.id.walloff_y);
+        mWallOffYView = findViewById(R.id.walloff_y);
         mWallOffYView.addTextChangedListener(mTextWatcher);
 
-        mPaddingLeftView = (TextView) findViewById(R.id.padding_left);
+        mPaddingLeftView = findViewById(R.id.padding_left);
         mPaddingLeftView.addTextChangedListener(mTextWatcher);
-        mPaddingRightView = (TextView) findViewById(R.id.padding_right);
+        mPaddingRightView = findViewById(R.id.padding_right);
         mPaddingRightView.addTextChangedListener(mTextWatcher);
-        mPaddingTopView = (TextView) findViewById(R.id.padding_top);
+        mPaddingTopView = findViewById(R.id.padding_top);
         mPaddingTopView.addTextChangedListener(mTextWatcher);
-        mPaddingBottomView = (TextView) findViewById(R.id.padding_bottom);
+        mPaddingBottomView = findViewById(R.id.padding_bottom);
         mPaddingBottomView.addTextChangedListener(mTextWatcher);
 
-        mDispOffXView = (TextView) findViewById(R.id.dispoff_x);
+        mDispOffXView = findViewById(R.id.dispoff_x);
         mDispOffXView.addTextChangedListener(mTextWatcher);
-        mDispOffYView = (TextView) findViewById(R.id.dispoff_y);
+        mDispOffYView = findViewById(R.id.dispoff_y);
         mDispOffYView.addTextChangedListener(mTextWatcher);
 
         updateDimens();

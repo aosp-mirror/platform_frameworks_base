@@ -133,6 +133,7 @@ public class DragDownHelper implements Gefingerpoken {
                         mDragDownCallback.setEmptyDragAmount(0f);
                     } else {
                         mCallback.setUserLockedChild(mStartingChild, false);
+                        mStartingChild = null;
                     }
                     mDraggingDown = false;
                 } else {
@@ -214,6 +215,7 @@ public class DragDownHelper implements Gefingerpoken {
         mFalsingManager.onNotificatonStopDraggingDown();
         if (mStartingChild != null) {
             cancelExpansion(mStartingChild);
+            mStartingChild = null;
         } else {
             cancelExpansion();
         }
@@ -226,6 +228,10 @@ public class DragDownHelper implements Gefingerpoken {
         x += mTemp2[0];
         y += mTemp2[1];
         return mCallback.getChildAtRawPosition(x, y);
+    }
+
+    public boolean isDraggingDown() {
+        return mDraggingDown;
     }
 
     public interface DragDownCallback {

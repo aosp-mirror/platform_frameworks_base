@@ -16,7 +16,6 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include "AssetAtlas.h"
 #include "Caches.h"
 #include "Glop.h"
 #include "renderstate/Blend.h"
@@ -36,11 +35,14 @@
 #include <utils/RefBase.h>
 #include <private/hwui/DrawGlInfo.h>
 
+class GrContext;
+
 namespace android {
 namespace uirenderer {
 
 class Caches;
 class Layer;
+class DeferredLayerUpdater;
 
 namespace renderthread {
 class CanvasContext;
@@ -57,7 +59,11 @@ public:
     void onGLContextCreated();
     void onGLContextDestroyed();
 
+    void onVkContextCreated();
+    void onVkContextDestroyed();
+
     void flush(Caches::FlushMode flushMode);
+    void onBitmapDestroyed(uint32_t pixelRefId);
 
     void setViewport(GLsizei width, GLsizei height);
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);
@@ -86,13 +92,20 @@ public:
         mRegisteredContexts.erase(context);
     }
 
+    void registerDeferredLayerUpdater(DeferredLayerUpdater* layerUpdater) {
+        mActiveLayerUpdaters.insert(layerUpdater);
+    }
+
+    void unregisterDeferredLayerUpdater(DeferredLayerUpdater* layerUpdater) {
+        mActiveLayerUpdaters.erase(layerUpdater);
+    }
+
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
     void render(const Glop& glop, const Matrix4& orthoMatrix);
 
-    AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }
     MeshState& meshState() { return *mMeshState; }
     Scissor& scissor() { return *mScissor; }
@@ -100,11 +113,14 @@ public:
 
     OffscreenBufferPool& layerPool() { return mLayerPool; }
 
+    GrContext* getGrContext() const;
+
     void dump();
 
 private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
+    void destroyLayersInUpdater();
 
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
@@ -120,8 +136,8 @@ private:
 
     OffscreenBufferPool mLayerPool;
 
-    AssetAtlas mAssetAtlas;
     std::set<Layer*> mActiveLayers;
+    std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;
 
     GLsizei mViewportWidth;

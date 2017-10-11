@@ -16,11 +16,12 @@
 
 package android.view;
 
-import dalvik.system.CloseGuard;
-
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
+
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
 
@@ -34,6 +35,23 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public abstract class DisplayEventReceiver {
+
+    /**
+     * When retrieving vsync events, this specifies that the vsync event should happen at the normal
+     * vsync-app tick.
+     * <p>
+     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     */
+    public static final int VSYNC_SOURCE_APP = 0;
+
+    /**
+     * When retrieving vsync events, this specifies that the vsync event should happen whenever
+     * Surface Flinger is processing a frame.
+     * <p>
+     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     */
+    public static final int VSYNC_SOURCE_SURFACE_FLINGER = 1;
+
     private static final String TAG = "DisplayEventReceiver";
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -45,8 +63,9 @@ public abstract class DisplayEventReceiver {
     private MessageQueue mMessageQueue;
 
     private static native long nativeInit(WeakReference<DisplayEventReceiver> receiver,
-            MessageQueue messageQueue);
+            MessageQueue messageQueue, int vsyncSource);
     private static native void nativeDispose(long receiverPtr);
+    @FastNative
     private static native void nativeScheduleVsync(long receiverPtr);
 
     /**
@@ -55,12 +74,23 @@ public abstract class DisplayEventReceiver {
      * @param looper The looper to use when invoking callbacks.
      */
     public DisplayEventReceiver(Looper looper) {
+        this(looper, VSYNC_SOURCE_APP);
+    }
+
+    /**
+     * Creates a display event receiver.
+     *
+     * @param looper The looper to use when invoking callbacks.
+     * @param vsyncSource The source of the vsync tick. Must be on of the VSYNC_SOURCE_* values.
+     */
+    public DisplayEventReceiver(Looper looper, int vsyncSource) {
         if (looper == null) {
             throw new IllegalArgumentException("looper must not be null");
         }
 
         mMessageQueue = looper.getQueue();
-        mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue);
+        mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue,
+                vsyncSource);
 
         mCloseGuard.open("dispose");
     }

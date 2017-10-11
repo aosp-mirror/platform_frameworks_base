@@ -16,28 +16,26 @@
 
 package com.android.server.wm;
 
-import android.content.res.CompatibilityInfo;
+import android.view.WindowManagerPolicy.StartingSurface;
 
-final class StartingData {
-    final String pkg;
-    final int theme;
-    final CompatibilityInfo compatInfo;
-    final CharSequence nonLocalizedLabel;
-    final int labelRes;
-    final int icon;
-    final int logo;
-    final int windowFlags;
+/**
+ * Represents the model about how a starting window should be constructed.
+ */
+public abstract class StartingData {
 
-    StartingData(String _pkg, int _theme, CompatibilityInfo _compatInfo,
-            CharSequence _nonLocalizedLabel,
-            int _labelRes, int _icon, int _logo, int _windowFlags) {
-        pkg = _pkg;
-        theme = _theme;
-        compatInfo = _compatInfo;
-        nonLocalizedLabel = _nonLocalizedLabel;
-        labelRes = _labelRes;
-        icon = _icon;
-        logo = _logo;
-        windowFlags = _windowFlags;
+    protected final WindowManagerService mService;
+
+    protected StartingData(WindowManagerService service) {
+        mService = service;
     }
+
+    /**
+     * Creates the actual starting window surface. DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING
+     * THIS METHOD.
+     *
+     * @param atoken the app to add the starting window to
+     * @return a class implementing {@link StartingSurface} for easy removal with
+     *         {@link StartingSurface#remove}
+     */
+    abstract StartingSurface createStartingSurface(AppWindowToken atoken);
 }

@@ -38,6 +38,7 @@ interface IAppOpsService {
     int checkPackage(int uid, String packageName);
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
+    List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);
     void setMode(int code, int uid, String packageName, int mode);
     void resetAllModes(int reqUserId, String reqPackageName);

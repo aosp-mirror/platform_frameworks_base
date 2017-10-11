@@ -41,7 +41,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 outline.setRect(translation,
                         mClipTopAmount,
                         getWidth() + translation,
-                        Math.max(getActualHeight(), mClipTopAmount));
+                        Math.max(getActualHeight() - mClipBottomAmount, mClipTopAmount));
             } else {
                 outline.setRect(mOutlineRect);
             }
@@ -63,6 +63,12 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     public void setClipTopAmount(int clipTopAmount) {
         super.setClipTopAmount(clipTopAmount);
+        invalidateOutline();
+    }
+
+    @Override
+    public void setClipBottomAmount(int clipBottomAmount) {
+        super.setClipBottomAmount(clipBottomAmount);
         invalidateOutline();
     }
 
@@ -97,13 +103,21 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (mCustomOutline) {
             return;
         }
-        boolean hasOutline = true;
-        if (isChildInGroup()) {
-            hasOutline = isGroupExpanded() && !isGroupExpansionChanging();
-        } else if (isSummaryWithChildren()) {
-            hasOutline = !isGroupExpanded() || isGroupExpansionChanging();
-        }
+        boolean hasOutline = needsOutline();
         setOutlineProvider(hasOutline ? mProvider : null);
+    }
+
+    /**
+     * @return whether the view currently needs an outline. This is usually false in case it doesn't
+     * have a background.
+     */
+    protected boolean needsOutline() {
+        if (isChildInGroup()) {
+            return isGroupExpanded() && !isGroupExpansionChanging();
+        } else if (isSummaryWithChildren()) {
+            return !isGroupExpanded() || isGroupExpansionChanging();
+        }
+        return true;
     }
 
     public boolean isOutlineShowing() {

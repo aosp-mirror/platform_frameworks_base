@@ -16,7 +16,11 @@
 
 package com.android.server.connectivity.tethering;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.reset;
@@ -38,16 +42,23 @@ import static com.android.server.connectivity.tethering.IControlsTethering.STATE
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.TextUtils;
+
+import java.net.Inet4Address;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -63,19 +74,20 @@ public class TetherInterfaceStateMachineTest {
     @Mock private INetworkStatsService mStatsService;
     @Mock private IControlsTethering mTetherHelper;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
-    @Mock private IPv6TetheringInterfaceServices mIPv6TetheringInterfaceServices;
     @Mock private SharedLog mSharedLog;
 
     private final TestLooper mLooper = new TestLooper();
+    private final ArgumentCaptor<LinkProperties> mLinkPropertiesCaptor =
+            ArgumentCaptor.forClass(LinkProperties.class);
     private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(int interfaceType) throws Exception {
         mTestedSm = new TetherInterfaceStateMachine(
                 IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
-                mNMService, mStatsService, mTetherHelper, mIPv6TetheringInterfaceServices);
+                mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
-        // the test of the world that we've changed from an unknown to available state.
+        // the rest of the world that we've changed from an unknown to available state.
         mLooper.dispatchAll();
         reset(mNMService, mStatsService, mTetherHelper);
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
@@ -99,12 +111,12 @@ public class TetherInterfaceStateMachineTest {
     @Test
     public void startsOutAvailable() {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
-                TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper,
-                mIPv6TetheringInterfaceServices);
+                TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         mLooper.dispatchAll();
-        verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        verify(mTetherHelper).updateLinkProperties(eq(mTestedSm), any(LinkProperties.class));
         verifyNoMoreInteractions(mTetherHelper, mNMService, mStatsService);
     }
 
@@ -133,8 +145,9 @@ public class TetherInterfaceStateMachineTest {
         initStateMachine(TETHERING_BLUETOOTH);
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
-        verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
+        verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
+        verify(mTetherHelper).updateLinkProperties(eq(mTestedSm), any(LinkProperties.class));
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
     }
 
@@ -145,8 +158,10 @@ public class TetherInterfaceStateMachineTest {
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED, STATE_TETHERED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), any(LinkProperties.class));
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
     }
 
@@ -157,8 +172,10 @@ public class TetherInterfaceStateMachineTest {
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), any(LinkProperties.class));
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
     }
 
@@ -171,8 +188,11 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).getInterfaceConfig(IFACE_NAME);
         inOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), mLinkPropertiesCaptor.capture());
+        assertIPv4AddressAndDirectlyConnectedRoute(mLinkPropertiesCaptor.getValue());
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
     }
 
@@ -180,7 +200,8 @@ public class TetherInterfaceStateMachineTest {
     public void handlesFirstUpstreamChange() throws Exception {
         initTetheredStateMachine(TETHERING_BLUETOOTH, null);
 
-        // Telling the state machine about its upstream interface triggers a little more configuration.
+        // Telling the state machine about its upstream interface triggers
+        // a little more configuration.
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
         InOrder inOrder = inOrder(mNMService);
         inOrder.verify(mNMService).enableNat(IFACE_NAME, UPSTREAM_IFACE);
@@ -248,8 +269,10 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), any(LinkProperties.class));
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
     }
 
@@ -266,8 +289,11 @@ public class TetherInterfaceStateMachineTest {
             usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
             usbTeardownOrder.verify(mNMService).setInterfaceConfig(
                     IFACE_NAME, mInterfaceConfiguration);
-            usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                    IFACE_NAME, mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
+            usbTeardownOrder.verify(mTetherHelper).updateInterfaceState(
+                    mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
+            usbTeardownOrder.verify(mTetherHelper).updateLinkProperties(
+                    eq(mTestedSm), mLinkPropertiesCaptor.capture());
+            assertNoAddressesNorRoutes(mLinkPropertiesCaptor.getValue());
         }
     }
 
@@ -281,8 +307,11 @@ public class TetherInterfaceStateMachineTest {
         usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
         usbTeardownOrder.verify(mNMService).setInterfaceConfig(
                 IFACE_NAME, mInterfaceConfiguration);
-        usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_TETHER_IFACE_ERROR);
+        usbTeardownOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_AVAILABLE, TETHER_ERROR_TETHER_IFACE_ERROR);
+        usbTeardownOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), mLinkPropertiesCaptor.capture());
+        assertNoAddressesNorRoutes(mLinkPropertiesCaptor.getValue());
     }
 
     @Test
@@ -294,8 +323,11 @@ public class TetherInterfaceStateMachineTest {
         InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration, mTetherHelper);
         usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
         usbTeardownOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
-        usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
-                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_ENABLE_NAT_ERROR);
+        usbTeardownOrder.verify(mTetherHelper).updateInterfaceState(
+                mTestedSm, STATE_AVAILABLE, TETHER_ERROR_ENABLE_NAT_ERROR);
+        usbTeardownOrder.verify(mTetherHelper).updateLinkProperties(
+                eq(mTestedSm), mLinkPropertiesCaptor.capture());
+        assertNoAddressesNorRoutes(mLinkPropertiesCaptor.getValue());
     }
 
     @Test
@@ -341,5 +373,29 @@ public class TetherInterfaceStateMachineTest {
         mTestedSm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
                 upstreamIface);
         mLooper.dispatchAll();
+    }
+
+    private void assertIPv4AddressAndDirectlyConnectedRoute(LinkProperties lp) {
+        // Find the first IPv4 LinkAddress.
+        LinkAddress addr4 = null;
+        for (LinkAddress addr : lp.getLinkAddresses()) {
+            if (!(addr.getAddress() instanceof Inet4Address)) continue;
+            addr4 = addr;
+            break;
+        }
+        assertTrue("missing IPv4 address", addr4 != null);
+
+        // Assert the presence of the associated directly connected route.
+        final RouteInfo directlyConnected = new RouteInfo(addr4, null, lp.getInterfaceName());
+        assertTrue("missing directly connected route: '" + directlyConnected.toString() + "'",
+                   lp.getRoutes().contains(directlyConnected));
+    }
+
+    private void assertNoAddressesNorRoutes(LinkProperties lp) {
+        assertTrue(lp.getLinkAddresses().isEmpty());
+        assertTrue(lp.getRoutes().isEmpty());
+        // We also check that interface name is non-empty, because we should
+        // never see an empty interface name in any LinkProperties update.
+        assertFalse(TextUtils.isEmpty(lp.getInterfaceName()));
     }
 }

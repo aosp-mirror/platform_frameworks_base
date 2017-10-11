@@ -121,17 +121,31 @@
 
     </PreferenceScreen>
 
-    <!--
+    <PreferenceScreen
+      android:key="doze"
+      android:title="@string/tuner_doze">
+
+        <com.android.systemui.tuner.TunerSwitch
+          android:key="doze_always_on"
+          android:title="@string/tuner_doze_always_on"
+          sysui:defValue="false" />
+
+    </PreferenceScreen>
+
     <Preference
         android:key="nav_bar"
         android:title="@string/nav_bar"
         android:fragment="com.android.systemui.tuner.NavBarTuner" />
-    -->
 
     <Preference
-            android:key="other"
-            android:title="@string/other"
-            android:fragment="com.android.systemui.tuner.OtherPrefs" />
+            android:key="lockscreen"
+            android:title="@string/tuner_lock_screen"
+            android:fragment="com.android.systemui.tuner.LockscreenFragment" />
+
+    <Preference
+            android:key="plugins"
+            android:title="@string/plugins"
+            android:fragment="com.android.systemui.tuner.PluginFragment" />
 
     <!-- Warning, this goes last. -->
     <Preference

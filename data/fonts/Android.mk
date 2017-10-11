@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # We have to use BUILD_PREBUILT instead of PRODUCT_COPY_FIES,
-# because SMALLER_FONT_FOOTPRINT is only available in Android.mks.
+# because MINIMAL_FONT_FOOTPRINT is only available in Android.mks.
 
 LOCAL_PATH := $(call my-dir)
 
@@ -59,21 +59,6 @@ include $(BUILD_PREBUILT)
 extra_font_files :=
 
 ################################
-# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT build
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSansFallback.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-droidsans_fallback_src :=
-
-endif  # SMALLER_FONT_FOOTPRINT
-
-################################
 # Build the rest of font files as prebuilt.
 
 # $(1): The source file name in LOCAL_PATH.
@@ -101,7 +86,7 @@ font_src_files :=
 checkbuild: fontchain_lint
 
 FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
 CHECK_EMOJI := false
 else
 CHECK_EMOJI := true

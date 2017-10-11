@@ -19,11 +19,14 @@ package com.android.systemui.statusbar.policy;
 import libcore.icu.LocaleData;
 
 import android.app.ActivityManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -33,15 +36,20 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.DemoMode;
+import com.android.systemui.Dependency;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -53,9 +61,13 @@ import java.util.TimeZone;
 /**
  * Digital clock for the status bar.
  */
-public class Clock extends TextView implements DemoMode, Tunable {
+public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.Callbacks,
+        DarkReceiver, ConfigurationListener {
 
     public static final String CLOCK_SECONDS = "clock_seconds";
+
+    private boolean mClockVisibleByPolicy = true;
+    private boolean mClockVisibleByUser = true;
 
     private boolean mAttached;
     private Calendar mCalendar;
@@ -69,6 +81,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private final int mAmPmStyle;
+    private final boolean mShowDark;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
 
@@ -88,6 +101,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
                 0, 0);
         try {
             mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
+            mShowDark = a.getBoolean(R.styleable.Clock_showDark, true);
         } finally {
             a.recycle();
         }
@@ -108,9 +122,13 @@ public class Clock extends TextView implements DemoMode, Tunable {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
-                    null, getHandler());
-            TunerService.get(getContext()).addTunable(this, CLOCK_SECONDS,
+                    null, Dependency.get(Dependency.TIME_TICK_HANDLER));
+            Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
+            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+            if (mShowDark) {
+                Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
+            }
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -130,7 +148,12 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
             mAttached = false;
-            TunerService.get(getContext()).removeTunable(this);
+            Dependency.get(TunerService.class).removeTunable(this);
+            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
+                    .removeCallbacks(this);
+            if (mShowDark) {
+                Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
+            }
         }
     }
 
@@ -140,20 +163,40 @@ public class Clock extends TextView implements DemoMode, Tunable {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
-                mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
-                if (mClockFormat != null) {
-                    mClockFormat.setTimeZone(mCalendar.getTimeZone());
-                }
+                getHandler().post(() -> {
+                    mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
+                    if (mClockFormat != null) {
+                        mClockFormat.setTimeZone(mCalendar.getTimeZone());
+                    }
+                });
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 final Locale newLocale = getResources().getConfiguration().locale;
-                if (! newLocale.equals(mLocale)) {
-                    mLocale = newLocale;
-                    mClockFormatString = ""; // force refresh
-                }
+                getHandler().post(() -> {
+                    if (!newLocale.equals(mLocale)) {
+                        mLocale = newLocale;
+                        mClockFormatString = ""; // force refresh
+                    }
+                });
             }
-            updateClock();
+            getHandler().post(() -> updateClock());
         }
     };
+
+    public void setClockVisibleByUser(boolean visible) {
+        mClockVisibleByUser = visible;
+        updateClockVisibility();
+    }
+
+    public void setClockVisibilityByPolicy(boolean visible) {
+        mClockVisibleByPolicy = visible;
+        updateClockVisibility();
+    }
+
+    private void updateClockVisibility() {
+        int visibility = (mClockVisibleByPolicy && mClockVisibleByUser)
+                ? View.VISIBLE : View.GONE;
+        setVisibility(visibility);
+    }
 
     final void updateClock() {
         if (mDemoMode) return;
@@ -167,10 +210,36 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (CLOCK_SECONDS.equals(key)) {
             mShowSeconds = newValue != null && Integer.parseInt(newValue) != 0;
             updateShowSeconds();
-        } else if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            ArraySet<String> list = StatusBarIconController.getIconBlacklist(newValue);
-            setVisibility(list.contains("clock") ? View.GONE : View.VISIBLE);
+        } else {
+            setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(newValue)
+                    .contains("clock"));
+            updateClockVisibility();
         }
+    }
+
+    @Override
+    public void disable(int state1, int state2, boolean animate) {
+        boolean clockVisibleByPolicy = (state1 & StatusBarManager.DISABLE_CLOCK) == 0;
+        if (clockVisibleByPolicy != mClockVisibleByPolicy) {
+            setClockVisibilityByPolicy(clockVisibleByPolicy);
+        }
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
+        setPaddingRelative(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_starting_padding),
+                0,
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_end_padding),
+                0);
     }
 
     private void updateShowSeconds() {

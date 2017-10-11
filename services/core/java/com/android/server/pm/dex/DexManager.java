@@ -19,7 +19,7 @@ package com.android.server.pm.dex;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
+import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.storage.StorageManager;
 import android.os.UserHandle;
@@ -60,6 +60,7 @@ public class DexManager {
     // Maps package name to code locations.
     // It caches the code locations for the installed packages. This allows for
     // faster lookups (no locks) when finding what package owns the dex file.
+    @GuardedBy("mPackageCodeLocationsCache")
     private final Map<String, PackageCodeLocations> mPackageCodeLocationsCache;
 
     // PackageDexUsage handles the actual I/O operations. It is responsible to
@@ -93,7 +94,7 @@ public class DexManager {
      * Note that this method is invoked when apps load dex files and it should
      * return as fast as possible.
      *
-     * @param loadingPackage the package performing the load
+     * @param loadingAppInfo the package performing the load
      * @param dexPaths the list of dex files being loaded
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
@@ -191,8 +192,7 @@ public class DexManager {
             throw new IllegalArgumentException(
                 "notifyPackageInstalled called with USER_ALL");
         }
-        cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
-                pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
+        cachePackageInfo(pi, userId);
     }
 
     /**
@@ -205,7 +205,7 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (mPackageDexUsage.clearUsedByOtherApps(packageName)) {
             mPackageDexUsage.maybeWriteAsync();
         }
@@ -225,19 +225,43 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (updated) {
             mPackageDexUsage.maybeWriteAsync();
         }
     }
 
-    public void cachePackageCodeLocation(String packageName, String baseCodePath,
-            String[] splitCodePaths, String dataDir, int userId) {
-        PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
-                new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
-        pcl.updateCodeLocation(baseCodePath, splitCodePaths);
-        if (dataDir != null) {
-            pcl.mergeAppDataDirs(dataDir, userId);
+    /**
+     * Caches the code location from the given package info.
+     */
+    private void cachePackageInfo(PackageInfo pi, int userId) {
+        ApplicationInfo ai = pi.applicationInfo;
+        String[] dataDirs = new String[] {ai.dataDir, ai.deviceProtectedDataDir,
+                ai.credentialProtectedDataDir};
+        cachePackageCodeLocation(pi.packageName, ai.sourceDir, ai.splitSourceDirs,
+                dataDirs, userId);
+    }
+
+    private void cachePackageCodeLocation(String packageName, String baseCodePath,
+            String[] splitCodePaths, String[] dataDirs, int userId) {
+        synchronized (mPackageCodeLocationsCache) {
+            PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
+                    new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
+            // TODO(calin): We are forced to extend the scope of this synchronization because
+            // the values of the cache (PackageCodeLocations) are updated in place.
+            // Make PackageCodeLocations immutable to simplify the synchronization reasoning.
+            pcl.updateCodeLocation(baseCodePath, splitCodePaths);
+            if (dataDirs != null) {
+                for (String dataDir : dataDirs) {
+                    // The set of data dirs includes deviceProtectedDataDir and
+                    // credentialProtectedDataDir which might be null for shared
+                    // libraries. Currently we don't track these but be lenient
+                    // and check in case we ever decide to store their usage data.
+                    if (dataDir != null) {
+                        pcl.mergeAppDataDirs(dataDir, userId);
+                    }
+                }
+            }
         }
     }
 
@@ -250,8 +274,7 @@ public class DexManager {
             int userId = entry.getKey();
             for (PackageInfo pi : packageInfoList) {
                 // Cache the code locations.
-                cachePackageCodeLocation(pi.packageName, pi.applicationInfo.sourceDir,
-                        pi.applicationInfo.splitSourceDirs, pi.applicationInfo.dataDir, userId);
+                cachePackageInfo(pi, userId);
 
                 // Cache a map from package name to the set of user ids who installed the package.
                 // We will use it to sync the data and remove obsolete entries from
@@ -329,6 +352,7 @@ public class DexManager {
                 mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
                 continue;
             }
+
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
                     dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps());
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
@@ -350,7 +374,7 @@ public class DexManager {
             // Nothing to reconcile.
             return;
         }
-        Set<String> dexFilesToRemove = new HashSet<>();
+
         boolean updated = false;
         for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
             String dexPath = entry.getKey();
@@ -378,14 +402,16 @@ public class DexManager {
             }
             ApplicationInfo info = pkg.applicationInfo;
             int flags = 0;
-            if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+            if (info.deviceProtectedDataDir != null &&
+                    FileUtils.contains(info.deviceProtectedDataDir, dexPath)) {
                 flags |= StorageManager.FLAG_STORAGE_DE;
-            } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+            } else if (info.credentialProtectedDataDir!= null &&
+                    FileUtils.contains(info.credentialProtectedDataDir, dexPath)) {
                 flags |= StorageManager.FLAG_STORAGE_CE;
             } else {
-                Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
-                updated = mPackageDexUsage.removeUserPackage(
-                        packageName, dexUseInfo.getOwnerUserId()) || updated;
+                Slog.e(TAG, "Could not infer CE/DE storage for path " + dexPath);
+                updated = mPackageDexUsage.removeDexFile(
+                        packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
 
@@ -459,18 +485,31 @@ public class DexManager {
         // The loadingPackage does not own the dex file.
         // Perform a reverse look-up in the cache to detect if any package has ownership.
         // Note that we can have false negatives if the cache falls out of date.
-        for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
-            outcome = pcl.searchDex(dexPath, userId);
-            if (outcome != DEX_SEARCH_NOT_FOUND) {
-                return new DexSearchResult(pcl.mPackageName, outcome);
+        synchronized (mPackageCodeLocationsCache) {
+            for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
+                outcome = pcl.searchDex(dexPath, userId);
+                if (outcome != DEX_SEARCH_NOT_FOUND) {
+                    return new DexSearchResult(pcl.mPackageName, outcome);
+                }
             }
         }
 
-        // Cache miss. Return not found for the moment.
-        //
-        // TODO(calin): this may be because of a newly installed package, an update
-        // or a new added user. We can either perform a full look up again or register
-        // observers to be notified of package/user updates.
+        if (DEBUG) {
+            // TODO(calin): Consider checking for /data/data symlink.
+            // /data/data/ symlinks /data/user/0/ and there's nothing stopping apps
+            // to load dex files through it.
+            try {
+                String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
+                if (dexPathReal != dexPath) {
+                    Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
+                            dexPath + " dexPathReal=" + dexPathReal);
+                }
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+        // Cache miss. The cache is updated during installs and uninstalls,
+        // so if we get here we're pretty sure the dex path does not exist.
         return new DexSearchResult(null, DEX_SEARCH_NOT_FOUND);
     }
 
@@ -519,12 +558,9 @@ public class DexManager {
 
         public int searchDex(String dexPath, int userId) {
             // First check that this package is installed or active for the given user.
-            // If we don't have a data dir it means this user is trying to load something
-            // unavailable for them.
+            // A missing data dir means the package is not installed.
             Set<String> userDataDirs = mAppDataDirs.get(userId);
             if (userDataDirs == null) {
-                Slog.w(TAG, "Trying to load a dex path which does not exist for the current " +
-                        "user. dexPath=" + dexPath + ", userId=" + userId);
                 return DEX_SEARCH_NOT_FOUND;
             }
 
@@ -540,19 +576,6 @@ public class DexManager {
                 }
             }
 
-            // TODO(calin): What if we get a symlink? e.g. data dir may be a symlink,
-            // /data/data/ -> /data/user/0/.
-            if (DEBUG) {
-                try {
-                    String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
-                    if (dexPathReal != dexPath) {
-                        Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
-                                dexPath + " dexPathReal=" + dexPathReal);
-                    }
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
             return DEX_SEARCH_NOT_FOUND;
         }
     }

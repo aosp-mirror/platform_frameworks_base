@@ -99,19 +99,30 @@ public abstract class WindowManagerInternal {
 
         /**
          * Called when a pending app transition gets cancelled.
+         *
+         * @param transit transition type indicating what kind of transition got cancelled
          */
-        public void onAppTransitionCancelledLocked() {}
+        public void onAppTransitionCancelledLocked(int transit) {}
 
         /**
          * Called when an app transition gets started
          *
+         * @param transit transition type indicating what kind of transition gets run, must be one
+         *                of AppTransition.TRANSIT_* values
          * @param openToken the token for the opening app
          * @param closeToken the token for the closing app
          * @param openAnimation the animation for the opening app
          * @param closeAnimation the animation for the closing app
+         *
+         * @return Return any bit set of {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_LAYOUT},
+         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_CONFIG},
+         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
+         * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
-        public void onAppTransitionStartingLocked(IBinder openToken, IBinder closeToken,
-                Animation openAnimation, Animation closeAnimation) {}
+        public int onAppTransitionStartingLocked(int transit, IBinder openToken, IBinder closeToken,
+                Animation openAnimation, Animation closeAnimation) {
+            return 0;
+        }
 
         /**
          * Called when an app transition is finished running.
@@ -155,6 +166,14 @@ public abstract class WindowManagerInternal {
      * @see #setMagnificationCallbacks(MagnificationCallbacks)
      */
     public abstract void setMagnificationSpec(MagnificationSpec spec);
+
+    /**
+     * Set by the accessibility framework to indicate whether the magnifiable regions of the display
+     * should be shown.
+     *
+     * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
+     */
+    public abstract void setForceShowMagnifiableBounds(boolean show);
 
     /**
      * Obtains the magnification regions.
@@ -206,6 +225,9 @@ public abstract class WindowManagerInternal {
      */
     public abstract boolean isKeyguardLocked();
 
+    /** @return {@code true} if the keyguard is going away. */
+    public abstract boolean isKeyguardGoingAway();
+
     /**
      * Gets the frame of a window given its token.
      *
@@ -230,16 +252,19 @@ public abstract class WindowManagerInternal {
      *
      * @param token The token to add.
      * @param type The window type.
+     * @param displayId The display to add the token to.
      */
-    public abstract void addWindowToken(android.os.IBinder token, int type);
+    public abstract void addWindowToken(android.os.IBinder token, int type, int displayId);
 
     /**
      * Removes a window token.
      *
      * @param token The toke to remove.
      * @param removeWindows Whether to also remove the windows associated with the token.
+     * @param displayId The display to remove the token from.
      */
-    public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows);
+    public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows,
+            int displayId);
 
     /**
      * Registers a listener to be notified about app transition events.
@@ -268,6 +293,31 @@ public abstract class WindowManagerInternal {
     public abstract void clearLastInputMethodWindowForTransition();
 
     /**
+     * Notifies WindowManagerService that the current IME window status is being changed.
+     *
+     * <p>Only {@link com.android.server.InputMethodManagerService} is the expected and tested
+     * caller of this method.</p>
+     *
+     * @param imeToken token to track the active input method. Corresponding IME windows can be
+     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
+     *                 Note that there is no guarantee that the corresponding window is already
+     *                 created
+     * @param imeWindowVisible whether the active IME thinks that its window should be visible or
+     *                         hidden, no matter how WindowManagerService will react / has reacted
+     *                         to corresponding API calls.  Note that this state is not guaranteed
+     *                         to be synchronized with state in WindowManagerService.
+     * @param dismissImeOnBackKeyPressed {@code true} if the software keyboard is shown and the back
+     *                                   key is expected to dismiss the software keyboard.
+     * @param targetWindowToken token to identify the target window that the IME is associated with.
+     *                          {@code null} when application, system, or the IME itself decided to
+     *                          change its window visibility before being associated with any target
+     *                          window.
+     */
+    public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
+            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed,
+            @Nullable IBinder targetWindowToken);
+
+    /**
       * Returns true when the hardware keyboard is available.
       */
     public abstract boolean isHardKeyboardAvailable();
@@ -287,4 +337,9 @@ public abstract class WindowManagerInternal {
      * @return True if and only if the docked divider is currently in resize mode.
      */
     public abstract boolean isDockedDividerResizing();
+
+    /**
+     * Requests the window manager to recompute the windows for accessibility.
+     */
+    public abstract void computeWindowsForAccessibility();
 }

@@ -39,7 +39,7 @@ public class SubActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        ViewGroup container = (ViewGroup) findViewById(R.id.my_container);
+        ViewGroup container = findViewById(R.id.my_container);
         int dx = getWindowManager().getDefaultDisplay().getWidth();
         for (int i = 0; i < container.getChildCount(); i++) {
             View child = container.getChildAt(i);

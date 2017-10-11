@@ -22,7 +22,6 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/LocaleData.h>
-#include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
@@ -266,7 +265,7 @@ struct Res_value
     uint8_t res0;
         
     // Type of the data value.
-    enum {
+    enum : uint8_t {
         // The 'data' is either 0 or 1, specifying this resource is either
         // undefined or empty, respectively.
         TYPE_NULL = 0x00,
@@ -1103,6 +1102,7 @@ struct ResTable_config
         UI_MODE_TYPE_TELEVISION = ACONFIGURATION_UI_MODE_TYPE_TELEVISION,
         UI_MODE_TYPE_APPLIANCE = ACONFIGURATION_UI_MODE_TYPE_APPLIANCE,
         UI_MODE_TYPE_WATCH = ACONFIGURATION_UI_MODE_TYPE_WATCH,
+        UI_MODE_TYPE_VR_HEADSET = ACONFIGURATION_UI_MODE_TYPE_VR_HEADSET,
 
         // uiMode bits for the night switch.
         MASK_UI_MODE_NIGHT = 0x30,
@@ -1146,11 +1146,26 @@ struct ResTable_config
         SCREENROUND_YES = ACONFIGURATION_SCREENROUND_YES,
     };
 
+    enum {
+        // colorMode bits for wide-color gamut/narrow-color gamut.
+        MASK_WIDE_COLOR_GAMUT = 0x03,
+        WIDE_COLOR_GAMUT_ANY = ACONFIGURATION_WIDE_COLOR_GAMUT_ANY,
+        WIDE_COLOR_GAMUT_NO = ACONFIGURATION_WIDE_COLOR_GAMUT_NO,
+        WIDE_COLOR_GAMUT_YES = ACONFIGURATION_WIDE_COLOR_GAMUT_YES,
+
+        // colorMode bits for HDR/LDR.
+        MASK_HDR = 0x0c,
+        SHIFT_COLOR_MODE_HDR = 2,
+        HDR_ANY = ACONFIGURATION_HDR_ANY << SHIFT_COLOR_MODE_HDR,
+        HDR_NO = ACONFIGURATION_HDR_NO << SHIFT_COLOR_MODE_HDR,
+        HDR_YES = ACONFIGURATION_HDR_YES << SHIFT_COLOR_MODE_HDR,
+    };
+
     // An extension of screenConfig.
     union {
         struct {
             uint8_t screenLayout2;      // Contains round/notround qualifier.
-            uint8_t screenConfigPad1;   // Reserved padding.
+            uint8_t colorMode;          // Wide-gamut, HDR, etc.
             uint16_t screenConfigPad2;  // Reserved padding.
         };
         uint32_t screenConfig2;
@@ -1173,6 +1188,8 @@ struct ResTable_config
     int compare(const ResTable_config& o) const;
     int compareLogical(const ResTable_config& o) const;
 
+    inline bool operator<(const ResTable_config& o) const { return compare(o) < 0; }
+
     // Flags indicating a set of config values.  These flag constants must
     // match the corresponding ones in android.content.pm.ActivityInfo and
     // attrs_manifest.xml.
@@ -1193,6 +1210,7 @@ struct ResTable_config
         CONFIG_UI_MODE = ACONFIGURATION_UI_MODE,
         CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
         CONFIG_SCREEN_ROUND = ACONFIGURATION_SCREEN_ROUND,
+        CONFIG_COLOR_MODE = ACONFIGURATION_COLOR_MODE,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -1227,7 +1245,10 @@ struct ResTable_config
     // |RESTABLE_MAX_LOCALE_LEN| (including a terminating '\0').
     //
     // Example: en-US, en-Latn-US, en-POSIX.
-    void getBcp47Locale(char* out) const;
+    //
+    // If canonicalize is set, Tagalog (tl) locales get converted
+    // to Filipino (fil).
+    void getBcp47Locale(char* out, bool canonicalize=false) const;
 
     // Append to str the resource-qualifer string representation of the
     // locale component of this Config. If the locale is only country
@@ -1318,11 +1339,20 @@ struct ResTable_typeSpec
 
 /**
  * A collection of resource entries for a particular resource data
- * type. Followed by an array of uint32_t defining the resource
+ * type.
+ *
+ * If the flag FLAG_SPARSE is not set in `flags`, then this struct is
+ * followed by an array of uint32_t defining the resource
  * values, corresponding to the array of type strings in the
  * ResTable_package::typeStrings string block. Each of these hold an
  * index from entriesStart; a value of NO_ENTRY means that entry is
  * not defined.
+ *
+ * If the flag FLAG_SPARSE is set in `flags`, then this struct is followed
+ * by an array of ResTable_sparseTypeEntry defining only the entries that
+ * have values for this type. Each entry is sorted by their entry ID such
+ * that a binary search can be performed over the entries. The ID and offset
+ * are encoded in a uint32_t. See ResTabe_sparseTypeEntry.
  *
  * There may be multiple of these chunks for a particular resource type,
  * supply different configuration variations for the resource values of
@@ -1344,20 +1374,54 @@ struct ResTable_type
     // resource identifier).  0 is invalid.
     uint8_t id;
     
+    enum {
+        // If set, the entry is sparse, and encodes both the entry ID and offset into each entry,
+        // and a binary search is used to find the key. Only available on platforms >= O.
+        // Mark any types that use this with a v26 qualifier to prevent runtime issues on older
+        // platforms.
+        FLAG_SPARSE = 0x01,
+    };
+    uint8_t flags;
+
     // Must be 0.
-    uint8_t res0;
-    // Must be 0.
-    uint16_t res1;
+    uint16_t reserved;
     
     // Number of uint32_t entry indices that follow.
     uint32_t entryCount;
 
     // Offset from header where ResTable_entry data starts.
     uint32_t entriesStart;
-    
-    // Configuration this collection of entries is designed for.
+
+    // Configuration this collection of entries is designed for. This must always be last.
     ResTable_config config;
 };
+
+// The minimum size required to read any version of ResTable_type.
+constexpr size_t kResTableTypeMinSize =
+    sizeof(ResTable_type) - sizeof(ResTable_config) + sizeof(ResTable_config::size);
+
+// Assert that the ResTable_config is always the last field. This poses a problem for extending
+// ResTable_type in the future, as ResTable_config is variable (over different releases).
+static_assert(sizeof(ResTable_type) == offsetof(ResTable_type, config) + sizeof(ResTable_config),
+              "ResTable_config must be last field in ResTable_type");
+
+/**
+ * An entry in a ResTable_type with the flag `FLAG_SPARSE` set.
+ */
+union ResTable_sparseTypeEntry {
+    // Holds the raw uint32_t encoded value. Do not read this.
+    uint32_t entry;
+    struct {
+        // The index of the entry.
+        uint16_t idx;
+
+        // The offset from ResTable_type::entriesStart, divided by 4.
+        uint16_t offset;
+    };
+};
+
+static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
+        "ResTable_sparseTypeEntry must be 4 bytes in size");
 
 /**
  * This is the beginning of information about an entry in the resource
@@ -1519,6 +1583,8 @@ struct ResTable_lib_entry
     uint16_t packageName[128];
 };
 
+class AssetManager2;
+
 /**
  * Holds the shared library ID table. Shared libraries are assigned package IDs at
  * build time, but they may be loaded in a different order, so we need to maintain
@@ -1529,7 +1595,9 @@ struct ResTable_lib_entry
  */
 class DynamicRefTable
 {
+    friend class AssetManager2;
 public:
+    DynamicRefTable();
     DynamicRefTable(uint8_t packageId, bool appAsLib);
 
     // Loads an unmapped reference table from the package.
@@ -1542,17 +1610,19 @@ public:
     // the given package.
     status_t addMapping(const String16& packageName, uint8_t packageId);
 
+    void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
+
     // Performs the actual conversion of build-time resource ID to run-time
     // resource ID.
-    inline status_t lookupResourceId(uint32_t* resId) const;
-    inline status_t lookupResourceValue(Res_value* value) const;
+    status_t lookupResourceId(uint32_t* resId) const;
+    status_t lookupResourceValue(Res_value* value) const;
 
     inline const KeyedVector<String16, uint8_t>& entries() const {
         return mEntries;
     }
 
 private:
-    const uint8_t                   mAssignedPackageId;
+    uint8_t                         mAssignedPackageId;
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
     bool                            mAppAsLib;
@@ -1849,7 +1919,8 @@ public:
     void getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap=false,
             bool ignoreAndroidPackage=false, bool includeSystemConfigs=true) const;
 
-    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true) const;
+    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true,
+            bool mergeEquivalentLangs=false) const;
 
     // Generate an idmap.
     //
@@ -1862,6 +1933,7 @@ public:
             void** outData, size_t* outSize) const;
 
     static const size_t IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256;
+    static const uint32_t IDMAP_CURRENT_VERSION = 0x00000001;
 
     // Retrieve idmap meta-data.
     //

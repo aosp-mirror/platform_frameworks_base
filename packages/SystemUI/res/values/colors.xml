@@ -26,20 +26,13 @@
     <drawable name="status_bar_notification_row_background_color">#ff090909</drawable>
     <color name="notification_list_shadow_top">#80000000</color>
     <drawable name="heads_up_notification_bg_pressed">#ff33B5E5</drawable>
-    <color name="batterymeter_frame_color">#4DFFFFFF</color><!-- 30% white -->
-    <color name="batterymeter_charge_color">#FFFFFFFF</color>
-    <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
-    <color name="system_warning_color">@*android:color/system_error</color>
-    <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
     <color name="qs_detail_button">@*android:color/quaternary_device_default_settings</color>
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_detail_transition">#66FFFFFF</color>
-    <color name="data_usage_secondary">#99FFFFFF</color><!-- 60% white -->
-    <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
-    <color name="data_usage_graph_warning">#FFFFFFFF</color>
+    <color name="scrim_behind_color">@android:color/black</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
@@ -79,6 +72,9 @@
     <!-- The color of the material notification background when dimmed -->
     <color name="notification_material_background_dimmed_color">#ccffffff</color>
 
+    <!-- The color of the material notification background when dark -->
+    <color name="notification_material_background_dark_color">#ff333333</color>
+
     <!-- The color of the material notification background when low priority -->
     <color name="notification_material_background_low_priority_color">#fff5f5f5</color>
 
@@ -99,10 +95,6 @@
 
     <!-- The "inside" of a notification, reached via longpress -->
     <color name="notification_guts_bg_color">#eeeeee</color>
-    <color name="notification_guts_disabled_slider_color">@*android:color/material_grey_300</color>
-    <color name="notification_guts_secondary_slider_color">#858383</color>
-    <color name="notification_guts_icon_tint">#8a000000</color>
-    <color name="notification_guts_disabled_icon_tint">#4d000000</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
@@ -120,8 +112,6 @@
     <color name="screen_pinning_request_window_bg">#80000000</color>
 
     <color name="segmented_buttons_background">#14FFFFFF</color><!-- 8% white -->
-    <color name="segmented_button_selected">#FFFFFFFF</color>
-    <color name="segmented_button_unselected">@*android:color/quaternary_device_default_settings</color>
 
     <color name="dark_mode_icon_color_single_tone">#99000000</color>
     <color name="dark_mode_icon_color_dual_tone_background">#3d000000</color>
@@ -131,7 +121,6 @@
     <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
     <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
 
-    <color name="volume_icon_color">#ffffffff</color>
     <color name="volume_settings_icon_color">#7fffffff</color>
     <color name="volume_slider_inactive">@*android:color/quaternary_device_default_settings</color>
 
@@ -147,14 +136,12 @@
 
     <color name="remote_input_accent">#eeeeee</color>
 
-    <color name="qs_tile_tint_unavailable">#40ffffff</color>
-    <color name="qs_tile_tint_inactive">#4dffffff</color>
-    <color name="qs_tile_tint_active">#ffffffff</color>
-
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_keyword_color">#d9000000</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
+
+    <color name="instant_apps_color">#ff4d5a64</color>
 
 </resources>

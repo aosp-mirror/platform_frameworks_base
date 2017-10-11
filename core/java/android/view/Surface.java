@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -26,10 +27,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import dalvik.system.CloseGuard;
 
 /**
  * Handle onto a raw buffer that is being managed by the screen compositor.
@@ -51,7 +52,9 @@ public class Surface implements Parcelable {
 
     private static native long nativeCreateFromSurfaceTexture(SurfaceTexture surfaceTexture)
             throws OutOfResourcesException;
+
     private static native long nativeCreateFromSurfaceControl(long surfaceControlNativeObject);
+    private static native long nativeGetFromSurfaceControl(long surfaceControlNativeObject);
 
     private static native long nativeLockCanvas(long nativeObject, Canvas canvas, Rect dirty)
             throws OutOfResourcesException;
@@ -72,6 +75,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native void nativeSetBuffersTransform(long nativeObject, long transform);
     private static native int nativeForceScopedDisconnect(long nativeObject);
+    private static native int nativeAttachAndQueueBuffer(long nativeObject, GraphicBuffer buffer);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -408,6 +412,9 @@ public class Surface implements Parcelable {
      * back from a client, converting it from the representation being managed
      * by the window manager to the representation the client uses to draw
      * in to it.
+     *
+     * @param other {@link SurfaceControl} to copy from.
+     *
      * @hide
      */
     public void copyFrom(SurfaceControl other) {
@@ -418,7 +425,39 @@ public class Surface implements Parcelable {
         long surfaceControlPtr = other.mNativeObject;
         if (surfaceControlPtr == 0) {
             throw new NullPointerException(
-                    "SurfaceControl native object is null. Are you using a released SurfaceControl?");
+                    "null SurfaceControl native object. Are you using a released SurfaceControl?");
+        }
+        long newNativeObject = nativeGetFromSurfaceControl(surfaceControlPtr);
+
+        synchronized (mLock) {
+            if (mNativeObject != 0) {
+                nativeRelease(mNativeObject);
+            }
+            setNativeObjectLocked(newNativeObject);
+        }
+    }
+
+    /**
+     * Gets a reference a surface created from this one.  This surface now holds a reference
+     * to the same data as the original surface, and is -not- the owner.
+     * This is for use by the window manager when returning a window surface
+     * back from a client, converting it from the representation being managed
+     * by the window manager to the representation the client uses to draw
+     * in to it.
+     *
+     * @param other {@link SurfaceControl} to create surface from.
+     *
+     * @hide
+     */
+    public void createFrom(SurfaceControl other) {
+        if (other == null) {
+            throw new IllegalArgumentException("other must not be null");
+        }
+
+        long surfaceControlPtr = other.mNativeObject;
+        if (surfaceControlPtr == 0) {
+            throw new NullPointerException(
+                    "null SurfaceControl native object. Are you using a released SurfaceControl?");
         }
         long newNativeObject = nativeCreateFromSurfaceControl(surfaceControlPtr);
 
@@ -557,6 +596,21 @@ public class Surface implements Parcelable {
             int err = nativeForceScopedDisconnect(mNativeObject);
             if (err != 0) {
                 throw new RuntimeException("Failed to disconnect Surface instance (bad object?)");
+            }
+        }
+    }
+
+    /**
+     * Transfer ownership of buffer and present it on the Surface.
+     * @hide
+     */
+    public void attachAndQueueBuffer(GraphicBuffer buffer) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            int err = nativeAttachAndQueueBuffer(mNativeObject, buffer);
+            if (err != 0) {
+                throw new RuntimeException(
+                        "Failed to attach and queue buffer to Surface (bad object?)");
             }
         }
     }

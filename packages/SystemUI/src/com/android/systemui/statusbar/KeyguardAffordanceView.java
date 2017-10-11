@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
@@ -78,6 +79,7 @@ public class KeyguardAffordanceView extends ImageView {
     private boolean mSupportHardware;
     private boolean mFinishing;
     private boolean mLaunchingAffordance;
+    private boolean mShouldTint = true;
 
     private CanvasProperty<Float> mHwCircleRadius;
     private CanvasProperty<Float> mHwCenterX;
@@ -137,6 +139,12 @@ public class KeyguardAffordanceView extends ImageView {
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.3f);
     }
 
+    public void setImageDrawable(@Nullable Drawable drawable, boolean tint) {
+        super.setImageDrawable(drawable);
+        mShouldTint = tint;
+        updateIconColor();
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -165,6 +173,7 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     private void updateIconColor() {
+        if (!mShouldTint) return;
         Drawable drawable = getDrawable().mutate();
         float alpha = mCircleRadius / mMinBackgroundRadius;
         alpha = Math.min(1.0f, alpha);

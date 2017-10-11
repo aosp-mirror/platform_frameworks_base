@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,6 +30,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
+import com.android.systemui.R;
 
 /**
  * A view which can draw a scrim
@@ -42,7 +44,6 @@ public class ScrimView extends View
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
     private Rect mExcludedRect = new Rect();
-    private int mLeftInset = 0;
     private boolean mHasExcludedArea;
     private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
             = new ValueAnimator.AnimatorUpdateListener() {
@@ -74,6 +75,14 @@ public class ScrimView extends View
 
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ScrimView);
+
+        try {
+            mScrimColor = ta.getColor(R.styleable.ScrimView_scrimColor, Color.BLACK);
+        } finally {
+            ta.recycle();
+        }
     }
 
     @Override
@@ -88,12 +97,12 @@ public class ScrimView extends View
                 if (mExcludedRect.top > 0) {
                     canvas.drawRect(0, 0, getWidth(), mExcludedRect.top, mPaint);
                 }
-                if (mExcludedRect.left + mLeftInset > 0) {
-                    canvas.drawRect(0,  mExcludedRect.top, mExcludedRect.left + mLeftInset,
-                            mExcludedRect.bottom, mPaint);
+                if (mExcludedRect.left > 0) {
+                    canvas.drawRect(0,  mExcludedRect.top, mExcludedRect.left, mExcludedRect.bottom,
+                            mPaint);
                 }
-                if (mExcludedRect.right + mLeftInset < getWidth()) {
-                    canvas.drawRect(mExcludedRect.right + mLeftInset,
+                if (mExcludedRect.right < getWidth()) {
+                    canvas.drawRect(mExcludedRect.right,
                             mExcludedRect.top,
                             getWidth(),
                             mExcludedRect.bottom,
@@ -183,15 +192,5 @@ public class ScrimView extends View
 
     public void setChangeRunnable(Runnable changeRunnable) {
         mChangeRunnable = changeRunnable;
-    }
-
-    public void setLeftInset(int leftInset) {
-        if (mLeftInset != leftInset) {
-            mLeftInset = leftInset;
-
-            if (mHasExcludedArea) {
-                invalidate();
-            }
-        }
     }
 }

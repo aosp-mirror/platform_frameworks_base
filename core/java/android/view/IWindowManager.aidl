@@ -20,19 +20,23 @@ import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
+import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
+import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
@@ -45,6 +49,7 @@ import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
+import android.view.WindowManager;
 
 /**
  * System private interface to the window manager.
@@ -80,55 +85,9 @@ interface IWindowManager
     void setOverscan(int displayId, int left, int top, int right, int bottom);
 
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
-    void pauseKeyDispatching(IBinder token);
-    void resumeKeyDispatching(IBinder token);
     void setEventDispatching(boolean enabled);
-    void addWindowToken(IBinder token, int type);
-    void removeWindowToken(IBinder token);
-    /**
-     * Adds an application token to the specified task Id.
-     * @param addPos The position to add the token to in the task.
-     * @param token The token to add.
-     * @param taskId The Id of the task we are adding the token to.
-     * @param stackId Stack Id to create a new Task with the input task Id on
-     *                if the task doesn't exist yet.
-     * @param requestedOrientation Orientation to use.
-     * @param fullscreen True if the application token is fullscreen.
-     * @param showWhenLocked True if the application token should be shown when locked.
-     * @param userId Id of user to associate the token with.
-     * @param configChanges Input configuration changes.
-     * @param voiceInteraction True if the token is in voice interaction mode.
-     * @param launchTaskBehind True if the token is been launched from behind.
-     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
-     *                   the task doesn't exist yet.
-     * @param configuration Configuration that is being used with this task.
-     * @param taskResizeMode The resize mode of the task.
-     * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
-     *                        they are in.
-     * @param homeTask True if this is the task.
-     * @param targetSdkVersion The application's target SDK version
-     */
-    void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            in Rect taskBounds, in Configuration configuration, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion, int rotationAnimationHint);
-    /**
-     *
-     * @param token The token we are adding to the input task Id.
-     * @param taskId The Id of the task we are adding the token to.
-     * @param stackId Stack Id to create a new Task with the input task Id on
-     *                if the task doesn't exist yet.
-     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
-     *                   the task doesn't exist yet.
-     * @param config Configuration that is being used with this task.
-     * @param taskResizeMode The resize mode of the task.
-     * @param homeTask True if this is the task.
-     */
-    void setAppTask(IBinder token, int taskId, int stackId, in Rect taskBounds,
-            in Configuration config, int taskResizeMode, boolean homeTask);
-    void setAppOrientation(IApplicationToken token, int requestedOrientation);
-    int getAppOrientation(IApplicationToken token);
+    void addWindowToken(IBinder token, int type, int displayId);
+    void removeWindowToken(IBinder token, int displayId);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
     int getPendingAppTransition();
@@ -138,9 +97,9 @@ interface IWindowManager
             int startHeight);
     void overridePendingAppTransitionClipReveal(int startX, int startY,
             int startWidth, int startHeight);
-    void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
+    void overridePendingAppTransitionThumb(in GraphicBuffer srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp);
-    void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,
+    void overridePendingAppTransitionAspectScaledThumb(in GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp);
     /**
@@ -165,20 +124,6 @@ interface IWindowManager
             boolean scaleUp);
     void executeAppTransition();
 
-    /**
-     * Called to set the starting window for the input token and returns true if the starting
-     * window was set for the token.
-     */
-    boolean setAppStartingWindow(IBinder token, String pkg, int theme,
-            in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
-    void setAppVisibility(IBinder token, boolean visible);
-    void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface);
-    void notifyAppStopped(IBinder token);
-    void startAppFreezingScreen(IBinder token, int configChanges);
-    void stopAppFreezingScreen(IBinder token, boolean force);
-    void removeAppToken(IBinder token);
-
     /** Used by system ui to report that recents has shown itself. */
     void endProlongedAnimations();
 
@@ -186,13 +131,10 @@ interface IWindowManager
     // If there is a change, the new Configuration is returned and the
     // caller must call setNewConfiguration() sometime later.
     Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded);
-    // Notify window manager of the new configuration. Returns an array of stack ids that's
-    // affected by the update, ActivityManager should resize these stacks.
-    int[] setNewConfiguration(in Configuration config);
-
-    // Retrieves the new bounds after the configuration update evaluated by window manager.
-    Rect getBoundsForNewConfiguration(int stackId);
+            IBinder freezeThisOneIfNeeded, int displayId);
+    // Notify window manager of the new display override configuration. Returns an array of stack
+    // ids that were affected by the update, ActivityManager should resize these stacks.
+    int[] setNewDisplayOverrideConfiguration(in Configuration overrideConfig, int displayId);
 
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
@@ -204,8 +146,10 @@ interface IWindowManager
     boolean isKeyguardLocked();
     boolean isKeyguardSecure();
     boolean inKeyguardRestrictedInputMode();
-    void dismissKeyguard();
-    void keyguardGoingAway(int flags);
+    void dismissKeyguard(IKeyguardDismissCallback callback);
+
+    // Requires INTERACT_ACROSS_USERS_FULL permission
+    void setSwitchingUser(boolean switching);
 
     void closeSystemDialogs(String reason);
 
@@ -239,14 +183,11 @@ interface IWindowManager
     void setScreenCaptureDisabled(int userId, boolean disabled);
 
     /**
-     * Cancels the window transitions for the given task.
+     * Testing and debugging infrastructure for writing surface events
+     * to given FD. See RemoteSurfaceTrace.java or Wm.java for format.
      */
-    void cancelTaskWindowTransition(int taskId);
-
-    /**
-     * Cancels the thumbnail transitions for the given task.
-     */
-    void cancelTaskThumbnailTransition(int taskId);
+    void enableSurfaceTrace(in ParcelFileDescriptor fd);
+    void disableSurfaceTrace();
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
@@ -261,16 +202,18 @@ interface IWindowManager
     void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
 
     /**
-     * Retrieve the current screen orientation, constants as per
-     * {@link android.view.Surface}.
+     * Retrieve the current orientation of the primary screen.
+     * @return Constant as per {@link android.view.Surface.Rotation}.
+     *
+     * @see android.view.Display#DEFAULT_DISPLAY
      */
-    int getRotation();
+    int getDefaultDisplayRotation();
 
     /**
-     * Watch the rotation of the screen.  Returns the current rotation,
+     * Watch the rotation of the specified screen.  Returns the current rotation,
      * calls back when it changes.
      */
-    int watchRotation(IRotationWatcher watcher);
+    int watchRotation(IRotationWatcher watcher, int displayId);
 
     /**
      * Remove a rotation watcher set using watchRotation.
@@ -317,15 +260,6 @@ interface IWindowManager
     boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
 
     /**
-     * Create a screenshot of the applications currently displayed.
-     *
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and
-     *                   height = -1
-     */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight,
-            float frameScale);
-
-    /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
     oneway void statusBarVisibilityChanged(int visibility);
@@ -338,7 +272,7 @@ interface IWindowManager
     /**
      * Called by System UI to notify of changes to the visibility of PIP.
      */
-    oneway void setTvPipVisibility(boolean visible);
+    oneway void setPipVisibility(boolean visible);
 
     /**
      * Device has a software navigation bar (separate from the status bar).
@@ -401,6 +335,11 @@ interface IWindowManager
     void registerDockedStackListener(IDockedStackListener listener);
 
     /**
+     * Registers a listener that will be called when the pinned stack state changes.
+     */
+    void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
+
+    /**
      * Updates the dim layer used while resizing.
      *
      * @param visible Whether the dim layer should be visible.
@@ -419,7 +358,7 @@ interface IWindowManager
     /**
      * Retrieves the current stable insets from the primary display.
      */
-    void getStableInsets(out Rect outInsets);
+    void getStableInsets(int displayId, out Rect outInsets);
 
     /**
      * Register shortcut key. Shortcut code is packed as:
@@ -429,12 +368,13 @@ interface IWindowManager
     void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
 
     /**
-     * Create the input consumer for wallpaper events.
+     * Create an input consumer by name.
      */
-    void createWallpaperInputConsumer(out InputChannel inputChannel);
+    void createInputConsumer(String name, out InputChannel inputChannel);
 
     /**
-     * Remove the input consumer for wallpaper events.
+     * Destroy an input consumer by name.  This method will also dispose the input channels
+     * associated with that InputConsumer.
      */
-    void removeWallpaperInputConsumer();
+    boolean destroyInputConsumer(String name);
 }

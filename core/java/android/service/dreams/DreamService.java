@@ -462,7 +462,7 @@ public class DreamService extends Service implements Window.Callback {
      * @return The view if found or null otherwise.
      */
     @Nullable
-    public View findViewById(@IdRes int id) {
+    public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
 

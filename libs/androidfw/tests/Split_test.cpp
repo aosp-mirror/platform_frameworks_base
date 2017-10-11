@@ -14,233 +14,255 @@
  * limitations under the License.
  */
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/ResourceTypes.h"
 
-#include <utils/String8.h>
-#include <utils/String16.h>
+#include "utils/String16.h"
+#include "utils/String8.h"
+
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 
-#include <gtest/gtest.h>
+using com::android::basic::R;
 
-using namespace android;
+namespace android {
 
-namespace {
-
-/**
- * Include a binary resource table. This table
- * is a base table for an APK split.
- *
- * Package: com.android.test.basic
- */
-#include "data/basic/basic_arsc.h"
-
-/**
- * Include a binary resource table. This table
- * is a configuration split table for an APK split.
- *
- * Package: com.android.test.basic
- */
-#include "data/basic/split_de_fr_arsc.h"
-#include "data/basic/split_hdpi_v4_arsc.h"
-#include "data/basic/split_xhdpi_v4_arsc.h"
-#include "data/basic/split_xxhdpi_v4_arsc.h"
-
-/**
- * Include a binary resource table. This table
- * is a feature split table for an APK split.
- *
- * Package: com.android.test.basic
- */
-#include "data/feature/feature_arsc.h"
-
-enum { MAY_NOT_BE_BAG = false };
-
-void makeConfigFrench(ResTable_config* config) {
-    memset(config, 0, sizeof(*config));
-    config->language[0] = 'f';
-    config->language[1] = 'r';
+static void makeConfigFrench(ResTable_config* config) {
+  memset(config, 0, sizeof(*config));
+  config->language[0] = 'f';
+  config->language[1] = 'r';
 }
 
-TEST(SplitTest, TestLoadBase) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+class SplitTest : public ::testing::Test {
+ public:
+  void SetUp() override {
+    ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk",
+                                        "resources.arsc", &basic_contents_));
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/basic/basic_de_fr.apk",
+                                "resources.arsc", &basic_de_fr_contents_));
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/basic/basic_hdpi-v4.apk",
+                                "resources.arsc", &basic_hdpi_contents_));
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/basic/basic_xhdpi-v4.apk",
+                                "resources.arsc", &basic_xhdpi_contents_));
+    ASSERT_TRUE(ReadFileFromZipToString(
+        GetTestDataPath() + "/basic/basic_xxhdpi-v4.apk", "resources.arsc",
+        &basic_xxhdpi_contents_));
+    ASSERT_TRUE(
+        ReadFileFromZipToString(GetTestDataPath() + "/feature/feature.apk",
+                                "resources.arsc", &feature_contents_));
+  }
+
+ protected:
+  std::string basic_contents_;
+  std::string basic_de_fr_contents_;
+  std::string basic_hdpi_contents_;
+  std::string basic_xhdpi_contents_;
+  std::string basic_xxhdpi_contents_;
+  std::string feature_contents_;
+};
+
+TEST_F(SplitTest, TestLoadBase) {
+  ResTable table;
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 }
 
-TEST(SplitTest, TestGetResourceFromBase) {
-    ResTable_config frenchConfig;
-    makeConfigFrench(&frenchConfig);
+TEST_F(SplitTest, TestGetResourceFromBase) {
+  ResTable_config frenchConfig;
+  makeConfigFrench(&frenchConfig);
 
-    ResTable table;
-    table.setParameters(&frenchConfig);
+  ResTable table;
+  table.setParameters(&frenchConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 
-    ResTable_config expectedConfig;
-    memset(&expectedConfig, 0, sizeof(expectedConfig));
+  ResTable_config expectedConfig;
+  memset(&expectedConfig, 0, sizeof(expectedConfig));
 
-    Res_value val;
-    ResTable_config config;
-    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+  Res_value val;
+  ResTable_config config;
+  ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0,
+                                    NULL, &config);
 
-    // The returned block should tell us which string pool to get the value, if it is a string.
-    EXPECT_GE(block, 0);
+  // The returned block should tell us which string pool to get the value, if it
+  // is a string.
+  EXPECT_GE(block, 0);
 
-    // We expect the default resource to be selected since it is the only resource configuration.
-    EXPECT_EQ(0, expectedConfig.compare(config));
+  // We expect the default resource to be selected since it is the only resource
+  // configuration.
+  EXPECT_EQ(0, expectedConfig.compare(config));
 
-    EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
+  EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
 }
 
-TEST(SplitTest, TestGetResourceFromSplit) {
-    ResTable_config expectedConfig;
-    makeConfigFrench(&expectedConfig);
+TEST_F(SplitTest, TestGetResourceFromSplit) {
+  ResTable_config expectedConfig;
+  makeConfigFrench(&expectedConfig);
 
-    ResTable table;
-    table.setParameters(&expectedConfig);
+  ResTable table;
+  table.setParameters(&expectedConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
-    ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
+  ASSERT_EQ(NO_ERROR, table.add(basic_de_fr_contents_.data(),
+                                basic_de_fr_contents_.size()));
 
-    Res_value val;
-    ResTable_config config;
-    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+  Res_value val;
+  ResTable_config config;
+  ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0,
+                                    NULL, &config);
 
-    EXPECT_GE(block, 0);
+  EXPECT_GE(block, 0);
 
-    EXPECT_EQ(0, expectedConfig.compare(config));
+  EXPECT_EQ(0, expectedConfig.compare(config));
 
-    EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
+  EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
 }
 
-TEST(SplitTest, ResourcesFromBaseAndSplitHaveSameNames) {
-    ResTable_config expectedConfig;
-    makeConfigFrench(&expectedConfig);
+TEST_F(SplitTest, ResourcesFromBaseAndSplitHaveSameNames) {
+  ResTable_config expectedConfig;
+  makeConfigFrench(&expectedConfig);
 
-    ResTable table;
-    table.setParameters(&expectedConfig);
+  ResTable table;
+  table.setParameters(&expectedConfig);
 
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 
-    ResTable::resource_name baseName;
-    EXPECT_TRUE(table.getResourceName(base::R::string::test1, false, &baseName));
+  ResTable::resource_name baseName;
+  EXPECT_TRUE(table.getResourceName(R::string::test1, false, &baseName));
 
-    ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
+  ASSERT_EQ(NO_ERROR, table.add(basic_de_fr_contents_.data(),
+                                basic_de_fr_contents_.size()));
 
-    ResTable::resource_name frName;
-    EXPECT_TRUE(table.getResourceName(base::R::string::test1, false, &frName));
+  ResTable::resource_name frName;
+  EXPECT_TRUE(table.getResourceName(R::string::test1, false, &frName));
 
-    EXPECT_EQ(
-            String16(baseName.package, baseName.packageLen),
+  EXPECT_EQ(String16(baseName.package, baseName.packageLen),
             String16(frName.package, frName.packageLen));
 
-    EXPECT_EQ(
-            String16(baseName.type, baseName.typeLen),
+  EXPECT_EQ(String16(baseName.type, baseName.typeLen),
             String16(frName.type, frName.typeLen));
 
-    EXPECT_EQ(
-            String16(baseName.name, baseName.nameLen),
+  EXPECT_EQ(String16(baseName.name, baseName.nameLen),
             String16(frName.name, frName.nameLen));
 }
 
-TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
-    ResTable_config defaultConfig;
-    memset(&defaultConfig, 0, sizeof(defaultConfig));
+TEST_F(SplitTest, TypeEntrySpecFlagsAreUpdated) {
+  ResTable_config defaultConfig;
+  memset(&defaultConfig, 0, sizeof(defaultConfig));
 
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+  ResTable table;
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 
-    Res_value val;
-    uint32_t specFlags = 0;
-    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, &specFlags, NULL);
-    EXPECT_GE(block, 0);
+  Res_value val;
+  uint32_t specFlags = 0;
+  ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0,
+                                    &specFlags, NULL);
+  EXPECT_GE(block, 0);
 
-    EXPECT_EQ(static_cast<uint32_t>(0), specFlags);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), specFlags);
 
-    ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
+  ASSERT_EQ(NO_ERROR, table.add(basic_de_fr_contents_.data(),
+                                basic_de_fr_contents_.size()));
 
-    uint32_t frSpecFlags = 0;
-    block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, &frSpecFlags, NULL);
-    EXPECT_GE(block, 0);
+  uint32_t frSpecFlags = 0;
+  block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0,
+                            &frSpecFlags, NULL);
+  ASSERT_GE(block, 0);
 
-    EXPECT_EQ(ResTable_config::CONFIG_LOCALE, frSpecFlags);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_config::CONFIG_LOCALE | ResTable_typeSpec::SPEC_PUBLIC),
+            frSpecFlags);
 }
 
-TEST(SplitTest, SelectBestDensity) {
-    ResTable_config baseConfig;
-    memset(&baseConfig, 0, sizeof(baseConfig));
-    baseConfig.density = ResTable_config::DENSITY_XHIGH;
-    baseConfig.sdkVersion = 21;
+TEST_F(SplitTest, SelectBestDensity) {
+  ResTable_config baseConfig;
+  memset(&baseConfig, 0, sizeof(baseConfig));
+  baseConfig.density = ResTable_config::DENSITY_XHIGH;
+  baseConfig.sdkVersion = 21;
 
-    ResTable table;
-    table.setParameters(&baseConfig);
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
-    ASSERT_EQ(NO_ERROR, table.add(split_hdpi_v4_arsc, split_hdpi_v4_arsc_len));
+  ResTable table;
+  table.setParameters(&baseConfig);
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
+  ASSERT_EQ(NO_ERROR, table.add(basic_hdpi_contents_.data(),
+                                basic_hdpi_contents_.size()));
 
-    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "hdpi"));
+  EXPECT_TRUE(IsStringEqual(table, R::string::density, "hdpi"));
 
-    ASSERT_EQ(NO_ERROR, table.add(split_xhdpi_v4_arsc, split_xhdpi_v4_arsc_len));
+  ASSERT_EQ(NO_ERROR, table.add(basic_xhdpi_contents_.data(),
+                                basic_xhdpi_contents_.size()));
 
-    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xhdpi"));
+  EXPECT_TRUE(IsStringEqual(table, R::string::density, "xhdpi"));
 
-    ASSERT_EQ(NO_ERROR, table.add(split_xxhdpi_v4_arsc, split_xxhdpi_v4_arsc_len));
+  ASSERT_EQ(NO_ERROR, table.add(basic_xxhdpi_contents_.data(),
+                                basic_xxhdpi_contents_.size()));
 
-    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xhdpi"));
+  EXPECT_TRUE(IsStringEqual(table, R::string::density, "xhdpi"));
 
-    baseConfig.density = ResTable_config::DENSITY_XXHIGH;
-    table.setParameters(&baseConfig);
+  baseConfig.density = ResTable_config::DENSITY_XXHIGH;
+  table.setParameters(&baseConfig);
 
-    EXPECT_TRUE(IsStringEqual(table, base::R::string::density, "xxhdpi"));
+  EXPECT_TRUE(IsStringEqual(table, R::string::density, "xxhdpi"));
 }
 
-TEST(SplitFeatureTest, TestNewResourceIsAccessible) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+TEST_F(SplitTest, TestNewResourceIsAccessible) {
+  ResTable table;
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 
-    Res_value val;
-    ssize_t block = table.getResource(base::R::string::test3, &val, MAY_NOT_BE_BAG);
-    EXPECT_LT(block, 0);
+  Res_value val;
+  ssize_t block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+  EXPECT_LT(block, 0);
 
-    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+  ASSERT_EQ(NO_ERROR,
+            table.add(feature_contents_.data(), feature_contents_.size()));
 
-    block = table.getResource(base::R::string::test3, &val, MAY_NOT_BE_BAG);
-    EXPECT_GE(block, 0);
+  block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+  ASSERT_GE(block, 0);
 
-    EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
+  EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
 }
 
-TEST(SplitFeatureTest, TestNewResourceNameHasCorrectName) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+TEST_F(SplitTest, TestNewResourceNameHasCorrectName) {
+  ResTable table;
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
 
-    ResTable::resource_name name;
-    EXPECT_FALSE(table.getResourceName(base::R::string::test3, false, &name));
+  ResTable::resource_name name;
+  EXPECT_FALSE(table.getResourceName(R::string::test3, false, &name));
 
-    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+  ASSERT_EQ(NO_ERROR,
+            table.add(feature_contents_.data(), feature_contents_.size()));
 
-    ASSERT_TRUE(table.getResourceName(base::R::string::test3, false, &name));
+  ASSERT_TRUE(table.getResourceName(R::string::test3, false, &name));
 
-    EXPECT_EQ(String16("com.android.test.basic"),
+  EXPECT_EQ(String16("com.android.basic"),
             String16(name.package, name.packageLen));
 
-    EXPECT_EQ(String16("string"),
-            String16(name.type, name.typeLen));
+  EXPECT_EQ(String16("string"), String16(name.type, name.typeLen));
 
-    EXPECT_EQ(String16("test3"),
-            String16(name.name, name.nameLen));
+  EXPECT_EQ(String16("test3"), String16(name.name, name.nameLen));
 }
 
-TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
-    ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
+TEST_F(SplitTest, TestNewResourceIsAccessibleByName) {
+  ResTable table;
+  ASSERT_EQ(NO_ERROR,
+            table.add(basic_contents_.data(), basic_contents_.size()));
+  ASSERT_EQ(NO_ERROR,
+            table.add(feature_contents_.data(), feature_contents_.size()));
 
-    const String16 name("test3");
-    const String16 type("string");
-    const String16 package("com.android.test.basic");
-    ASSERT_EQ(base::R::string::test3, table.identifierForName(name.string(), name.size(),
-                                                              type.string(), type.size(),
-                                                              package.string(), package.size()));
+  const String16 name("test3");
+  const String16 type("string");
+  const String16 package("com.android.basic");
+  ASSERT_EQ(
+      R::string::test3,
+      table.identifierForName(name.string(), name.size(), type.string(),
+                              type.size(), package.string(), package.size()));
 }
 
-} // namespace
+}  // namespace

@@ -19,11 +19,16 @@ package android.animation;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.os.Build;
+import android.os.Looper;
+import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.animation.Animation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -52,7 +57,7 @@ import java.util.List;
  * Animation</a> developer guide.</p>
  * </div>
  */
-public final class AnimatorSet extends Animator {
+public final class AnimatorSet extends Animator implements AnimationHandler.AnimationFrameCallback {
 
     private static final String TAG = "AnimatorSet";
     /**
@@ -66,7 +71,7 @@ public final class AnimatorSet extends Animator {
      * Tracks animations currently being played, so that we know what to
      * cancel or end when cancel() or end() is called on this AnimatorSet
      */
-    private ArrayList<Animator> mPlayingSet = new ArrayList<Animator>();
+    private ArrayList<Node> mPlayingSet = new ArrayList<Node>();
 
     /**
      * Contains all nodes, mapped to their respective Animators. When new
@@ -77,26 +82,16 @@ public final class AnimatorSet extends Animator {
     private ArrayMap<Animator, Node> mNodeMap = new ArrayMap<Animator, Node>();
 
     /**
+     * Contains the start and end events of all the nodes. All these events are sorted in this list.
+     */
+    private ArrayList<AnimationEvent> mEvents = new ArrayList<>();
+
+    /**
      * Set of all nodes created for this AnimatorSet. This list is used upon
      * starting the set, and the nodes are placed in sorted order into the
      * sortedNodes collection.
      */
     private ArrayList<Node> mNodes = new ArrayList<Node>();
-
-    /**
-     * Animator Listener that tracks the lifecycle of each Animator in the set. It will be added
-     * to each Animator before they start and removed after they end.
-     */
-    private AnimatorSetListener mSetListener = new AnimatorSetListener(this);
-
-    /**
-     * Flag indicating that the AnimatorSet has been manually
-     * terminated (by calling cancel() or end()).
-     * This flag is used to avoid starting other animations when currently-playing
-     * child animations of this AnimatorSet end. It also determines whether cancel/end
-     * notifications are sent out via the normal AnimatorSetListener mechanism.
-     */
-    private boolean mTerminated = false;
 
     /**
      * Tracks whether any change has been made to the AnimatorSet, which is then used to
@@ -131,8 +126,6 @@ public final class AnimatorSet extends Animator {
     // was set on this AnimatorSet, so it should not be passed down to the children.
     private TimeInterpolator mInterpolator = null;
 
-    // Whether the AnimatorSet can be reversed.
-    private boolean mReversible = true;
     // The total duration of finishing all the Animators in the set.
     private long mTotalDuration = 0;
 
@@ -142,19 +135,86 @@ public final class AnimatorSet extends Animator {
     // the animator set and immediately end it for N and forward.
     private final boolean mShouldIgnoreEndWithoutStart;
 
+    // In pre-O releases, calling start() doesn't reset all the animators values to start values.
+    // As a result, the start of the animation is inconsistent with what setCurrentPlayTime(0) would
+    // look like on O. Also it is inconsistent with what reverse() does on O, as reverse would
+    // advance all the animations to the right beginning values for before starting to reverse.
+    // From O and forward, we will add an additional step of resetting the animation values (unless
+    // the animation was previously seeked and therefore doesn't start from the beginning).
+    private final boolean mShouldResetValuesAtStart;
+
+    // In pre-O releases, end() may never explicitly called on a child animator. As a result, end()
+    // may not even be properly implemented in a lot of cases. After a few apps crashing on this,
+    // it became necessary to use an sdk target guard for calling end().
+    private final boolean mEndCanBeCalled;
+
+    // The time, in milliseconds, when last frame of the animation came in. -1 when the animation is
+    // not running.
+    private long mLastFrameTime = -1;
+
+    // The time, in milliseconds, when the first frame of the animation came in. This is the
+    // frame before we start counting down the start delay, if any.
+    // -1 when the animation is not running.
+    private long mFirstFrame = -1;
+
+    // The time, in milliseconds, when the first frame of the animation came in.
+    // -1 when the animation is not running.
+    private int mLastEventId = -1;
+
+    // Indicates whether the animation is reversing.
+    private boolean mReversing = false;
+
+    // Indicates whether the animation should register frame callbacks. If false, the animation will
+    // passively wait for an AnimatorSet to pulse it.
+    private boolean mSelfPulse = true;
+
+    // SeekState stores the last seeked play time as well as seek direction.
+    private SeekState mSeekState = new SeekState();
+
+    // Indicates where children animators are all initialized with their start values captured.
+    private boolean mChildrenInitialized = false;
+
+    /**
+     * Set on the next frame after pause() is called, used to calculate a new startTime
+     * or delayStartTime which allows the animator set to continue from the point at which
+     * it was paused. If negative, has not yet been set.
+     */
+    private long mPauseTime = -1;
+
+    // This is to work around a bug in b/34736819. This needs to be removed once app team
+    // fixes their side.
+    private AnimatorListenerAdapter mDummyListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mNodeMap.get(animation) == null) {
+                throw new AndroidRuntimeException("Error: animation ended is not in the node map");
+            }
+            mNodeMap.get(animation).mEnded = true;
+
+        }
+    };
+
     public AnimatorSet() {
         super();
         mNodeMap.put(mDelayAnim, mRootNode);
         mNodes.add(mRootNode);
+        boolean isPreO;
         // Set the flag to ignore calling end() without start() for pre-N releases
         Application app = ActivityThread.currentApplication();
         if (app == null || app.getApplicationInfo() == null) {
             mShouldIgnoreEndWithoutStart = true;
-        } else if (app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
-            mShouldIgnoreEndWithoutStart = true;
+            isPreO = true;
         } else {
-            mShouldIgnoreEndWithoutStart = false;
+            if (app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                mShouldIgnoreEndWithoutStart = true;
+            } else {
+                mShouldIgnoreEndWithoutStart = false;
+            }
+
+            isPreO = app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O;
         }
+        mShouldResetValuesAtStart = !isPreO;
+        mEndCanBeCalled = !isPreO;
     }
 
     /**
@@ -206,7 +266,6 @@ public final class AnimatorSet extends Animator {
             if (items.length == 1) {
                 play(items[0]);
             } else {
-                mReversible = false;
                 for (int i = 0; i < items.length - 1; ++i) {
                     play(items[i]).before(items[i + 1]);
                 }
@@ -225,7 +284,6 @@ public final class AnimatorSet extends Animator {
             if (items.size() == 1) {
                 play(items.get(0));
             } else {
-                mReversible = false;
                 for (int i = 0; i < items.size() - 1; ++i) {
                     play(items.get(i)).before(items.get(i + 1));
                 }
@@ -350,7 +408,9 @@ public final class AnimatorSet extends Animator {
     @SuppressWarnings("unchecked")
     @Override
     public void cancel() {
-        mTerminated = true;
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
         if (isStarted()) {
             ArrayList<AnimatorListener> tmpListeners = null;
             if (mListeners != null) {
@@ -360,19 +420,38 @@ public final class AnimatorSet extends Animator {
                     tmpListeners.get(i).onAnimationCancel(this);
                 }
             }
-            ArrayList<Animator> playingSet = new ArrayList<>(mPlayingSet);
+            ArrayList<Node> playingSet = new ArrayList<>(mPlayingSet);
             int setSize = playingSet.size();
             for (int i = 0; i < setSize; i++) {
-                playingSet.get(i).cancel();
+                playingSet.get(i).mAnimation.cancel();
             }
-            if (tmpListeners != null) {
-                int size = tmpListeners.size();
-                for (int i = 0; i < size; i++) {
-                    tmpListeners.get(i).onAnimationEnd(this);
-                }
-            }
-            mStarted = false;
+            mPlayingSet.clear();
+            endAnimation();
         }
+    }
+
+    // Force all the animations to end when the duration scale is 0.
+    private void forceToEnd() {
+        if (mEndCanBeCalled) {
+            end();
+            return;
+        }
+
+        // Note: we don't want to combine this case with the end() method below because in
+        // the case of developer calling end(), we still need to make sure end() is explicitly
+        // called on the child animators to maintain the old behavior.
+        if (mReversing) {
+            handleAnimationEvents(mLastEventId, 0, getTotalDuration());
+        } else {
+            long zeroScalePlayTime = getTotalDuration();
+            if (zeroScalePlayTime == DURATION_INFINITE) {
+                // Use a large number for the play time.
+                zeroScalePlayTime = Integer.MAX_VALUE;
+            }
+            handleAnimationEvents(mLastEventId, mEvents.size() - 1, zeroScalePlayTime);
+        }
+        mPlayingSet.clear();
+        endAnimation();
     }
 
     /**
@@ -383,49 +462,58 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public void end() {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
         if (mShouldIgnoreEndWithoutStart && !isStarted()) {
             return;
         }
-        mTerminated = true;
         if (isStarted()) {
-            endRemainingAnimations();
-        }
-        if (mListeners != null) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            for (int i = 0; i < tmpListeners.size(); i++) {
-                tmpListeners.get(i).onAnimationEnd(this);
-            }
-        }
-        mStarted = false;
-    }
-
-    /**
-     * Iterate the animations that haven't finished or haven't started, and end them.
-     */
-    private void endRemainingAnimations() {
-        ArrayList<Animator> remainingList = new ArrayList<Animator>(mNodes.size());
-        remainingList.addAll(mPlayingSet);
-
-        int index = 0;
-        while (index < remainingList.size()) {
-            Animator anim = remainingList.get(index);
-            anim.end();
-            index++;
-            Node node = mNodeMap.get(anim);
-            if (node.mChildNodes != null) {
-                int childSize = node.mChildNodes.size();
-                for (int i = 0; i < childSize; i++) {
-                    Node child = node.mChildNodes.get(i);
-                    if (child.mLatestParent != node) {
+            // Iterate the animations that haven't finished or haven't started, and end them.
+            if (mReversing) {
+                // Between start() and first frame, mLastEventId would be unset (i.e. -1)
+                mLastEventId = mLastEventId == -1 ? mEvents.size() : mLastEventId;
+                while (mLastEventId > 0) {
+                    mLastEventId = mLastEventId - 1;
+                    AnimationEvent event = mEvents.get(mLastEventId);
+                    Animator anim = event.mNode.mAnimation;
+                    if (mNodeMap.get(anim).mEnded) {
                         continue;
                     }
-                    remainingList.add(child.mAnimation);
+                    if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                        anim.reverse();
+                    } else if (event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED
+                            && anim.isStarted()) {
+                        // Make sure anim hasn't finished before calling end() so that we don't end
+                        // already ended animations, which will cause start and end callbacks to be
+                        // triggered again.
+                        anim.end();
+                    }
+                }
+            } else {
+                while (mLastEventId < mEvents.size() - 1) {
+                    // Avoid potential reentrant loop caused by child animators manipulating
+                    // AnimatorSet's lifecycle (i.e. not a recommended approach).
+                    mLastEventId = mLastEventId + 1;
+                    AnimationEvent event = mEvents.get(mLastEventId);
+                    Animator anim = event.mNode.mAnimation;
+                    if (mNodeMap.get(anim).mEnded) {
+                        continue;
+                    }
+                    if (event.mEvent == AnimationEvent.ANIMATION_START) {
+                        anim.start();
+                    } else if (event.mEvent == AnimationEvent.ANIMATION_END && anim.isStarted()) {
+                        // Make sure anim hasn't finished before calling end() so that we don't end
+                        // already ended animations, which will cause start and end callbacks to be
+                        // triggered again.
+                        anim.end();
+                    }
                 }
             }
+            mPlayingSet.clear();
         }
+        endAnimation();
     }
-
 
     /**
      * Returns true if any of the child animations of this AnimatorSet have been started and have
@@ -437,14 +525,10 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public boolean isRunning() {
-        int size = mNodes.size();
-        for (int i = 0; i < size; i++) {
-            Node node = mNodes.get(i);
-            if (node != mRootNode && node.mAnimation.isStarted()) {
-                return true;
-            }
+        if (mStartDelay == 0) {
+            return mStarted;
         }
-        return false;
+        return mLastFrameTime > 0;
     }
 
     @Override
@@ -482,9 +566,6 @@ public final class AnimatorSet extends Animator {
             return;
         }
         mStartDelay = startDelay;
-        if (mStartDelay > 0) {
-            mReversible = false;
-        }
         if (!mDependencyDirty) {
             // Dependency graph already constructed, update all the nodes' start/end time
             int size = mNodes.size();
@@ -562,40 +643,26 @@ public final class AnimatorSet extends Animator {
 
     @Override
     public void pause() {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
         boolean previouslyPaused = mPaused;
         super.pause();
         if (!previouslyPaused && mPaused) {
-            if (mDelayAnim.isStarted()) {
-                // If delay hasn't passed, pause the start delay animator.
-                mDelayAnim.pause();
-            } else {
-                int size = mNodes.size();
-                for (int i = 0; i < size; i++) {
-                    Node node = mNodes.get(i);
-                    if (node != mRootNode) {
-                        node.mAnimation.pause();
-                    }
-                }
-            }
+            mPauseTime = -1;
         }
     }
 
     @Override
     public void resume() {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
         boolean previouslyPaused = mPaused;
         super.resume();
         if (previouslyPaused && !mPaused) {
-            if (mDelayAnim.isStarted()) {
-                // If start delay hasn't passed, resume the previously paused start delay animator
-                mDelayAnim.resume();
-            } else {
-                int size = mNodes.size();
-                for (int i = 0; i < size; i++) {
-                    Node node = mNodes.get(i);
-                    if (node != mRootNode) {
-                        node.mAnimation.resume();
-                    }
-                }
+            if (mPauseTime >= 0) {
+                addAnimationCallback(0);
             }
         }
     }
@@ -606,13 +673,41 @@ public final class AnimatorSet extends Animator {
      * <p>Starting this <code>AnimatorSet</code> will, in turn, start the animations for which
      * it is responsible. The details of when exactly those animations are started depends on
      * the dependency relationships that have been set up between the animations.
+     *
+     * <b>Note:</b> Manipulating AnimatorSet's lifecycle in the child animators' listener callbacks
+     * will lead to undefined behaviors. Also, AnimatorSet will ignore any seeking in the child
+     * animators once {@link #start()} is called.
      */
     @SuppressWarnings("unchecked")
     @Override
     public void start() {
-        mTerminated = false;
+        start(false, true);
+    }
+
+    @Override
+    void startWithoutPulsing(boolean inReverse) {
+        start(inReverse, false);
+    }
+
+    private void initAnimation() {
+        if (mInterpolator != null) {
+            for (int i = 0; i < mNodes.size(); i++) {
+                Node node = mNodes.get(i);
+                node.mAnimation.setInterpolator(mInterpolator);
+            }
+        }
+        updateAnimatorsDuration();
+        createDependencyGraph();
+    }
+
+    private void start(boolean inReverse, boolean selfPulse) {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
         mStarted = true;
+        mSelfPulse = selfPulse;
         mPaused = false;
+        mPauseTime = -1;
 
         int size = mNodes.size();
         for (int i = 0; i < size; i++) {
@@ -621,26 +716,17 @@ public final class AnimatorSet extends Animator {
             node.mAnimation.setAllowRunningAsynchronously(false);
         }
 
-        if (mInterpolator != null) {
-            for (int i = 0; i < size; i++) {
-                Node node = mNodes.get(i);
-                node.mAnimation.setInterpolator(mInterpolator);
-            }
+        initAnimation();
+        if (inReverse && !canReverse()) {
+            throw new UnsupportedOperationException("Cannot reverse infinite AnimatorSet");
         }
 
-        updateAnimatorsDuration();
-        createDependencyGraph();
+        mReversing = inReverse;
 
         // Now that all dependencies are set up, start the animations that should be started.
-        boolean setIsEmpty = false;
-        if (mStartDelay > 0) {
-            start(mRootNode);
-        } else if (mNodes.size() > 1) {
-            // No delay, but there are other animators in the set
-            onChildAnimatorEnded(mDelayAnim);
-        } else {
-            // Set is empty, no delay, no other animation. Skip to end in this case
-            setIsEmpty = true;
+        boolean isEmptySet = isEmptySet(this);
+        if (!isEmptySet) {
+            startAnimation();
         }
 
         if (mListeners != null) {
@@ -648,13 +734,33 @@ public final class AnimatorSet extends Animator {
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this);
+                tmpListeners.get(i).onAnimationStart(this, inReverse);
             }
         }
-        if (setIsEmpty) {
-            // In the case of empty AnimatorSet, we will trigger the onAnimationEnd() right away.
-            onChildAnimatorEnded(mDelayAnim);
+        if (isEmptySet) {
+            // In the case of empty AnimatorSet, or 0 duration scale, we will trigger the
+            // onAnimationEnd() right away.
+            end();
         }
+    }
+
+    // Returns true if set is empty or contains nothing but animator sets with no start delay.
+    private static boolean isEmptySet(AnimatorSet set) {
+        if (set.getStartDelay() > 0) {
+            return false;
+        }
+        for (int i = 0; i < set.getChildAnimations().size(); i++) {
+            Animator anim = set.getChildAnimations().get(i);
+            if (!(anim instanceof AnimatorSet)) {
+                // Contains non-AnimatorSet, not empty.
+                return false;
+            } else {
+                if (!isEmptySet((AnimatorSet) anim)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void updateAnimatorsDuration() {
@@ -671,11 +777,541 @@ public final class AnimatorSet extends Animator {
         mDelayAnim.setDuration(mStartDelay);
     }
 
-    void start(final Node node) {
-        final Animator anim = node.mAnimation;
-        mPlayingSet.add(anim);
-        anim.addListener(mSetListener);
-        anim.start();
+    @Override
+    void skipToEndValue(boolean inReverse) {
+        if (!isInitialized()) {
+            throw new UnsupportedOperationException("Children must be initialized.");
+        }
+
+        // This makes sure the animation events are sorted an up to date.
+        initAnimation();
+
+        // Calling skip to the end in the sequence that they would be called in a forward/reverse
+        // run, such that the sequential animations modifying the same property would have
+        // the right value in the end.
+        if (inReverse) {
+            for (int i = mEvents.size() - 1; i >= 0; i--) {
+                if (mEvents.get(i).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                    mEvents.get(i).mNode.mAnimation.skipToEndValue(true);
+                }
+            }
+        } else {
+            for (int i = 0; i < mEvents.size(); i++) {
+                if (mEvents.get(i).mEvent == AnimationEvent.ANIMATION_END) {
+                    mEvents.get(i).mNode.mAnimation.skipToEndValue(false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Internal only.
+     *
+     * This method sets the animation values based on the play time. It also fast forward or
+     * backward all the child animations progress accordingly.
+     *
+     * This method is also responsible for calling
+     * {@link android.view.animation.Animation.AnimationListener#onAnimationRepeat(Animation)},
+     * as needed, based on the last play time and current play time.
+     */
+    @Override
+    void animateBasedOnPlayTime(long currentPlayTime, long lastPlayTime, boolean inReverse) {
+        if (currentPlayTime < 0 || lastPlayTime < 0) {
+            throw new UnsupportedOperationException("Error: Play time should never be negative.");
+        }
+        // TODO: take into account repeat counts and repeat callback when repeat is implemented.
+        // Clamp currentPlayTime and lastPlayTime
+
+        // TODO: Make this more efficient
+
+        // Convert the play times to the forward direction.
+        if (inReverse) {
+            if (getTotalDuration() == DURATION_INFINITE) {
+                throw new UnsupportedOperationException("Cannot reverse AnimatorSet with infinite"
+                        + " duration");
+            }
+            long duration = getTotalDuration() - mStartDelay;
+            currentPlayTime = Math.min(currentPlayTime, duration);
+            currentPlayTime = duration - currentPlayTime;
+            lastPlayTime = duration - lastPlayTime;
+            inReverse = false;
+        }
+        // Skip all values to start, and iterate mEvents to get animations to the right fraction.
+        skipToStartValue(false);
+
+        ArrayList<Node> unfinishedNodes = new ArrayList<>();
+        // Assumes forward playing from here on.
+        for (int i = 0; i < mEvents.size(); i++) {
+            AnimationEvent event = mEvents.get(i);
+            if (event.getTime() > currentPlayTime) {
+                break;
+            }
+
+            // This animation started prior to the current play time, and won't finish before the
+            // play time, add to the unfinished list.
+            if (event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                if (event.mNode.mEndTime == DURATION_INFINITE
+                        || event.mNode.mEndTime > currentPlayTime) {
+                    unfinishedNodes.add(event.mNode);
+                }
+            }
+            // For animations that do finish before the play time, end them in the sequence that
+            // they would in a normal run.
+            if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                // Skip to the end of the animation.
+                event.mNode.mAnimation.skipToEndValue(false);
+            }
+        }
+
+        // Seek unfinished animation to the right time.
+        for (int i = 0; i < unfinishedNodes.size(); i++) {
+            Node node = unfinishedNodes.get(i);
+            long playTime = getPlayTimeForNode(currentPlayTime, node, inReverse);
+            if (!inReverse) {
+                playTime -= node.mAnimation.getStartDelay();
+            }
+            node.mAnimation.animateBasedOnPlayTime(playTime, lastPlayTime, inReverse);
+        }
+    }
+
+    @Override
+    boolean isInitialized() {
+        if (mChildrenInitialized) {
+            return true;
+        }
+
+        boolean allInitialized = true;
+        for (int i = 0; i < mNodes.size(); i++) {
+            if (!mNodes.get(i).mAnimation.isInitialized()) {
+                allInitialized = false;
+                break;
+            }
+        }
+        mChildrenInitialized = allInitialized;
+        return mChildrenInitialized;
+    }
+
+    private void skipToStartValue(boolean inReverse) {
+        skipToEndValue(!inReverse);
+    }
+
+    /**
+     * Sets the position of the animation to the specified point in time. This time should
+     * be between 0 and the total duration of the animation, including any repetition. If
+     * the animation has not yet been started, then it will not advance forward after it is
+     * set to this time; it will simply set the time to this value and perform any appropriate
+     * actions based on that time. If the animation is already running, then setCurrentPlayTime()
+     * will set the current playing time to this value and continue playing from that point.
+     *
+     * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
+     *                 Unless the animation is reversing, the playtime is considered the time since
+     *                 the end of the start delay of the AnimatorSet in a forward playing direction.
+     *
+     */
+    public void setCurrentPlayTime(long playTime) {
+        if (mReversing && getTotalDuration() == DURATION_INFINITE) {
+            // Should never get here
+            throw new UnsupportedOperationException("Error: Cannot seek in reverse in an infinite"
+                    + " AnimatorSet");
+        }
+
+        if ((getTotalDuration() != DURATION_INFINITE && playTime > getTotalDuration() - mStartDelay)
+                || playTime < 0) {
+            throw new UnsupportedOperationException("Error: Play time should always be in between"
+                    + "0 and duration.");
+        }
+
+        initAnimation();
+
+        if (!isStarted()) {
+            if (mReversing) {
+                throw new UnsupportedOperationException("Error: Something went wrong. mReversing"
+                        + " should not be set when AnimatorSet is not started.");
+            }
+            if (!mSeekState.isActive()) {
+                findLatestEventIdForTime(0);
+                // Set all the values to start values.
+                initChildren();
+                skipToStartValue(mReversing);
+                mSeekState.setPlayTime(0, mReversing);
+            }
+            animateBasedOnPlayTime(playTime, 0, mReversing);
+            mSeekState.setPlayTime(playTime, mReversing);
+        } else {
+            // If the animation is running, just set the seek time and wait until the next frame
+            // (i.e. doAnimationFrame(...)) to advance the animation.
+            mSeekState.setPlayTime(playTime, mReversing);
+        }
+    }
+
+    /**
+     * Returns the milliseconds elapsed since the start of the animation.
+     *
+     * <p>For ongoing animations, this method returns the current progress of the animation in
+     * terms of play time. For an animation that has not yet been started: if the animation has been
+     * seeked to a certain time via {@link #setCurrentPlayTime(long)}, the seeked play time will
+     * be returned; otherwise, this method will return 0.
+     *
+     * @return the current position in time of the animation in milliseconds
+     */
+    public long getCurrentPlayTime() {
+        if (mSeekState.isActive()) {
+            return mSeekState.getPlayTime();
+        }
+        if (mLastFrameTime == -1) {
+            // Not yet started or during start delay
+            return 0;
+        }
+        float durationScale = ValueAnimator.getDurationScale();
+        durationScale = durationScale == 0 ? 1 : durationScale;
+        if (mReversing) {
+            return (long) ((mLastFrameTime - mFirstFrame) / durationScale);
+        } else {
+            return (long) ((mLastFrameTime - mFirstFrame - mStartDelay) / durationScale);
+        }
+    }
+
+    private void initChildren() {
+        if (!isInitialized()) {
+            mChildrenInitialized = true;
+            // Forcefully initialize all children based on their end time, so that if the start
+            // value of a child is dependent on a previous animation, the animation will be
+            // initialized after the the previous animations have been advanced to the end.
+            skipToEndValue(false);
+        }
+    }
+
+    /**
+     * @param frameTime The frame start time, in the {@link SystemClock#uptimeMillis()} time
+     *                  base.
+     * @return
+     * @hide
+     */
+    @Override
+    public boolean doAnimationFrame(long frameTime) {
+        float durationScale = ValueAnimator.getDurationScale();
+        if (durationScale == 0f) {
+            // Duration scale is 0, end the animation right away.
+            forceToEnd();
+            return true;
+        }
+
+        // After the first frame comes in, we need to wait for start delay to pass before updating
+        // any animation values.
+        if (mFirstFrame < 0) {
+            mFirstFrame = frameTime;
+        }
+
+        // Handle pause/resume
+        if (mPaused) {
+            // Note: Child animations don't receive pause events. Since it's never a contract that
+            // the child animators will be paused when set is paused, this is unlikely to be an
+            // issue.
+            mPauseTime = frameTime;
+            removeAnimationCallback();
+            return false;
+        } else if (mPauseTime > 0) {
+                // Offset by the duration that the animation was paused
+            mFirstFrame += (frameTime - mPauseTime);
+            mPauseTime = -1;
+        }
+
+        // Continue at seeked position
+        if (mSeekState.isActive()) {
+            mSeekState.updateSeekDirection(mReversing);
+            if (mReversing) {
+                mFirstFrame = (long) (frameTime - mSeekState.getPlayTime() * durationScale);
+            } else {
+                mFirstFrame = (long) (frameTime - (mSeekState.getPlayTime() + mStartDelay)
+                        * durationScale);
+            }
+            mSeekState.reset();
+        }
+
+        if (!mReversing && frameTime < mFirstFrame + mStartDelay * durationScale) {
+            // Still during start delay in a forward playing case.
+            return false;
+        }
+
+        // From here on, we always use unscaled play time. Note this unscaled playtime includes
+        // the start delay.
+        long unscaledPlayTime = (long) ((frameTime - mFirstFrame) / durationScale);
+        mLastFrameTime = frameTime;
+
+        // 1. Pulse the animators that will start or end in this frame
+        // 2. Pulse the animators that will finish in a later frame
+        int latestId = findLatestEventIdForTime(unscaledPlayTime);
+        int startId = mLastEventId;
+
+        handleAnimationEvents(startId, latestId, unscaledPlayTime);
+
+        mLastEventId = latestId;
+
+        // Pump a frame to the on-going animators
+        for (int i = 0; i < mPlayingSet.size(); i++) {
+            Node node = mPlayingSet.get(i);
+            if (!node.mEnded) {
+                pulseFrame(node, getPlayTimeForNode(unscaledPlayTime, node));
+            }
+        }
+
+        // Remove all the finished anims
+        for (int i = mPlayingSet.size() - 1; i >= 0; i--) {
+            if (mPlayingSet.get(i).mEnded) {
+                mPlayingSet.remove(i);
+            }
+        }
+
+        boolean finished = false;
+        if (mReversing) {
+            if (mPlayingSet.size() == 1 && mPlayingSet.get(0) == mRootNode) {
+                // The only animation that is running is the delay animation.
+                finished = true;
+            } else if (mPlayingSet.isEmpty() && mLastEventId < 3) {
+                // The only remaining animation is the delay animation
+                finished = true;
+            }
+        } else {
+            finished = mPlayingSet.isEmpty() && mLastEventId == mEvents.size() - 1;
+        }
+
+        if (finished) {
+            endAnimation();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void commitAnimationFrame(long frameTime) {
+        // No op.
+    }
+
+    @Override
+    boolean pulseAnimationFrame(long frameTime) {
+        return doAnimationFrame(frameTime);
+    }
+
+    /**
+     * When playing forward, we call start() at the animation's scheduled start time, and make sure
+     * to pump a frame at the animation's scheduled end time.
+     *
+     * When playing in reverse, we should reverse the animation when we hit animation's end event,
+     * and expect the animation to end at the its delay ended event, rather than start event.
+     */
+    private void handleAnimationEvents(int startId, int latestId, long playTime) {
+        if (mReversing) {
+            startId = startId == -1 ? mEvents.size() : startId;
+            for (int i = startId - 1; i >= latestId; i--) {
+                AnimationEvent event = mEvents.get(i);
+                Node node = event.mNode;
+                if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                    if (node.mAnimation.isStarted()) {
+                        // If the animation has already been started before its due time (i.e.
+                        // the child animator is being manipulated outside of the AnimatorSet), we
+                        // need to cancel the animation to reset the internal state (e.g. frame
+                        // time tracking) and remove the self pulsing callbacks
+                        node.mAnimation.cancel();
+                    }
+                    node.mEnded = false;
+                    mPlayingSet.add(event.mNode);
+                    node.mAnimation.startWithoutPulsing(true);
+                    pulseFrame(node, 0);
+                } else if (event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED && !node.mEnded) {
+                    // end event:
+                    pulseFrame(node, getPlayTimeForNode(playTime, node));
+                }
+            }
+        } else {
+            for (int i = startId + 1; i <= latestId; i++) {
+                AnimationEvent event = mEvents.get(i);
+                Node node = event.mNode;
+                if (event.mEvent == AnimationEvent.ANIMATION_START) {
+                    mPlayingSet.add(event.mNode);
+                    if (node.mAnimation.isStarted()) {
+                        // If the animation has already been started before its due time (i.e.
+                        // the child animator is being manipulated outside of the AnimatorSet), we
+                        // need to cancel the animation to reset the internal state (e.g. frame
+                        // time tracking) and remove the self pulsing callbacks
+                        node.mAnimation.cancel();
+                    }
+                    node.mEnded = false;
+                    node.mAnimation.startWithoutPulsing(false);
+                    pulseFrame(node, 0);
+                } else if (event.mEvent == AnimationEvent.ANIMATION_END && !node.mEnded) {
+                    // start event:
+                    pulseFrame(node, getPlayTimeForNode(playTime, node));
+                }
+            }
+        }
+    }
+
+    /**
+     * This method pulses frames into child animations. It scales the input animation play time
+     * with the duration scale and pass that to the child animation via pulseAnimationFrame(long).
+     *
+     * @param node child animator node
+     * @param animPlayTime unscaled play time (including start delay) for the child animator
+     */
+    private void pulseFrame(Node node, long animPlayTime) {
+        if (!node.mEnded) {
+            float durationScale = ValueAnimator.getDurationScale();
+            durationScale = durationScale == 0  ? 1 : durationScale;
+            node.mEnded = node.mAnimation.pulseAnimationFrame(
+                    (long) (animPlayTime * durationScale));
+        }
+    }
+
+    private long getPlayTimeForNode(long overallPlayTime, Node node) {
+        return getPlayTimeForNode(overallPlayTime, node, mReversing);
+    }
+
+    private long getPlayTimeForNode(long overallPlayTime, Node node, boolean inReverse) {
+        if (inReverse) {
+            overallPlayTime = getTotalDuration() - overallPlayTime;
+            return node.mEndTime - overallPlayTime;
+        } else {
+            return overallPlayTime - node.mStartTime;
+        }
+    }
+
+    private void startAnimation() {
+        addDummyListener();
+
+        // Register animation callback
+        addAnimationCallback(0);
+
+        if (mSeekState.getPlayTimeNormalized() == 0 && mReversing) {
+            // Maintain old behavior, if seeked to 0 then call reverse, we'll treat the case
+            // the same as no seeking at all.
+            mSeekState.reset();
+        }
+        // Set the child animators to the right end:
+        if (mShouldResetValuesAtStart) {
+            if (isInitialized()) {
+                skipToEndValue(!mReversing);
+            } else if (mReversing) {
+                // Reversing but haven't initialized all the children yet.
+                initChildren();
+                skipToEndValue(!mReversing);
+            } else {
+                // If not all children are initialized and play direction is forward
+                for (int i = mEvents.size() - 1; i >= 0; i--) {
+                    if (mEvents.get(i).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                        Animator anim = mEvents.get(i).mNode.mAnimation;
+                        // Only reset the animations that have been initialized to start value,
+                        // so that if they are defined without a start value, they will get the
+                        // values set at the right time (i.e. the next animation run)
+                        if (anim.isInitialized()) {
+                            anim.skipToEndValue(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (mReversing || mStartDelay == 0 || mSeekState.isActive()) {
+            long playTime;
+            // If no delay, we need to call start on the first animations to be consistent with old
+            // behavior.
+            if (mSeekState.isActive()) {
+                mSeekState.updateSeekDirection(mReversing);
+                playTime = mSeekState.getPlayTime();
+            } else {
+                playTime = 0;
+            }
+            int toId = findLatestEventIdForTime(playTime);
+            handleAnimationEvents(-1, toId, playTime);
+            for (int i = mPlayingSet.size() - 1; i >= 0; i--) {
+                if (mPlayingSet.get(i).mEnded) {
+                    mPlayingSet.remove(i);
+                }
+            }
+            mLastEventId = toId;
+        }
+    }
+
+    // This is to work around the issue in b/34736819, as the old behavior in AnimatorSet had
+    // masked a real bug in play movies. TODO: remove this and below once the root cause is fixed.
+    private void addDummyListener() {
+        for (int i = 1; i < mNodes.size(); i++) {
+            mNodes.get(i).mAnimation.addListener(mDummyListener);
+        }
+    }
+
+    private void removeDummyListener() {
+        for (int i = 1; i < mNodes.size(); i++) {
+            mNodes.get(i).mAnimation.removeListener(mDummyListener);
+        }
+    }
+
+    private int findLatestEventIdForTime(long currentPlayTime) {
+        int size = mEvents.size();
+        int latestId = mLastEventId;
+        // Call start on the first animations now to be consistent with the old behavior
+        if (mReversing) {
+            currentPlayTime = getTotalDuration() - currentPlayTime;
+            mLastEventId = mLastEventId == -1 ? size : mLastEventId;
+            for (int j = mLastEventId - 1; j >= 0; j--) {
+                AnimationEvent event = mEvents.get(j);
+                if (event.getTime() >= currentPlayTime) {
+                    latestId = j;
+                }
+            }
+        } else {
+            for (int i = mLastEventId + 1; i < size; i++) {
+                AnimationEvent event = mEvents.get(i);
+                if (event.getTime() <= currentPlayTime) {
+                    latestId = i;
+                }
+            }
+        }
+        return latestId;
+    }
+
+    private void endAnimation() {
+        mStarted = false;
+        mLastFrameTime = -1;
+        mFirstFrame = -1;
+        mLastEventId = -1;
+        mPaused = false;
+        mPauseTime = -1;
+        mSeekState.reset();
+        mPlayingSet.clear();
+
+        // No longer receive callbacks
+        removeAnimationCallback();
+        // Call end listener
+        if (mListeners != null) {
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationEnd(this, mReversing);
+            }
+        }
+        removeDummyListener();
+        mSelfPulse = true;
+        mReversing = false;
+    }
+
+    private void removeAnimationCallback() {
+        if (!mSelfPulse) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.removeCallback(this);
+    }
+
+    private void addAnimationCallback(long delay) {
+        if (!mSelfPulse) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.addAnimationFrameCallback(this, delay);
     }
 
     @Override
@@ -690,38 +1326,48 @@ public final class AnimatorSet extends Animator {
          * and will populate any appropriate lists, when it is started.
          */
         final int nodeCount = mNodes.size();
-        anim.mTerminated = false;
         anim.mStarted = false;
-        anim.mPlayingSet = new ArrayList<Animator>();
+        anim.mLastFrameTime = -1;
+        anim.mFirstFrame = -1;
+        anim.mLastEventId = -1;
+        anim.mPaused = false;
+        anim.mPauseTime = -1;
+        anim.mSeekState = new SeekState();
+        anim.mSelfPulse = true;
+        anim.mPlayingSet = new ArrayList<Node>();
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
-        anim.mReversible = mReversible;
-        anim.mSetListener = new AnimatorSetListener(anim);
+        anim.mEvents = new ArrayList<AnimationEvent>();
+        anim.mDummyListener = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (anim.mNodeMap.get(animation) == null) {
+                    throw new AndroidRuntimeException("Error: animation ended is not in the node"
+                            + " map");
+                }
+                anim.mNodeMap.get(animation).mEnded = true;
+
+            }
+        };
+        anim.mReversing = false;
+        anim.mDependencyDirty = true;
 
         // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
         // We need to track the old/new nodes in order to reconstruct the dependencies in the clone.
 
+        HashMap<Node, Node> clonesMap = new HashMap<>(nodeCount);
         for (int n = 0; n < nodeCount; n++) {
             final Node node = mNodes.get(n);
             Node nodeClone = node.clone();
-            node.mTmpClone = nodeClone;
+            // Remove the old internal listener from the cloned child
+            nodeClone.mAnimation.removeListener(mDummyListener);
+            clonesMap.put(node, nodeClone);
             anim.mNodes.add(nodeClone);
             anim.mNodeMap.put(nodeClone.mAnimation, nodeClone);
-
-            // clear out any listeners that were set up by the AnimatorSet
-            final ArrayList<AnimatorListener> cloneListeners = nodeClone.mAnimation.getListeners();
-            if (cloneListeners != null) {
-                for (int i = cloneListeners.size() - 1; i >= 0; i--) {
-                    final AnimatorListener listener = cloneListeners.get(i);
-                    if (listener instanceof AnimatorSetListener) {
-                        cloneListeners.remove(i);
-                    }
-                }
-            }
         }
 
-        anim.mRootNode = mRootNode.mTmpClone;
+        anim.mRootNode = clonesMap.get(mRootNode);
         anim.mDelayAnim = (ValueAnimator) anim.mRootNode.mAnimation;
 
         // Now that we've cloned all of the nodes, we're ready to walk through their
@@ -729,111 +1375,25 @@ public final class AnimatorSet extends Animator {
         for (int i = 0; i < nodeCount; i++) {
             Node node = mNodes.get(i);
             // Update dependencies for node's clone
-            node.mTmpClone.mLatestParent = node.mLatestParent == null ?
-                    null : node.mLatestParent.mTmpClone;
+            Node nodeClone = clonesMap.get(node);
+            nodeClone.mLatestParent = node.mLatestParent == null
+                    ? null : clonesMap.get(node.mLatestParent);
             int size = node.mChildNodes == null ? 0 : node.mChildNodes.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mChildNodes.set(j, node.mChildNodes.get(j).mTmpClone);
+                nodeClone.mChildNodes.set(j, clonesMap.get(node.mChildNodes.get(j)));
             }
             size = node.mSiblings == null ? 0 : node.mSiblings.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mSiblings.set(j, node.mSiblings.get(j).mTmpClone);
+                nodeClone.mSiblings.set(j, clonesMap.get(node.mSiblings.get(j)));
             }
             size = node.mParents == null ? 0 : node.mParents.size();
             for (int j = 0; j < size; j++) {
-                node.mTmpClone.mParents.set(j, node.mParents.get(j).mTmpClone);
+                nodeClone.mParents.set(j, clonesMap.get(node.mParents.get(j)));
             }
-        }
-
-        for (int n = 0; n < nodeCount; n++) {
-            mNodes.get(n).mTmpClone = null;
         }
         return anim;
     }
 
-
-    private static class AnimatorSetListener implements AnimatorListener {
-
-        private AnimatorSet mAnimatorSet;
-
-        AnimatorSetListener(AnimatorSet animatorSet) {
-            mAnimatorSet = animatorSet;
-        }
-
-        public void onAnimationCancel(Animator animation) {
-
-            if (!mAnimatorSet.mTerminated) {
-                // Listeners are already notified of the AnimatorSet canceling in cancel().
-                // The logic below only kicks in when animations end normally
-                if (mAnimatorSet.mPlayingSet.size() == 0) {
-                    ArrayList<AnimatorListener> listeners = mAnimatorSet.mListeners;
-                    if (listeners != null) {
-                        int numListeners = listeners.size();
-                        for (int i = 0; i < numListeners; ++i) {
-                            listeners.get(i).onAnimationCancel(mAnimatorSet);
-                        }
-                    }
-                }
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        public void onAnimationEnd(Animator animation) {
-            animation.removeListener(this);
-            mAnimatorSet.mPlayingSet.remove(animation);
-            mAnimatorSet.onChildAnimatorEnded(animation);
-        }
-
-        // Nothing to do
-        public void onAnimationRepeat(Animator animation) {
-        }
-
-        // Nothing to do
-        public void onAnimationStart(Animator animation) {
-        }
-
-    }
-
-    private void onChildAnimatorEnded(Animator animation) {
-        Node animNode = mNodeMap.get(animation);
-        animNode.mEnded = true;
-
-        if (!mTerminated) {
-            List<Node> children = animNode.mChildNodes;
-            // Start children animations, if any.
-            int childrenSize = children == null ? 0 : children.size();
-            for (int i = 0; i < childrenSize; i++) {
-                if (children.get(i).mLatestParent == animNode) {
-                    start(children.get(i));
-                }
-            }
-            // Listeners are already notified of the AnimatorSet ending in cancel() or
-            // end(); the logic below only kicks in when animations end normally
-            boolean allDone = true;
-            // Traverse the tree and find if there's any unfinished node
-            int size = mNodes.size();
-            for (int i = 0; i < size; i++) {
-                if (!mNodes.get(i).mEnded) {
-                    allDone = false;
-                    break;
-                }
-            }
-            if (allDone) {
-                // If this was the last child animation to end, then notify listeners that this
-                // AnimatorSet has ended
-                if (mListeners != null) {
-                    ArrayList<AnimatorListener> tmpListeners =
-                            (ArrayList<AnimatorListener>) mListeners.clone();
-                    int numListeners = tmpListeners.size();
-                    for (int i = 0; i < numListeners; ++i) {
-                        tmpListeners.get(i).onAnimationEnd(this);
-                    }
-                }
-                mStarted = false;
-                mPaused = false;
-            }
-        }
-    }
 
     /**
      * AnimatorSet is only reversible when the set contains no sequential animation, and no child
@@ -842,32 +1402,21 @@ public final class AnimatorSet extends Animator {
      */
     @Override
     public boolean canReverse() {
-        if (!mReversible)  {
-            return false;
-        }
-        // Loop to make sure all the Nodes can reverse.
-        int size = mNodes.size();
-        for (int i = 0; i < size; i++) {
-            Node node = mNodes.get(i);
-            if (!node.mAnimation.canReverse() || node.mAnimation.getStartDelay() > 0) {
-                return false;
-            }
-        }
-        return true;
+        return getTotalDuration() != DURATION_INFINITE;
     }
 
     /**
-     * @hide
+     * Plays the AnimatorSet in reverse. If the animation has been seeked to a specific play time
+     * using {@link #setCurrentPlayTime(long)}, it will play backwards from the point seeked when
+     * reverse was called. Otherwise, then it will start from the end and play backwards. This
+     * behavior is only set for the current animation; future playing of the animation will use the
+     * default behavior of playing forward.
+     * <p>
+     * Note: reverse is not supported for infinite AnimatorSet.
      */
     @Override
     public void reverse() {
-        if (canReverse()) {
-            int size = mNodes.size();
-            for (int i = 0; i < size; i++) {
-                Node node = mNodes.get(i);
-                node.mAnimation.reverse();
-            }
-        }
+        start(true, true);
     }
 
     @Override
@@ -974,18 +1523,124 @@ public final class AnimatorSet extends Animator {
         mRootNode.mEndTime = mDelayAnim.getDuration();
         updatePlayTime(mRootNode, visited);
 
-        long maxEndTime = 0;
-        for (int i = 0; i < size; i++) {
+        sortAnimationEvents();
+        mTotalDuration = mEvents.get(mEvents.size() - 1).getTime();
+    }
+
+    private void sortAnimationEvents() {
+        // Sort the list of events in ascending order of their time
+        // Create the list including the delay animation.
+        mEvents.clear();
+        for (int i = 1; i < mNodes.size(); i++) {
             Node node = mNodes.get(i);
-            node.mTotalDuration = node.mAnimation.getTotalDuration();
-            if (node.mEndTime == DURATION_INFINITE) {
-                maxEndTime = DURATION_INFINITE;
-                break;
+            mEvents.add(new AnimationEvent(node, AnimationEvent.ANIMATION_START));
+            mEvents.add(new AnimationEvent(node, AnimationEvent.ANIMATION_DELAY_ENDED));
+            mEvents.add(new AnimationEvent(node, AnimationEvent.ANIMATION_END));
+        }
+        mEvents.sort(new Comparator<AnimationEvent>() {
+            @Override
+            public int compare(AnimationEvent e1, AnimationEvent e2) {
+                long t1 = e1.getTime();
+                long t2 = e2.getTime();
+                if (t1 == t2) {
+                    // For events that happen at the same time, we need them to be in the sequence
+                    // (end, start, start delay ended)
+                    if (e2.mEvent + e1.mEvent == AnimationEvent.ANIMATION_START
+                            + AnimationEvent.ANIMATION_DELAY_ENDED) {
+                        // Ensure start delay happens after start
+                        return e1.mEvent - e2.mEvent;
+                    } else {
+                        return e2.mEvent - e1.mEvent;
+                    }
+                }
+                if (t2 == DURATION_INFINITE) {
+                    return -1;
+                }
+                if (t1 == DURATION_INFINITE) {
+                    return 1;
+                }
+                // When neither event happens at INFINITE time:
+                return (int) (t1 - t2);
+            }
+        });
+
+        int eventSize = mEvents.size();
+        // For the same animation, start event has to happen before end.
+        for (int i = 0; i < eventSize;) {
+            AnimationEvent event = mEvents.get(i);
+            if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                boolean needToSwapStart;
+                if (event.mNode.mStartTime == event.mNode.mEndTime) {
+                    needToSwapStart = true;
+                } else if (event.mNode.mEndTime == event.mNode.mStartTime
+                        + event.mNode.mAnimation.getStartDelay()) {
+                    // Swapping start delay
+                    needToSwapStart = false;
+                } else {
+                    i++;
+                    continue;
+                }
+
+                int startEventId = eventSize;
+                int startDelayEndId = eventSize;
+                for (int j = i + 1; j < eventSize; j++) {
+                    if (startEventId < eventSize && startDelayEndId < eventSize) {
+                        break;
+                    }
+                    if (mEvents.get(j).mNode == event.mNode) {
+                        if (mEvents.get(j).mEvent == AnimationEvent.ANIMATION_START) {
+                            // Found start event
+                            startEventId = j;
+                        } else if (mEvents.get(j).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                            startDelayEndId = j;
+                        }
+                    }
+
+                }
+                if (needToSwapStart && startEventId == mEvents.size()) {
+                    throw new UnsupportedOperationException("Something went wrong, no start is"
+                            + "found after stop for an animation that has the same start and end"
+                            + "time.");
+
+                }
+                if (startDelayEndId == mEvents.size()) {
+                    throw new UnsupportedOperationException("Something went wrong, no start"
+                            + "delay end is found after stop for an animation");
+
+                }
+
+                // We need to make sure start is inserted before start delay ended event,
+                // because otherwise inserting start delay ended events first would change
+                // the start event index.
+                if (needToSwapStart) {
+                    AnimationEvent startEvent = mEvents.remove(startEventId);
+                    mEvents.add(i, startEvent);
+                    i++;
+                }
+
+                AnimationEvent startDelayEndEvent = mEvents.remove(startDelayEndId);
+                mEvents.add(i, startDelayEndEvent);
+                i += 2;
             } else {
-                maxEndTime = node.mEndTime > maxEndTime ? node.mEndTime : maxEndTime;
+                i++;
             }
         }
-        mTotalDuration = maxEndTime;
+
+        if (!mEvents.isEmpty() && mEvents.get(0).mEvent != AnimationEvent.ANIMATION_START) {
+            throw new UnsupportedOperationException(
+                    "Sorting went bad, the start event should always be at index 0");
+        }
+
+        // Add AnimatorSet's start delay node to the beginning
+        mEvents.add(0, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_START));
+        mEvents.add(1, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_DELAY_ENDED));
+        mEvents.add(2, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_END));
+
+        if (mEvents.get(mEvents.size() - 1).mEvent == AnimationEvent.ANIMATION_START
+                || mEvents.get(mEvents.size() - 1).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+            throw new UnsupportedOperationException(
+                    "Something went wrong, the last event is not an end event");
+        }
     }
 
     /**
@@ -1108,11 +1763,6 @@ public final class AnimatorSet extends Animator {
         ArrayList<Node> mChildNodes = null;
 
         /**
-         * Temporary field to hold the clone in AnimatorSet#clone. Cleaned after clone is complete
-         */
-        private Node mTmpClone = null;
-
-        /**
          * Flag indicating whether the animation in this node is finished. This flag
          * is used by AnimatorSet to check, as each animation ends, whether all child animations
          * are mEnded and it's time to send out an end event for the entire AnimatorSet.
@@ -1216,6 +1866,97 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
+     * This class is a wrapper around a node and an event for the animation corresponding to the
+     * node. The 3 types of events represent the start of an animation, the end of a start delay of
+     * an animation, and the end of an animation. When playing forward (i.e. in the non-reverse
+     * direction), start event marks when start() should be called, and end event corresponds to
+     * when the animation should finish. When playing in reverse, start delay will not be a part
+     * of the animation. Therefore, reverse() is called at the end event, and animation should end
+     * at the delay ended event.
+     */
+    private static class AnimationEvent {
+        static final int ANIMATION_START = 0;
+        static final int ANIMATION_DELAY_ENDED = 1;
+        static final int ANIMATION_END = 2;
+        final Node mNode;
+        final int mEvent;
+
+        AnimationEvent(Node node, int event) {
+            mNode = node;
+            mEvent = event;
+        }
+
+        long getTime() {
+            if (mEvent == ANIMATION_START) {
+                return mNode.mStartTime;
+            } else if (mEvent == ANIMATION_DELAY_ENDED) {
+                return mNode.mStartTime == DURATION_INFINITE
+                        ? DURATION_INFINITE : mNode.mStartTime + mNode.mAnimation.getStartDelay();
+            } else {
+                return mNode.mEndTime;
+            }
+        }
+
+        public String toString() {
+            String eventStr = mEvent == ANIMATION_START ? "start" : (
+                    mEvent == ANIMATION_DELAY_ENDED ? "delay ended" : "end");
+            return eventStr + " " + mNode.mAnimation.toString();
+        }
+    }
+
+    private class SeekState {
+        private long mPlayTime = -1;
+        private boolean mSeekingInReverse = false;
+        void reset() {
+            mPlayTime = -1;
+            mSeekingInReverse = false;
+        }
+
+        void setPlayTime(long playTime, boolean inReverse) {
+            // TODO: This can be simplified.
+
+            // Clamp the play time
+            if (getTotalDuration() != DURATION_INFINITE) {
+                mPlayTime = Math.min(playTime, getTotalDuration() - mStartDelay);
+            }
+            mPlayTime = Math.max(0, mPlayTime);
+            mSeekingInReverse = inReverse;
+        }
+
+        void updateSeekDirection(boolean inReverse) {
+            // Change seek direction without changing the overall fraction
+            if (inReverse && getTotalDuration() == DURATION_INFINITE) {
+                throw new UnsupportedOperationException("Error: Cannot reverse infinite animator"
+                        + " set");
+            }
+            if (mPlayTime >= 0) {
+                if (inReverse != mSeekingInReverse) {
+                    mPlayTime = getTotalDuration() - mStartDelay - mPlayTime;
+                    mSeekingInReverse = inReverse;
+                }
+            }
+        }
+
+        long getPlayTime() {
+            return mPlayTime;
+        }
+
+        /**
+         * Returns the playtime assuming the animation is forward playing
+         */
+        long getPlayTimeNormalized() {
+            if (mReversing) {
+                return getTotalDuration() - mStartDelay - mPlayTime;
+            }
+            return mPlayTime;
+        }
+
+        boolean isActive() {
+            return mPlayTime != -1;
+        }
+    }
+
+    /**
      * The <code>Builder</code> object is a utility class to facilitate adding animations to a
      * <code>AnimatorSet</code> along with the relationships between the various animations. The
      * intention of the <code>Builder</code> methods, along with the {@link
@@ -1309,7 +2050,6 @@ public final class AnimatorSet extends Animator {
          * {@link AnimatorSet#play(Animator)} method ends.
          */
         public Builder before(Animator anim) {
-            mReversible = false;
             Node node = getNodeForAnimation(anim);
             mCurrentNode.addChild(node);
             return this;
@@ -1324,7 +2064,6 @@ public final class AnimatorSet extends Animator {
          * {@link AnimatorSet#play(Animator)} method to play.
          */
         public Builder after(Animator anim) {
-            mReversible = false;
             Node node = getNodeForAnimation(anim);
             mCurrentNode.addParent(node);
             return this;

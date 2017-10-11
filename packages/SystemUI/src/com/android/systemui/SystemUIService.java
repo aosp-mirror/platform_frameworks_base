@@ -18,7 +18,9 @@ package com.android.systemui;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemProperties;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -29,6 +31,11 @@ public class SystemUIService extends Service {
     public void onCreate() {
         super.onCreate();
         ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+
+        // For debugging RescueParty
+        if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.crash_sysui", false)) {
+            throw new RuntimeException();
+        }
     }
 
     @Override

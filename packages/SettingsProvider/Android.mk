@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := $(call all-subdir-java-files) \
+LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     src/com/android/providers/settings/EventLogTags.logtags
 
 LOCAL_JAVA_LIBRARIES := telephony-common ims-common

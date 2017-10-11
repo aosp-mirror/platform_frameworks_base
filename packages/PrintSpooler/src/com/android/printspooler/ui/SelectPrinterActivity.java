@@ -16,6 +16,8 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ComponentName;
@@ -23,13 +25,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.Loader;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.print.PrintServicesLoader;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.printservice.PrintService;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -56,6 +62,8 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.printspooler.R;
 
 import java.util.ArrayList;
@@ -73,12 +81,21 @@ public final class SelectPrinterActivity extends Activity implements
     private static final int LOADER_ID_PRINT_REGISTRY_INT = 2;
     private static final int LOADER_ID_ENABLED_PRINT_SERVICES = 3;
 
+    private static final int INFO_INTENT_REQUEST_CODE = 1;
+
     public static final String INTENT_EXTRA_PRINTER = "INTENT_EXTRA_PRINTER";
 
     private static final String EXTRA_PRINTER = "EXTRA_PRINTER";
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
     private static final String KEY_NOT_FIRST_CREATE = "KEY_NOT_FIRST_CREATE";
+    private static final String KEY_DID_SEARCH = "DID_SEARCH";
+    private static final String KEY_PRINTER_FOR_INFO_INTENT = "KEY_PRINTER_FOR_INFO_INTENT";
+
+    // Constants for MetricsLogger.count and MetricsLogger.histo
+    private static final String PRINTERS_LISTED_COUNT = "printers_listed";
+    private static final String PRINTERS_ICON_COUNT = "printers_icon";
+    private static final String PRINTERS_INFO_COUNT = "printers_info";
 
     /** The currently enabled print services by their ComponentName */
     private ArrayMap<ComponentName, PrintServiceInfo> mEnabledPrintServices;
@@ -89,7 +106,16 @@ public final class SelectPrinterActivity extends Activity implements
 
     private AnnounceFilterResult mAnnounceFilterResult;
 
+    private boolean mDidSearch;
+
+    /**
+     * Printer we are currently in the info intent for. This is only non-null while this activity
+     * started an info intent that has not yet returned
+     */
+    private @Nullable PrinterInfo mPrinterForInfoIntent;
+
     private void startAddPrinterActivity() {
+        MetricsLogger.action(this, MetricsEvent.ACTION_PRINT_SERVICE_ADD);
         startActivity(new Intent(this, AddPrinterActivity.class));
     }
 
@@ -100,13 +126,15 @@ public final class SelectPrinterActivity extends Activity implements
 
         setContentView(R.layout.select_printer_activity);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         mEnabledPrintServices = new ArrayMap<>();
 
         mPrinterRegistry = new PrinterRegistry(this, null, LOADER_ID_PRINT_REGISTRY,
                 LOADER_ID_PRINT_REGISTRY_INT);
 
         // Hook up the list view.
-        mListView = (ListView) findViewById(android.R.id.list);
+        mListView = findViewById(android.R.id.list);
         final DestinationAdapter adapter = new DestinationAdapter();
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -185,12 +213,19 @@ public final class SelectPrinterActivity extends Activity implements
                 }
             }
         }
+
+        if (savedInstanceState != null) {
+            mDidSearch = savedInstanceState.getBoolean(KEY_DID_SEARCH);
+            mPrinterForInfoIntent = savedInstanceState.getParcelable(KEY_PRINTER_FOR_INFO_INTENT);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(KEY_NOT_FIRST_CREATE, true);
+        outState.putBoolean(KEY_DID_SEARCH, mDidSearch);
+        outState.putParcelable(KEY_PRINTER_FOR_INFO_INTENT, mPrinterForInfoIntent);
     }
 
     @Override
@@ -232,6 +267,16 @@ public final class SelectPrinterActivity extends Activity implements
         });
 
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -305,6 +350,55 @@ public final class SelectPrinterActivity extends Activity implements
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        if (isFinishing()) {
+            DestinationAdapter adapter = (DestinationAdapter) mListView.getAdapter();
+            List<PrinterInfo> printers = adapter.getPrinters();
+            int numPrinters = adapter.getPrinters().size();
+
+            MetricsLogger.action(this, MetricsEvent.PRINT_ALL_PRINTERS, numPrinters);
+            MetricsLogger.count(this, PRINTERS_LISTED_COUNT, numPrinters);
+
+            int numInfoPrinters = 0;
+            int numIconPrinters = 0;
+            for (int i = 0; i < numPrinters; i++) {
+                PrinterInfo printer = printers.get(i);
+
+                if (printer.getInfoIntent() != null) {
+                    numInfoPrinters++;
+                }
+
+                if (printer.getHasCustomPrinterIcon()) {
+                    numIconPrinters++;
+                }
+            }
+
+            MetricsLogger.count(this, PRINTERS_INFO_COUNT, numInfoPrinters);
+            MetricsLogger.count(this, PRINTERS_ICON_COUNT, numIconPrinters);
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case INFO_INTENT_REQUEST_CODE:
+                if (resultCode == RESULT_OK &&
+                        data != null &&
+                        data.getBooleanExtra(PrintService.EXTRA_SELECT_PRINTER, false) &&
+                        mPrinterForInfoIntent != null &&
+                        mPrinterForInfoIntent.getStatus() != PrinterInfo.STATUS_UNAVAILABLE) {
+                    onPrinterSelected(mPrinterForInfoIntent);
+                }
+                mPrinterForInfoIntent = null;
+                break;
+            default:
+                // not reached
+        }
+    }
+
     private void onPrinterSelected(PrinterInfo printer) {
         Intent intent = new Intent();
         intent.putExtra(INTENT_EXTRA_PRINTER, printer);
@@ -317,7 +411,7 @@ public final class SelectPrinterActivity extends Activity implements
             View emptyView = findViewById(R.id.empty_print_state);
             mListView.setEmptyView(emptyView);
         }
-        TextView titleView = (TextView) findViewById(R.id.title);
+        TextView titleView = findViewById(R.id.title);
         View progressBar = findViewById(R.id.progress_bar);
         if (mEnabledPrintServices.size() == 0) {
             titleView.setText(R.string.print_no_print_services);
@@ -370,6 +464,26 @@ public final class SelectPrinterActivity extends Activity implements
         }
     }
 
+    /**
+     * Return the target SDK of the package that defined the printer.
+     *
+     * @param printer The printer
+     *
+     * @return The target SDK that defined a printer.
+     */
+    private int getTargetSDKOfPrintersService(@NonNull PrinterInfo printer) {
+        ApplicationInfo serviceAppInfo;
+        try {
+            serviceAppInfo = getPackageManager().getApplicationInfo(
+                    printer.getId().getServiceName().getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOG_TAG, "Could not find package that defined the printer", e);
+            return Build.VERSION_CODES.KITKAT;
+        }
+
+        return serviceAppInfo.targetSdkVersion;
+    }
+
     private final class DestinationAdapter extends BaseAdapter implements Filterable {
 
         private final Object mLock = new Object();
@@ -379,6 +493,15 @@ public final class SelectPrinterActivity extends Activity implements
         private final List<PrinterInfo> mFilteredPrinters = new ArrayList<>();
 
         private CharSequence mLastSearchString;
+
+        /**
+         * Get the currently known printers.
+         *
+         * @return The currently known printers
+         */
+        @NonNull List<PrinterInfo> getPrinters() {
+            return mPrinters;
+        }
 
         public DestinationAdapter() {
             mPrinterRegistry.setOnPrintersChangeListener(new PrinterRegistry.OnPrintersChangeListener() {
@@ -453,6 +576,12 @@ public final class SelectPrinterActivity extends Activity implements
                     }
                     if (resultCountChanged) {
                         announceSearchResultIfNeeded();
+                    }
+
+                    if (!mDidSearch) {
+                        MetricsLogger.action(SelectPrinterActivity.this,
+                                MetricsEvent.ACTION_PRINTER_SEARCH);
+                        mDidSearch = true;
                     }
                     notifyDataSetChanged();
                 }
@@ -575,15 +704,17 @@ public final class SelectPrinterActivity extends Activity implements
             LinearLayout moreInfoView = (LinearLayout) convertView.findViewById(R.id.more_info);
             if (printer.getInfoIntent() != null) {
                 moreInfoView.setVisibility(View.VISIBLE);
-                moreInfoView.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            startIntentSender(printer.getInfoIntent().getIntentSender(), null, 0, 0,
-                                    0);
-                        } catch (SendIntentException e) {
-                            Log.e(LOG_TAG, "Could not execute pending info intent: %s", e);
-                        }
+                moreInfoView.setOnClickListener(v -> {
+                    Intent fillInIntent = new Intent();
+                    fillInIntent.putExtra(PrintService.EXTRA_CAN_SELECT_PRINTER, true);
+
+                    try {
+                        mPrinterForInfoIntent = printer;
+                        startIntentSenderForResult(printer.getInfoIntent().getIntentSender(),
+                                INFO_INTENT_REQUEST_CODE, fillInIntent, 0, 0, 0);
+                    } catch (SendIntentException e) {
+                        mPrinterForInfoIntent = null;
+                        Log.e(LOG_TAG, "Could not execute pending info intent: %s", e);
                     }
                 });
             } else {

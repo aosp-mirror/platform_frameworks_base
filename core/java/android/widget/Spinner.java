@@ -16,11 +16,9 @@
 
 package android.widget;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.ShowableListMenu;
-
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.Widget;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -40,12 +38,16 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.PopupWindow.OnDismissListener;
+
+import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
 
 /**
  * A view that displays one child at a time and lets the user pick among them.
@@ -121,7 +123,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *                access the current theme, resources, etc.
      * @param mode Constant describing how the user will select choices from
      *             the spinner.
-     * 
+     *
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
      */
@@ -360,6 +362,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     /**
+     * @hide
+     */
+    @TestApi
+    public boolean isPopupShowing() {
+        return (mPopup != null) && mPopup.isShowing();
+    }
+
+    /**
      * Set a vertical offset in pixels for the spinner's popup window of choices.
      * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
      *
@@ -553,7 +563,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        
+
         if (mPopup != null && mPopup.isShowing()) {
             mPopup.dismiss();
         }
@@ -762,7 +772,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     @Override
     public boolean performClick() {
         boolean handled = super.performClick();
-        
+
         if (!handled) {
             handled = true;
 
@@ -774,6 +784,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return handled;
     }
 
+    @Override
     public void onClick(DialogInterface dialog, int which) {
         setSelection(which);
         dialog.dismiss();
@@ -894,6 +905,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
     }
 
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
+    }
+
     static class SavedState extends AbsSpinner.SavedState {
         boolean showDropdown;
 
@@ -993,7 +1012,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         /**
          * If the wrapped SpinnerAdapter is also a ListAdapter, delegate this call.
-         * Otherwise, return true. 
+         * Otherwise, return true.
          */
         public boolean areAllItemsEnabled() {
             final ListAdapter adapter = mListAdapter;
@@ -1024,19 +1043,19 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         public int getViewTypeCount() {
             return 1;
         }
-        
+
         public boolean isEmpty() {
             return getCount() == 0;
         }
     }
-    
+
     /**
      * Implements some sort of popup selection interface for selecting a spinner option.
      * Allows for different spinner modes.
      */
     private interface SpinnerPopup {
         public void setAdapter(ListAdapter adapter);
-        
+
         /**
          * Show the popup
          */
@@ -1046,12 +1065,12 @@ public class Spinner extends AbsSpinner implements OnClickListener {
          * Dismiss the popup
          */
         public void dismiss();
-        
+
         /**
          * @return true if the popup is showing, false otherwise.
          */
         public boolean isShowing();
-        
+
         /**
          * Set hint text to be displayed to the user. This should provide
          * a description of the choice being made.
@@ -1111,7 +1130,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             listView.setTextAlignment(textAlignment);
             mPopup.show();
         }
-        
+
         public void onClick(DialogInterface dialog, int which) {
             setSelection(which);
             if (mOnItemClickListener != null) {
@@ -1150,7 +1169,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             return 0;
         }
     }
-    
+
     private class DropdownPopup extends ListPopupWindow implements SpinnerPopup {
         private CharSequence mHintText;
         private ListAdapter mAdapter;
@@ -1172,7 +1191,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 }
             });
         }
-        
+
         @Override
         public void setAdapter(ListAdapter adapter) {
             super.setAdapter(adapter);
@@ -1182,7 +1201,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         public CharSequence getHintText() {
             return mHintText;
         }
-        
+
         public void setPromptText(CharSequence hintText) {
             // Hint text is ignored for dropdowns, but maintain it here.
             mHintText = hintText;

@@ -40,7 +40,7 @@ public class Hyphenator_Delegate {
     }
 
     /*package*/ @SuppressWarnings("UnusedParameters")  // TODO implement this.
-    static long loadHyphenator(ByteBuffer buffer, int offset) {
+    static long loadHyphenator(ByteBuffer buffer, int offset, int minPrefix, int minSuffix) {
         return sDelegateManager.addNewDelegate(new Hyphenator_Delegate());
     }
 }

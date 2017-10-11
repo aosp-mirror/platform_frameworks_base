@@ -20,6 +20,7 @@ LOCAL_SRC_FILES:= invoke_mock_media_player.cpp
 
 LOCAL_SHARED_LIBRARIES:= \
     libbinder \
+    libmedia \
     libutils \
     liblog
 

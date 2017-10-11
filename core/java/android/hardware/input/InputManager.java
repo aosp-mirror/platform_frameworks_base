@@ -21,6 +21,7 @@ import com.android.internal.os.SomeArgs;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -33,12 +34,15 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -50,13 +54,8 @@ import java.util.List;
 
 /**
  * Provides information about input devices and available key layouts.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument
- * {@link android.content.Context#INPUT_SERVICE}.
- * </p>
  */
+@SystemService(Context.INPUT_SERVICE)
 public final class InputManager {
     private static final String TAG = "InputManager";
     private static final boolean DEBUG = false;
@@ -225,8 +224,12 @@ public final class InputManager {
     public static InputManager getInstance() {
         synchronized (InputManager.class) {
             if (sInstance == null) {
-                IBinder b = ServiceManager.getService(Context.INPUT_SERVICE);
-                sInstance = new InputManager(IInputManager.Stub.asInterface(b));
+                try {
+                    sInstance = new InputManager(IInputManager.Stub
+                            .asInterface(ServiceManager.getServiceOrThrow(Context.INPUT_SERVICE)));
+                } catch (ServiceNotFoundException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             return sInstance;
         }
@@ -893,6 +896,25 @@ public final class InputManager {
         }
     }
 
+    /**
+     * Request or release pointer capture.
+     * <p>
+     * When in capturing mode, the pointer icon disappears and all mouse events are dispatched to
+     * the window which has requested the capture. Relative position changes are available through
+     * {@link MotionEvent#getX} and {@link MotionEvent#getY}.
+     *
+     * @param enable true when requesting pointer capture, false when releasing.
+     *
+     * @hide
+     */
+    public void requestPointerCapture(IBinder windowToken, boolean enable) {
+        try {
+            mIm.requestPointerCapture(windowToken, enable);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private void populateInputDevicesLocked() {
         if (mInputDevicesChangedListener == null) {
             final InputDevicesChangedListener listener = new InputDevicesChangedListener();
@@ -1129,23 +1151,33 @@ public final class InputManager {
             return true;
         }
 
-        /**
-         * @hide
-         */
         @Override
-        public void vibrate(int uid, String opPkg, long milliseconds, AudioAttributes attributes) {
-            vibrate(new long[] { 0, milliseconds}, -1);
+        public boolean hasAmplitudeControl() {
+            return false;
         }
 
         /**
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg, long[] pattern, int repeat,
-                AudioAttributes attributes) {
-            if (repeat >= pattern.length) {
-                throw new ArrayIndexOutOfBoundsException();
+        public void vibrate(int uid, String opPkg,
+                VibrationEffect effect, AudioAttributes attributes) {
+            long[] pattern;
+            int repeat;
+            if (effect instanceof VibrationEffect.OneShot) {
+                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
+                pattern = new long[] { 0, oneShot.getTiming() };
+                repeat = -1;
+            } else if (effect instanceof VibrationEffect.Waveform) {
+                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
+                pattern = waveform.getTimings();
+                repeat = waveform.getRepeatIndex();
+            } else {
+                // TODO: Add support for prebaked effects
+                Log.w(TAG, "Pre-baked effects aren't supported on input devices");
+                return;
             }
+
             try {
                 mIm.vibrate(mDeviceId, pattern, repeat, mToken);
             } catch (RemoteException ex) {

@@ -41,27 +41,27 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
     /**
      * Creates the base shader and do some basic test on the parameters.
      *
+     * @param nativeMatrix reference to the shader's native transformation matrix
      * @param colors The colors to be distributed along the gradient line
      * @param positions May be null. The relative positions [0..1] of each
      *            corresponding color in the colors array. If this is null, the
      *            the colors are distributed evenly along the gradient line.
      */
-    protected Gradient_Delegate(int colors[], float positions[]) {
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
-        if (positions != null && colors.length != positions.length) {
-            throw new IllegalArgumentException("color and position arrays must be of equal length");
-        }
+    protected Gradient_Delegate(long nativeMatrix, int colors[], float positions[]) {
+        super(nativeMatrix);
+        assert colors.length >= 2 : "needs >= 2 number of colors";
 
         if (positions == null) {
             float spacing = 1.f / (colors.length - 1);
             positions = new float[colors.length];
             positions[0] = 0.f;
-            positions[colors.length-1] = 1.f;
-            for (int i = 1; i < colors.length - 1 ; i++) {
+            positions[colors.length - 1] = 1.f;
+            for (int i = 1; i < colors.length - 1; i++) {
                 positions[i] = spacing * i;
             }
+        } else {
+            assert colors.length == positions.length :
+                    "color and position " + "arrays must be of equal length";
         }
 
         mColors = colors;

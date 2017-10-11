@@ -304,7 +304,7 @@ void Font::render(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
     }
 
     int glyphsCount = 0;
-    SkFixed prevRsbDelta = 0;
+    int prevRsbDelta = 0;
 
     float penX = 0.0f;
 
@@ -332,14 +332,14 @@ void Font::render(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
         }
 
         CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-        penX += SkFixedToFloat(AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta));
+        penX += AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta);
         prevRsbDelta = cachedGlyph->mRsbDelta;
 
         if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
             drawCachedGlyph(cachedGlyph, penX, hOffset, vOffset, measure, &position, &tangent);
         }
 
-        penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
+        penX += cachedGlyph->mAdvanceX;
 
         glyphsCount++;
     }

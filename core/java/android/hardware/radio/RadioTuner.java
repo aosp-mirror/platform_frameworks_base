@@ -16,6 +16,8 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -207,6 +210,20 @@ public abstract class RadioTuner {
      * </ul>
      */
     public abstract int getProgramInformation(RadioManager.ProgramInfo[] info);
+
+    /**
+     * Get the list of discovered radio stations.
+     *
+     * To get the full list, set filter to null or empty string. Otherwise, client application
+     * must verify vendor product/name before setting this parameter to anything else.
+     *
+     * @param filter vendor-specific selector for radio stations.
+     * @return a list of radio stations.
+     * @throws IllegalStateException if the scan is in progress or has not been started.
+     * @throws IllegalArgumentException if the filter argument is not valid.
+     * @hide FutureFeature
+     */
+    public abstract @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
 
     /**
      * Get current antenna connection state for current configuration.

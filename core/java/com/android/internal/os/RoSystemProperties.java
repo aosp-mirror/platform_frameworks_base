@@ -27,6 +27,8 @@ public class RoSystemProperties {
             SystemProperties.getInt("ro.debuggable", 0) == 1;
     public static final int FACTORYTEST =
             SystemProperties.getInt("ro.factorytest", 0);
+    public static final String CONTROL_PRIVAPP_PERMISSIONS =
+            SystemProperties.get("ro.control_privapp_permissions");
 
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_LOW_RAM =
@@ -48,4 +50,12 @@ public class RoSystemProperties {
             "file".equalsIgnoreCase(CRYPTO_TYPE);
     public static final boolean CRYPTO_BLOCK_ENCRYPTED =
             "block".equalsIgnoreCase(CRYPTO_TYPE);
+
+    public static final boolean CONTROL_PRIVAPP_PERMISSIONS_LOG =
+            "log".equalsIgnoreCase(CONTROL_PRIVAPP_PERMISSIONS);
+    public static final boolean CONTROL_PRIVAPP_PERMISSIONS_ENFORCE =
+            "enforce".equalsIgnoreCase(CONTROL_PRIVAPP_PERMISSIONS);
+    public static final boolean CONTROL_PRIVAPP_PERMISSIONS_DISABLE =
+            !CONTROL_PRIVAPP_PERMISSIONS_LOG && !CONTROL_PRIVAPP_PERMISSIONS_ENFORCE;
+
 }

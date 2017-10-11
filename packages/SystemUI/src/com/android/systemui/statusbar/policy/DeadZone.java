@@ -127,6 +127,7 @@ public class DeadZone extends View {
         final int action = event.getAction();
         if (action == MotionEvent.ACTION_OUTSIDE) {
             poke(event);
+            return true;
         } else if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG) {
                 Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
@@ -158,7 +159,7 @@ public class DeadZone extends View {
         return false;
     }
 
-    public void poke(MotionEvent event) {
+    private void poke(MotionEvent event) {
         mLastPokeTime = event.getEventTime();
         if (DEBUG)
             Slog.v(TAG, "poked! size=" + getSize(mLastPokeTime));

@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef CANVASCONTEXT_H_
-#define CANVASCONTEXT_H_
+#pragma once
 
+#include "BakedOpDispatcher.h"
+#include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
+#include "FrameBuilder.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
+#include "IRenderPipeline.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "thread/Task.h"
@@ -29,12 +32,6 @@
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-
-#if HWUI_NEW_OPS
-#include "BakedOpDispatcher.h"
-#include "BakedOpRenderer.h"
-#include "FrameBuilder.h"
-#endif
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
@@ -53,28 +50,70 @@ namespace uirenderer {
 
 class AnimationContext;
 class DeferredLayerUpdater;
-class OpenGLRenderer;
-class Rect;
 class Layer;
+class Rect;
 class RenderState;
 
 namespace renderthread {
 
 class EglManager;
-
-enum SwapBehavior {
-    kSwap_default,
-    kSwap_discardBuffer,
-};
+class Frame;
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 // TODO: Rename to Renderer or some other per-window, top-level manager
 class CanvasContext : public IFrameCallback {
 public:
-    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-            IContextFactory* contextFactory);
+    static CanvasContext* create(RenderThread& thread, bool translucent,
+            RenderNode* rootRenderNode, IContextFactory* contextFactory);
     virtual ~CanvasContext();
+
+    /**
+     * Update or create a layer specific for the provided RenderNode. The layer
+     * attached to the node will be specific to the RenderPipeline used by this
+     * context
+     *
+     *  @return true if the layer has been created or updated
+     */
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator) {
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator);
+    }
+
+    /**
+     * Pin any mutable images to the GPU cache. A pinned images is guaranteed to
+     * remain in the cache until it has been unpinned. We leverage this feature
+     * to avoid making a CPU copy of the pixels.
+     *
+     * @return true if all images have been successfully pinned to the GPU cache
+     *         and false otherwise (e.g. cache limits have been exceeded).
+     */
+    bool pinImages(std::vector<SkImage*>& mutableImages) {
+        return mRenderPipeline->pinImages(mutableImages);
+    }
+    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) {
+        return mRenderPipeline->pinImages(images);
+    }
+
+    /**
+     * Unpin any image that had be previously pinned to the GPU cache
+     */
+    void unpinImages() { mRenderPipeline->unpinImages(); }
+
+    /**
+     * Destroy any layers that have been attached to the provided RenderNode removing
+     * any state that may have been set during createOrUpdateLayer().
+     */
+    static void destroyLayer(RenderNode* node);
+
+    static void invokeFunctor(const RenderThread& thread, Functor* functor);
+
+    static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
+
+    /*
+     * If Properties::isSkiaEnabled() is true then this will return the Skia
+     * grContext associated with the current RenderPipeline.
+     */
+    GrContext* getGrContext() const { return mRenderThread.getGrContext(); }
 
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
@@ -85,7 +124,7 @@ public:
     void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
 
-    void setup(int width, int height, float lightRadius,
+    void setup(float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
@@ -93,27 +132,20 @@ public:
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
     void draw();
-    void destroy(TreeObserver* observer);
+    void destroy();
 
     // IFrameCallback, Choreographer-driven frame callback entry point
     virtual void doFrame() override;
     void prepareAndDraw(RenderNode* node);
 
-    void buildLayer(RenderNode* node, TreeObserver* observer);
+    void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
-    void destroyHardwareResources(TreeObserver* observer);
+    void destroyHardwareResources();
     static void trimMemory(RenderThread& thread, int level);
 
-    static void invokeFunctor(RenderThread& thread, Functor* functor);
-
-    void runWithGlContext(RenderTask* task);
-
-    Layer* createTextureLayer();
-
-    ANDROID_API static void setTextureAtlas(RenderThread& thread,
-            const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
+    DeferredLayerUpdater* createTextureLayer();
 
     void stopDrawing();
     void notifyFramePending();
@@ -123,20 +155,12 @@ public:
     void dumpFrames(int fd);
     void resetFrameStats();
 
-    void setName(const std::string&& name) { mName = name; }
-    const std::string& name() { return mName; }
+    void setName(const std::string&& name);
 
     void serializeDisplayListTree();
 
-    void addRenderNode(RenderNode* node, bool placeFront) {
-        int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
-        mRenderNodes.emplace(mRenderNodes.begin() + pos, node);
-    }
-
-    void removeRenderNode(RenderNode* node) {
-        mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
-                mRenderNodes.end());
-    }
+    void addRenderNode(RenderNode* node, bool placeFront);
+    void removeRenderNode(RenderNode* node);
 
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
@@ -171,6 +195,9 @@ public:
     void waitOnFences();
 
 private:
+    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
+            IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
+
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
     // lifecycle tracking
@@ -178,25 +205,24 @@ private:
 
     void setSurface(Surface* window);
 
-    void freePrefetchedLayers(TreeObserver* observer);
+    void freePrefetchedLayers();
 
     bool isSwapChainStuffed();
+
+    SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
     EGLint mLastFrameWidth = 0;
     EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    EglManager& mEglManager;
     sp<Surface> mNativeSurface;
-    EGLSurface mEglSurface = EGL_NO_SURFACE;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
     // CanvasContext is dirty if it has received an update that it has not
     // painted onto its surface.
     bool mIsDirty = false;
-    bool mBufferPreserved = false;
-    SwapBehavior mSwapBehavior = kSwap_default;
+    SwapBehavior mSwapBehavior = SwapBehavior::kSwap_default;
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;
@@ -212,12 +238,8 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
-#if HWUI_NEW_OPS
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
-#else
-    OpenGLRenderer* mCanvas = nullptr;
-#endif
 
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
@@ -248,9 +270,9 @@ private:
 
     std::vector< sp<FuncTask> > mFrameFences;
     sp<TaskProcessor<bool> > mFrameWorkProcessor;
+    std::unique_ptr<IRenderPipeline> mRenderPipeline;
 };
 
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
-#endif /* CANVASCONTEXT_H_ */

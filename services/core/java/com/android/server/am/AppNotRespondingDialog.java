@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -104,18 +104,18 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final FrameLayout frame = (FrameLayout) findViewById(android.R.id.custom);
+        final FrameLayout frame = findViewById(android.R.id.custom);
         final Context context = getContext();
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_anr_dialog, frame, true);
 
-        final TextView report = (TextView) findViewById(com.android.internal.R.id.aerr_report);
+        final TextView report = findViewById(com.android.internal.R.id.aerr_report);
         report.setOnClickListener(this);
         final boolean hasReceiver = mProc.errorReportReceiver != null;
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
-        final TextView close = (TextView) findViewById(com.android.internal.R.id.aerr_close);
+        final TextView close = findViewById(com.android.internal.R.id.aerr_close);
         close.setOnClickListener(this);
-        final TextView wait = (TextView) findViewById(com.android.internal.R.id.aerr_wait);
+        final TextView wait = findViewById(com.android.internal.R.id.aerr_wait);
         wait.setOnClickListener(this);
 
         findViewById(com.android.internal.R.id.customPanel).setVisibility(View.VISIBLE);

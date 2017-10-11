@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/qs_detail_item_secondary_text_size"
-                android:textColor="@color/qs_user_detail_name"
+                android:textColor="?android:attr/textColorSecondary"
                 android:gravity="center_horizontal" />
         <ImageView
                 android:id="@+id/restricted_padlock"

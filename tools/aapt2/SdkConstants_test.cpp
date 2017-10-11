@@ -16,23 +16,16 @@
 
 #include "SdkConstants.h"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace aapt {
 
 TEST(SdkConstantsTest, FirstAttributeIsSdk1) {
-    EXPECT_EQ(1u, findAttributeSdkLevel(ResourceId(0x01010000)));
+  EXPECT_EQ(1, FindAttributeSdkLevel(ResourceId(0x01010000)));
 }
 
-TEST(SdkConstantsTest, AllAttributesAfterLollipopAreLollipopMR1) {
-    EXPECT_EQ(SDK_LOLLIPOP, findAttributeSdkLevel(ResourceId(0x010103f7)));
-    EXPECT_EQ(SDK_LOLLIPOP, findAttributeSdkLevel(ResourceId(0x010104ce)));
-
-    EXPECT_EQ(SDK_LOLLIPOP_MR1, findAttributeSdkLevel(ResourceId(0x010104cf)));
-    EXPECT_EQ(SDK_LOLLIPOP_MR1, findAttributeSdkLevel(ResourceId(0x010104d8)));
-
-    EXPECT_EQ(SDK_LOLLIPOP_MR1, findAttributeSdkLevel(ResourceId(0x010104d9)));
-    EXPECT_EQ(SDK_LOLLIPOP_MR1, findAttributeSdkLevel(ResourceId(0x0101ffff)));
+TEST(SdkConstantsTest, NonFrameworkAttributeIsSdk0) {
+  EXPECT_EQ(0, FindAttributeSdkLevel(ResourceId(0x7f010345)));
 }
 
-} // namespace aapt
+}  // namespace aapt

@@ -51,7 +51,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     private static final String TAG = "LockscreenWallpaper";
 
-    private final PhoneStatusBar mBar;
+    private final StatusBar mBar;
     private final WallpaperManager mWallpaperManager;
     private final Handler mH;
     private final KeyguardUpdateMonitor mUpdateMonitor;
@@ -64,7 +64,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private UserHandle mSelectedUser;
     private AsyncTask<Void, Void, LoaderResult> mLoader;
 
-    public LockscreenWallpaper(Context ctx, PhoneStatusBar bar, Handler h) {
+    public LockscreenWallpaper(Context ctx, StatusBar bar, Handler h) {
         mBar = bar;
         mH = h;
         mWallpaperManager = (WallpaperManager) ctx.getSystemService(Context.WALLPAPER_SERVICE);
@@ -121,15 +121,13 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 IoUtils.closeQuietly(fd);
             }
         } else {
-            if (selectedUser != null && selectedUser.getIdentifier() != currentUserId) {
-                // When selected user is different from the current user, show the selected
-                // user's static wallpaper.
+            if (selectedUser != null) {
+                // Show the selected user's static wallpaper.
                 return LoaderResult.success(
                         mWallpaperManager.getBitmapAsUser(selectedUser.getIdentifier()));
 
             } else {
-                // When there is no selected user, or it's same as the current user, show the
-                // system (possibly dynamic) wallpaper for the selected user.
+                // When there is no selected user, show the system wallpaper
                 return LoaderResult.success(null);
             }
         }
@@ -137,7 +135,9 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     public void setCurrentUser(int user) {
         if (user != mCurrentUserId) {
-            mCached = false;
+            if (mSelectedUser == null || user != mSelectedUser.getIdentifier()) {
+                mCached = false;
+            }
             mCurrentUserId = user;
         }
     }

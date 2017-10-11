@@ -22,12 +22,13 @@ package android.text.format;
 
 import android.content.res.Resources;
 
+import libcore.icu.LocaleData;
+import libcore.util.ZoneInfo;
+
 import java.nio.CharBuffer;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
-import libcore.icu.LocaleData;
-import libcore.util.ZoneInfo;
 
 /**
  * Formatting logic for {@link Time}. Contains a port of Bionic's broken strftime_tz to Java.

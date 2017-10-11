@@ -78,6 +78,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @hide
          */
+        public Key(String name, Class<T> type, long vendorId) {
+            mKey = new CameraMetadataNative.Key<T>(name, type, vendorId);
+        }
+
+        /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
@@ -107,6 +116,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         @NonNull
         public String getName() {
             return mKey.getName();
+        }
+
+        /**
+         * Return vendor tag id.
+         *
+         * @hide
+         */
+        public long getVendorId() {
+            return mKey.getVendorId();
         }
 
         /**
@@ -186,6 +204,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
         if (mResults.isEmpty()) {
             throw new AssertionError("Results must not be empty");
         }
+        setNativeInstance(mResults);
         mRequest = parent;
         mSequenceId = extras.getRequestId();
         mFrameNumber = extras.getFrameNumber();
@@ -215,6 +234,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             throw new AssertionError("Results must not be empty");
         }
 
+        setNativeInstance(mResults);
         mRequest = null;
         mSequenceId = sequenceId;
         mFrameNumber = -1;
@@ -2130,6 +2150,39 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @PublicKey
     public static final Key<Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST =
             new Key<Integer>("android.control.postRawSensitivityBoost", int.class);
+
+    /**
+     * <p>Allow camera device to enable zero-shutter-lag mode for requests with
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE.</p>
+     * <p>If enableZsl is <code>true</code>, the camera device may enable zero-shutter-lag mode for requests with
+     * STILL_CAPTURE capture intent. The camera device may use images captured in the past to
+     * produce output images for a zero-shutter-lag request. The result metadata including the
+     * {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} reflects the source frames used to produce output images.
+     * Therefore, the contents of the output images and the result metadata may be out of order
+     * compared to previous regular requests. enableZsl does not affect requests with other
+     * capture intents.</p>
+     * <p>For example, when requests are submitted in the following order:
+     *   Request A: enableZsl is ON, {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} is PREVIEW
+     *   Request B: enableZsl is ON, {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} is STILL_CAPTURE</p>
+     * <p>The output images for request B may have contents captured before the output images for
+     * request A, and the result metadata for request B may be older than the result metadata for
+     * request A.</p>
+     * <p>Note that when enableZsl is <code>true</code>, it is not guaranteed to get output images captured in
+     * the past for requests with STILL_CAPTURE capture intent.</p>
+     * <p>For applications targeting SDK versions O and newer, the value of enableZsl in
+     * TEMPLATE_STILL_CAPTURE template may be <code>true</code>. The value in other templates is always
+     * <code>false</code> if present.</p>
+     * <p>For applications targeting SDK versions older than O, the value of enableZsl in all
+     * capture templates is always <code>false</code> if present.</p>
+     * <p>For application-operated ZSL, use CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     * @see CaptureResult#SENSOR_TIMESTAMP
+     */
+    @PublicKey
+    public static final Key<Boolean> CONTROL_ENABLE_ZSL =
+            new Key<Boolean>("android.control.enableZsl", boolean.class);
 
     /**
      * <p>Operation mode for edge

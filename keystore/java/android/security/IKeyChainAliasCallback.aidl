@@ -20,7 +20,7 @@ package android.security;
  *
  * @hide
  */
-interface IKeyChainAliasCallback {
+oneway interface IKeyChainAliasCallback {
 
     void alias(String alias);
 }

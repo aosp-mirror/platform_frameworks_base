@@ -31,6 +31,7 @@ import com.android.resources.ResourceType;
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -80,7 +81,7 @@ public final class BridgeTypedArray extends TypedArray {
 
     public BridgeTypedArray(Resources resources, BridgeContext context, int len,
             boolean platformFile) {
-        super(resources, null, null, 0);
+        super(resources);
         mBridgeResources = resources;
         mContext = context;
         mPlatformFile = platformFile;
@@ -584,6 +585,7 @@ public final class BridgeTypedArray extends TypedArray {
         if (value == null) {
             return defValue;
         }
+        value = value.trim();
 
         // if the value is just an integer, return it.
         try {
@@ -593,6 +595,11 @@ public final class BridgeTypedArray extends TypedArray {
             }
         } catch (NumberFormatException e) {
             // pass
+        }
+
+        if (value.startsWith("#")) {
+            // this looks like a color, do not try to parse it
+            return defValue;
         }
 
         // Handle the @id/<name>, @+id/<name> and @android:id/<name>
@@ -631,8 +638,19 @@ public final class BridgeTypedArray extends TypedArray {
                 return mContext.getProjectResourceValue(ResourceType.ID, idName, defValue);
             }
         }
+        else if (value.startsWith("@aapt:_aapt")) {
+            return mContext.getLayoutlibCallback().getResourceId(ResourceType.AAPT, value);
+        }
 
-        // not a direct id valid reference? resolve it
+        // not a direct id valid reference. First check if it's an enum (this is a corner case
+        // for attributes that have a reference|enum type), then fallback to resolve
+        // as an ID without prefix.
+        Integer enumValue = resolveEnumAttribute(index);
+        if (enumValue != null) {
+            return enumValue;
+        }
+
+        // Ok, not an enum, resolve as an ID
         Integer idValue;
 
         if (resValue.isFramework()) {
@@ -683,6 +701,22 @@ public final class BridgeTypedArray extends TypedArray {
 
 
     /**
+     * Retrieve the Typeface for the attribute at <var>index</var>.
+     * @param index Index of attribute to retrieve.
+     *
+     * @return Typeface for the attribute, or null if not defined.
+     */
+    @Override
+    public Typeface getFont(int index) {
+        if (!hasValue(index)) {
+            return null;
+        }
+
+        ResourceValue value = mResourceData[index];
+        return ResourceHelper.getFont(value, mContext, mTheme);
+    }
+
+    /**
      * Retrieve the CharSequence[] for the attribute at <var>index</var>.
      * This gets the resource ID of the selected attribute, and uses
      * {@link Resources#getTextArray Resources.getTextArray} of the owning
@@ -706,9 +740,11 @@ public final class BridgeTypedArray extends TypedArray {
         }
         int id = getResourceId(index, 0);
         String resIdMessage = id > 0 ? " (resource id 0x" + Integer.toHexString(id) + ')' : "";
-        throw new NotFoundException(
-                String.format("%1$s in %2$s%3$s is not a valid array resource.",
-                        resVal.getValue(), mNames[index], resIdMessage));
+        assert false :
+                String.format("%1$s in %2$s%3$s is not a valid array resource.", resVal.getValue(),
+                        mNames[index], resIdMessage);
+
+        return new CharSequence[0];
     }
 
     @Override

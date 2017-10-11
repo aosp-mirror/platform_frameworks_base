@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
 
 /**
  * Information you can retrieve about a particular piece of test
@@ -32,6 +33,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public String targetPackage;
 
     /**
+     * Names of the process(es) this instrumentation will run in.  If not specified, only
+     * runs in the main process of the targetPackage.  Can either be a comma-separated list
+     * of process names or '*' for any process that launches to run targetPackage code.
+     */
+    public String targetProcesses;
+
+    /**
      * Full path to the base APK for this application.
      */
     public String sourceDir;
@@ -44,8 +52,12 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public String publicSourceDir;
 
     /**
-     * Full paths to zero or more split APKs that, when combined with the base
-     * APK defined in {@link #sourceDir}, form a complete application.
+     * The names of all installed split APKs, ordered lexicographically.
+     */
+    public String[] splitNames;
+
+    /**
+     * Full paths to zero or more split APKs, indexed by the same order as {@link #splitNames}.
      */
     public String[] splitSourceDirs;
 
@@ -53,8 +65,31 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
      * Full path to the publicly available parts of {@link #splitSourceDirs},
      * including resources and manifest. This may be different from
      * {@link #splitSourceDirs} if an application is forward locked.
+     *
+     * @see #splitSourceDirs
      */
     public String[] splitPublicSourceDirs;
+
+    /**
+     * Maps the dependencies between split APKs. All splits implicitly depend on the base APK.
+     *
+     * Available since platform version O.
+     *
+     * Only populated if the application opts in to isolated split loading via the
+     * {@link android.R.attr.isolatedSplits} attribute in the &lt;manifest&gt; tag of the app's
+     * AndroidManifest.xml.
+     *
+     * The keys and values are all indices into the {@link #splitNames}, {@link #splitSourceDirs},
+     * and {@link #splitPublicSourceDirs} arrays.
+     * Each key represents a split and its value is an array of splits. The first element of this
+     * array is the parent split, and the rest are configuration splits. These configuration splits
+     * have no dependencies themselves.
+     * Cycles do not exist because they are illegal and screened for during installation.
+     *
+     * May be null if no splits are installed, or if no dependencies exist between them.
+     * @hide
+     */
+    public SparseArray<int[]> splitDependencies;
 
     /**
      * Full path to a directory assigned to the package for its persistent data.
@@ -86,10 +121,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public InstrumentationInfo(InstrumentationInfo orig) {
         super(orig);
         targetPackage = orig.targetPackage;
+        targetProcesses = orig.targetProcesses;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
+        splitNames = orig.splitNames;
         splitSourceDirs = orig.splitSourceDirs;
         splitPublicSourceDirs = orig.splitPublicSourceDirs;
+        splitDependencies = orig.splitDependencies;
         dataDir = orig.dataDir;
         deviceProtectedDataDir = orig.deviceProtectedDataDir;
         credentialProtectedDataDir = orig.credentialProtectedDataDir;
@@ -112,10 +150,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(targetPackage);
+        dest.writeString(targetProcesses);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
+        dest.writeStringArray(splitNames);
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
+        dest.writeSparseArray((SparseArray) splitDependencies);
         dest.writeString(dataDir);
         dest.writeString(deviceProtectedDataDir);
         dest.writeString(credentialProtectedDataDir);
@@ -135,13 +176,17 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         }
     };
 
+    @SuppressWarnings("unchecked")
     private InstrumentationInfo(Parcel source) {
         super(source);
         targetPackage = source.readString();
+        targetProcesses = source.readString();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
+        splitNames = source.readStringArray();
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
+        splitDependencies = source.readSparseArray(null);
         dataDir = source.readString();
         deviceProtectedDataDir = source.readString();
         credentialProtectedDataDir = source.readString();
@@ -156,8 +201,10 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         ai.packageName = packageName;
         ai.sourceDir = sourceDir;
         ai.publicSourceDir = publicSourceDir;
+        ai.splitNames = splitNames;
         ai.splitSourceDirs = splitSourceDirs;
         ai.splitPublicSourceDirs = splitPublicSourceDirs;
+        ai.splitDependencies = splitDependencies;
         ai.dataDir = dataDir;
         ai.deviceProtectedDataDir = deviceProtectedDataDir;
         ai.credentialProtectedDataDir = credentialProtectedDataDir;

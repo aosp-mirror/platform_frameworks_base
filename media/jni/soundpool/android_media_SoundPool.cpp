@@ -20,7 +20,7 @@
 #define LOG_TAG "SoundPool-JNI"
 
 #include <utils/Log.h>
-#include <nativehelper/jni.h>
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "SoundPool.h"
@@ -129,6 +129,15 @@ android_media_SoundPool_setVolume(JNIEnv *env, jobject thiz, jint channelID,
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return;
     ap->setVolume(channelID, (float) leftVolume, (float) rightVolume);
+}
+
+static void
+android_media_SoundPool_mute(JNIEnv *env, jobject thiz, jboolean muting)
+{
+    ALOGV("android_media_SoundPool_mute(%d)", muting);
+    SoundPool *ap = MusterSoundPool(env, thiz);
+    if (ap == NULL) return;
+    ap->mute(muting == JNI_TRUE);
 }
 
 static void
@@ -269,6 +278,10 @@ static JNINativeMethod gMethods[] = {
     {   "_setVolume",
         "(IFF)V",
         (void *)android_media_SoundPool_setVolume
+    },
+    {   "_mute",
+        "(Z)V",
+        (void *)android_media_SoundPool_mute
     },
     {   "setPriority",
         "(II)V",

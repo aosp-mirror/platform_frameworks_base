@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GRAPHICS_CANVAS_H
-#define ANDROID_GRAPHICS_CANVAS_H
+#pragma once
 
 #include <cutils/compiler.h>
 #include <utils/Functor.h>
 
 #include "GlFunctorLifecycleListener.h"
-#include "utils/NinePatch.h"
+#include "utils/Macros.h"
+#include <androidfw/ResourceTypes.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
+
+class SkCanvasState;
+
+namespace minikin {
+    class Layout;
+}
 
 namespace android {
 
@@ -61,6 +67,7 @@ class Tree;
 };
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
+class Bitmap;
 class Paint;
 struct Typeface;
 
@@ -70,7 +77,32 @@ public:
 
     static Canvas* create_canvas(const SkBitmap& bitmap);
 
-    static Canvas* create_recording_canvas(int width, int height);
+    /**
+     *  Create a new Canvas object that records view system drawing operations for deferred
+     *  rendering. A canvas returned by this call supports calls to the resetRecording(...) and
+     *  finishRecording() calls.  The latter call returns a DisplayList that is specific to the
+     *  RenderPipeline defined by Properties::getRenderPipelineType().
+     *
+     *  @param width of the requested Canvas.
+     *  @param height of the requested Canvas.
+     *  @param renderNode is an optional parameter that specifies the node that will consume the
+     *      DisplayList produced by the returned Canvas.  This enables the reuse of select C++
+     *      objects as a speed optimization.
+     *  @return new non-null Canvas Object.  The type of DisplayList produced by this canvas is
+            determined based on Properties::getRenderPipelineType().
+     *
+     */
+    static WARN_UNUSED_RESULT Canvas* create_recording_canvas(int width, int height,
+            uirenderer::RenderNode* renderNode = nullptr);
+
+    enum class XformToSRGB {
+        // Transform any Bitmaps to the sRGB color space before drawing.
+        kImmediate,
+
+        // Draw the Bitmap as is.  This likely means that we are recording and that the
+        // transform can be handled at playback time.
+        kDefer,
+    };
 
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.
@@ -79,9 +111,12 @@ public:
      *      delegated to this object. This function will call ref() on the
      *      SkCanvas, and the returned Canvas will unref() it upon
      *      destruction.
-     *  @return new Canvas object. Will not return NULL.
+     *  @param xformToSRGB Indicates if bitmaps should be xformed to the sRGB
+     *      color space before drawing.
+     *  @return new non-null Canvas Object.  The type of DisplayList produced by this canvas is
+     *      determined based on  Properties::getRenderPipelineType().
      */
-    static Canvas* create_canvas(SkCanvas* skiaCanvas);
+    static Canvas* create_canvas(SkCanvas* skiaCanvas, XformToSRGB xformToSRGB);
 
     /**
      *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
@@ -108,7 +143,8 @@ public:
 // View System operations (not exposed in public Canvas API)
 // ----------------------------------------------------------------------------
 
-    virtual void resetRecording(int width, int height) = 0;
+    virtual void resetRecording(int width, int height,
+            uirenderer::RenderNode* renderNode = nullptr) = 0;
     virtual uirenderer::DisplayList* finishRecording() = 0;
     virtual void insertReorderBarrier(bool enableReorder) = 0;
 
@@ -159,18 +195,20 @@ public:
     virtual bool quickRejectPath(const SkPath& path) const = 0;
 
     virtual bool clipRect(float left, float top, float right, float bottom,
-            SkRegion::Op op = SkRegion::kIntersect_Op) = 0;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) = 0;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
+            SkClipOp op) = 0;
+    virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
 
     // filters
     virtual SkDrawFilter* getDrawFilter() = 0;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) = 0;
 
+    // WebView only
+    virtual SkCanvasState* captureCanvasState() const { return nullptr; }
+
 // ----------------------------------------------------------------------------
 // Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual void drawColor(int color, SkXfermode::Mode mode) = 0;
+    virtual void drawColor(int color, SkBlendMode mode) = 0;
     virtual void drawPaint(const SkPaint& paint) = 0;
 
     // Geometry
@@ -195,16 +233,16 @@ public:
                               const uint16_t* indices, int indexCount, const SkPaint& paint) = 0;
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top,
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top,
             const SkPaint* paint) = 0;
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
             const SkPaint* paint) = 0;
-    virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) = 0;
-    virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+    virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) = 0;
-    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+    virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) = 0;
 
@@ -220,7 +258,7 @@ public:
     /**
      * Draws a VectorDrawable onto the canvas.
      */
-    virtual void drawVectorDrawable(VectorDrawableRoot* tree);
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree) = 0;
 
     /**
      * Converts utf16 text to glyphs, calculating position and boundary,
@@ -243,14 +281,11 @@ protected:
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) = 0;
-    /** drawTextOnPath: count is of glyphs */
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) = 0;
-
+    virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+            const SkPaint& paint, const SkPath& path, size_t start, size_t end) = 0;
     friend class DrawTextFunctor;
     friend class DrawTextOnPathFunctor;
     friend class uirenderer::SkiaCanvasProxy;
 };
 
 }; // namespace android
-#endif // ANDROID_GRAPHICS_CANVAS_H

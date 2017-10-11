@@ -20,12 +20,15 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.hardware.Camera;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.Surface;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -90,6 +93,7 @@ public class MediaRecorder
 
     private String mPath;
     private FileDescriptor mFd;
+    private File mFile;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -236,18 +240,16 @@ public class MediaRecorder
          */
         public static final int VOICE_CALL = 4;
 
-        /** Microphone audio source with same orientation as camera if available, the main
-         *  device microphone otherwise */
+        /** Microphone audio source tuned for video recording, with the same orientation
+         *  as the camera if available. */
         public static final int CAMCORDER = 5;
 
-        /** Microphone audio source tuned for voice recognition if available, behaves like
-         *  {@link #DEFAULT} otherwise. */
+        /** Microphone audio source tuned for voice recognition. */
         public static final int VOICE_RECOGNITION = 6;
 
         /** Microphone audio source tuned for voice communications such as VoIP. It
          *  will for instance take advantage of echo cancellation or automatic gain control
-         *  if available. It otherwise behaves like {@link #DEFAULT} if no voice processing
-         *  is applied.
+         *  if available.
          */
         public static final int VOICE_COMMUNICATION = 7;
 
@@ -389,8 +391,8 @@ public class MediaRecorder
         /** @hide Stream over a socket, limited to a single stream */
         public static final int OUTPUT_FORMAT_RTP_AVP = 7;
 
-        /** @hide H.264/AAC data encapsulated in MPEG2/TS */
-        public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+        /** H.264/AAC data encapsulated in MPEG2/TS */
+        public static final int MPEG_2_TS = 8;
 
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
@@ -746,14 +748,19 @@ public class MediaRecorder
     }
 
     /**
-     * Sets the video encoding profile for recording. Call this method before prepare().
-     * Prepare() may perform additional checks on the parameter to make sure whether the
-     * specified profile and level are applicable, and sometimes the passed profile or
-     * level will be discarded due to codec capablity or to ensure the video recording
-     * can proceed smoothly based on the capabilities of the platform.
-     * @hide
+     * Sets the desired video encoding profile and level for recording. The profile and level
+     * must be valid for the video encoder set by {@link #setVideoEncoder}. This method can
+     * called before or after {@link #setVideoEncoder} but it must be called before {@link #prepare}.
+     * {@code prepare()} may perform additional checks on the parameter to make sure that the specified
+     * profile and level are applicable, and sometimes the passed profile or level will be
+     * discarded due to codec capablity or to ensure the video recording can proceed smoothly
+     * based on the capabilities of the platform. <br>Application can also use the
+     * {@link MediaCodecInfo.CodecCapabilities#profileLevels} to query applicable combination of profile
+     * and level for the corresponding format. Note that the requested profile/level may not be supported by
+     * the codec that is actually being used by this MediaRecorder instance.
      * @param profile declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * @param level declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * @throws IllegalArgumentException when an invalid profile or level value is used.
      */
     public void setVideoEncodingProfileLevel(int profile, int level) {
         if (profile <= 0)  {
@@ -799,7 +806,47 @@ public class MediaRecorder
     public void setOutputFile(FileDescriptor fd) throws IllegalStateException
     {
         mPath = null;
+        mFile = null;
         mFd = fd;
+    }
+
+    /**
+     * Pass in the file object to be written. Call this after setOutputFormat() but before prepare().
+     * File should be seekable. After setting the next output file, application should not use the
+     * file until {@link #stop}. Application is responsible for cleaning up unused files after
+     * {@link #stop} is called.
+     *
+     * @param file the file object to be written into.
+     */
+    public void setOutputFile(File file)
+    {
+        mPath = null;
+        mFd = null;
+        mFile = file;
+    }
+
+    /**
+     * Sets the next output file descriptor to be used when the maximum filesize is reached
+     * on the prior output {@link #setOutputFile} or {@link #setNextOutputFile}). File descriptor
+     * must be seekable and writable. After setting the next output file, application should not
+     * use the file referenced by this file descriptor until {@link #stop}. It is the application's
+     * responsibility to close the file descriptor. It is safe to do so as soon as this call returns.
+     * Application must call this after receiving on the
+     * {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used until switching to
+     * that output. Application will receive{@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED}
+     * when the next output file is used. Application will not be able to set a new output file if
+     * the previous one has not been used. Application is responsible for cleaning up unused files
+     * after {@link #stop} is called.
+     *
+     * @param fd an open file descriptor to be written into.
+     * @throws IllegalStateException if it is called before prepare().
+     * @throws IOException if setNextOutputFile fails otherwise.
+     */
+    public void setNextOutputFile(FileDescriptor fd) throws IOException
+    {
+        _setNextOutputFile(fd);
     }
 
     /**
@@ -813,12 +860,40 @@ public class MediaRecorder
     public void setOutputFile(String path) throws IllegalStateException
     {
         mFd = null;
+        mFile = null;
         mPath = path;
     }
 
+    /**
+     * Sets the next output file to be used when the maximum filesize is reached on the prior
+     * output {@link #setOutputFile} or {@link #setNextOutputFile}). File should be seekable.
+     * After setting the next output file, application should not use the file until {@link #stop}.
+     * Application must call this after receiving on the
+     * {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used until switching to
+     * that output. Application will receive {@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED}
+     * when the next output file is used. Application will not be able to set a new output file if
+     * the previous one has not been used. Application is responsible for cleaning up unused files
+     * after {@link #stop} is called.
+     *
+     * @param  file The file to use.
+     * @throws IllegalStateException if it is called before prepare().
+     * @throws IOException if setNextOutputFile fails otherwise.
+     */
+    public void setNextOutputFile(File file) throws IOException
+    {
+        RandomAccessFile f = new RandomAccessFile(file, "rws");
+        try {
+            _setNextOutputFile(f.getFD());
+        } finally {
+            f.close();
+        }
+    }
+
     // native implementation
-    private native void _setOutputFile(FileDescriptor fd, long offset, long length)
-        throws IllegalStateException, IOException;
+    private native void _setOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
+    private native void _setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -835,12 +910,19 @@ public class MediaRecorder
         if (mPath != null) {
             RandomAccessFile file = new RandomAccessFile(mPath, "rws");
             try {
-                _setOutputFile(file.getFD(), 0, 0);
+                _setOutputFile(file.getFD());
             } finally {
                 file.close();
             }
         } else if (mFd != null) {
-            _setOutputFile(mFd, 0, 0);
+            _setOutputFile(mFd);
+        } else if (mFile != null) {
+            RandomAccessFile file = new RandomAccessFile(mFile, "rws");
+            try {
+                _setOutputFile(file.getFD());
+            } finally {
+                file.close();
+            }
         } else {
             throw new IOException("No valid output file");
         }
@@ -973,7 +1055,7 @@ public class MediaRecorder
     /* Do not change these values without updating their counterparts
      * in include/media/mediarecorder.h!
      */
-    /** Unspecified media recorder error.
+    /** Unspecified media recorder info.
      * @see android.media.MediaRecorder.OnInfoListener
      */
     public static final int MEDIA_RECORDER_INFO_UNKNOWN              = 1;
@@ -982,9 +1064,26 @@ public class MediaRecorder
      */
     public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800;
     /** A maximum filesize had been setup and has now been reached.
+     * Note: This event will not be sent if application already set
+     * next output file through {@link #setNextOutputFile}.
      * @see android.media.MediaRecorder.OnInfoListener
      */
     public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED = 801;
+    /** A maximum filesize had been setup and current recorded file size
+     * has reached 90% of the limit. This is sent once per file upon
+     * reaching/passing the 90% limit. To continue the recording, applicaiton
+     * should use {@link #setNextOutputFile} to set the next output file.
+     * Otherwise, recording will stop when reaching maximum file size.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING = 802;
+    /** A maximum filesize had been reached and MediaRecorder has switched
+     * output to a new file set by application {@link #setNextOutputFile}.
+     * For best practice, application should use this event to keep track
+     * of whether the file previously set has been used or not.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED = 803;
 
     /** informational events for individual tracks, for testing purpose.
      * The track informational event usually contains two parts in the ext1
@@ -1056,22 +1155,22 @@ public class MediaRecorder
 
 
     /**
-     * Interface definition for a callback to be invoked when an error
-     * occurs while recording.
+     * Interface definition of a callback to be invoked to communicate some
+     * info and/or warning about the recording.
      */
     public interface OnInfoListener
     {
         /**
-         * Called when an error occurs while recording.
+         * Called to indicate an info or a warning during recording.
          *
-         * @param mr the MediaRecorder that encountered the error
-         * @param what    the type of error that has occurred:
+         * @param mr   the MediaRecorder the info pertains to
+         * @param what the type of info or warning that has occurred
          * <ul>
          * <li>{@link #MEDIA_RECORDER_INFO_UNKNOWN}
          * <li>{@link #MEDIA_RECORDER_INFO_MAX_DURATION_REACHED}
          * <li>{@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}
          * </ul>
-         * @param extra   an extra code, specific to the error type
+         * @param extra   an extra code, specific to the info type
          */
         void onInfo(MediaRecorder mr, int what, int extra);
     }
@@ -1189,6 +1288,145 @@ public class MediaRecorder
 
     private native void setParameter(String nameValuePair);
 
+    /**
+     *  Return Metrics data about the current Mediarecorder instance.
+     *
+     * @return a {@link PersistableBundle} containing the set of attributes and values
+     * available for the media being generated by this instance of
+     * MediaRecorder.
+     * The attributes are descibed in {@link MetricsConstants}.
+     *
+     *  Additional vendor-specific fields may also be present in
+     *  the return value.
+     */
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
+    }
+
+    private native PersistableBundle native_getMetrics();
+
     @Override
     protected void finalize() { native_finalize(); }
+
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * Key to extract the audio bitrate
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String AUDIO_BITRATE = "android.media.mediarecorder.audio-bitrate";
+
+        /**
+         * Key to extract the number of audio channels
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String AUDIO_CHANNELS = "android.media.mediarecorder.audio-channels";
+
+        /**
+         * Key to extract the audio samplerate
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String AUDIO_SAMPLERATE = "android.media.mediarecorder.audio-samplerate";
+
+        /**
+         * Key to extract the audio timescale
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String AUDIO_TIMESCALE = "android.media.mediarecorder.audio-timescale";
+
+        /**
+         * Key to extract the video capture frame rate
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is a double.
+         */
+        public static final String CAPTURE_FPS = "android.media.mediarecorder.capture-fps";
+
+        /**
+         * Key to extract the video capture framerate enable value
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String CAPTURE_FPS_ENABLE = "android.media.mediarecorder.capture-fpsenable";
+
+        /**
+         * Key to extract the intended playback frame rate
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String FRAMERATE = "android.media.mediarecorder.frame-rate";
+
+        /**
+         * Key to extract the height (in pixels) of the captured video
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String HEIGHT = "android.media.mediarecorder.height";
+
+        /**
+         * Key to extract the recorded movies time units
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         * A value of 1000 indicates that the movie's timing is in milliseconds.
+         */
+        public static final String MOVIE_TIMESCALE = "android.media.mediarecorder.movie-timescale";
+
+        /**
+         * Key to extract the rotation (in degrees) to properly orient the video
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String ROTATION = "android.media.mediarecorder.rotation";
+
+        /**
+         * Key to extract the video bitrate from being used
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String VIDEO_BITRATE = "android.media.mediarecorder.video-bitrate";
+
+        /**
+         * Key to extract the value for how often video iframes are generated
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String VIDEO_IFRAME_INTERVAL = "android.media.mediarecorder.video-iframe-interval";
+
+        /**
+         * Key to extract the video encoding level
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String VIDEO_LEVEL = "android.media.mediarecorder.video-encoder-level";
+
+        /**
+         * Key to extract the video encoding profile
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String VIDEO_PROFILE = "android.media.mediarecorder.video-encoder-profile";
+
+        /**
+         * Key to extract the recorded video time units
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         * A value of 1000 indicates that the video's timing is in milliseconds.
+         */
+        public static final String VIDEO_TIMESCALE = "android.media.mediarecorder.video-timescale";
+
+        /**
+         * Key to extract the width (in pixels) of the captured video
+         * from the {@link MediaRecorder#getMetrics} return.
+         * The value is an integer.
+         */
+        public static final String WIDTH = "android.media.mediarecorder.width";
+
+    }
 }
+

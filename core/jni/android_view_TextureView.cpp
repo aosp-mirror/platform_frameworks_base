@@ -83,6 +83,10 @@ static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer)
             colorType = kN32_SkColorType;
             alphaType = kOpaque_SkAlphaType;
             break;
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            colorType = kRGBA_F16_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
         case WINDOW_FORMAT_RGB_565:
             colorType = kRGB_565_SkColorType;
             alphaType = kOpaque_SkAlphaType;
@@ -90,7 +94,8 @@ static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer)
         default:
             break;
     }
-    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType);
+    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType,
+            GraphicsJNI::defaultColorSpace());
 }
 
 /**
@@ -165,7 +170,8 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 
     Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
     nativeCanvas->setBitmap(bitmap);
-    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom);
+    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
+            SkClipOp::kIntersect);
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,

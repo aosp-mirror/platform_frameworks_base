@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
+import java.io.File;
 
 /**
  * A helper class to manage database creation and version management.
@@ -54,6 +55,7 @@ public abstract class SQLiteOpenHelper {
     private final String mName;
     private final CursorFactory mFactory;
     private final int mNewVersion;
+    private final int mMinimumSupportedVersion;
 
     private SQLiteDatabase mDatabase;
     private boolean mIsInitializing;
@@ -96,6 +98,34 @@ public abstract class SQLiteOpenHelper {
      */
     public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
             DatabaseErrorHandler errorHandler) {
+        this(context, name, factory, version, 0, errorHandler);
+    }
+
+    /**
+     * Same as {@link #SQLiteOpenHelper(Context, String, CursorFactory, int, DatabaseErrorHandler)}
+     * but also accepts an integer minimumSupportedVersion as a convenience for upgrading very old
+     * versions of this database that are no longer supported. If a database with older version that
+     * minimumSupportedVersion is found, it is simply deleted and a new database is created with the
+     * given name and version
+     *
+     * @param context to use to open or create the database
+     * @param name the name of the database file, null for a temporary in-memory database
+     * @param factory to use for creating cursor objects, null for default
+     * @param version the required version of the database
+     * @param minimumSupportedVersion the minimum version that is supported to be upgraded to
+     *            {@code version} via {@link #onUpgrade}. If the current database version is lower
+     *            than this, database is simply deleted and recreated with the version passed in
+     *            {@code version}. {@link #onBeforeDelete} is called before deleting the database
+     *            when this happens. This is 0 by default.
+     * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
+     *            corruption, or null to use the default error handler.
+     * @see #onBeforeDelete(SQLiteDatabase)
+     * @see #SQLiteOpenHelper(Context, String, CursorFactory, int, DatabaseErrorHandler)
+     * @see #onUpgrade(SQLiteDatabase, int, int)
+     * @hide
+     */
+    public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
+            int minimumSupportedVersion, DatabaseErrorHandler errorHandler) {
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
 
         mContext = context;
@@ -103,6 +133,7 @@ public abstract class SQLiteOpenHelper {
         mFactory = factory;
         mNewVersion = version;
         mErrorHandler = errorHandler;
+        mMinimumSupportedVersion = Math.max(0, minimumSupportedVersion);
     }
 
     /**
@@ -245,21 +276,34 @@ public abstract class SQLiteOpenHelper {
                             db.getVersion() + " to " + mNewVersion + ": " + mName);
                 }
 
-                db.beginTransaction();
-                try {
-                    if (version == 0) {
-                        onCreate(db);
+                if (version > 0 && version < mMinimumSupportedVersion) {
+                    File databaseFile = new File(db.getPath());
+                    onBeforeDelete(db);
+                    db.close();
+                    if (SQLiteDatabase.deleteDatabase(databaseFile)) {
+                        mIsInitializing = false;
+                        return getDatabaseLocked(writable);
                     } else {
-                        if (version > mNewVersion) {
-                            onDowngrade(db, version, mNewVersion);
-                        } else {
-                            onUpgrade(db, version, mNewVersion);
-                        }
+                        throw new IllegalStateException("Unable to delete obsolete database "
+                                + mName + " with version " + version);
                     }
-                    db.setVersion(mNewVersion);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
+                } else {
+                    db.beginTransaction();
+                    try {
+                        if (version == 0) {
+                            onCreate(db);
+                        } else {
+                            if (version > mNewVersion) {
+                                onDowngrade(db, version, mNewVersion);
+                            } else {
+                                onUpgrade(db, version, mNewVersion);
+                            }
+                        }
+                        db.setVersion(mNewVersion);
+                        db.setTransactionSuccessful();
+                    } finally {
+                        db.endTransaction();
+                    }
                 }
             }
 
@@ -292,23 +336,37 @@ public abstract class SQLiteOpenHelper {
     }
 
     /**
-     * Called when the database connection is being configured, to enable features
-     * such as write-ahead logging or foreign key support.
+     * Called when the database connection is being configured, to enable features such as
+     * write-ahead logging or foreign key support.
      * <p>
-     * This method is called before {@link #onCreate}, {@link #onUpgrade},
-     * {@link #onDowngrade}, or {@link #onOpen} are called.  It should not modify
-     * the database except to configure the database connection as required.
-     * </p><p>
-     * This method should only call methods that configure the parameters of the
-     * database connection, such as {@link SQLiteDatabase#enableWriteAheadLogging}
-     * {@link SQLiteDatabase#setForeignKeyConstraintsEnabled},
-     * {@link SQLiteDatabase#setLocale}, {@link SQLiteDatabase#setMaximumSize},
-     * or executing PRAGMA statements.
+     * This method is called before {@link #onCreate}, {@link #onUpgrade}, {@link #onDowngrade}, or
+     * {@link #onOpen} are called. It should not modify the database except to configure the
+     * database connection as required.
+     * </p>
+     * <p>
+     * This method should only call methods that configure the parameters of the database
+     * connection, such as {@link SQLiteDatabase#enableWriteAheadLogging}
+     * {@link SQLiteDatabase#setForeignKeyConstraintsEnabled}, {@link SQLiteDatabase#setLocale},
+     * {@link SQLiteDatabase#setMaximumSize}, or executing PRAGMA statements.
      * </p>
      *
      * @param db The database.
      */
     public void onConfigure(SQLiteDatabase db) {}
+
+    /**
+     * Called before the database is deleted when the version returned by
+     * {@link SQLiteDatabase#getVersion()} is lower than the minimum supported version passed (if at
+     * all) while creating this helper. After the database is deleted, a fresh database with the
+     * given version is created. This will be followed by {@link #onConfigure(SQLiteDatabase)} and
+     * {@link #onCreate(SQLiteDatabase)} being called with a new SQLiteDatabase object
+     *
+     * @param db the database opened with this helper
+     * @see #SQLiteOpenHelper(Context, String, CursorFactory, int, int, DatabaseErrorHandler)
+     * @hide
+     */
+    public void onBeforeDelete(SQLiteDatabase db) {
+    }
 
     /**
      * Called when the database is created for the first time. This is where the

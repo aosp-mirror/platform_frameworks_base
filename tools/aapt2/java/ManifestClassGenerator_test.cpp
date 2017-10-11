@@ -15,33 +15,33 @@
  */
 
 #include "java/ManifestClassGenerator.h"
-#include "test/Builders.h"
-#include "test/Context.h"
 
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
-static ::testing::AssertionResult getManifestClassText(IAaptContext* context, xml::XmlResource* res,
-                                                       std::string* outStr) {
-    std::unique_ptr<ClassDefinition> manifestClass = generateManifestClass(
-            context->getDiagnostics(), res);
-    if (!manifestClass) {
-        return ::testing::AssertionFailure() << "manifestClass == nullptr";
-    }
+static ::testing::AssertionResult GetManifestClassText(IAaptContext* context,
+                                                       xml::XmlResource* res,
+                                                       std::string* out_str) {
+  std::unique_ptr<ClassDefinition> manifest_class =
+      GenerateManifestClass(context->GetDiagnostics(), res);
+  if (!manifest_class) {
+    return ::testing::AssertionFailure() << "manifest_class == nullptr";
+  }
 
-    std::stringstream out;
-    if (!manifestClass->writeJavaFile(manifestClass.get(), "android", true, &out)) {
-        return ::testing::AssertionFailure() << "failed to write java file";
-    }
+  std::stringstream out;
+  if (!manifest_class->WriteJavaFile(manifest_class.get(), "android", true,
+                                     &out)) {
+    return ::testing::AssertionFailure() << "failed to write java file";
+  }
 
-    *outStr = out.str();
-    return ::testing::AssertionSuccess();
+  *out_str = out.str();
+  return ::testing::AssertionSuccess();
 }
 
 TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-    std::unique_ptr<xml::XmlResource> manifest = test::buildXmlDom(R"EOF(
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"EOF(
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
           <permission android:name="android.permission.ACCESS_INTERNET" />
           <permission android:name="android.DO_DANGEROUS_THINGS" />
@@ -49,46 +49,51 @@ TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
           <permission-group android:name="foo.bar.PERMISSION" />
         </manifest>)EOF");
 
-    std::string actual;
-    ASSERT_TRUE(getManifestClassText(context.get(), manifest.get(), &actual));
+  std::string actual;
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
 
-    const size_t permissionClassPos = actual.find("public static final class permission {");
-    const size_t permissionGroupClassPos =
-            actual.find("public static final class permission_group {");
-    ASSERT_NE(std::string::npos, permissionClassPos);
-    ASSERT_NE(std::string::npos, permissionGroupClassPos);
+  const size_t permission_class_pos =
+      actual.find("public static final class permission {");
+  const size_t permission_croup_class_pos =
+      actual.find("public static final class permission_group {");
+  ASSERT_NE(std::string::npos, permission_class_pos);
+  ASSERT_NE(std::string::npos, permission_croup_class_pos);
 
-    //
-    // Make sure these permissions are in the permission class.
-    //
+  //
+  // Make sure these permissions are in the permission class.
+  //
 
-    size_t pos = actual.find("public static final String ACCESS_INTERNET="
-                             "\"android.permission.ACCESS_INTERNET\";");
-    EXPECT_GT(pos, permissionClassPos);
-    EXPECT_LT(pos, permissionGroupClassPos);
+  size_t pos = actual.find(
+      "public static final String ACCESS_INTERNET="
+      "\"android.permission.ACCESS_INTERNET\";");
+  EXPECT_GT(pos, permission_class_pos);
+  EXPECT_LT(pos, permission_croup_class_pos);
 
-    pos = actual.find("public static final String DO_DANGEROUS_THINGS="
-                      "\"android.DO_DANGEROUS_THINGS\";");
-    EXPECT_GT(pos, permissionClassPos);
-    EXPECT_LT(pos, permissionGroupClassPos);
+  pos = actual.find(
+      "public static final String DO_DANGEROUS_THINGS="
+      "\"android.DO_DANGEROUS_THINGS\";");
+  EXPECT_GT(pos, permission_class_pos);
+  EXPECT_LT(pos, permission_croup_class_pos);
 
-    pos = actual.find("public static final String HUH=\"com.test.sample.permission.HUH\";");
-    EXPECT_GT(pos, permissionClassPos);
-    EXPECT_LT(pos, permissionGroupClassPos);
+  pos = actual.find(
+      "public static final String HUH=\"com.test.sample.permission.HUH\";");
+  EXPECT_GT(pos, permission_class_pos);
+  EXPECT_LT(pos, permission_croup_class_pos);
 
-    //
-    // Make sure these permissions are in the permission_group class
-    //
+  //
+  // Make sure these permissions are in the permission_group class
+  //
 
-    pos = actual.find("public static final String PERMISSION="
-                      "\"foo.bar.PERMISSION\";");
-    EXPECT_GT(pos, permissionGroupClassPos);
-    EXPECT_LT(pos, std::string::npos);
+  pos = actual.find(
+      "public static final String PERMISSION="
+      "\"foo.bar.PERMISSION\";");
+  EXPECT_GT(pos, permission_croup_class_pos);
+  EXPECT_LT(pos, std::string::npos);
 }
 
 TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
-    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-    std::unique_ptr<xml::XmlResource> manifest = test::buildXmlDom(R"EOF(
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"EOF(
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
           <!-- Required to access the internet.
                Added in API 1. -->
@@ -101,36 +106,36 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
           <permission android:name="android.permission.SECRET" />
         </manifest>)EOF");
 
-    std::string actual;
-    ASSERT_TRUE(getManifestClassText(context.get(), manifest.get(), &actual));
+  std::string actual;
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
 
-    const char* expectedAccessInternet =
-R"EOF(    /**
+  const char* expected_access_internet =
+      R"EOF(    /**
      * Required to access the internet.
      * Added in API 1.
      */
     public static final String ACCESS_INTERNET="android.permission.ACCESS_INTERNET";)EOF";
 
-    EXPECT_NE(std::string::npos, actual.find(expectedAccessInternet));
+  EXPECT_NE(std::string::npos, actual.find(expected_access_internet));
 
-    const char* expectedPlayOutside =
-R"EOF(    /**
+  const char* expected_play_outside =
+      R"EOF(    /**
      * @deprecated This permission is for playing outside.
      */
     @Deprecated
     public static final String PLAY_OUTSIDE="android.permission.PLAY_OUTSIDE";)EOF";
 
-    EXPECT_NE(std::string::npos, actual.find(expectedPlayOutside));
+  EXPECT_NE(std::string::npos, actual.find(expected_play_outside));
 
-    const char* expectedSecret =
-R"EOF(    /**
+  const char* expected_secret =
+      R"EOF(    /**
      * This is a private permission for system only!
      * @hide
      */
     @android.annotation.SystemApi
     public static final String SECRET="android.permission.SECRET";)EOF";
 
-    EXPECT_NE(std::string::npos, actual.find(expectedSecret));
+  EXPECT_NE(std::string::npos, actual.find(expected_secret));
 }
 
-} // namespace aapt
+}  // namespace aapt

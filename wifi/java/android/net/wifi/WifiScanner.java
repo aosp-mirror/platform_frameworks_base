@@ -16,7 +16,10 @@
 
 package android.net.wifi;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,12 +43,10 @@ import java.util.List;
 
 /**
  * This class provides a way to scan the Wifi universe around the device
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context
- * .WIFI_SCANNING_SERVICE)}.
  * @hide
  */
 @SystemApi
+@SystemService(Context.WIFI_SCANNING_SERVICE)
 public class WifiScanner {
 
     /** no band specified; use channel list instead */
@@ -732,6 +733,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
         startBackgroundScan(settings, listener, null);
     }
@@ -744,6 +746,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startBackgroundScan(ScanSettings settings, ScanListener listener,
             WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
@@ -761,6 +764,7 @@ public class WifiScanner {
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
      *  #startBackgroundScan}
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopBackgroundScan(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = removeListener(listener);
@@ -772,6 +776,7 @@ public class WifiScanner {
      * reports currently available scan results on appropriate listeners
      * @return true if all scan results were reported correctly
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean getScanResults() {
         validateChannel();
         Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
@@ -786,6 +791,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener) {
         startScan(settings, listener, null);
     }
@@ -799,6 +805,7 @@ public class WifiScanner {
      *                 key for this scan, and must also be specified to cancel the scan. Multiple
      *                 scans should also not share this object.
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = addListener(listener);
@@ -815,6 +822,7 @@ public class WifiScanner {
      * hasn't been called on the listener, ignored otherwise
      * @param listener
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopScan(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = removeListener(listener);
@@ -906,6 +914,7 @@ public class WifiScanner {
     }
 
     /** specifies information about an access point of interest */
+    @Deprecated
     public static class BssidInfo {
         /** bssid of the access point; in XX:XX:XX:XX:XX:XX format */
         public String bssid;
@@ -919,6 +928,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class WifiChangeSettings implements Parcelable {
         public int rssiSampleSize;                          /* sample size for RSSI averaging */
         public int lostApSampleSize;                        /* samples to confirm AP's loss */
@@ -959,6 +969,8 @@ public class WifiScanner {
      * @param periodInMs indicates period of scan to find changes
      * @param bssidInfos access points to watch
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
             int lostApSampleSize,                           /* samples to confirm AP's loss */
@@ -974,6 +986,7 @@ public class WifiScanner {
     /**
      * interface to get wifi change events on; use this on {@link #startTrackingWifiChange}
      */
+    @Deprecated
     public interface WifiChangeListener extends ActionListener {
         /** indicates that changes were detected in wifi environment
          * @param results indicate the access points that exhibited change
@@ -990,6 +1003,8 @@ public class WifiScanner {
      * @param listener object to report events on; this object must be unique and must also be
      *                 provided on {@link #stopTrackingWifiChange}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void startTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
@@ -999,17 +1014,22 @@ public class WifiScanner {
      * @param listener object that was provided to report events on {@link
      * #stopTrackingWifiChange}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void stopTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @SystemApi
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void configureWifiChange(WifiChangeSettings settings) {
         throw new UnsupportedOperationException();
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
+    @Deprecated
     public static interface BssidListener extends ActionListener {
         /** indicates that access points were found by on going scans
          * @param results list of scan results, one for each access point visible currently
@@ -1023,6 +1043,7 @@ public class WifiScanner {
 
     /** @hide */
     @SystemApi
+    @Deprecated
     public static class HotlistSettings implements Parcelable {
         public BssidInfo[] bssidInfos;
         public int apLostThreshold;
@@ -1057,6 +1078,8 @@ public class WifiScanner {
      * @param listener object provided to report events on; this object must be unique and must
      *                 also be provided on {@link #stopTrackingBssids}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
         throw new UnsupportedOperationException();
@@ -1066,6 +1089,8 @@ public class WifiScanner {
      * remove tracking of interesting access points
      * @param listener same object provided in {@link #startTrackingBssids}
      */
+    @Deprecated
+    @SuppressLint("Doclava125")
     public void stopTrackingBssids(BssidListener listener) {
         throw new UnsupportedOperationException();
     }

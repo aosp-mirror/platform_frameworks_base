@@ -274,7 +274,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
         // One or more unclipped saveLayers have been enqueued, with deferred clears.
         // Flush all of these clears with a single draw
         SkPaint* paint = allocator.create<SkPaint>();
-        paint->setXfermodeMode(SkXfermode::kClear_Mode);
+        paint->setBlendMode(SkBlendMode::kClear);
         SimpleRectsOp* op = allocator.create_trivial<SimpleRectsOp>(bounds,
                 Matrix4::identity(), nullptr, paint,
                 verts, vertCount);

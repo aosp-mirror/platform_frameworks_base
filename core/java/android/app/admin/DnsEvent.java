@@ -19,9 +19,14 @@ package android.app.admin;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A class that represents a DNS lookup event.
- * @hide
  */
 public final class DnsEvent extends NetworkEvent implements Parcelable {
 
@@ -60,32 +65,35 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
     }
 
     /** Returns (possibly a subset of) the IP addresses returned. */
-    public String[] getIpAddresses() {
-        return ipAddresses;
+    public List<InetAddress> getInetAddresses() {
+        if (ipAddresses == null || ipAddresses.length == 0) {
+            return Collections.emptyList();
+        }
+        final List<InetAddress> inetAddresses = new ArrayList<>(ipAddresses.length);
+        for (final String ipAddress : ipAddresses) {
+            try {
+                // ipAddress is already an address, not a host name, no DNS resolution will happen.
+                inetAddresses.add(InetAddress.getByName(ipAddress));
+            } catch (UnknownHostException e) {
+                // Should never happen as we aren't passing a host name.
+            }
+        }
+        return inetAddresses;
     }
 
     /**
      * Returns the number of IP addresses returned from the DNS lookup event. May be different from
-     * the length of ipAddresses if there were too many addresses to log.
+     * the length of the list returned by {@link #getInetAddresses()} if there were too many
+     * addresses to log.
      */
-    public int getIpAddressesCount() {
+    public int getTotalResolvedAddressCount() {
         return ipAddressesCount;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (ipAddresses != null) {
-            for (int i = 0; i < ipAddresses.length; i++) {
-                sb.append(ipAddresses[i]);
-                if (i < ipAddresses.length - 1) {
-                    sb.append(" ");
-                }
-            }
-        } else {
-            sb.append("NONE");
-        }
-        return String.format("DnsEvent(%s, %s, %d, %d, %s)", hostname, sb.toString(),
+        return String.format("DnsEvent(%s, %s, %d, %d, %s)", hostname,
+                (ipAddresses == null) ? "NONE" : String.join(" ", ipAddresses),
                 ipAddressesCount, timestamp, packageName);
     }
 

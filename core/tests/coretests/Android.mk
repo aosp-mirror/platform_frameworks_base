@@ -22,6 +22,7 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, EnabledTestApp/src)
 
 LOCAL_DX_FLAGS := --core-library
+LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_AAPT_FLAGS = -0 dat -0 gld -c fa
 LOCAL_STATIC_JAVA_LIBRARIES := \
     core-tests-support \
@@ -30,11 +31,16 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockwebserver \
     guava \
     android-support-test \
-    mockito-target \
+    mockito-target-minus-junit4 \
     espresso-core \
-    ub-uiautomator
+    ub-uiautomator \
+    platform-test-annotations \
+    compatibility-device-util \
+    truth-prebuilt
+
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
 

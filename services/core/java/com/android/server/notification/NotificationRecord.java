@@ -15,30 +15,47 @@
  */
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MIN;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.media.AudioSystem;
+import android.metrics.LogMaker;
+import android.net.Uri;
+import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationRecordProto;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
+import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -47,7 +64,7 @@ import java.util.Objects;
  * {@link android.service.notification.NotificationListenerService}s.
  *
  * <p>These objects should not be mutated unless the code is synchronized
- * on {@link NotificationManagerService#mNotificationList}, and any
+ * on {@link NotificationManagerService#mNotificationLock}, and any
  * modification should be followed by a sorting of that list.</p>
  *
  * <p>Is sortable by {@link NotificationComparator}.</p>
@@ -57,6 +74,7 @@ import java.util.Objects;
 public final class NotificationRecord {
     static final String TAG = "NotificationRecord";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
     final int mOriginalFlags;
     private final Context mContext;
@@ -70,6 +88,7 @@ public final class NotificationRecord {
     // to communicate with the ranking module.
     private float mContactAffinity;
     private boolean mRecentlyIntrusive;
+    private long mLastIntrusive;
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
@@ -100,9 +119,22 @@ public final class NotificationRecord {
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
     private String mPeopleExplanation;
+    private boolean mPreChannelsNotification = true;
+    private Uri mSound;
+    private long[] mVibration;
+    private AudioAttributes mAttributes;
+    private NotificationChannel mChannel;
+    private ArrayList<String> mPeopleOverride;
+    private ArrayList<SnoozeCriterion> mSnoozeCriteria;
+    private boolean mShowBadge;
+    private LogMaker mLogMaker;
+    private Light mLight;
+    private String mGroupLogTag;
+    private String mChannelIdLogTag;
 
     @VisibleForTesting
-    public NotificationRecord(Context context, StatusBarNotification sbn)
+    public NotificationRecord(Context context, StatusBarNotification sbn,
+            NotificationChannel channel)
     {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
@@ -111,55 +143,185 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
-        mImportance = defaultImportance();
+        mChannel = channel;
+        mPreChannelsNotification = isPreChannelsNotification();
+        mSound = calculateSound();
+        mVibration = calculateVibration();
+        mAttributes = calculateAttributes();
+        mImportance = calculateImportance();
+        mLight = calculateLights();
     }
 
-    private int defaultImportance() {
+    private boolean isPreChannelsNotification() {
+        try {
+            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+                  final ApplicationInfo applicationInfo =
+                        mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
+                                0, UserHandle.getUserId(sbn.getUid()));
+                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+                    return true;
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Can't find package", e);
+        }
+        return false;
+    }
+
+    private Uri calculateSound() {
         final Notification n = sbn.getNotification();
-        int importance = IMPORTANCE_DEFAULT;
+
+        // No notification sounds on tv
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return null;
+        }
+
+        Uri sound = mChannel.getSound();
+        if (mPreChannelsNotification && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_SOUND) == 0) {
+
+            final boolean useDefaultSound = (n.defaults & Notification.DEFAULT_SOUND) != 0;
+            if (useDefaultSound) {
+                sound = Settings.System.DEFAULT_NOTIFICATION_URI;
+            } else {
+                sound = n.sound;
+            }
+        }
+        return sound;
+    }
+
+    private Light calculateLights() {
+        int defaultLightColor = mContext.getResources().getColor(
+                com.android.internal.R.color.config_defaultNotificationColor);
+        int defaultLightOn = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOn);
+        int defaultLightOff = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOff);
+
+        int channelLightColor = getChannel().getLightColor() != 0 ? getChannel().getLightColor()
+                : defaultLightColor;
+        Light light = getChannel().shouldShowLights() ? new Light(channelLightColor,
+                defaultLightOn, defaultLightOff) : null;
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_LIGHTS) == 0) {
+            final Notification notification = sbn.getNotification();
+            if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
+                light = new Light(notification.ledARGB, notification.ledOnMS,
+                        notification.ledOffMS);
+                if ((notification.defaults & Notification.DEFAULT_LIGHTS) != 0) {
+                    light = new Light(defaultLightColor, defaultLightOn,
+                            defaultLightOff);
+                }
+            } else {
+                light = null;
+            }
+        }
+        return light;
+    }
+
+    private long[] calculateVibration() {
+        long[] vibration;
+        final long[] defaultVibration =  NotificationManagerService.getLongArray(
+                mContext.getResources(),
+                com.android.internal.R.array.config_defaultNotificationVibePattern,
+                NotificationManagerService.VIBRATE_PATTERN_MAXLEN,
+                NotificationManagerService.DEFAULT_VIBRATE_PATTERN);
+        if (getChannel().shouldVibrate()) {
+            vibration = getChannel().getVibrationPattern() == null
+                    ? defaultVibration : getChannel().getVibrationPattern();
+        } else {
+            vibration = null;
+        }
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
+            final Notification notification = sbn.getNotification();
+            final boolean useDefaultVibrate =
+                    (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
+            if (useDefaultVibrate) {
+                vibration = defaultVibration;
+            } else {
+                vibration = notification.vibrate;
+            }
+        }
+        return vibration;
+    }
+
+    private AudioAttributes calculateAttributes() {
+        final Notification n = sbn.getNotification();
+        AudioAttributes attributes = getChannel().getAudioAttributes();
+        if (attributes == null) {
+            attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+        }
+
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_SOUND) == 0) {
+            if (n.audioAttributes != null) {
+                // prefer audio attributes to stream type
+                attributes = n.audioAttributes;
+            } else if (n.audioStreamType >= 0
+                    && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
+                // the stream type is valid, use it
+                attributes = new AudioAttributes.Builder()
+                        .setInternalLegacyStreamType(n.audioStreamType)
+                        .build();
+            } else if (n.audioStreamType != AudioSystem.STREAM_DEFAULT) {
+                Log.w(TAG, String.format("Invalid stream type: %d", n.audioStreamType));
+            }
+        }
+        return attributes;
+    }
+
+    private int calculateImportance() {
+        final Notification n = sbn.getNotification();
+        int importance = getChannel().getImportance();
+        int requestedImportance = IMPORTANCE_DEFAULT;
 
         // Migrate notification flags to scores
         if (0 != (n.flags & Notification.FLAG_HIGH_PRIORITY)) {
             n.priority = Notification.PRIORITY_MAX;
         }
 
+        n.priority = NotificationManagerService.clamp(n.priority, Notification.PRIORITY_MIN,
+                Notification.PRIORITY_MAX);
         switch (n.priority) {
             case Notification.PRIORITY_MIN:
-                importance = IMPORTANCE_MIN;
+                requestedImportance = IMPORTANCE_MIN;
                 break;
             case Notification.PRIORITY_LOW:
-                importance = IMPORTANCE_LOW;
+                requestedImportance = IMPORTANCE_LOW;
                 break;
             case Notification.PRIORITY_DEFAULT:
-                importance = IMPORTANCE_DEFAULT;
+                requestedImportance = IMPORTANCE_DEFAULT;
                 break;
             case Notification.PRIORITY_HIGH:
-                importance = IMPORTANCE_HIGH;
-                break;
             case Notification.PRIORITY_MAX:
-                importance = IMPORTANCE_MAX;
+                requestedImportance = IMPORTANCE_HIGH;
                 break;
         }
-        stats.requestedImportance = importance;
+        stats.requestedImportance = requestedImportance;
+        stats.isNoisy = mSound != null || mVibration != null;
 
-        boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
-                || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
-                || n.sound != null
-                || n.vibrate != null;
-        stats.isNoisy = isNoisy;
-
-        if (!isNoisy && importance > IMPORTANCE_LOW) {
-            importance = IMPORTANCE_LOW;
-        }
-
-        if (isNoisy) {
-            if (importance < IMPORTANCE_DEFAULT) {
-                importance = IMPORTANCE_DEFAULT;
+        if (mPreChannelsNotification
+                && (importance == IMPORTANCE_UNSPECIFIED
+                || (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0)) {
+            if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
+                requestedImportance = IMPORTANCE_LOW;
             }
-        }
 
-        if (n.fullScreenIntent != null) {
-            importance = IMPORTANCE_MAX;
+            if (stats.isNoisy) {
+                if (requestedImportance < IMPORTANCE_DEFAULT) {
+                    requestedImportance = IMPORTANCE_DEFAULT;
+                }
+            }
+
+            if (n.fullScreenIntent != null) {
+                requestedImportance = IMPORTANCE_HIGH;
+            }
+            importance = requestedImportance;
         }
 
         stats.naturalImportance = importance;
@@ -189,6 +351,30 @@ public final class NotificationRecord {
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
 
+    void dump(ProtoOutputStream proto, boolean redact) {
+        proto.write(NotificationRecordProto.KEY, sbn.getKey());
+        if (getChannel() != null) {
+            proto.write(NotificationRecordProto.CHANNEL_ID, getChannel().getId());
+        }
+        proto.write(NotificationRecordProto.CAN_SHOW_LIGHT, getLight() != null);
+        proto.write(NotificationRecordProto.CAN_VIBRATE, getVibration() != null);
+        proto.write(NotificationRecordProto.FLAGS, sbn.getNotification().flags);
+        proto.write(NotificationRecordProto.GROUP_KEY, getGroupKey());
+        proto.write(NotificationRecordProto.IMPORTANCE, getImportance());
+        if (getSound() != null) {
+            proto.write(NotificationRecordProto.SOUND, getSound().toString());
+        }
+        if (getAudioAttributes() != null) {
+            proto.write(NotificationRecordProto.SOUND_USAGE, getAudioAttributes().getUsage());
+        }
+    }
+
+    String formatRemoteViews(RemoteViews rv) {
+        if (rv == null) return "null";
+        return String.format("%s/0x%08x (%d bytes): %s",
+            rv.getPackage(), rv.getLayoutId(), rv.estimateMemoryUsage(), rv.toString());
+    }
+
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
         final Notification notification = sbn.getNotification();
         final Icon icon = notification.getSmallIcon();
@@ -197,29 +383,41 @@ public final class NotificationRecord {
             iconStr += " / " + idDebugString(baseContext, icon.getResPackage(), icon.getResId());
         }
         pw.println(prefix + this);
-        pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
-        pw.println(prefix + "  icon=" + iconStr);
-        pw.println(prefix + "  pri=" + notification.priority);
-        pw.println(prefix + "  key=" + sbn.getKey());
-        pw.println(prefix + "  seen=" + mIsSeen);
-        pw.println(prefix + "  groupKey=" + getGroupKey());
-        pw.println(prefix + "  contentIntent=" + notification.contentIntent);
-        pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
-        pw.println(prefix + "  tickerText=" + notification.tickerText);
-        pw.println(prefix + "  contentView=" + notification.contentView);
-        pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
-                notification.defaults, notification.flags));
-        pw.println(prefix + "  sound=" + notification.sound);
-        pw.println(prefix + "  audioStreamType=" + notification.audioStreamType);
-        pw.println(prefix + "  audioAttributes=" + notification.audioAttributes);
-        pw.println(prefix + String.format("  color=0x%08x", notification.color));
-        pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
-        pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
-                notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+        prefix = prefix + "  ";
+        pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
+        pw.println(prefix + "icon=" + iconStr);
+        pw.println(prefix + "pri=" + notification.priority);
+        pw.println(prefix + "key=" + sbn.getKey());
+        pw.println(prefix + "seen=" + mIsSeen);
+        pw.println(prefix + "groupKey=" + getGroupKey());
+        pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
+        pw.println(prefix + "contentIntent=" + notification.contentIntent);
+        pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
+
+        pw.print(prefix + "tickerText=");
+        if (!TextUtils.isEmpty(notification.tickerText)) {
+            final String ticker = notification.tickerText.toString();
+            if (redact) {
+                // if the string is long enough, we allow ourselves a few bytes for debugging
+                pw.print(ticker.length() > 16 ? ticker.substring(0,8) : "");
+                pw.println("...");
+            } else {
+                pw.println(ticker);
+            }
+        } else {
+            pw.println("null");
+        }
+        pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
+        pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
+        pw.println(prefix + "headsUpContentView="
+                + formatRemoteViews(notification.headsUpContentView));
+        pw.print(prefix + String.format("color=0x%08x", notification.color));
+        pw.println(prefix + "timeout="
+                + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
-            pw.println(prefix + "  actions={");
+            pw.println(prefix + "actions={");
             final int N = notification.actions.length;
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 final Notification.Action action = notification.actions[i];
                 if (action != null) {
                     pw.println(String.format("%s    [%d] \"%s\" -> %s",
@@ -233,7 +431,7 @@ public final class NotificationRecord {
             pw.println(prefix + "  }");
         }
         if (notification.extras != null && notification.extras.size() > 0) {
-            pw.println(prefix + "  extras={");
+            pw.println(prefix + "extras={");
             for (String key : notification.extras.keySet()) {
                 pw.print(prefix + "    " + key + "=");
                 Object val = notification.extras.get(key);
@@ -251,7 +449,7 @@ public final class NotificationRecord {
                         final int N = Array.getLength(val);
                         pw.print(" (" + N + ")");
                         if (!redact) {
-                            for (int j=0; j<N; j++) {
+                            for (int j = 0; j < N; j++) {
                                 pw.println();
                                 pw.print(String.format("%s      [%d] %s",
                                         prefix, j, String.valueOf(Array.get(val, j))));
@@ -263,25 +461,47 @@ public final class NotificationRecord {
                     pw.println();
                 }
             }
-            pw.println(prefix + "  }");
+            pw.println(prefix + "}");
         }
-        pw.println(prefix + "  stats=" + stats.toString());
-        pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
-        pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
-        pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
-        pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
-        pw.println(prefix + "  mUserImportance="
+        pw.println(prefix + "stats=" + stats.toString());
+        pw.println(prefix + "mContactAffinity=" + mContactAffinity);
+        pw.println(prefix + "mRecentlyIntrusive=" + mRecentlyIntrusive);
+        pw.println(prefix + "mPackagePriority=" + mPackagePriority);
+        pw.println(prefix + "mPackageVisibility=" + mPackageVisibility);
+        pw.println(prefix + "mUserImportance="
                 + NotificationListenerService.Ranking.importanceToString(mUserImportance));
-        pw.println(prefix + "  mImportance="
+        pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
-        pw.println(prefix + "  mImportanceExplanation=" + mImportanceExplanation);
-        pw.println(prefix + "  mIntercept=" + mIntercept);
-        pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
-        pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
-        pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
-        pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
-        pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
-        pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
+        pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mIntercept=" + mIntercept);
+        pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
+        pw.println(prefix + "mRankingTimeMs=" + mRankingTimeMs);
+        pw.println(prefix + "mCreationTimeMs=" + mCreationTimeMs);
+        pw.println(prefix + "mVisibleSinceMs=" + mVisibleSinceMs);
+        pw.println(prefix + "mUpdateTimeMs=" + mUpdateTimeMs);
+        pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
+        if (mPreChannelsNotification) {
+            pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
+                    notification.defaults, notification.flags));
+            pw.println(prefix + "n.sound=" + notification.sound);
+            pw.println(prefix + "n.audioStreamType=" + notification.audioStreamType);
+            pw.println(prefix + "n.audioAttributes=" + notification.audioAttributes);
+            pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
+                    notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+            pw.println(prefix + "vibrate=" + Arrays.toString(notification.vibrate));
+        }
+        pw.println(prefix + "mSound= " + mSound);
+        pw.println(prefix + "mVibration= " + mVibration);
+        pw.println(prefix + "mAttributes= " + mAttributes);
+        pw.println(prefix + "mLight= " + mLight);
+        pw.println(prefix + "mShowBadge=" + mShowBadge);
+        pw.println(prefix + "effectiveNotificationChannel=" + getChannel());
+        if (getPeopleOverride() != null) {
+            pw.println(prefix + "overridePeople= " + TextUtils.join(",", getPeopleOverride()));
+        }
+        if (getSnoozeCriteria() != null) {
+            pw.println(prefix + "snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
+        }
     }
 
 
@@ -309,10 +529,11 @@ public final class NotificationRecord {
     @Override
     public final String toString() {
         return String.format(
-                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s: %s)",
+                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
+                        " channel=%s: %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
-                this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
+                this.sbn.getTag(), this.mImportance, this.sbn.getKey(), this.getChannel().getId(),
                 this.sbn.getNotification());
     }
 
@@ -330,10 +551,17 @@ public final class NotificationRecord {
 
     public void setRecentlyIntrusive(boolean recentlyIntrusive) {
         mRecentlyIntrusive = recentlyIntrusive;
+        if (recentlyIntrusive) {
+            mLastIntrusive = System.currentTimeMillis();
+        }
     }
 
     public boolean isRecentlyIntrusive() {
         return mRecentlyIntrusive;
+    }
+
+    public long getLastIntrusive() {
+        return mLastIntrusive;
     }
 
     public void setPackagePriority(int packagePriority) {
@@ -359,22 +587,22 @@ public final class NotificationRecord {
 
     private String getUserExplanation() {
         if (mUserExplanation == null) {
-            mUserExplanation =
-                    mContext.getString(com.android.internal.R.string.importance_from_user);
+            mUserExplanation = mContext.getResources().getString(
+                    com.android.internal.R.string.importance_from_user);
         }
         return mUserExplanation;
     }
 
     private String getPeopleExplanation() {
         if (mPeopleExplanation == null) {
-            mPeopleExplanation =
-                    mContext.getString(com.android.internal.R.string.importance_from_person);
+            mPeopleExplanation = mContext.getResources().getString(
+                    com.android.internal.R.string.importance_from_person);
         }
         return mPeopleExplanation;
     }
 
     private void applyUserImportance() {
-        if (mUserImportance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+        if (mUserImportance != IMPORTANCE_UNSPECIFIED) {
             mImportance = mUserImportance;
             mImportanceExplanation = getUserExplanation();
         }
@@ -385,7 +613,7 @@ public final class NotificationRecord {
     }
 
     public void setImportance(int importance, CharSequence explanation) {
-        if (importance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+        if (importance != IMPORTANCE_UNSPECIFIED) {
             mImportance = importance;
             mImportanceExplanation = explanation;
         }
@@ -468,9 +696,16 @@ public final class NotificationRecord {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
+        MetricsLogger.action(getLogMaker(now)
+                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
+        if (visible) {
+            MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
+        }
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
-                (int) (now - mCreationTimeMs),
-                (int) (now - mUpdateTimeMs),
+                getLifespanMs(now),
+                getFreshnessMs(now),
                 0, // exposure time
                 rank);
     }
@@ -523,7 +758,160 @@ public final class NotificationRecord {
         return sbn.getGroupKey();
     }
 
+    public void setOverrideGroupKey(String overrideGroupKey) {
+        sbn.setOverrideGroupKey(overrideGroupKey);
+        mGroupLogTag = null;
+    }
+
+    private String getGroupLogTag() {
+        if (mGroupLogTag == null) {
+            mGroupLogTag = shortenTag(sbn.getGroup());
+        }
+        return mGroupLogTag;
+    }
+
+    private String getChannelIdLogTag() {
+        if (mChannelIdLogTag == null) {
+            mChannelIdLogTag = shortenTag(mChannel.getId());
+        }
+        return mChannelIdLogTag;
+    }
+
+    private String shortenTag(String longTag) {
+        if (longTag == null) {
+            return null;
+        }
+        if (longTag.length() < MAX_LOGTAG_LENGTH) {
+            return longTag;
+        } else {
+            return longTag.substring(0, MAX_LOGTAG_LENGTH - 8) + "-" +
+                    Integer.toHexString(longTag.hashCode());
+        }
+    }
+
     public boolean isImportanceFromUser() {
         return mImportance == mUserImportance;
+    }
+
+    public NotificationChannel getChannel() {
+        return mChannel;
+    }
+
+    protected void updateNotificationChannel(NotificationChannel channel) {
+        if (channel != null) {
+            mChannel = channel;
+            calculateImportance();
+        }
+    }
+
+    public void setShowBadge(boolean showBadge) {
+        mShowBadge = showBadge;
+    }
+
+    public boolean canShowBadge() {
+        return mShowBadge;
+    }
+
+    public Light getLight() {
+        return mLight;
+    }
+
+    public Uri getSound() {
+        return mSound;
+    }
+
+    public long[] getVibration() {
+        return mVibration;
+    }
+
+    public AudioAttributes getAudioAttributes() {
+        return mAttributes;
+    }
+
+    public ArrayList<String> getPeopleOverride() {
+        return mPeopleOverride;
+    }
+
+    protected void setPeopleOverride(ArrayList<String> people) {
+        mPeopleOverride = people;
+    }
+
+    public ArrayList<SnoozeCriterion> getSnoozeCriteria() {
+        return mSnoozeCriteria;
+    }
+
+    protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
+        mSnoozeCriteria = snoozeCriteria;
+    }
+
+    public LogMaker getLogMaker(long now) {
+        if (mLogMaker == null) {
+            // initialize fields that only change on update (so a new record)
+            mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
+                    .setPackageName(sbn.getPackageName())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_ID, sbn.getId())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag())
+                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag());
+        }
+        // reset fields that can change between updates, or are used by multiple logs
+        return mLogMaker
+                .clearCategory()
+                .clearType()
+                .clearSubtype()
+                .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
+                        sbn.getNotification().isGroupSummary() ? 1 : 0)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now));
+    }
+
+    public LogMaker getLogMaker() {
+        return getLogMaker(System.currentTimeMillis());
+    }
+
+    @VisibleForTesting
+    static final class Light {
+        public final int color;
+        public final int onMs;
+        public final int offMs;
+
+        public Light(int color, int onMs, int offMs) {
+            this.color = color;
+            this.onMs = onMs;
+            this.offMs = offMs;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Light light = (Light) o;
+
+            if (color != light.color) return false;
+            if (onMs != light.onMs) return false;
+            return offMs == light.offMs;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = color;
+            result = 31 * result + onMs;
+            result = 31 * result + offMs;
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Light{" +
+                    "color=" + color +
+                    ", onMs=" + onMs +
+                    ", offMs=" + offMs +
+                    '}';
+        }
     }
 }

@@ -17,9 +17,9 @@
 #ifndef AAPT_IO_FILESYSTEM_H
 #define AAPT_IO_FILESYSTEM_H
 
-#include "io/File.h"
-
 #include <map>
+
+#include "io/File.h"
 
 namespace aapt {
 namespace io {
@@ -28,47 +28,47 @@ namespace io {
  * A regular file from the file system. Uses mmap to open the data.
  */
 class RegularFile : public IFile {
-public:
-    RegularFile(const Source& source);
+ public:
+  explicit RegularFile(const Source& source);
 
-    std::unique_ptr<IData> openAsData() override;
-    const Source& getSource() const override;
+  std::unique_ptr<IData> OpenAsData() override;
+  const Source& GetSource() const override;
 
-private:
-    Source mSource;
+ private:
+  Source source_;
 };
 
 class FileCollection;
 
 class FileCollectionIterator : public IFileCollectionIterator {
-public:
-    FileCollectionIterator(FileCollection* collection);
+ public:
+  explicit FileCollectionIterator(FileCollection* collection);
 
-    bool hasNext() override;
-    io::IFile* next() override;
+  bool HasNext() override;
+  io::IFile* Next() override;
 
-private:
-    std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
+ private:
+  std::map<std::string, std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
 /**
  * An IFileCollection representing the file system.
  */
 class FileCollection : public IFileCollection {
-public:
-    /**
-     * Adds a file located at path. Returns the IFile representation of that file.
-     */
-    IFile* insertFile(const StringPiece& path);
-    IFile* findFile(const StringPiece& path) override;
-    std::unique_ptr<IFileCollectionIterator> iterator() override;
+ public:
+  /**
+   * Adds a file located at path. Returns the IFile representation of that file.
+   */
+  IFile* InsertFile(const android::StringPiece& path);
+  IFile* FindFile(const android::StringPiece& path) override;
+  std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
-private:
-    friend class FileCollectionIterator;
-    std::map<std::string, std::unique_ptr<IFile>> mFiles;
+ private:
+  friend class FileCollectionIterator;
+  std::map<std::string, std::unique_ptr<IFile>> files_;
 };
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt
 
-#endif // AAPT_IO_FILESYSTEM_H
+#endif  // AAPT_IO_FILESYSTEM_H

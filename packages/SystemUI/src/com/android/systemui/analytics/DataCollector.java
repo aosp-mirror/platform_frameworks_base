@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -35,8 +36,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session;
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.PhoneEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
 
 /**
  * Tracks touch, sensor and phone events when the lockscreen is on. If the phone is unlocked
@@ -56,7 +57,7 @@ public class DataCollector implements SensorEventListener {
     private static final long TIMEOUT_MILLIS = 11000; // 11 seconds.
     public static final boolean DEBUG = false;
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
 
     // Err on the side of caution, so logging is not started after a crash even tough the screen

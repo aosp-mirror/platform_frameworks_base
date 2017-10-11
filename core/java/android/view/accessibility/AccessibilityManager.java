@@ -16,12 +16,20 @@
 
 package android.view.accessibility;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,14 +40,17 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IntPair;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
@@ -49,15 +60,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * {@link android.view.View} changes etc. Parties interested in handling accessibility
  * events implement and register an accessibility service which extends
  * {@link android.accessibilityservice.AccessibilityService}.
- * <p>
- * To obtain a handle to the accessibility manager do the following:
- * </p>
- * <p>
- * <code>
- * <pre>AccessibilityManager accessibilityManager =
- *        (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</pre>
- * </code>
- * </p>
  *
  * @see AccessibilityEvent
  * @see AccessibilityNodeInfo
@@ -65,6 +67,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see Context#getSystemService
  * @see Context#ACCESSIBILITY_SERVICE
  */
+@SystemService(Context.ACCESSIBILITY_SERVICE)
 public final class AccessibilityManager {
     private static final boolean DEBUG = false;
 
@@ -91,6 +94,22 @@ public final class AccessibilityManager {
     /** @hide */
     public static final int AUTOCLICK_DELAY_DEFAULT = 600;
 
+    /**
+     * Activity action: Launch UI to manage which accessibility service or feature is assigned
+     * to the navigation bar Accessibility button.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
+            "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
+
     static final Object sInstanceSync = new Object();
 
     private static AccessibilityManager sInstance;
@@ -103,20 +122,27 @@ public final class AccessibilityManager {
 
     final Handler mHandler;
 
+    final Handler.Callback mCallback;
+
     boolean mIsEnabled;
+
+    int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
     boolean mIsTouchExplorationEnabled;
 
     boolean mIsHighTextContrastEnabled;
 
-    private final CopyOnWriteArrayList<AccessibilityStateChangeListener>
-            mAccessibilityStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<AccessibilityStateChangeListener, Handler>
+            mAccessibilityStateChangeListeners = new ArrayMap<>();
 
-    private final CopyOnWriteArrayList<TouchExplorationStateChangeListener>
-            mTouchExplorationStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<TouchExplorationStateChangeListener, Handler>
+            mTouchExplorationStateChangeListeners = new ArrayMap<>();
 
-    private final CopyOnWriteArrayList<HighTextContrastChangeListener>
-            mHighTextContrastStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final ArrayMap<HighTextContrastChangeListener, Handler>
+            mHighTextContrastStateChangeListeners = new ArrayMap<>();
+
+    private final ArrayMap<AccessibilityServicesStateChangeListener, Handler>
+            mServicesStateChangeListeners = new ArrayMap<>();
 
     /**
      * Listener for the system accessibility state. To listen for changes to the
@@ -130,7 +156,7 @@ public final class AccessibilityManager {
          *
          * @param enabled Whether accessibility is enabled.
          */
-        public void onAccessibilityStateChanged(boolean enabled);
+        void onAccessibilityStateChanged(boolean enabled);
     }
 
     /**
@@ -146,7 +172,24 @@ public final class AccessibilityManager {
          *
          * @param enabled Whether touch exploration is enabled.
          */
-        public void onTouchExplorationStateChanged(boolean enabled);
+        void onTouchExplorationStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for changes to the state of accessibility services. Changes include services being
+     * enabled or disabled, or changes to the {@link AccessibilityServiceInfo} of a running service.
+     * {@see #addAccessibilityServicesStateChangeListener}.
+     *
+     * @hide
+     */
+    public interface AccessibilityServicesStateChangeListener {
+
+        /**
+         * Called when the state of accessibility services changes.
+         *
+         * @param manager The manager that is calling back
+         */
+        void onAccessibilityServicesStateChanged(AccessibilityManager manager);
     }
 
     /**
@@ -164,19 +207,44 @@ public final class AccessibilityManager {
          *
          * @param enabled Whether high text contrast is enabled.
          */
-        public void onHighTextContrastStateChanged(boolean enabled);
+        void onHighTextContrastStateChanged(boolean enabled);
     }
 
     private final IAccessibilityManagerClient.Stub mClient =
             new IAccessibilityManagerClient.Stub() {
+        @Override
         public void setState(int state) {
-            // We do not want to change this immediately as the applicatoin may
+            // We do not want to change this immediately as the application may
             // have already checked that accessibility is on and fired an event,
             // that is now propagating up the view tree, Hence, if accessibility
             // is now off an exception will be thrown. We want to have the exception
             // enforcement to guard against apps that fire unnecessary accessibility
             // events when accessibility is off.
-            mHandler.obtainMessage(MyHandler.MSG_SET_STATE, state, 0).sendToTarget();
+            mHandler.obtainMessage(MyCallback.MSG_SET_STATE, state, 0).sendToTarget();
+        }
+
+        @Override
+        public void notifyServicesStateChanged() {
+            final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
+            synchronized (mLock) {
+                if (mServicesStateChangeListeners.isEmpty()) {
+                    return;
+                }
+                listeners = new ArrayMap<>(mServicesStateChangeListeners);
+            }
+
+            int numListeners = listeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                final AccessibilityServicesStateChangeListener listener =
+                        mServicesStateChangeListeners.keyAt(i);
+                mServicesStateChangeListeners.valueAt(i).post(() -> listener
+                        .onAccessibilityServicesStateChanged(AccessibilityManager.this));
+            }
+        }
+
+        @Override
+        public void setRelevantEventTypes(int eventTypes) {
+            mRelevantEventTypes = eventTypes;
         }
     };
 
@@ -218,7 +286,28 @@ public final class AccessibilityManager {
      * @hide
      */
     public AccessibilityManager(Context context, IAccessibilityManager service, int userId) {
-        mHandler = new MyHandler(context.getMainLooper());
+        // Constructor can't be chained because we can't create an instance of an inner class
+        // before calling another constructor.
+        mCallback = new MyCallback();
+        mHandler = new Handler(context.getMainLooper(), mCallback);
+        mUserId = userId;
+        synchronized (mLock) {
+            tryConnectToServiceLocked(service);
+        }
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param handler The handler to use
+     * @param service An interface to the backing service.
+     * @param userId User id under which to run.
+     *
+     * @hide
+     */
+    public AccessibilityManager(Handler handler, IAccessibilityManager service, int userId) {
+        mCallback = new MyCallback();
+        mHandler = handler;
         mUserId = userId;
         synchronized (mLock) {
             tryConnectToServiceLocked(service);
@@ -230,6 +319,14 @@ public final class AccessibilityManager {
      */
     public IAccessibilityManagerClient getClient() {
         return mClient;
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler.Callback getCallback() {
+        return mCallback;
     }
 
     /**
@@ -318,16 +415,23 @@ public final class AccessibilityManager {
                     return;
                 }
             }
+            if ((event.getEventType() & mRelevantEventTypes) == 0) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Not dispatching irrelevant event: " + event
+                            + " that is not among "
+                            + AccessibilityEvent.eventTypeToString(mRelevantEventTypes));
+                }
+                return;
+            }
             userId = mUserId;
         }
-        boolean doRecycle = false;
         try {
             event.setEventTime(SystemClock.uptimeMillis());
             // it is possible that this manager is in the same process as the service but
             // client using it is called through Binder from another process. Example: MMS
             // app adds a SMS notification and the NotificationManagerService calls this method
             long identityToken = Binder.clearCallingIdentity();
-            doRecycle = service.sendAccessibilityEvent(event, userId);
+            service.sendAccessibilityEvent(event, userId);
             Binder.restoreCallingIdentity(identityToken);
             if (DEBUG) {
                 Log.i(LOG_TAG, event + " sent");
@@ -335,9 +439,7 @@ public final class AccessibilityManager {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error during sending " + event + " ", re);
         } finally {
-            if (doRecycle) {
-                event.recycle();
-            }
+            event.recycle();
         }
     }
 
@@ -473,52 +575,125 @@ public final class AccessibilityManager {
 
     /**
      * Registers an {@link AccessibilityStateChangeListener} for changes in
-     * the global accessibility state of the system.
+     * the global accessibility state of the system. Equivalent to calling
+     * {@link #addAccessibilityStateChangeListener(AccessibilityStateChangeListener, Handler)}
+     * with a null handler.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
+     * @return Always returns {@code true}.
      */
     public boolean addAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mAccessibilityStateChangeListeners.add(listener);
+        addAccessibilityStateChangeListener(listener, null);
+        return true;
+    }
+
+    /**
+     * Registers an {@link AccessibilityStateChangeListener} for changes in
+     * the global accessibility state of the system. If the listener has already been registered,
+     * the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addAccessibilityStateChangeListener(
+            @NonNull AccessibilityStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mAccessibilityStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters an {@link AccessibilityStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
+     * @return True if the listener was previously registered.
      */
     public boolean removeAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mAccessibilityStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            int index = mAccessibilityStateChangeListeners.indexOfKey(listener);
+            mAccessibilityStateChangeListeners.remove(listener);
+            return (index >= 0);
+        }
     }
 
     /**
      * Registers a {@link TouchExplorationStateChangeListener} for changes in
-     * the global touch exploration state of the system.
+     * the global touch exploration state of the system. Equivalent to calling
+     * {@link #addTouchExplorationStateChangeListener(TouchExplorationStateChangeListener, Handler)}
+     * with a null handler.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
+     * @return Always returns {@code true}.
      */
     public boolean addTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mTouchExplorationStateChangeListeners.add(listener);
+        addTouchExplorationStateChangeListener(listener, null);
+        return true;
+    }
+
+    /**
+     * Registers an {@link TouchExplorationStateChangeListener} for changes in
+     * the global touch exploration state of the system. If the listener has already been
+     * registered, the handler used to call it back is updated.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     */
+    public void addTouchExplorationStateChangeListener(
+            @NonNull TouchExplorationStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mTouchExplorationStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters a {@link TouchExplorationStateChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
+     * @return True if listener was previously registered.
      */
     public boolean removeTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
+        synchronized (mLock) {
+            int index = mTouchExplorationStateChangeListeners.indexOfKey(listener);
+            mTouchExplorationStateChangeListeners.remove(listener);
+            return (index >= 0);
+        }
+    }
+
+    /**
+     * Registers a {@link AccessibilityServicesStateChangeListener}.
+     *
+     * @param listener The listener.
+     * @param handler The handler on which the listener should be called back, or {@code null}
+     *                for a callback on the process's main handler.
+     * @hide
+     */
+    public void addAccessibilityServicesStateChangeListener(
+            @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mServicesStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
+    }
+
+    /**
+     * Unregisters a {@link AccessibilityServicesStateChangeListener}.
+     *
+     * @param listener The listener.
+     *
+     * @hide
+     */
+    public void removeAccessibilityServicesStateChangeListener(
+            @NonNull AccessibilityServicesStateChangeListener listener) {
         // Final CopyOnWriteArrayList - no lock needed.
-        return mTouchExplorationStateChangeListeners.remove(listener);
+        mServicesStateChangeListeners.remove(listener);
     }
 
     /**
@@ -526,28 +701,69 @@ public final class AccessibilityManager {
      * the global high text contrast state of the system.
      *
      * @param listener The listener.
-     * @return True if successfully registered.
      *
      * @hide
      */
-    public boolean addHighTextContrastStateChangeListener(
-            @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mHighTextContrastStateChangeListeners.add(listener);
+    public void addHighTextContrastStateChangeListener(
+            @NonNull HighTextContrastChangeListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            mHighTextContrastStateChangeListeners
+                    .put(listener, (handler == null) ? mHandler : handler);
+        }
     }
 
     /**
      * Unregisters a {@link HighTextContrastChangeListener}.
      *
      * @param listener The listener.
-     * @return True if successfully unregistered.
      *
      * @hide
      */
-    public boolean removeHighTextContrastStateChangeListener(
+    public void removeHighTextContrastStateChangeListener(
             @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        return mHighTextContrastStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            mHighTextContrastStateChangeListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Check if the accessibility volume stream is active.
+     *
+     * @return True if accessibility volume is active (i.e. some service has requested it). False
+     * otherwise.
+     * @hide
+     */
+    public boolean isAccessibilityVolumeStreamActive() {
+        List<AccessibilityServiceInfo> serviceInfos =
+                getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        for (int i = 0; i < serviceInfos.size(); i++) {
+            if ((serviceInfos.get(i).flags & FLAG_ENABLE_ACCESSIBILITY_VOLUME) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Report a fingerprint gesture to accessibility. Only available for the system process.
+     *
+     * @param keyCode The key code of the gesture
+     * @return {@code true} if accessibility consumes the event. {@code false} if not.
+     * @hide
+     */
+    public boolean sendFingerprintGesture(int keyCode) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.sendFingerprintGesture(keyCode);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**
@@ -572,16 +788,40 @@ public final class AccessibilityManager {
         mIsHighTextContrastEnabled = highTextContrastEnabled;
 
         if (wasEnabled != enabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED);
+            notifyAccessibilityStateChanged();
         }
 
         if (wasTouchExplorationEnabled != touchExplorationEnabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_EXPLORATION_STATE_CHANGED);
+            notifyTouchExplorationStateChanged();
         }
 
         if (wasHighTextContrastEnabled != highTextContrastEnabled) {
-            mHandler.sendEmptyMessage(MyHandler.MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED);
+            notifyHighTextContrastStateChanged();
         }
+    }
+
+    /**
+     * Find an installed service with the specified {@link ComponentName}.
+     *
+     * @param componentName The name to match to the service.
+     *
+     * @return The info corresponding to the installed service, or {@code null} if no such service
+     * is installed.
+     * @hide
+     */
+    public AccessibilityServiceInfo getInstalledServiceInfoWithComponentName(
+            ComponentName componentName) {
+        final List<AccessibilityServiceInfo> installedServiceInfos =
+                getInstalledAccessibilityServiceList();
+        if ((installedServiceInfos == null) || (componentName == null)) {
+            return null;
+        }
+        for (int i = 0; i < installedServiceInfos.size(); i++) {
+            if (componentName.equals(installedServiceInfos.get(i).getComponentName())) {
+                return installedServiceInfos.get(i);
+            }
+        }
+        return null;
     }
 
     /**
@@ -631,7 +871,95 @@ public final class AccessibilityManager {
         }
     }
 
-    private  IAccessibilityManager getServiceLocked() {
+    /**
+     * Perform the accessibility shortcut if the caller has permission.
+     *
+     * @hide
+     */
+    public void performAccessibilityShortcut() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.performAccessibilityShortcut();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
+        }
+    }
+
+    /**
+     * Notifies that the accessibility button in the system's navigation area has been clicked
+     *
+     * @hide
+     */
+    public void notifyAccessibilityButtonClicked() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyAccessibilityButtonClicked();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
+        }
+    }
+
+    /**
+     * Notifies that the visibility of the accessibility button in the system's navigation area
+     * has changed.
+     *
+     * @param shown {@code true} if the accessibility button is visible within the system
+     *                  navigation area, {@code false} otherwise
+     * @hide
+     */
+    public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyAccessibilityButtonVisibilityChanged(shown);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while dispatching accessibility button visibility change", re);
+        }
+    }
+
+    /**
+     * Set an IAccessibilityInteractionConnection to replace the actions of a picture-in-picture
+     * window. Intended for use by the System UI only.
+     *
+     * @param connection The connection to handle the actions. Set to {@code null} to avoid
+     * affecting the actions.
+     *
+     * @hide
+     */
+    public void setPictureInPictureActionReplacingConnection(
+            @Nullable IAccessibilityInteractionConnection connection) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setPictureInPictureActionReplacingConnection(connection);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting picture in picture action replacement", re);
+        }
+    }
+
+    private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
         }
@@ -648,8 +976,9 @@ public final class AccessibilityManager {
         }
 
         try {
-            final int stateFlags = service.addClient(mClient, mUserId);
-            setStateLocked(stateFlags);
+            final long userStateAndRelevantEvents = service.addClient(mClient, mUserId);
+            setStateLocked(IntPair.first(userStateAndRelevantEvents));
+            mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -659,70 +988,91 @@ public final class AccessibilityManager {
     /**
      * Notifies the registered {@link AccessibilityStateChangeListener}s.
      */
-    private void handleNotifyAccessibilityStateChanged() {
+    private void notifyAccessibilityStateChanged() {
         final boolean isEnabled;
+        final ArrayMap<AccessibilityStateChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mAccessibilityStateChangeListeners.isEmpty()) {
+                return;
+            }
             isEnabled = mIsEnabled;
+            listeners = new ArrayMap<>(mAccessibilityStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (AccessibilityStateChangeListener listener :mAccessibilityStateChangeListeners) {
-            listener.onAccessibilityStateChanged(isEnabled);
+
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final AccessibilityStateChangeListener listener =
+                    mAccessibilityStateChangeListeners.keyAt(i);
+            mAccessibilityStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onAccessibilityStateChanged(isEnabled));
         }
     }
 
     /**
      * Notifies the registered {@link TouchExplorationStateChangeListener}s.
      */
-    private void handleNotifyTouchExplorationStateChanged() {
+    private void notifyTouchExplorationStateChanged() {
         final boolean isTouchExplorationEnabled;
+        final ArrayMap<TouchExplorationStateChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mTouchExplorationStateChangeListeners.isEmpty()) {
+                return;
+            }
             isTouchExplorationEnabled = mIsTouchExplorationEnabled;
+            listeners = new ArrayMap<>(mTouchExplorationStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (TouchExplorationStateChangeListener listener :mTouchExplorationStateChangeListeners) {
-            listener.onTouchExplorationStateChanged(isTouchExplorationEnabled);
+
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final TouchExplorationStateChangeListener listener =
+                    mTouchExplorationStateChangeListeners.keyAt(i);
+            mTouchExplorationStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onTouchExplorationStateChanged(isTouchExplorationEnabled));
         }
     }
 
     /**
      * Notifies the registered {@link HighTextContrastChangeListener}s.
      */
-    private void handleNotifyHighTextContrastStateChanged() {
+    private void notifyHighTextContrastStateChanged() {
         final boolean isHighTextContrastEnabled;
+        final ArrayMap<HighTextContrastChangeListener, Handler> listeners;
         synchronized (mLock) {
+            if (mHighTextContrastStateChangeListeners.isEmpty()) {
+                return;
+            }
             isHighTextContrastEnabled = mIsHighTextContrastEnabled;
+            listeners = new ArrayMap<>(mHighTextContrastStateChangeListeners);
         }
-        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
-        for (HighTextContrastChangeListener listener : mHighTextContrastStateChangeListeners) {
-            listener.onHighTextContrastStateChanged(isHighTextContrastEnabled);
+
+        int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            final HighTextContrastChangeListener listener =
+                    mHighTextContrastStateChangeListeners.keyAt(i);
+            mHighTextContrastStateChangeListeners.valueAt(i)
+                    .post(() -> listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
     }
 
-    private final class MyHandler extends Handler {
-        public static final int MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED = 1;
-        public static final int MSG_NOTIFY_EXPLORATION_STATE_CHANGED = 2;
-        public static final int MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED = 3;
-        public static final int MSG_SET_STATE = 4;
+    /**
+     * Determines if the accessibility button within the system navigation area is supported.
+     *
+     * @return {@code true} if the accessibility button is supported on this device,
+     * {@code false} otherwise
+     * @hide
+     */
+    @SystemApi
+    public static boolean isAccessibilityButtonSupported() {
+        final Resources res = Resources.getSystem();
+        return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
+    }
 
-        public MyHandler(Looper looper) {
-            super(looper, null, false);
-        }
+    private final class MyCallback implements Handler.Callback {
+        public static final int MSG_SET_STATE = 1;
 
         @Override
-        public void handleMessage(Message message) {
+        public boolean handleMessage(Message message) {
             switch (message.what) {
-                case MSG_NOTIFY_ACCESSIBILITY_STATE_CHANGED: {
-                    handleNotifyAccessibilityStateChanged();
-                } break;
-
-                case MSG_NOTIFY_EXPLORATION_STATE_CHANGED: {
-                    handleNotifyTouchExplorationStateChanged();
-                } break;
-
-                case MSG_NOTIFY_HIGH_TEXT_CONTRAST_STATE_CHANGED: {
-                    handleNotifyHighTextContrastStateChanged();
-                } break;
-
                 case MSG_SET_STATE: {
                     // See comment at mClient
                     final int state = message.arg1;
@@ -731,6 +1081,7 @@ public final class AccessibilityManager {
                     }
                 } break;
             }
+            return true;
         }
     }
 }

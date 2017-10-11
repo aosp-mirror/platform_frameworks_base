@@ -16,11 +16,13 @@
 
 package android.os.health;
 
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 
 import com.android.internal.app.IBatteryStats;
 
@@ -39,6 +41,7 @@ import com.android.internal.app.IBatteryStats;
  * JobScheduler}), and while that can affect charging rates, it is still preferable
  * to actually draining the battery.
  */
+@SystemService(Context.SYSTEM_HEALTH_SERVICE)
 public class SystemHealthManager {
     private final IBatteryStats mBatteryStats;
 
@@ -47,8 +50,12 @@ public class SystemHealthManager {
      * @hide
      */
     public SystemHealthManager() {
-        mBatteryStats = IBatteryStats.Stub.asInterface(
-            ServiceManager.getService(BatteryStats.SERVICE_NAME));
+        this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+    }
+
+    /** {@hide} */
+    public SystemHealthManager(IBatteryStats batteryStats) {
+        mBatteryStats = batteryStats;
     }
 
     /**

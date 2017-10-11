@@ -26,8 +26,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,9 +43,9 @@ public final class BluetoothInputHost implements BluetoothProfile {
      *
      * <p>This intent will have 3 extras:
      * <ul>
-     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
-     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
-     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     * <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
      *
      * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
@@ -57,13 +57,12 @@ public final class BluetoothInputHost implements BluetoothProfile {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.inputhost.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.inputhost.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Constants representing device subclass.
      *
-     * @see #registerApp(String, String, String, byte, byte[],
-     *      BluetoothHidDeviceCallback)
+     * @see #registerApp(String, String, String, byte, byte[], BluetoothHidDeviceCallback)
      */
     public static final byte SUBCLASS1_NONE = (byte) 0x00;
     public static final byte SUBCLASS1_KEYBOARD = (byte) 0x40;
@@ -75,7 +74,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public static final byte SUBCLASS2_GAMEPAD = (byte) 0x02;
     public static final byte SUBCLASS2_REMOTE_CONTROL = (byte) 0x03;
     public static final byte SUBCLASS2_SENSING_DEVICE = (byte) 0x04;
-    public static final byte SUBCLASS2_DIGITIZER_TABLED = (byte) 0x05;
+    public static final byte SUBCLASS2_DIGITIZER_TABLET = (byte) 0x05;
     public static final byte SUBCLASS2_CARD_READER = (byte) 0x06;
 
     /**
@@ -114,11 +113,12 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
     private ServiceListener mServiceListener;
 
-    private IBluetoothInputHost mService;
+    private volatile IBluetoothInputHost mService;
 
     private BluetoothAdapter mAdapter;
 
-    private static class BluetoothHidDeviceCallbackWrapper extends IBluetoothHidDeviceCallback.Stub {
+    private static class BluetoothHidDeviceCallbackWrapper extends
+            IBluetoothHidDeviceCallback.Stub {
 
         private BluetoothHidDeviceCallback mCallback;
 
@@ -163,56 +163,57 @@ public final class BluetoothInputHost implements BluetoothProfile {
         }
     }
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-        new IBluetoothStateChangeCallback.Stub() {
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+            new IBluetoothStateChangeCallback.Stub() {
 
-        public void onBluetoothStateChange(boolean up) {
-            Log.d(TAG, "onBluetoothStateChange: up=" + up);
-            synchronized (mConnection) {
-                if (!up) {
-                    Log.d(TAG,"Unbinding service...");
-                    if (mService != null) {
-                        mService = null;
-                        try {
-                            mContext.unbindService(mConnection);
-                        } catch (IllegalArgumentException e) {
-                            Log.e(TAG,"onBluetoothStateChange: could not unbind service:", e);
+                public void onBluetoothStateChange(boolean up) {
+                    Log.d(TAG, "onBluetoothStateChange: up=" + up);
+                    synchronized (mConnection) {
+                        if (!up) {
+                            Log.d(TAG, "Unbinding service...");
+                            if (mService != null) {
+                                mService = null;
+                                try {
+                                    mContext.unbindService(mConnection);
+                                } catch (IllegalArgumentException e) {
+                                    Log.e(TAG, "onBluetoothStateChange: could not unbind service:",
+                                            e);
+                                }
+                            }
+                        } else {
+                            try {
+                                if (mService == null) {
+                                    Log.d(TAG, "Binding HID Device service...");
+                                    doBind();
+                                }
+                            } catch (IllegalStateException e) {
+                                Log.e(TAG,
+                                        "onBluetoothStateChange: could not bind to HID Dev "
+                                                + "service: ",
+                                        e);
+                            } catch (SecurityException e) {
+                                Log.e(TAG,
+                                        "onBluetoothStateChange: could not bind to HID Dev "
+                                                + "service: ",
+                                        e);
+                            }
                         }
-                    }
-                } else {
-                    try {
-                        if (mService == null) {
-                            Log.d(TAG,"Binding HID Device service...");
-                            doBind();
-                        }
-                    } catch (IllegalStateException e) {
-                        Log.e(TAG,"onBluetoothStateChange: could not bind to HID Dev service: ", e);
-                    } catch (SecurityException e) {
-                        Log.e(TAG,"onBluetoothStateChange: could not bind to HID Dev service: ", e);
                     }
                 }
-            }
-        }
-    };
+            };
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-
+    private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected()");
-
             mService = IBluetoothInputHost.Stub.asInterface(service);
-
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.INPUT_HOST,
-                    BluetoothInputHost.this);
+                        BluetoothInputHost.this);
             }
         }
-
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "onServiceDisconnected()");
-
             mService = null;
-
             if (mServiceListener != null) {
                 mServiceListener.onServiceDisconnected(BluetoothProfile.INPUT_HOST);
             }
@@ -269,9 +270,9 @@ public final class BluetoothInputHost implements BluetoothProfile {
                 try {
                     mContext.unbindService(mConnection);
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG,"close: could not unbind HID Dev service: ", e);
+                    Log.e(TAG, "close: could not unbind HID Dev service: ", e);
                 }
-           }
+            }
         }
 
         mServiceListener = null;
@@ -280,12 +281,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         Log.v(TAG, "getConnectedDevices()");
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getConnectedDevices();
+                return service.getConnectedDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -299,12 +302,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         Log.v(TAG, "getDevicesMatchingConnectionStates(): states=" + Arrays.toString(states));
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getDevicesMatchingConnectionStates(states);
+                return service.getDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -318,12 +323,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         Log.v(TAG, "getConnectionState(): device=" + device);
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                return mService.getConnectionState(device);
+                return service.getConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -341,14 +348,11 @@ public final class BluetoothInputHost implements BluetoothProfile {
      * should be unregistered using
      * {@link #unregisterApp(BluetoothHidDeviceAppConfiguration)}.
      *
-     * @param sdp {@link BluetoothHidDeviceAppSdpSettings} object of
-     *             HID Device SDP record.
-     * @param inQos {@link BluetoothHidDeviceAppQosSettings} object of
-     *             Incoming QoS Settings.
-     * @param outQos {@link BluetoothHidDeviceAppQosSettings} object of
-     *             Outgoing QoS Settings.
-     * @param callback {@link BluetoothHidDeviceCallback} object to which
-     *            callback messages will be sent.
+     * @param sdp {@link BluetoothHidDeviceAppSdpSettings} object of HID Device SDP record.
+     * @param inQos {@link BluetoothHidDeviceAppQosSettings} object of Incoming QoS Settings.
+     * @param outQos {@link BluetoothHidDeviceAppQosSettings} object of Outgoing QoS Settings.
+     * @param callback {@link BluetoothHidDeviceCallback} object to which callback messages will be
+     * sent.
      * @return
      */
     public boolean registerApp(BluetoothHidDeviceAppSdpSettings sdp,
@@ -363,13 +367,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
             return false;
         }
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
                 BluetoothHidDeviceAppConfiguration config =
-                    new BluetoothHidDeviceAppConfiguration();
+                        new BluetoothHidDeviceAppConfiguration();
                 BluetoothHidDeviceCallbackWrapper cbw =
-                    new BluetoothHidDeviceCallbackWrapper(callback);
-                result = mService.registerApp(config, sdp, inQos, outQos, cbw);
+                        new BluetoothHidDeviceCallbackWrapper(callback);
+                result = service.registerApp(config, sdp, inQos, outQos, cbw);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -385,11 +390,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
      * new connections will be allowed until registered again using
      * {@link #registerApp(String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
      *
-     * @param config {@link BluetoothHidDeviceAppConfiguration} object as
-     *            obtained from
-     *            {@link BluetoothHidDeviceCallback#onAppStatusChanged(BluetoothDevice,
-     *            BluetoothHidDeviceAppConfiguration, boolean)}
-     *
+     * @param config {@link BluetoothHidDeviceAppConfiguration} object as obtained from {@link
+     * BluetoothHidDeviceCallback#onAppStatusChanged(BluetoothDevice,
+     * BluetoothHidDeviceAppConfiguration,
+     * boolean)}
      * @return
      */
     public boolean unregisterApp(BluetoothHidDeviceAppConfiguration config) {
@@ -397,9 +401,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.unregisterApp(config);
+                result = service.unregisterApp(config);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -413,17 +418,18 @@ public final class BluetoothInputHost implements BluetoothProfile {
     /**
      * Sends report to remote host using interrupt channel.
      *
-     * @param id Report Id, as defined in descriptor. Can be 0 in case Report Id
-     *            are not defined in descriptor.
+     * @param id Report Id, as defined in descriptor. Can be 0 in case Report Id are not defined in
+     * descriptor.
      * @param data Report data, not including Report Id.
      * @return
      */
     public boolean sendReport(BluetoothDevice device, int id, byte[] data) {
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.sendReport(device, id, data);
+                result = service.sendReport(device, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -448,9 +454,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.replyReport(device, type, id, data);
+                result = service.replyReport(device, type, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -473,9 +480,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.reportError(device, error);
+                result = service.reportError(device, error);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -496,9 +504,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.unplug(device);
+                result = service.unplug(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -520,9 +529,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.connect(device);
+                result = service.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -543,9 +553,10 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        if (mService != null) {
+        final IBluetoothInputHost service = mService;
+        if (service != null) {
             try {
-                result = mService.disconnect(device);
+                result = service.disconnect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }

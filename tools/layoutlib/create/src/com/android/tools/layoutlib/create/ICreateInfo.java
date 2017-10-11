@@ -45,18 +45,20 @@ public interface ICreateInfo {
     String[] getDelegateClassNatives();
 
     /**
-     * Returns The list of methods to stub out. Each entry must be in the form
-     * "package.package.OuterClass$InnerClass#MethodName".
-     * The list can be empty but must not be null.
-     */
-    String[] getOverriddenMethods();
-
-    /**
      * Returns the list of classes to rename, must be an even list: the binary FQCN
      * of class to replace followed by the new FQCN.
      * The list can be empty but must not be null.
      */
     String[] getRenamedClasses();
+
+    /**
+     * List of classes to refactor. This is similar to combining {@link #getRenamedClasses()} and
+     * {@link #getJavaPkgClasses()}.
+     * Classes included here will be renamed and then all their references in any other classes
+     * will be also modified.
+     * FQCN of class to refactor followed by its new FQCN.
+     */
+    String[] getRefactoredClasses();
 
     /**
      * Returns the list of classes for which the methods returning them should be deleted.
@@ -83,6 +85,11 @@ public interface ICreateInfo {
      * separated by a '#'.
      */
     String[] getPromotedFields();
+
+    /**
+     * Returns a list of classes to be promoted to public visibility.
+     */
+    String[] getPromotedClasses();
 
     /**
      * Returns a map from binary FQCN className to {@link InjectMethodRunnable} which will be

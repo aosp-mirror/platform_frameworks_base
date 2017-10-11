@@ -74,7 +74,7 @@ public:
     void endLayer();
     WARN_UNUSED_RESULT OffscreenBuffer* copyToLayer(const Rect& area);
 
-    Texture* getTexture(const SkBitmap* bitmap);
+    Texture* getTexture(Bitmap* bitmap);
     const LightInfo& getLightInfo() const { return mLightInfo; }
 
     void renderGlop(const BakedOpState& state, const Glop& glop) {

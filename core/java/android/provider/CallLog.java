@@ -217,6 +217,12 @@ public class CallLog {
         /** Call was pulled externally. */
         public static final int FEATURES_PULLED_EXTERNALLY = 0x2;
 
+        /** Call was HD. */
+        public static final int FEATURES_HD_CALL = 0x4;
+
+        /** Call was WIFI call. */
+        public static final int FEATURES_WIFI = 0x8;
+
         /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
@@ -325,6 +331,13 @@ public class CallLog {
          * entries of type {@link #VOICEMAIL_TYPE} that have valid transcriptions.
          */
         public static final String TRANSCRIPTION = "transcription";
+
+        /**
+         * State of voicemail transcription entry. This will only be populated for call log
+         * entries of type {@link #VOICEMAIL_TYPE}.
+         * @hide
+         */
+        public static final String TRANSCRIPTION_STATE = "transcription_state";
 
         /**
          * Whether this item has been read or otherwise consumed by the user.
@@ -849,10 +862,34 @@ public class CallLog {
             }
 
             try {
+                // When cleaning up the call log, try to delete older call long entries on a per
+                // PhoneAccount basis first.  There can be multiple ConnectionServices causing
+                // the addition of entries in the call log.  With the introduction of Self-Managed
+                // ConnectionServices, we want to ensure that a misbehaving self-managed CS cannot
+                // spam the call log with its own entries, causing entries from Telephony to be
+                // removed.
                 final Uri result = resolver.insert(uri, values);
-                resolver.delete(uri, "_id IN " +
-                        "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
-                        + " LIMIT -1 OFFSET 500)", null);
+                if (values.containsKey(PHONE_ACCOUNT_ID)
+                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
+                        && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)
+                        && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME))) {
+                    // Only purge entries for the same phone account.
+                    resolver.delete(uri, "_id IN " +
+                            "(SELECT _id FROM calls"
+                            + " WHERE " + PHONE_ACCOUNT_COMPONENT_NAME + " = ?"
+                            + " AND " + PHONE_ACCOUNT_ID + " = ?"
+                            + " ORDER BY " + DEFAULT_SORT_ORDER
+                            + " LIMIT -1 OFFSET 500)", new String[] {
+                            values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME),
+                            values.getAsString(PHONE_ACCOUNT_ID)
+                    });
+                } else {
+                    // No valid phone account specified, so default to the old behavior.
+                    resolver.delete(uri, "_id IN " +
+                            "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
+                            + " LIMIT -1 OFFSET 500)", null);
+                }
+
                 return result;
             } catch (IllegalArgumentException e) {
                 Log.w(LOG_TAG, "Failed to insert calllog", e);

@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
@@ -44,6 +45,7 @@ import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.android.graphics.NopCanvas;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
+import com.android.layoutlib.bridge.android.support.SupportPreferencesUtil;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
@@ -142,7 +144,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
 
-        public PostInflateException(String message) {
+        private PostInflateException(String message) {
             super(message);
         }
     }
@@ -206,7 +208,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     /**
      * Measures the the current layout if needed (see {@link #invalidateRenderingSize}).
      */
-    private void measure(@NonNull SessionParams params) {
+    private void measureLayout(@NonNull SessionParams params) {
         // only do the screen measure when needed.
         if (mMeasuredScreenWidth != -1) {
             return;
@@ -240,11 +242,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // Then measure only the content with UNSPECIFIED to see the size difference
             // and apply this to the screen size.
 
+            View measuredView = mContentRoot.getChildAt(0);
+
             // first measure the full layout, with EXACTLY to get the size of the
             // content as it is inside the decor/dialog
             @SuppressWarnings("deprecation")
             Pair<Integer, Integer> exactMeasure = measureView(
-                    mViewRoot, mContentRoot.getChildAt(0),
+                    mViewRoot, measuredView,
                     mMeasuredScreenWidth, MeasureSpec.EXACTLY,
                     mMeasuredScreenHeight, MeasureSpec.EXACTLY);
 
@@ -255,6 +259,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     mContentRoot, mContentRoot.getChildAt(0),
                     mMeasuredScreenWidth, widthMeasureSpecMode,
                     mMeasuredScreenHeight, heightMeasureSpecMode);
+
+            // If measuredView is not null, exactMeasure nor result will be null.
+            assert exactMeasure != null;
+            assert result != null;
 
             // now look at the difference and add what is needed.
             if (renderingMode.isHorizExpand()) {
@@ -303,6 +311,20 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             SessionParams params = getParams();
             BridgeContext context = getContext();
 
+            if (Bridge.isLocaleRtl(params.getLocale())) {
+                if (!params.isRtlSupported()) {
+                    Bridge.getLog().warning(LayoutLog.TAG_RTL_NOT_ENABLED,
+                            "You are using a right-to-left " +
+                                    "(RTL) locale but RTL is not enabled", null);
+                } else if (params.getSimulatedPlatformVersion() < 17) {
+                    // This will render ok because we are using the latest layoutlib but at least
+                    // warn the user that this might fail in a real device.
+                    Bridge.getLog().warning(LayoutLog.TAG_RTL_NOT_SUPPORTED, "You are using a " +
+                            "right-to-left " +
+                            "(RTL) locale but RTL is not supported for API level < 17", null);
+                }
+            }
+
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
             Fragment_Delegate.setLayoutlibCallback(params.getLayoutlibCallback());
@@ -311,8 +333,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             boolean isPreference = "PreferenceScreen".equals(rootTag);
             View view;
             if (isPreference) {
-                view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
+                // First try to use the support library inflater. If something fails, fallback
+                // to the system preference inflater.
+                view = SupportPreferencesUtil.inflatePreference(getContext(), mBlockParser,
                         mContentRoot);
+                if (view == null) {
+                    view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
+                            mContentRoot);
+                }
             } else {
                 view = mInflater.inflate(mBlockParser, mContentRoot);
             }
@@ -331,12 +359,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             setActiveToolbar(view, context, params);
 
-            measure(params);
+            measureLayout(params);
             measureView(mViewRoot, null /*measuredView*/,
                     mMeasuredScreenWidth, MeasureSpec.EXACTLY,
                     mMeasuredScreenHeight, MeasureSpec.EXACTLY);
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
-            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+            mSystemViewInfoList =
+                    visitAllChildren(mViewRoot, 0, 0, params.getExtendedViewInfoMode(),
                     false);
 
             return SUCCESS.createResult();
@@ -362,13 +391,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Renders the given view hierarchy to the passed canvas and returns the result of the render
-     * operation.
-     * @param canvas an optional canvas to render the views to. If null, only the measure and
-     * layout steps will be executed.
+     * Runs a layout pass for the given view root
      */
-    private static Result render(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
-            @Nullable Canvas canvas, int width, int height) {
+    private static void doLayout(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
+            int width, int height) {
         // measure again with the size we need
         // This must always be done before the call to layout
         measureView(viewRoot, null /*measuredView*/,
@@ -378,7 +404,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         // now do the layout.
         viewRoot.layout(0, 0, width, height);
         handleScrolling(context, viewRoot);
+    }
 
+    /**
+     * Renders the given view hierarchy to the passed canvas and returns the result of the render
+     * operation.
+     * @param canvas an optional canvas to render the views to. If null, only the measure and
+     * layout steps will be executed.
+     */
+    private static Result renderAndBuildResult(@NonNull ViewGroup viewRoot, @Nullable Canvas canvas) {
         if (canvas == null) {
             return SUCCESS.createResult();
         }
@@ -405,6 +439,40 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @see RenderSession#render(long)
      */
     public Result render(boolean freshRender) {
+        return renderAndBuildResult(freshRender, false);
+    }
+
+    /**
+     * Measures the layout
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see SessionParams#getRenderingMode()
+     * @see RenderSession#render(long)
+     */
+    public Result measure() {
+        return renderAndBuildResult(false, true);
+    }
+
+    /**
+     * Renders the scene.
+     * <p>
+     * {@link #acquire(long)} must have been called before this.
+     *
+     * @param freshRender whether the render is a new one and should erase the existing bitmap (in
+     *      the case where bitmaps are reused). This is typically needed when not playing
+     *      animations.)
+     *
+     * @throws IllegalStateException if the current context is different than the one owned by
+     *      the scene, or if {@link #acquire(long)} was not called.
+     *
+     * @see SessionParams#getRenderingMode()
+     * @see RenderSession#render(long)
+     */
+    private Result renderAndBuildResult(boolean freshRender, boolean onlyMeasure) {
         checkLock();
 
         SessionParams params = getParams();
@@ -414,14 +482,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 return ERROR_NOT_INFLATED.createResult();
             }
 
-            measure(params);
+            measureLayout(params);
 
             HardwareConfig hardwareConfig = params.getHardwareConfig();
             Result renderResult = SUCCESS.createResult();
-            if (params.isLayoutOnly()) {
+            if (onlyMeasure) {
                 // delete the canvas and image to reset them on the next full rendering
                 mImage = null;
                 mCanvas = null;
+                doLayout(getContext(), mViewRoot, mMeasuredScreenWidth, mMeasuredScreenHeight);
             } else {
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.
@@ -482,11 +551,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     gc.dispose();
                 }
 
+                doLayout(getContext(), mViewRoot, mMeasuredScreenWidth, mMeasuredScreenHeight);
                 if (mElapsedFrameTimeNanos >= 0) {
                     long initialTime = System_Delegate.nanoTime();
                     if (!mFirstFrameExecuted) {
                         // We need to run an initial draw call to initialize the animations
-                        render(getContext(), mViewRoot, NOP_CANVAS, mMeasuredScreenWidth, mMeasuredScreenHeight);
+                        renderAndBuildResult(mViewRoot, NOP_CANVAS);
 
                         // The first frame will initialize the animations
                         Choreographer_Delegate.doFrame(initialTime);
@@ -495,11 +565,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // Second frame will move the animations
                     Choreographer_Delegate.doFrame(initialTime + mElapsedFrameTimeNanos);
                 }
-                renderResult = render(getContext(), mViewRoot, mCanvas, mMeasuredScreenWidth,
-                        mMeasuredScreenHeight);
+                renderResult = renderAndBuildResult(mViewRoot, mCanvas);
             }
 
-            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+            mSystemViewInfoList =
+                    visitAllChildren(mViewRoot, 0, 0, params.getExtendedViewInfoMode(),
                     false);
 
             // success!
@@ -1140,7 +1210,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * Sets up a {@link TabHost} object.
      * @param tabHost the TabHost to setup.
      * @param layoutlibCallback The project callback object to access the project R class.
-     * @throws PostInflateException
+     * @throws PostInflateException if TabHost is missing the required ids for TabHost
      */
     private void setupTabHost(TabHost tabHost, LayoutlibCallback layoutlibCallback)
             throws PostInflateException {
@@ -1188,12 +1258,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             TabSpec spec = tabHost.newTabSpec("tag")
                     .setIndicator("Tab Label", tabHost.getResources()
                             .getDrawable(android.R.drawable.ic_menu_info_details, null))
-                    .setContent(new TabHost.TabContentFactory() {
-                        @Override
-                        public View createTabContent(String tag) {
-                            return new LinearLayout(getContext());
-                        }
-                    });
+                    .setContent(tag -> new LinearLayout(getContext()));
             tabHost.addTab(spec);
         } else {
             // for each child of the frameLayout, add a new TabSpec
@@ -1220,20 +1285,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * bounds of all the views.
      *
      * @param view the root View
-     * @param offset an offset for the view bounds.
+     * @param hOffset horizontal offset for the view bounds.
+     * @param vOffset vertical offset for the view bounds.
      * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
      *                       content frame.
      *
      * @return {@code ViewInfo} containing the bounds of the view and it children otherwise.
      */
-    private ViewInfo visit(View view, int offset, boolean setExtendedInfo,
+    private ViewInfo visit(View view, int hOffset, int vOffset, boolean setExtendedInfo,
             boolean isContentFrame) {
-        ViewInfo result = createViewInfo(view, offset, setExtendedInfo, isContentFrame);
+        ViewInfo result = createViewInfo(view, hOffset, vOffset, setExtendedInfo, isContentFrame);
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
-            result.setChildren(visitAllChildren(group, isContentFrame ? 0 : offset,
+            result.setChildren(visitAllChildren(group, isContentFrame ? 0 : hOffset,
+                    isContentFrame ? 0 : vOffset,
                     setExtendedInfo, isContentFrame));
         }
         return result;
@@ -1245,28 +1312,31 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * the children of the {@code mContentRoot}.
      *
      * @param viewGroup the root View
-     * @param offset an offset from the top for the content view frame.
+     * @param hOffset horizontal offset from the top for the content view frame.
+     * @param vOffset vertical offset from the top for the content view frame.
      * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
      *                       content frame. {@code false} if the {@code ViewInfo} to be created is
      *                       part of the system decor.
      */
-    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset,
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int hOffset, int vOffset,
             boolean setExtendedInfo, boolean isContentFrame) {
         if (viewGroup == null) {
             return null;
         }
 
         if (!isContentFrame) {
-            offset += viewGroup.getTop();
+            vOffset += viewGroup.getTop();
+            hOffset += viewGroup.getLeft();
         }
 
         int childCount = viewGroup.getChildCount();
         if (viewGroup == mContentRoot) {
-            List<ViewInfo> childrenWithoutOffset = new ArrayList<ViewInfo>(childCount);
-            List<ViewInfo> childrenWithOffset = new ArrayList<ViewInfo>(childCount);
+            List<ViewInfo> childrenWithoutOffset = new ArrayList<>(childCount);
+            List<ViewInfo> childrenWithOffset = new ArrayList<>(childCount);
             for (int i = 0; i < childCount; i++) {
-                ViewInfo[] childViewInfo = visitContentRoot(viewGroup.getChildAt(i), offset,
+                ViewInfo[] childViewInfo =
+                        visitContentRoot(viewGroup.getChildAt(i), hOffset, vOffset,
                         setExtendedInfo);
                 childrenWithoutOffset.add(childViewInfo[0]);
                 childrenWithOffset.add(childViewInfo[1]);
@@ -1274,9 +1344,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mViewInfoList = childrenWithOffset;
             return childrenWithoutOffset;
         } else {
-            List<ViewInfo> children = new ArrayList<ViewInfo>(childCount);
+            List<ViewInfo> children = new ArrayList<>(childCount);
             for (int i = 0; i < childCount; i++) {
-                children.add(visit(viewGroup.getChildAt(i), offset, setExtendedInfo,
+                children.add(visit(viewGroup.getChildAt(i), hOffset, vOffset, setExtendedInfo,
                         isContentFrame));
             }
             return children;
@@ -1295,16 +1365,18 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      *         index 1 is with the offset.
      */
     @NonNull
-    private ViewInfo[] visitContentRoot(View view, int offset, boolean setExtendedInfo) {
+    private ViewInfo[] visitContentRoot(View view, int hOffset, int vOffset,
+            boolean setExtendedInfo) {
         ViewInfo[] result = new ViewInfo[2];
         if (view == null) {
             return result;
         }
 
-        result[0] = createViewInfo(view, 0, setExtendedInfo, true);
-        result[1] = createViewInfo(view, offset, setExtendedInfo, true);
+        result[0] = createViewInfo(view, 0, 0, setExtendedInfo, true);
+        result[1] = createViewInfo(view, hOffset, vOffset, setExtendedInfo, true);
         if (view instanceof ViewGroup) {
-            List<ViewInfo> children = visitAllChildren((ViewGroup) view, 0, setExtendedInfo, true);
+            List<ViewInfo> children =
+                    visitAllChildren((ViewGroup) view, 0, 0, setExtendedInfo, true);
             result[0].setChildren(children);
             result[1].setChildren(children);
         }
@@ -1315,9 +1387,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * Creates a {@link ViewInfo} for the view. The {@code ViewInfo} corresponding to the children
      * of the {@code view} are not created. Consequently, the children of {@code ViewInfo} is not
      * set.
-     * @param offset an offset for the view bounds. Used only if view is part of the content frame.
+     * @param hOffset horizontal offset for the view bounds. Used only if view is part of the
+     * content frame.
+     * @param vOffset vertial an offset for the view bounds. Used only if view is part of the
+     * content frame.
      */
-    private ViewInfo createViewInfo(View view, int offset, boolean setExtendedInfo,
+    private ViewInfo createViewInfo(View view, int hOffset, int vOffset, boolean setExtendedInfo,
             boolean isContentFrame) {
         if (view == null) {
             return null;
@@ -1333,9 +1408,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // The view is part of the layout added by the user. Hence,
             // the ViewCookie may be obtained only through the Context.
             result = new ViewInfo(view.getClass().getName(),
-                    getContext().getViewKey(view),
-                    -scrollX + view.getLeft(), -scrollY + view.getTop() + offset,
-                    -scrollX + view.getRight(), -scrollY + view.getBottom() + offset,
+                    getContext().getViewKey(view), -scrollX + view.getLeft() + hOffset,
+                    -scrollY + view.getTop() + vOffset, -scrollX + view.getRight() + hOffset,
+                    -scrollY + view.getBottom() + vOffset,
                     view, view.getLayoutParams());
         } else {
             // We are part of the system decor.

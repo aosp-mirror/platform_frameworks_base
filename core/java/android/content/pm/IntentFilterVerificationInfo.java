@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -36,6 +37,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * The {@link com.android.server.pm.PackageManagerService} maintains some
@@ -43,6 +45,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
+@SystemApi
 public final class IntentFilterVerificationInfo implements Parcelable {
     private static final String TAG = IntentFilterVerificationInfo.class.getName();
 
@@ -55,22 +58,26 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     private String mPackageName;
     private int mMainStatus;
 
+    /** @hide */
     public IntentFilterVerificationInfo() {
         mPackageName = null;
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
-    public IntentFilterVerificationInfo(String packageName, ArrayList<String> domains) {
+    /** @hide */
+    public IntentFilterVerificationInfo(String packageName, ArraySet<String> domains) {
         mPackageName = packageName;
-        mDomains.addAll(domains);
+        mDomains = domains;
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
+    /** @hide */
     public IntentFilterVerificationInfo(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         readFromXml(parser);
     }
 
+    /** @hide */
     public IntentFilterVerificationInfo(Parcel source) {
         readFromParcel(source);
     }
@@ -83,6 +90,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         return mMainStatus;
     }
 
+    /** @hide */
     public void setStatus(int s) {
         if (s >= INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED &&
                 s <= INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
@@ -92,14 +100,16 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
     }
 
-    public ArraySet<String> getDomains() {
+    public Set<String> getDomains() {
         return mDomains;
     }
 
-    public void setDomains(ArrayList<String> list) {
-        mDomains = new ArraySet<>(list);
+    /** @hide */
+    public void setDomains(ArraySet<String> list) {
+        mDomains = list;
     }
 
+    /** @hide */
     public String getDomainsString() {
         StringBuilder sb = new StringBuilder();
         for (String str : mDomains) {
@@ -135,6 +145,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
     }
 
+    /** @hide */
     public void readFromXml(XmlPullParser parser) throws XmlPullParserException,
             IOException {
         mPackageName = getStringFromXml(parser, ATTR_PACKAGE_NAME, null);
@@ -170,6 +181,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
     }
 
+    /** @hide */
     public void writeToXml(XmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_PACKAGE_NAME, mPackageName);
         serializer.attribute(null, ATTR_STATUS, String.valueOf(mMainStatus));
@@ -180,10 +192,12 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
     }
 
+    /** @hide */
     public String getStatusString() {
-        return getStatusStringFromValue(mMainStatus);
+        return getStatusStringFromValue(((long)mMainStatus) << 32);
     }
 
+    /** @hide */
     public static String getStatusStringFromValue(long val) {
         StringBuilder sb = new StringBuilder();
         switch ((int)(val >> 32)) {

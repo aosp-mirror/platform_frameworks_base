@@ -247,6 +247,11 @@ public class AlertController {
         return false;
     }
 
+    public void installContent(AlertParams params) {
+        params.apply(this);
+        installContent();
+    }
+
     public void installContent() {
         int contentView = selectContentView();
         mWindow.setContentView(contentView);

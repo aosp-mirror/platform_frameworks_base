@@ -21,7 +21,7 @@ import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.transition.Transition.TransitionListener;
-import android.transition.Transition.TransitionListenerAdapter;
+import android.transition.TransitionListenerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -50,7 +50,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         TransitionLatch latch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
         assertTrue(latch.startLatch.await(200, TimeUnit.MILLISECONDS));
         assertEquals(View.VISIBLE, square1.getVisibility());
-        Thread.sleep(100);
+        waitForAnimation();
         assertFalse(square1.getTransitionAlpha() == 0 || square1.getTransitionAlpha() == 1);
         assertTrue(latch.endLatch.await(400, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
@@ -60,7 +60,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         latch = setVisibilityInTransition(fadeIn, R.id.square1, View.VISIBLE);
         assertTrue(latch.startLatch.await(200, TimeUnit.MILLISECONDS));
         assertEquals(View.VISIBLE, square1.getVisibility());
-        Thread.sleep(100);
+        waitForAnimation();
         final float transitionAlpha = square1.getTransitionAlpha();
         assertTrue("expecting transitionAlpha to be between 0 and 1. Was " + transitionAlpha,
                 transitionAlpha > 0 && transitionAlpha < 1);
@@ -77,7 +77,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         fadeOut.addListener(fadeOutValueCheck);
         TransitionLatch outLatch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
         assertTrue(outLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
-        Thread.sleep(100);
+        waitForAnimation();
 
         Fade fadeIn = new Fade(Fade.MODE_IN);
         FadeValueCheck fadeInValueCheck = new FadeValueCheck(square1);
@@ -110,7 +110,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         fadeIn.addListener(fadeInValueCheck);
         TransitionLatch inLatch = setVisibilityInTransition(fadeIn, R.id.square1, View.VISIBLE);
         assertTrue(inLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
-        Thread.sleep(100);
+        waitForAnimation();
 
         Fade fadeOut = new Fade(Fade.MODE_OUT);
         FadeValueCheck fadeOutValueCheck = new FadeValueCheck(square1);
@@ -143,6 +143,23 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
             }
         });
         return latch;
+    }
+
+    /**
+     * Waits for two animation frames to ensure animation values change.
+     */
+    private void waitForAnimation() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(2);
+        mActivity.getWindow().getDecorView().postOnAnimation(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+                if (latch.getCount() > 0) {
+                    mActivity.getWindow().getDecorView().postOnAnimation(this);
+                }
+            }
+        });
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
     }
 
     public static class TransitionLatch implements TransitionListener {

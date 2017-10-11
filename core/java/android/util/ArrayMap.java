@@ -19,6 +19,7 @@ package android.util;
 import libcore.util.EmptyArray;
 
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +48,18 @@ import java.util.Set;
 public final class ArrayMap<K, V> implements Map<K, V> {
     private static final boolean DEBUG = false;
     private static final String TAG = "ArrayMap";
+
+    /**
+     * Attempt to spot concurrent modifications to this data structure.
+     *
+     * It's best-effort, but any time we can throw something more diagnostic than an
+     * ArrayIndexOutOfBoundsException deep in the ArrayMap internals it's going to
+     * save a lot of development time.
+     *
+     * Good times to look for CME include after any allocArrays() call and at the end of
+     * functions that change mSize (put/remove/clear).
+     */
+    private static final boolean CONCURRENT_MODIFICATION_EXCEPTIONS = true;
 
     /**
      * The minimum amount by which the capacity of a ArrayMap will increase.
@@ -86,6 +99,18 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     int mSize;
     MapCollections<K, V> mCollections;
 
+    private static int binarySearchHashes(int[] hashes, int N, int hash) {
+        try {
+            return ContainerHelpers.binarySearch(hashes, N, hash);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            if (CONCURRENT_MODIFICATION_EXCEPTIONS) {
+                throw new ConcurrentModificationException();
+            } else {
+                throw e; // the cache is poisoned at this point, there's not much we can do
+            }
+        }
+    }
+
     int indexOf(Object key, int hash) {
         final int N = mSize;
 
@@ -94,7 +119,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             return ~0;
         }
 
-        int index = ContainerHelpers.binarySearch(mHashes, N, hash);
+        int index = binarySearchHashes(mHashes, N, hash);
 
         // If the hash code wasn't found, then we have no entry for this key.
         if (index < 0) {
@@ -132,7 +157,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             return ~0;
         }
 
-        int index = ContainerHelpers.binarySearch(mHashes, N, 0);
+        int index = binarySearchHashes(mHashes, N, 0);
 
         // If the hash code wasn't found, then we have no entry for this key.
         if (index < 0) {
@@ -282,10 +307,16 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     @Override
     public void clear() {
         if (mSize > 0) {
-            freeArrays(mHashes, mArray, mSize);
+            final int[] ohashes = mHashes;
+            final Object[] oarray = mArray;
+            final int osize = mSize;
             mHashes = EmptyArray.INT;
             mArray = EmptyArray.OBJECT;
             mSize = 0;
+            freeArrays(ohashes, oarray, osize);
+        }
+        if (CONCURRENT_MODIFICATION_EXCEPTIONS && mSize > 0) {
+            throw new ConcurrentModificationException();
         }
     }
 
@@ -309,15 +340,19 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * items.
      */
     public void ensureCapacity(int minimumCapacity) {
+        final int osize = mSize;
         if (mHashes.length < minimumCapacity) {
             final int[] ohashes = mHashes;
             final Object[] oarray = mArray;
             allocArrays(minimumCapacity);
             if (mSize > 0) {
-                System.arraycopy(ohashes, 0, mHashes, 0, mSize);
-                System.arraycopy(oarray, 0, mArray, 0, mSize<<1);
+                System.arraycopy(ohashes, 0, mHashes, 0, osize);
+                System.arraycopy(oarray, 0, mArray, 0, osize<<1);
             }
-            freeArrays(ohashes, oarray, mSize);
+            freeArrays(ohashes, oarray, osize);
+        }
+        if (CONCURRENT_MODIFICATION_EXCEPTIONS && mSize != osize) {
+            throw new ConcurrentModificationException();
         }
     }
 
@@ -435,6 +470,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V put(K key, V value) {
+        final int osize = mSize;
         final int hash;
         int index;
         if (key == null) {
@@ -452,9 +488,9 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
 
         index = ~index;
-        if (mSize >= mHashes.length) {
-            final int n = mSize >= (BASE_SIZE*2) ? (mSize+(mSize>>1))
-                    : (mSize >= BASE_SIZE ? (BASE_SIZE*2) : BASE_SIZE);
+        if (osize >= mHashes.length) {
+            final int n = osize >= (BASE_SIZE*2) ? (osize+(osize>>1))
+                    : (osize >= BASE_SIZE ? (BASE_SIZE*2) : BASE_SIZE);
 
             if (DEBUG) Log.d(TAG, "put: grow from " + mHashes.length + " to " + n);
 
@@ -462,22 +498,31 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             final Object[] oarray = mArray;
             allocArrays(n);
 
+            if (CONCURRENT_MODIFICATION_EXCEPTIONS && osize != mSize) {
+                throw new ConcurrentModificationException();
+            }
+
             if (mHashes.length > 0) {
-                if (DEBUG) Log.d(TAG, "put: copy 0-" + mSize + " to 0");
+                if (DEBUG) Log.d(TAG, "put: copy 0-" + osize + " to 0");
                 System.arraycopy(ohashes, 0, mHashes, 0, ohashes.length);
                 System.arraycopy(oarray, 0, mArray, 0, oarray.length);
             }
 
-            freeArrays(ohashes, oarray, mSize);
+            freeArrays(ohashes, oarray, osize);
         }
 
-        if (index < mSize) {
-            if (DEBUG) Log.d(TAG, "put: move " + index + "-" + (mSize-index)
+        if (index < osize) {
+            if (DEBUG) Log.d(TAG, "put: move " + index + "-" + (osize-index)
                     + " to " + (index+1));
-            System.arraycopy(mHashes, index, mHashes, index + 1, mSize - index);
+            System.arraycopy(mHashes, index, mHashes, index + 1, osize - index);
             System.arraycopy(mArray, index << 1, mArray, (index + 1) << 1, (mSize - index) << 1);
         }
 
+        if (CONCURRENT_MODIFICATION_EXCEPTIONS) {
+            if (osize != mSize || index >= mHashes.length) {
+                throw new ConcurrentModificationException();
+            }
+        }
         mHashes[index] = hash;
         mArray[index<<1] = key;
         mArray[(index<<1)+1] = value;
@@ -594,19 +639,22 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public V removeAt(int index) {
         final Object old = mArray[(index << 1) + 1];
-        if (mSize <= 1) {
+        final int osize = mSize;
+        final int nsize;
+        if (osize <= 1) {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
-            freeArrays(mHashes, mArray, mSize);
+            freeArrays(mHashes, mArray, osize);
             mHashes = EmptyArray.INT;
             mArray = EmptyArray.OBJECT;
-            mSize = 0;
+            nsize = 0;
         } else {
+            nsize = osize - 1;
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {
                 // Shrunk enough to reduce size of arrays.  We don't allow it to
                 // shrink smaller than (BASE_SIZE*2) to avoid flapping between
                 // that and BASE_SIZE.
-                final int n = mSize > (BASE_SIZE*2) ? (mSize + (mSize>>1)) : (BASE_SIZE*2);
+                final int n = osize > (BASE_SIZE*2) ? (osize + (osize>>1)) : (BASE_SIZE*2);
 
                 if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to " + n);
 
@@ -614,32 +662,38 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 final Object[] oarray = mArray;
                 allocArrays(n);
 
-                mSize--;
+                if (CONCURRENT_MODIFICATION_EXCEPTIONS && osize != mSize) {
+                    throw new ConcurrentModificationException();
+                }
+
                 if (index > 0) {
                     if (DEBUG) Log.d(TAG, "remove: copy from 0-" + index + " to 0");
                     System.arraycopy(ohashes, 0, mHashes, 0, index);
                     System.arraycopy(oarray, 0, mArray, 0, index << 1);
                 }
-                if (index < mSize) {
-                    if (DEBUG) Log.d(TAG, "remove: copy from " + (index+1) + "-" + mSize
+                if (index < nsize) {
+                    if (DEBUG) Log.d(TAG, "remove: copy from " + (index+1) + "-" + nsize
                             + " to " + index);
-                    System.arraycopy(ohashes, index + 1, mHashes, index, mSize - index);
+                    System.arraycopy(ohashes, index + 1, mHashes, index, nsize - index);
                     System.arraycopy(oarray, (index + 1) << 1, mArray, index << 1,
-                            (mSize - index) << 1);
+                            (nsize - index) << 1);
                 }
             } else {
-                mSize--;
-                if (index < mSize) {
-                    if (DEBUG) Log.d(TAG, "remove: move " + (index+1) + "-" + mSize
+                if (index < nsize) {
+                    if (DEBUG) Log.d(TAG, "remove: move " + (index+1) + "-" + nsize
                             + " to " + index);
-                    System.arraycopy(mHashes, index + 1, mHashes, index, mSize - index);
+                    System.arraycopy(mHashes, index + 1, mHashes, index, nsize - index);
                     System.arraycopy(mArray, (index + 1) << 1, mArray, index << 1,
-                            (mSize - index) << 1);
+                            (nsize - index) << 1);
                 }
-                mArray[mSize << 1] = null;
-                mArray[(mSize << 1) + 1] = null;
+                mArray[nsize << 1] = null;
+                mArray[(nsize << 1) + 1] = null;
             }
         }
+        if (CONCURRENT_MODIFICATION_EXCEPTIONS && osize != mSize) {
+            throw new ConcurrentModificationException();
+        }
+        mSize = nsize;
         return (V)old;
     }
 

@@ -96,6 +96,8 @@ public class ResolverDrawerLayout extends ViewGroup {
     private OnDismissedListener mOnDismissedListener;
     private RunOnDismissedListener mRunOnDismissedListener;
 
+    private boolean mDismissLocked;
+
     private float mInitialTouchX;
     private float mInitialTouchY;
     private float mLastTouchY;
@@ -187,6 +189,10 @@ public class ResolverDrawerLayout extends ViewGroup {
         invalidate();
     }
 
+    public void setDismissLocked(boolean locked) {
+        mDismissLocked = locked;
+    }
+
     private boolean isMoving() {
         return mIsDragging || !mScroller.isFinished();
     }
@@ -227,6 +233,10 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     public void setOnDismissedListener(OnDismissedListener listener) {
         mOnDismissedListener = listener;
+    }
+
+    private boolean isDismissable() {
+        return mOnDismissedListener != null && !mDismissLocked;
     }
 
     @Override
@@ -296,7 +306,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mInitialTouchY = mLastTouchY = y;
                 mActivePointerId = ev.getPointerId(0);
                 final boolean hitView = findChildUnder(mInitialTouchX, mInitialTouchY) != null;
-                handled = mOnDismissedListener != null || mCollapsibleHeight > 0;
+                handled = isDismissable() || mCollapsibleHeight > 0;
                 mIsDragging = hitView && handled;
                 abortAnimation();
             }
@@ -348,7 +358,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mIsDragging = false;
                 if (!wasDragging && findChildUnder(mInitialTouchX, mInitialTouchY) == null &&
                         findChildUnder(ev.getX(), ev.getY()) == null) {
-                    if (mOnDismissedListener != null) {
+                    if (isDismissable()) {
                         dispatchOnDismissed();
                         resetTouch();
                         return true;
@@ -362,7 +372,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mVelocityTracker.computeCurrentVelocity(1000);
                 final float yvel = mVelocityTracker.getYVelocity(mActivePointerId);
                 if (Math.abs(yvel) > mMinFlingVelocity) {
-                    if (mOnDismissedListener != null
+                    if (isDismissable()
                             && yvel > 0 && mCollapseOffset > mCollapsibleHeight) {
                         smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, yvel);
                         mDismissOnScrollerFinished = true;
@@ -656,7 +666,7 @@ public class ResolverDrawerLayout extends ViewGroup {
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         if (!consumed && Math.abs(velocityY) > mMinFlingVelocity) {
-            if (mOnDismissedListener != null
+            if (isDismissable()
                     && velocityY < 0 && mCollapseOffset > mCollapsibleHeight) {
                 smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, velocityY);
                 mDismissOnScrollerFinished = true;
@@ -748,6 +758,10 @@ public class ResolverDrawerLayout extends ViewGroup {
         final int widthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
         final int heightSpec = MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY);
         final int widthPadding = getPaddingLeft() + getPaddingRight();
+
+        // Currently we allot more height than is really needed so that the entirety of the
+        // sheet may be pulled up.
+        // TODO: Restrict the height here to be the right value.
         int heightUsed = getPaddingTop() + getPaddingBottom();
 
         // Measure always-show children first.
@@ -757,7 +771,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (lp.alwaysShow && child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
-                heightUsed += getHeightUsed(child);
+                heightUsed += child.getMeasuredHeight();
             }
         }
 
@@ -769,7 +783,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             if (!lp.alwaysShow && child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
-                heightUsed += getHeightUsed(child);
+                heightUsed += child.getMeasuredHeight();
             }
         }
 
@@ -783,36 +797,6 @@ public class ResolverDrawerLayout extends ViewGroup {
         mTopOffset = Math.max(0, heightSize - heightUsed) + (int) mCollapseOffset;
 
         setMeasuredDimension(sourceWidth, heightSize);
-    }
-
-    private int getHeightUsed(View child) {
-        // This method exists because we're taking a fast path at measuring ListViews that
-        // lets us get away with not doing the more expensive wrap_content measurement which
-        // imposes double child view measurement costs. If we're looking at a ListView, we can
-        // check against the lowest child view plus padding and margin instead of the actual
-        // measured height of the ListView. This lets the ListView hang off the edge when
-        // all of the content would fit on-screen.
-
-        int heightUsed = child.getMeasuredHeight();
-        if (child instanceof AbsListView) {
-            final AbsListView lv = (AbsListView) child;
-            final int lvPaddingBottom = lv.getPaddingBottom();
-
-            int lowest = 0;
-            for (int i = 0, N = lv.getChildCount(); i < N; i++) {
-                final int bottom = lv.getChildAt(i).getBottom() + lvPaddingBottom;
-                if (bottom > lowest) {
-                    lowest = bottom;
-                }
-            }
-
-            if (lowest < heightUsed) {
-                heightUsed = lowest;
-            }
-        }
-
-        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        return lp.topMargin + heightUsed + lp.bottomMargin;
     }
 
     @Override

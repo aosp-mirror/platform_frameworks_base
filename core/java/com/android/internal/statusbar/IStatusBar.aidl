@@ -53,9 +53,6 @@ oneway interface IStatusBar
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
     void setWindowState(int window, int state);
-    void buzzBeepBlinked();
-    void notificationLightOff();
-    void notificationLightPulse(int argb, int millisOn, int millisOff);
 
     void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
@@ -105,9 +102,14 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
-     * Shows the TV's picture-in-picture menu if an activity is in picture-in-picture mode.
+     * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
-    void showTvPictureInPictureMenu();
+    void showPictureInPictureMenu();
+
+    /**
+     * Shows the global actions menu.
+     */
+    void showGlobalActionsMenu();
 
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);

@@ -49,13 +49,13 @@ public class ViewLayerInvalidationActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_layer_invalidation);
 
-        container = (LinearLayout) findViewById(R.id.container);
-        final LinearLayout container1 = (LinearLayout) findViewById(R.id.container1);
-        final LinearLayout container2 = (LinearLayout) findViewById(R.id.container2);
-        final LinearLayout container3 = (LinearLayout) findViewById(R.id.container3);
-        nestedStatusTV = (TextView) findViewById(R.id.nestedStatus);
-        invalidateStatusTV = (TextView) findViewById(R.id.invalidateStatus);
-        final TextView tva = (TextView) findViewById(R.id.textviewa);
+        container = findViewById(R.id.container);
+        final LinearLayout container1 = findViewById(R.id.container1);
+        final LinearLayout container2 = findViewById(R.id.container2);
+        final LinearLayout container3 = findViewById(R.id.container3);
+        nestedStatusTV = findViewById(R.id.nestedStatus);
+        invalidateStatusTV = findViewById(R.id.invalidateStatus);
+        final TextView tva = findViewById(R.id.textviewa);
 
         topLayouts.add(container1);
         topLayouts.add(container2);

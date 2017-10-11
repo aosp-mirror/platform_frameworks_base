@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.BaseCanvas_Delegate;
 import android.graphics.Canvas_Delegate;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -70,6 +71,13 @@ public class VectorDrawable_Delegate {
     private static final DelegateManager<VNativeObject> sPathManager =
             new DelegateManager<>(VNativeObject.class);
 
+    private static long addNativeObject(VNativeObject object) {
+        long ptr = sPathManager.addNewDelegate(object);
+        object.setNativePtr(ptr);
+
+        return ptr;
+    }
+
     /**
      * Obtains styled attributes from the theme, if available, or unstyled resources if the theme is
      * null.
@@ -91,8 +99,14 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateTree(long rootGroupPtr) {
-        VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
-        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroup));
+        return addNativeObject(new VPathRenderer_Delegate(rootGroupPtr));
+    }
+
+    @LayoutlibDelegate
+    static long nCreateTreeFromCopy(long rendererToCopyPtr, long rootGroupPtr) {
+        VPathRenderer_Delegate rendererToCopy = VNativeObject.getDelegate(rendererToCopyPtr);
+        return addNativeObject(new VPathRenderer_Delegate(rendererToCopy,
+                rootGroupPtr));
     }
 
     @LayoutlibDelegate
@@ -128,12 +142,12 @@ public class VectorDrawable_Delegate {
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache) {
         VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
 
-        Canvas_Delegate.native_save(canvasWrapperPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
-        Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.left, bounds.top);
+        Canvas_Delegate.nSave(canvasWrapperPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+        Canvas_Delegate.nTranslate(canvasWrapperPtr, bounds.left, bounds.top);
 
         if (needsMirroring) {
-            Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.width(), 0);
-            Canvas_Delegate.native_scale(canvasWrapperPtr, -1.0f, 1.0f);
+            Canvas_Delegate.nTranslate(canvasWrapperPtr, bounds.width(), 0);
+            Canvas_Delegate.nScale(canvasWrapperPtr, -1.0f, 1.0f);
         }
 
         // At this point, canvas has been translated to the right position.
@@ -142,21 +156,20 @@ public class VectorDrawable_Delegate {
         bounds.offsetTo(0, 0);
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
 
-        Canvas_Delegate.native_restore(canvasWrapperPtr, true);
+        Canvas_Delegate.nRestore(canvasWrapperPtr);
 
         return bounds.width() * bounds.height();
     }
 
     @LayoutlibDelegate
     static long nCreateFullPath() {
-        return sPathManager.addNewDelegate(new VFullPath_Delegate());
+        return addNativeObject(new VFullPath_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateFullPath(long nativeFullPathPtr) {
         VFullPath_Delegate original = VNativeObject.getDelegate(nativeFullPathPtr);
-
-        return sPathManager.addNewDelegate(new VFullPath_Delegate(original));
+        return addNativeObject(new VFullPath_Delegate(original));
     }
 
     @LayoutlibDelegate
@@ -222,25 +235,24 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateClipPath() {
-        return sPathManager.addNewDelegate(new VClipPath_Delegate());
+        return addNativeObject(new VClipPath_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateClipPath(long clipPathPtr) {
         VClipPath_Delegate original = VNativeObject.getDelegate(clipPathPtr);
-        return sPathManager.addNewDelegate(new VClipPath_Delegate(original));
+        return addNativeObject(new VClipPath_Delegate(original));
     }
 
     @LayoutlibDelegate
     static long nCreateGroup() {
-        return sPathManager.addNewDelegate(new VGroup_Delegate());
+        return addNativeObject(new VGroup_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateGroup(long groupPtr) {
         VGroup_Delegate original = VNativeObject.getDelegate(groupPtr);
-        return sPathManager.addNewDelegate(
-                new VGroup_Delegate(original, new ArrayMap<String, Object>()));
+        return addNativeObject(new VGroup_Delegate(original, new ArrayMap<>()));
     }
 
     @LayoutlibDelegate
@@ -493,7 +505,9 @@ public class VectorDrawable_Delegate {
      *     not need it
      * </ol>
      */
-    interface VNativeObject {
+    abstract static class VNativeObject {
+        long mNativePtr = 0;
+
         @NonNull
         static <T> T getDelegate(long nativePtr) {
             //noinspection unchecked
@@ -503,7 +517,17 @@ public class VectorDrawable_Delegate {
             return vNativeObject;
         }
 
-        void setName(String name);
+        abstract void setName(String name);
+
+        void setNativePtr(long nativePtr) {
+            mNativePtr = nativePtr;
+        }
+
+        /**
+         * Method to explicitly dispose native objects
+         */
+        void dispose() {
+        }
     }
 
     private static class VClipPath_Delegate extends VPath_Delegate {
@@ -547,6 +571,8 @@ public class VectorDrawable_Delegate {
         @NonNull
         public Consumer<Float> getFloatPropertySetter(int propertyIdx) {
             switch (propertyIdx) {
+                case STROKE_WIDTH_INDEX:
+                    return this::setStrokeWidth;
                 case STROKE_ALPHA_INDEX:
                     return this::setStrokeAlpha;
                 case FILL_ALPHA_INDEX:
@@ -559,8 +585,8 @@ public class VectorDrawable_Delegate {
                     return this::setTrimPathOffset;
             }
 
-            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VFullPath_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         @NonNull
@@ -572,8 +598,8 @@ public class VectorDrawable_Delegate {
                     return this::setFillColor;
             }
 
-            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VFullPath_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         /////////////////////////////////////////////////////
@@ -773,7 +799,7 @@ public class VectorDrawable_Delegate {
         }
     }
 
-    static class VGroup_Delegate implements VNativeObject {
+    static class VGroup_Delegate extends VNativeObject {
         // This constants need to be kept in sync with their definitions in VectorDrawable.Group
         private static final int ROTATE_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
@@ -801,8 +827,8 @@ public class VectorDrawable_Delegate {
                     return this::setTranslateY;
             }
 
-            throw new IllegalArgumentException("Invalid VGroup_Delegate property index "
-                    + propertyIdx);
+            assert false : ("Invalid VGroup_Delegate property index " + propertyIdx);
+            return t -> {};
         }
 
         /////////////////////////////////////////////////////
@@ -839,29 +865,6 @@ public class VectorDrawable_Delegate {
             }
 
             mLocalMatrix.set(copy.mLocalMatrix);
-
-            final ArrayList<Object> children = copy.mChildren;
-            //noinspection ForLoopReplaceableByForEach
-            for (int i = 0; i < children.size(); i++) {
-                Object copyChild = children.get(i);
-                if (copyChild instanceof VGroup_Delegate) {
-                    VGroup_Delegate copyGroup = (VGroup_Delegate) copyChild;
-                    mChildren.add(new VGroup_Delegate(copyGroup, targetsMap));
-                } else {
-                    VPath_Delegate newPath;
-                    if (copyChild instanceof VFullPath_Delegate) {
-                        newPath = new VFullPath_Delegate((VFullPath_Delegate) copyChild);
-                    } else if (copyChild instanceof VClipPath_Delegate) {
-                        newPath = new VClipPath_Delegate((VClipPath_Delegate) copyChild);
-                    } else {
-                        throw new IllegalStateException("Unknown object in the tree!");
-                    }
-                    mChildren.add(newPath);
-                    if (newPath.mPathName != null) {
-                        targetsMap.put(newPath.mPathName, newPath);
-                    }
-                }
-            }
         }
 
         private VGroup_Delegate() {
@@ -959,9 +962,28 @@ public class VectorDrawable_Delegate {
         public void setName(String name) {
             mGroupName = name;
         }
+
+        @Override
+        protected void dispose() {
+            mChildren.stream().filter(child -> child instanceof VNativeObject).forEach(child
+                    -> {
+                VNativeObject nativeObject = (VNativeObject) child;
+                if (nativeObject.mNativePtr != 0) {
+                    sPathManager.removeJavaReferenceFor(nativeObject.mNativePtr);
+                    nativeObject.mNativePtr = 0;
+                }
+                nativeObject.dispose();
+            });
+            mChildren.clear();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+        }
     }
 
-    public static class VPath_Delegate implements VNativeObject {
+    public static class VPath_Delegate extends VNativeObject {
         protected PathParser_Delegate.PathDataNode[] mNodes = null;
         String mPathName;
         int mChangingConfigurations;
@@ -973,7 +995,7 @@ public class VectorDrawable_Delegate {
         public VPath_Delegate(VPath_Delegate copy) {
             mPathName = copy.mPathName;
             mChangingConfigurations = copy.mChangingConfigurations;
-            mNodes = PathParser_Delegate.deepCopyNodes(copy.mNodes);
+            mNodes = copy.mNodes != null ? PathParser_Delegate.deepCopyNodes(copy.mNodes) : null;
         }
 
         public void toPath(Path path) {
@@ -1001,9 +1023,14 @@ public class VectorDrawable_Delegate {
                 PathParser_Delegate.updateNodes(mNodes, nodes);
             }
         }
+
+        @Override
+        void dispose() {
+            mNodes = null;
+        }
     }
 
-    static class VPathRenderer_Delegate implements VNativeObject {
+    static class VPathRenderer_Delegate extends VNativeObject {
         /* Right now the internal data structure is organized as a tree.
          * Each node can be a group node, or a path.
          * A group node can have groups or paths as children, but a path node has
@@ -1021,7 +1048,7 @@ public class VectorDrawable_Delegate {
         private final Path mPath;
         private final Path mRenderPath;
         private final Matrix mFinalPathMatrix = new Matrix();
-        private final VGroup_Delegate mRootGroup;
+        private final long mRootGroupPtr;
         private float mViewportWidth = 0;
         private float mViewportHeight = 0;
         private float mRootAlpha = 1.0f;
@@ -1029,10 +1056,18 @@ public class VectorDrawable_Delegate {
         private Paint mFillPaint;
         private PathMeasure mPathMeasure;
 
-        private VPathRenderer_Delegate(VGroup_Delegate rootGroup) {
-            mRootGroup = rootGroup;
+        private VPathRenderer_Delegate(long rootGroupPtr) {
+            mRootGroupPtr = rootGroupPtr;
             mPath = new Path();
             mRenderPath = new Path();
+        }
+
+        private VPathRenderer_Delegate(VPathRenderer_Delegate rendererToCopy,
+                long rootGroupPtr) {
+            this(rootGroupPtr);
+            mViewportWidth = rendererToCopy.mViewportWidth;
+            mViewportHeight = rendererToCopy.mViewportHeight;
+            mRootAlpha = rendererToCopy.mRootAlpha;
         }
 
         private float getRootAlpha() {
@@ -1053,7 +1088,7 @@ public class VectorDrawable_Delegate {
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
             // Save the current clip information, which is local to this group.
-            Canvas_Delegate.native_save(canvasPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+            Canvas_Delegate.nSave(canvasPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
             // Draw the group tree in the same order as the XML file.
             for (int i = 0; i < currentGroup.mChildren.size(); i++) {
                 Object child = currentGroup.mChildren.get(i);
@@ -1066,12 +1101,12 @@ public class VectorDrawable_Delegate {
                     drawPath(currentGroup, childPath, canvasPtr, w, h, filterPtr);
                 }
             }
-            Canvas_Delegate.native_restore(canvasPtr, true);
+            Canvas_Delegate.nRestore(canvasPtr);
         }
 
         public void draw(long canvasPtr, long filterPtr, int w, int h) {
             // Traverse the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, Matrix.IDENTITY_MATRIX, canvasPtr, w, h, filterPtr);
+            drawGroupTree(VNativeObject.getDelegate(mRootGroupPtr), Matrix.IDENTITY_MATRIX, canvasPtr, w, h, filterPtr);
         }
 
         private void drawPath(VGroup_Delegate VGroup, VPath_Delegate VPath, long canvasPtr,
@@ -1098,7 +1133,7 @@ public class VectorDrawable_Delegate {
 
             if (VPath.isClipPath()) {
                 mRenderPath.addPath(path, mFinalPathMatrix);
-                Canvas_Delegate.native_clipPath(canvasPtr, mRenderPath.mNativePath, Op
+                Canvas_Delegate.nClipPath(canvasPtr, mRenderPath.mNativePath, Op
                         .INTERSECT.nativeInt);
             } else {
                 VFullPath_Delegate fullPath = (VFullPath_Delegate) VPath;
@@ -1133,15 +1168,16 @@ public class VectorDrawable_Delegate {
                     }
 
                     final Paint fillPaint = mFillPaint;
-                    fillPaint.setColor(applyAlpha(fullPath.mFillColor, fullPath.mFillAlpha));
+                    fillPaint.setColor(applyAlpha(applyAlpha(fullPath.mFillColor, fullPath
+                      .mFillAlpha), getRootAlpha()));
                     Paint_Delegate fillPaintDelegate = Paint_Delegate.getDelegate(fillPaint
                             .getNativeInstance());
                     // mFillPaint can not be null at this point so we will have a delegate
                     assert fillPaintDelegate != null;
                     fillPaintDelegate.setColorFilter(filterPtr);
                     fillPaintDelegate.setShader(fullPath.mFillGradient);
-                    Path_Delegate.native_setFillType(mRenderPath.mNativePath, fullPath.mFillType);
-                    Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
+                    Path_Delegate.nSetFillType(mRenderPath.mNativePath, fullPath.mFillType);
+                    BaseCanvas_Delegate.nDrawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
                             .getNativeInstance());
                 }
 
@@ -1162,7 +1198,8 @@ public class VectorDrawable_Delegate {
                     }
 
                     strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
-                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, fullPath.mStrokeAlpha));
+                    strokePaint.setColor(applyAlpha(applyAlpha(fullPath.mStrokeColor, fullPath
+                      .mStrokeAlpha), getRootAlpha()));
                     Paint_Delegate strokePaintDelegate = Paint_Delegate.getDelegate(strokePaint
                             .getNativeInstance());
                     // mStrokePaint can not be null at this point so we will have a delegate
@@ -1171,7 +1208,7 @@ public class VectorDrawable_Delegate {
                     final float finalStrokeScale = minScale * matrixScale;
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * finalStrokeScale);
                     strokePaintDelegate.setShader(fullPath.mStrokeGradient);
-                    Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, strokePaint
+                    BaseCanvas_Delegate.nDrawPath(canvasPtr, mRenderPath.mNativePath, strokePaint
                             .getNativeInstance());
                 }
             }
@@ -1208,6 +1245,18 @@ public class VectorDrawable_Delegate {
 
         @Override
         public void setName(String name) {
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            // The mRootGroupPtr is not explicitly freed by anything in the VectorDrawable so we
+            // need to free it here.
+            VNativeObject nativeObject = sPathManager.getDelegate(mRootGroupPtr);
+            sPathManager.removeJavaReferenceFor(mRootGroupPtr);
+            assert nativeObject != null;
+            nativeObject.dispose();
+
+            super.finalize();
         }
     }
 }

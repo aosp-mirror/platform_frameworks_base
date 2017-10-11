@@ -38,16 +38,21 @@ import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.ComplexColor;
 import android.content.res.ComplexColor_Accessor;
+import android.content.res.FontResourcesParser;
 import android.content.res.GradientColor;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
+import android.graphics.Color;
 import android.graphics.NinePatch_Delegate;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.Typeface_Accessor;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
+import android.text.FontConfig;
 import android.util.TypedValue;
 
 import java.io.File;
@@ -77,6 +82,7 @@ public final class ResourceHelper {
      */
     public static int getColor(String value) {
         if (value != null) {
+            value = value.trim();
             if (!value.startsWith("#")) {
                 if (value.startsWith(SdkConstants.PREFIX_THEME_REF)) {
                     throw new NumberFormatException(String.format(
@@ -179,7 +185,8 @@ public final class ResourceHelper {
                     }
 
                     if (type != XmlPullParser.START_TAG) {
-                        throw new XmlPullParserException("No start tag found");
+                        assert false : "No start tag found";
+                        return null;
                     }
 
                     final String name = blockParser.getName();
@@ -281,18 +288,15 @@ public final class ResourceHelper {
 
         Density density = Density.MEDIUM;
         if (value instanceof DensityBasedResourceValue) {
-            density =
-                ((DensityBasedResourceValue)value).getResourceDensity();
+            density = ((DensityBasedResourceValue) value).getResourceDensity();
         }
-
 
         if (lowerCaseValue.endsWith(NinePatch.EXTENSION_9PATCH)) {
             File file = new File(stringValue);
             if (file.isFile()) {
                 try {
-                    return getNinePatchDrawable(
-                            new FileInputStream(file), density, value.isFramework(),
-                            stringValue, context);
+                    return getNinePatchDrawable(new FileInputStream(file), density,
+                            value.isFramework(), stringValue, context);
                 } catch (IOException e) {
                     // failed to read the file, we'll return null below.
                     Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
@@ -301,30 +305,28 @@ public final class ResourceHelper {
             }
 
             return null;
-        } else if (lowerCaseValue.endsWith(".xml")) {
+        } else if (lowerCaseValue.endsWith(".xml") || stringValue.startsWith("@aapt:_aapt/")) {
             // create a block parser for the file
-            File f = new File(stringValue);
-            if (f.isFile()) {
-                try {
-                    // let the framework inflate the Drawable from the XML file.
-                    XmlPullParser parser = ParserFactory.create(f);
-
-                    BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
-                            parser, context, value.isFramework());
-                    try {
-                        return Drawable.createFromXml(context.getResources(), blockParser, theme);
-                    } finally {
-                        blockParser.ensurePopped();
+            try {
+                XmlPullParser parser = context.getLayoutlibCallback().getParser(value);
+                if (parser == null) {
+                    File drawableFile = new File(stringValue);
+                    if (drawableFile.isFile()) {
+                        parser = ParserFactory.create(drawableFile);
                     }
-                } catch (Exception e) {
-                    // this is an error and not warning since the file existence is checked before
-                    // attempting to parse it.
-                    Bridge.getLog().error(null, "Failed to parse file " + stringValue,
-                            e, null /*data*/);
                 }
-            } else {
-                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        String.format("File %s does not exist (or is not a file)", stringValue),
+
+                BridgeXmlBlockParser blockParser =
+                        new BridgeXmlBlockParser(parser, context, value.isFramework());
+                try {
+                    return Drawable.createFromXml(context.getResources(), blockParser, theme);
+                } finally {
+                    blockParser.ensurePopped();
+                }
+            } catch (Exception e) {
+                // this is an error and not warning since the file existence is checked before
+                // attempting to parse it.
+                Bridge.getLog().error(null, "Failed to parse file " + stringValue, e,
                         null /*data*/);
             }
 
@@ -337,8 +339,8 @@ public final class ResourceHelper {
                             value.isFramework() ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,
-                                density);
+                        bitmap =
+                                Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/, density);
                         Bridge.setCachedBitmap(stringValue, bitmap,
                                 value.isFramework() ? null : context.getProjectKey());
                     }
@@ -364,6 +366,89 @@ public final class ResourceHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Returns a {@link Typeface} given a font name. The font name, can be a system font family
+     * (like sans-serif) or a full path if the font is to be loaded from resources.
+     */
+    public static Typeface getFont(String fontName, BridgeContext context, Theme theme, boolean
+            isFramework) {
+        if (fontName == null) {
+            return null;
+        }
+
+        if (Typeface_Accessor.isSystemFont(fontName)) {
+            // Shortcut for the case where we are asking for a system font name. Those are not
+            // loaded using external resources.
+            return null;
+        }
+
+        // Check if this is an asset that we've already loaded dynamically
+        Typeface typeface = Typeface.findFromCache(context.getAssets(), fontName);
+        if (typeface != null) {
+            return typeface;
+        }
+
+        String lowerCaseValue = fontName.toLowerCase();
+        if (lowerCaseValue.endsWith(".xml")) {
+            // create a block parser for the file
+            Boolean psiParserSupport = context.getLayoutlibCallback().getFlag(
+                    RenderParamsFlags.FLAG_KEY_XML_FILE_PARSER_SUPPORT);
+            XmlPullParser parser = null;
+            if (psiParserSupport != null && psiParserSupport) {
+                parser = context.getLayoutlibCallback().getXmlFileParser(fontName);
+            }
+            else {
+                File f = new File(fontName);
+                if (f.isFile()) {
+                    try {
+                        parser = ParserFactory.create(f);
+                    } catch (XmlPullParserException | FileNotFoundException e) {
+                        // this is an error and not warning since the file existence is checked before
+                        // attempting to parse it.
+                        Bridge.getLog().error(null, "Failed to parse file " + fontName,
+                                e, null /*data*/);
+                    }
+                }
+            }
+
+            if (parser != null) {
+                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                        parser, context, isFramework);
+                try {
+                    FontResourcesParser.FamilyResourceEntry entry =
+                            FontResourcesParser.parse(blockParser, context.getResources());
+                    typeface = Typeface.createFromResources(entry, context.getAssets(),
+                            fontName);
+                } catch (XmlPullParserException | IOException e) {
+                    Bridge.getLog().error(null, "Failed to parse file " + fontName,
+                            e, null /*data*/);
+                } finally {
+                    blockParser.ensurePopped();
+                }
+            } else {
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                        String.format("File %s does not exist (or is not a file)", fontName),
+                        null /*data*/);
+            }
+        } else {
+            typeface = Typeface.createFromResources(context.getAssets(), fontName, 0);
+        }
+
+        return typeface;
+    }
+
+    /**
+     * Returns a {@link Typeface} given a font name. The font name, can be a system font family
+     * (like sans-serif) or a full path if the font is to be loaded from resources.
+     */
+    public static Typeface getFont(ResourceValue value, BridgeContext context, Theme theme) {
+        if (value == null) {
+            return null;
+        }
+
+        return getFont(value.getValue(), context, theme, value.isFramework());
     }
 
     private static Drawable getNinePatchDrawable(InputStream inputStream, Density density,

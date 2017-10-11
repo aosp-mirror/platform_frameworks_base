@@ -28,7 +28,8 @@
         android:layout_alignParentStart="true"
         android:layout_below="@id/frameLayout"
         android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:pointerIcon="hand" />
 
     <TextView
         android:id="@id/textView3"
@@ -262,7 +263,8 @@
             android:id="@id/radioButton2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton" />
+            android:text="New RadioButton"
+            android:checked="true" />
 
     </RadioGroup>
 

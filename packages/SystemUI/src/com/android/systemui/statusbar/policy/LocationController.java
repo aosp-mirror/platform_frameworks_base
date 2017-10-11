@@ -16,22 +16,29 @@
 
 package com.android.systemui.statusbar.policy;
 
-public interface LocationController {
+import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
+
+public interface LocationController extends CallbackController<LocationChangeCallback> {
+    boolean isLocationActive();
     boolean isLocationEnabled();
     boolean setLocationEnabled(boolean enabled);
-    void addSettingsChangedCallback(LocationSettingsChangeCallback cb);
-    void removeSettingsChangedCallback(LocationSettingsChangeCallback cb);
 
     /**
      * A callback for change in location settings (the user has enabled/disabled location).
      */
-    public interface LocationSettingsChangeCallback {
+    public interface LocationChangeCallback {
+        /**
+         * Called whenever location's state changes.
+         * @param active
+         */
+        default void onLocationActiveChanged(boolean active) {}
+
         /**
          * Called whenever location settings change.
          *
          * @param locationEnabled A value of true indicates that at least one type of location
          *                        is enabled in settings.
          */
-        void onLocationSettingsChanged(boolean locationEnabled);
+        default void onLocationSettingsChanged(boolean locationEnabled) {}
     }
 }

@@ -17,7 +17,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 # Only compile source java files in this lib.
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := \
+	$(call all-java-files-under, src) \
+	$(call all-java-files-under, res/testApp/MyApplication/src/main/myapplication.widgets)
 LOCAL_JAVA_RESOURCE_DIRS := res
 
 LOCAL_MODULE := layoutlib-tests
@@ -28,7 +30,9 @@ LOCAL_JAVA_LIBRARIES := layoutlib \
 			layoutlib_api-prebuilt \
 			tools-common-prebuilt \
 			sdk-common \
-			junit-host
+			junit-host \
+			guavalib \
+			mockito-host
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 

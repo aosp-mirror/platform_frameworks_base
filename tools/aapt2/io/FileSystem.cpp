@@ -14,65 +14,62 @@
  * limitations under the License.
  */
 
-#include "Source.h"
 #include "io/FileSystem.h"
+
+#include "androidfw/StringPiece.h"
+#include "utils/FileMap.h"
+
+#include "Source.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 
-#include <utils/FileMap.h>
+using android::StringPiece;
 
 namespace aapt {
 namespace io {
 
-RegularFile::RegularFile(const Source& source) : mSource(source) {
-}
+RegularFile::RegularFile(const Source& source) : source_(source) {}
 
-std::unique_ptr<IData> RegularFile::openAsData() {
-    android::FileMap map;
-    if (Maybe<android::FileMap> map = file::mmapPath(mSource.path, nullptr)) {
-        if (map.value().getDataPtr() && map.value().getDataLength() > 0) {
-            return util::make_unique<MmappedData>(std::move(map.value()));
-        }
-        return util::make_unique<EmptyData>();
+std::unique_ptr<IData> RegularFile::OpenAsData() {
+  android::FileMap map;
+  if (Maybe<android::FileMap> map = file::MmapPath(source_.path, nullptr)) {
+    if (map.value().getDataPtr() && map.value().getDataLength() > 0) {
+      return util::make_unique<MmappedData>(std::move(map.value()));
     }
-    return {};
+    return util::make_unique<EmptyData>();
+  }
+  return {};
 }
 
-const Source& RegularFile::getSource() const {
-    return mSource;
+const Source& RegularFile::GetSource() const { return source_; }
+
+FileCollectionIterator::FileCollectionIterator(FileCollection* collection)
+    : current_(collection->files_.begin()), end_(collection->files_.end()) {}
+
+bool FileCollectionIterator::HasNext() { return current_ != end_; }
+
+IFile* FileCollectionIterator::Next() {
+  IFile* result = current_->second.get();
+  ++current_;
+  return result;
 }
 
-FileCollectionIterator::FileCollectionIterator(FileCollection* collection) :
-        mCurrent(collection->mFiles.begin()), mEnd(collection->mFiles.end()) {
+IFile* FileCollection::InsertFile(const StringPiece& path) {
+  return (files_[path.to_string()] = util::make_unique<RegularFile>(Source(path))).get();
 }
 
-bool FileCollectionIterator::hasNext() {
-    return mCurrent != mEnd;
+IFile* FileCollection::FindFile(const StringPiece& path) {
+  auto iter = files_.find(path.to_string());
+  if (iter != files_.end()) {
+    return iter->second.get();
+  }
+  return nullptr;
 }
 
-IFile* FileCollectionIterator::next() {
-    IFile* result = mCurrent->second.get();
-    ++mCurrent;
-    return result;
+std::unique_ptr<IFileCollectionIterator> FileCollection::Iterator() {
+  return util::make_unique<FileCollectionIterator>(this);
 }
 
-IFile* FileCollection::insertFile(const StringPiece& path) {
-    return (mFiles[path.toString()] = util::make_unique<RegularFile>(Source(path))).get();
-}
-
-IFile* FileCollection::findFile(const StringPiece& path) {
-    auto iter = mFiles.find(path.toString());
-    if (iter != mFiles.end()) {
-        return iter->second.get();
-    }
-    return nullptr;
-}
-
-std::unique_ptr<IFileCollectionIterator> FileCollection::iterator() {
-    return util::make_unique<FileCollectionIterator>(this);
-}
-
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt

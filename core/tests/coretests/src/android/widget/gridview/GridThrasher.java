@@ -115,9 +115,9 @@ public class GridThrasher extends Activity implements AdapterView.OnItemSelected
         
         setContentView(R.layout.grid_thrasher);
         
-        mText = (TextView) findViewById(R.id.text);
+        mText = findViewById(R.id.text);
         mAdapter = new ThrashListAdapter(this);
-        GridView g = (GridView) findViewById(R.id.grid);
+        GridView g = findViewById(R.id.grid);
         g.setAdapter(mAdapter);
         
         mHandler.postDelayed(mThrash, 5000);

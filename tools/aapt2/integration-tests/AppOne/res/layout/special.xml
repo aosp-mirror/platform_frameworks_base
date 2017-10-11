@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <include>
+        <aapt:attr name="layout" xmlns:aapt="http://schemas.android.com/aapt">
+            <RelativeLayout android:id="@+id/hello" />
+        </aapt:attr>
+    </include>
+</View>

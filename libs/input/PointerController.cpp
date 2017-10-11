@@ -31,7 +31,7 @@
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 #pragma GCC diagnostic pop
 
 namespace android {
@@ -108,7 +108,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
-    mLocked.requestedPointerType= mPolicy->getDefaultPointerIconId();
+    mLocked.requestedPointerType = mPolicy->getDefaultPointerIconId();
 
     mLocked.animationFrameIndex = 0;
     mLocked.lastFrameUpdatedTime = 0;
@@ -631,7 +631,7 @@ void PointerController::updatePointerLocked() {
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
         if (mLocked.presentation == PRESENTATION_POINTER) {
-            if (mLocked.requestedPointerType== mPolicy->getDefaultPointerIconId()) {
+            if (mLocked.requestedPointerType == mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
                 std::map<int32_t, SpriteIcon>::const_iterator iter =

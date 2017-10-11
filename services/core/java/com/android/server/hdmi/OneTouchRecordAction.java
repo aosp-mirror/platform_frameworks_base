@@ -22,8 +22,8 @@ import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDIN
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT;
 
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.Slog;
-
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -62,7 +62,7 @@ public class OneTouchRecordAction extends HdmiCecFeatureAction {
                 @Override
                     public void onSendCompleted(int error) {
                         // if failed to send <Record On>, display error message and finish action.
-                        if (error != Constants.SEND_RESULT_SUCCESS) {
+                        if (error != SendMessageResult.SUCCESS) {
                             tv().announceOneTouchRecordResult(
                                     mRecorderAddress,
                                     ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);

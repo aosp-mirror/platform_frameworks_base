@@ -19,19 +19,19 @@ package android.bluetooth;
 /**
  * This abstract class is used to implement {@link BluetoothGatt} callbacks.
  */
-public abstract class BluetoothGattCallback{
+public abstract class BluetoothGattCallback {
 
     /**
      * Callback triggered as result of {@link BluetoothGatt#setPreferredPhy}, or as a result of
      * remote device changing the PHY.
      *
      * @param gatt GATT client
-     * @param txPhy the transmitter PHY in use. One of {@link BluetoothDevice#PHY_LE_1M},
-     *             {@link BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
-     * @param rxPhy the receiver PHY in use. One of {@link BluetoothDevice#PHY_LE_1M},
-     *             {@link BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
-     * @param status Status of the PHY update operation.
-     *                  {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
+     * @param txPhy the transmitter PHY in use. One of {@link BluetoothDevice#PHY_LE_1M}, {@link
+     * BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param rxPhy the receiver PHY in use. One of {@link BluetoothDevice#PHY_LE_1M}, {@link
+     * BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param status Status of the PHY update operation. {@link BluetoothGatt#GATT_SUCCESS} if the
+     * operation succeeds.
      */
     public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
     }
@@ -40,12 +40,12 @@ public abstract class BluetoothGattCallback{
      * Callback triggered as result of {@link BluetoothGatt#readPhy}
      *
      * @param gatt GATT client
-     * @param txPhy the transmitter PHY in use. One of {@link BluetoothDevice#PHY_LE_1M},
-     *             {@link BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
-     * @param rxPhy the receiver PHY in use. One of {@link BluetoothDevice#PHY_LE_1M},
-     *             {@link BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
-     * @param status Status of the PHY read operation.
-     *                  {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
+     * @param txPhy the transmitter PHY in use. One of {@link BluetoothDevice#PHY_LE_1M}, {@link
+     * BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param rxPhy the receiver PHY in use. One of {@link BluetoothDevice#PHY_LE_1M}, {@link
+     * BluetoothDevice#PHY_LE_2M}, and {@link BluetoothDevice#PHY_LE_CODED}.
+     * @param status Status of the PHY read operation. {@link BluetoothGatt#GATT_SUCCESS} if the
+     * operation succeeds.
      */
     public void onPhyRead(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
     }
@@ -55,14 +55,13 @@ public abstract class BluetoothGattCallback{
      * GATT server.
      *
      * @param gatt GATT client
-     * @param status Status of the connect or disconnect operation.
-     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
-     * @param newState Returns the new connection state. Can be one of
-     *                  {@link BluetoothProfile#STATE_DISCONNECTED} or
-     *                  {@link BluetoothProfile#STATE_CONNECTED}
+     * @param status Status of the connect or disconnect operation. {@link
+     * BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
+     * @param newState Returns the new connection state. Can be one of {@link
+     * BluetoothProfile#STATE_DISCONNECTED} or {@link BluetoothProfile#STATE_CONNECTED}
      */
     public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                                        int newState) {
+            int newState) {
     }
 
     /**
@@ -70,8 +69,8 @@ public abstract class BluetoothGattCallback{
      * for the remote device have been updated, ie new services have been discovered.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#discoverServices}
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the remote device
-     *               has been explored successfully.
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the remote device has been explored
+     * successfully.
      */
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
     }
@@ -80,13 +79,12 @@ public abstract class BluetoothGattCallback{
      * Callback reporting the result of a characteristic read operation.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#readCharacteristic}
-     * @param characteristic Characteristic that was read from the associated
-     *                       remote device.
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation
-     *               was completed successfully.
+     * @param characteristic Characteristic that was read from the associated remote device.
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     * successfully.
      */
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
-                                     int status) {
+            int status) {
     }
 
     /**
@@ -99,58 +97,55 @@ public abstract class BluetoothGattCallback{
      * the application must abort the reliable write transaction.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#writeCharacteristic}
-     * @param characteristic Characteristic that was written to the associated
-     *                       remote device.
-     * @param status The result of the write operation
-     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
+     * @param characteristic Characteristic that was written to the associated remote device.
+     * @param status The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if the
+     * operation succeeds.
      */
     public void onCharacteristicWrite(BluetoothGatt gatt,
-                                      BluetoothGattCharacteristic characteristic, int status) {
+            BluetoothGattCharacteristic characteristic, int status) {
     }
 
     /**
      * Callback triggered as a result of a remote characteristic notification.
      *
      * @param gatt GATT client the characteristic is associated with
-     * @param characteristic Characteristic that has been updated as a result
-     *                       of a remote notification event.
+     * @param characteristic Characteristic that has been updated as a result of a remote
+     * notification event.
      */
     public void onCharacteristicChanged(BluetoothGatt gatt,
-                                        BluetoothGattCharacteristic characteristic) {
+            BluetoothGattCharacteristic characteristic) {
     }
 
     /**
      * Callback reporting the result of a descriptor read operation.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#readDescriptor}
-     * @param descriptor Descriptor that was read from the associated
-     *                   remote device.
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation
-     *               was completed successfully
+     * @param descriptor Descriptor that was read from the associated remote device.
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the read operation was completed
+     * successfully
      */
     public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
-                                 int status) {
+            int status) {
     }
 
     /**
      * Callback indicating the result of a descriptor write operation.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#writeDescriptor}
-     * @param descriptor Descriptor that was writte to the associated
-     *                   remote device.
-     * @param status The result of the write operation
-     *               {@link BluetoothGatt#GATT_SUCCESS} if the operation succeeds.
+     * @param descriptor Descriptor that was writte to the associated remote device.
+     * @param status The result of the write operation {@link BluetoothGatt#GATT_SUCCESS} if the
+     * operation succeeds.
      */
     public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,
-                                  int status) {
+            int status) {
     }
 
     /**
      * Callback invoked when a reliable write transaction has been completed.
      *
      * @param gatt GATT client invoked {@link BluetoothGatt#executeReliableWrite}
-     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the reliable write
-     *               transaction was executed successfully
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the reliable write transaction was
+     * executed successfully
      */
     public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
     }
@@ -186,17 +181,17 @@ public abstract class BluetoothGattCallback{
      * Callback indicating the connection parameters were updated.
      *
      * @param gatt GATT client involved
-     * @param interval Connection interval used on this connection, 1.25ms unit. Valid
-     *            range is from 6 (7.5ms) to 3200 (4000ms).
-     * @param latency Slave latency for the connection in number of connection events. Valid
-     *            range is from 0 to 499
-     * @param timeout Supervision timeout for this connection, in 10ms unit. Valid range is
-     *            from 10 (0.1s) to 3200 (32s)
+     * @param interval Connection interval used on this connection, 1.25ms unit. Valid range is from
+     * 6 (7.5ms) to 3200 (4000ms).
+     * @param latency Slave latency for the connection in number of connection events. Valid range
+     * is from 0 to 499
+     * @param timeout Supervision timeout for this connection, in 10ms unit. Valid range is from 10
+     * (0.1s) to 3200 (32s)
      * @param status {@link BluetoothGatt#GATT_SUCCESS} if the connection has been updated
-     *                successfully
+     * successfully
      * @hide
      */
     public void onConnectionUpdated(BluetoothGatt gatt, int interval, int latency, int timeout,
-                                    int status) {
+            int status) {
     }
 }

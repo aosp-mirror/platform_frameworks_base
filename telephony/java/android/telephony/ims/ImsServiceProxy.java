@@ -90,10 +90,10 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
                         " status: " + status);
                 if (mSlotId == slotId && feature == mSupportedFeature) {
                     mFeatureStatusCached = status;
+                    if (mStatusCallback != null) {
+                        mStatusCallback.notifyStatusChanged();
+                    }
                 }
-            }
-            if (mStatusCallback != null) {
-                mStatusCallback.notifyStatusChanged();
             }
         }
     };
@@ -129,7 +129,9 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     @Override
     public void endSession(int sessionId) throws RemoteException {
         synchronized (mLock) {
-            checkServiceIsReady();
+            // Only check to make sure the binder connection still exists. This method should
+            // still be able to be called when the state is STATE_NOT_AVAILABLE.
+            checkBinderConnection();
             getServiceInterface(mBinder).endSession(mSlotId, mSupportedFeature, sessionId);
         }
     }

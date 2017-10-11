@@ -16,6 +16,8 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.inputmethodservice.InputMethodService;
@@ -146,6 +148,44 @@ public interface InputMethod {
      * @see EditorInfo
      */
     public void restartInput(InputConnection inputConnection, EditorInfo attribute);
+
+    /**
+     * This method is called when {@code {@link #startInput(InputConnection, EditorInfo)} or
+     * {@code {@link #restartInput(InputConnection, EditorInfo)} needs to be dispatched.
+     *
+     * <p>Note: This method is hidden because the {@code startInputToken} that this method is
+     * dealing with is one of internal details, which should not be exposed to the IME developers.
+     * If you override this method, you are responsible for not breaking existing IMEs that expect
+     * {@link #startInput(InputConnection, EditorInfo)} to be still called back.</p>
+     *
+     * @param inputConnection optional specific input connection for communicating with the text
+     *                        box; if {@code null}, you should use the generic bound input
+     *                        connection
+     * @param editorInfo information about the text box (typically, an EditText) that requests input
+     * @param restarting {@code false} if this corresponds to
+     *                   {@link #startInput(InputConnection, EditorInfo)}. Otherwise this
+     *                   corresponds to {@link #restartInput(InputConnection, EditorInfo)}.
+     * @param startInputToken a token that identifies a logical session that starts with this method
+     *                        call. Some internal IPCs such as {@link
+     *                        InputMethodManager#setImeWindowStatus(IBinder, IBinder, int, int)}
+     *                        require this token to work, and you have to keep the token alive until
+     *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
+     *                        long as your implementation of {@link InputMethod} relies on such
+     *                        IPCs
+     * @see #startInput(InputConnection, EditorInfo)
+     * @see #restartInput(InputConnection, EditorInfo)
+     * @see EditorInfo
+     * @hide
+     */
+    default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
+            @NonNull EditorInfo editorInfo, boolean restarting,
+            @NonNull IBinder startInputToken) {
+        if (restarting) {
+            restartInput(inputConnection, editorInfo);
+        } else {
+            startInput(inputConnection, editorInfo);
+        }
+    }
 
     /**
      * Create a new {@link InputMethodSession} that can be handed to client

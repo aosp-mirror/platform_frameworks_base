@@ -30,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.TextureView;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.TextureView.SurfaceTextureListener;
@@ -95,6 +96,8 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
     public OverlayDisplayWindow(Context context, String name,
             int width, int height, int densityDpi, int gravity, boolean secure,
             Listener listener) {
+        // Workaround device freeze (b/38372997)
+        ThreadedRenderer.disableVsync();
         mContext = context;
         mName = name;
         mGravity = gravity;

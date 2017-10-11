@@ -15,31 +15,28 @@
  */
 package com.android.server.devicepolicy;
 
-import com.android.server.LocalServices;
-import com.android.server.SystemService;
-import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Pair;
+import android.provider.Settings;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
+import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import java.util.Set;
 
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     private DpmMockContext mContext;
@@ -57,7 +54,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     public void testMigration() throws Exception {
         final File user10dir = mMockContext.addUser(10, 0);
         final File user11dir = mMockContext.addUser(11, UserInfo.FLAG_MANAGED_PROFILE);
-        final File user12dir = mMockContext.addUser(12, 0);
+        mMockContext.addUser(12, 0);
 
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         setUpPackageManagerForAdmin(admin2, UserHandle.getUid(10, 123));
@@ -109,16 +106,13 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final Map<Integer, Bundle> newBaseRestrictions = new HashMap<>();
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Integer userId = (Integer) invocation.getArguments()[0];
-                Bundle bundle = (Bundle) invocation.getArguments()[1];
+        doAnswer(invocation -> {
+            Integer userId = (Integer) invocation.getArguments()[0];
+            Bundle bundle = (Bundle) invocation.getArguments()[1];
 
-                newBaseRestrictions.put(userId, bundle);
+            newBaseRestrictions.put(userId, bundle);
 
-                return null;
-            }
+            return null;
         }).when(mContext.userManagerInternal).setBaseUserRestrictionsByDpmsForMigration(
                 anyInt(), any(Bundle.class));
 
@@ -183,7 +177,8 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         // Check the new owner restrictions.
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_ADD_USER
+                        UserManager.DISALLOW_ADD_USER,
+                        UserManager.DISALLOW_ADD_MANAGED_PROFILE
                 ),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions());
 
@@ -224,16 +219,13 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         final Map<Integer, Bundle> newBaseRestrictions = new HashMap<>();
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Integer userId = (Integer) invocation.getArguments()[0];
-                Bundle bundle = (Bundle) invocation.getArguments()[1];
+        doAnswer(invocation -> {
+            Integer userId = (Integer) invocation.getArguments()[0];
+            Bundle bundle = (Bundle) invocation.getArguments()[1];
 
-                newBaseRestrictions.put(userId, bundle);
+            newBaseRestrictions.put(userId, bundle);
 
-                return null;
-            }
+            return null;
         }).when(mContext.userManagerInternal).setBaseUserRestrictionsByDpmsForMigration(
                 anyInt(), any(Bundle.class));
 
@@ -276,5 +268,64 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
                         UserManager.DISALLOW_OUTGOING_CALLS
                 ),
                 dpms.getProfileOwnerAdminLocked(UserHandle.USER_SYSTEM).ensureUserRestrictions());
+    }
+
+    // Test setting default restrictions for managed profile.
+    public void testMigration3_managedProfileOwner() throws Exception {
+        // Create a managed profile user.
+        final File user10dir = mMockContext.addUser(10, UserInfo.FLAG_MANAGED_PROFILE);
+        // Profile owner package for managed profile user.
+        setUpPackageManagerForAdmin(admin1, UserHandle.getUid(10, 123));
+        // Set up fake UserManager to make it look like a managed profile.
+        when(mMockContext.userManager.isManagedProfile(eq(10))).thenReturn(true);
+        // Set up fake Settings to make it look like INSTALL_NON_MARKET_APPS was reversed.
+        when(mMockContext.settings.settingsSecureGetIntForUser(
+                eq(Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED),
+                eq(0), eq(10))).thenReturn(1);
+        // Write policy and owners files.
+        DpmTestUtils.writeToFile(
+                (new File(mContext.systemUserDataDir, "device_policies.xml")).getAbsoluteFile(),
+                DpmTestUtils.readAsset(mRealTestContext,
+                        "DevicePolicyManagerServiceMigrationTest3/system_device_policies.xml"));
+        DpmTestUtils.writeToFile(
+                (new File(user10dir, "device_policies.xml")).getAbsoluteFile(),
+                DpmTestUtils.readAsset(mRealTestContext,
+                        "DevicePolicyManagerServiceMigrationTest3/profile_device_policies.xml"));
+        DpmTestUtils.writeToFile(
+                (new File(user10dir, "profile_owner.xml")).getAbsoluteFile(),
+                DpmTestUtils.readAsset(mRealTestContext,
+                        "DevicePolicyManagerServiceMigrationTest3/profile_owner.xml"));
+
+        final DevicePolicyManagerServiceTestable dpms;
+
+        // Initialize DPM/DPMS and let it migrate the persisted information.
+        // (Need clearCallingIdentity() to pass permission checks.)
+        final long ident = mContext.binder.clearCallingIdentity();
+        try {
+            LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+
+            dpms = new DevicePolicyManagerServiceTestable(mContext, dataDir);
+
+            dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
+            dpms.systemReady(SystemService.PHASE_BOOT_COMPLETED);
+        } finally {
+            mContext.binder.restoreCallingIdentity(ident);
+        }
+
+        assertFalse(dpms.mOwners.hasDeviceOwner());
+        assertTrue(dpms.mOwners.hasProfileOwner(10));
+
+        // Check that default restrictions were applied.
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                        UserManager.DISALLOW_BLUETOOTH_SHARING
+                ),
+                dpms.getProfileOwnerAdminLocked(10).ensureUserRestrictions());
+
+        final Set<String> alreadySet =
+                dpms.getProfileOwnerAdminLocked(10).defaultEnabledRestrictionsAlreadySet;
+        assertEquals(alreadySet.size(), 1);
+        assertTrue(alreadySet.contains(UserManager.DISALLOW_BLUETOOTH_SHARING));
     }
 }

@@ -15,10 +15,13 @@
  */
 package android.app.usage;
 
+import android.annotation.IntDef;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +30,12 @@ import java.util.List;
  * from which to read {@link android.app.usage.UsageEvents.Event} objects.
  */
 public final class UsageEvents implements Parcelable {
+
+    /** @hide */
+    public static final String INSTANT_APP_PACKAGE_NAME = "android.instant_app";
+
+    /** @hide */
+    public static final String INSTANT_APP_CLASS_NAME = "android.instant_class";
 
     /**
      * An event representing a state change for a component.
@@ -86,6 +95,23 @@ public final class UsageEvents implements Parcelable {
         public static final int SHORTCUT_INVOCATION = 8;
 
         /**
+         * An event type denoting that a package was selected by the user for ChooserActivity.
+         * @hide
+         */
+        public static final int CHOOSER_ACTION = 9;
+
+        /** @hide */
+        public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
+
+        /** @hide */
+        @IntDef(flag = true,
+                value = {
+                        FLAG_IS_PACKAGE_INSTANT_APP,
+                })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface EventFlags {}
+
+        /**
          * {@hide}
          */
         public String mPackage;
@@ -117,6 +143,48 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public String mShortcutId;
+
+        /**
+         * Action type passed to ChooserActivity
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String mAction;
+
+        /**
+         * Content type passed to ChooserActivity.
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String mContentType;
+
+        /**
+         * Content annotations passed to ChooserActivity.
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String[] mContentAnnotations;
+
+        /** @hide */
+        @EventFlags
+        public int mFlags;
+
+        public Event() {
+        }
+
+        /** @hide */
+        public Event(Event orig) {
+            mPackage = orig.mPackage;
+            mClass = orig.mClass;
+            mTimeStamp = orig.mTimeStamp;
+            mEventType = orig.mEventType;
+            mConfiguration = orig.mConfiguration;
+            mShortcutId = orig.mShortcutId;
+            mAction = orig.mAction;
+            mContentType = orig.mContentType;
+            mContentAnnotations = orig.mContentAnnotations;
+            mFlags = orig.mFlags;
+        }
 
         /**
          * The package name of the source of this event.
@@ -168,6 +236,20 @@ public final class UsageEvents implements Parcelable {
          */
         public String getShortcutId() {
             return mShortcutId;
+        }
+
+        /** @hide */
+        public Event getObfuscatedIfInstantApp() {
+            if ((mFlags & FLAG_IS_PACKAGE_INSTANT_APP) == 0) {
+                return this;
+            }
+            final Event ret = new Event(this);
+            ret.mPackage = INSTANT_APP_PACKAGE_NAME;
+            ret.mClass = INSTANT_APP_CLASS_NAME;
+
+            // Note there are other string fields too, but they're for app shortcuts and choosers,
+            // which instant apps can't use anyway, so there's no need to hide them.
+            return ret;
         }
     }
 
@@ -307,6 +389,11 @@ public final class UsageEvents implements Parcelable {
             case Event.SHORTCUT_INVOCATION:
                 p.writeString(event.mShortcutId);
                 break;
+            case Event.CHOOSER_ACTION:
+                p.writeString(event.mAction);
+                p.writeString(event.mContentType);
+                p.writeStringArray(event.mContentAnnotations);
+                break;
         }
     }
 
@@ -333,6 +420,9 @@ public final class UsageEvents implements Parcelable {
         // Fill out the event-dependant fields.
         eventOut.mConfiguration = null;
         eventOut.mShortcutId = null;
+        eventOut.mAction = null;
+        eventOut.mContentType = null;
+        eventOut.mContentAnnotations = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -341,6 +431,11 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.SHORTCUT_INVOCATION:
                 eventOut.mShortcutId = p.readString();
+                break;
+            case Event.CHOOSER_ACTION:
+                eventOut.mAction = p.readString();
+                eventOut.mContentType = p.readString();
+                eventOut.mContentAnnotations = p.createStringArray();
                 break;
         }
     }

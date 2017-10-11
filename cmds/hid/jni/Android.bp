@@ -1,0 +1,18 @@
+cc_library_shared {
+    name: "libhidcommand_jni",
+
+    srcs: ["com_android_commands_hid_Device.cpp"],
+
+    shared_libs: [
+        "libandroid_runtime",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+}

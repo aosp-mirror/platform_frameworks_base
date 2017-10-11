@@ -17,9 +17,6 @@
 package android.view;
 
 import android.graphics.Rect;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
 
 /**
  * Helper class to handle situations where you want a view to have a larger touch area than its
@@ -33,24 +30,24 @@ import android.view.ViewConfiguration;
  * </p>
  */
 public class TouchDelegate {
-    
+
     /**
-     * View that should receive forwarded touch events 
+     * View that should receive forwarded touch events
      */
     private View mDelegateView;
-    
+
     /**
      * Bounds in local coordinates of the containing view that should be mapped to the delegate
      * view. This rect is used for initial hit testing.
      */
     private Rect mBounds;
-    
+
     /**
      * mBounds inflated to include some slop. This rect is to track whether the motion events
      * should be considered to be be within the delegate view.
      */
     private Rect mSlopBounds;
-    
+
     /**
      * True if the delegate had been targeted on a down event (intersected mBounds).
      */
@@ -82,7 +79,7 @@ public class TouchDelegate {
 
     /**
      * Constructor
-     * 
+     *
      * @param bounds Bounds in local coordinates of the containing view that should be mapped to
      *        the delegate view
      * @param delegateView The view that should receive motion events
@@ -99,7 +96,7 @@ public class TouchDelegate {
     /**
      * Will forward touch events to the delegate view if the event is within the bounds
      * specified in the constructor.
-     * 
+     *
      * @param event The touch event to forward
      * @return True if the event was forwarded to the delegate, false otherwise.
      */
@@ -136,7 +133,7 @@ public class TouchDelegate {
         }
         if (sendToDelegate) {
             final View delegateView = mDelegateView;
-            
+
             if (hit) {
                 // Offset event coordinates to be inside the target view
                 event.setLocation(delegateView.getWidth() / 2, delegateView.getHeight() / 2);

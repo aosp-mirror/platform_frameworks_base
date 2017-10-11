@@ -18,6 +18,8 @@ package android.content.res;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.util.SparseArray;
+
 /**
  * Delegate used to provide implementation of a select few native methods of {@link AssetManager}
  * <p/>
@@ -38,4 +40,8 @@ public class AssetManager_Delegate {
         Resources_Theme_Delegate.getDelegateManager().removeJavaReferenceFor(theme);
     }
 
+    @LayoutlibDelegate
+    /*package*/ static SparseArray<String> getAssignedPackageIdentifiers(AssetManager manager) {
+        return new SparseArray<>();
+    }
 }

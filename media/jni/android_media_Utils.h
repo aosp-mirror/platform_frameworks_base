@@ -23,7 +23,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <gui/CpuConsumer.h>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 #include <SkStream.h>

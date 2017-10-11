@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3171996292755059205">"കീഗാർഡ്"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"പിൻ കോഡ് ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"സിം PUK-യും പുതിയ പിൻ കോഡും ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"സിം PUK കോഡ്"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"പുതിയ സിം പിൻ കോഡ്"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"പാസ്‌വേഡ് ടൈപ്പുചെയ്യുന്നതിന് സ്‌പർശിക്കുക"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"അൺലോക്കുചെയ്യുന്നതിന് പാസ്‌വേഡ് ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"അൺലോക്കുചെയ്യുന്നതിന് പിൻ ടൈപ്പുചെയ്യുക"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"പിൻ കോഡ് തെറ്റാണ്."</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"ചാർജായി"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"വേഗത്തിൽ ചാർജുചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"പതുക്കെ ചാർജുചെയ്യുന്നു"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"നിങ്ങളുടെ ചാർജർ കണക്റ്റുചെയ്യുക."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"സിം കാർഡില്ല"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ഫോണിൽ സിം കാർഡൊന്നുമില്ല."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"ഒരു ‌സിം കാർഡ് ഇടുക."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"സിം കാർഡ് കാണുന്നില്ല, അല്ലെങ്കിൽ റീഡുചെയ്യാനായില്ല. ഒരു സിം കാർഡ് ഇടുക."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"ഉപയോഗയോഗ്യമല്ലാത്ത സിം കാർഡ്."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"നിങ്ങളുടെ സിം കാർഡ് ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കി.\n മറ്റൊരു സിം കാർഡിനായി നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"സിം കാർഡ് ലോക്കുചെയ്‌തു."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"സിം കാർഡ് PUK-ലോക്ക് ചെയ്‌തതാണ്."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"സിം കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"പിൻ ഏരിയ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"സിം ‌പിൻ ഏരിയ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"സിം PUK ഏരിയ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"അടുത്ത അലാറം <xliff:g id="ALARM">%1$s</xliff:g>-ന് സജ്ജീകരിച്ചു"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"ഇല്ലാതാക്കുക"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"എന്റർ"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"പാറ്റേൺ മറന്നു"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"പാറ്റേൺ തെറ്റാണ്"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"പിൻ തെറ്റാണ്"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"സിം പിൻ നൽകുക"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" എന്നതിനുള്ള സിം പിൻ നൽകുക"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"പിൻ നൽകുക"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"പാസ്‌വേഡ് നൽകുക"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"താൽപ്പര്യപ്പെടുന്ന പിൻ കോഡ് നൽകുക"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"താൽപ്പര്യപ്പെടുന്ന പിൻകോ‌ഡ് സ്ഥിരീകരിക്കുക"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"സിം കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ ടൈപ്പുചെയ്യുക."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK കോഡിൽ 8 അല്ലെങ്കിൽ അതിലധികം സംഖ്യകൾ ഉണ്ടായിരിക്കണം."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ സിം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ പിൻ ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ നിങ്ങളുടെ പാസ്‌വേഡ് ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ അൺലോക്ക് പാറ്റേൺ ‌തെറ്റായി ‌വരച്ചു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഈ ടാബ്‌ലെറ്റ് ‌റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകു കയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ‌ശ്രമിക്കുക."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ഫോൺ അൺലോക്കുചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ‌ശ്രമിക്കുക."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇനി നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="other">സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
+      <item quantity="one">സിം പിൻ കോഡ് തെറ്റാണ്, ഉപകരണം അൺലോക്കുചെയ്യാൻ സേവനദാതാവുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിനു മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"സിം ഉപയോഗയോഗ്യമല്ല. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="other">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
+      <item quantity="one">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"പിൻ ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"PUK ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"കോഡ് അംഗീകരിച്ചു!"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"സേവനമില്ല"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ഇൻപുട്ട് രീതി മാറുക"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"ഫ്ലൈറ്റ് മോഡ്"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാറ്റേൺ വരയ്‌ക്കേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പിൻ നൽകേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാസ്‌വേഡ് നൽകേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"അധിക സുരക്ഷയ്ക്ക് പാറ്റേൺ ആവശ്യമാണ്"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"അധിക സുരക്ഷയ്ക്ക് പിൻ ആവശ്യമാണ്"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"അധിക സുരക്ഷയ്ക്ക് പാസ്‌വേഡ് ആവശ്യമാണ്"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ പാറ്റേൺ വരയ്‌ക്കേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ പിൻ നൽകേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"പ്രൊഫൈലുകൾ തമ്മിൽ മാറുമ്പോൾ പാസ്‌വേഡ് നൽകേണ്ടതുണ്ട്"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"ഉപകരണം അഡ്‌മിൻ ലോക്കുചെയ്തു"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക.</item>
+      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാറ്റേൺ സ്ഥിരീകരിക്കുക.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പിൻ സ്ഥിരീകരിക്കുക.</item>
+      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പിൻ സ്ഥിരീകരിക്കുക.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
+      <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"തിരിച്ചറിഞ്ഞില്ല"</string>
+</resources>

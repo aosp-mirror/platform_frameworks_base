@@ -16,7 +16,7 @@
 
 package com.android.systemui;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -66,7 +66,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
             UserInfo currentUser;
             try {
-                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+                currentUser = ActivityManager.getService().getCurrentUser();
             } catch (RemoteException e) {
                 return;
             }
@@ -96,7 +96,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
         UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         UserInfo currentUser;
         try {
-            currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            currentUser = ActivityManager.getService().getCurrentUser();
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't wipe session because ActivityManager is dead");
             return;
@@ -122,12 +122,12 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
         try {
             if (newGuest == null) {
                 Log.e(TAG, "Could not create new guest, switching back to system user");
-                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_SYSTEM);
+                ActivityManager.getService().switchUser(UserHandle.USER_SYSTEM);
                 userManager.removeUser(currentUser.id);
                 WindowManagerGlobal.getWindowManagerService().lockNow(null /* options */);
                 return;
             }
-            ActivityManagerNative.getDefault().switchUser(newGuest.id);
+            ActivityManager.getService().switchUser(newGuest.id);
             userManager.removeUser(currentUser.id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't wipe session because ActivityManager or WindowManager is dead");

@@ -25,6 +25,17 @@ import java.util.Objects;
 public final class VolumePolicy implements Parcelable {
     public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400);
 
+    /**
+     * Accessibility volume policy where the STREAM_MUSIC volume (i.e. media volume) affects
+     * the STREAM_ACCESSIBILITY volume, and vice-versa.
+     */
+    public static final int A11Y_MODE_MEDIA_A11Y_VOLUME = 0;
+    /**
+     * Accessibility volume policy where the STREAM_ACCESSIBILITY volume is independent from
+     * any other volume.
+     */
+    public static final int A11Y_MODE_INDEPENDENT_A11Y_VOLUME = 1;
+
     /** Allow volume adjustments lower from vibrate to enter ringer mode = silent */
     public final boolean volumeDownToEnterSilent;
 

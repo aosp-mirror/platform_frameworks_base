@@ -16,11 +16,13 @@
 
 package com.android.server.updates;
 
+import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
+
 import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 /**
  * An install receiver responsible for installing timezone data updates.
@@ -46,7 +48,8 @@ public class TzDataInstallReceiver extends ConfigUpdateInstallReceiver {
 
     @Override
     protected void install(byte[] content, int version) throws IOException {
-        boolean valid = installer.install(content);
+        TimeZoneDistro distro = new TimeZoneDistro(content);
+        boolean valid = installer.install(distro);
         Slog.i(TAG, "Timezone data install valid for this device: " + valid);
         // Even if !valid, we call super.install(). Only in the event of an exception should we
         // not. If we didn't do this we could attempt to install repeatedly.

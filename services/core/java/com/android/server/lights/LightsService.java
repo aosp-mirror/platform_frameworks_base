@@ -143,7 +143,7 @@ public class LightsService extends SystemService {
                 Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", 0x"
                         + Integer.toHexString(color) + ")");
                 try {
-                    setLight_native(mNativePointer, mId, color, mode, onMS, offMS, brightnessMode);
+                    setLight_native(mId, color, mode, onMS, offMS, brightnessMode);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_POWER);
                 }
@@ -171,8 +171,6 @@ public class LightsService extends SystemService {
     public LightsService(Context context) {
         super(context);
 
-        mNativePointer = init_native();
-
         for (int i = 0; i < LightsManager.LIGHT_ID_COUNT; i++) {
             mLights[i] = new LightImpl(i);
         }
@@ -198,19 +196,13 @@ public class LightsService extends SystemService {
     private final LightsManager mService = new LightsManager() {
         @Override
         public Light getLight(int id) {
-            if (id < LIGHT_ID_COUNT) {
+            if (0 <= id && id < LIGHT_ID_COUNT) {
                 return mLights[id];
             } else {
                 return null;
             }
         }
     };
-
-    @Override
-    protected void finalize() throws Throwable {
-        finalize_native(mNativePointer);
-        super.finalize();
-    }
 
     private Handler mH = new Handler() {
         @Override
@@ -220,11 +212,6 @@ public class LightsService extends SystemService {
         }
     };
 
-    private static native long init_native();
-    private static native void finalize_native(long ptr);
-
-    static native void setLight_native(long ptr, int light, int color, int mode,
+    static native void setLight_native(int light, int color, int mode,
             int onMS, int offMS, int brightnessMode);
-
-    private long mNativePointer;
 }

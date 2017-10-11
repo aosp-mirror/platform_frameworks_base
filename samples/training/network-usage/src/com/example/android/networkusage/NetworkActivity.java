@@ -158,7 +158,7 @@ public class NetworkActivity extends Activity {
         setContentView(R.layout.main);
 
         // The specified network connection is not available. Displays error message.
-        WebView myWebView = (WebView) findViewById(R.id.webview);
+        WebView myWebView = findViewById(R.id.webview);
         myWebView.loadData(getResources().getString(R.string.connection_error),
                 "text/html", null);
     }
@@ -205,7 +205,7 @@ public class NetworkActivity extends Activity {
         protected void onPostExecute(String result) {
             setContentView(R.layout.main);
             // Displays the HTML string in the UI via a WebView
-            WebView myWebView = (WebView) findViewById(R.id.webview);
+            WebView myWebView = findViewById(R.id.webview);
             myWebView.loadData(result, "text/html", null);
         }
     }

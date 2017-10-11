@@ -27,6 +27,7 @@
 
 #include <SkBlurDrawLooper.h>
 #include <SkDashPathEffect.h>
+#include <SkPath.h>
 
 using namespace android::uirenderer;
 
@@ -79,15 +80,13 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
             << "Glop(s) expected";
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
     SkPaint strokePaint;
     strokePaint.setStyle(SkPaint::kStroke_Style);
     strokePaint.setStrokeWidth(4);
 
     float intervals[] = {1.0f, 1.0f};
-    auto dashEffect = SkDashPathEffect::Create(intervals, 2, 0);
-    strokePaint.setPathEffect(dashEffect);
-    dashEffect->unref();
+    strokePaint.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0));
 
     auto textureGlopVerifier = [] (const Glop& glop) {
         // validate glop produced by renderPathTexture (so texture, unit quad)
@@ -114,7 +113,7 @@ RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
     testUnmergedGlopDispatch(renderThread, &ovalOp, textureGlopVerifier);
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     SkPaint layerPaint;
     layerPaint.setAlpha(128);
     OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
@@ -132,7 +131,7 @@ static int getGlopTransformFlags(renderthread::RenderThread& renderThread, Recor
     return result;
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, offsetFlags) {
     Rect bounds(10, 15, 20, 25);
     SkPaint paint;
     SkPaint aaPaint;
@@ -158,15 +157,15 @@ RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
             << "Expect an offset for non-AA lines.";
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
-    auto node = TestUtils::createNode(0, 0, 100, 100,
-            [](RenderProperties& props, TestCanvas& canvas) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, renderTextWithShadow) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
 
         android::Paint shadowPaint;
         shadowPaint.setColor(SK_ColorRED);
 
         SkScalar sigma = Blur::convertRadiusToSigma(5);
-        shadowPaint.setLooper(SkBlurDrawLooper::Create(SK_ColorWHITE, sigma, 3, 3))->unref();
+        shadowPaint.setLooper(SkBlurDrawLooper::Make(SK_ColorWHITE, sigma, 3, 3));
 
         TestUtils::drawUtf8ToCanvas(&canvas, "A", shadowPaint, 25, 25);
         TestUtils::drawUtf8ToCanvas(&canvas, "B", shadowPaint, 50, 50);
@@ -196,13 +195,13 @@ RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
 
 static void validateLayerDraw(renderthread::RenderThread& renderThread,
         std::function<void(const Glop& glop)> validator) {
-    auto node = TestUtils::createNode(0, 0, 100, 100,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
 
         // provide different blend mode, so decoration draws contrast
-        props.mutateLayerProperties().setXferMode(SkXfermode::Mode::kSrc_Mode);
-        canvas.drawColor(Color::Black, SkXfermode::Mode::kSrcOver_Mode);
+        props.mutateLayerProperties().setXferMode(SkBlendMode::kSrc);
+        canvas.drawColor(Color::Black, SkBlendMode::kSrcOver);
     });
     OffscreenBuffer** layerHandle = node->getLayerHandle();
 
@@ -233,7 +232,7 @@ static FloatColor makeFloatColor(uint32_t color) {
     return c;
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, layerUpdateProperties) {
     for (bool debugOverdraw : { false, true }) {
         for (bool debugLayersUpdates : { false, true }) {
             ScopedProperty<bool> ovdProp(Properties::debugOverdraw, debugOverdraw);
@@ -272,4 +271,18 @@ RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
             EXPECT_EQ(expectedCount, glopCount);
         }
     }
+}
+
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTextureSnapping) {
+    Rect bounds(10, 15, 20, 25);
+    SkPaint paint;
+    SkPath path;
+    path.addRect(SkRect::MakeXYWH(1.5, 3.8, 100, 90));
+    PathOp op(bounds, Matrix4::identity(), nullptr, &paint, &path);
+    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
+        auto texture = glop.fill.texture.texture;
+        ASSERT_NE(nullptr, texture);
+        EXPECT_EQ(1, reinterpret_cast<PathTexture*>(texture)->left);
+        EXPECT_EQ(3, reinterpret_cast<PathTexture*>(texture)->top);
+    });
 }

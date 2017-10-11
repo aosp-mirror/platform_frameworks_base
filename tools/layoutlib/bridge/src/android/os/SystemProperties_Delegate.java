@@ -102,4 +102,9 @@ public class SystemProperties_Delegate {
     /*package*/ static void native_add_change_callback() {
         // pass.
     }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_report_sysprop_change() {
+        // pass.
+    }
 }

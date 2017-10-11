@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.util.Log;
@@ -32,14 +33,49 @@ public class InstallerTest extends AndroidTestCase {
 
     private Installer mInstaller;
 
+    private final Timer mManual = new Timer("Manual");
+    private final Timer mQuota = new Timer("Quota");
+
+    private static class Timer {
+        private final String mTitle;
+        private long mStart;
+        private long mTotal;
+
+        public Timer(String title) {
+            mTitle = title;
+        }
+
+        public void start() {
+            mStart = SystemClock.currentTimeMicro();
+        }
+
+        public void stop() {
+            mTotal += SystemClock.currentTimeMicro() - mStart;
+        }
+
+        public void reset() {
+            mStart = 0;
+            mTotal = 0;
+        }
+
+        @Override
+        public String toString() {
+            return mTitle + ": " + (mTotal / 1000) + "ms";
+        }
+    }
+
     @Override
     public void setUp() throws Exception {
         mInstaller = new Installer(getContext());
         mInstaller.onStart();
+        mManual.reset();
+        mQuota.reset();
     }
 
     @Override
     public void tearDown() throws Exception {
+        Log.i(TAG, mManual.toString());
+        Log.i(TAG, mQuota.toString());
         mInstaller = null;
     }
 
@@ -69,49 +105,66 @@ public class InstallerTest extends AndroidTestCase {
             final PackageStats stats = new PackageStats(app.packageName);
             final PackageStats quotaStats = new PackageStats(app.packageName);
 
+            mManual.start();
             mInstaller.getAppSize(app.volumeUuid, packageNames, userId, 0,
                     appId, ceDataInodes, codePaths, stats);
+            mManual.stop();
 
+            mQuota.start();
             mInstaller.getAppSize(app.volumeUuid, packageNames, userId, Installer.FLAG_USE_QUOTA,
                     appId, ceDataInodes, codePaths, quotaStats);
+            mQuota.stop();
 
             checkEquals(Arrays.toString(packageNames) + " UID=" + app.uid, stats, quotaStats);
         }
     }
 
     public void testGetUserSize() throws Exception {
-        int[] appIds = null;
-
-        final PackageManager pm = getContext().getPackageManager();
-        for (ApplicationInfo app : pm.getInstalledApplications(0)) {
-            final int appId = UserHandle.getAppId(app.uid);
-            if (!ArrayUtils.contains(appIds, appId)) {
-                appIds = ArrayUtils.appendInt(appIds, appId);
-            }
-        }
+        final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
 
         final PackageStats stats = new PackageStats("android");
         final PackageStats quotaStats = new PackageStats("android");
 
+        mManual.start();
         mInstaller.getUserSize(null, UserHandle.USER_SYSTEM, 0,
                 appIds, stats);
+        mManual.stop();
 
+        mQuota.start();
         mInstaller.getUserSize(null, UserHandle.USER_SYSTEM, Installer.FLAG_USE_QUOTA,
                 appIds, quotaStats);
+        mQuota.stop();
 
         checkEquals(Arrays.toString(appIds), stats, quotaStats);
     }
 
     public void testGetExternalSize() throws Exception {
+        final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
 
-        final long[] stats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM, 0);
+        mManual.start();
+        final long[] stats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM, 0, appIds);
+        mManual.stop();
 
+        mQuota.start();
         final long[] quotaStats = mInstaller.getExternalSize(null, UserHandle.USER_SYSTEM,
-                Installer.FLAG_USE_QUOTA);
+                Installer.FLAG_USE_QUOTA, appIds);
+        mQuota.stop();
 
         for (int i = 0; i < stats.length; i++) {
             checkEquals("#" + i, stats[i], quotaStats[i]);
         }
+    }
+
+    private int[] getAppIds(int userId) {
+        int[] appIds = null;
+        for (ApplicationInfo app : getContext().getPackageManager().getInstalledApplicationsAsUser(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId)) {
+            final int appId = UserHandle.getAppId(app.uid);
+            if (!ArrayUtils.contains(appIds, appId)) {
+                appIds = ArrayUtils.appendInt(appIds, appId);
+            }
+        }
+        return appIds;
     }
 
     private static void checkEquals(String msg, PackageStats a, PackageStats b) {

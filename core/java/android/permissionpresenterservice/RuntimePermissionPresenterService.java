@@ -72,14 +72,6 @@ public abstract class RuntimePermissionPresenterService extends Service {
      */
     public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(String packageName);
 
-    /**
-     * Gets the apps that use runtime permissions.
-     *
-     * @param system Whether to return only the system apps or only the non-system ones.
-     * @return The app list.
-     */
-    public abstract List<ApplicationInfo> onGetAppsUsingPermissions(boolean system);
-
     @Override
     public final IBinder onBind(Intent intent) {
         return new IRuntimePermissionPresenter.Stub() {
@@ -90,12 +82,6 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 args.arg2 = callback;
                 mHandler.obtainMessage(MyHandler.MSG_GET_APP_PERMISSIONS,
                         args).sendToTarget();
-            }
-
-            @Override
-            public void getAppsUsingPermissions(boolean system, RemoteCallback callback) {
-                mHandler.obtainMessage(MyHandler.MSG_GET_APPS_USING_PERMISSIONS,
-                        system ? 1 : 0, 0, callback).sendToTarget();
             }
         };
     }
@@ -122,19 +108,6 @@ public abstract class RuntimePermissionPresenterService extends Service {
                         Bundle result = new Bundle();
                         result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT,
                                 permissions);
-                        callback.sendResult(result);
-                    } else {
-                        callback.sendResult(null);
-                    }
-                } break;
-
-                case MSG_GET_APPS_USING_PERMISSIONS: {
-                    RemoteCallback callback = (RemoteCallback) msg.obj;
-                    final boolean system = msg.arg1 == 1;
-                    List<ApplicationInfo> apps = onGetAppsUsingPermissions(system);
-                    if (apps != null && !apps.isEmpty()) {
-                        Bundle result = new Bundle();
-                        result.putParcelableList(RuntimePermissionPresenter.KEY_RESULT, apps);
                         callback.sendResult(result);
                     } else {
                         callback.sendResult(null);

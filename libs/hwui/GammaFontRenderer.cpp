@@ -24,12 +24,13 @@ namespace uirenderer {
 GammaFontRenderer::GammaFontRenderer() {
     INIT_LOGD("Creating lookup gamma font renderer");
 
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
     // Compute the gamma tables
     const float gamma = 1.0f / Properties::textGamma;
-
     for (uint32_t i = 0; i <= 255; i++) {
         mGammaTable[i] = uint8_t((float)::floor(pow(i / 255.0f, gamma) * 255.0f + 0.5f));
     }
+#endif
 }
 
 void GammaFontRenderer::endPrecaching() {

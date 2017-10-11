@@ -36,75 +36,39 @@ import java.util.Set;
  */
 public final class CreateInfo implements ICreateInfo {
 
-    /**
-     * Returns the list of class from layoutlib_create to inject in layoutlib.
-     * The list can be empty but must not be null.
-     */
     @Override
     public Class<?>[] getInjectedClasses() {
         return INJECTED_CLASSES;
     }
 
-    /**
-     * Returns the list of methods to rewrite as delegates.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDelegateMethods() {
         return DELEGATE_METHODS;
     }
 
-    /**
-     * Returns the list of classes on which to delegate all native methods.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDelegateClassNatives() {
         return DELEGATE_CLASS_NATIVES;
     }
 
-    /**
-     * Returns The list of methods to stub out. Each entry must be in the form
-     * "package.package.OuterClass$InnerClass#MethodName".
-     * The list can be empty but must not be null.
-     * <p/>
-     * This usage is deprecated. Please use method 'delegates' instead.
-     */
-    @Override
-    public String[] getOverriddenMethods() {
-        return OVERRIDDEN_METHODS;
-    }
-
-    /**
-     * Returns the list of classes to rename, must be an even list: the binary FQCN
-     * of class to replace followed by the new FQCN.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getRenamedClasses() {
         return RENAMED_CLASSES;
     }
 
-    /**
-     * Returns the list of classes for which the methods returning them should be deleted.
-     * The array contains a list of null terminated section starting with the name of the class
-     * to rename in which the methods are deleted, followed by a list of return types identifying
-     * the methods to delete.
-     * The list can be empty but must not be null.
-     */
     @Override
     public String[] getDeleteReturns() {
         return DELETE_RETURNS;
     }
 
-    /**
-     * Returns the list of classes to refactor, must be an even list: the binary FQCN of class to
-     * replace followed by the new FQCN. All references to the old class should be updated to the
-     * new class. The list can be empty but must not be null.
-     */
     @Override
     public String[] getJavaPkgClasses() {
       return JAVA_PKG_CLASSES;
+    }
+
+    @Override
+    public String[] getRefactoredClasses() {
+        return REFACTOR_CLASSES;
     }
 
     @Override
@@ -122,6 +86,11 @@ public final class CreateInfo implements ICreateInfo {
     @Override
     public String[] getPromotedFields() {
         return PROMOTED_FIELDS;
+    }
+
+    @Override
+    public String[] getPromotedClasses() {
+        return PROMOTED_CLASSES;
     }
 
     @Override
@@ -163,9 +132,12 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.Resources#getDimensionPixelOffset",
         "android.content.res.Resources#getDimensionPixelSize",
         "android.content.res.Resources#getDrawable",
+        "android.content.res.Resources#getFont",
         "android.content.res.Resources#getIntArray",
         "android.content.res.Resources#getInteger",
         "android.content.res.Resources#getLayout",
+        "android.content.res.Resources#getQuantityString",
+        "android.content.res.Resources#getQuantityText",
         "android.content.res.Resources#getResourceEntryName",
         "android.content.res.Resources#getResourceName",
         "android.content.res.Resources#getResourcePackageName",
@@ -186,11 +158,13 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.Resources$Theme#resolveAttributes",
         "android.content.res.AssetManager#newTheme",
         "android.content.res.AssetManager#deleteTheme",
+        "android.content.res.AssetManager#getAssignedPackageIdentifiers",
         "android.content.res.TypedArray#getValueAt",
         "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
         "android.graphics.BitmapFactory#setDensityFromOptions",
         "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#useLastSeenTarget",
+        "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#onDraw",
         "android.graphics.drawable.GradientDrawable#buildRing",
         "android.graphics.FontFamily#addFont",
         "android.graphics.Typeface#getSystemFontConfigLocation",
@@ -217,7 +191,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.MenuInflater#registerMenu",
         "android.view.RenderNode#getMatrix",
         "android.view.RenderNode#nCreate",
-        "android.view.RenderNode#nDestroyRenderNode",
+        "android.view.RenderNode#nGetNativeFinalizer",
         "android.view.RenderNode#nSetElevation",
         "android.view.RenderNode#nGetElevation",
         "android.view.RenderNode#nSetTranslationX",
@@ -242,10 +216,10 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nSetScaleY",
         "android.view.RenderNode#nGetScaleY",
         "android.view.RenderNode#nIsPivotExplicitlySet",
+        "android.view.PointerIcon#loadResource",
         "android.view.ViewGroup#drawChild",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
-        "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
         "dalvik.system.VMRuntime#newUnpaddedArray",
         "libcore.io.MemoryMappedFile#mmapRO",
         "libcore.io.MemoryMappedFile#close",
@@ -258,6 +232,7 @@ public final class CreateInfo implements ICreateInfo {
      */
     public final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.animation.PropertyValuesHolder",
+        "android.graphics.BaseCanvas",
         "android.graphics.Bitmap",
         "android.graphics.BitmapFactory",
         "android.graphics.BitmapShader",
@@ -273,7 +248,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.DrawFilter",
         "android.graphics.EmbossMaskFilter",
         "android.graphics.FontFamily",
-        "android.graphics.LayerRasterizer",
         "android.graphics.LightingColorFilter",
         "android.graphics.LinearGradient",
         "android.graphics.MaskFilter",
@@ -286,15 +260,12 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.PathEffect",
         "android.graphics.PathMeasure",
         "android.graphics.PorterDuffColorFilter",
-        "android.graphics.PorterDuffXfermode",
         "android.graphics.RadialGradient",
-        "android.graphics.Rasterizer",
         "android.graphics.Region",
         "android.graphics.Shader",
         "android.graphics.SumPathEffect",
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
-        "android.graphics.Xfermode",
         "android.graphics.drawable.AnimatedVectorDrawable",
         "android.graphics.drawable.VectorDrawable",
         "android.os.SystemClock",
@@ -309,20 +280,13 @@ public final class CreateInfo implements ICreateInfo {
     };
 
     /**
-     * The list of methods to stub out. Each entry must be in the form
-     *  "package.package.OuterClass$InnerClass#MethodName".
-     *  This usage is deprecated. Please use method 'delegates' instead.
-     */
-    private final static String[] OVERRIDDEN_METHODS = new String[] {
-    };
-
-    /**
      *  The list of classes to rename, must be an even list: the binary FQCN
      *  of class to replace followed by the new FQCN.
      */
     private final static String[] RENAMED_CLASSES =
         new String[] {
             "android.os.ServiceManager",                       "android.os._Original_ServiceManager",
+            "android.view.textservice.TextServicesManager",    "android.view.textservice._Original_TextServicesManager",
             "android.util.LruCache",                           "android.util._Original_LruCache",
             "android.view.SurfaceView",                        "android.view._Original_SurfaceView",
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
@@ -345,10 +309,22 @@ public final class CreateInfo implements ICreateInfo {
             "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat",
         };
 
+    /**
+     * List of classes to refactor. This is similar to combining {@link #getRenamedClasses()} and
+     * {@link #getJavaPkgClasses()}.
+     * Classes included here will be renamed and then all their references in any other classes
+     * will be also modified.
+     * FQCN of class to refactor followed by its new FQCN.
+     */
+    private final static String[] REFACTOR_CLASSES =
+            new String[] {
+                    "android.os.Build",                                "android.os._Original_Build",
+            };
+
     private final static String[] EXCLUDED_CLASSES =
         new String[] {
             "android.preference.PreferenceActivity",
-            "org.kxml2.io.KXmlParser"
+            "org.kxml2.io.KXmlParser",
         };
 
     /**
@@ -357,7 +333,16 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] PROMOTED_FIELDS = new String[] {
         "android.graphics.drawable.VectorDrawable#mVectorState",
-        "android.view.Choreographer#mLastFrameTimeNanos"
+        "android.view.Choreographer#mLastFrameTimeNanos",
+        "android.graphics.FontFamily#mBuilderPtr",
+        "android.graphics.Typeface#sDynamicTypefaceCache"
+    };
+
+    /**
+     * List of classes to be promoted to public visibility. Prefer using PROMOTED_FIELDS to this
+     * if possible.
+     */
+    private final static String[] PROMOTED_CLASSES = new String[] {
     };
 
     /**

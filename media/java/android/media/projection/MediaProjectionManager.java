@@ -18,6 +18,7 @@ package android.media.projection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -33,14 +34,8 @@ import java.util.Map;
 
 /**
  * Manages the retrieval of certain types of {@link MediaProjection} tokens.
- *
- * <p>
- * Get an instance of this class by calling {@link
- * android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument {@link
- * android.content.Context#MEDIA_PROJECTION_SERVICE}.
- * </p>
  */
+@SystemService(Context.MEDIA_PROJECTION_SERVICE)
 public final class MediaProjectionManager {
     private static final String TAG = "MediaProjectionManager";
     /** @hide */

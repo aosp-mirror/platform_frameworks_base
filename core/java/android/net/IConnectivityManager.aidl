@@ -75,7 +75,7 @@ interface IConnectivityManager
 
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported();
+    boolean isTetheringSupported(String callerPkg);
 
     void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
             String callerPkg);
@@ -123,6 +123,7 @@ interface IConnectivityManager
     VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
+    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
     boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
     String getAlwaysOnVpnPackage(int userId);
 

@@ -55,9 +55,9 @@ public class StartVoiceInteractionActivity extends Activity implements View.OnCl
         mPickButton.setOnClickListener(this);
         mCancelButton = (Button)findViewById(R.id.cancel);
         mCancelButton.setOnClickListener(this);
-        mStartButton = (Button) findViewById(R.id.start);
+        mStartButton = findViewById(R.id.start);
         mStartButton.setOnClickListener(this);
-        mStopButton = (Button) findViewById(R.id.stop);
+        mStopButton = findViewById(R.id.stop);
         mStopButton.setOnClickListener(this);
 
         mLog.append("Local Voice Interaction Supported = " + isLocalVoiceInteractionSupported());

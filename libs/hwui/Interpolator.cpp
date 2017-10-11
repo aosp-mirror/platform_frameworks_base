@@ -89,6 +89,39 @@ float OvershootInterpolator::interpolate(float t) {
     return t * t * ((mTension + 1) * t + mTension) + 1.0f;
 }
 
+float PathInterpolator::interpolate(float t) {
+    if (t <= 0) {
+        return 0;
+    } else if (t >= 1) {
+        return 1;
+    }
+    // Do a binary search for the correct x to interpolate between.
+    size_t startIndex = 0;
+    size_t endIndex = mX.size() - 1;
+
+    while (endIndex > startIndex + 1) {
+        int midIndex = (startIndex + endIndex) / 2;
+        if (t < mX[midIndex]) {
+            endIndex = midIndex;
+        } else {
+            startIndex = midIndex;
+        }
+    }
+
+    float xRange = mX[endIndex] - mX[startIndex];
+    if (xRange == 0) {
+        return mY[startIndex];
+    }
+
+    float tInRange = t - mX[startIndex];
+    float fraction = tInRange / xRange;
+
+    float startY = mY[startIndex];
+    float endY = mY[endIndex];
+    return startY + (fraction * (endY - startY));
+
+}
+
 LUTInterpolator::LUTInterpolator(float* values, size_t size)
     : mValues(values)
     , mSize(size) {

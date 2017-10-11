@@ -96,7 +96,7 @@ public class PssTable extends SparseMappingTable.Table {
             }
 
             val = getValue(key, PSS_USS_AVERAGE);
-            setValue(key, PSS_AVERAGE,
+            setValue(key, PSS_USS_AVERAGE,
                     (long)(((val*(double)count)+(avgUss*(double)inCount)) / (count+inCount)));
 
             val = getValue(key, PSS_USS_MAXIMUM);

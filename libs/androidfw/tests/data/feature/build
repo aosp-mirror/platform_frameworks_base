@@ -15,7 +15,14 @@
 # limitations under the License.
 #
 
-aapt package -M AndroidManifest.xml -S res --feature-of ../basic/bundle.apk -F bundle.apk -f && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc feature.arsc && \
-xxd -i feature.arsc > feature_arsc.h
+set -e
+
+PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
+
+aapt2 compile --dir res -o compiled.flata
+aapt2 link -o feature.apk \
+    --manifest AndroidManifest.xml \
+    -I $PATH_TO_FRAMEWORK_RES \
+    -I ../basic/basic.apk \
+    --package-id 0x80 \
+    compiled.flata

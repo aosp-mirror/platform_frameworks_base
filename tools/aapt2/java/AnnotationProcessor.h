@@ -17,10 +17,10 @@
 #ifndef AAPT_JAVA_ANNOTATIONPROCESSOR_H
 #define AAPT_JAVA_ANNOTATIONPROCESSOR_H
 
-#include "util/StringPiece.h"
-
 #include <sstream>
 #include <string>
+
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -52,35 +52,36 @@ namespace aapt {
  *
  */
 class AnnotationProcessor {
-public:
-    /**
-     * Adds more comments. Since resources can have various values with different configurations,
-     * we need to collect all the comments.
-     */
-    void appendComment(const StringPiece16& comment);
-    void appendComment(const StringPiece& comment);
+ public:
+  /**
+   * Adds more comments. Since resources can have various values with different
+   * configurations,
+   * we need to collect all the comments.
+   */
+  void AppendComment(const android::StringPiece& comment);
 
-    void appendNewLine();
+  void AppendNewLine();
 
-    /**
-     * Writes the comments and annotations to the stream, with the given prefix before each line.
-     */
-    void writeToStream(std::ostream* out, const StringPiece& prefix) const;
+  /**
+   * Writes the comments and annotations to the stream, with the given prefix
+   * before each line.
+   */
+  void WriteToStream(std::ostream* out, const android::StringPiece& prefix) const;
 
-private:
-    enum : uint32_t {
-        kDeprecated = 0x01,
-        kSystemApi = 0x02,
-    };
+ private:
+  enum : uint32_t {
+    kDeprecated = 0x01,
+    kSystemApi = 0x02,
+  };
 
-    std::stringstream mComment;
-    std::stringstream mAnnotations;
-    bool mHasComments = false;
-    uint32_t mAnnotationBitMask = 0;
+  std::stringstream comment_;
+  std::stringstream mAnnotations;
+  bool has_comments_ = false;
+  uint32_t annotation_bit_mask_ = 0;
 
-    void appendCommentLine(std::string& line);
+  void AppendCommentLine(std::string& line);
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_JAVA_ANNOTATIONPROCESSOR_H */

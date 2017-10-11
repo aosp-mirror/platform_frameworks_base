@@ -53,15 +53,15 @@ public final class Backup {
 
         String arg = nextArg();
         if (arg.equals("backup")) {
-            doFullBackup(OsConstants.STDOUT_FILENO);
+            doBackup(OsConstants.STDOUT_FILENO);
         } else if (arg.equals("restore")) {
-            doFullRestore(OsConstants.STDIN_FILENO);
+            doRestore(OsConstants.STDIN_FILENO);
         } else {
-            Log.e(TAG, "Invalid operation '" + arg + "'");
+            showUsage();
         }
     }
 
-    private void doFullBackup(int socketFd) {
+    private void doBackup(int socketFd) {
         ArrayList<String> packages = new ArrayList<String>();
         boolean saveApks = false;
         boolean saveObbs = false;
@@ -70,6 +70,7 @@ public final class Backup {
         boolean doWidgets = false;
         boolean allIncludesSystem = true;
         boolean doCompress = true;
+        boolean doKeyValue = false;
 
         String arg;
         while ((arg = nextArg()) != null) {
@@ -100,6 +101,10 @@ public final class Backup {
                     doCompress = true;
                 } else if ("-nocompress".equals(arg)) {
                     doCompress = false;
+                } else if ("-keyvalue".equals(arg)) {
+                    doKeyValue = true;
+                } else if ("-nokeyvalue".equals(arg)) {
+                    doKeyValue = false;
                 } else {
                     Log.w(TAG, "Unknown backup flag " + arg);
                     continue;
@@ -123,8 +128,8 @@ public final class Backup {
         try {
             fd = ParcelFileDescriptor.adoptFd(socketFd);
             String[] packArray = new String[packages.size()];
-            mBackupManager.fullBackup(fd, saveApks, saveObbs, saveShared, doWidgets,
-                    doEverything, allIncludesSystem, doCompress, packages.toArray(packArray));
+            mBackupManager.adbBackup(fd, saveApks, saveObbs, saveShared, doWidgets, doEverything,
+                    allIncludesSystem, doCompress, doKeyValue, packages.toArray(packArray));
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for backup");
         } finally {
@@ -136,12 +141,12 @@ public final class Backup {
         }
     }
 
-    private void doFullRestore(int socketFd) {
+    private void doRestore(int socketFd) {
         // No arguments to restore
         ParcelFileDescriptor fd = null;
         try {
             fd = ParcelFileDescriptor.adoptFd(socketFd);
-            mBackupManager.fullRestore(fd);
+            mBackupManager.adbRestore(fd);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for restore");
         } finally {
@@ -151,6 +156,21 @@ public final class Backup {
                 } catch (IOException e) {}
             }
         }
+    }
+
+    private static void showUsage() {
+        System.err.println(" backup [-f FILE] [-apk|-noapk] [-obb|-noobb] [-shared|-noshared] [-all]");
+        System.err.println("        [-system|-nosystem] [-keyvalue|-nokeyvalue] [PACKAGE...]");
+        System.err.println("     write an archive of the device's data to FILE [default=backup.adb]");
+        System.err.println("     package list optional if -all/-shared are supplied");
+        System.err.println("     -apk/-noapk: do/don't back up .apk files (default -noapk)");
+        System.err.println("     -obb/-noobb: do/don't back up .obb files (default -noobb)");
+        System.err.println("     -shared|-noshared: do/don't back up shared storage (default -noshared)");
+        System.err.println("     -all: back up all installed applications");
+        System.err.println("     -system|-nosystem: include system apps in -all (default -system)");
+        System.err.println("     -keyvalue|-nokeyvalue: include apps that perform key/value backups.");
+        System.err.println("         (default -nokeyvalue)");
+        System.err.println(" restore FILE             restore device contents from FILE");
     }
 
     private String nextArg() {

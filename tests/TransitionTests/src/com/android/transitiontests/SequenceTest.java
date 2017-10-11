@@ -41,12 +41,12 @@ public class SequenceTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fading_test);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mRemovingButton = (Button) findViewById(R.id.removingButton);
-        mInvisibleButton = (Button) findViewById(R.id.invisibleButton);
-        mGoneButton = (Button) findViewById(R.id.goneButton);
+        mRemovingButton = findViewById(R.id.removingButton);
+        mInvisibleButton = findViewById(R.id.invisibleButton);
+        mGoneButton = findViewById(R.id.goneButton);
 
         mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test, this);
         mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test_scene_2, this);

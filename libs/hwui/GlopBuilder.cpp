@@ -16,9 +16,12 @@
 #include "GlopBuilder.h"
 
 #include "Caches.h"
+#include "GlLayer.h"
 #include "Glop.h"
+#include "Layer.h"
 #include "Matrix.h"
 #include "Patch.h"
+#include "PathCache.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/RenderState.h"
 #include "SkiaShader.h"
@@ -165,20 +168,6 @@ GlopBuilder& GlopBuilder::setMeshTexturedIndexedQuads(TextureVertex* vertexData,
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setMeshTexturedMesh(TextureVertex* vertexData, int elementCount) {
-    TRIGGER_STAGE(kMeshStage);
-
-    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
-    mOutGlop->mesh.indices = { 0, nullptr };
-    mOutGlop->mesh.vertices = {
-            0,
-            VertexAttribFlags::TextureCoord,
-            &vertexData[0].x, &vertexData[0].u, nullptr,
-            kTextureVertexStride };
-    mOutGlop->mesh.elementCount = elementCount;
-    return *this;
-}
-
 GlopBuilder& GlopBuilder::setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount) {
     TRIGGER_STAGE(kMeshStage);
 
@@ -233,19 +222,19 @@ GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void GlopBuilder::setFill(int color, float alphaScale,
-        SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
+        SkBlendMode mode, Blend::ModeOrderSwap modeUsage,
         const SkShader* shader, const SkColorFilter* colorFilter) {
-    if (mode != SkXfermode::kClear_Mode) {
-        float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
+    if (mode != SkBlendMode::kClear) {
         if (!shader) {
-            float colorScale = alpha / 255.0f;
-            mOutGlop->fill.color = {
-                    colorScale * SkColorGetR(color),
-                    colorScale * SkColorGetG(color),
-                    colorScale * SkColorGetB(color),
-                    alpha
-            };
+            FloatColor c;
+            c.set(color);
+            c.r *= alphaScale;
+            c.g *= alphaScale;
+            c.b *= alphaScale;
+            c.a *= alphaScale;
+            mOutGlop->fill.color = c;
         } else {
+            float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
             mOutGlop->fill.color = { 1, 1, 1, alpha };
         }
     } else {
@@ -259,8 +248,8 @@ void GlopBuilder::setFill(int color, float alphaScale,
             || mOutGlop->roundRectClipState
             || PaintUtils::isBlendedShader(shader)
             || PaintUtils::isBlendedColorFilter(colorFilter)
-            || mode != SkXfermode::kSrcOver_Mode) {
-        if (CC_LIKELY(mode <= SkXfermode::kScreen_Mode)) {
+            || mode != SkBlendMode::kSrcOver) {
+        if (CC_LIKELY(mode <= SkBlendMode::kScreen)) {
             Blend::getFactors(mode, modeUsage,
                     &mOutGlop->blend.src, &mOutGlop->blend.dst);
         } else {
@@ -275,7 +264,7 @@ void GlopBuilder::setFill(int color, float alphaScale,
                 // blending in shader, don't enable
             } else {
                 // unsupported
-                Blend::getFactors(SkXfermode::kSrcOver_Mode, modeUsage,
+                Blend::getFactors(SkBlendMode::kSrcOver, modeUsage,
                         &mOutGlop->blend.src, &mOutGlop->blend.dst);
             }
         }
@@ -284,20 +273,12 @@ void GlopBuilder::setFill(int color, float alphaScale,
 
     if (colorFilter) {
         SkColor color;
-        SkXfermode::Mode mode;
+        SkBlendMode bmode;
         SkScalar srcColorMatrix[20];
-        if (colorFilter->asColorMode(&color, &mode)) {
+        if (colorFilter->asColorMode(&color, &bmode)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Blend;
-            mDescription.colorMode = mode;
-
-            const float alpha = SkColorGetA(color) / 255.0f;
-            float colorScale = alpha / 255.0f;
-            mOutGlop->fill.filter.color = {
-                    colorScale * SkColorGetR(color),
-                    colorScale * SkColorGetG(color),
-                    colorScale * SkColorGetB(color),
-                    alpha,
-            };
+            mDescription.colorMode = bmode;
+            mOutGlop->fill.filter.color.set(color);
         } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
             mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::Matrix;
 
@@ -310,10 +291,10 @@ void GlopBuilder::setFill(int color, float alphaScale,
             // Skia uses the range [0..255] for the addition vector, but we need
             // the [0..1] range to apply the vector in GLSL
             float* colorVector = mOutGlop->fill.filter.matrix.vector;
-            colorVector[0] = srcColorMatrix[4] / 255.0f;
-            colorVector[1] = srcColorMatrix[9] / 255.0f;
-            colorVector[2] = srcColorMatrix[14] / 255.0f;
-            colorVector[3] = srcColorMatrix[19] / 255.0f;
+            colorVector[0] = EOCF(srcColorMatrix[4]  / 255.0f);
+            colorVector[1] = EOCF(srcColorMatrix[9]  / 255.0f);
+            colorVector[2] = EOCF(srcColorMatrix[14] / 255.0f);
+            colorVector[3] =      srcColorMatrix[19] / 255.0f;  // alpha is linear
         } else {
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
@@ -329,8 +310,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
 
     GLenum filter = (textureFillFlags & TextureFillFlags::ForceFilter)
             ? GL_LINEAR : PaintUtils::getFilter(paint);
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_2D, filter, GL_CLAMP_TO_EDGE, nullptr };
+    mOutGlop->fill.texture = { &texture, filter, GL_CLAMP_TO_EDGE, nullptr };
 
     if (paint) {
         int color = paint->getColor();
@@ -342,7 +322,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
             shader = nullptr;
         }
         setFill(color, alphaScale,
-                PaintUtils::getXfermode(paint->getXfermode()), Blend::ModeOrderSwap::NoSwap,
+                paint->getBlendMode(), Blend::ModeOrderSwap::NoSwap,
                 shader, paint->getColorFilter());
     } else {
         mOutGlop->fill.color = { alphaScale, alphaScale, alphaScale, alphaScale };
@@ -351,7 +331,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
                 || (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::Alpha)
                 || texture.blend
                 || mOutGlop->roundRectClipState) {
-            Blend::getFactors(SkXfermode::kSrcOver_Mode, Blend::ModeOrderSwap::NoSwap,
+            Blend::getFactors(SkBlendMode::kSrcOver, Blend::ModeOrderSwap::NoSwap,
                     &mOutGlop->blend.src, &mOutGlop->blend.dst);
         } else {
             mOutGlop->blend = { GL_ZERO, GL_ZERO };
@@ -373,15 +353,15 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale, b
 
     if (CC_LIKELY(!shadowInterp)) {
         mOutGlop->fill.texture = {
-                nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+                nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     } else {
         mOutGlop->fill.texture = {
-                mCaches.textureState().getShadowLutTexture(), GL_TEXTURE_2D,
+                mCaches.textureState().getShadowLutTexture(),
                 GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     }
 
     setFill(paint.getColor(), alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
     mDescription.useShadowAlphaInterp = shadowInterp;
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
@@ -394,10 +374,10 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for PathTextures
-    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     setFill(paint.getColor(), alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
 
     mDescription.hasAlpha8Texture = true;
@@ -411,7 +391,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     //specify invalid filter/clamp, since these are always static for ShadowTextures
-    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     const int ALPHA_BITMASK = SK_ColorBLACK;
     const int COLOR_BITMASK = ~ALPHA_BITMASK;
@@ -421,7 +401,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
     }
 
     setFill(shadowColor, alphaScale,
-            PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
+            paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
 
     mDescription.hasAlpha8Texture = true;
@@ -433,8 +413,8 @@ GlopBuilder& GlopBuilder::setFillBlack() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
-    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kSrcOver_Mode, Blend::ModeOrderSwap::NoSwap,
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kSrcOver, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
 }
@@ -443,19 +423,18 @@ GlopBuilder& GlopBuilder::setFillClear() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
-    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kClear_Mode, Blend::ModeOrderSwap::NoSwap,
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    setFill(SK_ColorBLACK, 1.0f, SkBlendMode::kClear, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
     return *this;
 }
 
 GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
-        float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage) {
+        float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
+    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
 
     setFill(SK_ColorWHITE, alpha, mode, modeUsage, nullptr, colorFilter);
 
@@ -463,12 +442,12 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
+GlopBuilder& GlopBuilder::setFillTextureLayer(GlLayer& layer, float alpha) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { &(layer.getTexture()),
-            layer.getRenderTarget(), GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
+            GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
 
     setFill(SK_ColorWHITE, alpha, layer.getMode(), Blend::ModeOrderSwap::NoSwap,
             nullptr, layer.getColorFilter());
@@ -482,15 +461,20 @@ GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& text
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_EXTERNAL_OES, GL_LINEAR, GL_CLAMP_TO_EDGE,
-            &textureTransform };
+    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE, &textureTransform };
 
-    setFill(SK_ColorWHITE, 1.0f, SkXfermode::kSrc_Mode, Blend::ModeOrderSwap::NoSwap,
+    setFill(SK_ColorWHITE, 1.0f, SkBlendMode::kSrc, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     mDescription.hasTextureTransform = true;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setGammaCorrection(bool enabled) {
+    REQUIRE_STAGES(kFillStage);
+
+    mDescription.hasGammaCorrection = enabled;
     return *this;
 }
 
@@ -515,9 +499,6 @@ GlopBuilder& GlopBuilder::setModelViewMapUnitToRect(const Rect destination) {
 
     mOutGlop->transform.modelView.loadTranslate(destination.left, destination.top, 0.0f);
     mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = destination;
-#endif
     return *this;
 }
 
@@ -541,9 +522,6 @@ GlopBuilder& GlopBuilder::setModelViewMapUnitToRectSnap(const Rect destination) 
 
     mOutGlop->transform.modelView.loadTranslate(left, top, 0.0f);
     mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = destination;
-#endif
     return *this;
 }
 
@@ -551,10 +529,6 @@ GlopBuilder& GlopBuilder::setModelViewOffsetRect(float offsetX, float offsetY, c
     TRIGGER_STAGE(kModelViewStage);
 
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = source;
-    mOutGlop->bounds.translate(offsetX, offsetY);
-#endif
     return *this;
 }
 
@@ -574,10 +548,6 @@ GlopBuilder& GlopBuilder::setModelViewOffsetRectSnap(float offsetX, float offset
     }
 
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = source;
-    mOutGlop->bounds.translate(offsetX, offsetY);
-#endif
     return *this;
 }
 
@@ -631,11 +601,16 @@ void verify(const ProgramDescription& description, const Glop& glop) {
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
     if (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-        if (mOutGlop->fill.texture.target == GL_TEXTURE_2D) {
+        Texture* texture = mOutGlop->fill.texture.texture;
+        if (texture->target() == GL_TEXTURE_2D) {
             mDescription.hasTexture = true;
         } else {
             mDescription.hasExternalTexture = true;
         }
+        mDescription.hasLinearTexture = texture->isLinear();
+        mDescription.hasColorSpaceConversion = texture->hasColorSpaceConversion();
+        mDescription.transferFunction = texture->getTransferFunctionType();
+        mDescription.hasTranslucentConversion = texture->blend;
     }
 
     mDescription.hasColors = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::Color;
@@ -677,9 +652,6 @@ void GlopBuilder::build() {
 
     // Final step: populate program and map bounds into render target space
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);
-#if !HWUI_NEW_OPS
-    mOutGlop->transform.meshTransform().mapRect(mOutGlop->bounds);
-#endif
 }
 
 void GlopBuilder::dump(const Glop& glop) {
@@ -699,7 +671,8 @@ void GlopBuilder::dump(const Glop& glop) {
     ALOGD("    program %p", fill.program);
     if (fill.texture.texture) {
         ALOGD("    texture %p, target %d, filter %d, clamp %d",
-                fill.texture.texture, fill.texture.target, fill.texture.filter, fill.texture.clamp);
+                fill.texture.texture, fill.texture.texture->target(),
+                fill.texture.filter, fill.texture.clamp);
         if (fill.texture.textureTransform) {
             fill.texture.textureTransform->dump("texture transform");
         }
@@ -719,9 +692,6 @@ void GlopBuilder::dump(const Glop& glop) {
     ALOGD_IF(glop.roundRectClipState, "Glop RRCS %p", glop.roundRectClipState);
 
     ALOGD("Glop blend %d %d", glop.blend.src, glop.blend.dst);
-#if !HWUI_NEW_OPS
-    ALOGD("Glop bounds " RECT_STRING, RECT_ARGS(glop.bounds));
-#endif
 }
 
 } /* namespace uirenderer */

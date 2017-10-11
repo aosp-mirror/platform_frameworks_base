@@ -32,12 +32,12 @@ public final class BluetoothCodecConfig implements Parcelable {
     // Add an entry for each source codec here.
     // NOTE: The values should be same as those listed in the following file:
     //   hardware/libhardware/include/hardware/bt_av.h
-    public static final int SOURCE_CODEC_TYPE_SBC     = 0;
-    public static final int SOURCE_CODEC_TYPE_AAC     = 1;
-    public static final int SOURCE_CODEC_TYPE_APTX    = 2;
+    public static final int SOURCE_CODEC_TYPE_SBC = 0;
+    public static final int SOURCE_CODEC_TYPE_AAC = 1;
+    public static final int SOURCE_CODEC_TYPE_APTX = 2;
     public static final int SOURCE_CODEC_TYPE_APTX_HD = 3;
-    public static final int SOURCE_CODEC_TYPE_LDAC    = 4;
-    public static final int SOURCE_CODEC_TYPE_MAX     = 5;
+    public static final int SOURCE_CODEC_TYPE_LDAC = 4;
+    public static final int SOURCE_CODEC_TYPE_MAX = 5;
 
     public static final int SOURCE_CODEC_TYPE_INVALID = 1000 * 1000;
 
@@ -45,21 +45,21 @@ public final class BluetoothCodecConfig implements Parcelable {
     public static final int CODEC_PRIORITY_DEFAULT = 0;
     public static final int CODEC_PRIORITY_HIGHEST = 1000 * 1000;
 
-    public static final int SAMPLE_RATE_NONE   = 0;
-    public static final int SAMPLE_RATE_44100  = 0x1 << 0;
-    public static final int SAMPLE_RATE_48000  = 0x1 << 1;
-    public static final int SAMPLE_RATE_88200  = 0x1 << 2;
-    public static final int SAMPLE_RATE_96000  = 0x1 << 3;
+    public static final int SAMPLE_RATE_NONE = 0;
+    public static final int SAMPLE_RATE_44100 = 0x1 << 0;
+    public static final int SAMPLE_RATE_48000 = 0x1 << 1;
+    public static final int SAMPLE_RATE_88200 = 0x1 << 2;
+    public static final int SAMPLE_RATE_96000 = 0x1 << 3;
     public static final int SAMPLE_RATE_176400 = 0x1 << 4;
     public static final int SAMPLE_RATE_192000 = 0x1 << 5;
 
     public static final int BITS_PER_SAMPLE_NONE = 0;
-    public static final int BITS_PER_SAMPLE_16   = 0x1 << 0;
-    public static final int BITS_PER_SAMPLE_24   = 0x1 << 1;
-    public static final int BITS_PER_SAMPLE_32   = 0x1 << 2;
+    public static final int BITS_PER_SAMPLE_16 = 0x1 << 0;
+    public static final int BITS_PER_SAMPLE_24 = 0x1 << 1;
+    public static final int BITS_PER_SAMPLE_32 = 0x1 << 2;
 
-    public static final int CHANNEL_MODE_NONE   = 0;
-    public static final int CHANNEL_MODE_MONO   = 0x1 << 0;
+    public static final int CHANNEL_MODE_NONE = 0;
+    public static final int CHANNEL_MODE_MONO = 0x1 << 0;
     public static final int CHANNEL_MODE_STEREO = 0x1 << 1;
 
     private final int mCodecType;
@@ -73,10 +73,10 @@ public final class BluetoothCodecConfig implements Parcelable {
     private final long mCodecSpecific4;
 
     public BluetoothCodecConfig(int codecType, int codecPriority,
-                                int sampleRate, int bitsPerSample,
-                                int channelMode, long codecSpecific1,
-                                long codecSpecific2, long codecSpecific3,
-                                long codecSpecific4) {
+            int sampleRate, int bitsPerSample,
+            int channelMode, long codecSpecific1,
+            long codecSpecific2, long codecSpecific3,
+            long codecSpecific4) {
         mCodecType = codecType;
         mCodecPriority = codecPriority;
         mSampleRate = sampleRate;
@@ -91,16 +91,16 @@ public final class BluetoothCodecConfig implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (o instanceof BluetoothCodecConfig) {
-            BluetoothCodecConfig other = (BluetoothCodecConfig)o;
-            return (other.mCodecType == mCodecType &&
-                    other.mCodecPriority == mCodecPriority &&
-                    other.mSampleRate == mSampleRate &&
-                    other.mBitsPerSample == mBitsPerSample &&
-                    other.mChannelMode == mChannelMode &&
-                    other.mCodecSpecific1 == mCodecSpecific1 &&
-                    other.mCodecSpecific2 == mCodecSpecific2 &&
-                    other.mCodecSpecific3 == mCodecSpecific3 &&
-                    other.mCodecSpecific4 == mCodecSpecific4);
+            BluetoothCodecConfig other = (BluetoothCodecConfig) o;
+            return (other.mCodecType == mCodecType
+                    && other.mCodecPriority == mCodecPriority
+                    && other.mSampleRate == mSampleRate
+                    && other.mBitsPerSample == mBitsPerSample
+                    && other.mChannelMode == mChannelMode
+                    && other.mCodecSpecific1 == mCodecSpecific1
+                    && other.mCodecSpecific2 == mCodecSpecific2
+                    && other.mCodecSpecific3 == mCodecSpecific3
+                    && other.mCodecSpecific4 == mCodecSpecific4);
         }
         return false;
     }
@@ -108,32 +108,30 @@ public final class BluetoothCodecConfig implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mCodecType, mCodecPriority, mSampleRate,
-                            mBitsPerSample, mChannelMode, mCodecSpecific1,
-                            mCodecSpecific2, mCodecSpecific3, mCodecSpecific4);
+                mBitsPerSample, mChannelMode, mCodecSpecific1,
+                mCodecSpecific2, mCodecSpecific3, mCodecSpecific4);
     }
 
     /**
      * Checks whether the object contains valid codec configuration.
      *
-     * @return true if the object contains valid codec configuration,
-     * otherwise false.
+     * @return true if the object contains valid codec configuration, otherwise false.
      */
     public boolean isValid() {
-        return (mSampleRate != SAMPLE_RATE_NONE) &&
-            (mBitsPerSample != BITS_PER_SAMPLE_NONE) &&
-            (mChannelMode != CHANNEL_MODE_NONE);
+        return (mSampleRate != SAMPLE_RATE_NONE)
+                && (mBitsPerSample != BITS_PER_SAMPLE_NONE)
+                && (mChannelMode != CHANNEL_MODE_NONE);
     }
 
     /**
      * Adds capability string to an existing string.
      *
-     * @param prevStr the previous string with the capabilities. Can be
-     * a null pointer.
+     * @param prevStr the previous string with the capabilities. Can be a null pointer.
      * @param capStr the capability string to append to prevStr argument.
      * @return the result string in the form "prevStr|capStr".
      */
     private static String appendCapabilityToString(String prevStr,
-                                                   String capStr) {
+            String capStr) {
         if (prevStr == null) {
             return capStr;
         }
@@ -190,48 +188,51 @@ public final class BluetoothCodecConfig implements Parcelable {
             channelModeStr = appendCapabilityToString(channelModeStr, "STEREO");
         }
 
-        return "{codecName:" + getCodecName() +
-            ",mCodecType:" + mCodecType +
-            ",mCodecPriority:" + mCodecPriority +
-            ",mSampleRate:" + String.format("0x%x", mSampleRate) +
-            "(" + sampleRateStr + ")" +
-            ",mBitsPerSample:" + String.format("0x%x", mBitsPerSample) +
-            "(" + bitsPerSampleStr + ")" +
-            ",mChannelMode:" + String.format("0x%x", mChannelMode) +
-            "(" + channelModeStr + ")" +
-            ",mCodecSpecific1:" + mCodecSpecific1 +
-            ",mCodecSpecific2:" + mCodecSpecific2 +
-            ",mCodecSpecific3:" + mCodecSpecific3 +
-            ",mCodecSpecific4:" + mCodecSpecific4 + "}";
+        return "{codecName:" + getCodecName()
+                + ",mCodecType:" + mCodecType
+                + ",mCodecPriority:" + mCodecPriority
+                + ",mSampleRate:" + String.format("0x%x", mSampleRate)
+                + "(" + sampleRateStr + ")"
+                + ",mBitsPerSample:" + String.format("0x%x", mBitsPerSample)
+                + "(" + bitsPerSampleStr + ")"
+                + ",mChannelMode:" + String.format("0x%x", mChannelMode)
+                + "(" + channelModeStr + ")"
+                + ",mCodecSpecific1:" + mCodecSpecific1
+                + ",mCodecSpecific2:" + mCodecSpecific2
+                + ",mCodecSpecific3:" + mCodecSpecific3
+                + ",mCodecSpecific4:" + mCodecSpecific4 + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
     public static final Parcelable.Creator<BluetoothCodecConfig> CREATOR =
             new Parcelable.Creator<BluetoothCodecConfig>() {
-        public BluetoothCodecConfig createFromParcel(Parcel in) {
-            final int codecType = in.readInt();
-            final int codecPriority = in.readInt();
-            final int sampleRate = in.readInt();
-            final int bitsPerSample = in.readInt();
-            final int channelMode = in.readInt();
-            final long codecSpecific1 = in.readLong();
-            final long codecSpecific2 = in.readLong();
-            final long codecSpecific3 = in.readLong();
-            final long codecSpecific4 = in.readLong();
-            return new BluetoothCodecConfig(codecType, codecPriority,
-                                            sampleRate, bitsPerSample,
-                                            channelMode, codecSpecific1,
-                                            codecSpecific2, codecSpecific3,
-                                            codecSpecific4);
-        }
-        public BluetoothCodecConfig[] newArray(int size) {
-            return new BluetoothCodecConfig[size];
-        }
-    };
+                public BluetoothCodecConfig createFromParcel(Parcel in) {
+                    final int codecType = in.readInt();
+                    final int codecPriority = in.readInt();
+                    final int sampleRate = in.readInt();
+                    final int bitsPerSample = in.readInt();
+                    final int channelMode = in.readInt();
+                    final long codecSpecific1 = in.readLong();
+                    final long codecSpecific2 = in.readLong();
+                    final long codecSpecific3 = in.readLong();
+                    final long codecSpecific4 = in.readLong();
+                    return new BluetoothCodecConfig(codecType, codecPriority,
+                            sampleRate, bitsPerSample,
+                            channelMode, codecSpecific1,
+                            codecSpecific2, codecSpecific3,
+                            codecSpecific4);
+                }
 
+                public BluetoothCodecConfig[] newArray(int size) {
+                    return new BluetoothCodecConfig[size];
+                }
+            };
+
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mCodecType);
         out.writeInt(mCodecPriority);
@@ -251,20 +252,20 @@ public final class BluetoothCodecConfig implements Parcelable {
      */
     public String getCodecName() {
         switch (mCodecType) {
-        case SOURCE_CODEC_TYPE_SBC:
-            return "SBC";
-        case SOURCE_CODEC_TYPE_AAC:
-            return "AAC";
-        case SOURCE_CODEC_TYPE_APTX:
-            return "aptX";
-        case SOURCE_CODEC_TYPE_APTX_HD:
-            return "aptX HD";
-        case SOURCE_CODEC_TYPE_LDAC:
-            return "LDAC";
-        case SOURCE_CODEC_TYPE_INVALID:
-            return "INVALID CODEC";
-        default:
-            break;
+            case SOURCE_CODEC_TYPE_SBC:
+                return "SBC";
+            case SOURCE_CODEC_TYPE_AAC:
+                return "AAC";
+            case SOURCE_CODEC_TYPE_APTX:
+                return "aptX";
+            case SOURCE_CODEC_TYPE_APTX_HD:
+                return "aptX HD";
+            case SOURCE_CODEC_TYPE_LDAC:
+                return "LDAC";
+            case SOURCE_CODEC_TYPE_INVALID:
+                return "INVALID CODEC";
+            default:
+                break;
         }
         return "UNKNOWN CODEC(" + mCodecType + ")";
     }
@@ -397,8 +398,8 @@ public final class BluetoothCodecConfig implements Parcelable {
      * @return true if the audio feeding parameters are same, otherwise false
      */
     public boolean sameAudioFeedingParameters(BluetoothCodecConfig other) {
-        return (other != null && other.mSampleRate == mSampleRate &&
-                other.mBitsPerSample == mBitsPerSample &&
-                other.mChannelMode == mChannelMode);
+        return (other != null && other.mSampleRate == mSampleRate
+                && other.mBitsPerSample == mBitsPerSample
+                && other.mChannelMode == mChannelMode);
     }
 }

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.Printer;
 
@@ -69,6 +71,7 @@ public class Handler {
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
     private static final String TAG = "Handler";
+    private static Handler MAIN_THREAD_HANDLER = null;
 
     /**
      * Callback interface you can use when instantiating a Handler to avoid
@@ -229,6 +232,21 @@ public class Handler {
         mQueue = looper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+    }
+
+    /** @hide */
+    @NonNull
+    public static Handler getMain() {
+        if (MAIN_THREAD_HANDLER == null) {
+            MAIN_THREAD_HANDLER = new Handler(Looper.getMainLooper());
+        }
+        return MAIN_THREAD_HANDLER;
+    }
+
+    /** @hide */
+    @NonNull
+    public static Handler mainIfNull(@Nullable Handler handler) {
+        return handler == null ? getMain() : handler;
     }
 
     /** {@hide} */
@@ -678,6 +696,14 @@ public class Handler {
     }
 
     /**
+     * Return whether there are any messages or callbacks currently scheduled on this handler.
+     * @hide
+     */
+    public final boolean hasMessagesOrCallbacks() {
+        return mQueue.hasMessages(this);
+    }
+
+    /**
      * Check if there are any pending posts of messages with code 'what' and
      * whose obj is 'object' in the message queue.
      */
@@ -707,6 +733,18 @@ public class Handler {
             pw.println(prefix + "looper uninitialized");
         } else {
             mLooper.dump(pw, prefix + "  ");
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final void dumpMine(Printer pw, String prefix) {
+        pw.println(prefix + this + " @ " + SystemClock.uptimeMillis());
+        if (mLooper == null) {
+            pw.println(prefix + "looper uninitialized");
+        } else {
+            mLooper.dump(pw, prefix + "  ", this);
         }
     }
 

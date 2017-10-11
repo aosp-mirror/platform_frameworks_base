@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"ລາຍງານບັນຫາ"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ກຳລັງສ້າງລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"ບັນທຶກລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g> ແລ້ວ"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"ກຳລັງເພີ່ມລາຍລະອຽດໃສ່ລາຍງານຂໍ້ຜິດພາດ"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"ກະລຸນາລໍຖ້າ..."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ລາຍງານຂໍ້ຜິດພາດຈະປາກົດໃນໂທລະສັບໃນໄວໆນີ້"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ເລືອກເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ເລືອກເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ແຕະເພື່ອແບ່ງປັນລາຍງານຂໍ້ຜິດພາດຂອງທ່ານໂດຍບໍ່ໃຊ້ຮູບໜ້າຈໍ ຫຼື ລໍຖ້າໃຫ້ຮູບໜ້າຈໍແລ້ວໆ"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"ລາຍງານຂໍ້ຜິດພາດມີຂໍ້ມູນຈາກໄຟລ໌ບັນທຶກຕ່າງໆຂອງລະບົບ ເຊິ່ງອາດຮວມມີຂໍ້ມູນທີ່ທ່ານຖືວ່າເປັນຂໍ້ມູນລະອຽດອ່ອນນຳ (ເຊັ່ນ: ການນຳໃຊ້ແອັບ ແລະ ຂໍ້ມູນສະຖານທີ່). ທ່ານຄວນແບ່ງປັນລາຍງານນີ້ໃຫ້ກັບຄົນ ແລະ ແອັບທີ່ທ່ານເຊື່ອໃຈເທົ່ານັ້ນ."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"ລາຍ​ງານ​ບັນ​ຫາ"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"ບໍ່ສາມາດອ່ານໄຟລ໌ລາຍງານຂໍ້ຜິດພາດໄດ້"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ບໍ່ສາມາດເພີ່ມລາຍລະອຽດການລາຍງານຂໍ້ຜິດພາດໃສ່ໄຟລ໌ zip ໄດ້"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"ບໍ່ມີຊື່"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"ລາຍລະອຽດ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ພາບໜ້າຈໍ"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ຖ່າຍພາບໜ້າຈໍສຳເລັດແລ້ວ."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ບໍ່ສາມາດຖ່າຍພາບໜ້າຈໍໄດ້."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ລາຍລະອຽດຂອງລາຍງານຂໍ້ຜິດພາດ <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ຊື່ໄຟລ໌"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ຊື່ຂໍ້ຜິດພາດ"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ສະຫຼຸບຂໍ້ຜິດພາດ"</string>
+    <string name="save" msgid="4781509040564835759">"ບັນທຶກ"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"ແບ່ງປັນລາຍງານບັນຫາບໍ?"</string>
+</resources>

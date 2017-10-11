@@ -19,15 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"PIP 모드"</string>
+    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(제목 없는 프로그램)"</string>
     <string name="pip_close" msgid="3480680679023423574">"PIP 닫기"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"전체화면"</string>
-    <string name="pip_play" msgid="674145557658227044">"재생"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"일시중지"</string>
-    <string name="pip_hold_home" msgid="340086535668778109"><b>"HOME"</b>"을 눌러 PIP 제어"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"PIP 모드"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"다른 동영상을 재생할 때까지 동영상이 계속 표시됩니다. 제어하려면 "<b>"홈"</b>"을 길게 누릅니다."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"확인"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"닫기"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

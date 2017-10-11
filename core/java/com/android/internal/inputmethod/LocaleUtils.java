@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public final class LocaleUtils {
     /**
      * Calculates a matching score for the single desired locale.
      *
-     * @see LocaleUtils#calculateMatchingScore(ULocale, LocaleList, byte[])
+     * @see LocaleUtils#filterByLanguage(List, LocaleExtractor, LocaleList, ArrayList)
      *
      * @param supported The locale supported by IME subtype.
      * @param desired The locale preferred by user.
@@ -70,48 +71,6 @@ public final class LocaleUtils {
 
         // Ignore others e.g. variants, extensions.
         return 3;
-    }
-
-    /**
-     * Calculates a matching score for the desired locale list.
-     *
-     * <p>The supported locale gets a matching score of 3 if all language, script and country of the
-     * supported locale matches with the desired locale.  The supported locale gets a matching
-     * score of 2 if the language and script of the supported locale matches with the desired
-     * locale. The supported locale gets a matching score of 1 if only language of the supported
-     * locale matches with the desired locale.  The supported locale gets a matching score of 0 if
-     * the language of the supported locale doesn't match with the desired locale.</p>
-     *
-     * @param supported The locale supported by IME subtyle.
-     * @param desired The locale list preferred by user. Typically system locale list.
-     * @param out The output buffer to be stored the individual score for the desired language list.
-     * The length of {@code out} must be same as the length of {@code desired} language list.
-     * @return {@code false} if supported locale doesn't match with any desired locale list.
-     * Otherwise {@code true}.
-     */
-    private static boolean calculateMatchingScore(@NonNull final ULocale supported,
-            @NonNull final LocaleList desired, @NonNull byte[] out) {
-        if (desired.isEmpty()) {
-            return false;
-        }
-
-        boolean allZeros = true;
-        final int N = desired.size();
-        for (int i = 0; i < N; ++i) {
-            final Locale locale = desired.get(i);
-
-            if (!locale.getLanguage().equals(supported.getLanguage())) {
-                // TODO: cache the result of addLikelySubtags if it is slow.
-                out[i] = 0;
-            } else {
-                out[i] = calculateMatchingSubScore(
-                        supported, ULocale.addLikelySubtags(ULocale.forLocale(locale)));
-                if (allZeros && out[i] != 0) {
-                    allZeros = false;
-                }
-            }
-        }
-        return !allZeros;
     }
 
     private static final class ScoreEntry implements Comparable<ScoreEntry> {
@@ -175,17 +134,17 @@ public final class LocaleUtils {
     /**
      * Filters the given items based on language preferences.
      *
-     * <p>For each language found in {@code preferredLanguages}, this method tries to copy at most
+     * <p>For each language found in {@code preferredLocales}, this method tries to copy at most
      * one best-match item from {@code source} to {@code dest}.  For example, if
-     * {@code "en-GB", "ja", "en-AU", "fr-CA", "en-IN"} is specified to {@code preferredLanguages},
+     * {@code "en-GB", "ja", "en-AU", "fr-CA", "en-IN"} is specified to {@code preferredLocales},
      * this method tries to copy at most one English locale, at most one Japanese, and at most one
      * French locale from {@code source} to {@code dest}.  Here the best matching English locale
      * will be searched from {@code source} based on matching score. For the score design, see
-     * {@link LocaleUtils#calculateMatchingScore(ULocale, LocaleList, byte[])}</p>
+     * {@link LocaleUtils#calculateMatchingSubScore(ULocale, ULocale)}</p>
      *
      * @param sources Source items to be filtered.
      * @param extractor Type converter from the source items to {@link Locale} object.
-     * @param preferredLanguages Ordered list of locales with which the input items will be
+     * @param preferredLocales Ordered list of locales with which the input items will be
      * filtered.
      * @param dest Destination into which the filtered items will be added.
      * @param <T> Type of the data items.
@@ -194,17 +153,43 @@ public final class LocaleUtils {
     public static <T> void filterByLanguage(
             @NonNull List<T> sources,
             @NonNull LocaleExtractor<T> extractor,
-            @NonNull LocaleList preferredLanguages,
+            @NonNull LocaleList preferredLocales,
             @NonNull ArrayList<T> dest) {
+        if (preferredLocales.isEmpty()) {
+            return;
+        }
+
+        final int numPreferredLocales = preferredLocales.size();
         final HashMap<String, ScoreEntry> scoreboard = new HashMap<>();
-        final byte[] score = new byte[preferredLanguages.size()];
+        final byte[] score = new byte[numPreferredLocales];
+        final ULocale[] preferredULocaleCache = new ULocale[numPreferredLocales];
 
         final int sourceSize = sources.size();
         for (int i = 0; i < sourceSize; ++i) {
             final Locale locale = extractor.get(sources.get(i));
-            if (locale == null ||
-                    !calculateMatchingScore(ULocale.addLikelySubtags(ULocale.forLocale(locale)),
-                            preferredLanguages, score)) {
+            if (locale == null) {
+                continue;
+            }
+
+            boolean canSkip = true;
+            for (int j = 0; j < numPreferredLocales; ++j) {
+                final Locale preferredLocale = preferredLocales.get(j);
+                if (!TextUtils.equals(locale.getLanguage(), preferredLocale.getLanguage())) {
+                    score[j] = 0;
+                    continue;
+                }
+                if (preferredULocaleCache[j] == null) {
+                    preferredULocaleCache[j] = ULocale.addLikelySubtags(
+                            ULocale.forLocale(preferredLocale));
+                }
+                score[j] = calculateMatchingSubScore(
+                        preferredULocaleCache[j],
+                        ULocale.addLikelySubtags(ULocale.forLocale(locale)));
+                if (canSkip && score[j] != 0) {
+                    canSkip = false;
+                }
+            }
+            if (canSkip) {
                 continue;
             }
 

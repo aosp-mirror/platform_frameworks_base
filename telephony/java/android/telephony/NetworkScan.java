@@ -34,12 +34,26 @@ public class NetworkScan {
 
     public static final String TAG = "NetworkScan";
 
-    public static final int SUCCESS = 0;
-    public static final int ERROR_INVALID_SCAN = 1;
-    public static final int ERROR_UNSUPPORTED = 2;
-    public static final int ERROR_INTERRUPTED = 3;
-    public static final int ERROR_CANCELLED = 4;
+    // Below errors are mapped from RadioError which is returned from RIL. We will consolidate
+    // RadioErrors during the mapping if those RadioErrors mean no difference to the users.
+    public static final int SUCCESS = 0;                    // RadioError:NONE
+    public static final int ERROR_MODEM_ERROR = 1;          // RadioError:RADIO_NOT_AVAILABLE
+                                                            // RadioError:NO_MEMORY
+                                                            // RadioError:INTERNAL_ERR
+                                                            // RadioError:MODEM_ERR
+                                                            // RadioError:OPERATION_NOT_ALLOWED
+    public static final int ERROR_INVALID_SCAN = 2;         // RadioError:INVALID_ARGUMENTS
+    public static final int ERROR_MODEM_BUSY = 3;           // RadioError:DEVICE_IN_USE
+    public static final int ERROR_UNSUPPORTED = 4;          // RadioError:REQUEST_NOT_SUPPORTED
 
+    // Below errors are generated at the Telephony.
+    public static final int ERROR_RIL_ERROR = 10000;        // Nothing or only exception is
+                                                            // returned from RIL.
+    public static final int ERROR_INVALID_SCANID = 10001;   // The scanId is invalid. The user is
+                                                            // either trying to stop a scan which
+                                                            // does not exist or started by others.
+    public static final int ERROR_INTERRUPTED = 10002;      // Scan was interrupted by another scan
+                                                            // with higher priority.
     private final int mScanId;
     private final int mSubId;
 

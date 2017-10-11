@@ -17,11 +17,13 @@
 #pragma once
 
 #include "renderthread/RenderThread.h"
+#include "Rect.h"
 
 #include <SkBitmap.h>
 #include <gui/Surface.h>
 
 namespace android {
+class GraphicBuffer;
 namespace uirenderer {
 
 // Keep in sync with PixelCopy.java codes
@@ -36,8 +38,18 @@ enum class CopyResult {
 
 class Readback {
 public:
-    static CopyResult copySurfaceInto(renderthread::RenderThread& renderThread,
-            Surface& surface, SkBitmap* bitmap);
+    /**
+     * Copies the surface's most recently queued buffer into the provided bitmap.
+     */
+    virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
+            SkBitmap* bitmap) = 0;
+    virtual CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, SkBitmap* bitmap) = 0;
+
+protected:
+    explicit Readback(renderthread::RenderThread& thread) : mRenderThread(thread) {}
+    virtual ~Readback() {}
+
+    renderthread::RenderThread& mRenderThread;
 };
 
 } // namespace uirenderer

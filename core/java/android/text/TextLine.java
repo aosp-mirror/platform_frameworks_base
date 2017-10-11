@@ -16,11 +16,9 @@
 
 package android.text;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
-import android.graphics.RectF;
 import android.text.Layout.Directions;
 import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
@@ -56,6 +54,10 @@ class TextLine {
     private char[] mChars;
     private boolean mCharsValid;
     private Spanned mSpanned;
+
+    // Additional width of whitespace for justification. This value is per whitespace, thus
+    // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
+    private float mAddedWidth;
     private final TextPaint mWorkPaint = new TextPaint();
     private final SpanSet<MetricAffectingSpan> mMetricAffectingSpanSpanSet =
             new SpanSet<MetricAffectingSpan>(MetricAffectingSpan.class);
@@ -179,6 +181,25 @@ class TextLine {
             }
         }
         mTabs = tabStops;
+        mAddedWidth = 0;
+    }
+
+    /**
+     * Justify the line to the given width.
+     */
+    void justify(float justifyWidth) {
+        int end = mLen;
+        while (end > 0 && isLineEndSpace(mText.charAt(mStart + end - 1))) {
+            end--;
+        }
+        final int spaces = countStretchableSpaces(0, end);
+        if (spaces == 0) {
+            // There are no stretchable spaces, so we can't help the justification by adding any
+            // width.
+            return;
+        }
+        final float width = Math.abs(measure(end, false, null));
+        mAddedWidth = (justifyWidth - width) / spaces;
     }
 
     /**
@@ -597,6 +618,7 @@ class TextLine {
 
         TextPaint wp = mWorkPaint;
         wp.set(mPaint);
+        wp.setWordSpacing(mAddedWidth);
 
         int spanStart = runStart;
         int spanLimit;
@@ -697,6 +719,7 @@ class TextLine {
             Canvas c, float x, int top, int y, int bottom,
             FontMetricsInt fmi, boolean needWidth, int offset) {
 
+        wp.setWordSpacing(mAddedWidth);
         // Get metrics first (even for empty strings or "0" width runs)
         if (fmi != null) {
             expandMetricsFromPaint(fmi, wp);
@@ -829,6 +852,18 @@ class TextLine {
         return runIsRtl ? -ret : ret;
     }
 
+    private int adjustHyphenEdit(int start, int limit, int hyphenEdit) {
+        int result = hyphenEdit;
+        // Only draw hyphens on first or last run in line. Disable them otherwise.
+        if (start > 0) { // not the first run
+            result &= ~Paint.HYPHENEDIT_MASK_START_OF_LINE;
+        }
+        if (limit < mLen) { // not the last run
+            result &= ~Paint.HYPHENEDIT_MASK_END_OF_LINE;
+        }
+        return result;
+    }
+
     /**
      * Utility function for handling a unidirectional run.  The run must not
      * contain tabs but can contain styles.
@@ -852,6 +887,11 @@ class TextLine {
             int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
             int bottom, FontMetricsInt fmi, boolean needWidth) {
 
+        if (measureLimit < start || measureLimit > limit) {
+            throw new IndexOutOfBoundsException("measureLimit (" + measureLimit + ") is out of "
+                    + "start (" + start + ") and limit (" + limit + ") bounds");
+        }
+
         // Case of an empty line, make sure we update fmi according to mPaint
         if (start == measureLimit) {
             TextPaint wp = mWorkPaint;
@@ -865,9 +905,9 @@ class TextLine {
         if (mSpanned == null) {
             TextPaint wp = mWorkPaint;
             wp.set(mPaint);
-            final int mlimit = measureLimit;
+            wp.setHyphenEdit(adjustHyphenEdit(start, limit, wp.getHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, x, top,
-                    y, bottom, fmi, needWidth || mlimit < measureLimit, mlimit);
+                    y, bottom, fmi, needWidth, measureLimit);
         }
 
         mMetricAffectingSpanSpanSet.init(mSpanned, mStart + start, mStart + limit);
@@ -925,10 +965,8 @@ class TextLine {
                     span.updateDrawState(wp);
                 }
 
-                // Only draw hyphen on last run in line
-                if (jnext < mLen) {
-                    wp.setHyphenEdit(0);
-                }
+                wp.setHyphenEdit(adjustHyphenEdit(j, jnext, wp.getHyphenEdit()));
+
                 x += handleText(wp, j, jnext, i, inext, runIsRtl, c, x,
                         top, y, bottom, fmi, needWidth || jnext < measureLimit, offset);
             }
@@ -976,6 +1014,35 @@ class TextLine {
             return mTabs.nextTab(h);
         }
         return TabStops.nextDefaultStop(h, TAB_INCREMENT);
+    }
+
+    private boolean isStretchableWhitespace(int ch) {
+        // TODO: Support other stretchable whitespace. (Bug: 34013491)
+        return ch == 0x0020 || ch == 0x00A0;
+    }
+
+    private int nextStretchableSpace(int start, int end) {
+        for (int i = start; i < end; i++) {
+            final char c = mCharsValid ? mChars[i] : mText.charAt(i + mStart);
+            if (isStretchableWhitespace(c)) return i;
+        }
+        return end;
+    }
+
+    /* Return the number of spaces in the text line, for the purpose of justification */
+    private int countStretchableSpaces(int start, int end) {
+        int count = 0;
+        for (int i = start; i < end; i = nextStretchableSpace(i + 1, end)) {
+            count++;
+        }
+        return count;
+    }
+
+    // Note: keep this in sync with Minikin LineBreaker::isLineEndSpace()
+    public static boolean isLineEndSpace(char ch) {
+        return ch == ' ' || ch == '\t' || ch == 0x1680
+                || (0x2000 <= ch && ch <= 0x200A && ch != 0x2007)
+                || ch == 0x205F || ch == 0x3000;
     }
 
     private static final int TAB_INCREMENT = 20;

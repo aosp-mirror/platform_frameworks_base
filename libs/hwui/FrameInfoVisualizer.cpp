@@ -15,11 +15,8 @@
  */
 #include "FrameInfoVisualizer.h"
 
-#if HWUI_NEW_OPS
 #include "BakedOpRenderer.h"
-#else
-#include "OpenGLRenderer.h"
-#endif
+#include "IProfileRenderer.h"
 #include "utils/Color.h"
 
 #include <cutils/compiler.h>
@@ -92,7 +89,7 @@ void FrameInfoVisualizer::unionDirty(SkRect* dirty) {
     }
 }
 
-void FrameInfoVisualizer::draw(ContentRenderer* renderer) {
+void FrameInfoVisualizer::draw(IProfileRenderer& renderer) {
     RETURN_IF_DISABLED();
 
     if (mShowDirtyRegions) {
@@ -100,8 +97,8 @@ void FrameInfoVisualizer::draw(ContentRenderer* renderer) {
         if (mFlashToggle) {
             SkPaint paint;
             paint.setColor(0x7fff0000);
-            renderer->drawRect(mDirtyRegion.fLeft, mDirtyRegion.fTop,
-                    mDirtyRegion.fRight, mDirtyRegion.fBottom, &paint);
+            renderer.drawRect(mDirtyRegion.fLeft, mDirtyRegion.fTop,
+                    mDirtyRegion.fRight, mDirtyRegion.fBottom, paint);
         }
     }
 
@@ -115,7 +112,7 @@ void FrameInfoVisualizer::draw(ContentRenderer* renderer) {
         info.markSwapBuffers();
         info.markFrameCompleted();
 
-        initializeRects(renderer->getViewportHeight(), renderer->getViewportWidth());
+        initializeRects(renderer.getViewportHeight(), renderer.getViewportWidth());
         drawGraph(renderer);
         drawThreshold(renderer);
     }
@@ -198,26 +195,26 @@ void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex en
     }
 }
 
-void FrameInfoVisualizer::drawGraph(ContentRenderer* renderer) {
+void FrameInfoVisualizer::drawGraph(IProfileRenderer& renderer) {
     SkPaint paint;
     for (size_t i = 0; i < Bar.size(); i++) {
         nextBarSegment(Bar[i].start, Bar[i].end);
         paint.setColor(Bar[i].color & BAR_FAST_MASK);
-        renderer->drawRects(mFastRects.get(), mNumFastRects * 4, &paint);
+        renderer.drawRects(mFastRects.get(), mNumFastRects * 4, paint);
         paint.setColor(Bar[i].color & BAR_JANKY_MASK);
-        renderer->drawRects(mJankyRects.get(), mNumJankyRects * 4, &paint);
+        renderer.drawRects(mJankyRects.get(), mNumJankyRects * 4, paint);
     }
 }
 
-void FrameInfoVisualizer::drawThreshold(ContentRenderer* renderer) {
+void FrameInfoVisualizer::drawThreshold(IProfileRenderer& renderer) {
     SkPaint paint;
     paint.setColor(THRESHOLD_COLOR);
-    float yLocation = renderer->getViewportHeight() - (FRAME_THRESHOLD * mVerticalUnit);
-    renderer->drawRect(0.0f,
+    float yLocation = renderer.getViewportHeight() - (FRAME_THRESHOLD * mVerticalUnit);
+    renderer.drawRect(0.0f,
             yLocation - mThresholdStroke/2,
-            renderer->getViewportWidth(),
+            renderer.getViewportWidth(),
             yLocation + mThresholdStroke/2,
-            &paint);
+            paint);
 }
 
 bool FrameInfoVisualizer::consumeProperties() {

@@ -16,11 +16,16 @@
 
 package android.media.tv;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.hardware.tv.input.V1_0.Constants;
 import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import java.lang.annotation.Retention;
 
 /**
  * Simple container for information about TV input hardware.
@@ -33,16 +38,41 @@ public final class TvInputHardwareInfo implements Parcelable {
     static final String TAG = "TvInputHardwareInfo";
 
     // Match hardware/libhardware/include/hardware/tv_input.h
-    public static final int TV_INPUT_TYPE_OTHER_HARDWARE = 1;
-    public static final int TV_INPUT_TYPE_TUNER          = 2;
-    public static final int TV_INPUT_TYPE_COMPOSITE      = 3;
-    public static final int TV_INPUT_TYPE_SVIDEO         = 4;
-    public static final int TV_INPUT_TYPE_SCART          = 5;
-    public static final int TV_INPUT_TYPE_COMPONENT      = 6;
-    public static final int TV_INPUT_TYPE_VGA            = 7;
-    public static final int TV_INPUT_TYPE_DVI            = 8;
-    public static final int TV_INPUT_TYPE_HDMI           = 9;
-    public static final int TV_INPUT_TYPE_DISPLAY_PORT   = 10;
+    public static final int TV_INPUT_TYPE_OTHER_HARDWARE = Constants.TV_INPUT_TYPE_OTHER;
+    public static final int TV_INPUT_TYPE_TUNER          = Constants.TV_INPUT_TYPE_TUNER;
+    public static final int TV_INPUT_TYPE_COMPOSITE      = Constants.TV_INPUT_TYPE_COMPOSITE;
+    public static final int TV_INPUT_TYPE_SVIDEO         = Constants.TV_INPUT_TYPE_SVIDEO;
+    public static final int TV_INPUT_TYPE_SCART          = Constants.TV_INPUT_TYPE_SCART;
+    public static final int TV_INPUT_TYPE_COMPONENT      = Constants.TV_INPUT_TYPE_COMPONENT;
+    public static final int TV_INPUT_TYPE_VGA            = Constants.TV_INPUT_TYPE_VGA;
+    public static final int TV_INPUT_TYPE_DVI            = Constants.TV_INPUT_TYPE_DVI;
+    public static final int TV_INPUT_TYPE_HDMI           = Constants.TV_INPUT_TYPE_HDMI;
+    public static final int TV_INPUT_TYPE_DISPLAY_PORT   = Constants.TV_INPUT_TYPE_DISPLAY_PORT;
+
+    /** @hide */
+    @Retention(SOURCE)
+    @IntDef({CABLE_CONNECTION_STATUS_UNKNOWN, CABLE_CONNECTION_STATUS_CONNECTED,
+        CABLE_CONNECTION_STATUS_DISCONNECTED})
+    public @interface CableConnectionStatus {}
+
+    // Match hardware/interfaces/tv/input/1.0/types.hal
+    /**
+     * The hardware is unsure about the connection status or does not support cable detection.
+     */
+    public static final int CABLE_CONNECTION_STATUS_UNKNOWN =
+            Constants.CABLE_CONNECTION_STATUS_UNKNOWN;
+
+    /**
+     * Cable is connected to the hardware.
+     */
+    public static final int CABLE_CONNECTION_STATUS_CONNECTED =
+            Constants.CABLE_CONNECTION_STATUS_CONNECTED;
+
+    /**
+     * Cable is disconnected to the hardware.
+     */
+    public static final int CABLE_CONNECTION_STATUS_DISCONNECTED =
+            Constants.CABLE_CONNECTION_STATUS_DISCONNECTED;
 
     public static final Parcelable.Creator<TvInputHardwareInfo> CREATOR =
             new Parcelable.Creator<TvInputHardwareInfo>() {
@@ -69,6 +99,8 @@ public final class TvInputHardwareInfo implements Parcelable {
     private int mAudioType;
     private String mAudioAddress;
     private int mHdmiPortId;
+    @CableConnectionStatus
+    private int mCableConnectionStatus;
 
     private TvInputHardwareInfo() {
     }
@@ -96,6 +128,19 @@ public final class TvInputHardwareInfo implements Parcelable {
         return mHdmiPortId;
     }
 
+    /**
+     * Gets the cable connection status of the hardware.
+     *
+     * @return {@code CABLE_CONNECTION_STATUS_CONNECTED} if cable is connected.
+     *         {@code CABLE_CONNECTION_STATUS_DISCONNECTED} if cable is disconnected.
+     *         {@code CABLE_CONNECTION_STATUS_UNKNOWN} if the hardware is unsure about the
+     *         connection status or does not support cable detection.
+     */
+    @CableConnectionStatus
+    public int getCableConnectionStatus() {
+        return mCableConnectionStatus;
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
@@ -106,6 +151,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         if (mType == TV_INPUT_TYPE_HDMI) {
             b.append(", hdmi_port=").append(mHdmiPortId);
         }
+        b.append(", cable_connection_status=").append(mCableConnectionStatus);
         b.append("}");
         return b.toString();
     }
@@ -125,6 +171,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         if (mType == TV_INPUT_TYPE_HDMI) {
             dest.writeInt(mHdmiPortId);
         }
+        dest.writeInt(mCableConnectionStatus);
     }
 
     public void readFromParcel(Parcel source) {
@@ -135,6 +182,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         if (mType == TV_INPUT_TYPE_HDMI) {
             mHdmiPortId = source.readInt();
         }
+        mCableConnectionStatus = source.readInt();
     }
 
     public static final class Builder {
@@ -143,6 +191,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         private int mAudioType = AudioManager.DEVICE_NONE;
         private String mAudioAddress = "";
         private Integer mHdmiPortId = null;
+        private Integer mCableConnectionStatus = CABLE_CONNECTION_STATUS_UNKNOWN;
 
         public Builder() {
         }
@@ -172,6 +221,14 @@ public final class TvInputHardwareInfo implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets cable connection status.
+         */
+        public Builder cableConnectionStatus(@CableConnectionStatus int cableConnectionStatus) {
+            mCableConnectionStatus = cableConnectionStatus;
+            return this;
+        }
+
         public TvInputHardwareInfo build() {
             if (mDeviceId == null || mType == null) {
                 throw new UnsupportedOperationException();
@@ -191,6 +248,7 @@ public final class TvInputHardwareInfo implements Parcelable {
             if (mHdmiPortId != null) {
                 info.mHdmiPortId = mHdmiPortId;
             }
+            info.mCableConnectionStatus = mCableConnectionStatus;
             return info;
         }
     }

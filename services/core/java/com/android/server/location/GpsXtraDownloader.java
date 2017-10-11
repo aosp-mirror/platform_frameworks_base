@@ -16,21 +16,18 @@
 
 package com.android.server.location;
 
+import android.net.TrafficStats;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
-import libcore.io.Streams;
 
 /**
  * A class for downloading GPS XTRA data.
@@ -94,7 +91,12 @@ public class GpsXtraDownloader {
 
         // load balance our requests among the available servers
         while (result == null) {
-            result = doDownload(mXtraServers[mNextServerIndex]);
+            final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_GPS);
+            try {
+                result = doDownload(mXtraServers[mNextServerIndex]);
+            } finally {
+                TrafficStats.setThreadStatsTag(oldTag);
+            }
 
             // increment mNextServerIndex and wrap around if necessary
             mNextServerIndex++;

@@ -40,7 +40,7 @@ public class ListDividers extends Activity {
             values[i] = ((Integer) i).toString();
         }
 
-        mListView = (ListView) findViewById(android.R.id.list);
+        mListView = findViewById(android.R.id.list);
         mListView.setAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
 

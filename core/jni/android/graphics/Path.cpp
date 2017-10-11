@@ -26,6 +26,7 @@
 
 #include "SkPath.h"
 #include "SkPathOps.h"
+#include "SkGeometry.h" // WARNING: Internal Skia Header
 
 #include <Caches.h>
 #include <vector>
@@ -36,7 +37,18 @@ namespace android {
 class SkPathGlue {
 public:
 
-    static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
+    // ---------------- Regular JNI -----------------------------
+
+    static jlong init(JNIEnv* env, jclass clazz) {
+        return reinterpret_cast<jlong>(new SkPath());
+    }
+
+    static jlong init_Path(JNIEnv* env, jclass clazz, jlong valHandle) {
+        SkPath* val = reinterpret_cast<SkPath*>(valHandle);
+        return reinterpret_cast<jlong>(new SkPath(*val));
+    }
+
+    static void finalize(JNIEnv* env, jclass clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         // Purge entries from the HWUI path cache if this path's data is unique
         if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
@@ -45,112 +57,68 @@ public:
         delete obj;
     }
 
-    static jlong init1(JNIEnv* env, jobject clazz) {
-        return reinterpret_cast<jlong>(new SkPath());
-    }
-
-    static jlong init2(JNIEnv* env, jobject clazz, jlong valHandle) {
-        SkPath* val = reinterpret_cast<SkPath*>(valHandle);
-        return reinterpret_cast<jlong>(new SkPath(*val));
-    }
-
-    static void reset(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        obj->reset();
-    }
-
-    static void rewind(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        obj->rewind();
-    }
-
-    static void assign(JNIEnv* env, jobject clazz, jlong dstHandle, jlong srcHandle) {
+    static void set(JNIEnv* env, jclass clazz, jlong dstHandle, jlong srcHandle) {
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
         const SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         *dst = *src;
     }
 
-    static jboolean isConvex(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        return obj->isConvex();
-    }
-
-    static jint getFillType(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        return obj->getFillType();
-    }
-
-    static void setFillType(JNIEnv* env, jobject clazz, jlong pathHandle, jint ftHandle) {
-        SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-        SkPath::FillType ft = static_cast<SkPath::FillType>(ftHandle);
-        path->setFillType(ft);
-    }
-
-    static jboolean isEmpty(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        return obj->isEmpty();
-    }
-
-    static jboolean isRect(JNIEnv* env, jobject clazz, jlong objHandle, jobject jrect) {
-        SkRect rect;
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        jboolean result = obj->isRect(&rect);
-        GraphicsJNI::rect_to_jrectf(rect, env, jrect);
-        return result;
-    }
-
-    static void computeBounds(JNIEnv* env, jobject clazz, jlong objHandle, jobject jbounds) {
+    static void computeBounds(JNIEnv* env, jclass clazz, jlong objHandle, jobject jbounds) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         const SkRect& bounds = obj->getBounds();
         GraphicsJNI::rect_to_jrectf(bounds, env, jbounds);
     }
 
-    static void incReserve(JNIEnv* env, jobject clazz, jlong objHandle, jint extraPtCount) {
+    static void incReserve(JNIEnv* env, jclass clazz, jlong objHandle, jint extraPtCount) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->incReserve(extraPtCount);
     }
 
-    static void moveTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
+    static void moveTo__FF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->moveTo(x, y);
     }
 
-    static void rMoveTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void rMoveTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rMoveTo(dx, dy);
     }
 
-    static void lineTo__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y) {
+    static void lineTo__FF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x, jfloat y) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->lineTo(x, y);
     }
 
-    static void rLineTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void rLineTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rLineTo(dx, dy);
     }
 
-    static void quadTo__FFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2) {
+    static void quadTo__FFFF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x1, jfloat y1,
+            jfloat x2, jfloat y2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->quadTo(x1, y1, x2, y2);
     }
 
-    static void rQuadTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx1, jfloat dy1, jfloat dx2, jfloat dy2) {
+    static void rQuadTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx1, jfloat dy1,
+            jfloat dx2, jfloat dy2) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rQuadTo(dx1, dy1, dx2, dy2);
     }
 
-    static void cubicTo__FFFFFF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
+    static void cubicTo__FFFFFF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x1, jfloat y1,
+            jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->cubicTo(x1, y1, x2, y2, x3, y3);
     }
 
-    static void rCubicTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
+    static void rCubicTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x1, jfloat y1,
+            jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rCubicTo(x1, y1, x2, y2, x3, y3);
     }
 
-    static void arcTo(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+    static void arcTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat left, jfloat top,
             jfloat right, jfloat bottom, jfloat startAngle, jfloat sweepAngle,
             jboolean forceMoveTo) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
@@ -158,19 +126,19 @@ public:
         obj->arcTo(oval, startAngle, sweepAngle, forceMoveTo);
     }
 
-    static void close(JNIEnv* env, jobject clazz, jlong objHandle) {
+    static void close(JNIEnv* env, jclass clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->close();
     }
 
-    static void addRect(JNIEnv* env, jobject clazz, jlong objHandle,
+    static void addRect(JNIEnv* env, jclass clazz, jlong objHandle,
             jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addRect(left, top, right, bottom, dir);
     }
 
-    static void addOval(JNIEnv* env, jobject clazz, jlong objHandle,
+    static void addOval(JNIEnv* env, jclass clazz, jlong objHandle,
             jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
@@ -178,20 +146,21 @@ public:
         obj->addOval(oval, dir);
     }
 
-    static void addCircle(JNIEnv* env, jobject clazz, jlong objHandle, jfloat x, jfloat y, jfloat radius, jint dirHandle) {
+    static void addCircle(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x, jfloat y,
+            jfloat radius, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addCircle(x, y, radius, dir);
     }
 
-    static void addArc(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+    static void addArc(JNIEnv* env, jclass clazz, jlong objHandle, jfloat left, jfloat top,
             jfloat right, jfloat bottom, jfloat startAngle, jfloat sweepAngle) {
         SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->addArc(oval, startAngle, sweepAngle);
     }
 
-    static void addRoundRectXY(JNIEnv* env, jobject clazz, jlong objHandle, jfloat left, jfloat top,
+    static void addRoundRectXY(JNIEnv* env, jclass clazz, jlong objHandle, jfloat left, jfloat top,
             jfloat right, jfloat bottom, jfloat rx, jfloat ry, jint dirHandle) {
         SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
@@ -199,8 +168,8 @@ public:
         obj->addRoundRect(rect, rx, ry, dir);
     }
 
-    static void addRoundRect8(JNIEnv* env, jobject, jlong objHandle, jfloat left, jfloat top,
-            jfloat right, jfloat bottom, jfloatArray array, jint dirHandle) {
+    static void addRoundRect8(JNIEnv* env, jclass clazz, jlong objHandle, jfloat left, jfloat top,
+                jfloat right, jfloat bottom, jfloatArray array, jint dirHandle) {
         SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
@@ -213,49 +182,53 @@ public:
         obj->addRoundRect(rect, src, dir);
     }
 
-    static void addPath__PathFF(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle, jfloat dx, jfloat dy) {
+    static void addPath__PathFF(JNIEnv* env, jclass clazz, jlong objHandle, jlong srcHandle,
+            jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         obj->addPath(*src, dx, dy);
     }
 
-    static void addPath__Path(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle) {
+    static void addPath__Path(JNIEnv* env, jclass clazz, jlong objHandle, jlong srcHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         obj->addPath(*src);
     }
 
-    static void addPath__PathMatrix(JNIEnv* env, jobject clazz, jlong objHandle, jlong srcHandle, jlong matrixHandle) {
+    static void addPath__PathMatrix(JNIEnv* env, jclass clazz, jlong objHandle, jlong srcHandle,
+            jlong matrixHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         obj->addPath(*src, *matrix);
     }
 
-    static void offset__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void offset__FF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->offset(dx, dy);
     }
 
-    static void setLastPoint(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
+    static void setLastPoint(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->setLastPt(dx, dy);
     }
 
-    static void transform__MatrixPath(JNIEnv* env, jobject clazz, jlong objHandle, jlong matrixHandle, jlong dstHandle) {
+    static void transform__MatrixPath(JNIEnv* env, jclass clazz, jlong objHandle, jlong matrixHandle,
+            jlong dstHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
         obj->transform(*matrix, dst);
     }
 
-    static void transform__Matrix(JNIEnv* env, jobject clazz, jlong objHandle, jlong matrixHandle) {
+    static void transform__Matrix(JNIEnv* env, jclass clazz, jlong objHandle, jlong matrixHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         obj->transform(*matrix);
     }
 
-    static jboolean op(JNIEnv* env, jobject clazz, jlong p1Handle, jlong p2Handle, jint opHandle, jlong rHandle) {
+    static jboolean op(JNIEnv* env, jclass clazz, jlong p1Handle, jlong p2Handle, jint opHandle,
+            jlong rHandle) {
         SkPath* p1  = reinterpret_cast<SkPath*>(p1Handle);
         SkPath* p2  = reinterpret_cast<SkPath*>(p2Handle);
         SkPathOp op = static_cast<SkPathOp>(opHandle);
@@ -383,8 +356,9 @@ public:
         }
     }
 
-    static void createVerbSegments(SkPath::Verb verb, const SkPoint* points,
-        std::vector<SkPoint>& segmentPoints, std::vector<float>& lengths, float errorSquared) {
+    static void createVerbSegments(const SkPath::Iter& pathIter, SkPath::Verb verb,
+            const SkPoint* points, std::vector<SkPoint>& segmentPoints,
+            std::vector<float>& lengths, float errorSquared, float errorConic) {
         switch (verb) {
             case SkPath::kMove_Verb:
                 addMove(segmentPoints, lengths, points[0]);
@@ -403,8 +377,27 @@ public:
                 addBezier(points, cubicBezierCalculation, segmentPoints, lengths,
                     errorSquared, true);
                 break;
+            case SkPath::kConic_Verb: {
+                SkAutoConicToQuads converter;
+                const SkPoint* quads = converter.computeQuads(
+                        points, pathIter.conicWeight(), errorConic);
+                for (int i = 0; i < converter.countQuads(); i++) {
+                    // Note: offset each subsequent quad by 2, since end points are shared
+                    const SkPoint* quad = quads + i * 2;
+                    addBezier(quad, quadraticBezierCalculation, segmentPoints, lengths,
+                        errorConic, false);
+                }
+                break;
+            }
             default:
-                // Leave element as NULL, Conic sections are not supported.
+                static_assert(SkPath::kMove_Verb == 0
+                                && SkPath::kLine_Verb == 1
+                                && SkPath::kQuad_Verb == 2
+                                && SkPath::kConic_Verb == 3
+                                && SkPath::kCubic_Verb == 4
+                                && SkPath::kClose_Verb == 5
+                                && SkPath::kDone_Verb == 6,
+                        "Path enum changed, new types may have been added.");
                 break;
         }
     }
@@ -416,8 +409,8 @@ public:
     // Note that more than one point may have the same length along the path in
     // the case of a move.
     // NULL can be returned if the Path is empty.
-    static jfloatArray approximate(JNIEnv* env, jclass, jlong pathHandle, float acceptableError)
-    {
+    static jfloatArray approximate(JNIEnv* env, jclass clazz, jlong pathHandle,
+            float acceptableError) {
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkASSERT(path);
         SkPath::Iter pathIter(*path, false);
@@ -426,9 +419,11 @@ public:
         std::vector<SkPoint> segmentPoints;
         std::vector<float> lengths;
         float errorSquared = acceptableError * acceptableError;
+        float errorConic = acceptableError / 2; // somewhat arbitrary
 
         while ((verb = pathIter.next(points, false)) != SkPath::kDone_Verb) {
-            createVerbSegments(verb, points, segmentPoints, lengths, errorSquared);
+            createVerbSegments(pathIter, verb, points, segmentPoints, lengths,
+                    errorSquared, errorConic);
         }
 
         if (segmentPoints.empty()) {
@@ -467,47 +462,94 @@ public:
         delete[] approximation;
         return result;
     }
+
+    // ---------------- @FastNative -----------------------------
+
+    static jboolean isRect(JNIEnv* env, jclass clazz, jlong objHandle, jobject jrect) {
+        SkRect rect;
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        jboolean result = obj->isRect(&rect);
+        GraphicsJNI::rect_to_jrectf(rect, env, jrect);
+        return result;
+    }
+
+    // ---------------- @CriticalNative -------------------------
+
+    static void reset(jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        obj->reset();
+    }
+
+    static void rewind(jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        obj->rewind();
+    }
+
+    static jboolean isEmpty(jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        return obj->isEmpty();
+    }
+
+    static jboolean isConvex(jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        return obj->isConvex();
+    }
+
+    static jint getFillType(jlong objHandle) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        return obj->getFillType();
+    }
+
+    static void setFillType(jlong pathHandle, jint ftHandle) {;
+        SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+        SkPath::FillType ft = static_cast<SkPath::FillType>(ftHandle);
+        path->setFillType(ft);
+    }
 };
 
 static const JNINativeMethod methods[] = {
-    {"finalizer", "(J)V", (void*) SkPathGlue::finalizer},
-    {"init1","()J", (void*) SkPathGlue::init1},
-    {"init2","(J)J", (void*) SkPathGlue::init2},
-    {"native_reset","(J)V", (void*) SkPathGlue::reset},
-    {"native_rewind","(J)V", (void*) SkPathGlue::rewind},
-    {"native_set","(JJ)V", (void*) SkPathGlue::assign},
-    {"native_isConvex","(J)Z", (void*) SkPathGlue::isConvex},
-    {"native_getFillType","(J)I", (void*) SkPathGlue::getFillType},
-    {"native_setFillType","(JI)V", (void*) SkPathGlue::setFillType},
-    {"native_isEmpty","(J)Z", (void*) SkPathGlue::isEmpty},
-    {"native_isRect","(JLandroid/graphics/RectF;)Z", (void*) SkPathGlue::isRect},
-    {"native_computeBounds","(JLandroid/graphics/RectF;)V", (void*) SkPathGlue::computeBounds},
-    {"native_incReserve","(JI)V", (void*) SkPathGlue::incReserve},
-    {"native_moveTo","(JFF)V", (void*) SkPathGlue::moveTo__FF},
-    {"native_rMoveTo","(JFF)V", (void*) SkPathGlue::rMoveTo},
-    {"native_lineTo","(JFF)V", (void*) SkPathGlue::lineTo__FF},
-    {"native_rLineTo","(JFF)V", (void*) SkPathGlue::rLineTo},
-    {"native_quadTo","(JFFFF)V", (void*) SkPathGlue::quadTo__FFFF},
-    {"native_rQuadTo","(JFFFF)V", (void*) SkPathGlue::rQuadTo},
-    {"native_cubicTo","(JFFFFFF)V", (void*) SkPathGlue::cubicTo__FFFFFF},
-    {"native_rCubicTo","(JFFFFFF)V", (void*) SkPathGlue::rCubicTo},
-    {"native_arcTo","(JFFFFFFZ)V", (void*) SkPathGlue::arcTo},
-    {"native_close","(J)V", (void*) SkPathGlue::close},
-    {"native_addRect","(JFFFFI)V", (void*) SkPathGlue::addRect},
-    {"native_addOval","(JFFFFI)V", (void*) SkPathGlue::addOval},
-    {"native_addCircle","(JFFFI)V", (void*) SkPathGlue::addCircle},
-    {"native_addArc","(JFFFFFF)V", (void*) SkPathGlue::addArc},
-    {"native_addRoundRect","(JFFFFFFI)V", (void*) SkPathGlue::addRoundRectXY},
-    {"native_addRoundRect","(JFFFF[FI)V", (void*) SkPathGlue::addRoundRect8},
-    {"native_addPath","(JJFF)V", (void*) SkPathGlue::addPath__PathFF},
-    {"native_addPath","(JJ)V", (void*) SkPathGlue::addPath__Path},
-    {"native_addPath","(JJJ)V", (void*) SkPathGlue::addPath__PathMatrix},
-    {"native_offset","(JFF)V", (void*) SkPathGlue::offset__FF},
-    {"native_setLastPoint","(JFF)V", (void*) SkPathGlue::setLastPoint},
-    {"native_transform","(JJJ)V", (void*) SkPathGlue::transform__MatrixPath},
-    {"native_transform","(JJ)V", (void*) SkPathGlue::transform__Matrix},
-    {"native_op","(JJIJ)Z", (void*) SkPathGlue::op},
-    {"native_approximate", "(JF)[F", (void*) SkPathGlue::approximate},
+    {"nInit","()J", (void*) SkPathGlue::init},
+    {"nInit","(J)J", (void*) SkPathGlue::init_Path},
+    {"nFinalize", "(J)V", (void*) SkPathGlue::finalize},
+    {"nSet","(JJ)V", (void*) SkPathGlue::set},
+    {"nComputeBounds","(JLandroid/graphics/RectF;)V", (void*) SkPathGlue::computeBounds},
+    {"nIncReserve","(JI)V", (void*) SkPathGlue::incReserve},
+    {"nMoveTo","(JFF)V", (void*) SkPathGlue::moveTo__FF},
+    {"nRMoveTo","(JFF)V", (void*) SkPathGlue::rMoveTo},
+    {"nLineTo","(JFF)V", (void*) SkPathGlue::lineTo__FF},
+    {"nRLineTo","(JFF)V", (void*) SkPathGlue::rLineTo},
+    {"nQuadTo","(JFFFF)V", (void*) SkPathGlue::quadTo__FFFF},
+    {"nRQuadTo","(JFFFF)V", (void*) SkPathGlue::rQuadTo},
+    {"nCubicTo","(JFFFFFF)V", (void*) SkPathGlue::cubicTo__FFFFFF},
+    {"nRCubicTo","(JFFFFFF)V", (void*) SkPathGlue::rCubicTo},
+    {"nArcTo","(JFFFFFFZ)V", (void*) SkPathGlue::arcTo},
+    {"nClose","(J)V", (void*) SkPathGlue::close},
+    {"nAddRect","(JFFFFI)V", (void*) SkPathGlue::addRect},
+    {"nAddOval","(JFFFFI)V", (void*) SkPathGlue::addOval},
+    {"nAddCircle","(JFFFI)V", (void*) SkPathGlue::addCircle},
+    {"nAddArc","(JFFFFFF)V", (void*) SkPathGlue::addArc},
+    {"nAddRoundRect","(JFFFFFFI)V", (void*) SkPathGlue::addRoundRectXY},
+    {"nAddRoundRect","(JFFFF[FI)V", (void*) SkPathGlue::addRoundRect8},
+    {"nAddPath","(JJFF)V", (void*) SkPathGlue::addPath__PathFF},
+    {"nAddPath","(JJ)V", (void*) SkPathGlue::addPath__Path},
+    {"nAddPath","(JJJ)V", (void*) SkPathGlue::addPath__PathMatrix},
+    {"nOffset","(JFF)V", (void*) SkPathGlue::offset__FF},
+    {"nSetLastPoint","(JFF)V", (void*) SkPathGlue::setLastPoint},
+    {"nTransform","(JJJ)V", (void*) SkPathGlue::transform__MatrixPath},
+    {"nTransform","(JJ)V", (void*) SkPathGlue::transform__Matrix},
+    {"nOp","(JJIJ)Z", (void*) SkPathGlue::op},
+    {"nApproximate", "(JF)[F", (void*) SkPathGlue::approximate},
+
+    // ------- @FastNative below here ----------------------
+    {"nIsRect","(JLandroid/graphics/RectF;)Z", (void*) SkPathGlue::isRect},
+
+    // ------- @CriticalNative below here ------------------
+    {"nReset","(J)V", (void*) SkPathGlue::reset},
+    {"nRewind","(J)V", (void*) SkPathGlue::rewind},
+    {"nIsEmpty","(J)Z", (void*) SkPathGlue::isEmpty},
+    {"nIsConvex","(J)Z", (void*) SkPathGlue::isConvex},
+    {"nGetFillType","(J)I", (void*) SkPathGlue::getFillType},
+    {"nSetFillType","(JI)V", (void*) SkPathGlue::setFillType},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {

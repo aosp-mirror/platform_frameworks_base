@@ -16,6 +16,7 @@
 
 package android.util;
 
+import com.android.ide.common.rendering.api.AttrResourceValue;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.internal.util.XmlUtils;
@@ -27,6 +28,11 @@ import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.annotation.NonNull;
+
+import java.util.Map;
+import java.util.function.Function;
+
 /**
  * A correct implementation of the {@link AttributeSet} interface on top of a XmlPullParser
  */
@@ -34,12 +40,30 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
 
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
+    private final Function<String, Map<String, Integer>> mFrameworkEnumValueSupplier;
+    private final Function<String, Map<String, Integer>> mProjectEnumValueSupplier;
 
-    public BridgeXmlPullAttributes(XmlPullParser parser, BridgeContext context,
-            boolean platformFile) {
+    // VisibleForTesting
+    BridgeXmlPullAttributes(@NonNull XmlPullParser parser, @NonNull BridgeContext context,
+            boolean platformFile,
+            @NonNull Function<String, Map<String, Integer>> frameworkEnumValueSupplier,
+            @NonNull Function<String, Map<String, Integer>> projectEnumValueSupplier) {
         super(parser);
         mContext = context;
         mPlatformFile = platformFile;
+        mFrameworkEnumValueSupplier = frameworkEnumValueSupplier;
+        mProjectEnumValueSupplier = projectEnumValueSupplier;
+    }
+
+    public BridgeXmlPullAttributes(@NonNull XmlPullParser parser, @NonNull BridgeContext context,
+            boolean platformFile) {
+        this(parser, context, platformFile, Bridge::getEnumValues, attrName -> {
+            // get the styleable matching the resolved name
+            RenderResources res = context.getRenderResources();
+            ResourceValue attr = res.getProjectResource(ResourceType.ATTR, attrName);
+            return attr instanceof AttrResourceValue ?
+                    ((AttrResourceValue) attr).getAttributeValues() : null;
+        });
     }
 
     /*
@@ -59,12 +83,8 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         String ns = mParser.getAttributeNamespace(index);
 
         if (BridgeConstants.NS_RESOURCES.equals(ns)) {
-            Integer v = Bridge.getResourceId(ResourceType.ATTR, name);
-            if (v != null) {
-                return v.intValue();
-            }
+            return Bridge.getResourceId(ResourceType.ATTR, name);
 
-            return 0;
         }
 
         // this is not an attribute in the android namespace, we query the customviewloader, if
@@ -72,7 +92,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         if (mContext.getLayoutlibCallback().getNamespace().equals(ns)) {
             Integer v = mContext.getLayoutlibCallback().getResourceId(ResourceType.ATTR, name);
             if (v != null) {
-                return v.intValue();
+                return v;
             }
         }
 
@@ -121,20 +141,38 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
     }
 
     @Override
-    public int getAttributeIntValue(String namespace, String attribute,
-            int defaultValue) {
+    public int getAttributeIntValue(String namespace, String attribute, int defaultValue) {
         String value = getAttributeValue(namespace, attribute);
-        if (value != null) {
-            ResourceValue r = getResourceValue(value);
-
-            if (r != null) {
-                value = r.getValue();
-            }
-
-            return XmlUtils.convertValueToInt(value, defaultValue);
+        if (value == null) {
+            return defaultValue;
         }
 
-        return defaultValue;
+        ResourceValue r = getResourceValue(value);
+
+        if (r != null) {
+            value = r.getValue();
+        }
+
+        if (value.charAt(0) == '#') {
+            return ResourceHelper.getColor(value);
+        }
+
+        try {
+            return XmlUtils.convertValueToInt(value, defaultValue);
+        } catch (NumberFormatException e) {
+            // This is probably an enum
+            Map<String, Integer> enumValues = BridgeConstants.NS_RESOURCES.equals(namespace) ?
+                    mFrameworkEnumValueSupplier.apply(attribute) :
+                    mProjectEnumValueSupplier.apply(attribute);
+
+            Integer enumValue = enumValues != null ? enumValues.get(value) : null;
+            if (enumValue != null) {
+                return enumValue;
+            }
+
+            // We weren't able to find the enum int value
+            throw e;
+        }
     }
 
     @Override
@@ -203,21 +241,9 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
 
     @Override
     public int getAttributeIntValue(int index, int defaultValue) {
-        String value = getAttributeValue(index);
-        if (value != null) {
-            ResourceValue r = getResourceValue(value);
-
-            if (r != null) {
-                value = r.getValue();
-            }
-
-            if (value.charAt(0) == '#') {
-                return ResourceHelper.getColor(value);
-            }
-            return XmlUtils.convertValueToInt(value, defaultValue);
-        }
-
-        return defaultValue;
+        return getAttributeIntValue(mParser.getAttributeNamespace(index),
+                getAttributeName(index)
+                , defaultValue);
     }
 
     @Override

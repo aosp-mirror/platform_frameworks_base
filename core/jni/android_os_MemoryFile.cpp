@@ -19,7 +19,7 @@
 
 #include <cutils/ashmem.h>
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <unistd.h>
 #include <sys/mman.h>
 

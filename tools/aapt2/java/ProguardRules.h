@@ -17,41 +17,44 @@
 #ifndef AAPT_PROGUARD_RULES_H
 #define AAPT_PROGUARD_RULES_H
 
-#include "Resource.h"
-#include "Source.h"
-#include "xml/XmlDom.h"
-
 #include <map>
 #include <ostream>
 #include <set>
 #include <string>
 
+#include "Resource.h"
+#include "Source.h"
+#include "xml/XmlDom.h"
+
 namespace aapt {
 namespace proguard {
 
 class KeepSet {
-public:
-    inline void addClass(const Source& source, const std::u16string& className) {
-        mKeepSet[className].insert(source);
-    }
+ public:
+  inline void AddClass(const Source& source, const std::string& class_name) {
+    keep_set_[class_name].insert(source);
+  }
 
-    inline void addMethod(const Source& source, const std::u16string& methodName) {
-        mKeepMethodSet[methodName].insert(source);
-    }
+  inline void AddMethod(const Source& source, const std::string& method_name) {
+    keep_method_set_[method_name].insert(source);
+  }
 
-private:
-    friend bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
+ private:
+  friend bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set);
 
-    std::map<std::u16string, std::set<Source>> mKeepSet;
-    std::map<std::u16string, std::set<Source>> mKeepMethodSet;
+  std::map<std::string, std::set<Source>> keep_set_;
+  std::map<std::string, std::set<Source>> keep_method_set_;
 };
 
-bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
-bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
+bool CollectProguardRulesForManifest(const Source& source,
+                                     xml::XmlResource* res, KeepSet* keep_set,
+                                     bool main_dex_only = false);
+bool CollectProguardRules(const Source& source, xml::XmlResource* res,
+                          KeepSet* keep_set);
 
-bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
+bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set);
 
-} // namespace proguard
-} // namespace aapt
+}  // namespace proguard
+}  // namespace aapt
 
-#endif // AAPT_PROGUARD_RULES_H
+#endif  // AAPT_PROGUARD_RULES_H

@@ -17,19 +17,18 @@
 package android.media.midi;
 
 import android.media.midi.MidiDeviceInfo;
-import android.os.ParcelFileDescriptor;
 
 /** @hide */
 interface IMidiDeviceServer
 {
-    ParcelFileDescriptor openInputPort(IBinder token, int portNumber);
-    ParcelFileDescriptor openOutputPort(IBinder token, int portNumber);
+    FileDescriptor openInputPort(IBinder token, int portNumber);
+    FileDescriptor openOutputPort(IBinder token, int portNumber);
     void closePort(IBinder token);
     void closeDevice();
 
     // connects the input port pfd to the specified output port
     // Returns the PID of the called process.
-    int connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
+    int connectPorts(IBinder token, in FileDescriptor fd, int outputPortNumber);
 
     MidiDeviceInfo getDeviceInfo();
     void setDeviceInfo(in MidiDeviceInfo deviceInfo);

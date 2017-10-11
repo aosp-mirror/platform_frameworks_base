@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CONDENSED"
+        android:textSize="50sp"
+        android:fontFamily="sans-serif-condensed"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CONDENSED ITALIC"
+        android:textSize="30sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="italic"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MONOSPACE"
+        android:textSize="50sp"
+        android:fontFamily="monospace"/>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="30dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom"
+        android:textSize="20sp"
+        android:fontFamily="@font/testfont"/>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="30dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom family"
+        android:textSize="20sp"
+        android:fontFamily="@font/testfamily"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom family"
+        android:textSize="20sp"
+        android:fontFamily="@font/testfamily"
+        android:textStyle="italic"/>
+
+</LinearLayout>

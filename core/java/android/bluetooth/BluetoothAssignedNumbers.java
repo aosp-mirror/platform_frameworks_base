@@ -20,9 +20,9 @@ package android.bluetooth;
  * Bluetooth Assigned Numbers.
  * <p>
  * For now we only include Company ID values.
- * @see <a href="https://www.bluetooth.org/technical/assignednumbers/identifiers.htm">
- * The Official Bluetooth SIG Member Website | Company Identifiers</a>
  *
+ * @see <a href="https://www.bluetooth.org/technical/assignednumbers/identifiers.htm"> The Official
+ * Bluetooth SIG Member Website | Company Identifiers</a>
  */
 public class BluetoothAssignedNumbers {
 

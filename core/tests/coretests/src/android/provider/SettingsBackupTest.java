@@ -1,0 +1,569 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.provider;
+
+import static com.google.android.collect.Sets.newHashSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+/** Tests that ensure appropriate settings are backed up. */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class SettingsBackupTest {
+
+    /**
+     * The following blacklists contain settings that should *not* be backed up and restored to
+     * another device.  As a general rule, anything that is not user configurable should be
+     * blacklisted (and conversely, things that *are* user configurable *should* be backed up)
+     */
+    private static final Set<String> BACKUP_BLACKLISTED_SYSTEM_SETTINGS =
+            newHashSet(
+                    Settings.System.ADVANCED_SETTINGS, // candidate for backup?
+                    Settings.System.ALARM_ALERT, // backup candidate?
+                    Settings.System.ALARM_ALERT_CACHE, // internal cache
+                    Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
+                    Settings.System.EGG_MODE, // I am the lolrus
+                    Settings.System.END_BUTTON_BEHAVIOR, // bug?
+                    Settings.System
+                            .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, // candidate for backup?
+                    Settings.System.LOCKSCREEN_DISABLED, // ?
+                    Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
+                    Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
+                    Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
+                    Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
+                    Settings.System.POINTER_LOCATION, // backup candidate?
+                    Settings.System.RINGTONE_CACHE, // internal cache
+                    Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
+                    Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
+                    Settings.System.SHOW_TOUCHES, // bug?
+                    Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
+                    Settings.System.SIP_ALWAYS, // value, not a setting
+                    Settings.System.SYSTEM_LOCALES, // bug?
+                    Settings.System.USER_ROTATION, // backup candidate?
+                    Settings.System.VIBRATE_IN_SILENT, // deprecated?
+                    Settings.System.VIBRATE_ON, // candidate for backup?
+                    Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
+                                                          // not change volume
+                    Settings.System.VOLUME_ALARM, // deprecated since API 2?
+                    Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
+                    Settings.System.VOLUME_MASTER, // candidate for backup?
+                    Settings.System.VOLUME_MUSIC, // deprecated since API 2?
+                    Settings.System.VOLUME_NOTIFICATION, // deprecated since API 2?
+                    Settings.System.VOLUME_RING, // deprecated since API 2?
+                    Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
+                    Settings.System.VOLUME_VOICE, // deprecated since API 2?
+                    Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
+                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG // used for debugging only
+                    );
+
+    private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
+            newHashSet(
+                    Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
+                    Settings.Global.ADB_ENABLED,
+                    Settings.Global.ADD_USERS_WHEN_LOCKED,
+                    Settings.Global.AIRPLANE_MODE_ON,
+                    Settings.Global.AIRPLANE_MODE_RADIOS,
+                    Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
+                    Settings.Global.ALARM_MANAGER_CONSTANTS,
+                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
+                    Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                    Settings.Global.ANIMATOR_DURATION_SCALE,
+                    Settings.Global.APN_DB_UPDATE_CONTENT_URL,
+                    Settings.Global.APN_DB_UPDATE_METADATA_URL,
+                    Settings.Global.APP_IDLE_CONSTANTS,
+                    Settings.Global.ASSISTED_GPS_ENABLED,
+                    Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                    Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
+                    Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
+                    Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
+                    Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
+                    Settings.Global.BLUETOOTH_DISABLED_PROFILES,
+                    Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
+                    Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_ON, // Candidate for backup?
+                    Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
+                    Settings.Global.BOOT_COUNT,
+                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL,
+                    Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
+                    Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
+                    Settings.Global.CAPTIVE_PORTAL_MODE,
+                    Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
+                    Settings.Global.CAPTIVE_PORTAL_SERVER,
+                    Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
+                    Settings.Global.CAPTIVE_PORTAL_USER_AGENT,
+                    Settings.Global.CAR_DOCK_SOUND,
+                    Settings.Global.CARRIER_APP_WHITELIST,
+                    Settings.Global.CAR_UNDOCK_SOUND,
+                    Settings.Global.CDMA_CELL_BROADCAST_SMS,
+                    Settings.Global.CDMA_ROAMING_MODE,
+                    Settings.Global.CDMA_SUBSCRIPTION_MODE,
+                    Settings.Global.CELL_ON,
+                    Settings.Global.CERT_PIN_UPDATE_CONTENT_URL,
+                    Settings.Global.CERT_PIN_UPDATE_METADATA_URL,
+                    Settings.Global.COMPATIBILITY_MODE,
+                    Settings.Global.CONNECTIVITY_CHANGE_DELAY,
+                    Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE,
+                    Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
+                    Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
+                    Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
+                    Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
+                    Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
+                    Settings.Global.DATABASE_CREATION_BUILDID,
+                    Settings.Global.DATABASE_DOWNGRADE_REASON,
+                    Settings.Global.DATA_ROAMING,
+                    Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
+                    Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
+                    Settings.Global.DEBUG_APP,
+                    Settings.Global.DEBUG_VIEW_ATTRIBUTES,
+                    Settings.Global.DEFAULT_DNS_SERVER,
+                    Settings.Global.DEFAULT_INSTALL_LOCATION,
+                    Settings.Global.DESK_DOCK_SOUND,
+                    Settings.Global.DESK_UNDOCK_SOUND,
+                    Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
+                    Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
+                    Settings.Global.DEVELOPMENT_FORCE_RTL,
+                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                    Settings.Global.DEVICE_DEMO_MODE,
+                    Settings.Global.DEVICE_IDLE_CONSTANTS,
+                    Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
+                    Settings.Global.BATTERY_SAVER_CONSTANTS,
+                    Settings.Global.DEVICE_NAME,
+                    Settings.Global.DEVICE_POLICY_CONSTANTS,
+                    Settings.Global.DEVICE_PROVISIONED,
+                    Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
+                    Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+                    Settings.Global.DISPLAY_SCALING_FORCE,
+                    Settings.Global.DISPLAY_SIZE_FORCED,
+                    Settings.Global.DNS_RESOLVER_MAX_SAMPLES,
+                    Settings.Global.DNS_RESOLVER_MIN_SAMPLES,
+                    Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
+                    Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
+                    Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY,
+                    Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
+                    Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
+                    Settings.Global.DROPBOX_AGE_SECONDS,
+                    Settings.Global.DROPBOX_MAX_FILES,
+                    Settings.Global.DROPBOX_QUOTA_KB,
+                    Settings.Global.DROPBOX_QUOTA_PERCENT,
+                    Settings.Global.DROPBOX_RESERVE_PERCENT,
+                    Settings.Global.DROPBOX_TAG_PREFIX,
+                    Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
+                    Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
+                    Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
+                    Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                    Settings.Global.ENABLE_DISKSTATS_LOGGING,
+                    Settings.Global.ENABLE_EPHEMERAL_FEATURE,
+                    Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                    Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                    Settings.Global.ERROR_LOGCAT_PREFIX,
+                    Settings.Global.FANCY_IME_ANIMATIONS,
+                    Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
+                    Settings.Global.FSTRIM_MANDATORY_INTERVAL,
+                    Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                    Settings.Global.GLOBAL_HTTP_PROXY_HOST,
+                    Settings.Global.GLOBAL_HTTP_PROXY_PAC,
+                    Settings.Global.GLOBAL_HTTP_PROXY_PORT,
+                    Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
+                    Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
+                    Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
+                    Settings.Global.HDMI_CONTROL_ENABLED,
+                    Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
+                    Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                    Settings.Global.HTTP_PROXY,
+                    Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
+                    Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
+                    Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
+                    Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
+                    Settings.Global.JOB_SCHEDULER_CONSTANTS,
+                    Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
+                    Settings.Global.LANG_ID_UPDATE_METADATA_URL,
+                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
+                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
+                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
+                    Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
+                    Settings.Global.LOCK_SOUND,
+                    Settings.Global.LOW_BATTERY_SOUND,
+                    Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
+                    Settings.Global.LOW_POWER_MODE,
+                    Settings.Global.LTE_SERVICE_FORCED,
+                    Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
+                    Settings.Global.MDC_INITIAL_MAX_RETRY,
+                    Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
+                    Settings.Global.MHL_POWER_CHARGE_ENABLED,
+                    Settings.Global.MOBILE_DATA, // Candidate for backup?
+                    Settings.Global.MOBILE_DATA_ALWAYS_ON,
+                    Settings.Global.MODE_RINGER,
+                    Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
+                    Settings.Global.MULTI_SIM_SMS_PROMPT,
+                    Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,
+                    Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
+                    Settings.Global.MULTI_SIM_VOICE_PROMPT,
+                    Settings.Global.NETSTATS_DEV_BUCKET_DURATION,
+                    Settings.Global.NETSTATS_DEV_DELETE_AGE,
+                    Settings.Global.NETSTATS_DEV_PERSIST_BYTES,
+                    Settings.Global.NETSTATS_DEV_ROTATE_AGE,
+                    Settings.Global.NETSTATS_ENABLED,
+                    Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES,
+                    Settings.Global.NETSTATS_POLL_INTERVAL,
+                    Settings.Global.NETSTATS_SAMPLE_ENABLED,
+                    Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
+                    Settings.Global.NETSTATS_UID_BUCKET_DURATION,
+                    Settings.Global.NETSTATS_UID_DELETE_AGE,
+                    Settings.Global.NETSTATS_UID_PERSIST_BYTES,
+                    Settings.Global.NETSTATS_UID_ROTATE_AGE,
+                    Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION,
+                    Settings.Global.NETSTATS_UID_TAG_DELETE_AGE,
+                    Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES,
+                    Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE,
+                    Settings.Global.NETWORK_AVOID_BAD_WIFI,
+                    Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
+                    Settings.Global.NETWORK_PREFERENCE,
+                    Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
+                    Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
+                    Settings.Global.NETWORK_SCORER_APP,
+                    Settings.Global.NETWORK_SCORING_PROVISIONED,
+                    Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                    Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
+                    Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
+                    Settings.Global.NEW_CONTACT_AGGREGATOR,
+                    Settings.Global.NITZ_UPDATE_DIFF,
+                    Settings.Global.NITZ_UPDATE_SPACING,
+                    Settings.Global.NSD_ON,
+                    Settings.Global.NTP_SERVER,
+                    Settings.Global.NTP_TIMEOUT,
+                    Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
+                    Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                    Settings.Global.PAC_CHANGE_DELAY,
+                    Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
+                    Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                    Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
+                    Settings.Global.PACKAGE_VERIFIER_SETTING_VISIBLE,
+                    Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
+                    Settings.Global.PDP_WATCHDOG_ERROR_POLL_COUNT,
+                    Settings.Global.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS,
+                    Settings.Global.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS,
+                    Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
+                    Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS,
+                    Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
+                    Settings.Global.POLICY_CONTROL,
+                    Settings.Global.POWER_MANAGER_CONSTANTS,
+                    Settings.Global.PREFERRED_NETWORK_MODE,
+                    Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
+                    Settings.Global.RADIO_BLUETOOTH,
+                    Settings.Global.RADIO_CELL,
+                    Settings.Global.RADIO_NFC,
+                    Settings.Global.RADIO_WIFI,
+                    Settings.Global.RADIO_WIMAX,
+                    Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
+                    Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
+                    Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
+                    Settings.Global.RETAIL_DEMO_MODE_CONSTANTS,
+                    Settings.Global.SAFE_BOOT_DISALLOWED,
+                    Settings.Global.SAMPLING_PROFILER_MS,
+                    Settings.Global.SELINUX_STATUS,
+                    Settings.Global.SELINUX_UPDATE_CONTENT_URL,
+                    Settings.Global.SELINUX_UPDATE_METADATA_URL,
+                    Settings.Global.SEND_ACTION_APP_ERROR,
+                    Settings.Global.SET_GLOBAL_HTTP_PROXY,
+                    Settings.Global.SET_INSTALL_LOCATION,
+                    Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL,
+                    Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
+                    Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
+                    Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
+                    Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
+                    Settings.Global.SHOW_TEMPERATURE_WARNING,
+                    Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
+                    Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
+                    Settings.Global.SMS_OUTGOING_CHECK_INTERVAL_MS,
+                    Settings.Global.SMS_OUTGOING_CHECK_MAX_COUNT,
+                    Settings.Global.SMS_SHORT_CODE_CONFIRMATION,
+                    Settings.Global.SMS_SHORT_CODE_RULE,
+                    Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
+                    Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                    Settings.Global.STORAGE_BENCHMARK_INTERVAL,
+                    Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
+                    Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
+                    Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
+                    Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
+                    Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
+                    Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
+                    Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                    Settings.Global.TCP_DEFAULT_INIT_RWND,
+                    Settings.Global.TETHER_DUN_APN,
+                    Settings.Global.TETHER_DUN_REQUIRED,
+                    Settings.Global.TETHER_SUPPORTED,
+                    Settings.Global.THEATER_MODE_ON,
+                    Settings.Global.TRANSITION_ANIMATION_SCALE,
+                    Settings.Global.TRUSTED_SOUND,
+                    Settings.Global.TZINFO_UPDATE_CONTENT_URL,
+                    Settings.Global.TZINFO_UPDATE_METADATA_URL,
+                    Settings.Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                    Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                    Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                    Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                    Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                    Settings.Global.UNLOCK_SOUND,
+                    Settings.Global.USE_GOOGLE_MAIL,
+                    Settings.Global.VT_IMS_ENABLED,
+                    Settings.Global.WAIT_FOR_DEBUGGER,
+                    Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
+                    Settings.Global.WARNING_TEMPERATURE,
+                    Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
+                    Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
+                    Settings.Global.WEBVIEW_MULTIPROCESS,
+                    Settings.Global.WEBVIEW_PROVIDER,
+                    Settings.Global.WFC_IMS_ENABLED,
+                    Settings.Global.WFC_IMS_MODE,
+                    Settings.Global.WFC_IMS_ROAMING_ENABLED,
+                    Settings.Global.WFC_IMS_ROAMING_MODE,
+                    Settings.Global.WIFI_BADGING_THRESHOLDS,
+                    Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
+                    Settings.Global.WIFI_COUNTRY_CODE,
+                    Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
+                    Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON,
+                    Settings.Global.WIFI_DISPLAY_ON,
+                    Settings.Global.WIFI_DISPLAY_WPS_CONFIG,
+                    Settings.Global.WIFI_ENHANCED_AUTO_JOIN,
+                    Settings.Global.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS,
+                    Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
+                    Settings.Global.WIFI_FREQUENCY_BAND,
+                    Settings.Global.WIFI_IDLE_MS,
+                    Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
+                    Settings.Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
+                    Settings.Global.WIFI_NETWORK_SHOW_RSSI,
+                    Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+                    Settings.Global.WIFI_NUM_OPEN_NETWORKS_KEPT,
+                    Settings.Global.WIFI_ON,
+                    Settings.Global.WIFI_P2P_DEVICE_NAME,
+                    Settings.Global.WIFI_REENABLE_DELAY_MS,
+                    Settings.Global.WIFI_SAVED_STATE,
+                    Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
+                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS,
+                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
+                    Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
+                    Settings.Global.WIFI_SLEEP_POLICY,
+                    Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
+                    Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
+                    Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
+                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                    Settings.Global.WIFI_WATCHDOG_ON,
+                    Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    Settings.Global.WINDOW_ANIMATION_SCALE,
+                    Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                    Settings.Global.WTF_IS_FATAL,
+                    Settings.Global.ZEN_MODE,
+                    Settings.Global.ZEN_MODE_CONFIG_ETAG,
+                    Settings.Global.ZEN_MODE_RINGER_LEVEL);
+
+    private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
+             newHashSet(
+                 Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                 Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
+                 Settings.Secure.ALWAYS_ON_VPN_APP,
+                 Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
+                 Settings.Secure.ANDROID_ID,
+                 Settings.Secure.ANR_SHOW_BACKGROUND,
+                 Settings.Secure.ASSISTANT,
+                 Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                 Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
+                 Settings.Secure.ASSIST_STRUCTURE_ENABLED,
+                 Settings.Secure.AUTOFILL_SERVICE_SEARCH_URI,
+                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
+                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
+                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
+                 Settings.Secure.BACKUP_AUTO_RESTORE,
+                 Settings.Secure.BACKUP_ENABLED,
+                 Settings.Secure.BACKUP_PROVISIONED,
+                 Settings.Secure.BACKUP_TRANSPORT,
+                 Settings.Secure.CARRIER_APPS_HANDLED,
+                 Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
+                 Settings.Secure.COMPLETED_CATEGORY_PREFIX,
+                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
+                 Settings.Secure.DEFAULT_INPUT_METHOD,
+                 Settings.Secure.DEMO_USER_SETUP_COMPLETE,
+                 Settings.Secure.DEVICE_PAIRED,
+                 Settings.Secure.DIALER_DEFAULT_APPLICATION,
+                 Settings.Secure.DISABLED_PRINT_SERVICES,
+                 Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
+                 Settings.Secure.DISPLAY_DENSITY_FORCED,
+                 Settings.Secure.DOZE_ALWAYS_ON,
+                 Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
+                 Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                 Settings.Secure.ENABLED_PRINT_SERVICES,
+                 Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
+                 Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
+                 Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
+                 Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
+                 Settings.Secure.INSTALL_NON_MARKET_APPS,
+                 Settings.Secure.LAST_SETUP_SHOWN,
+                 Settings.Secure.LOCATION_MODE,
+                 Settings.Secure.LOCATION_PREVIOUS_MODE,
+                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, // Candidate?
+                 Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
+                 Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, // Candidate?
+                 Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
+                 Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
+                 Settings.Secure.MULTI_PRESS_TIMEOUT,
+                 Settings.Secure.NFC_PAYMENT_FOREGROUND,
+                 Settings.Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME,
+                 Settings.Secure.PACKAGE_VERIFIER_STATE,
+                 Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
+                 Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
+                 Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
+                 Settings.Secure.PRINT_SERVICE_SEARCH_URI,
+                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, // Candidate?
+                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, // Candidate?
+                 Settings.Secure.SCREENSAVER_COMPONENTS,
+                 Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT, // Candidate?
+                 Settings.Secure.SCREENSAVER_ENABLED, // Candidate?
+                 Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
+                 Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
+                 Settings.Secure.SEARCH_MAX_RESULTS_TO_DISPLAY,
+                 Settings.Secure.SEARCH_MAX_SHORTCUTS_RETURNED,
+                 Settings.Secure.SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS,
+                 Settings.Secure.SEARCH_MAX_STAT_AGE_MILLIS,
+                 Settings.Secure.SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING,
+                 Settings.Secure.SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING,
+                 Settings.Secure.SEARCH_NUM_PROMOTED_SOURCES,
+                 Settings.Secure.SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT,
+                 Settings.Secure.SEARCH_PREFILL_MILLIS,
+                 Settings.Secure.SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS,
+                 Settings.Secure.SEARCH_QUERY_THREAD_CORE_POOL_SIZE,
+                 Settings.Secure.SEARCH_QUERY_THREAD_MAX_POOL_SIZE,
+                 Settings.Secure.SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE,
+                 Settings.Secure.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE,
+                 Settings.Secure.SEARCH_SOURCE_TIMEOUT_MILLIS,
+                 Settings.Secure.SEARCH_THREAD_KEEPALIVE_SECONDS,
+                 Settings.Secure.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT,
+                 Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                 Settings.Secure.SETTINGS_CLASSNAME,
+                 Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, // candidate?
+                 Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
+                 Settings.Secure.SMS_DEFAULT_APPLICATION,
+                 Settings.Secure.TRUST_AGENTS_INITIALIZED,
+                 Settings.Secure.TV_INPUT_CUSTOM_LABELS,
+                 Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
+                 Settings.Secure.UI_NIGHT_MODE, // candidate?
+                 Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
+                 Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
+                 Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
+                 Settings.Secure.USER_SETUP_COMPLETE,
+                 Settings.Secure.VOICE_INTERACTION_SERVICE,
+                 Settings.Secure.VOICE_RECOGNITION_SERVICE,
+                 Settings.Secure.INSTANT_APPS_ENABLED);
+
+    @Test
+    public void systemSettingsBackedUpOrBlacklisted() {
+        checkSettingsBackedUpOrBlacklisted(
+                getCandidateSettings(Settings.System.class),
+                newHashSet(Settings.System.SETTINGS_TO_BACKUP),
+                BACKUP_BLACKLISTED_SYSTEM_SETTINGS);
+    }
+
+    @Test
+    public void globalSettingsBackedUpOrBlacklisted() {
+        checkSettingsBackedUpOrBlacklisted(
+            getCandidateSettings(Settings.Global.class),
+            newHashSet(Settings.Global.SETTINGS_TO_BACKUP),
+            BACKUP_BLACKLISTED_GLOBAL_SETTINGS);
+    }
+
+    @Test
+    public void secureSettingsBackedUpOrBlacklisted() {
+        checkSettingsBackedUpOrBlacklisted(
+                getCandidateSettings(Settings.Secure.class),
+                newHashSet(Settings.Secure.SETTINGS_TO_BACKUP),
+            BACKUP_BLACKLISTED_SECURE_SETTINGS);
+    }
+
+    private static void checkSettingsBackedUpOrBlacklisted(
+            Set<String> settings, Set<String> settingsToBackup, Set<String> blacklist) {
+        Set<String> settingsNotBackedUp = difference(settings, settingsToBackup);
+        Set<String> settingsNotBackedUpOrBlacklisted = difference(settingsNotBackedUp, blacklist);
+        assertThat(
+                "Settings not backed up or blacklisted",
+                settingsNotBackedUpOrBlacklisted,
+                is(empty()));
+
+        assertThat(
+            "blacklisted settings backed up",
+            intersect(settingsToBackup, blacklist),
+            is(empty()));
+    }
+
+    private static Set<String> getCandidateSettings(Class<? extends Settings.NameValueTable> clazz) {
+        HashSet<String> result = new HashSet<String>();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (looksLikeValidSetting(field)) {
+                try {
+                    result.add((String) field.get(null));
+                } catch (IllegalAccessException e) {
+                    // Impossible for public fields
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static boolean looksLikeValidSetting(Field field) {
+        int modifiers = field.getModifiers();
+        return isPublic(modifiers)
+                && isStatic(modifiers)
+                && isFinal(modifiers)
+                && field.getType() == String.class
+                && field.getAnnotation(Deprecated.class) == null;
+    }
+
+    private static <T> Set<T> difference(Set<T> s1, Set<T> s2) {
+        HashSet<T> result = new HashSet<T>(s1);
+        result.removeAll(s2);
+        return result;
+    }
+
+    private static <T> Set<T> intersect(Set<T> s1, Set<T> s2) {
+        HashSet<T> result = new HashSet<T>(s1);
+        result.retainAll(s2);
+        return result;
+    }
+
+}

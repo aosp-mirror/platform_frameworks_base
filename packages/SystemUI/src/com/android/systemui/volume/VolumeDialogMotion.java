@@ -140,7 +140,17 @@ public class VolumeDialogMotion {
                         final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         final int posY = chevronPosY();
                         mChevron.setTranslationY(posY + v + -mDialogView.getTranslationY());
-                    }})
+                    }
+                })
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mChevronPositionAnimator == null) return;
+                        // reposition chevron
+                        final int posY = chevronPosY();
+                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
+                    }
+                })
                 .start();
 
         mContentsPositionAnimator = ValueAnimator.ofFloat(-chevronDistance(), 0)

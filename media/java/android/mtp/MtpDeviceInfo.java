@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import android.annotation.NonNull;
+
 /**
  * This class encapsulates information about an MTP device.
  * This corresponds to the DeviceInfo Dataset described in
@@ -39,7 +41,7 @@ public class MtpDeviceInfo {
      *
      * @return the manufacturer name
      */
-    public final String getManufacturer() {
+    public final @NonNull String getManufacturer() {
         return mManufacturer;
     }
 
@@ -48,7 +50,7 @@ public class MtpDeviceInfo {
      *
      * @return the model name
      */
-    public final String getModel() {
+    public final @NonNull String getModel() {
         return mModel;
     }
 
@@ -57,7 +59,7 @@ public class MtpDeviceInfo {
      *
      * @return the device version
      */
-    public final String getVersion() {
+    public final @NonNull String getVersion() {
         return mVersion;
     }
 
@@ -66,7 +68,7 @@ public class MtpDeviceInfo {
      *
      * @return the serial number
      */
-    public final String getSerialNumber() {
+    public final @NonNull String getSerialNumber() {
         return mSerialNumber;
     }
 
@@ -110,7 +112,7 @@ public class MtpDeviceInfo {
      * @see MtpConstants#OPERATION_SET_OBJECT_REFERENCES
      * @see MtpConstants#OPERATION_SKIP
      */
-    public final int[] getOperationsSupported() {
+    public final @NonNull int[] getOperationsSupported() {
         return mOperationsSupported;
     }
 
@@ -137,7 +139,7 @@ public class MtpDeviceInfo {
      * @see MtpEvent#EVENT_OBJECT_PROP_DESC_CHANGED
      * @see MtpEvent#EVENT_OBJECT_REFERENCES_CHANGED
      */
-    public final int[] getEventsSupported() {
+    public final @NonNull int[] getEventsSupported() {
         return mEventsSupported;
     }
 
@@ -163,7 +165,7 @@ public class MtpDeviceInfo {
      * Returns if the code set contains code.
      * @hide
      */
-    private static boolean isSupported(int[] set, int code) {
+    private static boolean isSupported(@NonNull int[] set, int code) {
         for (final int element : set) {
             if (element == code) {
                 return true;

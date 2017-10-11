@@ -34,13 +34,6 @@ import java.util.Collections;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
-    /** @removed */
-    public static final int STATUS_NOT_SUPPORTED = 0;
-    /** @removed */
-    public static final int STATUS_READY = 1;
-    /** @removed */
-    public static final int STATUS_GNSS_LOCATION_DISABLED = 2;
-
     private final GnssClock mClock;
     private final Collection<GnssMeasurement> mReadOnlyMeasurements;
 

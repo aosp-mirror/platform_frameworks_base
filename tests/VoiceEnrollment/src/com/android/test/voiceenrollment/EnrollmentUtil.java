@@ -139,7 +139,6 @@ public class EnrollmentUtil {
      * @param keyphraseId The keyphrase ID to look-up the sound model for.
      * @return {@code true} if the call succeeds, {@code false} otherwise.
      */
-    @Nullable
     public boolean deleteSoundModel(int keyphraseId, String bcp47Locale) {
         if (keyphraseId <= 0) {
             Log.e(TAG, "Keyphrase must have a valid ID");

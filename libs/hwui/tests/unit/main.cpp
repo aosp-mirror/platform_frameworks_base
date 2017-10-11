@@ -15,19 +15,16 @@
  */
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "Caches.h"
+#include "debug/GlesDriver.h"
+#include "debug/NullGlesDriver.h"
+#include "hwui/Typeface.h"
 #include "thread/TaskManager.h"
-#include "tests/common/TestUtils.h"
+#include "tests/common/LeakChecker.h"
 
-#include <memunreachable/memunreachable.h>
-
-#include <cstdio>
-#include <iostream>
-#include <map>
-#include <unordered_set>
 #include <signal.h>
-#include <unistd.h>
 
 using namespace std;
 using namespace android;
@@ -54,66 +51,12 @@ static void gtestSigHandler(int sig, siginfo_t* siginfo, void* context) {
     raise(sig);
 }
 
-static void logUnreachable(initializer_list<UnreachableMemoryInfo> infolist) {
-    // merge them all
-    UnreachableMemoryInfo merged;
-    unordered_set<uintptr_t> addrs;
-    merged.allocation_bytes = 0;
-    merged.leak_bytes = 0;
-    merged.num_allocations = 0;
-    merged.num_leaks = 0;
-    for (auto& info : infolist) {
-        // We'll be a little hazzy about these ones and just hope the biggest
-        // is the most accurate
-        merged.allocation_bytes = max(merged.allocation_bytes, info.allocation_bytes);
-        merged.num_allocations = max(merged.num_allocations, info.num_allocations);
-        for (auto& leak : info.leaks) {
-             if (addrs.find(leak.begin) == addrs.end()) {
-                 merged.leaks.push_back(leak);
-                 merged.num_leaks++;
-                 merged.leak_bytes += leak.size;
-                 addrs.insert(leak.begin);
-             }
-        }
+class TypefaceEnvironment : public testing::Environment {
+public:
+    virtual void SetUp() {
+        Typeface::setRobotoTypefaceForTest();
     }
-
-    // Now log the result
-    if (merged.num_leaks) {
-        cout << endl << "Leaked memory!" << endl;
-        if (!merged.leaks[0].backtrace.num_frames) {
-            cout << "Re-run with 'setprop libc.debug.malloc.program hwui_unit_test'"
-                    << endl << "and 'setprop libc.debug.malloc.options backtrace=8'"
-                    << " to get backtraces" << endl;
-        }
-        cout << merged.ToString(false);
-    }
-}
-
-static void checkForLeaks() {
-    // TODO: Until we can shutdown the RT thread we need to do this in
-    // two passes as GetUnreachableMemory has limited insight into
-    // thread-local caches so some leaks will not be properly tagged as leaks
-    nsecs_t before = systemTime();
-    UnreachableMemoryInfo rtMemInfo;
-    TestUtils::runOnRenderThread([&rtMemInfo](renderthread::RenderThread& thread) {
-        if (Caches::hasInstance()) {
-            Caches::getInstance().tasks.stop();
-        }
-        // Check for leaks
-        if (!GetUnreachableMemory(rtMemInfo)) {
-            cerr << "Failed to get unreachable memory!" << endl;
-            return;
-        }
-    });
-    UnreachableMemoryInfo uiMemInfo;
-    if (!GetUnreachableMemory(uiMemInfo)) {
-        cerr << "Failed to get unreachable memory!" << endl;
-        return;
-    }
-    logUnreachable({rtMemInfo, uiMemInfo});
-    nsecs_t after = systemTime();
-    cout << "Leak check took " << ns2ms(after - before) << "ms" << endl;
-}
+};
 
 int main(int argc, char* argv[]) {
     // Register a crash handler
@@ -127,10 +70,17 @@ int main(int argc, char* argv[]) {
         gSigChain.insert(pair<int, struct sigaction>(sig, old_sa));
     }
 
+    // Replace the default GLES driver
+    debug::GlesDriver::replace(std::make_unique<debug::NullGlesDriver>());
+
     // Run the tests
     testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleMock(&argc, argv);
+
+    testing::AddGlobalTestEnvironment(new TypefaceEnvironment());
+
     int ret = RUN_ALL_TESTS();
-    checkForLeaks();
+    test::LeakChecker::checkForLeaks();
     return ret;
 }
 

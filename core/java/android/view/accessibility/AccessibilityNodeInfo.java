@@ -16,15 +16,25 @@
 
 package android.view.accessibility;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityURLSpan;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.util.ArraySet;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
@@ -35,6 +45,7 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class represents a node of the window content as well as actions that
@@ -74,17 +85,19 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final int UNDEFINED_SELECTION_INDEX = -1;
 
+    /* Special IDs for node source IDs */
     /** @hide */
     public static final int UNDEFINED_ITEM_ID = Integer.MAX_VALUE;
 
     /** @hide */
-    public static final long ROOT_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
+    public static final int ROOT_ITEM_ID = Integer.MAX_VALUE - 1;
 
     /** @hide */
-    public static final int ACTIVE_WINDOW_ID = UNDEFINED_ITEM_ID;
+    public static final long UNDEFINED_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
 
     /** @hide */
-    public static final int ANY_WINDOW_ID = -2;
+    public static final long ROOT_NODE_ID = makeNodeId(ROOT_ITEM_ID,
+            AccessibilityNodeProvider.HOST_VIEW_ID);
 
     /** @hide */
     public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
@@ -462,6 +475,42 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_PROGRESS_VALUE =
             "android.view.accessibility.action.ARGUMENT_PROGRESS_VALUE";
 
+    /**
+     * Argument for specifying the x coordinate to which to move a window.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_MOVE_WINDOW}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_MOVE_WINDOW
+     */
+    public static final String ACTION_ARGUMENT_MOVE_WINDOW_X =
+            "ACTION_ARGUMENT_MOVE_WINDOW_X";
+
+    /**
+     * Argument for specifying the y coordinate to which to move a window.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_MOVE_WINDOW}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_MOVE_WINDOW
+     */
+    public static final String ACTION_ARGUMENT_MOVE_WINDOW_Y =
+            "ACTION_ARGUMENT_MOVE_WINDOW_Y";
+
+    /**
+     * Argument to pass the {@link AccessibilityClickableSpan}.
+     * For use with R.id.accessibilityActionClickOnClickableSpan
+     * @hide
+     */
+    public static final String ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN =
+            "android.view.accessibility.action.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN";
+
     // Focus types
 
     /**
@@ -500,6 +549,46 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Movement granularity bit for traversing the text of a node by page.
      */
     public static final int MOVEMENT_GRANULARITY_PAGE = 0x00000010;
+
+    /**
+     * Key used to request and locate extra data for text character location. This key requests that
+     * an array of {@link android.graphics.RectF}s be added to the extras. This request is made with
+     * {@link #refreshWithExtraData(String, Bundle)}. The arguments taken by this request are two
+     * integers: {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX} and
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}. The starting index must be valid
+     * inside the CharSequence returned by {@link #getText()}, and the length must be positive.
+     * <p>
+     * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
+     * string as a key for {@link Bundle#getParcelableArray(String)}. The
+     * {@link android.graphics.RectF} will be null for characters that either do not exist or are
+     * off the screen.
+     *
+     * {@see #refreshWithExtraData(String, Bundle)}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+
+    /**
+     * Integer argument specifying the start index of the requested text location data. Must be
+     * valid inside the CharSequence returned by {@link #getText()}.
+     *
+     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
+
+    /**
+     * Integer argument specifying the end index of the requested text location data. Must be
+     * positive.
+     *
+     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
+
+    /** @hide */
+    public static final String EXTRA_DATA_REQUESTED_KEY =
+            "android.view.accessibility.AccessibilityNodeInfo.extra_data_requested";
 
     // Boolean attributes.
 
@@ -541,6 +630,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IMPORTANCE = 0x0040000;
 
+    private static final int BOOLEAN_PROPERTY_IS_SHOWING_HINT = 0x0100000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -552,6 +643,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * hierarchy and is only reported via the accessibility APIs.
      */
     private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
+
+    private static AtomicInteger sNumInstancesInUse;
 
     /**
      * Gets the accessibility view id which identifies a View in the view three.
@@ -591,13 +684,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public static long makeNodeId(int accessibilityViewId, int virtualDescendantId) {
-        // We changed the value for undefined node to positive due to wrong
-        // global id composition (two 32-bin ints into one 64-bit long) but
-        // the value used for the host node provider view has id -1 so we
-        // remap it here.
-        if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
-            virtualDescendantId = UNDEFINED_ITEM_ID;
-        }
         return (((long) virtualDescendantId) << VIRTUAL_DESCENDANT_ID_SHIFT) | accessibilityViewId;
     }
 
@@ -609,13 +695,13 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private int mWindowId = UNDEFINED_ITEM_ID;
-    private long mSourceNodeId = ROOT_NODE_ID;
-    private long mParentNodeId = ROOT_NODE_ID;
-    private long mLabelForId = ROOT_NODE_ID;
-    private long mLabeledById = ROOT_NODE_ID;
-    private long mTraversalBefore = ROOT_NODE_ID;
-    private long mTraversalAfter = ROOT_NODE_ID;
+    private int mWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+    private long mSourceNodeId = UNDEFINED_NODE_ID;
+    private long mParentNodeId = UNDEFINED_NODE_ID;
+    private long mLabelForId = UNDEFINED_NODE_ID;
+    private long mLabeledById = UNDEFINED_NODE_ID;
+    private long mTraversalBefore = UNDEFINED_NODE_ID;
+    private long mTraversalAfter = UNDEFINED_NODE_ID;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -624,10 +710,14 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private CharSequence mPackageName;
     private CharSequence mClassName;
+    // Hidden, unparceled value used to hold the original value passed to setText
+    private CharSequence mOriginalText;
     private CharSequence mText;
+    private CharSequence mHintText;
     private CharSequence mError;
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
+    private ArrayList<String> mExtraDataKeys;
 
     private LongArray mChildNodeIds;
     private ArrayList<AccessibilityAction> mActions;
@@ -666,7 +756,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param source The info source.
      */
     public void setSource(View source) {
-        setSource(source, UNDEFINED_ITEM_ID);
+        setSource(source, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -763,14 +853,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    public boolean refresh(boolean bypassCache) {
+    public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         AccessibilityNodeInfo refreshedInfo = client.findAccessibilityNodeInfoByAccessibilityId(
-                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0);
+                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0, arguments);
         if (refreshedInfo == null) {
             return false;
         }
@@ -781,15 +871,33 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Refreshes this info with the latest state of the view it represents.
-     * <p>
-     * <strong>Note:</strong> If this method returns false this info is obsolete
-     * since it represents a view that is no longer in the view tree and should
-     * be recycled.
-     * </p>
-     * @return Whether the refresh succeeded.
+     *
+     * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
+     * by this node is no longer in the view tree (and thus this node is obsolete and should be
+     * recycled).
      */
     public boolean refresh() {
-        return refresh(true);
+        return refresh(null, true);
+    }
+
+    /**
+     * Refreshes this info with the latest state of the view it represents, and request new
+     * data be added by the View.
+     *
+     * @param extraDataKey A bitmask of the extra data requested. Data that must be requested
+     *                     with this mechanism is generally expensive to retrieve, so should only be
+     *                     requested when needed. See
+     *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY} and
+     *                     {@link #getAvailableExtraData()}.
+     * @param args A bundle of arguments for the request. These depend on the particular request.
+     *
+     * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
+     * by this node is no longer in the view tree (and thus this node is obsolete and should be
+     * recycled).
+     */
+    public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
+        args.putString(EXTRA_DATA_REQUESTED_KEY, extraDataKey);
+        return refresh(args, true);
     }
 
     /**
@@ -849,7 +957,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         final long childId = mChildNodeIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
-                childId, false, FLAG_PREFETCH_DESCENDANTS);
+                childId, false, FLAG_PREFETCH_DESCENDANTS, null);
     }
 
     /**
@@ -865,7 +973,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
-        addChildInternal(child, UNDEFINED_ITEM_ID, true);
+        addChildInternal(child, AccessibilityNodeProvider.HOST_VIEW_ID, true);
     }
 
     /**
@@ -875,7 +983,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public void addChildUnchecked(View child) {
-        addChildInternal(child, UNDEFINED_ITEM_ID, false);
+        addChildInternal(child, AccessibilityNodeProvider.HOST_VIEW_ID, false);
     }
 
     /**
@@ -893,7 +1001,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public boolean removeChild(View child) {
-        return removeChild(child, UNDEFINED_ITEM_ID);
+        return removeChild(child, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1120,6 +1228,17 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Removes all actions.
+     *
+     * @hide
+     */
+    public void removeAllActions() {
+        if (mActions != null) {
+            mActions.clear();
+        }
+    }
+
+    /**
      * Gets the node before which this one is visited during traversal. A screen-reader
      * must visit the content of this node before the content of the one it precedes.
      *
@@ -1148,7 +1267,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #getTraversalBefore()
      */
     public void setTraversalBefore(View view) {
-        setTraversalBefore(view, UNDEFINED_ITEM_ID);
+        setTraversalBefore(view, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1209,7 +1328,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #getTraversalAfter()
      */
     public void setTraversalAfter(View view) {
-        setTraversalAfter(view, UNDEFINED_ITEM_ID);
+        setTraversalAfter(view, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -1237,6 +1356,45 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mTraversalAfter = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+    }
+
+    /**
+     * Get the extra data available for this node.
+     * <p>
+     * Some data that is useful for some accessibility services is expensive to compute, and would
+     * place undue overhead on apps to compute all the time. That data can be requested with
+     * {@link #refreshWithExtraData(String, Bundle)}.
+     *
+     * @return An unmodifiable list of keys corresponding to extra data that can be requested.
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+     */
+    public List<String> getAvailableExtraData() {
+        if (mExtraDataKeys != null) {
+            return Collections.unmodifiableList(mExtraDataKeys);
+        } else {
+            return EMPTY_LIST;
+        }
+    }
+
+    /**
+     * Set the extra data available for this node.
+     * <p>
+     * <strong>Note:</strong> When a {@code View} passes in a non-empty list, it promises that
+     * it will populate the node's extras with corresponding pieces of information in
+     * {@link View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, String, Bundle)}.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     *
+     * @param extraDataKeys A list of types of extra data that are available.
+     * @see #getAvailableExtraData()
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setAvailableExtraData(List<String> extraDataKeys) {
+        enforceNotSealed();
+        mExtraDataKeys = new ArrayList<>(extraDataKeys);
     }
 
     /**
@@ -1448,7 +1606,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParent(View parent) {
-        setParent(parent, UNDEFINED_ITEM_ID);
+        setParent(parent, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2156,6 +2314,33 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns whether the node's text represents a hint for the user to enter text. It should only
+     * be {@code true} if the node has editable text.
+     *
+     * @return {@code true} if the text in the node represents a hint to the user, {@code false}
+     * otherwise.
+     */
+    public boolean isShowingHintText() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IS_SHOWING_HINT);
+    }
+
+    /**
+     * Sets whether the node's text represents a hint for the user to enter text. It should only
+     * be {@code true} if the node has editable text.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param showingHintText {@code true} if the text in the node represents a hint to the user,
+     * {@code false} otherwise.
+     */
+    public void setShowingHintText(boolean showingHintText) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IS_SHOWING_HINT, showingHintText);
+    }
+
+    /**
      * Gets the package this node comes from.
      *
      * @return The package name.
@@ -2209,11 +2394,46 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets the text of this node.
+     * <p>
+     *   <strong>Note:</strong> If the text contains {@link ClickableSpan}s or {@link URLSpan}s,
+     *   these spans will have been replaced with ones whose {@link ClickableSpan#onClick(View)}
+     *   can be called from an {@link AccessibilityService}. When called from a service, the
+     *   {@link View} argument is ignored and the corresponding span will be found on the view that
+     *   this {@code AccessibilityNodeInfo} represents and called with that view as its argument.
+     *   <p>
+     *   This treatment of {@link ClickableSpan}s means that the text returned from this method may
+     *   different slightly one passed to {@link #setText(CharSequence)}, although they will be
+     *   equivalent according to {@link TextUtils#equals(CharSequence, CharSequence)}. The
+     *   {@link ClickableSpan#onClick(View)} of any spans, however, will generally not work outside
+     *   of an accessibility service.
+     * </p>
      *
      * @return The text.
      */
     public CharSequence getText() {
+        // Attach this node to any spans that need it
+        if (mText instanceof Spanned) {
+            Spanned spanned = (Spanned) mText;
+            AccessibilityClickableSpan[] clickableSpans =
+                    spanned.getSpans(0, mText.length(), AccessibilityClickableSpan.class);
+            for (int i = 0; i < clickableSpans.length; i++) {
+                clickableSpans[i].copyConnectionDataFrom(this);
+            }
+            AccessibilityURLSpan[] urlSpans =
+                    spanned.getSpans(0, mText.length(), AccessibilityURLSpan.class);
+            for (int i = 0; i < urlSpans.length; i++) {
+                urlSpans[i].copyConnectionDataFrom(this);
+            }
+        }
         return mText;
+    }
+
+    /**
+     * Get the text passed to setText before any changes to the spans.
+     * @hide
+     */
+    public CharSequence getOriginalText() {
+        return mOriginalText;
     }
 
     /**
@@ -2230,7 +2450,61 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setText(CharSequence text) {
         enforceNotSealed();
-        mText = text;
+        mOriginalText = text;
+        // Replace any ClickableSpans in mText with placeholders
+        if (text instanceof Spanned) {
+            ClickableSpan[] spans =
+                    ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
+            if (spans.length > 0) {
+                Spannable spannable = new SpannableStringBuilder(text);
+                for (int i = 0; i < spans.length; i++) {
+                    ClickableSpan span = spans[i];
+                    if ((span instanceof AccessibilityClickableSpan)
+                            || (span instanceof AccessibilityURLSpan)) {
+                        // We've already done enough
+                        break;
+                    }
+                    int spanToReplaceStart = spannable.getSpanStart(span);
+                    int spanToReplaceEnd = spannable.getSpanEnd(span);
+                    int spanToReplaceFlags = spannable.getSpanFlags(span);
+                    spannable.removeSpan(span);
+                    ClickableSpan replacementSpan = (span instanceof URLSpan)
+                            ? new AccessibilityURLSpan((URLSpan) span)
+                            : new AccessibilityClickableSpan(span.getId());
+                    spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,
+                            spanToReplaceFlags);
+                }
+                mText = spannable;
+                return;
+            }
+        }
+        mText = (text == null) ? null : text.subSequence(0, text.length());
+    }
+
+    /**
+     * Gets the hint text of this node. Only applies to nodes where text can be entered.
+     *
+     * @return The hint text.
+     */
+    public CharSequence getHintText() {
+        return mHintText;
+    }
+
+    /**
+     * Sets the hint text of this node. Only applies to nodes where text can be entered.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param hintText The hint text for this mode.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setHintText(CharSequence hintText) {
+        enforceNotSealed();
+        mHintText = (hintText == null) ? null : hintText.subSequence(0, hintText.length());
     }
 
     /**
@@ -2247,7 +2521,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setError(CharSequence error) {
         enforceNotSealed();
-        mError = error;
+        mError = (error == null) ? null : error.subSequence(0, error.length());
     }
 
     /**
@@ -2282,7 +2556,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setContentDescription(CharSequence contentDescription) {
         enforceNotSealed();
-        mContentDescription = contentDescription;
+        mContentDescription = (contentDescription == null) ? null
+                : contentDescription.subSequence(0, contentDescription.length());
     }
 
     /**
@@ -2292,7 +2567,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param labeled The view for which this info serves as a label.
      */
     public void setLabelFor(View labeled) {
-        setLabelFor(labeled, UNDEFINED_ITEM_ID);
+        setLabelFor(labeled, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2344,7 +2619,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param label The view that labels this node's source.
      */
     public void setLabeledBy(View label) {
-        setLabeledBy(label, UNDEFINED_ITEM_ID);
+        setLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**
@@ -2518,6 +2793,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Check if a node has an extras bundle
+     * @hide
+     */
+    public boolean hasExtras() {
+        return mExtras != null;
+    }
+
+    /**
      * Gets the value of a boolean property.
      *
      * @param property The property.
@@ -2558,11 +2841,36 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Get the connection ID.
+     *
+     * @return The connection id
+     *
+     * @hide
+     */
+    public int getConnectionId() {
+        return mConnectionId;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Sets the id of the source node.
+     *
+     * @param sourceId The id.
+     * @param windowId The window id.
+     *
+     * @hide
+     */
+    public void setSourceNodeId(long sourceId, int windowId) {
+        enforceNotSealed();
+        mSourceNodeId = sourceId;
+        mWindowId = windowId;
     }
 
     /**
@@ -2688,6 +2996,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static AccessibilityNodeInfo obtain() {
         AccessibilityNodeInfo info = sPool.acquire();
+        if (sNumInstancesInUse != null) {
+            sNumInstancesInUse.incrementAndGet();
+        }
         return (info != null) ? info : new AccessibilityNodeInfo();
     }
 
@@ -2715,6 +3026,19 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void recycle() {
         clear();
         sPool.release(this);
+        if (sNumInstancesInUse != null) {
+            sNumInstancesInUse.decrementAndGet();
+        }
+    }
+
+    /**
+     * Specify a counter that will be incremented on obtain() and decremented on recycle()
+     *
+     * @hide
+     */
+    @TestApi
+    public static void setNumInstancesInUseCounter(AtomicInteger counter) {
+        sNumInstancesInUse = counter;
     }
 
     /**
@@ -2760,16 +3084,19 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mActions != null && !mActions.isEmpty()) {
             final int actionCount = mActions.size();
-            parcel.writeInt(actionCount);
 
+            int nonLegacyActionCount = 0;
             int defaultLegacyStandardActions = 0;
             for (int i = 0; i < actionCount; i++) {
                 AccessibilityAction action = mActions.get(i);
                 if (isDefaultLegacyStandardAction(action)) {
                     defaultLegacyStandardActions |= action.getId();
+                } else {
+                    nonLegacyActionCount++;
                 }
             }
             parcel.writeInt(defaultLegacyStandardActions);
+            parcel.writeInt(nonLegacyActionCount);
 
             for (int i = 0; i < actionCount; i++) {
                 AccessibilityAction action = mActions.get(i);
@@ -2780,6 +3107,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             }
         } else {
             parcel.writeInt(0);
+            parcel.writeInt(0);
         }
 
         parcel.writeInt(mMaxTextLength);
@@ -2789,6 +3117,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mPackageName);
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
+        parcel.writeCharSequence(mHintText);
         parcel.writeCharSequence(mError);
         parcel.writeCharSequence(mContentDescription);
         parcel.writeString(mViewIdResourceName);
@@ -2798,6 +3127,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mInputType);
         parcel.writeInt(mLiveRegion);
         parcel.writeInt(mDrawingOrderInParent);
+        if (mExtraDataKeys != null) {
+            parcel.writeInt(1);
+            parcel.writeStringList(mExtraDataKeys);
+        } else {
+            parcel.writeInt(0);
+        }
 
         if (mExtras != null) {
             parcel.writeInt(1);
@@ -2863,6 +3198,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = other.mPackageName;
         mClassName = other.mClassName;
         mText = other.mText;
+        mHintText = other.mHintText;
         mError = other.mError;
         mContentDescription = other.mContentDescription;
         mViewIdResourceName = other.mViewIdResourceName;
@@ -2896,6 +3232,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = other.mInputType;
         mLiveRegion = other.mLiveRegion;
         mDrawingOrderInParent = other.mDrawingOrderInParent;
+        mExtraDataKeys = other.mExtraDataKeys;
+
         if (other.mExtras != null) {
             mExtras = new Bundle(other.mExtras);
         } else {
@@ -2947,16 +3285,13 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInScreen.left = parcel.readInt();
         mBoundsInScreen.right = parcel.readInt();
 
-        final int actionCount = parcel.readInt();
-        if (actionCount > 0) {
-            final int legacyStandardActions = parcel.readInt();
-            addLegacyStandardActions(legacyStandardActions);
-            final int nonLegacyActionCount = actionCount - Integer.bitCount(legacyStandardActions);
-            for (int i = 0; i < nonLegacyActionCount; i++) {
-                final AccessibilityAction action = new AccessibilityAction(
-                        parcel.readInt(), parcel.readCharSequence());
-                addActionUnchecked(action);
-            }
+        final int legacyStandardActions = parcel.readInt();
+        addLegacyStandardActions(legacyStandardActions);
+        final int nonLegacyActionCount = parcel.readInt();
+        for (int i = 0; i < nonLegacyActionCount; i++) {
+            final AccessibilityAction action = new AccessibilityAction(
+                    parcel.readInt(), parcel.readCharSequence());
+            addActionUnchecked(action);
         }
 
         mMaxTextLength = parcel.readInt();
@@ -2966,6 +3301,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = parcel.readCharSequence();
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
+        mHintText = parcel.readCharSequence();
         mError = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
         mViewIdResourceName = parcel.readString();
@@ -2976,6 +3312,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = parcel.readInt();
         mLiveRegion = parcel.readInt();
         mDrawingOrderInParent = parcel.readInt();
+
+        if (parcel.readInt() == 1) {
+            mExtraDataKeys = parcel.createStringArrayList();
+        } else {
+            mExtraDataKeys = null;
+        }
 
         if (parcel.readInt() == 1) {
             mExtras = parcel.readBundle();
@@ -3017,13 +3359,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private void clear() {
         mSealed = false;
-        mSourceNodeId = ROOT_NODE_ID;
-        mParentNodeId = ROOT_NODE_ID;
-        mLabelForId = ROOT_NODE_ID;
-        mLabeledById = ROOT_NODE_ID;
-        mTraversalBefore = ROOT_NODE_ID;
-        mTraversalAfter = ROOT_NODE_ID;
-        mWindowId = UNDEFINED_ITEM_ID;
+        mSourceNodeId = UNDEFINED_NODE_ID;
+        mParentNodeId = UNDEFINED_NODE_ID;
+        mLabelForId = UNDEFINED_NODE_ID;
+        mLabeledById = UNDEFINED_NODE_ID;
+        mTraversalBefore = UNDEFINED_NODE_ID;
+        mTraversalAfter = UNDEFINED_NODE_ID;
+        mWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         mConnectionId = UNDEFINED_CONNECTION_ID;
         mMaxTextLength = -1;
         mMovementGranularities = 0;
@@ -3034,15 +3376,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
         mDrawingOrderInParent = 0;
+        mExtraDataKeys = null;
         mPackageName = null;
         mClassName = null;
         mText = null;
+        mHintText = null;
         mError = null;
         mContentDescription = null;
         mViewIdResourceName = null;
-        if (mActions != null) {
-            mActions.clear();
-        }
+        removeAllActions();
         mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
         mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
         mInputType = InputType.TYPE_NULL;
@@ -3186,9 +3528,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
-        return (mWindowId != UNDEFINED_ITEM_ID
-                && getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID
-                && mConnectionId != UNDEFINED_CONNECTION_ID);
+        return ((mWindowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
+                && (getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID)
+                && (mConnectionId != UNDEFINED_CONNECTION_ID));
     }
 
     @Override
@@ -3282,6 +3624,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
+        builder.append("; importantForAccessibility: ").append(isImportantForAccessibility());
         builder.append("; actions: ").append(mActions);
 
         return builder.toString();
@@ -3294,7 +3637,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
                 mWindowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
     }
 
     /**
@@ -3306,6 +3649,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <li><strong>Standard actions</strong> - These are actions that are reported and
      * handled by the standard UI widgets in the platform. For each standard action
      * there is a static constant defined in this class, e.g. {@link #ACTION_FOCUS}.
+     * These actions will have {@code null} labels.
      * </li>
      * <li><strong>Custom actions action</strong> - These are actions that are reported
      * and handled by custom widgets. i.e. ones that are not part of the UI toolkit. For
@@ -3689,6 +4033,16 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final AccessibilityAction ACTION_SET_PROGRESS =
                 new AccessibilityAction(R.id.accessibilityActionSetProgress, null);
 
+        /**
+         * Action to move a window to a new location.
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVE_WINDOW_X}
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVE_WINDOW_Y}
+         */
+        public static final AccessibilityAction ACTION_MOVE_WINDOW =
+                new AccessibilityAction(R.id.accessibilityActionMoveWindow, null);
+
         private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
         static {
             sStandardActions.add(ACTION_FOCUS);
@@ -3734,7 +4088,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * how to override the standard click action by adding a custom label:
          * <pre>
          *   AccessibilityAction action = new AccessibilityAction(
-         *           AccessibilityAction.ACTION_ACTION_CLICK, getLocalizedLabel());
+         *           AccessibilityAction.ACTION_CLICK.getId(), getLocalizedLabel());
          *   node.addAction(action);
          * </pre>
          *
@@ -3801,7 +4155,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a range. Use
-     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance.
+     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance. Recycling is
+     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
      */
     public static final class RangeInfo {
         private static final int MAX_POOL_SIZE = 10;
@@ -3836,8 +4191,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Obtains a pooled instance.
          *
          * @param type The type of the range.
-         * @param min The min value.
-         * @param max The max value.
+         * @param min The minimum value. Use {@code Float.NEGATIVE_INFINITY} if the range has no
+         *            minimum.
+         * @param max The maximum value. Use {@code Float.POSITIVE_INFINITY} if the range has no
+         *            maximum.
          * @param current The current value.
          */
         public static RangeInfo obtain(int type, float min, float max, float current) {
@@ -3857,8 +4214,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Creates a new range.
          *
          * @param type The type of the range.
-         * @param min The min value.
-         * @param max The max value.
+         * @param min The minimum value. Use {@code Float.NEGATIVE_INFINITY} if the range has no
+         *            minimum.
+         * @param max The maximum value. Use {@code Float.POSITIVE_INFINITY} if the range has no
+         *            maximum.
          * @param current The current value.
          */
         private RangeInfo(int type, float min, float max, float current) {
@@ -3882,18 +4241,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
-         * Gets the min value.
+         * Gets the minimum value.
          *
-         * @return The min value.
+         * @return The minimum value, or {@code Float.NEGATIVE_INFINITY} if no minimum exists.
          */
         public float getMin() {
             return mMin;
         }
 
         /**
-         * Gets the max value.
+         * Gets the maximum value.
          *
-         * @return The max value.
+         * @return The maximum value, or {@code Float.POSITIVE_INFINITY} if no maximum exists.
          */
         public float getMax() {
             return mMax;
@@ -3926,7 +4285,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a collection. Use
-     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance.
+     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance. Recycling is
+     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
      * <p>
      * A collection of items has rows and columns and may be hierarchical.
      * For example, a horizontal list is a collection with one column, as
@@ -4082,7 +4442,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Class with information if a node is a collection item. Use
      * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
-     * to get an instance.
+     * to get an instance. Recycling is handled by the {@link AccessibilityNodeInfo} to which this
+     * object is attached.
      * <p>
      * A collection item is contained in a collection, it starts at
      * a given row and column in the collection, and spans one or

@@ -35,19 +35,27 @@ import android.widget.TextView;
 import java.text.NumberFormat;
 
 /**
- * <p>A dialog showing a progress indicator and an optional text message or view.
- * Only a text message or a view can be used at the same time.</p>
+ * A dialog showing a progress indicator and an optional text message or view.
+ * Only a text message or a view can be used at the same time.
+ *
  * <p>The dialog can be made cancelable on back key press.</p>
- * <p>The progress range is 0..10000.</p>
+ *
+ * <p>The progress range is 0 to {@link #getMax() max}.</p>
+ *
+ * @deprecated Use a progress indicator such as ProgressBar inline inside of
+ * an activity rather than using this modal dialog.
  */
+@Deprecated
 public class ProgressDialog extends AlertDialog {
     
-    /** Creates a ProgressDialog with a circular, spinning progress
+    /**
+     * Creates a ProgressDialog with a circular, spinning progress
      * bar. This is the default.
      */
     public static final int STYLE_SPINNER = 0;
     
-    /** Creates a ProgressDialog with a horizontal progress bar.
+    /**
+     * Creates a ProgressDialog with a horizontal progress bar.
      */
     public static final int STYLE_HORIZONTAL = 1;
     
@@ -72,12 +80,25 @@ public class ProgressDialog extends AlertDialog {
     
     private boolean mHasStarted;
     private Handler mViewUpdateHandler;
-    
+
+    /**
+     * Creates a Progress dialog.
+     *
+     * @param context the parent context
+     */
     public ProgressDialog(Context context) {
         super(context);
         initFormats();
     }
 
+    /**
+     * Creates a Progress dialog.
+     *
+     * @param context the parent context
+     * @param theme the resource ID of the theme against which to inflate
+     *              this dialog, or {@code 0} to use the parent
+     *              {@code context}'s default alert dialog theme
+     */
     public ProgressDialog(Context context, int theme) {
         super(context, theme);
         initFormats();
@@ -88,22 +109,66 @@ public class ProgressDialog extends AlertDialog {
         mProgressPercentFormat = NumberFormat.getPercentInstance();
         mProgressPercentFormat.setMaximumFractionDigits(0);
     }
-    
+
+    /**
+     * Creates and shows a ProgressDialog.
+     *
+     * @param context the parent context
+     * @param title the title text for the dialog's window
+     * @param message the text to be displayed in the dialog
+     * @return the ProgressDialog
+     */
     public static ProgressDialog show(Context context, CharSequence title,
             CharSequence message) {
         return show(context, title, message, false);
     }
 
+    /**
+     * Creates and shows a ProgressDialog.
+     *
+     * @param context the parent context
+     * @param title the title text for the dialog's window
+     * @param message the text to be displayed in the dialog
+     * @param indeterminate true if the dialog should be {@link #setIndeterminate(boolean)
+     *        indeterminate}, false otherwise
+     * @return the ProgressDialog
+     */
     public static ProgressDialog show(Context context, CharSequence title,
             CharSequence message, boolean indeterminate) {
         return show(context, title, message, indeterminate, false, null);
     }
 
+    /**
+     * Creates and shows a ProgressDialog.
+     *
+     * @param context the parent context
+     * @param title the title text for the dialog's window
+     * @param message the text to be displayed in the dialog
+     * @param indeterminate true if the dialog should be {@link #setIndeterminate(boolean)
+     *        indeterminate}, false otherwise
+     * @param cancelable true if the dialog is {@link #setCancelable(boolean) cancelable},
+     *        false otherwise
+     * @return the ProgressDialog
+     */
     public static ProgressDialog show(Context context, CharSequence title,
             CharSequence message, boolean indeterminate, boolean cancelable) {
         return show(context, title, message, indeterminate, cancelable, null);
     }
 
+    /**
+     * Creates and shows a ProgressDialog.
+     *
+     * @param context the parent context
+     * @param title the title text for the dialog's window
+     * @param message the text to be displayed in the dialog
+     * @param indeterminate true if the dialog should be {@link #setIndeterminate(boolean)
+     *        indeterminate}, false otherwise
+     * @param cancelable true if the dialog is {@link #setCancelable(boolean) cancelable},
+     *        false otherwise
+     * @param cancelListener the {@link #setOnCancelListener(OnCancelListener) listener}
+     *        to be invoked when the dialog is canceled
+     * @return the ProgressDialog
+     */
     public static ProgressDialog show(Context context, CharSequence title,
             CharSequence message, boolean indeterminate,
             boolean cancelable, OnCancelListener cancelListener) {
@@ -210,6 +275,13 @@ public class ProgressDialog extends AlertDialog {
         mHasStarted = false;
     }
 
+    /**
+     * Sets the current progress.
+     *
+     * @param value the current progress, a value between 0 and {@link #getMax()}
+     *
+     * @see ProgressBar#setProgress(int)
+     */
     public void setProgress(int value) {
         if (mHasStarted) {
             mProgress.setProgress(value);
@@ -219,6 +291,14 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Sets the secondary progress.
+     *
+     * @param secondaryProgress the current secondary progress, a value between 0 and
+     * {@link #getMax()}
+     *
+     * @see ProgressBar#setSecondaryProgress(int)
+     */
     public void setSecondaryProgress(int secondaryProgress) {
         if (mProgress != null) {
             mProgress.setSecondaryProgress(secondaryProgress);
@@ -228,6 +308,11 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Gets the current progress.
+     *
+     * @return the current progress, a value between 0 and {@link #getMax()}
+     */
     public int getProgress() {
         if (mProgress != null) {
             return mProgress.getProgress();
@@ -235,6 +320,11 @@ public class ProgressDialog extends AlertDialog {
         return mProgressVal;
     }
 
+    /**
+     * Gets the current secondary progress.
+     *
+     * @return the current secondary progress, a value between 0 and {@link #getMax()}
+     */
     public int getSecondaryProgress() {
         if (mProgress != null) {
             return mProgress.getSecondaryProgress();
@@ -242,6 +332,11 @@ public class ProgressDialog extends AlertDialog {
         return mSecondaryProgressVal;
     }
 
+    /**
+     * Gets the maximum allowed progress value. The default value is 100.
+     *
+     * @return the maximum value
+     */
     public int getMax() {
         if (mProgress != null) {
             return mProgress.getMax();
@@ -249,6 +344,9 @@ public class ProgressDialog extends AlertDialog {
         return mMax;
     }
 
+    /**
+     * Sets the maximum allowed progress value.
+     */
     public void setMax(int max) {
         if (mProgress != null) {
             mProgress.setMax(max);
@@ -258,6 +356,12 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Increments the current progress value.
+     *
+     * @param diff the amount by which the current progress will be incremented,
+     * up to {@link #getMax()}
+     */
     public void incrementProgressBy(int diff) {
         if (mProgress != null) {
             mProgress.incrementProgressBy(diff);
@@ -267,6 +371,12 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Increments the current secondary progress value.
+     *
+     * @param diff the amount by which the current secondary progress will be incremented,
+     * up to {@link #getMax()}
+     */
     public void incrementSecondaryProgressBy(int diff) {
         if (mProgress != null) {
             mProgress.incrementSecondaryProgressBy(diff);
@@ -276,6 +386,13 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Sets the drawable to be used to display the progress value.
+     *
+     * @param d the drawable to be used
+     *
+     * @see ProgressBar#setProgressDrawable(Drawable)
+     */
     public void setProgressDrawable(Drawable d) {
         if (mProgress != null) {
             mProgress.setProgressDrawable(d);
@@ -284,6 +401,14 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Sets the drawable to be used to display the indeterminate progress value.
+     *
+     * @param d the drawable to be used
+     *
+     * @see ProgressBar#setProgressDrawable(Drawable)
+     * @see #setIndeterminate(boolean)
+     */
     public void setIndeterminateDrawable(Drawable d) {
         if (mProgress != null) {
             mProgress.setIndeterminateDrawable(d);
@@ -292,6 +417,18 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Change the indeterminate mode for this ProgressDialog. In indeterminate
+     * mode, the progress is ignored and the dialog shows an infinite
+     * animation instead.
+     *
+     * <p><strong>Note:</strong> A ProgressDialog with style {@link #STYLE_SPINNER}
+     * is always indeterminate and will ignore this setting.</p>
+     *
+     * @param indeterminate true to enable indeterminate mode, false otherwise
+     *
+     * @see #setProgressStyle(int)
+     */
     public void setIndeterminate(boolean indeterminate) {
         if (mProgress != null) {
             mProgress.setIndeterminate(indeterminate);
@@ -300,6 +437,11 @@ public class ProgressDialog extends AlertDialog {
         }
     }
 
+    /**
+     * Whether this ProgressDialog is in indeterminate mode.
+     *
+     * @return true if the dialog is in indeterminate mode, false otherwise
+     */
     public boolean isIndeterminate() {
         if (mProgress != null) {
             return mProgress.isIndeterminate();
@@ -319,7 +461,18 @@ public class ProgressDialog extends AlertDialog {
             mMessage = message;
         }
     }
-    
+
+    /**
+     * Sets the style of this ProgressDialog, either {@link #STYLE_SPINNER} or
+     * {@link #STYLE_HORIZONTAL}. The default is {@link #STYLE_SPINNER}.
+     *
+     * <p><strong>Note:</strong> A ProgressDialog with style {@link #STYLE_SPINNER}
+     * is always indeterminate and will ignore the {@link #setIndeterminate(boolean)
+     * indeterminate} setting.</p>
+     *
+     * @param style the style of this ProgressDialog, either {@link #STYLE_SPINNER} or
+     * {@link #STYLE_HORIZONTAL}
+     */
     public void setProgressStyle(int style) {
         mProgressStyle = style;
     }

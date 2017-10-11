@@ -17,7 +17,7 @@
 #ifndef CORE_JNI_HELPERS
 #define CORE_JNI_HELPERS
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
 namespace android {

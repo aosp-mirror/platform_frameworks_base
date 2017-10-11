@@ -30,7 +30,7 @@ public class TestGroupingTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mGrouping = new TestGrouping(TestGrouping.SORT_BY_SIMPLE_NAME);
+        mGrouping = new TestGrouping(TestGrouping.SORT_BY_SIMPLE_NAME, getClass().getClassLoader());
     }
 
     /**

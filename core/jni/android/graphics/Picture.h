@@ -55,12 +55,12 @@ public:
 private:
     int mWidth;
     int mHeight;
-    SkAutoTUnref<const SkPicture> mPicture;
+    sk_sp<SkPicture> mPicture;
     std::unique_ptr<SkPictureRecorder> mRecorder;
 
     // Make a copy of a picture that is in the midst of being recorded. The
     // resulting picture will have balanced saves and restores.
-    SkPicture* makePartialCopy() const;
+    sk_sp<SkPicture> makePartialCopy() const;
 
     void validate() const;
 };

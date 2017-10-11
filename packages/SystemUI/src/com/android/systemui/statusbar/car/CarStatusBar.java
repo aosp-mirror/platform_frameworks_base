@@ -17,41 +17,54 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
+import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
-public class CarStatusBar extends PhoneStatusBar implements
+public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
 
     private TaskStackListenerImpl mTaskStackListener;
 
-    private CarNavigationBarView mCarNavigationBar;
     private CarNavigationBarController mController;
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     private CarBatteryController mCarBatteryController;
     private BatteryMeterView mBatteryMeterView;
+
+    private ConnectedDeviceSignalController mConnectedDeviceSignalController;
+    private CarNavigationBarView mNavigationBarView;
 
     @Override
     public void start() {
@@ -60,41 +73,80 @@ public class CarStatusBar extends PhoneStatusBar implements
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
 
+        mStackScroller.setScrollingEnabled(true);
+
+        createBatteryController();
         mCarBatteryController.startListening();
     }
 
     @Override
     public void destroy() {
         mCarBatteryController.stopListening();
+        mConnectedDeviceSignalController.stopListening();
+
         super.destroy();
     }
 
     @Override
-    protected PhoneStatusBarView makeStatusBarView() {
-        PhoneStatusBarView statusBarView = super.makeStatusBarView();
+    protected void makeStatusBarView() {
+        super.makeStatusBarView();
 
-        mBatteryMeterView = ((BatteryMeterView) statusBarView.findViewById(R.id.battery));
+        FragmentHostManager manager = FragmentHostManager.get(mStatusBarWindow);
+        manager.addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
+            mBatteryMeterView = ((BatteryMeterView) fragment.getView().findViewById(
+                    R.id.battery));
 
-        // By default, the BatteryMeterView should not be visible. It will be toggled visible
-        // when a device has connected by bluetooth.
-        mBatteryMeterView.setVisibility(View.GONE);
+            // By default, the BatteryMeterView should not be visible. It will be toggled
+            // when a device has connected by bluetooth.
+            mBatteryMeterView.setVisibility(View.GONE);
 
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
-        }
+            ViewStub stub = (ViewStub) fragment.getView().findViewById(
+                    R.id.connected_device_signals_stub);
+            View signalsView = stub.inflate();
 
-        return statusBarView;
+            // When a ViewStub if inflated, it does not respect the margins on the
+            // inflated view.
+            // As a result, manually add the ending margin.
+            ((LinearLayout.LayoutParams) signalsView.getLayoutParams()).setMarginEnd(
+                    mContext.getResources().getDimensionPixelOffset(
+                            R.dimen.status_bar_connected_device_signal_margin_end));
+
+            if (mConnectedDeviceSignalController != null) {
+                mConnectedDeviceSignalController.stopListening();
+            }
+            mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
+                    signalsView);
+            mConnectedDeviceSignalController.startListening();
+
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
+            }
+        });
     }
 
-    @Override
-    protected BatteryController createBatteryController() {
+    private BatteryController createBatteryController() {
         mCarBatteryController = new CarBatteryController(mContext);
         mCarBatteryController.addBatteryViewHandler(this);
         return mCarBatteryController;
     }
 
     @Override
-    protected void addNavigationBar() {
+    protected void createNavigationBar() {
+        if (mNavigationBarView != null) {
+            return;
+        }
+
+        // SystemUI requires that the navigation bar view have a parent. Since the regular
+        // StatusBar inflates navigation_bar_window as this parent view, use the same view for the
+        // CarNavigationBarView.
+        ViewGroup navigationBarWindow = (ViewGroup) View.inflate(mContext,
+                R.layout.navigation_bar_window, null);
+        View.inflate(mContext, R.layout.car_navigation_bar, navigationBarWindow);
+        mNavigationBarView = (CarNavigationBarView) navigationBarWindow.getChildAt(0);
+
+        mController = new CarNavigationBarController(mContext, mNavigationBarView,
+                this /* ActivityStarter*/);
+        mNavigationBarView.getBarTransitions().setAlwaysOpaque(true);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
@@ -107,20 +159,33 @@ public class CarStatusBar extends PhoneStatusBar implements
                 PixelFormat.TRANSLUCENT);
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
-        mWindowManager.addView(mNavigationBarView, lp);
+
+        mWindowManager.addView(navigationBarWindow, lp);
     }
 
     @Override
-    protected void createNavigationBarView(Context context) {
-        if (mNavigationBarView != null) {
-            return;
-        }
-        mCarNavigationBar =
-                (CarNavigationBarView) View.inflate(context, R.layout.car_navigation_bar, null);
-        mController = new CarNavigationBarController(context, mCarNavigationBar,
-                this /* ActivityStarter*/);
-        mNavigationBarView = mCarNavigationBar;
+    public NavigationBarView getNavigationBarView() {
+        return mNavigationBarView;
+    }
 
+    @Override
+    protected View.OnTouchListener getStatusBarWindowTouchListener() {
+        // Usually, a touch on the background window will dismiss the notification shade. However,
+        // for the car use-case, the shade should remain unless the user switches to a different
+        // facet (e.g. phone).
+        return null;
+    }
+
+    /**
+     * Returns the {@link com.android.systemui.SwipeHelper.LongPressListener} that will be
+     * triggered when a notification card is long-pressed.
+     */
+    @Override
+    protected SwipeHelper.LongPressListener getNotificationLongClicker() {
+        // For the automative use case, we do not want to the user to be able to interact with
+        // a notification other than a regular click. As a result, just return null for the
+        // long click listener.
+        return null;
     }
 
     @Override
@@ -164,10 +229,8 @@ public class CarStatusBar extends PhoneStatusBar implements
         mContext.registerReceiver(mPackageChangeReceiver, filter);
     }
 
-    @Override
-    protected void repositionNavigationBar() {
-        // The navigation bar for a vehicle will not need to be repositioned, as it is always
-        // set at the bottom.
+    public boolean hasDockedTask() {
+        return Recents.getSystemServices().hasDockedTask();
     }
 
     /**
@@ -179,14 +242,20 @@ public class CarStatusBar extends PhoneStatusBar implements
         public void onTaskStackChanged() {
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
-            mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
+            if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
+                mController.taskChanged(runningTaskInfo.baseActivity.getPackageName(),
+                        runningTaskInfo.stackId);
+            }
         }
     }
 
     @Override
     protected void createUserSwitcher() {
-        if (mUserSwitcherController.useFullscreenUserSwitcher()) {
-            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
+        UserSwitcherController userSwitcherController =
+                Dependency.get(UserSwitcherController.class);
+        if (userSwitcherController.useFullscreenUserSwitcher()) {
+            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
+                    userSwitcherController,
                     (ViewStub) mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
         } else {
             super.createUserSwitcher();
@@ -211,5 +280,47 @@ public class CarStatusBar extends PhoneStatusBar implements
                 mFullscreenUserSwitcher.hide();
             }
         }
+    }
+
+    @Override
+    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
+        // Do nothing, we don't want to display media art in the lock screen for a car.
+    }
+
+    private int startActivityWithOptions(Intent intent, Bundle options) {
+        int result = ActivityManager.START_CANCELED;
+        try {
+            result = ActivityManager.getService().startActivityAsUser(null /* caller */,
+                    mContext.getBasePackageName(),
+                    intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    null /* resultTo*/,
+                    null /* resultWho*/,
+                    0 /* requestCode*/,
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP,
+                    null /* profilerInfo*/,
+                    options,
+                    UserHandle.CURRENT.getIdentifier());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to start activity", e);
+        }
+
+        return result;
+    }
+
+    public int startActivityOnStack(Intent intent, int stackId) {
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchStackId(stackId);
+        return startActivityWithOptions(intent, options.toBundle());
+    }
+
+    /**
+     * Ensures that relevant child views are appropriately recreated when the device's density
+     * changes.
+     */
+    @Override
+    protected void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
+        mController.onDensityOrFontScaleChanged();
     }
 }

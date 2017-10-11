@@ -25,7 +25,7 @@
 
 #include "core_jni_helpers.h"
 #include <jni.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 

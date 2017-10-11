@@ -69,9 +69,6 @@ static SkColorType flinger2skia(PixelFormat f)
 
 static status_t notifyMediaScanner(const char* fileName) {
     String8 cmd("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://");
-    String8 fileUrl("\"");
-    fileUrl.append(fileName);
-    fileUrl.append("\"");
     cmd.append(fileName);
     cmd.append(" > /dev/null");
     int result = system(cmd.string());
@@ -84,6 +81,11 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
+    // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
+    // not allowed to spawn any additional threads, but we still spawn
+    // a binder thread from userspace when we call startThreadPool().
+    // See b/36066697 for rationale
+    ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
     const char* pname = argv[0];
@@ -162,7 +164,9 @@ int main(int argc, char** argv)
     uint8_t displayOrientation = configs[activeConfig].orientation;
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
 
-    status_t result = screenshot.update(display, Rect(), 0, 0, 0, -1U,
+    status_t result = screenshot.update(display, Rect(),
+            0 /* reqWidth */, 0 /* reqHeight */,
+            INT32_MIN, INT32_MAX, /* all layers */
             false, captureOrientation);
     if (result == NO_ERROR) {
         base = screenshot.getPixels();
@@ -175,13 +179,20 @@ int main(int argc, char** argv)
 
     if (base != NULL) {
         if (png) {
-            const SkImageInfo info = SkImageInfo::Make(w, h, flinger2skia(f),
-                                                       kPremul_SkAlphaType);
-            SkAutoTUnref<SkData> data(SkImageEncoder::EncodeData(info, base, s*bytesPerPixel(f),
-                    SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality));
-            if (data.get()) {
-                write(fd, data->data(), data->size());
-            }
+            const SkImageInfo info =
+                SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType);
+            SkPixmap pixmap(info, base, s * bytesPerPixel(f));
+            struct FDWStream final : public SkWStream {
+              size_t fBytesWritten = 0;
+              int fFd;
+              FDWStream(int f) : fFd(f) {}
+              size_t bytesWritten() const override { return fBytesWritten; }
+              bool write(const void* buffer, size_t size) override {
+                fBytesWritten += size;
+                return size == 0 || ::write(fFd, buffer, size) > 0;
+              }
+            } fdStream(fd);
+            (void)SkEncodeImage(&fdStream, pixmap, SkEncodedImageFormat::kPNG, 100);
             if (fn != NULL) {
                 notifyMediaScanner(fn);
             }
@@ -200,5 +211,7 @@ int main(int argc, char** argv)
     if (mapbase != MAP_FAILED) {
         munmap((void *)mapbase, mapsize);
     }
-    return 0;
+
+    // b/36066697: Avoid running static destructors.
+    _exit(0);
 }

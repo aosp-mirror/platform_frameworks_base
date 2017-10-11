@@ -19,10 +19,8 @@ package com.android.server.print;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,22 +39,23 @@ import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
-import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
-import android.printservice.recommendation.RecommendationInfo;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
+import android.printservice.recommendation.IRecommendationsChangeListener;
+import android.printservice.recommendation.RecommendationInfo;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
@@ -629,13 +628,7 @@ public final class PrintManagerService extends SystemService {
             fd = Preconditions.checkNotNull(fd);
             pw = Preconditions.checkNotNull(pw);
 
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump PrintManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
+            if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
 
             synchronized (mLock) {
                 final long identity = Binder.clearCallingIdentity();
@@ -728,7 +721,8 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageModified(String packageName) {
                     if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                            false /* enforceUserUnlockingOrUnlocked */);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)
@@ -743,7 +737,8 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     if (!mUserManager.isUserUnlockingOrUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                            false /* enforceUserUnlockingOrUnlocked */);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)) {
@@ -762,8 +757,8 @@ public final class PrintManagerService extends SystemService {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
                         // to handle it as the change may affect ongoing print jobs.
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
-                                false);
+                        UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false,
+                                false /* enforceUserUnlockingOrUnlocked */);
                         boolean stoppedSomePackages = false;
 
                         List<PrintServiceInfo> enabledServices = userState
@@ -799,7 +794,7 @@ public final class PrintManagerService extends SystemService {
                     synchronized (mLock) {
                         if (hasPrintService(packageName)) {
                             UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
-                                    false);
+                                    false, false /* enforceUserUnlockingOrUnlocked */);
                             userState.updateIfNeededLocked();
                         }
                     }
@@ -810,9 +805,14 @@ public final class PrintManagerService extends SystemService {
             monitor.register(mContext, BackgroundThread.getHandler().getLooper(),
                     UserHandle.ALL, true);
         }
-
         private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority) {
-            if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            return getOrCreateUserStateLocked(userId, lowPriority,
+                    true /* enforceUserUnlockingOrUnlocked */);
+        }
+
+        private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority,
+                boolean enforceUserUnlockingOrUnlocked) {
+            if (enforceUserUnlockingOrUnlocked && !mUserManager.isUserUnlockingOrUnlocked(userId)) {
                 throw new IllegalStateException(
                         "User " + userId + " must be unlocked for printing to be available");
             }
@@ -840,7 +840,8 @@ public final class PrintManagerService extends SystemService {
 
                     UserState userState;
                     synchronized (mLock) {
-                        userState = getOrCreateUserStateLocked(userId, true);
+                        userState = getOrCreateUserStateLocked(userId, true,
+                                false /*enforceUserUnlockingOrUnlocked */);
                         userState.updateIfNeededLocked();
                     }
                     // This is the first time we switch to this user after boot, so
@@ -907,7 +908,7 @@ public final class PrintManagerService extends SystemService {
 
         private int resolveCallingUserEnforcingPermissions(int userId) {
             try {
-                return ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
+                return ActivityManager.getService().handleIncomingUser(Binder.getCallingPid(),
                         Binder.getCallingUid(), userId, true, true, "", null);
             } catch (RemoteException re) {
                 // Shouldn't happen, local.

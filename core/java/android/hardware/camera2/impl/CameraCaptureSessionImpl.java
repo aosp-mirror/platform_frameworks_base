@@ -19,6 +19,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.dispatch.ArgumentReplacingDispatcher;
 import android.hardware.camera2.dispatch.BroadcastDispatcher;
 import android.hardware.camera2.dispatch.DuckTypingDispatcher;
@@ -48,8 +49,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
     /** Input surface configured by native camera framework based on user-specified configuration */
     private final Surface mInput;
-    /** User-specified set of surfaces used as the configuration outputs */
-    private final List<Surface> mOutputs;
     /**
      * User-specified state callback, used for outgoing events; calls to this object will be
      * automatically {@link Handler#post(Runnable) posted} to {@code mStateHandler}.
@@ -87,21 +86,17 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraCaptureSessionImpl(int id, Surface input, List<Surface> outputs,
+    CameraCaptureSessionImpl(int id, Surface input,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
-        if (outputs == null || outputs.isEmpty()) {
-            throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
-        } else if (callback == null) {
+        if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
 
         mId = id;
         mIdString = String.format("Session %d: ", mId);
 
-        // TODO: extra verification of outputs
-        mOutputs = outputs;
         mInput = input;
         mStateHandler = checkHandler(stateHandler);
         mStateCallback = createUserStateCallbackProxy(mStateHandler, callback);
@@ -157,9 +152,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
-    public void finishDeferredConfiguration(
-            List<OutputConfiguration> deferredOutputConfigs) throws CameraAccessException {
-        mDeviceImpl.finishDeferredConfig(deferredOutputConfigs);
+    public void finalizeOutputConfigurations(
+            List<OutputConfiguration> outputConfigs) throws CameraAccessException {
+        mDeviceImpl.finalizeOutputConfigs(outputConfigs);
     }
 
     @Override
@@ -457,6 +452,37 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxy(
             Handler handler, CaptureCallback callback) {
         CameraDeviceImpl.CaptureCallback localCallback = new CameraDeviceImpl.CaptureCallback() {
+
+            @Override
+            public void onCaptureStarted(CameraDevice camera,
+                    CaptureRequest request, long timestamp, long frameNumber) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCapturePartial(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureResult result) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureProgressed(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureResult partialResult) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureCompleted(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.TotalCaptureResult result) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureFailed(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureFailure failure) {
+                // Do nothing
+            }
+
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
@@ -468,6 +494,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     int sequenceId) {
                 finishPendingSequence(sequenceId);
             }
+
+            @Override
+            public void onCaptureBufferLost(CameraDevice camera,
+                    CaptureRequest request, Surface target, long frameNumber) {
+                // Do nothing
+            }
+
         };
 
         /*
@@ -604,11 +637,16 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             @Override
-            public void onSurfacePrepared(Surface surface) {
-                if (DEBUG) Log.v(TAG, mIdString + "onPrepared");
-                mStateCallback.onSurfacePrepared(session, surface);
+            public void onRequestQueueEmpty() {
+                if (DEBUG) Log.v(TAG, mIdString + "onRequestQueueEmpty");
+                mStateCallback.onCaptureQueueEmpty(session);
             }
 
+            @Override
+            public void onSurfacePrepared(Surface surface) {
+                if (DEBUG) Log.v(TAG, mIdString + "onSurfacePrepared");
+                mStateCallback.onSurfacePrepared(session, surface);
+            }
         };
 
     }
@@ -743,7 +781,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     try {
                         // begin transition to unconfigured
                         mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
-                                /*isConstrainedHighSpeed*/false);
+                                /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE);
                     } catch (CameraAccessException e) {
                         // OK: do not throw checked exceptions.
                         Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);

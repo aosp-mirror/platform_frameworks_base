@@ -28,6 +28,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import android.os.HandlerThread;
 import android.os.Handler;
@@ -38,6 +39,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.os.Message;
 import android.os.Messenger;
 import com.android.internal.util.AsyncChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +58,9 @@ public class NsdManagerTest {
     @Mock INsdManager mService;
     MockServiceHandler mServiceHandler;
 
-    long mTimeoutMs = 100; // non-final so that tests can adjust the value.
+    NsdManager mManager;
+
+    long mTimeoutMs = 200; // non-final so that tests can adjust the value.
 
     @Before
     public void setUp() throws Exception {
@@ -64,11 +68,23 @@ public class NsdManagerTest {
 
         mServiceHandler = spy(MockServiceHandler.create(mContext));
         when(mService.getMessenger()).thenReturn(new Messenger(mServiceHandler));
+
+        mManager = makeManager();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mServiceHandler.waitForIdle(mTimeoutMs);
+        mServiceHandler.chan.disconnect();
+        mServiceHandler.stop();
+        if (mManager != null) {
+            mManager.disconnect();
+        }
     }
 
     @Test
     public void testResolveService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply = new NsdServiceInfo("resolved_name", "resolved_type");
@@ -88,7 +104,7 @@ public class NsdManagerTest {
 
     @Test
     public void testParallelResolveService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply = new NsdServiceInfo("resolved_name", "resolved_type");
@@ -111,7 +127,7 @@ public class NsdManagerTest {
 
     @Test
     public void testRegisterService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo request1 = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo request2 = new NsdServiceInfo("another_name", "another_type");
@@ -170,7 +186,7 @@ public class NsdManagerTest {
 
     @Test
     public void testDiscoverService() {
-        NsdManager manager = makeManager();
+        NsdManager manager = mManager;
 
         NsdServiceInfo reply1 = new NsdServiceInfo("a_name", "a_type");
         NsdServiceInfo reply2 = new NsdServiceInfo("another_name", "a_type");
@@ -248,7 +264,7 @@ public class NsdManagerTest {
 
     @Test
     public void testInvalidCalls() {
-        NsdManager manager = new NsdManager(mContext, mService);
+        NsdManager manager = mManager;
 
         NsdManager.RegistrationListener listener1 = mock(NsdManager.RegistrationListener.class);
         NsdManager.DiscoveryListener listener2 = mock(NsdManager.DiscoveryListener.class);
@@ -318,9 +334,10 @@ public class NsdManagerTest {
     }
 
     int verifyRequest(int expectedMessageType) {
+        mServiceHandler.waitForIdle(mTimeoutMs);
         verify(mServiceHandler, timeout(mTimeoutMs)).handleMessage(any());
         reset(mServiceHandler);
-        Message received = mServiceHandler.lastMessage;
+        Message received = mServiceHandler.getLastMessage();
         assertEquals(NsdManager.nameOf(expectedMessageType), NsdManager.nameOf(received.what));
         return received.arg2;
     }
@@ -331,28 +348,43 @@ public class NsdManagerTest {
 
     // Implements the server side of AsyncChannel connection protocol
     public static class MockServiceHandler extends Handler {
-        public Context mContext;
+        public final Context context;
         public AsyncChannel chan;
-        public volatile Message lastMessage;
+        public Message lastMessage;
 
-        MockServiceHandler(Looper looper, Context context) {
-            super(looper);
-            mContext = context;
+        MockServiceHandler(Looper l, Context c) {
+            super(l);
+            context = c;
+        }
+
+        synchronized Message getLastMessage() {
+            return lastMessage;
+        }
+
+        synchronized void setLastMessage(Message msg) {
+            lastMessage = obtainMessage();
+            lastMessage.copyFrom(msg);
+        }
+
+        void waitForIdle(long timeoutMs) {
+            waitForIdleHandler(this, timeoutMs);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            lastMessage = obtainMessage();
-            lastMessage.copyFrom(msg);
+            setLastMessage(msg);
             if (msg.what == AsyncChannel.CMD_CHANNEL_FULL_CONNECTION) {
                 chan = new AsyncChannel();
-                chan.connect(mContext, this, msg.replyTo);
+                chan.connect(context, this, msg.replyTo);
                 chan.sendMessage(AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED);
             }
-
         }
 
-        public static MockServiceHandler create(Context context) {
+        void stop() {
+            getLooper().quitSafely();
+        }
+
+        static MockServiceHandler create(Context context) {
             HandlerThread t = new HandlerThread("mock-service-handler");
             t.start();
             return new MockServiceHandler(t.getLooper(), context);

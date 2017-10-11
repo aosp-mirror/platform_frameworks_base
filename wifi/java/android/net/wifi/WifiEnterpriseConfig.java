@@ -156,9 +156,20 @@ public class WifiEnterpriseConfig implements Parcelable {
 
     }
 
-    /** Copy constructor */
-    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+    /**
+     * Copy over the contents of the source WifiEnterpriseConfig object over to this object.
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     * @param ignoreMaskedPassword Set to true to ignore masked password field, false otherwise.
+     * @param mask if |ignoreMaskedPassword| is set, check if the incoming password field is set
+     *             to this value.
+     */
+    private void copyFrom(WifiEnterpriseConfig source, boolean ignoreMaskedPassword, String mask) {
         for (String key : source.mFields.keySet()) {
+            if (ignoreMaskedPassword && key.equals(PASSWORD_KEY)
+                    && TextUtils.equals(source.mFields.get(key), mask)) {
+                continue;
+            }
             mFields.put(key, source.mFields.get(key));
         }
         if (source.mCaCerts != null) {
@@ -176,6 +187,29 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
+    }
+
+    /**
+     * Copy constructor.
+     * This copies over all the fields verbatim (does not ignore masked password fields).
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     */
+    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+        copyFrom(source, false, "");
+    }
+
+    /**
+     * Copy fields from the provided external WifiEnterpriseConfig.
+     * This is needed to handle the WifiEnterpriseConfig objects which were sent by apps with the
+     * password field masked.
+     *
+     * @param externalConfig External WifiEnterpriseConfig object.
+     * @param mask String mask to compare against.
+     * @hide
+     */
+    public void copyFromExternal(WifiEnterpriseConfig externalConfig, String mask) {
+        copyFrom(externalConfig, true, convertToQuotedString(mask));
     }
 
     @Override
@@ -940,8 +974,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set realm for passpoint credential; realm identifies a set of networks where your
-     * passpoint credential can be used
+     * Set realm for Passpoint credential; realm identifies a set of networks where your
+     * Passpoint credential can be used
      * @param realm the realm
      */
     public void setRealm(String realm) {
@@ -949,7 +983,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get realm for passpoint credential; see {@link #setRealm(String)} for more information
+     * Get realm for Passpoint credential; see {@link #setRealm(String)} for more information
      * @return the realm
      */
     public String getRealm() {
@@ -957,7 +991,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set plmn (Public Land Mobile Network) of the provider of passpoint credential
+     * Set plmn (Public Land Mobile Network) of the provider of Passpoint credential
      * @param plmn the plmn value derived from mcc (mobile country code) & mnc (mobile network code)
      */
     public void setPlmn(String plmn) {
@@ -965,7 +999,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get plmn (Public Land Mobile Network) for passpoint credential; see {@link #setPlmn
+     * Get plmn (Public Land Mobile Network) for Passpoint credential; see {@link #setPlmn
      * (String)} for more information
      * @return the plmn
      */

@@ -98,6 +98,9 @@
 // Turn on to enable debugging shadow
 #define DEBUG_SHADOW 0
 
+// Turn on to enable debugging vector drawable
+#define DEBUG_VECTOR_DRAWABLE 0
+
 #if DEBUG_INIT
     #define INIT_LOGD(...) ALOGD(__VA_ARGS__)
 #else

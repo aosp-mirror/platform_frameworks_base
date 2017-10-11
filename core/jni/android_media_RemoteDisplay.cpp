@@ -17,7 +17,7 @@
 #define LOG_TAG "RemoteDisplay"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -36,7 +36,7 @@
 
 #include <utils/Log.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
 

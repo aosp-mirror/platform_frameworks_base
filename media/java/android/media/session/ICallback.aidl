@@ -32,3 +32,4 @@ oneway interface ICallback {
     void onAddressedPlayerChangedToMediaSession(in MediaSession.Token sessionToken);
     void onAddressedPlayerChangedToMediaButtonReceiver(in ComponentName mediaButtonReceiver);
 }
+

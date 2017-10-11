@@ -124,6 +124,7 @@ public class Main {
                         "android.annotation.NonNull",       // annotations
                         "android.annotation.Nullable",      // annotations
                         "com.android.internal.transition.EpicenterTranslateClipReveal",
+                        "com.android.internal.graphics.drawable.AnimationScaleListDrawable",
                     },
                     excludeClasses,
                     new String[] {

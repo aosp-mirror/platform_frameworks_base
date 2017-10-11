@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * for a certain amount of time (maybe hours or days) are considered idle. When the app comes
  * out of idle state, it will be allowed to run scheduled jobs.
  */
-public class AppIdleController extends StateController {
+public final class AppIdleController extends StateController {
 
     private static final String LOG_TAG = "AppIdleController";
     private static final boolean DEBUG = false;
@@ -123,7 +123,8 @@ public class AppIdleController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
     }
 
     @Override
@@ -170,7 +171,7 @@ public class AppIdleController extends StateController {
         }
     }
 
-    private class AppIdleStateChangeListener
+    private final class AppIdleStateChangeListener
             extends UsageStatsManagerInternal.AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {

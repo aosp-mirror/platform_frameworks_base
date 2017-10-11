@@ -43,8 +43,8 @@ public class TransactionTracker {
         resetTraces();
     }
 
-    public void addTrace() {
-        String trace = Log.getStackTraceString(new Throwable());
+    public void addTrace(Throwable tr) {
+        String trace = Log.getStackTraceString(tr);
         synchronized (this) {
             if (mTraces.containsKey(trace)) {
                 mTraces.put(trace, mTraces.get(trace) + 1);

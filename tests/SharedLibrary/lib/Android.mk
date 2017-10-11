@@ -1,5 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
+LOCAL_USE_AAPT2 := true
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 

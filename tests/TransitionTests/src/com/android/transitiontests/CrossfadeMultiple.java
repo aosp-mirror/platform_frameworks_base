@@ -49,12 +49,12 @@ public class CrossfadeMultiple extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.crossfade_multiple);
 
-        ViewGroup container = (ViewGroup) findViewById(R.id.container);
+        ViewGroup container = findViewById(R.id.container);
         mSceneRoot = container;
 
-        mButton = (Button) findViewById(R.id.button);
-        mImageView = (ImageView) findViewById(R.id.imageview);
-        mTextView = (TextView) findViewById(R.id.textview);
+        mButton = findViewById(R.id.button);
+        mImageView = findViewById(R.id.imageview);
+        mTextView = findViewById(R.id.textview);
 
         mCrossfade = new Crossfade();
         mCrossfade.addTarget(R.id.button).addTarget(R.id.textview).addTarget(R.id.imageview);

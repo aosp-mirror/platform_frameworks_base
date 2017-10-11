@@ -161,7 +161,7 @@ public class SmsMessage extends SmsMessageBase {
 
             // Second byte is the MSG_LEN, length of the message
             // See 3GPP2 C.S0023 3.4.27
-            int size = data[1];
+            int size = data[1] & 0xFF;
 
             // Note: Data may include trailing FF's.  That's OK; message
             // should still parse correctly.

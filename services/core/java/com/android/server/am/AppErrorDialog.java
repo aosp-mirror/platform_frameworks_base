@@ -106,7 +106,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final FrameLayout frame = (FrameLayout) findViewById(android.R.id.custom);
+        final FrameLayout frame = findViewById(android.R.id.custom);
         final Context context = getContext();
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_error_dialog, frame, true);
@@ -114,19 +114,19 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         boolean hasRestart = !mRepeating && mIsRestartable;
         final boolean hasReceiver = mProc.errorReportReceiver != null;
 
-        final TextView restart = (TextView) findViewById(com.android.internal.R.id.aerr_restart);
+        final TextView restart = findViewById(com.android.internal.R.id.aerr_restart);
         restart.setOnClickListener(this);
         restart.setVisibility(hasRestart ? View.VISIBLE : View.GONE);
-        final TextView report = (TextView) findViewById(com.android.internal.R.id.aerr_report);
+        final TextView report = findViewById(com.android.internal.R.id.aerr_report);
         report.setOnClickListener(this);
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
-        final TextView close = (TextView) findViewById(com.android.internal.R.id.aerr_close);
+        final TextView close = findViewById(com.android.internal.R.id.aerr_close);
         close.setVisibility(!hasRestart ? View.VISIBLE : View.GONE);
         close.setOnClickListener(this);
 
         boolean showMute = !IS_USER_BUILD && Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
-        final TextView mute = (TextView) findViewById(com.android.internal.R.id.aerr_mute);
+        final TextView mute = findViewById(com.android.internal.R.id.aerr_mute);
         mute.setOnClickListener(this);
         mute.setVisibility(showMute ? View.VISIBLE : View.GONE);
 
@@ -148,18 +148,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
-            final int result = msg.what;
-
-            synchronized (mService) {
-                if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
-                    mProc.crashDialog = null;
-                }
-            }
-            mResult.set(result);
-
-            // Make sure we don't have time timeout still hanging around.
-            removeMessages(TIMEOUT);
-
+            setResult(msg.what);
             dismiss();
         }
     };
@@ -168,9 +157,21 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     public void dismiss() {
         if (!mResult.mHasResult) {
             // We are dismissing and the result has not been set...go ahead and set.
-            mResult.set(FORCE_QUIT);
+            setResult(FORCE_QUIT);
         }
         super.dismiss();
+    }
+
+    private void setResult(int result) {
+        synchronized (mService) {
+            if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
+                mProc.crashDialog = null;
+            }
+        }
+        mResult.set(result);
+
+        // Make sure we don't have time timeout still hanging around.
+        mHandler.removeMessages(TIMEOUT);
     }
 
     @Override

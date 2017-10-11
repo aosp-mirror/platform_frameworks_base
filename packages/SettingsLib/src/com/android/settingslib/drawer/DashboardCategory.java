@@ -16,14 +16,19 @@
 
 package com.android.settingslib.drawer;
 
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DashboardCategory implements Parcelable {
+
+    private static final String TAG = "DashboardCategory";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * Title of the category that is shown to the user.
@@ -43,7 +48,7 @@ public class DashboardCategory implements Parcelable {
     /**
      * List of the category's children
      */
-    public List<Tile> tiles = new ArrayList<Tile>();
+    public List<Tile> tiles = new ArrayList<>();
 
 
     public DashboardCategory() {
@@ -72,6 +77,22 @@ public class DashboardCategory implements Parcelable {
 
     public Tile getTile(int n) {
         return tiles.get(n);
+    }
+
+    public boolean containsComponent(ComponentName component) {
+        for (Tile tile : tiles) {
+            if (TextUtils.equals(tile.intent.getComponent().getClassName(),
+                    component.getClassName())) {
+                if (DEBUG) {
+                    Log.d(TAG,  "category " + key + "contains component" + component);
+                }
+                return true;
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG,  "category " + key + " does not contain component" + component);
+        }
+        return false;
     }
 
     @Override

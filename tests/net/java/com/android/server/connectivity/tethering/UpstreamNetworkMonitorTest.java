@@ -44,9 +44,13 @@ import android.os.Message;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkState;
 import android.net.util.SharedLog;
 
 import android.support.test.filters.SmallTest;
@@ -65,6 +69,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,6 +80,9 @@ import java.util.Set;
 @SmallTest
 public class UpstreamNetworkMonitorTest {
     private static final int EVENT_UNM_UPDATE = 1;
+
+    private static final boolean INCLUDES = true;
+    private static final boolean EXCLUDES = false;
 
     @Mock private Context mContext;
     @Mock private IConnectivityManager mCS;
@@ -93,7 +101,8 @@ public class UpstreamNetworkMonitorTest {
 
         mCM = spy(new TestConnectivityManager(mContext, mCS));
         mSM = new TestStateMachine();
-        mUNM = new UpstreamNetworkMonitor(mSM, EVENT_UNM_UPDATE, (ConnectivityManager) mCM, mLog);
+        mUNM = new UpstreamNetworkMonitor(
+                (ConnectivityManager) mCM, mSM, mLog, EVENT_UNM_UPDATE);
     }
 
     @After public void tearDown() throws Exception {
@@ -253,31 +262,32 @@ public class UpstreamNetworkMonitorTest {
 
         mUNM.start();
         // There are no networks, so there is nothing to select.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
         wifiAgent.fakeConnect();
         // WiFi is up, we should prefer it.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
         wifiAgent.fakeDisconnect();
         // There are no networks, so there is nothing to select.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
         cellAgent.fakeConnect();
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         preferredTypes.add(TYPE_MOBILE_DUN);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(true);
         // DUN is available, but only use regular cell: no upstream selected.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
         preferredTypes.remove(TYPE_MOBILE_DUN);
         // No WiFi, but our preferred flavour of cell is up.
         preferredTypes.add(TYPE_MOBILE_HIPRI);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(false);
-        assertEquals(TYPE_MOBILE_HIPRI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_MOBILE_HIPRI,
+                mUNM.selectPreferredUpstreamType(preferredTypes));
         // Check to see we filed an explicit request.
         assertEquals(1, mCM.requested.size());
         NetworkRequest netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
@@ -286,30 +296,130 @@ public class UpstreamNetworkMonitorTest {
 
         wifiAgent.fakeConnect();
         // WiFi is up, and we should prefer it over cell.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
         assertEquals(0, mCM.requested.size());
 
         preferredTypes.remove(TYPE_MOBILE_HIPRI);
         preferredTypes.add(TYPE_MOBILE_DUN);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(true);
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
         dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
         dunAgent.fakeConnect();
 
         // WiFi is still preferred.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         // WiFi goes down, cell and DUN are still up but only DUN is preferred.
         wifiAgent.fakeDisconnect();
-        assertEquals(TYPE_MOBILE_DUN, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_MOBILE_DUN,
+                mUNM.selectPreferredUpstreamType(preferredTypes));
         // Check to see we filed an explicit request.
         assertEquals(1, mCM.requested.size());
         netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
         assertTrue(netReq.networkCapabilities.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(netReq.networkCapabilities.hasCapability(NET_CAPABILITY_DUN));
+    }
+
+    @Test
+    public void testLocalPrefixes() throws Exception {
+        mUNM.start();
+
+        // [0] Test minimum set of local prefixes.
+        Set<IpPrefix> local = mUNM.getLocalPrefixes();
+        assertTrue(local.isEmpty());
+
+        final Set<String> alreadySeen = new HashSet<>();
+
+        // [1] Pretend Wi-Fi connects.
+        final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
+        final LinkProperties wifiLp = new LinkProperties();
+        wifiLp.setInterfaceName("wlan0");
+        final String[] WIFI_ADDRS = {
+                "fe80::827a:bfff:fe6f:374d", "100.112.103.18",
+                "2001:db8:4:fd00:827a:bfff:fe6f:374d",
+                "2001:db8:4:fd00:6dea:325a:fdae:4ef4",
+                "fd6a:a640:60bf:e985::123",  // ULA address for good measure.
+        };
+        for (String addrStr : WIFI_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/20";
+            wifiLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        wifiAgent.fakeConnect();
+        wifiAgent.sendLinkProperties(wifiLp);
+
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
+        final String[] wifiLinkPrefixes = {
+                // Link-local prefixes are excluded and dealt with elsewhere.
+                "100.112.96.0/20", "2001:db8:4:fd00::/64", "fd6a:a640:60bf:e985::/64",
+        };
+        assertPrefixSet(local, INCLUDES, wifiLinkPrefixes);
+        Collections.addAll(alreadySeen, wifiLinkPrefixes);
+        assertEquals(alreadySeen.size(), local.size());
+
+        // [2] Pretend mobile connects.
+        final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName("rmnet_data0");
+        final String[] CELL_ADDRS = {
+                "10.102.211.48", "2001:db8:0:1:b50e:70d9:10c9:433d",
+        };
+        for (String addrStr : CELL_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/27";
+            cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        cellAgent.fakeConnect();
+        cellAgent.sendLinkProperties(cellLp);
+
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
+        final String[] cellLinkPrefixes = { "10.102.211.32/27", "2001:db8:0:1::/64" };
+        assertPrefixSet(local, INCLUDES, cellLinkPrefixes);
+        Collections.addAll(alreadySeen, cellLinkPrefixes);
+        assertEquals(alreadySeen.size(), local.size());
+
+        // [3] Pretend DUN connects.
+        final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
+        final LinkProperties dunLp = new LinkProperties();
+        dunLp.setInterfaceName("rmnet_data1");
+        final String[] DUN_ADDRS = {
+                "192.0.2.48", "2001:db8:1:2:b50e:70d9:10c9:433d",
+        };
+        for (String addrStr : DUN_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/27";
+            cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        dunAgent.fakeConnect();
+        dunAgent.sendLinkProperties(dunLp);
+
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
+        final String[] dunLinkPrefixes = { "192.0.2.32/27", "2001:db8:1:2::/64" };
+        assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
+        Collections.addAll(alreadySeen, dunLinkPrefixes);
+        assertEquals(alreadySeen.size(), local.size());
+
+        // [4] Pretend Wi-Fi disconnected.  It's addresses/prefixes should no
+        // longer be included (should be properly removed).
+        wifiAgent.fakeDisconnect();
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, EXCLUDES, wifiLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, cellLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
+    }
+
+    private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
+        if (legacyType == TYPE_NONE) {
+            assertTrue(ns == null);
+            return;
+        }
+
+        final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
+        assertTrue(nc.satisfiedByNetworkCapabilities(ns.networkCapabilities));
     }
 
     private void assertUpstreamTypeRequested(int upstreamType) throws Exception {
@@ -463,6 +573,12 @@ public class UpstreamNetworkMonitorTest {
                 cb.onLost(networkId);
             }
         }
+
+        public void sendLinkProperties(LinkProperties lp) {
+            for (NetworkCallback cb : cm.listening.keySet()) {
+                cb.onLinkPropertiesChanged(networkId, lp);
+            }
+        }
     }
 
     public static class TestStateMachine extends StateMachine {
@@ -490,5 +606,20 @@ public class UpstreamNetworkMonitorTest {
 
     static NetworkCapabilities copy(NetworkCapabilities nc) {
         return new NetworkCapabilities(nc);
+    }
+
+    static void assertPrefixSet(Set<IpPrefix> prefixes, boolean expectation, String... expected) {
+        final Set<String> expectedSet = new HashSet<>();
+        Collections.addAll(expectedSet, expected);
+        assertPrefixSet(prefixes, expectation, expectedSet);
+    }
+
+    static void assertPrefixSet(Set<IpPrefix> prefixes, boolean expectation, Set<String> expected) {
+        for (String expectedPrefix : expected) {
+            final String errStr = expectation ? "did not find" : "found";
+            assertEquals(
+                    String.format("Failed expectation: %s prefix: %s", errStr, expectedPrefix),
+                    expectation, prefixes.contains(new IpPrefix(expectedPrefix)));
+        }
     }
 }

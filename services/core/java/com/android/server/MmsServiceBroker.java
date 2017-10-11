@@ -93,7 +93,7 @@ public class MmsServiceBroker extends SystemService {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Slog.i(TAG, "MmsService connected");
             synchronized (MmsServiceBroker.this) {
-                mService = IMms.Stub.asInterface(service);
+                mService = IMms.Stub.asInterface(Binder.allowBlocking(service));
                 MmsServiceBroker.this.notifyAll();
             }
         }

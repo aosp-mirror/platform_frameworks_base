@@ -18,6 +18,8 @@ package android.printservice;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
+import android.print.PrinterInfo;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -246,6 +249,26 @@ public abstract class PrintService extends Service {
      */
     public static final String EXTRA_PRINT_DOCUMENT_INFO =
             "android.printservice.extra.PRINT_DOCUMENT_INFO";
+
+    /**
+     * When the {@link PendingIntent} declared via
+     * {@link PrinterInfo.Builder#setInfoIntent(PendingIntent)} is called this boolean extra
+     * will be filled in if the activity can select the printer.
+     *
+     * @see #EXTRA_SELECT_PRINTER
+     */
+    public static final String EXTRA_CAN_SELECT_PRINTER =
+            "android.printservice.extra.CAN_SELECT_PRINTER";
+
+    /**
+     * If this boolean extra is set to {@code true} in the {@link Activity#setResult(int, Intent)
+     * result data} from the activity specified in
+     * {@link PrinterInfo.Builder#setInfoIntent(PendingIntent)} the printer will be selected.
+     *
+     * @see #EXTRA_CAN_SELECT_PRINTER
+     */
+    public static final String EXTRA_SELECT_PRINTER =
+            "android.printservice.extra.SELECT_PRINTER";
 
     private Handler mHandler;
 

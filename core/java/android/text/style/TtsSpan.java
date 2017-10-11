@@ -16,13 +16,13 @@
 
 package android.text.style;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
+
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * A span that supplies additional meta-data for the associated text intended

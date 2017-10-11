@@ -34,9 +34,9 @@ public class Reparenting extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.reparenting);
 
-        ViewGroup container = (ViewGroup) findViewById(R.id.container);
-        mContainer1 = (ViewGroup) findViewById(R.id.container1);
-        mContainer2 = (ViewGroup) findViewById(R.id.container2);
+        ViewGroup container = findViewById(R.id.container);
+        mContainer1 = findViewById(R.id.container1);
+        mContainer2 = findViewById(R.id.container2);
         System.out.println("container 1 and 2 " + mContainer1 + ", " + mContainer2);
 
         setupButtons(0, mContainer1);

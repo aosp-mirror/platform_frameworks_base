@@ -17,8 +17,6 @@
 #ifndef ANDROID_HWUI_CACHED_GLYPH_INFO_H
 #define ANDROID_HWUI_CACHED_GLYPH_INFO_H
 
-#include <SkFixed.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -41,14 +39,14 @@ struct CachedGlyphInfo {
     float mBitmapMaxV;
     // Minimize how much we call freetype
     uint32_t mGlyphIndex;
-    uint32_t mAdvanceX;
-    uint32_t mAdvanceY;
+    float mAdvanceX;
+    float mAdvanceY;
     // Values below contain a glyph's origin in the bitmap
     int32_t mBitmapLeft;
     int32_t mBitmapTop;
-    // Auto-kerning
-    SkFixed mLsbDelta;
-    SkFixed mRsbDelta;
+    // Auto-kerning; represents a 2.6 fixed-point value with range [-1, 1].
+    int8_t mLsbDelta;
+    int8_t mRsbDelta;
     CacheTexture* mCacheTexture;
 };
 

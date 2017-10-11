@@ -21,21 +21,28 @@
     android:versionName="1"
     coreApp="true">
 
+    <uses-permission android:name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+
     <application android:label="@string/app_name"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
 
-        <library android:name="android.ext.services"/>
-
-        <service android:name=".notification.Ranker"
-                android:label="@string/notification_ranker"
-                android:permission="android.permission.BIND_NOTIFICATION_RANKER_SERVICE"
-                android:exported="true">
+        <service android:name=".storage.CacheQuotaServiceImpl"
+             android:permission="android.permission.BIND_CACHE_QUOTA_SERVICE">
             <intent-filter>
-                <action android:name="android.service.notification.NotificationRankerService" />
+                <action android:name="android.app.usage.CacheQuotaService" />
             </intent-filter>
         </service>
 
+        <service android:name=".resolver.LRResolverRankerService"
+                 android:permission="android.permission.BIND_RESOLVER_RANKER_SERVICE"
+                 android:priority="-1" >
+            <intent-filter>
+                <action android:name="android.service.resolver.ResolverRankerService" />
+            </intent-filter>
+        </service>
+
+        <library android:name="android.ext.services"/>
     </application>
 
 </manifest>

@@ -151,7 +151,7 @@ public class IntentFirewall {
         // For the first pass, find all the rules that have at least one intent-filter or
         // component-filter that matches this intent
         List<Rule> candidateRules;
-        candidateRules = resolver.queryIntent(intent, resolvedType, false, 0);
+        candidateRules = resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/, 0);
         if (candidateRules == null) {
             candidateRules = new ArrayList<Rule>();
         }

@@ -15,98 +15,114 @@
  */
 
 #include "filter/ConfigFilter.h"
-#include "test/Common.h"
 
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(ConfigFilterTest, EmptyFilterMatchesAnything) {
-    AxisConfigFilter filter;
+  AxisConfigFilter filter;
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("320dpi")));
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("fr")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("320dpi")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("fr")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithUnrelatedAxis) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("320dpi")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("320dpi")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithSameValueAxis) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("fr")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("fr")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithSameValueAxisAndOtherUnrelatedAxis) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("fr-320dpi")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("fr-320dpi")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithOneMatchingAxis) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr-rFR"));
-    filter.addConfig(test::parseConfigOrDie("sw360dp"));
-    filter.addConfig(test::parseConfigOrDie("normal"));
-    filter.addConfig(test::parseConfigOrDie("en-rUS"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr-rFR"));
+  filter.AddConfig(test::ParseConfigOrDie("sw360dp"));
+  filter.AddConfig(test::ParseConfigOrDie("normal"));
+  filter.AddConfig(test::ParseConfigOrDie("en-rUS"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("en")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("en")));
 }
 
 TEST(ConfigFilterTest, DoesNotMatchConfigWithDifferentValueAxis) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr"));
 
-    EXPECT_FALSE(filter.match(test::parseConfigOrDie("de")));
+  EXPECT_FALSE(filter.Match(test::ParseConfigOrDie("de")));
 }
 
 TEST(ConfigFilterTest, DoesNotMatchWhenOneQualifierIsExplicitlyNotMatched) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("fr-rFR"));
-    filter.addConfig(test::parseConfigOrDie("en-rUS"));
-    filter.addConfig(test::parseConfigOrDie("normal"));
-    filter.addConfig(test::parseConfigOrDie("large"));
-    filter.addConfig(test::parseConfigOrDie("xxhdpi"));
-    filter.addConfig(test::parseConfigOrDie("sw320dp"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("fr-rFR"));
+  filter.AddConfig(test::ParseConfigOrDie("en-rUS"));
+  filter.AddConfig(test::ParseConfigOrDie("normal"));
+  filter.AddConfig(test::ParseConfigOrDie("large"));
+  filter.AddConfig(test::ParseConfigOrDie("xxhdpi"));
+  filter.AddConfig(test::ParseConfigOrDie("sw320dp"));
 
-    EXPECT_FALSE(filter.match(test::parseConfigOrDie("fr-sw600dp-v13")));
+  EXPECT_FALSE(filter.Match(test::ParseConfigOrDie("fr-sw600dp-v13")));
 }
 
 TEST(ConfigFilterTest, MatchesSmallestWidthWhenSmaller) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("sw600dp"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("sw600dp"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("fr-sw320dp-v13")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("fr-sw320dp-v13")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithSameLanguageButNoRegionSpecified) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("de-rDE"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("de-rDE"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("de")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("de")));
 }
 
 TEST(ConfigFilterTest, IgnoresVersion) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("normal-v4"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("normal-v4"));
 
-    // The configs don't match on any axis besides version, which should be ignored.
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("sw600dp-v13")));
+  // The configs don't match on any axis besides version, which should be
+  // ignored.
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("sw600dp-v13")));
 }
 
 TEST(ConfigFilterTest, MatchesConfigWithRegion) {
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("kok"));
-    filter.addConfig(test::parseConfigOrDie("kok-rIN"));
-    filter.addConfig(test::parseConfigOrDie("kok-v419"));
+  AxisConfigFilter filter;
+  filter.AddConfig(test::ParseConfigOrDie("kok"));
+  filter.AddConfig(test::ParseConfigOrDie("kok-rIN"));
+  filter.AddConfig(test::ParseConfigOrDie("kok-v419"));
 
-    EXPECT_TRUE(filter.match(test::parseConfigOrDie("kok-rIN")));
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("kok-rIN")));
 }
 
-} // namespace aapt
+TEST(ConfigFilterTest, MatchesScripts) {
+  AxisConfigFilter filter;
+
+  // "sr" gets automatically computed the script "Cyrl"
+  filter.AddConfig(test::ParseConfigOrDie("sr"));
+
+  // "sr" -> "b+sr+Cyrl"
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("b+sr+Cyrl")));
+
+  // The incoming "sr" is also auto-computed to "b+sr+Cyrl".
+  EXPECT_TRUE(filter.Match(test::ParseConfigOrDie("sr")));
+
+  // "sr" -> "b+sr+Cyrl", which doesn't match "Latn".
+  EXPECT_FALSE(filter.Match(test::ParseConfigOrDie("b+sr+Latn")));
+}
+
+}  // namespace aapt

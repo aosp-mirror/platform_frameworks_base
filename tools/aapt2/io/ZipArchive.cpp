@@ -14,129 +14,136 @@
  * limitations under the License.
  */
 
-#include "Source.h"
 #include "io/ZipArchive.h"
+
+#include "utils/FileMap.h"
+#include "ziparchive/zip_archive.h"
+
+#include "Source.h"
 #include "util/Util.h"
 
-#include <utils/FileMap.h>
-#include <ziparchive/zip_archive.h>
+using android::StringPiece;
 
 namespace aapt {
 namespace io {
 
-ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source) :
-        mZipHandle(handle), mZipEntry(entry), mSource(source) {
-}
+ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry,
+                 const Source& source)
+    : zip_handle_(handle), zip_entry_(entry), source_(source) {}
 
-std::unique_ptr<IData> ZipFile::openAsData() {
-    if (mZipEntry.method == kCompressStored) {
-        int fd = GetFileDescriptor(mZipHandle);
+std::unique_ptr<IData> ZipFile::OpenAsData() {
+  if (zip_entry_.method == kCompressStored) {
+    int fd = GetFileDescriptor(zip_handle_);
 
-        android::FileMap fileMap;
-        bool result = fileMap.create(nullptr, fd, mZipEntry.offset,
-                                     mZipEntry.uncompressed_length, true);
-        if (!result) {
-            return {};
-        }
-        return util::make_unique<MmappedData>(std::move(fileMap));
-
-    } else {
-        std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(
-                new uint8_t[mZipEntry.uncompressed_length]);
-        int32_t result = ExtractToMemory(mZipHandle, &mZipEntry, data.get(),
-                                         static_cast<uint32_t>(mZipEntry.uncompressed_length));
-        if (result != 0) {
-            return {};
-        }
-        return util::make_unique<MallocData>(std::move(data), mZipEntry.uncompressed_length);
+    android::FileMap file_map;
+    bool result = file_map.create(nullptr, fd, zip_entry_.offset,
+                                  zip_entry_.uncompressed_length, true);
+    if (!result) {
+      return {};
     }
-}
+    return util::make_unique<MmappedData>(std::move(file_map));
 
-const Source& ZipFile::getSource() const {
-    return mSource;
-}
-
-ZipFileCollectionIterator::ZipFileCollectionIterator(ZipFileCollection* collection) :
-        mCurrent(collection->mFiles.begin()), mEnd(collection->mFiles.end()) {
-}
-
-bool ZipFileCollectionIterator::hasNext() {
-    return mCurrent != mEnd;
-}
-
-IFile* ZipFileCollectionIterator::next() {
-    IFile* result = mCurrent->second.get();
-    ++mCurrent;
-    return result;
-}
-
-ZipFileCollection::ZipFileCollection() : mHandle(nullptr) {
-}
-
-std::unique_ptr<ZipFileCollection> ZipFileCollection::create(const StringPiece& path,
-                                                             std::string* outError) {
-    constexpr static const int32_t kEmptyArchive = -6;
-
-    std::unique_ptr<ZipFileCollection> collection = std::unique_ptr<ZipFileCollection>(
-            new ZipFileCollection());
-
-    int32_t result = OpenArchive(path.data(), &collection->mHandle);
+  } else {
+    std::unique_ptr<uint8_t[]> data =
+        std::unique_ptr<uint8_t[]>(new uint8_t[zip_entry_.uncompressed_length]);
+    int32_t result =
+        ExtractToMemory(zip_handle_, &zip_entry_, data.get(),
+                        static_cast<uint32_t>(zip_entry_.uncompressed_length));
     if (result != 0) {
-        // If a zip is empty, result will be an error code. This is fine and we should
-        // return an empty ZipFileCollection.
-        if (result == kEmptyArchive) {
-            return collection;
-        }
-
-        if (outError) *outError = ErrorCodeString(result);
-        return {};
+      return {};
     }
-
-    void* cookie = nullptr;
-    result = StartIteration(collection->mHandle, &cookie, nullptr, nullptr);
-    if (result != 0) {
-        if (outError) *outError = ErrorCodeString(result);
-        return {};
-    }
-
-    using IterationEnder = std::unique_ptr<void, decltype(EndIteration)*>;
-    IterationEnder iterationEnder(cookie, EndIteration);
-
-    ZipString zipEntryName;
-    ZipEntry zipData;
-    while ((result = Next(cookie, &zipData, &zipEntryName)) == 0) {
-        std::string zipEntryPath = std::string(reinterpret_cast<const char*>(zipEntryName.name),
-                                               zipEntryName.name_length);
-        std::string nestedPath = path.toString() + "@" + zipEntryPath;
-        collection->mFiles[zipEntryPath] = util::make_unique<ZipFile>(collection->mHandle,
-                                                                      zipData,
-                                                                      Source(nestedPath));
-    }
-
-    if (result != -1) {
-        if (outError) *outError = ErrorCodeString(result);
-        return {};
-    }
-    return collection;
+    return util::make_unique<MallocData>(std::move(data),
+                                         zip_entry_.uncompressed_length);
+  }
 }
 
-IFile* ZipFileCollection::findFile(const StringPiece& path) {
-    auto iter = mFiles.find(path.toString());
-    if (iter != mFiles.end()) {
-        return iter->second.get();
-    }
-    return nullptr;
+const Source& ZipFile::GetSource() const { return source_; }
+
+bool ZipFile::WasCompressed() {
+  return zip_entry_.method != kCompressStored;
 }
 
-std::unique_ptr<IFileCollectionIterator> ZipFileCollection::iterator() {
-    return util::make_unique<ZipFileCollectionIterator>(this);
+ZipFileCollectionIterator::ZipFileCollectionIterator(
+    ZipFileCollection* collection)
+    : current_(collection->files_.begin()), end_(collection->files_.end()) {}
+
+bool ZipFileCollectionIterator::HasNext() { return current_ != end_; }
+
+IFile* ZipFileCollectionIterator::Next() {
+  IFile* result = current_->get();
+  ++current_;
+  return result;
+}
+
+ZipFileCollection::ZipFileCollection() : handle_(nullptr) {}
+
+std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
+    const StringPiece& path, std::string* out_error) {
+  constexpr static const int32_t kEmptyArchive = -6;
+
+  std::unique_ptr<ZipFileCollection> collection =
+      std::unique_ptr<ZipFileCollection>(new ZipFileCollection());
+
+  int32_t result = OpenArchive(path.data(), &collection->handle_);
+  if (result != 0) {
+    // If a zip is empty, result will be an error code. This is fine and we
+    // should
+    // return an empty ZipFileCollection.
+    if (result == kEmptyArchive) {
+      return collection;
+    }
+
+    if (out_error) *out_error = ErrorCodeString(result);
+    return {};
+  }
+
+  void* cookie = nullptr;
+  result = StartIteration(collection->handle_, &cookie, nullptr, nullptr);
+  if (result != 0) {
+    if (out_error) *out_error = ErrorCodeString(result);
+    return {};
+  }
+
+  using IterationEnder = std::unique_ptr<void, decltype(EndIteration)*>;
+  IterationEnder iteration_ender(cookie, EndIteration);
+
+  ZipString zip_entry_name;
+  ZipEntry zip_data;
+  while ((result = Next(cookie, &zip_data, &zip_entry_name)) == 0) {
+    std::string zip_entry_path =
+        std::string(reinterpret_cast<const char*>(zip_entry_name.name),
+                    zip_entry_name.name_length);
+    std::string nested_path = path.to_string() + "@" + zip_entry_path;
+    std::unique_ptr<IFile> file =
+        util::make_unique<ZipFile>(collection->handle_, zip_data, Source(nested_path));
+    collection->files_by_name_[zip_entry_path] = file.get();
+    collection->files_.push_back(std::move(file));
+  }
+
+  if (result != -1) {
+    if (out_error) *out_error = ErrorCodeString(result);
+    return {};
+  }
+  return collection;
+}
+
+IFile* ZipFileCollection::FindFile(const StringPiece& path) {
+  auto iter = files_by_name_.find(path.to_string());
+  if (iter != files_by_name_.end()) {
+    return iter->second;
+  }
+  return nullptr;
+}
+
+std::unique_ptr<IFileCollectionIterator> ZipFileCollection::Iterator() {
+  return util::make_unique<ZipFileCollectionIterator>(this);
 }
 
 ZipFileCollection::~ZipFileCollection() {
-    if (mHandle) {
-        CloseArchive(mHandle);
-    }
+  if (handle_) {
+    CloseArchive(handle_);
+  }
 }
 
-} // namespace io
-} // namespace aapt
+}  // namespace io
+}  // namespace aapt

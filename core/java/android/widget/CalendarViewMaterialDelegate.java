@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.StyleRes;
 import android.content.Context;
+import android.graphics.Rect;
 import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.widget.DayPickerView.OnDaySelectedListener;
@@ -107,6 +108,25 @@ class CalendarViewMaterialDelegate extends CalendarView.AbstractCalendarViewDele
     @Override
     public void setOnDateChangeListener(CalendarView.OnDateChangeListener listener) {
         mOnDateChangeListener = listener;
+    }
+
+    @Override
+    public boolean getBoundsForDate(long date, Rect outBounds) {
+        boolean result = mDayPickerView.getBoundsForDate(date, outBounds);
+        if (result) {
+            // Found the date in the current picker. Now need to offset vertically to return correct
+            // bounds in the coordinate system of the entire layout
+            final int[] dayPickerPositionOnScreen = new int[2];
+            final int[] delegatorPositionOnScreen = new int[2];
+            mDayPickerView.getLocationOnScreen(dayPickerPositionOnScreen);
+            mDelegator.getLocationOnScreen(delegatorPositionOnScreen);
+            final int extraVerticalOffset =
+                    dayPickerPositionOnScreen[1] - delegatorPositionOnScreen[1];
+            outBounds.top += extraVerticalOffset;
+            outBounds.bottom += extraVerticalOffset;
+            return true;
+        }
+        return false;
     }
 
     private final OnDaySelectedListener mOnDaySelectedListener = new OnDaySelectedListener() {

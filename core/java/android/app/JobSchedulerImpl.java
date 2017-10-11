@@ -20,6 +20,8 @@ package android.app;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.IJobScheduler;
+import android.app.job.JobWorkItem;
+import android.content.Intent;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -40,6 +42,15 @@ public class JobSchedulerImpl extends JobScheduler {
     public int schedule(JobInfo job) {
         try {
             return mBinder.schedule(job);
+        } catch (RemoteException e) {
+            return JobScheduler.RESULT_FAILURE;
+        }
+    }
+
+    @Override
+    public int enqueue(JobInfo job, JobWorkItem work) {
+        try {
+            return mBinder.enqueue(job, work);
         } catch (RemoteException e) {
             return JobScheduler.RESULT_FAILURE;
         }

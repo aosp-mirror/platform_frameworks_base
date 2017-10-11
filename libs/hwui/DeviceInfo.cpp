@@ -43,6 +43,13 @@ void DeviceInfo::initialize() {
     });
 }
 
+void DeviceInfo::initialize(int maxTextureSize) {
+    std::call_once(sInitializedFlag, [maxTextureSize]() {
+        sDeviceInfo = new DeviceInfo();
+        sDeviceInfo->mMaxTextureSize = maxTextureSize;
+    });
+}
+
 void DeviceInfo::load() {
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }

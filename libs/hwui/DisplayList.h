@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_DISPLAY_LIST_H
-#define ANDROID_HWUI_DISPLAY_LIST_H
+#pragma once
 
 #include <SkCamera.h>
+#include <SkDrawable.h>
 #include <SkMatrix.h>
 
 #include <private/hwui/DrawGlInfo.h>
@@ -34,10 +34,11 @@
 
 #include "Debug.h"
 #include "CanvasProperty.h"
-#include "DeferredDisplayList.h"
 #include "GlFunctorLifecycleListener.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+#include "TreeInfo.h"
+#include "hwui/Bitmap.h"
 
 #include <vector>
 
@@ -49,71 +50,19 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
-class DeferredDisplayList;
-class DisplayListOp;
-class DisplayListCanvas;
-class OpenGLRenderer;
 class Rect;
 class Layer;
 
-#if HWUI_NEW_OPS
 struct RecordedOp;
 struct RenderNodeOp;
 
 typedef RecordedOp BaseOpType;
 typedef RenderNodeOp NodeOpType;
-#else
-class DrawRenderNodeOp;
-
-typedef DisplayListOp BaseOpType;
-typedef DrawRenderNodeOp NodeOpType;
-#endif
 
 namespace VectorDrawable {
 class Tree;
 };
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
-
-/**
- * Holds data used in the playback a tree of DisplayLists.
- */
-struct PlaybackStateStruct {
-protected:
-    PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
-            : mRenderer(renderer)
-            , mReplayFlags(replayFlags)
-            , mAllocator(allocator) {}
-
-public:
-    OpenGLRenderer& mRenderer;
-    const int mReplayFlags;
-
-    // Allocator with the lifetime of a single frame. replay uses an Allocator owned by the struct,
-    // while defer shares the DeferredDisplayList's Allocator
-    // TODO: move this allocator to be owned by object with clear frame lifecycle
-    LinearAllocator * const mAllocator;
-
-    SkPath* allocPathForFrame() {
-        return mRenderer.allocPathForFrame();
-    }
-};
-
-struct DeferStateStruct : public PlaybackStateStruct {
-    DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
-            : PlaybackStateStruct(renderer, replayFlags, &(deferredList.mAllocator)),
-            mDeferredList(deferredList) {}
-
-    DeferredDisplayList& mDeferredList;
-};
-
-struct ReplayStateStruct : public PlaybackStateStruct {
-    ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
-            : PlaybackStateStruct(renderer, replayFlags, &mReplayAllocator),
-            mDirty(dirty) {}
-
-    Rect& mDirty;
-    LinearAllocator mReplayAllocator;
-};
 
 struct FunctorContainer {
     Functor* functor;
@@ -124,7 +73,6 @@ struct FunctorContainer {
  * Data structure that holds the list of commands used in display list stream
  */
 class DisplayList {
-    friend class DisplayListCanvas;
     friend class RecordingCanvas;
 public:
     struct Chunk {
@@ -138,13 +86,13 @@ public:
 
         // whether children with non-zero Z in the chunk should be reordered
         bool reorderChildren;
-#if HWUI_NEW_OPS
+
+        // clip at the beginning of a reorder section, applied to reordered children
         const ClipBase* reorderClip;
-#endif
     };
 
     DisplayList();
-    ~DisplayList();
+    virtual ~DisplayList();
 
     // index of DisplayListOp restore, after which projected descendants should be drawn
     int projectionReceiveIndex;
@@ -154,9 +102,7 @@ public:
 
     const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
-    const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
-    const LsaVector<FunctorContainer>& getFunctors() const { return functors; }
-    const LsaVector<VectorDrawableRoot*>& getVectorDrawables() { return vectorDrawables; }
+    const LsaVector<sk_sp<Bitmap>>& getBitmapResources() const { return bitmapResources; }
 
     size_t addChild(NodeOpType* childOp);
 
@@ -168,19 +114,28 @@ public:
     size_t getUsedSize() {
         return allocator.usedSize();
     }
-    bool isEmpty() {
-#if HWUI_NEW_OPS
-        return ops.empty();
-#else
-        return !hasDrawOps;
-#endif
+
+    virtual bool isEmpty() const { return ops.empty(); }
+    virtual bool hasFunctor() const { return !functors.empty(); }
+    virtual bool hasVectorDrawables() const { return !vectorDrawables.empty(); }
+    virtual bool isSkiaDL() const { return false; }
+    virtual bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
+        return false;
     }
 
-private:
+    virtual void syncContents();
+    virtual void updateChildren(std::function<void(RenderNode*)> updateFn);
+    virtual bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
+
+    virtual void output(std::ostream& output, uint32_t level);
+
+protected:
     // allocator into which all ops and LsaVector arrays allocated
     LinearAllocator allocator;
     LinearStdAllocator<void*> stdAllocator;
 
+private:
     LsaVector<Chunk> chunks;
     LsaVector<BaseOpType*> ops;
 
@@ -188,7 +143,7 @@ private:
     LsaVector<NodeOpType*> children;
 
     // Resources - Skia objects + 9 patches referred to by this DisplayList
-    LsaVector<const SkBitmap*> bitmapResources;
+    LsaVector<sk_sp<Bitmap>> bitmapResources;
     LsaVector<const SkPath*> pathResources;
     LsaVector<const Res_png_9patch*> patchResources;
     LsaVector<std::unique_ptr<const SkPaint>> paints;
@@ -203,12 +158,8 @@ private:
     // gets special treatment exclusive for webview.
     LsaVector<VectorDrawableRoot*> vectorDrawables;
 
-    bool hasDrawOps; // only used if !HWUI_NEW_OPS
-
     void cleanupResources();
 };
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_OPENGL_RENDERER_H

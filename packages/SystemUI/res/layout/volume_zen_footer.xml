@@ -29,6 +29,52 @@
         android:layout_marginTop="8dp"
         android:background="@color/qs_tile_divider" />
 
+
+    <RelativeLayout
+        android:id="@+id/zen_introduction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@drawable/zen_introduction_message_background"
+        android:theme="@*android:style/ThemeOverlay.DeviceDefault.Accent.Light">
+
+        <ImageView
+            android:id="@+id/zen_introduction_confirm"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/btn_borderless_rect"
+            android:clickable="true"
+            android:contentDescription="@string/accessibility_desc_close"
+            android:scaleType="center"
+            android:src="@drawable/ic_close"
+            android:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/zen_introduction_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="24dp"
+            android:textDirection="locale"
+            android:lineSpacingMultiplier="1.20029"
+            android:layout_toStartOf="@id/zen_introduction_confirm"
+            android:text="@string/zen_alarms_introduction"
+            android:textAppearance="@style/TextAppearance.QS.Introduction" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="16dp"
+            android:layout_below="@id/zen_introduction_message"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

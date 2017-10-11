@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.pm.ApplicationInfo;
+import android.content.res.ResourceId;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -169,7 +170,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     Dialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-            if (themeResId == 0) {
+            if (themeResId == ResourceId.ID_NULL) {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
                 themeResId = outValue.resourceId;
@@ -498,14 +499,22 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Finds a child view with the given identifier. Returns null if the
-     * specified child view does not exist or the dialog has not yet been fully
-     * created (for example, via {@link #show()} or {@link #create()}).
+     * Finds the first descendant view with the given ID or {@code null} if the
+     * ID is invalid (< 0), there is no matching view in the hierarchy, or the
+     * dialog has not yet been fully created (for example, via {@link #show()}
+     * or {@link #create()}).
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
      *
-     * @param id the identifier of the view to find
-     * @return The view with the given id or null.
+     * @param id the ID to search for
+     * @return a view with given ID if found, or {@code null} otherwise
+     * @see View#findViewById(int)
      */
-    public @Nullable View findViewById(@IdRes int id) {
+    @Nullable
+    public <T extends View> T findViewById(@IdRes int id) {
         return mWindow.findViewById(id);
     }
 

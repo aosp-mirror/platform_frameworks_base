@@ -199,83 +199,77 @@ public class ArcMotion extends PathMotion {
 
         float ex;
         float ey;
-        if (startY == endY) {
-            ex = (startX + endX) / 2;
-            ey = startY + mMinimumHorizontalTangent * Math.abs(endX - startX) / 2;
-        } else if (startX == endX) {
-            ex = startX + mMinimumVerticalTangent * Math.abs(endY - startY) / 2;
-            ey = (startY + endY) / 2;
-        } else {
-            float deltaX = endX - startX;
-            float deltaY = endY - startY;
-            // hypotenuse squared.
-            float h2 = deltaX * deltaX + deltaY * deltaY;
+        float deltaX = endX - startX;
+        float deltaY = endY - startY;
 
-            // Midpoint between start and end
-            float dx = (startX + endX) / 2;
-            float dy = (startY + endY) / 2;
+        // hypotenuse squared.
+        float h2 = deltaX * deltaX + deltaY * deltaY;
 
-            // Distance squared between end point and mid point is (1/2 hypotenuse)^2
-            float midDist2 = h2 * 0.25f;
+        // Midpoint between start and end
+        float dx = (startX + endX) / 2;
+        float dy = (startY + endY) / 2;
 
-            float minimumArcDist2 = 0;
-            boolean isQuadrant1Or3 = (deltaX * deltaY) > 0;
+        // Distance squared between end point and mid point is (1/2 hypotenuse)^2
+        float midDist2 = h2 * 0.25f;
 
-            if ((Math.abs(deltaX) < Math.abs(deltaY))) {
-                // Similar triangles bfa and bde mean that (ab/fb = eb/bd)
-                // Therefore, eb = ab * bd / fb
-                // ab = hypotenuse
-                // bd = hypotenuse/2
-                // fb = deltaY
-                float eDistY = h2 / (2 * deltaY);
-                if (isQuadrant1Or3) {
-                    ey = startY + eDistY;
-                    ex = startX;
-                } else {
-                    ey = endY - eDistY;
-                    ex = endX;
-                }
+        float minimumArcDist2 = 0;
 
-                minimumArcDist2 = midDist2 * mMinimumVerticalTangent
-                        * mMinimumVerticalTangent;
+        boolean isMovingUpwards = startY > endY;
+
+        if ((Math.abs(deltaX) < Math.abs(deltaY))) {
+            // Similar triangles bfa and bde mean that (ab/fb = eb/bd)
+            // Therefore, eb = ab * bd / fb
+            // ab = hypotenuse
+            // bd = hypotenuse/2
+            // fb = deltaY
+            float eDistY = Math.abs(h2 / (2 * deltaY));
+            if (isMovingUpwards) {
+                ey = endY + eDistY;
+                ex = endX;
             } else {
-                // Same as above, but flip X & Y
-                float eDistX = h2 / (2 * deltaX);
-                if (isQuadrant1Or3) {
-                    ex = endX - eDistX;
-                    ey = endY;
-                } else {
-                    ex = startX + eDistX;
-                    ey = startY;
-                }
-
-                minimumArcDist2 = midDist2 * mMinimumHorizontalTangent
-                        * mMinimumHorizontalTangent;
+                ey = startY + eDistY;
+                ex = startX;
             }
-            float arcDistX = dx - ex;
-            float arcDistY = dy - ey;
-            float arcDist2 = arcDistX * arcDistX + arcDistY * arcDistY;
 
-            float maximumArcDist2 = midDist2 * mMaximumTangent * mMaximumTangent;
+            minimumArcDist2 = midDist2 * mMinimumVerticalTangent
+                    * mMinimumVerticalTangent;
+        } else {
+            // Same as above, but flip X & Y and account for negative eDist
+            float eDistX = h2 / (2 * deltaX);
+            if (isMovingUpwards) {
+                ex = startX + eDistX;
+                ey = startY;
+            } else {
+                ex = endX - eDistX;
+                ey = endY;
+            }
 
-            float newArcDistance2 = 0;
-            if (arcDist2 < minimumArcDist2) {
-                newArcDistance2 = minimumArcDist2;
-            } else if (arcDist2 > maximumArcDist2) {
-                newArcDistance2 = maximumArcDist2;
-            }
-            if (newArcDistance2 != 0) {
-                float ratio2 = newArcDistance2 / arcDist2;
-                float ratio = (float) Math.sqrt(ratio2);
-                ex = dx + (ratio * (ex - dx));
-                ey = dy + (ratio * (ey - dy));
-            }
+            minimumArcDist2 = midDist2 * mMinimumHorizontalTangent
+                    * mMinimumHorizontalTangent;
         }
-        float controlX1 = (startX + ex) / 2;
-        float controlY1 = (startY + ey) / 2;
-        float controlX2 = (ex + endX) / 2;
-        float controlY2 = (ey + endY) / 2;
-        path.cubicTo(controlX1, controlY1, controlX2, controlY2, endX, endY);
+        float arcDistX = dx - ex;
+        float arcDistY = dy - ey;
+        float arcDist2 = arcDistX * arcDistX + arcDistY * arcDistY;
+
+        float maximumArcDist2 = midDist2 * mMaximumTangent * mMaximumTangent;
+
+        float newArcDistance2 = 0;
+        if (arcDist2 < minimumArcDist2) {
+            newArcDistance2 = minimumArcDist2;
+        } else if (arcDist2 > maximumArcDist2) {
+            newArcDistance2 = maximumArcDist2;
+        }
+        if (newArcDistance2 != 0) {
+            float ratio2 = newArcDistance2 / arcDist2;
+            float ratio = (float) Math.sqrt(ratio2);
+            ex = dx + (ratio * (ex - dx));
+            ey = dy + (ratio * (ey - dy));
+        }
+        float control1X = (startX + ex) / 2;
+        float control1Y = (startY + ey) / 2;
+        float control2X = (ex + endX) / 2;
+        float control2Y = (ey + endY) / 2;
+        path.cubicTo(control1X, control1Y, control2X, control2Y, endX, endY);
         return path;
     }
 }

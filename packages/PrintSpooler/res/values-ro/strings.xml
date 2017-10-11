@@ -38,7 +38,7 @@
     <string name="save_as_pdf" msgid="5718454119847596853">"Salvați ca PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Toate imprimantele..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Caseta de dialog de printare"</string>
-    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"Pagina <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> din <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"Rezumat, copii <xliff:g id="COPIES">%1$s</xliff:g>, dimensiunea paginii <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Ghidaj de extindere"</string>
@@ -62,6 +62,8 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> – <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"Mai multe informații despre această imprimantă"</string>
+    <string name="notification_channel_progress" msgid="872788690775721436">"Sarcini de printare în rulare"</string>
+    <string name="notification_channel_failure" msgid="9042250774797916414">"Sarcini de printare nereușite"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Fișierul nu a putut fi creat"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Unele servicii de printare sunt dezactivate"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Se caută imprimante"</string>

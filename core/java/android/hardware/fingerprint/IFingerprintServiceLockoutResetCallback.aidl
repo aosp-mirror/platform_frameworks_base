@@ -17,14 +17,17 @@ package android.hardware.fingerprint;
 
 import android.hardware.fingerprint.Fingerprint;
 import android.os.Bundle;
+import android.os.IRemoteCallback;
 import android.os.UserHandle;
 
 /**
  * Callback when lockout period expired and clients are allowed to authenticate again.
  * @hide
  */
-interface IFingerprintServiceLockoutResetCallback {
+oneway interface IFingerprintServiceLockoutResetCallback {
 
-    /** Method is synchronous so wakelock is held when this is called from a WAKEUP alarm. */
-    void onLockoutReset(long deviceId);
+    /**
+     * A wakelock will be held until the reciever calls back into {@param callback}
+     */
+    void onLockoutReset(long deviceId, IRemoteCallback callback);
 }

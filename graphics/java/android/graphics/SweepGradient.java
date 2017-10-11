@@ -16,6 +16,10 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 public class SweepGradient extends Shader {
 
     private static final int TYPE_COLORS_AND_POSITIONS = 1;
@@ -35,7 +39,7 @@ public class SweepGradient extends Shader {
     private int mColor1;
 
     /**
-     * A subclass of Shader that draws a sweep gradient around a center point.
+     * A Shader that draws a sweep gradient around a center point.
      *
      * @param cx       The x-coordinate of the center
      * @param cy       The y-coordinate of the center
@@ -49,37 +53,46 @@ public class SweepGradient extends Shader {
      *                 spaced evenly.
      */
     public SweepGradient(float cx, float cy,
-                         int colors[], float positions[]) {
+            @NonNull @ColorInt int colors[], @Nullable float positions[]) {
         if (colors.length < 2) {
             throw new IllegalArgumentException("needs >= 2 number of colors");
         }
         if (positions != null && colors.length != positions.length) {
             throw new IllegalArgumentException(
-                        "color and position arrays must be of equal length");
+                    "color and position arrays must be of equal length");
         }
         mType = TYPE_COLORS_AND_POSITIONS;
         mCx = cx;
         mCy = cy;
-        mColors = colors;
-        mPositions = positions;
-        init(nativeCreate1(cx, cy, colors, positions));
+        mColors = colors.clone();
+        mPositions = positions != null ? positions.clone() : null;
     }
 
     /**
-     * A subclass of Shader that draws a sweep gradient around a center point.
+     * A Shader that draws a sweep gradient around a center point.
      *
      * @param cx       The x-coordinate of the center
      * @param cy       The y-coordinate of the center
      * @param color0   The color to use at the start of the sweep
      * @param color1   The color to use at the end of the sweep
      */
-    public SweepGradient(float cx, float cy, int color0, int color1) {
+    public SweepGradient(float cx, float cy, @ColorInt int color0, @ColorInt int color1) {
         mType = TYPE_COLOR_START_AND_COLOR_END;
         mCx = cx;
         mCy = cy;
         mColor0 = color0;
         mColor1 = color1;
-        init(nativeCreate2(cx, cy, color0, color1));
+        mColors = null;
+        mPositions = null;
+    }
+
+    @Override
+    long createNativeInstance(long nativeMatrix) {
+        if (mType == TYPE_COLORS_AND_POSITIONS) {
+            return nativeCreate1(nativeMatrix, mCx, mCy, mColors, mPositions);
+        } else { // TYPE_COLOR_START_AND_COLOR_END
+            return nativeCreate2(nativeMatrix, mCx, mCy, mColor0, mColor1);
+        }
     }
 
     /**
@@ -88,23 +101,19 @@ public class SweepGradient extends Shader {
     @Override
     protected Shader copy() {
         final SweepGradient copy;
-        switch (mType) {
-            case TYPE_COLORS_AND_POSITIONS:
-                copy = new SweepGradient(mCx, mCy, mColors.clone(),
-                        mPositions != null ? mPositions.clone() : null);
-                break;
-            case TYPE_COLOR_START_AND_COLOR_END:
-                copy = new SweepGradient(mCx, mCy, mColor0, mColor1);
-                break;
-            default:
-                throw new IllegalArgumentException("SweepGradient should be created with either " +
-                        "colors and positions or start color and end color");
+        if (mType == TYPE_COLORS_AND_POSITIONS) {
+            copy = new SweepGradient(mCx, mCy, mColors.clone(),
+                    mPositions != null ? mPositions.clone() : null);
+        } else { // TYPE_COLOR_START_AND_COLOR_END
+            copy = new SweepGradient(mCx, mCy, mColor0, mColor1);
         }
         copyLocalMatrix(copy);
         return copy;
     }
 
-    private static native long nativeCreate1(float x, float y, int colors[], float positions[]);
-    private static native long nativeCreate2(float x, float y, int color0, int color1);
+    private static native long nativeCreate1(long matrix, float x, float y,
+            int colors[], float positions[]);
+    private static native long nativeCreate2(long matrix, float x, float y,
+            int color0, int color1);
 }
 

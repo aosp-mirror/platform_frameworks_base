@@ -24,4 +24,3 @@ public interface FallbackEventHandler {
     public void preDispatchKeyEvent(KeyEvent event);
     public boolean dispatchKeyEvent(KeyEvent event);
 }
-

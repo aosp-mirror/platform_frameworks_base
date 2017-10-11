@@ -20,11 +20,11 @@ import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.Map;
  * Binding data to views occurs in two phases. First, if a
  * {@link android.widget.SimpleAdapter.ViewBinder} is available,
  * {@link ViewBinder#setViewValue(android.view.View, Object, String)}
- * is invoked. If the returned value is true, binding has occurred. 
+ * is invoked. If the returned value is true, binding has occurred.
  * If the returned value is false, the following views are then tried in order:
  * <ul>
  * <li> A view that implements Checkable (e.g. CheckBox).  The expected bind value is a boolean.
@@ -223,7 +223,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
                         setViewText((TextView) v, text);
                     } else if (v instanceof ImageView) {
                         if (data instanceof Integer) {
-                            setViewImage((ImageView) v, (Integer) data);                            
+                            setViewImage((ImageView) v, (Integer) data);
                         } else {
                             setViewImage((ImageView) v, text);
                         }
@@ -291,7 +291,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
      * @param v ImageView to receive an image
      * @param value the value retrieved from the data set
      *
-     * @see #setViewImage(ImageView, int) 
+     * @see #setViewImage(ImageView, int)
      */
     public void setViewImage(ImageView v, String value) {
         try {
@@ -381,18 +381,18 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, ThemedSpin
                 for (int i = 0; i < count; i++) {
                     Map<String, ?> h = unfilteredValues.get(i);
                     if (h != null) {
-                        
+
                         int len = mTo.length;
 
                         for (int j=0; j<len; j++) {
                             String str =  (String)h.get(mFrom[j]);
-                            
+
                             String[] words = str.split(" ");
                             int wordCount = words.length;
-                            
+
                             for (int k = 0; k < wordCount; k++) {
                                 String word = words[k];
-                                
+
                                 if (word.toLowerCase().startsWith(prefixString)) {
                                     newValues.add(h);
                                     break;

@@ -17,7 +17,8 @@
 package com.android.server;
 
 import android.Manifest;
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -49,7 +50,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.IMaintenanceActivityListener;
 import android.os.Looper;
@@ -61,6 +61,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -80,6 +81,7 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
@@ -114,6 +116,7 @@ public class DeviceIdleController extends SystemService
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
+    private ActivityManagerInternal mLocalActivityManager;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private ConnectivityService mConnectivityService;
@@ -229,6 +232,12 @@ public class DeviceIdleController extends SystemService
      * except for device idle mode.
      */
     private final ArrayMap<String, Integer> mPowerSaveWhitelistAppsExceptIdle = new ArrayMap<>();
+
+    /**
+     * Package names the user has white-listed using commandline option to opt out of
+     * power save restrictions, except for device idle mode.
+     */
+    private final ArraySet<String> mPowerSaveWhitelistUserAppsExceptIdle = new ArraySet<>();
 
     /**
      * Package names the system has white-listed to opt out of power save restrictions for
@@ -1134,6 +1143,9 @@ public class DeviceIdleController extends SystemService
 
     private final class BinderService extends IDeviceIdleController.Stub {
         @Override public void addPowerSaveWhitelistApp(String name) {
+            if (DEBUG) {
+                Slog.i(TAG, "addPowerSaveWhitelistApp(name = " + name + ")");
+            }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             long ident = Binder.clearCallingIdentity();
@@ -1145,6 +1157,9 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public void removePowerSaveWhitelistApp(String name) {
+            if (DEBUG) {
+                Slog.i(TAG, "removePowerSaveWhitelistApp(name = " + name + ")");
+            }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             long ident = Binder.clearCallingIdentity();
@@ -1244,17 +1259,26 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-            (new Shell()).exec(this, in, out, err, args, resultReceiver);
+                FileDescriptor err, String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
         }
     }
 
-    public final class LocalService {
+    public class LocalService {
+        // duration in milliseconds
+        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+                long duration, int userId, boolean sync, String reason) {
+            addPowerSaveTempWhitelistAppInternal(callingUid, packageName, duration,
+                    userId, sync, reason);
+        }
+
+        // duration in milliseconds
         public void addPowerSaveTempWhitelistAppDirect(int appId, long duration, boolean sync,
                 String reason) {
             addPowerSaveTempWhitelistAppDirectInternal(0, appId, duration, sync, reason);
         }
 
+        // duration in milliseconds
         public long getNotificationWhitelistDuration() {
             return mConstants.NOTIFICATION_WHITELIST_DURATION;
         }
@@ -1272,6 +1296,11 @@ public class DeviceIdleController extends SystemService
             DeviceIdleController.this.setAlarmsActive(active);
         }
 
+        /** Is the app on any of the power save whitelists, whether system or user? */
+        public boolean isAppOnWhitelist(int appid) {
+            return DeviceIdleController.this.isAppOnWhitelistInternal(appid);
+        }
+
         /**
          * Returns the array of app ids whitelisted by user. Take care not to
          * modify this, as it is a reference to the original copy. But the reference
@@ -1287,6 +1316,12 @@ public class DeviceIdleController extends SystemService
         super(context);
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = new MyHandler(BackgroundThread.getHandler().getLooper());
+    }
+
+    boolean isAppOnWhitelistInternal(int appid) {
+        synchronized (this) {
+            return Arrays.binarySearch(mPowerSaveWhitelistAllAppIdArray, appid) >= 0;
+        }
     }
 
     int[] getPowerSaveWhitelistUserAppIds() {
@@ -1362,6 +1397,7 @@ public class DeviceIdleController extends SystemService
             synchronized (this) {
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mBatteryStats = BatteryStatsService.getService();
+                mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
                 mPowerManager = getContext().getSystemService(PowerManager.class);
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -1431,6 +1467,7 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 getContext().registerReceiver(mReceiver, filter);
 
+                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
@@ -1444,7 +1481,7 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             try {
                 ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_ANY_USER);
                 if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid)) == null) {
                     reportPowerSaveWhitelistChangedLocked();
                     updateWhitelistAppIdsLocked();
@@ -1472,6 +1509,45 @@ public class DeviceIdleController extends SystemService
     public boolean getPowerSaveWhitelistAppInternal(String name) {
         synchronized (this) {
             return mPowerSaveWhitelistUserApps.containsKey(name);
+        }
+    }
+
+    public boolean addPowerSaveWhitelistExceptIdleInternal(String name) {
+        synchronized (this) {
+            try {
+                final ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
+                        PackageManager.MATCH_ANY_USER);
+                if (mPowerSaveWhitelistAppsExceptIdle.put(name, UserHandle.getAppId(ai.uid))
+                        == null) {
+                    mPowerSaveWhitelistUserAppsExceptIdle.add(name);
+                    reportPowerSaveWhitelistChangedLocked();
+                    mPowerSaveWhitelistExceptIdleAppIdArray = buildAppIdArray(
+                            mPowerSaveWhitelistAppsExceptIdle, mPowerSaveWhitelistUserApps,
+                            mPowerSaveWhitelistExceptIdleAppIds);
+                }
+                return true;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+    }
+
+    public void resetPowerSaveWhitelistExceptIdleInternal() {
+        synchronized (this) {
+            if (mPowerSaveWhitelistAppsExceptIdle.removeAll(
+                    mPowerSaveWhitelistUserAppsExceptIdle)) {
+                reportPowerSaveWhitelistChangedLocked();
+                mPowerSaveWhitelistExceptIdleAppIdArray = buildAppIdArray(
+                        mPowerSaveWhitelistAppsExceptIdle, mPowerSaveWhitelistUserApps,
+                        mPowerSaveWhitelistExceptIdleAppIds);
+                mPowerSaveWhitelistUserAppsExceptIdle.clear();
+            }
+        }
+    }
+
+    public boolean getPowerSaveWhitelistExceptIdleInternal(String name) {
+        synchronized (this) {
+            return mPowerSaveWhitelistAppsExceptIdle.containsKey(name);
         }
     }
 
@@ -1586,7 +1662,7 @@ public class DeviceIdleController extends SystemService
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
-        userId = ActivityManagerNative.getDefault().handleIncomingUser(
+        userId = ActivityManager.getService().handleIncomingUser(
                 Binder.getCallingPid(),
                 callingUid,
                 userId,
@@ -1652,7 +1728,7 @@ public class DeviceIdleController extends SystemService
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(appId, duration);
-                updateTempWhitelistAppIdsLocked();
+                updateTempWhitelistAppIdsLocked(appId, true);
                 if (mNetworkPolicyTempWhitelistCallback != null) {
                     if (!sync) {
                         mHandler.post(mNetworkPolicyTempWhitelistCallback);
@@ -1698,7 +1774,7 @@ public class DeviceIdleController extends SystemService
                 if (DEBUG) {
                     Slog.d(TAG, "Removing UID " + uid + " from temp whitelist");
                 }
-                updateTempWhitelistAppIdsLocked();
+                updateTempWhitelistAppIdsLocked(uid, false);
                 if (mNetworkPolicyTempWhitelistCallback != null) {
                     mHandler.post(mNetworkPolicyTempWhitelistCallback);
                 }
@@ -2318,6 +2394,13 @@ public class DeviceIdleController extends SystemService
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistAllAppIds);
         mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
+        if (mLocalActivityManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting activity manager whitelist to "
+                        + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
+            }
+            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+        }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting wakelock whitelist to "
@@ -2334,13 +2417,21 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    private void updateTempWhitelistAppIdsLocked() {
+    private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (mTempWhitelistAppIdArray.length != size) {
             mTempWhitelistAppIdArray = new int[size];
         }
         for (int i = 0; i < size; i++) {
             mTempWhitelistAppIdArray[i] = mTempWhitelistAppIdEndTimes.keyAt(i);
+        }
+        if (mLocalActivityManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting activity manager temp whitelist to "
+                        + Arrays.toString(mTempWhitelistAppIdArray));
+            }
+            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, appId,
+                    adding);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -2412,7 +2503,7 @@ public class DeviceIdleController extends SystemService
                     if (name != null) {
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(name,
-                                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                                    PackageManager.MATCH_ANY_USER);
                             mPowerSaveWhitelistUserApps.put(ai.packageName,
                                     UserHandle.getAppId(ai.uid));
                         } catch (PackageManager.NameNotFoundException e) {
@@ -2510,10 +2601,17 @@ public class DeviceIdleController extends SystemService
         pw.println("    Print currently whitelisted apps.");
         pw.println("  whitelist [package ...]");
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
+        pw.println("  except-idle-whitelist [package ...|reset]");
+        pw.println("    Prefix the package with '+' to add it to whitelist or "
+                + "'=' to check if it is already whitelisted");
+        pw.println("    [reset] will reset the whitelist to it's original state");
+        pw.println("    Note that unlike <whitelist> cmd, "
+                + "changes made using this won't be persisted across boots");
         pw.println("  tempwhitelist");
         pw.println("    Print packages that are temporarily whitelisted.");
-        pw.println("  tempwhitelist [-u] [package ..]");
-        pw.println("    Temporarily place packages in whitelist for 10 seconds.");
+        pw.println("  tempwhitelist [-u USER] [-d DURATION] [package ..]");
+        pw.println("    Temporarily place packages in whitelist for DURATION milliseconds.");
+        pw.println("    If no DURATION is specified, 10 seconds is used");
     }
 
     class Shell extends ShellCommand {
@@ -2796,6 +2894,7 @@ public class DeviceIdleController extends SystemService
                 }
             }
         } else if ("tempwhitelist".equals(cmd)) {
+            long duration = 10000;
             String opt;
             while ((opt=shell.getNextOption()) != null) {
                 if ("-u".equals(opt)) {
@@ -2805,17 +2904,62 @@ public class DeviceIdleController extends SystemService
                         return -1;
                     }
                     shell.userId = Integer.parseInt(opt);
+                } else if ("-d".equals(opt)) {
+                    opt = shell.getNextArg();
+                    if (opt == null) {
+                        pw.println("-d requires a duration");
+                        return -1;
+                    }
+                    duration = Long.parseLong(opt);
                 }
             }
             String arg = shell.getNextArg();
             if (arg != null) {
                 try {
-                    addPowerSaveTempWhitelistAppChecked(arg, 10000L, shell.userId, "shell");
-                } catch (RemoteException re) {
-                    pw.println("Failed: " + re);
+                    addPowerSaveTempWhitelistAppChecked(arg, duration, shell.userId, "shell");
+                } catch (Exception e) {
+                    pw.println("Failed: " + e);
+                    return -1;
                 }
             } else {
                 dumpTempWhitelistSchedule(pw, false);
+            }
+        } else if ("except-idle-whitelist".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                String arg = shell.getNextArg();
+                if (arg == null) {
+                    pw.println("No arguments given");
+                    return -1;
+                } else if ("reset".equals(arg)) {
+                    resetPowerSaveWhitelistExceptIdleInternal();
+                } else {
+                    do {
+                        if (arg.length() < 1 || (arg.charAt(0) != '-'
+                                && arg.charAt(0) != '+' && arg.charAt(0) != '=')) {
+                            pw.println("Package must be prefixed with +, -, or =: " + arg);
+                            return -1;
+                        }
+                        char op = arg.charAt(0);
+                        String pkg = arg.substring(1);
+                        if (op == '+') {
+                            if (addPowerSaveWhitelistExceptIdleInternal(pkg)) {
+                                pw.println("Added: " + pkg);
+                            } else {
+                                pw.println("Unknown package: " + pkg);
+                            }
+                        } else if (op == '=') {
+                            pw.println(getPowerSaveWhitelistExceptIdleInternal(pkg));
+                        } else {
+                            pw.println("Unknown argument: " + arg);
+                            return -1;
+                        }
+                    } while ((arg = shell.getNextArg()) != null);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         } else {
             return shell.handleDefaultCommands(cmd);
@@ -2824,13 +2968,7 @@ public class DeviceIdleController extends SystemService
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump DeviceIdleController from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " without permission " + android.Manifest.permission.DUMP);
-            return;
-        }
+        if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
         if (args != null) {
             int userId = UserHandle.USER_SYSTEM;
@@ -2855,7 +2993,8 @@ public class DeviceIdleController extends SystemService
                     shell.userId = userId;
                     String[] newArgs = new String[args.length-i];
                     System.arraycopy(args, i, newArgs, 0, args.length-i);
-                    shell.exec(mBinderService, null, fd, null, newArgs, new ResultReceiver(null));
+                    shell.exec(mBinderService, null, fd, null, newArgs, null,
+                            new ResultReceiver(null));
                     return;
                 }
             }

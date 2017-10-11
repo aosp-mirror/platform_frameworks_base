@@ -1,0 +1,223 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ReorderBarrierDrawables.h"
+#include "RenderNode.h"
+#include "SkiaDisplayList.h"
+#include "SkiaPipeline.h"
+
+#include <SkBlurMask.h>
+#include <SkBlurMaskFilter.h>
+#include <SkGaussianEdgeShader.h>
+#include <SkPathOps.h>
+#include <SkRRectsGaussianEdgeMaskFilter.h>
+#include <SkShadowUtils.h>
+
+namespace android {
+namespace uirenderer {
+namespace skiapipeline {
+
+StartReorderBarrierDrawable::StartReorderBarrierDrawable(SkiaDisplayList* data)
+        : mEndChildIndex(0)
+        , mBeginChildIndex(data->mChildNodes.size())
+        , mDisplayList(data) {
+}
+
+void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
+    if (mChildren.empty()) {
+        //mChildren is allocated and initialized only the first time onDraw is called and cached for
+        //subsequent calls
+        mChildren.reserve(mEndChildIndex - mBeginChildIndex + 1);
+        for (int i = mBeginChildIndex; i <= mEndChildIndex; i++) {
+            mChildren.push_back(const_cast<RenderNodeDrawable*>(&mDisplayList->mChildNodes[i]));
+        }
+    }
+    std::stable_sort(mChildren.begin(), mChildren.end(),
+        [](RenderNodeDrawable* a, RenderNodeDrawable* b) {
+            const float aZValue = a->getNodeProperties().getZ();
+            const float bZValue = b->getNodeProperties().getZ();
+            return aZValue < bZValue;
+        });
+
+    SkASSERT(!mChildren.empty());
+
+    size_t drawIndex = 0;
+    const size_t endIndex = mChildren.size();
+    while (drawIndex < endIndex) {
+        RenderNodeDrawable* childNode = mChildren[drawIndex];
+        SkASSERT(childNode);
+        const float casterZ = childNode->getNodeProperties().getZ();
+        if (casterZ >= -NON_ZERO_EPSILON) { //draw only children with negative Z
+            return;
+        }
+        childNode->forceDraw(canvas);
+        drawIndex++;
+    }
+}
+
+EndReorderBarrierDrawable::EndReorderBarrierDrawable(StartReorderBarrierDrawable* startBarrier)
+        : mStartBarrier(startBarrier) {
+    mStartBarrier->mEndChildIndex = mStartBarrier->mDisplayList->mChildNodes.size() - 1;
+}
+
+#define SHADOW_DELTA 0.1f
+
+void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
+    auto& zChildren = mStartBarrier->mChildren;
+    SkASSERT(!zChildren.empty());
+
+    /**
+     * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
+     * with very similar Z heights to draw together.
+     *
+     * This way, if Views A & B have the same Z height and are both casting shadows, the shadows are
+     * underneath both, and neither's shadow is drawn on top of the other.
+     */
+    size_t drawIndex = 0;
+
+    const size_t endIndex = zChildren.size();
+    while (drawIndex < endIndex     //draw only children with positive Z
+            && zChildren[drawIndex]->getNodeProperties().getZ() <= NON_ZERO_EPSILON) drawIndex++;
+    size_t shadowIndex = drawIndex;
+
+    float lastCasterZ = 0.0f;
+    while (shadowIndex < endIndex || drawIndex < endIndex) {
+        if (shadowIndex < endIndex) {
+            const float casterZ = zChildren[shadowIndex]->getNodeProperties().getZ();
+
+            // attempt to render the shadow if the caster about to be drawn is its caster,
+            // OR if its caster's Z value is similar to the previous potential caster
+            if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
+                this->drawShadow(canvas, zChildren[shadowIndex]);
+                lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
+                shadowIndex++;
+                continue;
+            }
+        }
+
+        RenderNodeDrawable* childNode = zChildren[drawIndex];
+        SkASSERT(childNode);
+        childNode->forceDraw(canvas);
+
+        drawIndex++;
+    }
+}
+
+// copied from FrameBuilder::deferShadow
+void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable* caster) {
+    const RenderProperties& casterProperties = caster->getNodeProperties();
+
+    if (casterProperties.getAlpha() <= 0.0f
+            || casterProperties.getOutline().getAlpha() <= 0.0f
+            || !casterProperties.getOutline().getPath()
+            || casterProperties.getScaleX() == 0
+            || casterProperties.getScaleY() == 0) {
+        // no shadow to draw
+        return;
+    }
+
+    const SkScalar casterAlpha = casterProperties.getAlpha()
+            * casterProperties.getOutline().getAlpha();
+    if (casterAlpha <= 0.0f) {
+        return;
+    }
+
+    float ambientAlpha = (SkiaPipeline::getAmbientShadowAlpha()/255.f)*casterAlpha;
+    float spotAlpha = (SkiaPipeline::getSpotShadowAlpha()/255.f)*casterAlpha;
+    const float casterZValue = casterProperties.getZ();
+
+    const RevealClip& revealClip = casterProperties.getRevealClip();
+    const SkPath* revealClipPath = revealClip.getPath();
+    if (revealClipPath && revealClipPath->isEmpty()) {
+        // An empty reveal clip means nothing is drawn
+        return;
+    }
+
+    bool clippedToBounds = casterProperties.getClippingFlags() & CLIP_TO_CLIP_BOUNDS;
+
+    SkRect casterClipRect = SkRect::MakeEmpty();
+    if (clippedToBounds) {
+        Rect clipBounds;
+        casterProperties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
+        casterClipRect = clipBounds.toSkRect();
+        if (casterClipRect.isEmpty()) {
+            // An empty clip rect means nothing is drawn
+            return;
+        }
+    }
+
+    SkAutoCanvasRestore acr(canvas, true);
+
+    SkMatrix shadowMatrix;
+    mat4 hwuiMatrix;
+    // TODO we don't pass the optional boolean to treat it as a 4x4 matrix
+    caster->getRenderNode()->applyViewPropertyTransforms(hwuiMatrix);
+    hwuiMatrix.copyTo(shadowMatrix);
+    canvas->concat(shadowMatrix);
+
+    const SkPath* casterOutlinePath = casterProperties.getOutline().getPath();
+    // holds temporary SkPath to store the result of intersections
+    SkPath tmpPath;
+    const SkPath* casterPath = casterOutlinePath;
+
+    // TODO: In to following course of code that calculates the final shape, is there an optimal
+    //       of doing the Op calculations?
+    // intersect the shadow-casting path with the reveal, if present
+    if (revealClipPath) {
+        Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, &tmpPath);
+        casterPath = &tmpPath;
+    }
+
+    // intersect the shadow-casting path with the clipBounds, if present
+    if (clippedToBounds) {
+        SkPath clipBoundsPath;
+        clipBoundsPath.addRect(casterClipRect);
+        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, &tmpPath);
+        casterPath = &tmpPath;
+    }
+    const Vector3 lightPos = SkiaPipeline::getLightCenter();
+    SkPoint3 skiaLightPos = SkPoint3::Make(lightPos.x, lightPos.y, lightPos.z);
+    if (shadowMatrix.hasPerspective() || revealClipPath || clippedToBounds) {
+        std::function<SkScalar(SkScalar, SkScalar)> casterHeightFunc;
+        if (shadowMatrix.hasPerspective()) {
+            // get the matrix with the full 3D transform
+            mat4 zMatrix;
+            caster->getRenderNode()->applyViewPropertyTransforms(zMatrix, true);
+            SkScalar A = zMatrix[2];
+            SkScalar B = zMatrix[6];
+            SkScalar C = zMatrix[mat4::kTranslateZ];
+            casterHeightFunc = [A, B, C](SkScalar x, SkScalar y) {
+                return A*x + B*y + C;  // casterZValue already baked into C
+            };
+        } else {
+            casterHeightFunc = [casterZValue] (SkScalar, SkScalar) {
+                return casterZValue;
+            };
+        }
+
+        SkShadowUtils::DrawUncachedShadow(canvas, *casterPath, casterHeightFunc, skiaLightPos,
+            SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
+            casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
+    } else {
+        SkShadowUtils::DrawShadow(canvas, *casterPath, casterZValue, skiaLightPos,
+            SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
+            casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
+    }
+}
+
+}; // namespace skiapipeline
+}; // namespace uirenderer
+}; // namespace android

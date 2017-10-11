@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3171996292755059205">"Näppäinvahti"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"Anna PIN-koodi."</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"Anna SIM-kortin PUK-koodi ja uusi PIN-koodi."</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM-kortin PUK-koodi"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"Uusi SIM-kortin PIN-koodi"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Kosketa ja anna salasana"</font>"."</string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Poista lukitus antamalla salasana."</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Poista lukitus antamalla PIN-koodi."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Väärä PIN-koodi"</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"Ladattu"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"Ladataan"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Nopea lataus käynnissä"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Hidas lataus käynnissä"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"Kytke laturi."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Poista lukitus painamalla Valikkoa."</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Verkko lukittu"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Ei SIM-korttia"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Tabletissa ei ole SIM-korttia."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Puhelimessa ei ole SIM-korttia."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Aseta SIM-kortti."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM-korttia ei löydy tai ei voi lukea. Aseta SIM-kortti."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"SIM-kortti ei käytettävissä"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"SIM-kortti on poistettu pysyvästi käytöstä.\n Ota yhteyttä operaattoriisi ja hanki uusi SIM-kortti."</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM-kortti on lukittu."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM-kortti on PUK-lukittu."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM-kortin lukitusta avataan…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN-koodin alue"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM-kortin PIN-koodin alue"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM-kortin PUK-koodin alue"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Seuraava hälytys asetettu: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Poista"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Unohtunut kuvio"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Väärä kuvio"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"Väärä salasana"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"Väärä PIN-koodi"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Yritä uudelleen <xliff:g id="NUMBER">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"Piirrä kuvio"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"Anna SIM-kortin PIN-koodi"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"Anna operaattorin <xliff:g id="CARRIER">%1$s</xliff:g> SIM-kortin PIN-koodi."</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"Anna PIN-koodi."</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"Anna salasana"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM-kortti on nyt poistettu käytöstä. Jatka antamalla PUK-koodi. Saat lisätietoja ottamalla yhteyttä operaattoriin."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"Operaattorin <xliff:g id="CARRIER">%1$s</xliff:g> SIM-kortti on nyt lukittu. Jatka antamalla PUK-koodi. Saat lisätietoja operaattoriltasi."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"Anna haluamasi PIN-koodi."</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"Vahvista haluamasi PIN-koodi."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM-kortin lukitusta avataan…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"Anna 4–8-numeroinen PIN-koodi."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK-koodissa tulee olla vähintään 8 numeroa."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"Anna uudelleen oikea PUK-koodi. Jos teet liian monta yritystä, SIM-kortti poistetaan käytöstä pysyvästi."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN-koodit eivät täsmää"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"Liikaa kuvionpiirtoyrityksiä"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, tämä puhelin nollataan ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, tämä puhelin nollataan ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Tämä tabletti nollataan ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Tämä puhelin nollataan ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, tämä käyttäjä ja kaikki sen käyttäjätiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, tämä käyttäjä ja kaikki käyttäjän tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Tämä käyttäjä ja kaikki sen käyttäjätiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Tämä käyttäjä ja kaikki sen käyttäjätiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, työprofiili ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos <xliff:g id="NUMBER_1">%2$d</xliff:g> seuraavaa yritystä epäonnistuu, työprofiili ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"Yritit avata tabletin lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Työprofiili ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"Yritit avata puhelimen lukituksen virheellisillä tiedoilla <xliff:g id="NUMBER">%d</xliff:g> kertaa. Työprofiili ja kaikki sen tiedot poistetaan."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan tabletin lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään avaamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"Virheellinen SIM-kortin PIN-koodi. Sinun on nyt otettava yhteys operaattoriin laitteen lukituksen avaamiseksi."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="other">Virheellinen SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER_1">%d</xliff:g> yritystä jäljellä.</item>
+      <item quantity="one">Virheellinen SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER_0">%d</xliff:g> yritys jäljellä, ennen kuin sinun on otettava yhteys operaattoriin laitteen lukituksen avaamiseksi.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM-korttia ei voi käyttää. Ota yhteys operaattoriin."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="other">Virheellinen SIM-kortin PUK-koodi. Sinulla on <xliff:g id="NUMBER_1">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortista tulee pysyvästi käyttökelvoton.</item>
+      <item quantity="one">Virheellinen SIM-kortin PUK-koodi. Sinulla on <xliff:g id="NUMBER_0">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortista tulee pysyvästi käyttökelvoton.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"SIM-kortin PIN-toiminto epäonnistui."</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM-kortin PUK-toiminto epäonnistui."</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"Koodi hyväksytty"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"Ei yhteyttä"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Vaihda syöttötapaa."</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"Lentokonetila"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Kuvio vaaditaan laitteen uudelleenkäynnistyksen jälkeen."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"PIN-koodi vaaditaan laitteen uudelleenkäynnistyksen jälkeen."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Salasana vaaditaan laitteen uudelleenkäynnistyksen jälkeen."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Kuvio vaaditaan suojauksen parantamiseksi."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"PIN-koodi vaaditaan suojauksen parantamiseksi."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Salasana vaaditaan suojauksen parantamiseksi."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Kuvio vaaditaan profiilia vaihdettaessa."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"PIN-koodi vaaditaan profiilia vaihdettaessa."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Salasana vaaditaan profiilia vaihdettaessa."</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Järjestelmänvalvoja lukitsi laitteen."</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Laite lukittiin manuaalisesti"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="other">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_1">%d</xliff:g> tuntiin. Vahvista kuvio.</item>
+      <item quantity="one">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_0">%d</xliff:g> tuntiin. Vahvista kuvio.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="other">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_1">%d</xliff:g> tuntiin. Vahvista PIN-koodi.</item>
+      <item quantity="one">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_0">%d</xliff:g> tuntiin. Vahvista PIN-koodi.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="other">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_1">%d</xliff:g> tuntiin. Vahvista salasana.</item>
+      <item quantity="one">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_0">%d</xliff:g> tuntiin. Vahvista salasana.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ei tunnistettu"</string>
+</resources>

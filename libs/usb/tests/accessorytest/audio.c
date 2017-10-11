@@ -164,7 +164,6 @@ static void* capture_thread(void* arg)
 static void* play_thread(void* arg)
 {
     struct pcm *pcm = arg;
-    char *buffer;
     int index, err;
 
     fprintf(stderr, "play_thread start\n");
@@ -181,7 +180,6 @@ static void* play_thread(void* arg)
 
     fprintf(stderr, "play_thread done\n");
     pcm_close(pcm);
-    free(buffer);
 
     return NULL;
 }

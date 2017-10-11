@@ -314,7 +314,7 @@ public final class PublishConfig implements Parcelable {
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link DiscoverySession#destroy()} is
+         *     Session will be terminated when {@link DiscoverySession#close()} is
          *     called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.

@@ -171,8 +171,10 @@ public class HTTPHandler implements AutoCloseable {
     }
 
     public void close() throws IOException {
+        mSocket.shutdownInput();
+        mSocket.shutdownOutput();
+        mSocket.close();
         mIn.close();
         mOut.close();
-        mSocket.close();
     }
 }

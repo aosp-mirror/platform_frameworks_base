@@ -16,16 +16,23 @@
 
 package android.view;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
+
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.style.AccessibilityClickableSpan;
+import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -33,6 +40,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
+import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -86,6 +94,19 @@ final class AccessibilityInteractionController {
         mPrefetcher = new AccessibilityNodePrefetcher();
     }
 
+    private void scheduleMessage(Message message, int interrogatingPid, long interrogatingTid) {
+        // If the interrogation is performed by the same thread as the main UI
+        // thread in this process, set the message as a static reference so
+        // after this call completes the same thread but in the interrogating
+        // client can handle the message to generate the result.
+        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
+            AccessibilityInteractionClient.getInstanceForThread(
+                    interrogatingTid).setSameThreadMessage(message);
+        } else {
+            mHandler.sendMessage(message);
+        }
+    }
+
     private boolean isShown(View view) {
         // The first two checks are made also made by isShown() which
         // however traverses the tree up to the parent to catch that.
@@ -99,7 +120,7 @@ final class AccessibilityInteractionController {
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
             long accessibilityNodeId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
+            long interrogatingTid, MagnificationSpec spec, Bundle arguments) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID;
         message.arg1 = flags;
@@ -111,18 +132,10 @@ final class AccessibilityInteractionController {
         args.arg1 = callback;
         args.arg2 = spec;
         args.arg3 = interactiveRegion;
+        args.arg4 = arguments;
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
@@ -136,6 +149,7 @@ final class AccessibilityInteractionController {
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final Region interactiveRegion = (Region) args.arg3;
+        final Bundle arguments = (Bundle) args.arg4;
 
         args.recycle();
 
@@ -147,35 +161,18 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId == AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 root = mViewRootImpl.mView;
             } else {
                 root = findViewByAccessibilityId(accessibilityViewId);
             }
             if (root != null && isShown(root)) {
-                mPrefetcher.prefetchAccessibilityNodeInfos(root, virtualDescendantId, flags, infos);
+                mPrefetcher.prefetchAccessibilityNodeInfos(
+                        root, virtualDescendantId, flags, infos, arguments);
             }
         } finally {
-            try {
-                mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-                applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                // Recycle if called from another process. Specs are cached in the
-                // system process and obtained from a pool when read from parcel.
-                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
-                    spec.recycle();
-                }
-                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
-                callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-                infos.clear();
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-
-            // Recycle if called from the same process. Regions are obtained in
-            // the system process and instantiated  when read from parcel.
-            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
-                interactiveRegion.recycle();
-            }
+            updateInfosForViewportAndReturnFindNodeResult(
+                    infos, callback, interactionId, spec, interactiveRegion);
         }
     }
 
@@ -194,19 +191,9 @@ final class AccessibilityInteractionController {
         args.arg2 = spec;
         args.arg3 = viewId;
         args.arg4 = interactiveRegion;
-
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void findAccessibilityNodeInfosByViewIdUiThread(Message message) {
@@ -220,7 +207,6 @@ final class AccessibilityInteractionController {
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final String viewId = (String) args.arg3;
         final Region interactiveRegion = (Region) args.arg4;
-
         args.recycle();
 
         final List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
@@ -231,7 +217,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -250,25 +236,8 @@ final class AccessibilityInteractionController {
                 mAddNodeInfosForViewId.reset();
             }
         } finally {
-            try {
-                mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-                applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                // Recycle if called from another process. Specs are cached in the
-                // system process and obtained from a pool when read from parcel.
-                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
-                    spec.recycle();
-                }
-                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
-                callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-
-            // Recycle if called from the same process. Regions are obtained in
-            // the system process and instantiated  when read from parcel.
-            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
-                interactiveRegion.recycle();
-            }
+            updateInfosForViewportAndReturnFindNodeResult(
+                    infos, callback, interactionId, spec, interactiveRegion);
         }
     }
 
@@ -290,16 +259,7 @@ final class AccessibilityInteractionController {
         args.arg4 = interactiveRegion;
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void findAccessibilityNodeInfosByTextUiThread(Message message) {
@@ -323,7 +283,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -331,14 +291,9 @@ final class AccessibilityInteractionController {
             if (root != null && isShown(root)) {
                 AccessibilityNodeProvider provider = root.getAccessibilityNodeProvider();
                 if (provider != null) {
-                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        infos = provider.findAccessibilityNodeInfosByText(text,
-                                virtualDescendantId);
-                    } else {
-                        infos = provider.findAccessibilityNodeInfosByText(text,
-                                AccessibilityNodeProvider.HOST_VIEW_ID);
-                    }
-                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                    infos = provider.findAccessibilityNodeInfosByText(text,
+                            virtualDescendantId);
+                } else if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
                     ArrayList<View> foundViews = mTempArrayList;
                     foundViews.clear();
                     root.findViewsWithText(foundViews, text, View.FIND_VIEWS_WITH_TEXT
@@ -368,31 +323,14 @@ final class AccessibilityInteractionController {
                 }
             }
         } finally {
-            try {
-                mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-                applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
-                // Recycle if called from another process. Specs are cached in the
-                // system process and obtained from a pool when read from parcel.
-                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
-                    spec.recycle();
-                }
-                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
-                callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-
-            // Recycle if called from the same process. Regions are obtained in
-            // the system process and instantiated  when read from parcel.
-            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
-                interactiveRegion.recycle();
-            }
+            updateInfosForViewportAndReturnFindNodeResult(
+                    infos, callback, interactionId, spec, interactiveRegion);
         }
     }
 
     public void findFocusClientThread(long accessibilityNodeId, int focusType,
             Region interactiveRegion, int interactionId,
-            IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
             long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_FOCUS;
@@ -409,16 +347,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void findFocusUiThread(Message message) {
@@ -442,7 +371,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -468,7 +397,7 @@ final class AccessibilityInteractionController {
                                 focused = AccessibilityNodeInfo.obtain(
                                         mViewRootImpl.mAccessibilityFocusedVirtualView);
                             }
-                        } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        } else if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
                             focused = host.createAccessibilityNodeInfo();
                         }
                     } break;
@@ -490,31 +419,14 @@ final class AccessibilityInteractionController {
                 }
             }
         } finally {
-            try {
-                mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-                applyAppScaleAndMagnificationSpecIfNeeded(focused, spec);
-                // Recycle if called from another process. Specs are cached in the
-                // system process and obtained from a pool when read from parcel.
-                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
-                    spec.recycle();
-                }
-                adjustIsVisibleToUserIfNeeded(focused, interactiveRegion);
-                callback.setFindAccessibilityNodeInfoResult(focused, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-
-            // Recycle if called from the same process. Regions are obtained in
-            // the system process and instantiated  when read from parcel.
-            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
-                interactiveRegion.recycle();
-            }
+            updateInfoForViewportAndReturnFindNodeResult(
+                    focused, callback, interactionId, spec, interactiveRegion);
         }
     }
 
     public void focusSearchClientThread(long accessibilityNodeId, int direction,
             Region interactiveRegion, int interactionId,
-            IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
             long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FOCUS_SEARCH;
@@ -530,16 +442,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void focusSearchUiThread(Message message) {
@@ -563,7 +466,7 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View root = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 root = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 root = mViewRootImpl.mView;
@@ -575,31 +478,14 @@ final class AccessibilityInteractionController {
                 }
             }
         } finally {
-            try {
-                mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-                applyAppScaleAndMagnificationSpecIfNeeded(next, spec);
-                // Recycle if called from another process. Specs are cached in the
-                // system process and obtained from a pool when read from parcel.
-                if (spec != null && android.os.Process.myPid() != Binder.getCallingPid()) {
-                    spec.recycle();
-                }
-                adjustIsVisibleToUserIfNeeded(next, interactiveRegion);
-                callback.setFindAccessibilityNodeInfoResult(next, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-
-            // Recycle if called from the same process. Regions are obtained in
-            // the system process and instantiated  when read from parcel.
-            if (interactiveRegion != null && android.os.Process.myPid() == Binder.getCallingPid()) {
-                interactiveRegion.recycle();
-            }
+            updateInfoForViewportAndReturnFindNodeResult(
+                    next, callback, interactionId, spec, interactiveRegion);
         }
     }
 
     public void performAccessibilityActionClientThread(long accessibilityNodeId, int action,
             Bundle arguments, int interactionId,
-            IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
             long interrogatingTid) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_PERFORM_ACCESSIBILITY_ACTION;
@@ -615,16 +501,7 @@ final class AccessibilityInteractionController {
 
         message.obj = args;
 
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
+        scheduleMessage(message, interrogatingPid, interrogatingTid);
     }
 
     private void performAccessibilityActionUiThread(Message message) {
@@ -649,23 +526,24 @@ final class AccessibilityInteractionController {
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             View target = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (accessibilityViewId != AccessibilityNodeInfo.ROOT_ITEM_ID) {
                 target = findViewByAccessibilityId(accessibilityViewId);
             } else {
                 target = mViewRootImpl.mView;
             }
             if (target != null && isShown(target)) {
-                AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                if (provider != null) {
-                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                if (action == R.id.accessibilityActionClickOnClickableSpan) {
+                    // Handle this hidden action separately
+                    succeeded = handleClickableSpanActionUiThread(
+                            target, virtualDescendantId, arguments);
+                } else {
+                    AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
+                    if (provider != null) {
                         succeeded = provider.performAction(virtualDescendantId, action,
                                 arguments);
-                    } else {
-                        succeeded = provider.performAction(AccessibilityNodeProvider.HOST_VIEW_ID,
-                                action, arguments);
+                    } else if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
+                        succeeded = target.performAccessibilityAction(action, arguments);
                     }
-                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                    succeeded = target.performAccessibilityAction(action, arguments);
                 }
             }
         } finally {
@@ -729,26 +607,6 @@ final class AccessibilityInteractionController {
         }
     }
 
-    private void applyAppScaleAndMagnificationSpecIfNeeded(Point point,
-            MagnificationSpec spec) {
-        final float applicationScale = mViewRootImpl.mAttachInfo.mApplicationScale;
-        if (!shouldApplyAppScaleAndMagnificationSpec(applicationScale, spec)) {
-            return;
-        }
-
-        if (applicationScale != 1.0f) {
-            point.x *= applicationScale;
-            point.y *= applicationScale;
-        }
-
-        if (spec != null) {
-            point.x *= spec.scale;
-            point.y *= spec.scale;
-            point.x += (int) spec.offsetX;
-            point.y += (int) spec.offsetY;
-        }
-    }
-
     private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,
             MagnificationSpec spec) {
         if (info == null) {
@@ -777,6 +635,25 @@ final class AccessibilityInteractionController {
         }
         info.setBoundsInParent(boundsInParent);
         info.setBoundsInScreen(boundsInScreen);
+
+        // Scale text locations if they are present
+        if (info.hasExtras()) {
+            Bundle extras = info.getExtras();
+            Parcelable[] textLocations =
+                    extras.getParcelableArray(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY);
+            if (textLocations != null) {
+                for (int i = 0; i < textLocations.length; i++) {
+                    // Unchecked cast - an app that puts other objects in this bundle with this
+                    // key will crash.
+                    RectF textLocation = ((RectF) textLocations[i]);
+                    textLocation.scale(applicationScale);
+                    if (spec != null) {
+                        textLocation.scale(spec.scale);
+                        textLocation.offset(spec.offsetX, spec.offsetY);
+                    }
+                }
+            }
+        }
 
         if (spec != null) {
             AttachInfo attachInfo = mViewRootImpl.mAttachInfo;
@@ -816,6 +693,84 @@ final class AccessibilityInteractionController {
         return (appScale != 1.0f || (spec != null && !spec.isNop()));
     }
 
+    private void updateInfosForViewportAndReturnFindNodeResult(List<AccessibilityNodeInfo> infos,
+            IAccessibilityInteractionConnectionCallback callback, int interactionId,
+            MagnificationSpec spec, Region interactiveRegion) {
+        try {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
+            adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
+            callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
+            if (infos != null) {
+                infos.clear();
+            }
+        } catch (RemoteException re) {
+            /* ignore - the other side will time out */
+        } finally {
+            recycleMagnificationSpecAndRegionIfNeeded(spec, interactiveRegion);
+        }
+    }
+
+    private void updateInfoForViewportAndReturnFindNodeResult(AccessibilityNodeInfo info,
+            IAccessibilityInteractionConnectionCallback callback, int interactionId,
+            MagnificationSpec spec, Region interactiveRegion) {
+        try {
+            mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
+            adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
+            callback.setFindAccessibilityNodeInfoResult(info, interactionId);
+        } catch (RemoteException re) {
+                /* ignore - the other side will time out */
+        } finally {
+            recycleMagnificationSpecAndRegionIfNeeded(spec, interactiveRegion);
+        }
+    }
+
+    private void recycleMagnificationSpecAndRegionIfNeeded(MagnificationSpec spec, Region region) {
+        if (android.os.Process.myPid() != Binder.getCallingPid()) {
+            // Specs are cached in the system process and obtained from a pool when read from
+            // a parcel, so only recycle the spec if called from another process.
+            if (spec != null) {
+                spec.recycle();
+            }
+        } else {
+            // Regions are obtained in the system process and instantiated when read from
+            // a parcel, so only recycle the region if caled from the same process.
+            if (region != null) {
+                region.recycle();
+            }
+        }
+    }
+
+    private boolean handleClickableSpanActionUiThread(
+            View view, int virtualDescendantId, Bundle arguments) {
+        Parcelable span = arguments.getParcelable(ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN);
+        if (!(span instanceof AccessibilityClickableSpan)) {
+            return false;
+        }
+
+        // Find the original ClickableSpan if it's still on the screen
+        AccessibilityNodeInfo infoWithSpan = null;
+        AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
+        if (provider != null) {
+            infoWithSpan = provider.createAccessibilityNodeInfo(virtualDescendantId);
+        } else if (virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
+            infoWithSpan = view.createAccessibilityNodeInfo();
+        }
+        if (infoWithSpan == null) {
+            return false;
+        }
+
+        // Click on the corresponding span
+        ClickableSpan clickableSpan = ((AccessibilityClickableSpan) span).findClickableSpan(
+                infoWithSpan.getOriginalText());
+        if (clickableSpan != null) {
+            clickableSpan.onClick(view);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * This class encapsulates a prefetching strategy for the accessibility APIs for
      * querying window content. It is responsible to prefetch a batch of
@@ -828,11 +783,18 @@ final class AccessibilityInteractionController {
         private final ArrayList<View> mTempViewList = new ArrayList<View>();
 
         public void prefetchAccessibilityNodeInfos(View view, int virtualViewId, int fetchFlags,
-                List<AccessibilityNodeInfo> outInfos) {
+                List<AccessibilityNodeInfo> outInfos, Bundle arguments) {
             AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
+            // Determine if we'll be populating extra data
+            final String extraDataRequested = (arguments == null) ? null
+                    : arguments.getString(AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY);
             if (provider == null) {
                 AccessibilityNodeInfo root = view.createAccessibilityNodeInfo();
                 if (root != null) {
+                    if (extraDataRequested != null) {
+                        view.addExtraDataToAccessibilityNodeInfo(
+                                root, extraDataRequested, arguments);
+                    }
                     outInfos.add(root);
                     if ((fetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
                         prefetchPredecessorsOfRealNode(view, outInfos);
@@ -845,14 +807,13 @@ final class AccessibilityInteractionController {
                     }
                 }
             } else {
-                final AccessibilityNodeInfo root;
-                if (virtualViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                    root = provider.createAccessibilityNodeInfo(virtualViewId);
-                } else {
-                    root = provider.createAccessibilityNodeInfo(
-                            AccessibilityNodeProvider.HOST_VIEW_ID);
-                }
+                final AccessibilityNodeInfo root =
+                        provider.createAccessibilityNodeInfo(virtualViewId);
                 if (root != null) {
+                    if (extraDataRequested != null) {
+                        provider.addExtraDataToAccessibilityNodeInfo(
+                                virtualViewId, root, extraDataRequested, arguments);
+                    }
                     outInfos.add(root);
                     if ((fetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
                         prefetchPredecessorsOfVirtualNode(root, view, provider, outInfos);
@@ -1062,15 +1023,10 @@ final class AccessibilityInteractionController {
                 }
                 final int virtualDescendantId =
                     AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-                if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
+                if (virtualDescendantId != AccessibilityNodeProvider.HOST_VIEW_ID
                         || accessibilityViewId == providerHost.getAccessibilityViewId()) {
                     final AccessibilityNodeInfo parent;
-                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
-                    } else {
-                        parent = provider.createAccessibilityNodeInfo(
-                                AccessibilityNodeProvider.HOST_VIEW_ID);
-                    }
+                    parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
                     if (parent == null) {
                         // Going up the parent relation we found a null predecessor,
                         // so remove these disconnected nodes form the result.
@@ -1100,15 +1056,10 @@ final class AccessibilityInteractionController {
                 AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
             final int parentVirtualDescendantId =
                 AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-            if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
+            if (parentVirtualDescendantId != AccessibilityNodeProvider.HOST_VIEW_ID
                     || parentAccessibilityViewId == providerHost.getAccessibilityViewId()) {
-                final AccessibilityNodeInfo parent;
-                if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                    parent = provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
-                } else {
-                    parent = provider.createAccessibilityNodeInfo(
-                            AccessibilityNodeProvider.HOST_VIEW_ID);
-                }
+                final AccessibilityNodeInfo parent =
+                        provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
                 if (parent != null) {
                     final int childCount = parent.getChildCount();
                     for (int i = 0; i < childCount; i++) {
@@ -1158,12 +1109,12 @@ final class AccessibilityInteractionController {
     }
 
     private class PrivateHandler extends Handler {
-        private final static int MSG_PERFORM_ACCESSIBILITY_ACTION = 1;
-        private final static int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID = 2;
-        private final static int MSG_FIND_ACCESSIBILITY_NODE_INFOS_BY_VIEW_ID = 3;
-        private final static int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_TEXT = 4;
-        private final static int MSG_FIND_FOCUS = 5;
-        private final static int MSG_FOCUS_SEARCH = 6;
+        private static final int MSG_PERFORM_ACCESSIBILITY_ACTION = 1;
+        private static final int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID = 2;
+        private static final int MSG_FIND_ACCESSIBILITY_NODE_INFOS_BY_VIEW_ID = 3;
+        private static final int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_TEXT = 4;
+        private static final int MSG_FIND_FOCUS = 5;
+        private static final int MSG_FOCUS_SEARCH = 6;
 
         public PrivateHandler(Looper looper) {
             super(looper);

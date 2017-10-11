@@ -795,34 +795,57 @@ public class ServiceState implements Parcelable {
         return rtString;
     }
 
+    /**
+     * Convert RIL Service State to String
+     *
+     * @param serviceState
+     * @return String representation of the ServiceState
+     *
+     * @hide
+     */
+    public static String rilServiceStateToString(int serviceState) {
+        switch(serviceState) {
+            case STATE_IN_SERVICE:
+                return "IN_SERVICE";
+            case STATE_OUT_OF_SERVICE:
+                return "OUT_OF_SERVICE";
+            case STATE_EMERGENCY_ONLY:
+                return "EMERGENCY_ONLY";
+            case STATE_POWER_OFF:
+                return "POWER_OFF";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     @Override
     public String toString() {
-        String radioTechnology = rilRadioTechnologyToString(mRilVoiceRadioTechnology);
-        String dataRadioTechnology = rilRadioTechnologyToString(mRilDataRadioTechnology);
-
-        return (mVoiceRegState + " " + mDataRegState
-                + " "
-                + "voice " + getRoamingLogString(mVoiceRoamingType)
-                + " "
-                + "data " + getRoamingLogString(mDataRoamingType)
-                + " " + mVoiceOperatorAlphaLong
-                + " " + mVoiceOperatorAlphaShort
-                + " " + mVoiceOperatorNumeric
-                + " " + mDataOperatorAlphaLong
-                + " " + mDataOperatorAlphaShort
-                + " " + mDataOperatorNumeric
-                + " " + (mIsManualNetworkSelection ? "(manual)" : "")
-                + " " + radioTechnology
-                + " " + dataRadioTechnology
-                + " " + (mCssIndicator ? "CSS supported" : "CSS not supported")
-                + " " + mNetworkId
-                + " " + mSystemId
-                + " RoamInd=" + mCdmaRoamingIndicator
-                + " DefRoamInd=" + mCdmaDefaultRoamingIndicator
-                + " EmergOnly=" + mIsEmergencyOnly
-                + " IsDataRoamingFromRegistration=" + mIsDataRoamingFromRegistration
-                + " IsUsingCarrierAggregation=" + mIsUsingCarrierAggregation
-                + " mLteEarfcnRsrpBoost=" + mLteEarfcnRsrpBoost);
+        return new StringBuilder().append("{mVoiceRegState=").append(mVoiceRegState)
+            .append("(" + rilServiceStateToString(mVoiceRegState) + ")")
+            .append(", mDataRegState=").append(mDataRegState)
+            .append("(" + rilServiceStateToString(mDataRegState) + ")")
+            .append(", mVoiceRoamingType=").append(getRoamingLogString(mVoiceRoamingType))
+            .append(", mDataRoamingType=").append(getRoamingLogString(mDataRoamingType))
+            .append(", mVoiceOperatorAlphaLong=").append(mVoiceOperatorAlphaLong)
+            .append(", mVoiceOperatorAlphaShort=").append(mVoiceOperatorAlphaShort)
+            .append(", mDataOperatorAlphaLong=").append(mDataOperatorAlphaLong)
+            .append(", mDataOperatorAlphaShort=").append(mDataOperatorAlphaShort)
+            .append(", isManualNetworkSelection=").append(mIsManualNetworkSelection)
+            .append(mIsManualNetworkSelection ? "(manual)" : "(automatic)")
+            .append(", mRilVoiceRadioTechnology=").append(mRilVoiceRadioTechnology)
+            .append("(" + rilRadioTechnologyToString(mRilVoiceRadioTechnology) + ")")
+            .append(", mRilDataRadioTechnology=").append(mRilDataRadioTechnology)
+            .append("(" + rilRadioTechnologyToString(mRilDataRadioTechnology) + ")")
+            .append(", mCssIndicator=").append(mCssIndicator ? "supported" : "unsupported")
+            .append(", mNetworkId=").append(mNetworkId)
+            .append(", mSystemId=").append(mSystemId)
+            .append(", mCdmaRoamingIndicator=").append(mCdmaRoamingIndicator)
+            .append(", mCdmaDefaultRoamingIndicator=").append(mCdmaDefaultRoamingIndicator)
+            .append(", mIsEmergencyOnly=").append(mIsEmergencyOnly)
+            .append(", mIsDataRoamingFromRegistration=").append(mIsDataRoamingFromRegistration)
+            .append(", mIsUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
+            .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
+            .append("}").toString();
     }
 
     private void setNullState(int state) {

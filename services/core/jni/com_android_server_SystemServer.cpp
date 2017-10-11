@@ -15,9 +15,13 @@
  */
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
+#include <hidl/HidlTransportSupport.h>
+
+#include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
+#include <sensorservicehidl/SensorManager.h>
 
 #include <cutils/properties.h>
 #include <utils/Log.h>
@@ -26,19 +30,36 @@
 
 namespace android {
 
-static int start_sensor_service(void* /*unused*/) {
-    SensorService::instantiate();
-    return 0;
-}
-
 static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
     char propBuf[PROPERTY_VALUE_MAX];
     property_get("system_init.startsensorservice", propBuf, "1");
     if (strcmp(propBuf, "1") == 0) {
-        // Start the sensor service in a new thread
-        createThreadEtc(start_sensor_service, nullptr,
-                        "StartSensorThread", PRIORITY_FOREGROUND);
+        SensorService::instantiate();
     }
+
+}
+
+static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /* clazz */) {
+    using ::android::frameworks::schedulerservice::V1_0::ISchedulingPolicyService;
+    using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
+    using ::android::frameworks::sensorservice::V1_0::ISensorManager;
+    using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
+    using ::android::hardware::configureRpcThreadpool;
+
+    status_t err;
+
+    configureRpcThreadpool(5, false /* callerWillJoin */);
+
+    JavaVM *vm;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
+
+    sp<ISensorManager> sensorService = new SensorManager(vm);
+    err = sensorService->registerAsService();
+    ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+
+    sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
+    err = schedulingService->registerAsService();
+    ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
 }
 
 /*
@@ -47,6 +68,7 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
+    { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)

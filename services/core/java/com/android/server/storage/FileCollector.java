@@ -17,13 +17,17 @@
 package com.android.server.storage;
 
 import android.annotation.IntDef;
+import android.app.usage.ExternalStorageStats;
+import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.ArrayMap;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
@@ -154,21 +158,58 @@ public class FileCollector {
     }
 
     /**
+     * Returns the file categorization result for the primary internal storage UUID.
+     *
+     * @param context
+     */
+    public static MeasurementResult getMeasurementResult(Context context) {
+        MeasurementResult result = new MeasurementResult();
+        StorageStatsManager ssm =
+                (StorageStatsManager) context.getSystemService(Context.STORAGE_STATS_SERVICE);
+        ExternalStorageStats stats = null;
+        try {
+            stats =
+                    ssm.queryExternalStatsForUser(
+                            StorageManager.UUID_PRIVATE_INTERNAL,
+                            UserHandle.of(context.getUserId()));
+            result.imagesSize = stats.getImageBytes();
+            result.videosSize = stats.getVideoBytes();
+            result.audioSize = stats.getAudioBytes();
+            result.miscSize =
+                    stats.getTotalBytes()
+                            - result.imagesSize
+                            - result.videosSize
+                            - result.audioSize;
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not query storage");
+        }
+
+        return result;
+    }
+
+    /**
      * Returns the size of a system for a given context. This is done by finding the difference
      * between the shared data and the total primary storage size.
+     *
      * @param context Context to use to get storage information.
      */
     public static long getSystemSize(Context context) {
         PackageManager pm = context.getPackageManager();
         VolumeInfo primaryVolume = pm.getPrimaryStorageCurrentVolume();
 
-        StorageManager sm = context.getSystemService(StorageManager.class);
+        StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         VolumeInfo shared = sm.findEmulatedForPrivate(primaryVolume);
         if (shared == null) {
             return 0;
         }
 
-        final long sharedDataSize = shared.getPath().getTotalSpace();
+        // In some cases, the path may be null -- we can't determine the size in this case.
+        final File sharedPath = shared.getPath();
+        if (sharedPath == null) {
+          return 0;
+        }
+
+        final long sharedDataSize = sharedPath.getTotalSpace();
         long systemSize = sm.getPrimaryStorageSize() - sharedDataSize;
 
         // This case is not exceptional -- we just fallback to the shared data volume in this case.

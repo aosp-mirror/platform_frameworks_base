@@ -16,6 +16,7 @@
 
 package com.android.systemui.power;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,14 +31,14 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-
+import com.android.systemui.statusbar.phone.StatusBar;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -75,7 +76,10 @@ public class PowerUI extends SystemUI {
         mHardwarePropertiesManager = (HardwarePropertiesManager)
                 mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
-        mWarnings = new PowerNotificationWarnings(mContext, getComponent(PhoneStatusBar.class));
+        mWarnings = new PowerNotificationWarnings(
+                mContext,
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE),
+                getComponent(StatusBar.class));
 
         ContentObserver obs = new ContentObserver(mHandler) {
             @Override
@@ -89,6 +93,10 @@ public class PowerUI extends SystemUI {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+
+        // Check to see if we need to let the user know that the phone previously shut down due
+        // to the temperature being too high.
+        showThermalShutdownDialog();
 
         initTemperatureWarning();
     }
@@ -151,8 +159,6 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
@@ -255,6 +261,13 @@ public class PowerUI extends SystemUI {
         updateTemperatureWarning();
     }
 
+    private void showThermalShutdownDialog() {
+        if (mPowerManager.getLastShutdownReason()
+                == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
+            mWarnings.showThermalShutdownWarning();
+        }
+    }
+
     private void updateTemperatureWarning() {
         float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
                 HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
@@ -263,13 +276,13 @@ public class PowerUI extends SystemUI {
             float temp = temps[0];
             mRecentTemps[mNumTemps++] = temp;
 
-            PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
-            if (phoneStatusBar != null && !phoneStatusBar.isDeviceInVrMode()
+            StatusBar statusBar = getComponent(StatusBar.class);
+            if (statusBar != null && !statusBar.isDeviceInVrMode()
                     && temp >= mThresholdTemp) {
                 logAtTemperatureThreshold(temp);
-                mWarnings.showTemperatureWarning();
+                mWarnings.showHighTemperatureWarning();
             } else {
-                mWarnings.dismissTemperatureWarning();
+                mWarnings.dismissHighTemperatureWarning();
             }
         }
 
@@ -368,8 +381,9 @@ public class PowerUI extends SystemUI {
         void showInvalidChargerWarning();
         void updateLowBatteryWarning();
         boolean isInvalidChargerWarningShowing();
-        void dismissTemperatureWarning();
-        void showTemperatureWarning();
+        void dismissHighTemperatureWarning();
+        void showHighTemperatureWarning();
+        void showThermalShutdownWarning();
         void dump(PrintWriter pw);
         void userSwitched();
     }

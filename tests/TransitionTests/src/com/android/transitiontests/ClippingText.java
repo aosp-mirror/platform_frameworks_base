@@ -42,7 +42,7 @@ public class ClippingText extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.clipping_text_1);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
         mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.clipping_text_1, this);

@@ -56,10 +56,8 @@ public class PatternMatcher implements Parcelable {
      * with full support for character ranges and the not ({@code ^}) modifier.
      * Supported modifiers include star ({@code *}) for zero-or-more, plus ({@code +})
      * for one-or-more and full range ({@code {...}}) support. This is a simple
-     * evaulation implementation in which matching is done against the pattern in
-     * realtime with no backtracking support.
-     *
-     * {@hide} Pending approval for public API
+     * evaluation implementation in which matching is done against the pattern in
+     * real time with no backtracking support.
      */
     public static final int PATTERN_ADVANCED_GLOB = 3;
 

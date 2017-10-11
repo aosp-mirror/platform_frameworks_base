@@ -49,7 +49,7 @@ public class ContactsExpansion extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contacts_list);
-        ViewGroup contactsContainer = (ViewGroup) findViewById(R.id.contactsContainer);
+        ViewGroup contactsContainer = findViewById(R.id.contactsContainer);
 
         int contactsIndex = 0;
         addContact(contactsContainer, contactsIndex, R.drawable.self_portrait_square_100);

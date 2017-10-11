@@ -394,33 +394,42 @@ public final class PageRangeUtils {
         return pageRanges.getStart() == 0 && pageRanges.getEnd() == pageCount - 1;
     }
 
-    public static PageRange[] computePrintedPages(PageRange[] requestedPages,
-            PageRange[] writtenPages, int pageCount) {
+    /**
+     * Compute the pages of the file that correspond to the requested pages in the doc.
+     *
+     * @param pagesInDocRequested The requested pages, doc-indexed
+     * @param pagesWrittenToFile The pages in the file
+     * @param pageCount The number of pages in the doc
+     *
+     * @return The pages, file-indexed
+     */
+    public static PageRange[] computeWhichPagesInFileToPrint(PageRange[] pagesInDocRequested,
+            PageRange[] pagesWrittenToFile, int pageCount) {
         // Adjust the print job pages based on what was requested and written.
         // The cases are ordered in the most expected to the least expected
         // with a special case first where the app does not know the page count
         // so we ask for all to be written.
-        if (Arrays.equals(requestedPages, ALL_PAGES_RANGE)
+        if (Arrays.equals(pagesInDocRequested, ALL_PAGES_RANGE)
                 && pageCount == PrintDocumentInfo.PAGE_COUNT_UNKNOWN) {
             return ALL_PAGES_RANGE;
-        } else if (Arrays.equals(writtenPages, requestedPages)) {
+        } else if (Arrays.equals(pagesWrittenToFile, pagesInDocRequested)) {
             // We got a document with exactly the pages we wanted. Hence,
             // the printer has to print all pages in the data.
             return ALL_PAGES_RANGE;
-        } else if (Arrays.equals(writtenPages, ALL_PAGES_RANGE)) {
+        } else if (Arrays.equals(pagesWrittenToFile, ALL_PAGES_RANGE)) {
             // We requested specific pages but got all of them. Hence,
             // the printer has to print only the requested pages.
-            return requestedPages;
-        } else if (PageRangeUtils.contains(writtenPages, requestedPages, pageCount)) {
+            return pagesInDocRequested;
+        } else if (PageRangeUtils.contains(pagesWrittenToFile, pagesInDocRequested, pageCount)) {
             // We requested specific pages and got more but not all pages.
             // Hence, we have to offset appropriately the printed pages to
             // be based off the start of the written ones instead of zero.
             // The written pages are always non-null and not empty.
-            final int offset = -writtenPages[0].getStart();
-            PageRangeUtils.offset(requestedPages, offset);
-            return requestedPages;
-        } else if (Arrays.equals(requestedPages, ALL_PAGES_RANGE)
-                && isAllPages(writtenPages, pageCount)) {
+            final int offset = -pagesWrittenToFile[0].getStart();
+            PageRangeUtils.offset(pagesInDocRequested.clone(), offset);
+            return pagesInDocRequested;
+        } else if (Arrays.equals(pagesInDocRequested, ALL_PAGES_RANGE)
+                && isAllPages(pagesWrittenToFile, pageCount)) {
             // We requested all pages via the special constant and got all
             // of them as an explicit enumeration. Hence, the printer has
             // to print only the requested pages.

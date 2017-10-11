@@ -36,7 +36,15 @@
     <declare-styleable name="WifiEncryptionState">
         <attr name="state_encrypted" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="WifiMeteredState">
+        <attr name="state_metered" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="WifiSavedState">
+        <attr name="state_saved" format="boolean" />
+    </declare-styleable>
+
     <attr name="wifi_signal" format="reference" />
+    <attr name="wifi_friction" format="reference" />
 
     <declare-styleable name="UsageView">
         <attr name="android:colorAccent" />

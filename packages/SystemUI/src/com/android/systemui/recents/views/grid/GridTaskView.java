@@ -51,7 +51,7 @@ public class GridTaskView extends TaskView {
         // Show the full thumbnail and don't overlap with the header.
         mThumbnailView.setSizeToFit(true);
         mThumbnailView.setOverlayHeaderOnThumbnailActionBar(false);
-        mThumbnailView.updateThumbnailScale();
+        mThumbnailView.updateThumbnailMatrix();
         mThumbnailView.setTranslationY(mHeaderHeight);
         mHeaderView.setShouldDarkenBackgroundColor(true);
     }

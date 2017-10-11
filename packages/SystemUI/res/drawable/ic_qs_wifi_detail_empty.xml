@@ -17,9 +17,11 @@ Copyright (C) 2014 The Android Open Source Project
         android:width="56dp"
         android:height="56dp"
         android:viewportWidth="48.0"
-        android:viewportHeight="48.0">
+        android:viewportHeight="48.0"
+        android:alpha="0.14"
+        android:tint="?android:attr/colorForeground">
 
     <path
         android:pathData="M24.0,4.0C15.0,4.0 6.7,7.0 0.0,12.0l24.0,32.0l24.0,-32.0C41.3,7.0 33.0,4.0 24.0,4.0z"
-        android:fillColor="@color/qs_detail_empty" />
+        android:fillColor="#FFFFFF" />
 </vector>

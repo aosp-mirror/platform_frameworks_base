@@ -15,68 +15,82 @@
  */
 
 #include "Locale.h"
-#include "util/Util.h"
 
-#include <gtest/gtest.h>
 #include <string>
+
+#include "gtest/gtest.h"
+
+#include "util/Util.h"
 
 namespace aapt {
 
-static ::testing::AssertionResult TestLanguage(const char* input, const char* lang) {
-    std::vector<std::string> parts = util::splitAndLowercase(std::string(input), '-');
-    LocaleValue lv;
-    ssize_t count = lv.initFromParts(std::begin(parts), std::end(parts));
-    if (count < 0) {
-        return ::testing::AssertionFailure() << " failed to parse '" << input << "'.";
-    }
+static ::testing::AssertionResult TestLanguage(const char* input,
+                                               const char* lang) {
+  std::vector<std::string> parts = util::SplitAndLowercase(input, '-');
+  LocaleValue lv;
+  ssize_t count = lv.InitFromParts(std::begin(parts), std::end(parts));
+  if (count < 0) {
+    return ::testing::AssertionFailure() << " failed to parse '" << input
+                                         << "'.";
+  }
 
-    if (count != 1) {
-        return ::testing::AssertionFailure() << count
-            << " parts were consumed parsing '" << input << "' but expected 1.";
-    }
+  if (count != 1) {
+    return ::testing::AssertionFailure()
+           << count << " parts were consumed parsing '" << input
+           << "' but expected 1.";
+  }
 
-    if (memcmp(lv.language, lang, std::min(strlen(lang), sizeof(lv.language))) != 0) {
-        return ::testing::AssertionFailure() << "expected " << lang << " but got "
-            << std::string(lv.language, sizeof(lv.language)) << ".";
-    }
+  if (memcmp(lv.language, lang, std::min(strlen(lang), sizeof(lv.language))) !=
+      0) {
+    return ::testing::AssertionFailure()
+           << "expected " << lang << " but got "
+           << std::string(lv.language, sizeof(lv.language)) << ".";
+  }
 
-    return ::testing::AssertionSuccess();
+  return ::testing::AssertionSuccess();
 }
 
-static ::testing::AssertionResult TestLanguageRegion(const char* input, const char* lang,
+static ::testing::AssertionResult TestLanguageRegion(const char* input,
+                                                     const char* lang,
                                                      const char* region) {
-    std::vector<std::string> parts = util::splitAndLowercase(std::string(input), '-');
-    LocaleValue lv;
-    ssize_t count = lv.initFromParts(std::begin(parts), std::end(parts));
-    if (count < 0) {
-        return ::testing::AssertionFailure() << " failed to parse '" << input << "'.";
-    }
+  std::vector<std::string> parts = util::SplitAndLowercase(input, '-');
+  LocaleValue lv;
+  ssize_t count = lv.InitFromParts(std::begin(parts), std::end(parts));
+  if (count < 0) {
+    return ::testing::AssertionFailure() << " failed to parse '" << input
+                                         << "'.";
+  }
 
-    if (count != 2) {
-        return ::testing::AssertionFailure() << count
-            << " parts were consumed parsing '" << input << "' but expected 2.";
-    }
+  if (count != 2) {
+    return ::testing::AssertionFailure()
+           << count << " parts were consumed parsing '" << input
+           << "' but expected 2.";
+  }
 
-    if (memcmp(lv.language, lang, std::min(strlen(lang), sizeof(lv.language))) != 0) {
-        return ::testing::AssertionFailure() << "expected " << input << " but got "
-            << std::string(lv.language, sizeof(lv.language)) << ".";
-    }
+  if (memcmp(lv.language, lang, std::min(strlen(lang), sizeof(lv.language))) !=
+      0) {
+    return ::testing::AssertionFailure()
+           << "expected " << input << " but got "
+           << std::string(lv.language, sizeof(lv.language)) << ".";
+  }
 
-    if (memcmp(lv.region, region, std::min(strlen(region), sizeof(lv.region))) != 0) {
-        return ::testing::AssertionFailure() << "expected " << region << " but got "
-            << std::string(lv.region, sizeof(lv.region)) << ".";
-    }
+  if (memcmp(lv.region, region, std::min(strlen(region), sizeof(lv.region))) !=
+      0) {
+    return ::testing::AssertionFailure()
+           << "expected " << region << " but got "
+           << std::string(lv.region, sizeof(lv.region)) << ".";
+  }
 
-    return ::testing::AssertionSuccess();
+  return ::testing::AssertionSuccess();
 }
 
 TEST(ConfigDescriptionTest, ParseLanguage) {
-    EXPECT_TRUE(TestLanguage("en", "en"));
-    EXPECT_TRUE(TestLanguage("fr", "fr"));
-    EXPECT_FALSE(TestLanguage("land", ""));
-    EXPECT_TRUE(TestLanguage("fr-land", "fr"));
+  EXPECT_TRUE(TestLanguage("en", "en"));
+  EXPECT_TRUE(TestLanguage("fr", "fr"));
+  EXPECT_FALSE(TestLanguage("land", ""));
+  EXPECT_TRUE(TestLanguage("fr-land", "fr"));
 
-    EXPECT_TRUE(TestLanguageRegion("fr-rCA", "fr", "CA"));
+  EXPECT_TRUE(TestLanguageRegion("fr-rCA", "fr", "CA"));
 }
 
-} // namespace aapt
+}  // namespace aapt

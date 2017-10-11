@@ -26,7 +26,7 @@
 
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_media_Utils.h"
 
 using namespace android;

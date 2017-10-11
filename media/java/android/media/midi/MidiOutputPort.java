@@ -28,6 +28,7 @@ import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -91,17 +92,17 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
     };
 
     /* package */ MidiOutputPort(IMidiDeviceServer server, IBinder token,
-            ParcelFileDescriptor pfd, int portNumber) {
+            FileDescriptor fd, int portNumber) {
         mDeviceServer = server;
         mToken = token;
         mPortNumber = portNumber;
-        mInputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        mInputStream = new ParcelFileDescriptor.AutoCloseInputStream(new ParcelFileDescriptor(fd));
         mThread.start();
         mGuard.open("close");
     }
 
-    /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
-        this(null, null, pfd, portNumber);
+    /* package */ MidiOutputPort(FileDescriptor fd, int portNumber) {
+        this(null, null, fd, portNumber);
     }
 
     /**

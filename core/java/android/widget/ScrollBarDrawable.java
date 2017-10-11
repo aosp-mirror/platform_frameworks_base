@@ -16,14 +16,14 @@
 
 package android.widget;
 
-import com.android.internal.widget.ScrollBarUtils;
-
 import android.annotation.NonNull;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+
+import com.android.internal.widget.ScrollBarUtils;
 
 /**
  * This is only used by View for displaying its scroll bars. It should probably

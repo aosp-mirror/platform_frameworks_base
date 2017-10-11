@@ -31,6 +31,13 @@ public final class ServiceManager {
     }
 
     /**
+     * Is not supposed to return null, but that is fine for layoutlib.
+     */
+    public static IBinder getServiceOrThrow(String name) throws ServiceNotFoundException {
+        throw new ServiceNotFoundException(name);
+    }
+
+    /**
      * Place a new @a service called @a name into the service
      * manager.
      *
@@ -70,5 +77,19 @@ public final class ServiceManager {
      */
     public static void initServiceCache(Map<String, IBinder> cache) {
         // pass
+    }
+
+    /**
+     * Exception thrown when no service published for given name. This might be
+     * thrown early during boot before certain services have published
+     * themselves.
+     *
+     * @hide
+     */
+    public static class ServiceNotFoundException extends Exception {
+        // identical to the original implementation
+        public ServiceNotFoundException(String name) {
+            super("No service published for: " + name);
+        }
     }
 }

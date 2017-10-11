@@ -18,7 +18,6 @@ package com.android.server.usage;
 
 import android.os.Environment;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -101,7 +100,7 @@ public class AppIdleHistory {
         mElapsedSnapshot = elapsedRealtime;
         mScreenOnSnapshot = elapsedRealtime;
         mStorageDir = storageDir;
-        readScreenOnTimeLocked();
+        readScreenOnTime();
     }
 
     public void setThresholds(long elapsedTimeThreshold, long screenOnTimeThreshold) {
@@ -109,7 +108,7 @@ public class AppIdleHistory {
         mScreenOnTimeThreshold = screenOnTimeThreshold;
     }
 
-    public void updateDisplayLocked(boolean screenOn, long elapsedRealtime) {
+    public void updateDisplay(boolean screenOn, long elapsedRealtime) {
         if (screenOn == mScreenOn) return;
 
         mScreenOn = screenOn;
@@ -122,7 +121,7 @@ public class AppIdleHistory {
         }
     }
 
-    public long getScreenOnTimeLocked(long elapsedRealtime) {
+    public long getScreenOnTime(long elapsedRealtime) {
         long screenOnTime = mScreenOnDuration;
         if (mScreenOn) {
             screenOnTime += elapsedRealtime - mScreenOnSnapshot;
@@ -135,7 +134,7 @@ public class AppIdleHistory {
         return new File(mStorageDir, "screen_on_time");
     }
 
-    private void readScreenOnTimeLocked() {
+    private void readScreenOnTime() {
         File screenOnTimeFile = getScreenOnTimeFile();
         if (screenOnTimeFile.exists()) {
             try {
@@ -146,11 +145,11 @@ public class AppIdleHistory {
             } catch (IOException | NumberFormatException e) {
             }
         } else {
-            writeScreenOnTimeLocked();
+            writeScreenOnTime();
         }
     }
 
-    private void writeScreenOnTimeLocked() {
+    private void writeScreenOnTime() {
         AtomicFile screenOnTimeFile = new AtomicFile(getScreenOnTimeFile());
         FileOutputStream fos = null;
         try {
@@ -166,30 +165,30 @@ public class AppIdleHistory {
     /**
      * To be called periodically to keep track of elapsed time when app idle times are written
      */
-    public void writeAppIdleDurationsLocked() {
+    public void writeAppIdleDurations() {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         // Only bump up and snapshot the elapsed time. Don't change screen on duration.
         mElapsedDuration += elapsedRealtime - mElapsedSnapshot;
         mElapsedSnapshot = elapsedRealtime;
-        writeScreenOnTimeLocked();
+        writeScreenOnTime();
     }
 
-    public void reportUsageLocked(String packageName, int userId, long elapsedRealtime) {
-        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
-        PackageHistory packageHistory = getPackageHistoryLocked(userHistory, packageName,
+    public void reportUsage(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, PackageHistory> userHistory = getUserHistory(userId);
+        PackageHistory packageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime);
 
         shiftHistoryToNow(userHistory, elapsedRealtime);
 
         packageHistory.lastUsedElapsedTime = mElapsedDuration
                 + (elapsedRealtime - mElapsedSnapshot);
-        packageHistory.lastUsedScreenTime = getScreenOnTimeLocked(elapsedRealtime);
+        packageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
         packageHistory.recent[HISTORY_SIZE - 1] = FLAG_LAST_STATE | FLAG_PARTIAL_ACTIVE;
     }
 
     public void setIdle(String packageName, int userId, long elapsedRealtime) {
-        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
-        PackageHistory packageHistory = getPackageHistoryLocked(userHistory, packageName,
+        ArrayMap<String, PackageHistory> userHistory = getUserHistory(userId);
+        PackageHistory packageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime);
 
         shiftHistoryToNow(userHistory, elapsedRealtime);
@@ -222,23 +221,23 @@ public class AppIdleHistory {
         mLastPeriod = thisPeriod;
     }
 
-    private ArrayMap<String, PackageHistory> getUserHistoryLocked(int userId) {
+    private ArrayMap<String, PackageHistory> getUserHistory(int userId) {
         ArrayMap<String, PackageHistory> userHistory = mIdleHistory.get(userId);
         if (userHistory == null) {
             userHistory = new ArrayMap<>();
             mIdleHistory.put(userId, userHistory);
-            readAppIdleTimesLocked(userId, userHistory);
+            readAppIdleTimes(userId, userHistory);
         }
         return userHistory;
     }
 
-    private PackageHistory getPackageHistoryLocked(ArrayMap<String, PackageHistory> userHistory,
+    private PackageHistory getPackageHistory(ArrayMap<String, PackageHistory> userHistory,
             String packageName, long elapsedRealtime) {
         PackageHistory packageHistory = userHistory.get(packageName);
         if (packageHistory == null) {
             packageHistory = new PackageHistory();
-            packageHistory.lastUsedElapsedTime = getElapsedTimeLocked(elapsedRealtime);
-            packageHistory.lastUsedScreenTime = getScreenOnTimeLocked(elapsedRealtime);
+            packageHistory.lastUsedElapsedTime = getElapsedTime(elapsedRealtime);
+            packageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
             userHistory.put(packageName, packageHistory);
         }
         return packageHistory;
@@ -248,41 +247,41 @@ public class AppIdleHistory {
         mIdleHistory.remove(userId);
     }
 
-    public boolean isIdleLocked(String packageName, int userId, long elapsedRealtime) {
-        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
+    public boolean isIdle(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, PackageHistory> userHistory = getUserHistory(userId);
         PackageHistory packageHistory =
-                getPackageHistoryLocked(userHistory, packageName, elapsedRealtime);
+                getPackageHistory(userHistory, packageName, elapsedRealtime);
         if (packageHistory == null) {
             return false; // Default to not idle
         } else {
-            return hasPassedThresholdsLocked(packageHistory, elapsedRealtime);
+            return hasPassedThresholds(packageHistory, elapsedRealtime);
         }
     }
 
-    private long getElapsedTimeLocked(long elapsedRealtime) {
+    private long getElapsedTime(long elapsedRealtime) {
         return (elapsedRealtime - mElapsedSnapshot + mElapsedDuration);
     }
 
-    public void setIdleLocked(String packageName, int userId, boolean idle, long elapsedRealtime) {
-        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
-        PackageHistory packageHistory = getPackageHistoryLocked(userHistory, packageName,
+    public void setIdle(String packageName, int userId, boolean idle, long elapsedRealtime) {
+        ArrayMap<String, PackageHistory> userHistory = getUserHistory(userId);
+        PackageHistory packageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime);
-        packageHistory.lastUsedElapsedTime = getElapsedTimeLocked(elapsedRealtime)
+        packageHistory.lastUsedElapsedTime = getElapsedTime(elapsedRealtime)
                 - mElapsedTimeThreshold;
-        packageHistory.lastUsedScreenTime = getScreenOnTimeLocked(elapsedRealtime)
+        packageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime)
                 - (idle ? mScreenOnTimeThreshold : 0) - 1000 /* just a second more */;
     }
 
-    public void clearUsageLocked(String packageName, int userId) {
-        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
+    public void clearUsage(String packageName, int userId) {
+        ArrayMap<String, PackageHistory> userHistory = getUserHistory(userId);
         userHistory.remove(packageName);
     }
 
-    private boolean hasPassedThresholdsLocked(PackageHistory packageHistory, long elapsedRealtime) {
+    private boolean hasPassedThresholds(PackageHistory packageHistory, long elapsedRealtime) {
         return (packageHistory.lastUsedScreenTime
-                    <= getScreenOnTimeLocked(elapsedRealtime) - mScreenOnTimeThreshold)
+                    <= getScreenOnTime(elapsedRealtime) - mScreenOnTimeThreshold)
                 && (packageHistory.lastUsedElapsedTime
-                        <= getElapsedTimeLocked(elapsedRealtime) - mElapsedTimeThreshold);
+                        <= getElapsedTime(elapsedRealtime) - mElapsedTimeThreshold);
     }
 
     private File getUserFile(int userId) {
@@ -290,7 +289,7 @@ public class AppIdleHistory {
                 Integer.toString(userId)), APP_IDLE_FILENAME);
     }
 
-    private void readAppIdleTimesLocked(int userId, ArrayMap<String, PackageHistory> userHistory) {
+    private void readAppIdleTimes(int userId, ArrayMap<String, PackageHistory> userHistory) {
         FileInputStream fis = null;
         try {
             AtomicFile appIdleFile = new AtomicFile(getUserFile(userId));
@@ -332,7 +331,7 @@ public class AppIdleHistory {
         }
     }
 
-    public void writeAppIdleTimesLocked(int userId) {
+    public void writeAppIdleTimes(int userId) {
         FileOutputStream fos = null;
         AtomicFile appIdleFile = new AtomicFile(getUserFile(userId));
         try {
@@ -346,7 +345,7 @@ public class AppIdleHistory {
 
             xml.startTag(null, TAG_PACKAGES);
 
-            ArrayMap<String,PackageHistory> userHistory = getUserHistoryLocked(userId);
+            ArrayMap<String,PackageHistory> userHistory = getUserHistory(userId);
             final int N = userHistory.size();
             for (int i = 0; i < N; i++) {
                 String packageName = userHistory.keyAt(i);
@@ -374,8 +373,8 @@ public class AppIdleHistory {
         idpw.increaseIndent();
         ArrayMap<String, PackageHistory> userHistory = mIdleHistory.get(userId);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-        final long totalElapsedTime = getElapsedTimeLocked(elapsedRealtime);
-        final long screenOnTime = getScreenOnTimeLocked(elapsedRealtime);
+        final long totalElapsedTime = getElapsedTime(elapsedRealtime);
+        final long screenOnTime = getScreenOnTime(elapsedRealtime);
         if (userHistory == null) return;
         final int P = userHistory.size();
         for (int p = 0; p < P; p++) {
@@ -386,15 +385,15 @@ public class AppIdleHistory {
             TimeUtils.formatDuration(totalElapsedTime - packageHistory.lastUsedElapsedTime, idpw);
             idpw.print(" lastUsedScreenOn=");
             TimeUtils.formatDuration(screenOnTime - packageHistory.lastUsedScreenTime, idpw);
-            idpw.print(" idle=" + (isIdleLocked(packageName, userId, elapsedRealtime) ? "y" : "n"));
+            idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
             idpw.println();
         }
         idpw.println();
         idpw.print("totalElapsedTime=");
-        TimeUtils.formatDuration(getElapsedTimeLocked(elapsedRealtime), idpw);
+        TimeUtils.formatDuration(getElapsedTime(elapsedRealtime), idpw);
         idpw.println();
         idpw.print("totalScreenOnTime=");
-        TimeUtils.formatDuration(getScreenOnTimeLocked(elapsedRealtime), idpw);
+        TimeUtils.formatDuration(getScreenOnTime(elapsedRealtime), idpw);
         idpw.println();
         idpw.decreaseIndent();
     }
@@ -410,7 +409,7 @@ public class AppIdleHistory {
             for (int i = 0; i < HISTORY_SIZE; i++) {
                 idpw.print(history[i] == 0 ? '.' : 'A');
             }
-            idpw.print(" idle=" + (isIdleLocked(packageName, userId, elapsedRealtime) ? "y" : "n"));
+            idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
             idpw.print("  " + packageName);
             idpw.println();
         }

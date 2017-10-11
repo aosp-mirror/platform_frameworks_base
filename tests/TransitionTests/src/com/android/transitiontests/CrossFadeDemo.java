@@ -38,7 +38,7 @@ public class CrossFadeDemo extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.crossfade);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
         mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.crossfade, this);

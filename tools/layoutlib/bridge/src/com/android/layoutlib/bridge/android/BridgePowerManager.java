@@ -18,6 +18,8 @@ package com.android.layoutlib.bridge.android;
 
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.PowerManager;
+import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.WorkSource;
 
@@ -40,6 +42,10 @@ public class BridgePowerManager implements IPowerManager {
     @Override
     public boolean setPowerSaveMode(boolean mode) throws RemoteException {
         return false;
+    }
+
+    public PowerSaveState getPowerSaveState(int serviceType) {
+        return null;
     }
 
     @Override
@@ -164,5 +170,10 @@ public class BridgePowerManager implements IPowerManager {
     @Override
     public boolean isScreenBrightnessBoosted() throws RemoteException {
         return false;
+    }
+
+    @Override
+    public int getLastShutdownReason() {
+        return PowerManager.SHUTDOWN_REASON_UNKNOWN;
     }
 }

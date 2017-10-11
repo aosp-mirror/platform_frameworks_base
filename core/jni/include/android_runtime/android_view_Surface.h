@@ -18,6 +18,7 @@
 #define _ANDROID_VIEW_SURFACE_H
 
 #include <android/native_window.h>
+#include <system/graphics.h>
 
 #include "jni.h"
 
@@ -42,12 +43,14 @@ enum class PublicFormat {
     NV16              = 0x10,
     NV21              = 0x11,
     YUY2              = 0x14,
+    RGBA_FP16         = 0x16,
     RAW_SENSOR        = 0x20,
     PRIVATE           = 0x22,
     YUV_420_888       = 0x23,
     RAW_PRIVATE       = 0x24,
     RAW10             = 0x25,
     RAW12             = 0x26,
+    RGBA_1010102      = 0x2b,
     JPEG              = 0x100,
     DEPTH_POINT_CLOUD = 0x101,
     YV12              = 0x32315659,
@@ -65,6 +68,10 @@ extern bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj);
 
 /* Gets the underlying Surface from a Surface Java object. */
 extern sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj);
+
+/* Creates a Surface from an android::Surface. */
+extern jobject android_view_Surface_createFromSurface(JNIEnv* env,
+        const sp<Surface>& surface);
 
 /* Creates a Surface from an IGraphicBufferProducer. */
 extern jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,

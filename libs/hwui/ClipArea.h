@@ -146,7 +146,6 @@ public:
     void setClip(float left, float top, float right, float bottom);
     void clipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
-    void clipRegion(const SkRegion& region, SkRegion::Op op);
     void clipPathWithTransform(const SkPath& path, const mat4* transform,
             SkRegion::Op op);
 
@@ -195,6 +194,7 @@ private:
     void regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
 
+    void clipRegion(const SkRegion& region, SkRegion::Op op);
     void ensureClipRegion();
     void onClipRegionUpdated();
 

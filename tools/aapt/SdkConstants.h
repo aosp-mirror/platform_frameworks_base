@@ -39,6 +39,9 @@ enum {
     SDK_LOLLIPOP = 21,
     SDK_LOLLIPOP_MR1 = 22,
     SDK_MNC = 23,
+    SDK_NOUGAT = 24,
+    SDK_NOUGAT_MR1 = 25,
+    SDK_O = 26, // STOPSHIP replace with real version
 };
 
 #endif // H_AAPT_SDK_CONSTANTS

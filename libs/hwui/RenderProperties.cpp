@@ -24,7 +24,6 @@
 #include <SkPathOps.h>
 
 #include "Matrix.h"
-#include "OpenGLRenderer.h"
 #include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 
@@ -53,7 +52,7 @@ bool LayerProperties::setColorFilter(SkColorFilter* filter) {
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
     changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
-    changed |= setXferMode(PaintUtils::getXfermodeDirect(paint));
+    changed |= setXferMode(PaintUtils::getBlendModeDirect(paint));
     changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }
@@ -100,26 +99,34 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
     return *this;
 }
 
-void RenderProperties::debugOutputProperties(const int level) const {
+static void dumpMatrix(std::ostream& output, std::string& indent,
+        const char* label, SkMatrix* matrix) {
+   if (matrix) {
+        output << indent << "(" <<  label << " " << matrix << ": ";
+        output << std::fixed << std::setprecision(2);
+        output << "[" << matrix->get(0) << " "<< matrix->get(1) << " " << matrix->get(2) << "]";
+        output << " [" << matrix->get(3) << " "<< matrix->get(4) << " " << matrix->get(5) << "]";
+        output << " [" << matrix->get(6) << " "<< matrix->get(7) << " " << matrix->get(8) << "]";
+        output << ")" << std::endl;
+    }
+}
+
+void RenderProperties::debugOutputProperties(std::ostream& output, const int level) const {
+    auto indent = std::string(level * 2, ' ');
     if (mPrimitiveFields.mLeft != 0 || mPrimitiveFields.mTop != 0) {
-        ALOGD("%*s(Translate (left, top) %d, %d)", level * 2, "",
-                mPrimitiveFields.mLeft, mPrimitiveFields.mTop);
+        output << indent << "(Translate (left, top) " << mPrimitiveFields.mLeft
+                << ", " << mPrimitiveFields.mTop << ")" << std::endl;
     }
-    if (mStaticMatrix) {
-        ALOGD("%*s(ConcatMatrix (static) %p: " SK_MATRIX_STRING ")",
-                level * 2, "", mStaticMatrix, SK_MATRIX_ARGS(mStaticMatrix));
-    }
-    if (mAnimationMatrix) {
-        ALOGD("%*s(ConcatMatrix (animation) %p: " SK_MATRIX_STRING ")",
-                level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
-    }
+    dumpMatrix(output, indent, "ConcatMatrix (static)", mStaticMatrix);
+    dumpMatrix(output, indent, "ConcatMatrix (animation)", mAnimationMatrix);
+
+    output << std::fixed << std::setprecision(2);
     if (hasTransformMatrix()) {
         if (isTransformTranslateOnly()) {
-            ALOGD("%*s(Translate %.2f, %.2f, %.2f)",
-                    level * 2, "", getTranslationX(), getTranslationY(), getZ());
+            output << indent << "(Translate " << getTranslationX() << ", " << getTranslationY()
+                    << ", " << getZ() << ")" << std::endl;
         } else {
-            ALOGD("%*s(ConcatMatrix %p: " SK_MATRIX_STRING ")",
-                    level * 2, "", mComputedFields.mTransformMatrix, SK_MATRIX_ARGS(mComputedFields.mTransformMatrix));
+            dumpMatrix(output, indent, "ConcatMatrix ", mComputedFields.mTransformMatrix);
         }
     }
 
@@ -133,7 +140,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
 
         if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
             // simply scale rendering content's alpha
-            ALOGD("%*s(ScaleAlpha %.2f)", level * 2, "", mPrimitiveFields.mAlpha);
+            output << indent << "(ScaleAlpha " << mPrimitiveFields.mAlpha << ")" << std::endl;
         } else {
             // savelayeralpha to create an offscreen buffer to apply alpha
             Rect layerBounds(0, 0, getWidth(), getHeight());
@@ -141,35 +148,40 @@ void RenderProperties::debugOutputProperties(const int level) const {
                 getClippingRectForFlags(clipFlags, &layerBounds);
                 clipFlags = 0; // all clipping done by savelayer
             }
-            ALOGD("%*s(SaveLayerAlpha %d, %d, %d, %d, %d, 0x%x)", level * 2, "",
-                    (int)layerBounds.left, (int)layerBounds.top,
-                    (int)layerBounds.right, (int)layerBounds.bottom,
-                    (int)(mPrimitiveFields.mAlpha * 255),
-                    SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
+            output << indent << "(SaveLayerAlpha "
+                    << (int)layerBounds.left << ", " << (int)layerBounds.top << ", "
+                    << (int)layerBounds.right << ", " << (int)layerBounds.bottom << ", "
+                    << (int)(mPrimitiveFields.mAlpha * 255) << ", 0x" << std::hex
+                    << (SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer) << ")" << std::dec
+                    << std::endl;
         }
     }
 
     if (clipFlags) {
         Rect clipRect;
         getClippingRectForFlags(clipFlags, &clipRect);
-        ALOGD("%*s(ClipRect %d, %d, %d, %d)", level * 2, "",
-                (int)clipRect.left, (int)clipRect.top, (int)clipRect.right, (int)clipRect.bottom);
+        output << indent << "(ClipRect "
+                << (int)clipRect.left << ", " << (int)clipRect.top << ", "
+                << (int)clipRect.right << ", " << (int)clipRect.bottom << ")" << std::endl;
     }
 
     if (getRevealClip().willClip()) {
         Rect bounds;
         getRevealClip().getBounds(&bounds);
-        ALOGD("%*s(Clip to reveal clip with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
-                RECT_ARGS(bounds));
+        output << indent << "(Clip to reveal clip with bounds "
+                << bounds.left << ", " << bounds.top << ", "
+                << bounds.right << ", " << bounds.bottom << ")" << std::endl;
     }
 
     auto& outline = mPrimitiveFields.mOutline;
     if (outline.getShouldClip()) {
         if (outline.isEmpty()) {
-            ALOGD("%*s(Clip to empty outline)", level * 2, "");
+            output << indent << "(Clip to empty outline)";
         } else if (outline.willClip()) {
-            ALOGD("%*s(Clip to outline with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
-                    RECT_ARGS(outline.getBounds()));
+            const Rect& bounds = outline.getBounds();
+            output << indent << "(Clip to outline with bounds "
+                    << bounds.left << ", " << bounds.top << ", "
+                    << bounds.right << ", " << bounds.bottom << ")" << std::endl;
         }
     }
 }

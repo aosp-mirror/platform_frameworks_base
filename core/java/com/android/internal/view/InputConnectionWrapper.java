@@ -467,12 +467,8 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     public boolean reportFullscreenMode(boolean enabled) {
-        try {
-            mIInputContext.reportFullscreenMode(enabled);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
+        // Nothing should happen when called from input method.
+        return false;
     }
 
     public boolean performPrivateCommand(String action, Bundle data) {

@@ -26,6 +26,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.content.res.BridgeAssetManager;
+import android.graphics.fonts.FontVariationAxis;
+import android.text.FontConfig;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -43,6 +45,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import static android.graphics.Typeface.RESOLVE_BY_FONT_TABLE;
 import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
 
 /**
@@ -247,15 +250,20 @@ public class FontFamily_Delegate {
 
     // ---- delegate methods ----
     @LayoutlibDelegate
-    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex) {
-        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mNativePtr);
-        return delegate != null && delegate.addFont(path, ttcIndex);
+    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex,
+            FontVariationAxis[] axes, int weight, int italic) {
+        if (thisFontFamily.mBuilderPtr == 0) {
+            assert false : "Unable to call addFont after freezing.";
+            return false;
+        }
+        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mBuilderPtr);
+        return delegate != null && delegate.addFont(path, ttcIndex, weight, italic);
     }
 
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nCreateFamily(String lang, int variant) {
+    /*package*/ static long nInitBuilder(String lang, int variant) {
         // TODO: support lang. This is required for japanese locale.
         FontFamily_Delegate delegate = new FontFamily_Delegate();
         // variant can be 0, 1 or 2.
@@ -270,6 +278,11 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static long nCreateFamily(long builderPtr) {
+        return builderPtr;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void nUnrefFamily(long nativePtr) {
         // Removing the java reference for the object doesn't mean that it's freed for garbage
         // collection. Typeface_Delegate may still hold a reference for it.
@@ -277,35 +290,42 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex) {
-        assert false : "The only client of this method has been overriden.";
+    /*package*/ static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
+            int weight, int isItalic) {
+        assert false : "The only client of this method has been overridden.";
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
-            int ttcIndex, List<FontListParser.Axis> listOfAxis,
-            int weight, boolean isItalic) {
-        assert false : "The only client of this method has been overriden.";
+    /*package*/ static boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
+            int ttcIndex, int weight, int isItalic) {
+        assert false : "The only client of this method has been overridden.";
         return false;
     }
 
-    static boolean addFont(long nativeFamily, final String path, final int weight,
+    @LayoutlibDelegate
+    /*package*/ static void nAddAxisValue(long builderPtr, int tag, float value) {
+        assert false : "The only client of this method has been overridden.";
+    }
+
+    static boolean addFont(long builderPtr, final String path, final int weight,
             final boolean isItalic) {
-        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
+        final FontFamily_Delegate delegate = getDelegate(builderPtr);
+        int italic = isItalic ? 1 : 0;
         if (delegate != null) {
             if (sFontLocation == null) {
-                delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, isItalic));
+                delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, italic));
                 return true;
             }
-            return delegate.addFont(path, weight, isItalic);
+            return delegate.addFont(path, weight, italic);
         }
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
-        FontFamily_Delegate ffd = sManager.getDelegate(nativeFamily);
+    /*package*/ static boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr, String path,
+            int cookie, boolean isAsset, int ttcIndex, int weight, int isItalic) {
+        FontFamily_Delegate ffd = sManager.getDelegate(builderPtr);
         if (ffd == null) {
             return false;
         }
@@ -334,7 +354,9 @@ public class FontFamily_Delegate {
                     ffd.addFont(fontInfo);
                     return true;
                 }
-                fontStream = assetRepository.openAsset(path, AssetManager.ACCESS_STREAMING);
+                fontStream = isAsset ?
+                        assetRepository.openAsset(path, AssetManager.ACCESS_STREAMING) :
+                        assetRepository.openNonAsset(cookie, path, AssetManager.ACCESS_STREAMING);
                 if (fontStream == null) {
                     Bridge.getLog().error(LayoutLog.TAG_MISSING_ASSET, "Asset not found: " + path,
                             path);
@@ -343,8 +365,13 @@ public class FontFamily_Delegate {
                 Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
                 fontInfo = new FontInfo();
                 fontInfo.mFont = font;
-                fontInfo.mWeight = font.isBold() ? BOLD_FONT_WEIGHT : DEFAULT_FONT_WEIGHT;
-                fontInfo.mIsItalic = font.isItalic();
+                if (weight == RESOLVE_BY_FONT_TABLE) {
+                    fontInfo.mWeight = font.isBold() ? BOLD_FONT_WEIGHT : DEFAULT_FONT_WEIGHT;
+                } else {
+                    fontInfo.mWeight = weight;
+                }
+                fontInfo.mIsItalic = isItalic == RESOLVE_BY_FONT_TABLE ? font.isItalic() :
+                        isItalic == 1;
                 ffd.addFont(fontInfo);
                 return true;
             } catch (IOException e) {
@@ -379,6 +406,10 @@ public class FontFamily_Delegate {
         return false;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static void nAbort(long builderPtr) {
+        sManager.removeJavaReferenceFor(builderPtr);
+    }
 
     // ---- private helper methods ----
 
@@ -389,20 +420,20 @@ public class FontFamily_Delegate {
         mPostInitRunnables = null;
     }
 
-    private boolean addFont(final String path, int ttcIndex) {
+    private boolean addFont(final String path, int ttcIndex, int weight, int italic) {
         // FIXME: support ttc fonts. Hack JRE??
         if (sFontLocation == null) {
-            mPostInitRunnables.add(() -> addFont(path));
+            mPostInitRunnables.add(() -> addFont(path, weight, italic));
             return true;
         }
-        return addFont(path);
+        return addFont(path, weight, italic);
     }
 
      private boolean addFont(@NonNull String path) {
-         return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC));
+         return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC) ? 1 : RESOLVE_BY_FONT_TABLE);
      }
 
-    private boolean addFont(@NonNull String path, int weight, boolean isItalic) {
+    private boolean addFont(@NonNull String path, int weight, int italic) {
         if (path.startsWith(SYSTEM_FONTS) &&
                 !SDK_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
             return mValid = false;
@@ -416,7 +447,7 @@ public class FontFamily_Delegate {
         FontInfo fontInfo = new FontInfo();
         fontInfo.mFont = font;
         fontInfo.mWeight = weight;
-        fontInfo.mIsItalic = isItalic;
+        fontInfo.mIsItalic = italic == RESOLVE_BY_FONT_TABLE ? font.isItalic() : italic == 1;
         addFont(fontInfo);
         return true;
     }

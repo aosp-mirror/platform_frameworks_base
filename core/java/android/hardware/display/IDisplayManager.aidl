@@ -66,7 +66,7 @@ interface IDisplayManager {
     // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in IVirtualDisplayCallback callback,
             in IMediaProjection projectionToken, String packageName, String name,
-            int width, int height, int densityDpi, in Surface surface, int flags);
+            int width, int height, int densityDpi, in Surface surface, int flags, String uniqueId);
 
     // No permissions required, but must be same Uid as the creator.
     void resizeVirtualDisplay(in IVirtualDisplayCallback token,

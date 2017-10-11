@@ -16,13 +16,13 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import android.os.Build.VERSION_CODES;
+import android.os._Original_Build.VERSION_CODES;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static android.os.Build.VERSION_CODES.*;
+import static android.os._Original_Build.VERSION_CODES.*;
 
 /**
  * Various helper methods to simulate older versions of platform.
@@ -74,8 +74,8 @@ public class Config {
     }
 
     public static String getTime(int platformVersion) {
-        if (isGreaterOrEqual(platformVersion, M)) {
-            return "6:00";
+        if (isGreaterOrEqual(platformVersion, N)) {
+            return "7:00";
         }
         if (platformVersion < GINGERBREAD) {
             return "2:20";
@@ -97,6 +97,9 @@ public class Config {
         }
         if (platformVersion < M) {
             return "5:10";
+        }
+        if (platformVersion < N) {
+            return "6:00";
         }
         // Should never happen.
         return "4:04";

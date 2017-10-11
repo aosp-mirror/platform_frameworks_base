@@ -20,7 +20,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <fcntl.h>
 #include <inttypes.h>
@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <android-base/stringprintf.h>
 #include <binder/IInterface.h>
 #include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
@@ -43,8 +44,8 @@
 #include <utils/SystemClock.h>
 #include <utils/threads.h>
 
-#include <ScopedUtfChars.h>
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 
@@ -192,18 +193,36 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
 
     if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
         /*
-         * It's an Error: Reraise the exception, detach this thread, and
-         * wait for the fireworks. Die even more blatantly after a minute
-         * if the gentler attempt doesn't do the trick.
-         *
-         * The GetJavaVM function isn't on the "approved" list of JNI calls
-         * that can be made while an exception is pending, so we want to
-         * get the VM ptr, throw the exception, and then detach the thread.
+         * It's an Error: Reraise the exception and ask the runtime to abort.
          */
+
+        // Try to get the exception string. Sometimes logcat isn't available,
+        // so try to add it to the abort message.
+        std::string exc_msg = "(Unknown exception message)";
+        {
+            ScopedLocalRef<jclass> exc_class(env, env->GetObjectClass(excep));
+            jmethodID method_id = env->GetMethodID(exc_class.get(),
+                                                   "toString",
+                                                   "()Ljava/lang/String;");
+            ScopedLocalRef<jstring> jstr(
+                    env,
+                    reinterpret_cast<jstring>(
+                            env->CallObjectMethod(excep, method_id)));
+            env->ExceptionClear();  // Just for good measure.
+            if (jstr.get() != nullptr) {
+                ScopedUtfChars jstr_utf(env, jstr.get());
+                exc_msg = jstr_utf.c_str();
+            }
+        }
+
         env->Throw(excep);
+        ALOGE("java.lang.Error thrown during binder transaction (stack trace follows) : ");
         env->ExceptionDescribe();
-        ALOGE("Forcefully exiting");
-        exit(1);
+
+        std::string error_msg = base::StringPrintf(
+                "java.lang.Error thrown during binder transaction: %s",
+                exc_msg.c_str());
+        env->FatalError(error_msg.c_str());
     }
 
 bail:
@@ -469,8 +488,8 @@ protected:
 
 private:
     JavaVM* const mVM;
-    jobject mObject;
-    jweak mObjectWeak; // will be a weak ref to the same VM-side DeathRecipient after binderDied()
+    jobject mObject;  // Initial strong ref to Java-side DeathRecipient. Cleared on binderDied().
+    jweak mObjectWeak; // weak ref to the same Java-side DeathRecipient after binderDied().
     wp<DeathRecipientList> mList;
 };
 
@@ -542,7 +561,7 @@ static void proxy_cleanup(const void* id, void* obj, void* cleanupCookie)
     env->DeleteGlobalRef((jobject)obj);
 }
 
-static Mutex mProxyLock;
+static Mutex gProxyLock;
 
 jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 {
@@ -557,7 +576,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 
     // For the rest of the function we will hold this lock, to serialize
     // looking/creation/destruction of Java proxies for native Binder proxies.
-    AutoMutex _l(mProxyLock);
+    AutoMutex _l(gProxyLock);
 
     // Someone else's...  do we know about it?
     jobject object = (jobject)val->findObject(&gBinderProxyOffsets);
@@ -817,7 +836,7 @@ static void android_os_Binder_init(JNIEnv* env, jobject obj)
     env->SetLongField(obj, gBinderOffsets.mObject, (jlong)jbh);
 }
 
-static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
+static void android_os_Binder_destroyBinder(JNIEnv* env, jobject obj)
 {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*)
         env->GetLongField(obj, gBinderOffsets.mObject);
@@ -828,7 +847,7 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
     } else {
         // Encountering an uninitialized binder is harmless.  All it means is that
         // the Binder was only partially initialized when its finalizer ran and called
-        // destroy().  The Binder could be partially initialized for several reasons.
+        // destroyBinder().  The Binder could be partially initialized for several reasons.
         // For example, a Binder subclass constructor might have thrown an exception before
         // it could delegate to its superclass's constructor.  Consequently init() would
         // not have been called and the holder pointer would remain NULL.
@@ -853,7 +872,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "init", "()V", (void*)android_os_Binder_init },
-    { "destroy", "()V", (void*)android_os_Binder_destroy },
+    { "destroyBinder", "()V", (void*)android_os_Binder_destroyBinder },
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable }
 };
 
@@ -1233,7 +1252,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
 {
     // Don't race with construction/initialization
-    AutoMutex _l(mProxyLock);
+    AutoMutex _l(gProxyLock);
 
     IBinder* b = (IBinder*)
             env->GetLongField(obj, gBinderProxyOffsets.mObject);

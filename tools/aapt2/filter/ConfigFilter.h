@@ -17,10 +17,10 @@
 #ifndef AAPT_FILTER_CONFIGFILTER_H
 #define AAPT_FILTER_CONFIGFILTER_H
 
-#include "ConfigDescription.h"
-
 #include <set>
 #include <utility>
+
+#include "ConfigDescription.h"
 
 namespace aapt {
 
@@ -28,34 +28,37 @@ namespace aapt {
  * Matches ConfigDescriptions based on some pattern.
  */
 class IConfigFilter {
-public:
-    virtual ~IConfigFilter() = default;
+ public:
+  virtual ~IConfigFilter() = default;
 
-    /**
-     * Returns true if the filter matches the configuration, false otherwise.
-     */
-    virtual bool match(const ConfigDescription& config) const = 0;
+  /**
+   * Returns true if the filter matches the configuration, false otherwise.
+   */
+  virtual bool Match(const ConfigDescription& config) const = 0;
 };
 
 /**
- * Implements config axis matching. An axis is one component of a configuration, like screen
- * density or locale. If an axis is specified in the filter, and the axis is specified in
- * the configuration to match, they must be compatible. Otherwise the configuration to match is
+ * Implements config axis matching. An axis is one component of a configuration,
+ * like screen
+ * density or locale. If an axis is specified in the filter, and the axis is
+ * specified in
+ * the configuration to match, they must be compatible. Otherwise the
+ * configuration to match is
  * accepted.
  *
  * Used when handling "-c" options.
  */
 class AxisConfigFilter : public IConfigFilter {
-public:
-    void addConfig(ConfigDescription config);
+ public:
+  void AddConfig(ConfigDescription config);
 
-    bool match(const ConfigDescription& config) const override;
+  bool Match(const ConfigDescription& config) const override;
 
-private:
-    std::set<std::pair<ConfigDescription, uint32_t>> mConfigs;
-    uint32_t mConfigMask = 0;
+ private:
+  std::set<std::pair<ConfigDescription, uint32_t>> configs_;
+  uint32_t config_mask_ = 0;
 };
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FILTER_CONFIGFILTER_H */

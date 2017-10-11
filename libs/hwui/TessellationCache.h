@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_TESSELLATION_CACHE_H
-#define ANDROID_HWUI_TESSELLATION_CACHE_H
+#pragma once
 
 #include "Debug.h"
 #include "Matrix.h"
@@ -161,17 +160,6 @@ public:
     const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint,
             float width, float height, float rx, float ry);
 
-    // TODO: delete these when switching to HWUI_NEW_OPS
-    void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
-            bool opaque, const SkPath* casterPerimeter,
-            const Matrix4* transformXY, const Matrix4* transformZ,
-            const Vector3& lightCenter, float lightRadius);
-    void getShadowBuffers(const Matrix4* drawTransform, const Rect& localClip,
-            bool opaque, const SkPath* casterPerimeter,
-            const Matrix4* transformXY, const Matrix4* transformZ,
-            const Vector3& lightCenter, float lightRadius,
-            vertexBuffer_pair_t& outBuffers);
-
     sp<ShadowTask> getShadowTask(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
             const Matrix4* transformXY, const Matrix4* transformZ,
@@ -183,6 +171,11 @@ private:
     class TessellationProcessor;
 
     typedef VertexBuffer* (*Tessellator)(const Description&);
+
+    void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
+                bool opaque, const SkPath* casterPerimeter,
+                const Matrix4* transformXY, const Matrix4* transformZ,
+                const Vector3& lightCenter, float lightRadius);
 
     Buffer* getRectBuffer(const Matrix4& transform, const SkPaint& paint,
             float width, float height);
@@ -232,5 +225,3 @@ void tessellateShadows(
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_PATH_CACHE_H

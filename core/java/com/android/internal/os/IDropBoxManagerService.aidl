@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import android.os.DropBoxManager;
-import android.os.ParcelFileDescriptor;
 
 /**
  * "Backend" interface used by {@link android.os.DropBoxManager} to talk to the

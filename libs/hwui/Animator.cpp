@@ -317,7 +317,7 @@ struct RenderPropertyAnimator::PropertyAccessors {
 const RenderPropertyAnimator::PropertyAccessors RenderPropertyAnimator::PROPERTY_ACCESSOR_LUT[] = {
     {RenderNode::TRANSLATION_X, &RenderProperties::getTranslationX, &RenderProperties::setTranslationX },
     {RenderNode::TRANSLATION_Y, &RenderProperties::getTranslationY, &RenderProperties::setTranslationY },
-    {RenderNode::TRANSLATION_X, &RenderProperties::getTranslationZ, &RenderProperties::setTranslationZ },
+    {RenderNode::TRANSLATION_Z, &RenderProperties::getTranslationZ, &RenderProperties::setTranslationZ },
     {RenderNode::SCALE_X, &RenderProperties::getScaleX, &RenderProperties::setScaleX },
     {RenderNode::SCALE_Y, &RenderProperties::getScaleY, &RenderProperties::setScaleY },
     {RenderNode::ROTATION, &RenderProperties::getRotation, &RenderProperties::setRotation },

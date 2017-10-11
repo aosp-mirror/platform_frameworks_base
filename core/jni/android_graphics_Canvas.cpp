@@ -27,6 +27,7 @@
 #include "Bitmap.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
+#include "SkRegion.h"
 
 namespace android {
 
@@ -63,97 +64,87 @@ static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap)
     get_canvas(canvasHandle)->setBitmap(bitmap);
 }
 
-static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {
+static jboolean isOpaque(jlong canvasHandle) {
     return get_canvas(canvasHandle)->isOpaque() ? JNI_TRUE : JNI_FALSE;
 }
 
-static jint getWidth(JNIEnv*, jobject, jlong canvasHandle) {
+static jint getWidth(jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->width());
 }
 
-static jint getHeight(JNIEnv*, jobject, jlong canvasHandle) {
+static jint getHeight(jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
 }
 
-static void setHighContrastText(JNIEnv*, jobject, jlong canvasHandle, jboolean highContrastText) {
+static void setHighContrastText(jlong canvasHandle, jboolean highContrastText) {
     Canvas* canvas = get_canvas(canvasHandle);
     canvas->setHighContrastText(highContrastText);
 }
 
-static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
-    return static_cast<jint>(get_canvas(canvasHandle)->getSaveCount());
-}
-
-static jint save(JNIEnv*, jobject, jlong canvasHandle, jint flagsHandle) {
+static jint save(jlong canvasHandle, jint flagsHandle) {
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->save(flags));
 }
 
-static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
+static jint saveLayer(jlong canvasHandle, jfloat l, jfloat t,
                       jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
 }
 
-static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
+static jint saveLayerAlpha(jlong canvasHandle, jfloat l, jfloat t,
                            jfloat r, jfloat b, jint alpha, jint flagsHandle) {
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
-static void restore(JNIEnv* env, jobject, jlong canvasHandle, jboolean throwOnUnderflow) {
+static bool restore(jlong canvasHandle) {
     Canvas* canvas = get_canvas(canvasHandle);
-    if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
-        if (throwOnUnderflow) {
-            doThrowISE(env, "Underflow in restore - more restores than saves");
-        }
-        return; // compat behavior - return without throwing
+    if (canvas->getSaveCount() <= 1) {
+        return false; // cannot restore anymore
     }
     canvas->restore();
+    return true; // success
 }
 
-static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle, jint restoreCount,
-        jboolean throwOnUnderflow) {
+static void restoreToCount(jlong canvasHandle, jint saveCount) {
     Canvas* canvas = get_canvas(canvasHandle);
-    if (restoreCount < 1 || restoreCount > canvas->getSaveCount()) {
-        if (throwOnUnderflow) {
-            doThrowIAE(env, "Underflow in restoreToCount - more restores than saves");
-            return;
-        }
-        restoreCount = 1; // compat behavior - restore as far as possible
-    }
-    canvas->restoreToCount(restoreCount);
+    canvas->restoreToCount(saveCount);
 }
 
-static void getCTM(JNIEnv* env, jobject, jlong canvasHandle, jlong matrixHandle) {
+static jint getSaveCount(jlong canvasHandle) {
+    return static_cast<jint>(get_canvas(canvasHandle)->getSaveCount());
+}
+
+static void getMatrix(jlong canvasHandle, jlong matrixHandle) {
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->getMatrix(matrix);
 }
 
-static void setMatrix(JNIEnv* env, jobject, jlong canvasHandle, jlong matrixHandle) {
+static void setMatrix(jlong canvasHandle, jlong matrixHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->setMatrix(matrix ? *matrix : SkMatrix::I());
 }
 
-static void concat(JNIEnv* env, jobject, jlong canvasHandle, jlong matrixHandle) {
+static void concat(jlong canvasHandle, jlong matrixHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->concat(*matrix);
 }
 
-static void rotate(JNIEnv*, jobject, jlong canvasHandle, jfloat degrees) {
+static void rotate(jlong canvasHandle, jfloat degrees) {
     get_canvas(canvasHandle)->rotate(degrees);
 }
 
-static void scale(JNIEnv*, jobject, jlong canvasHandle, jfloat sx, jfloat sy) {
+static void scale(jlong canvasHandle, jfloat sx, jfloat sy) {
     get_canvas(canvasHandle)->scale(sx, sy);
 }
 
-static void skew(JNIEnv*, jobject, jlong canvasHandle, jfloat sx, jfloat sy) {
+static void skew(jlong canvasHandle, jfloat sx, jfloat sy) {
     get_canvas(canvasHandle)->skew(sx, sy);
 }
 
-static void translate(JNIEnv*, jobject, jlong canvasHandle, jfloat dx, jfloat dy) {
+static void translate(jlong canvasHandle, jfloat dx, jfloat dy) {
     get_canvas(canvasHandle)->translate(dx, dy);
 }
 
@@ -171,43 +162,56 @@ static jboolean getClipBounds(JNIEnv* env, jobject, jlong canvasHandle, jobject 
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean quickRejectRect(JNIEnv* env, jobject, jlong canvasHandle,
+static jboolean quickRejectRect(jlong canvasHandle,
                                 jfloat left, jfloat top, jfloat right, jfloat bottom) {
     bool result = get_canvas(canvasHandle)->quickRejectRect(left, top, right, bottom);
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean quickRejectPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle) {
+static jboolean quickRejectPath(jlong canvasHandle, jlong pathHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     bool result = get_canvas(canvasHandle)->quickRejectPath(*path);
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean clipRect(JNIEnv*, jobject, jlong canvasHandle, jfloat l, jfloat t,
+// SkRegion::Op and SkClipOp are numerically identical, so we can freely cast
+// from one to the other (though SkClipOp is destined to become a strict subset)
+static_assert(SkRegion::kDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kDifference), "");
+static_assert(SkRegion::kIntersect_Op == static_cast<SkRegion::Op>(SkClipOp::kIntersect), "");
+static_assert(SkRegion::kUnion_Op == static_cast<SkRegion::Op>(SkClipOp::kUnion_deprecated), "");
+static_assert(SkRegion::kXOR_Op == static_cast<SkRegion::Op>(SkClipOp::kXOR_deprecated), "");
+static_assert(SkRegion::kReverseDifference_Op == static_cast<SkRegion::Op>(SkClipOp::kReverseDifference_deprecated), "");
+static_assert(SkRegion::kReplace_Op == static_cast<SkRegion::Op>(SkClipOp::kReplace_deprecated), "");
+
+static SkClipOp opHandleToClipOp(jint opHandle) {
+    // The opHandle is defined in Canvas.java to be Region::Op
+    SkRegion::Op rgnOp = static_cast<SkRegion::Op>(opHandle);
+
+    // In the future, when we no longer support the wide range of ops (e.g. Union, Xor)
+    // this function can perform a range check and throw an unsupported-exception.
+    // e.g. if (rgnOp != kIntersect && rgnOp != kDifference) throw...
+
+    // Skia now takes a different type, SkClipOp, as the parameter to clipping calls
+    // This type is binary compatible with SkRegion::Op, so a static_cast<> is safe.
+    return static_cast<SkClipOp>(rgnOp);
+}
+
+static jboolean clipRect(jlong canvasHandle, jfloat l, jfloat t,
                          jfloat r, jfloat b, jint opHandle) {
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b, op);
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b,
+            opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHandle,
+static jboolean clipPath(jlong canvasHandle, jlong pathHandle,
                          jint opHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, op);
-    return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
-}
-
-static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong deviceRgnHandle,
-                           jint opHandle) {
-    SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, op);
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
-    SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(modeHandle);
+    SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
     get_canvas(canvasHandle)->drawColor(color, mode);
 }
 
@@ -341,14 +345,12 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         jlong paintHandle, jint dstDensity, jint srcDensity) {
 
     Canvas* canvas = get_canvas(canvasHandle);
-    Bitmap* bitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
-    SkBitmap skiaBitmap;
-    bitmap->getSkBitmap(&skiaBitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, bitmapHandle);
     const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (CC_LIKELY(dstDensity == srcDensity || dstDensity == 0 || srcDensity == 0)) {
-        canvas->drawNinePatch(skiaBitmap, *chunk, left, top, right, bottom, paint);
+        canvas->drawNinePatch(bitmap, *chunk, left, top, right, bottom, paint);
     } else {
         canvas->save(SaveFlags::MatrixClip);
 
@@ -362,19 +364,18 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
         }
         filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
-        canvas->drawNinePatch(skiaBitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
+        canvas->drawNinePatch(bitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
                 &filteredPaint);
 
         canvas->restore();
     }
 }
 
-static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject jbitmap,
+static void drawBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
@@ -409,8 +410,7 @@ static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jobject j
                              jlong matrixHandle, jlong paintHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmap(bitmap, *matrix, paint);
 }
 
@@ -421,8 +421,7 @@ static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     Canvas* canvas = get_canvas(canvasHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     if (screenDensity != 0 && screenDensity != bitmapDensity) {
         Paint filteredPaint;
         if (paint) {
@@ -443,12 +442,12 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
                             jboolean hasAlpha, jlong paintHandle) {
     // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
     // correct the alphaType to kOpaque_SkAlphaType.
-    SkImageInfo info = SkImageInfo::Make(width, height,
-                           hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
-                           kPremul_SkAlphaType);
+    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType,
+            GraphicsJNI::defaultColorSpace());
     SkBitmap bitmap;
     bitmap.setInfo(info);
-    if (!GraphicsJNI::allocatePixels(env, &bitmap, NULL)) {
+    sk_sp<Bitmap> androidBitmap = Bitmap::allocateHeapBitmap(&bitmap, NULL);
+    if (!androidBitmap) {
         return;
     }
 
@@ -457,7 +456,7 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
     }
 
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    get_canvas(canvasHandle)->drawBitmap(bitmap, x, y, paint);
+    get_canvas(canvasHandle)->drawBitmap(*androidBitmap, x, y, paint);
 }
 
 static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
@@ -468,8 +467,7 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
 
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
                                              vertA.ptr(), colorA.ptr(), paint);
 }
@@ -503,7 +501,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
-    const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    const int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
@@ -517,7 +515,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
-    int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
@@ -558,7 +556,7 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     env->ReleaseStringChars(text, jchars);
 }
 
-static void setDrawFilter(JNIEnv* env, jobject, jlong canvasHandle, jlong filterHandle) {
+static void setDrawFilter(jlong canvasHandle, jlong filterHandle) {
     get_canvas(canvasHandle)->setDrawFilter(reinterpret_cast<SkDrawFilter*>(filterHandle));
 }
 
@@ -567,71 +565,84 @@ static void freeCaches(JNIEnv* env, jobject) {
 }
 
 static void freeTextLayoutCaches(JNIEnv* env, jobject) {
-    Layout::purgeCaches();
+    minikin::Layout::purgeCaches();
 }
 
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
-    {"getNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
-    {"initRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
-    {"native_setBitmap", "!(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
-    {"native_isOpaque","!(J)Z", (void*) CanvasJNI::isOpaque},
-    {"native_getWidth","!(J)I", (void*) CanvasJNI::getWidth},
-    {"native_getHeight","!(J)I", (void*) CanvasJNI::getHeight},
-    {"native_setHighContrastText","!(JZ)V", (void*) CanvasJNI::setHighContrastText},
-    {"native_save","!(JI)I", (void*) CanvasJNI::save},
-    {"native_saveLayer","!(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
-    {"native_saveLayerAlpha","!(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
-    {"native_getSaveCount","!(J)I", (void*) CanvasJNI::getSaveCount},
-    {"native_restore","!(JZ)V", (void*) CanvasJNI::restore},
-    {"native_restoreToCount","!(JIZ)V", (void*) CanvasJNI::restoreToCount},
-    {"native_getCTM", "!(JJ)V", (void*)CanvasJNI::getCTM},
-    {"native_setMatrix","!(JJ)V", (void*) CanvasJNI::setMatrix},
-    {"native_concat","!(JJ)V", (void*) CanvasJNI::concat},
-    {"native_rotate","!(JF)V", (void*) CanvasJNI::rotate},
-    {"native_scale","!(JFF)V", (void*) CanvasJNI::scale},
-    {"native_skew","!(JFF)V", (void*) CanvasJNI::skew},
-    {"native_translate","!(JFF)V", (void*) CanvasJNI::translate},
-    {"native_getClipBounds","!(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
-    {"native_quickReject","!(JJ)Z", (void*) CanvasJNI::quickRejectPath},
-    {"native_quickReject","!(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
-    {"native_clipRect","!(JFFFFI)Z", (void*) CanvasJNI::clipRect},
-    {"native_clipPath","!(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"native_clipRegion","!(JJI)Z", (void*) CanvasJNI::clipRegion},
-    {"native_drawColor","!(JII)V", (void*) CanvasJNI::drawColor},
-    {"native_drawPaint","!(JJ)V", (void*) CanvasJNI::drawPaint},
-    {"native_drawPoint", "!(JFFJ)V", (void*) CanvasJNI::drawPoint},
-    {"native_drawPoints", "!(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
-    {"native_drawLine", "!(JFFFFJ)V", (void*) CanvasJNI::drawLine},
-    {"native_drawLines", "!(J[FIIJ)V", (void*) CanvasJNI::drawLines},
-    {"native_drawRect","!(JFFFFJ)V", (void*) CanvasJNI::drawRect},
-    {"native_drawRegion", "!(JJJ)V", (void*) CanvasJNI::drawRegion },
-    {"native_drawRoundRect","!(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
-    {"native_drawCircle","!(JFFFJ)V", (void*) CanvasJNI::drawCircle},
-    {"native_drawOval","!(JFFFFJ)V", (void*) CanvasJNI::drawOval},
-    {"native_drawArc","!(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
-    {"native_drawPath","!(JJJ)V", (void*) CanvasJNI::drawPath},
-    {"nativeDrawVertices", "!(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"native_drawNinePatch", "!(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nativeDrawBitmapMatrix", "!(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
-    {"native_drawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nativeDrawBitmapMesh", "!(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"native_drawText","!(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
-    {"native_drawText","!(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
-    {"native_drawTextRun","!(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"native_drawTextRun","!(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"native_drawTextOnPath","!(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"native_drawTextOnPath","!(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nativeSetDrawFilter", "!(JJ)V", (void*) CanvasJNI::setDrawFilter},
-    {"freeCaches", "()V", (void*) CanvasJNI::freeCaches},
-    {"freeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches}
+    {"nGetNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
+    {"nInitRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
+    {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
+    {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
+
+    // ------------ @FastNative ----------------
+    {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
+    {"nGetClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
+
+    // ------------ @CriticalNative ----------------
+    {"nIsOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
+    {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
+    {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
+    {"nSetHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
+    {"nSave","(JI)I", (void*) CanvasJNI::save},
+    {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
+    {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
+    {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
+    {"nRestore","(J)Z", (void*) CanvasJNI::restore},
+    {"nRestoreToCount","(JI)V", (void*) CanvasJNI::restoreToCount},
+    {"nGetMatrix", "(JJ)V", (void*)CanvasJNI::getMatrix},
+    {"nSetMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
+    {"nConcat","(JJ)V", (void*) CanvasJNI::concat},
+    {"nRotate","(JF)V", (void*) CanvasJNI::rotate},
+    {"nScale","(JFF)V", (void*) CanvasJNI::scale},
+    {"nSkew","(JFF)V", (void*) CanvasJNI::skew},
+    {"nTranslate","(JFF)V", (void*) CanvasJNI::translate},
+    {"nQuickReject","(JJ)Z", (void*) CanvasJNI::quickRejectPath},
+    {"nQuickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
+    {"nClipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
+    {"nClipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
+    {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
+};
+
+// If called from Canvas these are regular JNI
+// If called from DisplayListCanvas they are @FastNative
+static const JNINativeMethod gDrawMethods[] = {
+    {"nDrawColor","(JII)V", (void*) CanvasJNI::drawColor},
+    {"nDrawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
+    {"nDrawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
+    {"nDrawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
+    {"nDrawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
+    {"nDrawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
+    {"nDrawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
+    {"nDrawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
+    {"nDrawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
+    {"nDrawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
+    {"nDrawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
+    {"nDrawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
+    {"nDrawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
+    {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
+    {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
+    {"nDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+    {"nDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
+    {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
+    {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nDrawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
+    {"nDrawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
+    {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
+    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
+    {"nDrawTextOnPath","(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
+    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
+    int ret = 0;
+    ret |= RegisterMethodsOrDie(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
+    ret |= RegisterMethodsOrDie(env, "android/graphics/BaseCanvas", gDrawMethods, NELEM(gDrawMethods));
+    ret |= RegisterMethodsOrDie(env, "android/view/RecordingCanvas", gDrawMethods, NELEM(gDrawMethods));
+    return ret;
+
 }
 
 }; // namespace android

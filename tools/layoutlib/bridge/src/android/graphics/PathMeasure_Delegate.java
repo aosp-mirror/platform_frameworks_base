@@ -56,8 +56,8 @@ public final class PathMeasure_Delegate {
         if (native_path != 0) {
             if (forceClosed) {
                 // Copy the path and call close
-                native_path = Path_Delegate.init2(native_path);
-                Path_Delegate.native_close(native_path);
+                native_path = Path_Delegate.nInit(native_path);
+                Path_Delegate.nClose(native_path);
             }
 
             Path_Delegate pathDelegate = Path_Delegate.getDelegate(native_path);
@@ -108,8 +108,8 @@ public final class PathMeasure_Delegate {
         if (native_path != 0) {
             if (forceClosed) {
                 // Copy the path and call close
-                native_path = Path_Delegate.init2(native_path);
-                Path_Delegate.native_close(native_path);
+                native_path = Path_Delegate.nInit(native_path);
+                Path_Delegate.nClose(native_path);
             }
 
             Path_Delegate pathDelegate = Path_Delegate.getDelegate(native_path);
@@ -184,28 +184,28 @@ public final class PathMeasure_Delegate {
                     if (type != PathIterator.SEG_MOVETO) {
                         float[] lastPoint = new float[2];
                         iterator.getCurrentSegmentEnd(lastPoint);
-                        Path_Delegate.native_moveTo(native_dst_path, lastPoint[0], lastPoint[1]);
+                        Path_Delegate.nMoveTo(native_dst_path, lastPoint[0], lastPoint[1]);
                     }
                 }
 
                 isZeroLength = isZeroLength && iterator.getCurrentSegmentLength() > 0;
                 switch (type) {
                     case PathIterator.SEG_MOVETO:
-                        Path_Delegate.native_moveTo(native_dst_path, points[0], points[1]);
+                        Path_Delegate.nMoveTo(native_dst_path, points[0], points[1]);
                         break;
                     case PathIterator.SEG_LINETO:
-                        Path_Delegate.native_lineTo(native_dst_path, points[0], points[1]);
+                        Path_Delegate.nLineTo(native_dst_path, points[0], points[1]);
                         break;
                     case PathIterator.SEG_CLOSE:
-                        Path_Delegate.native_close(native_dst_path);
+                        Path_Delegate.nClose(native_dst_path);
                         break;
                     case PathIterator.SEG_CUBICTO:
-                        Path_Delegate.native_cubicTo(native_dst_path, points[0], points[1],
+                        Path_Delegate.nCubicTo(native_dst_path, points[0], points[1],
                                 points[2], points[3],
                                 points[4], points[5]);
                         break;
                     case PathIterator.SEG_QUADTO:
-                        Path_Delegate.native_quadTo(native_dst_path, points[0], points[1],
+                        Path_Delegate.nQuadTo(native_dst_path, points[0], points[1],
                                 points[2],
                                 points[3]);
                         break;

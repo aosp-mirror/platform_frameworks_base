@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
@@ -35,6 +36,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class that generates a new JAR from a list of classes, some of which are to be kept as-is
@@ -48,8 +51,6 @@ public class AsmGenerator {
     private final String mOsDestJar;
     /** List of classes to inject in the final JAR from _this_ archive. */
     private final Class<?>[] mInjectClasses;
-    /** The set of methods to stub out. */
-    private final Set<String> mStubMethods;
     /** All classes to output as-is, except if they have native methods. */
     private Map<String, ClassReader> mKeep;
     /** All dependencies that must be completely stubbed. */
@@ -79,6 +80,8 @@ public class AsmGenerator {
     private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
     /** A map { FQCN => set { field names } } which should be promoted to public visibility */
     private final Map<String, Set<String>> mPromotedFields;
+    /** A list of classes to be promoted to public visibility */
+    private final Set<String> mPromotedClasses;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -107,7 +110,6 @@ public class AsmGenerator {
             }
         }
         mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
-        mStubMethods = new HashSet<>(Arrays.asList(createInfo.getOverriddenMethods()));
 
         // Create the map/set of methods to change to delegates
         mDelegateMethods = new HashMap<>();
@@ -126,7 +128,10 @@ public class AsmGenerator {
         // Create the map of classes to rename.
         mRenameClasses = new HashMap<>();
         mClassesNotRenamed = new HashSet<>();
-        String[] renameClasses = createInfo.getRenamedClasses();
+        String[] renameClasses = Stream.concat(
+                Arrays.stream(createInfo.getRenamedClasses()),
+                Arrays.stream(createInfo.getRefactoredClasses()))
+                .toArray(String[]::new);
         int n = renameClasses.length;
         for (int i = 0; i < n; i += 2) {
             assert i + 1 < n;
@@ -139,7 +144,10 @@ public class AsmGenerator {
 
         // Create a map of classes to be refactored.
         mRefactorClasses = new HashMap<>();
-        String[] refactorClasses = createInfo.getJavaPkgClasses();
+        String[] refactorClasses = Stream.concat(
+                Arrays.stream(createInfo.getJavaPkgClasses()),
+                Arrays.stream(createInfo.getRefactoredClasses()))
+                .toArray(String[]::new);
         n = refactorClasses.length;
         for (int i = 0; i < n; i += 2) {
             assert i + 1 < n;
@@ -181,6 +189,9 @@ public class AsmGenerator {
         addToMap(createInfo.getPromotedFields(), mPromotedFields);
 
         mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
+
+        mPromotedClasses =
+                Arrays.stream(createInfo.getPromotedClasses()).collect(Collectors.toSet());
     }
 
     /**
@@ -384,7 +395,7 @@ public class AsmGenerator {
         if (mInjectedMethodsMap.keySet().contains(binaryNewName)) {
             cv = new InjectMethodsAdapter(cv, mInjectedMethodsMap.get(binaryNewName));
         }
-        cv = new TransformClassAdapter(mLog, mStubMethods, mDeleteReturns.get(className),
+        cv = new TransformClassAdapter(mLog, Collections.emptySet(), mDeleteReturns.get(className),
                 newName, cv, stubNativesOnly);
 
         Set<String> delegateMethods = mDelegateMethods.get(className);
@@ -402,7 +413,11 @@ public class AsmGenerator {
         if (promoteFields != null && !promoteFields.isEmpty()) {
             cv = new PromoteFieldClassAdapter(cv, promoteFields);
         }
+        if (!mPromotedClasses.isEmpty()) {
+            cv = new PromoteClassClassAdapter(cv, mPromotedClasses);
+        }
         cr.accept(cv, 0);
+
         return cw.toByteArray();
     }
 

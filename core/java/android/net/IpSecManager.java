@@ -18,12 +18,18 @@ package android.net;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.AndroidException;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
+
 import dalvik.system.CloseGuard;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -37,9 +43,8 @@ import java.net.Socket;
  * <p>An IpSecManager may be obtained by calling {@link
  * android.content.Context#getSystemService(String) Context#getSystemService(String)} with {@link
  * android.content.Context#IPSEC_SERVICE Context#IPSEC_SERVICE}
- *
- * @hide
  */
+@SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
     private static final String TAG = "IpSecManager";
 
@@ -185,7 +190,8 @@ public final class IpSecManager {
         }
 
         /** @hide */
-        int getResourceId() {
+        @VisibleForTesting
+        public int getResourceId() {
             return mResourceId;
         }
     }
@@ -486,7 +492,8 @@ public final class IpSecManager {
         }
 
         /** @hide */
-        int getResourceId() {
+        @VisibleForTesting
+        public int getResourceId() {
             return mResourceId;
         }
     };

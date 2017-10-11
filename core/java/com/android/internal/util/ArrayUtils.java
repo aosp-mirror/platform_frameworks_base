@@ -169,6 +169,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Length of the given array or 0 if it's null.
+     */
+    public static int size(@Nullable Object[] array) {
+        return array == null ? 0 : array.length;
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
@@ -236,6 +243,29 @@ public class ArrayUtils {
         return false;
     }
 
+    public static boolean contains(@Nullable char[] array, char value) {
+        if (array == null) return false;
+        for (char element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test if all {@code check} items are contained in {@code array}.
+     */
+    public static <T> boolean containsAll(@Nullable char[] array, char[] check) {
+        if (check == null) return true;
+        for (char checkItem : check) {
+            if (!contains(array, checkItem)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static long total(@Nullable long[] array) {
         long total = 0;
         if (array != null) {
@@ -260,10 +290,19 @@ public class ArrayUtils {
      */
     @SuppressWarnings("unchecked")
     public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
+        return appendElement(kind, array, element, false);
+    }
+
+    /**
+     * Adds value to given array.
+     */
+    @SuppressWarnings("unchecked")
+    public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element,
+            boolean allowDuplicates) {
         final T[] result;
         final int end;
         if (array != null) {
-            if (contains(array, element)) return array;
+            if (!allowDuplicates && contains(array, element)) return array;
             end = array.length;
             result = (T[])Array.newInstance(kind, end + 1);
             System.arraycopy(array, 0, result, 0, end);
@@ -299,23 +338,33 @@ public class ArrayUtils {
     }
 
     /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
+     * Adds value to given array.
      */
-    public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
+    public static @NonNull int[] appendInt(@Nullable int[] cur, int val,
+            boolean allowDuplicates) {
         if (cur == null) {
             return new int[] { val };
         }
         final int N = cur.length;
-        for (int i = 0; i < N; i++) {
-            if (cur[i] == val) {
-                return cur;
+        if (!allowDuplicates) {
+            for (int i = 0; i < N; i++) {
+                if (cur[i] == val) {
+                    return cur;
+                }
             }
         }
         int[] ret = new int[N + 1];
         System.arraycopy(cur, 0, ret, 0, N);
         ret[N] = val;
         return ret;
+    }
+
+    /**
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
+     */
+    public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
+        return appendInt(cur, val, false);
     }
 
     /**
@@ -435,10 +484,6 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(@Nullable ArraySet<T> cur, T val) {
-        return (cur != null) ? cur.contains(val) : false;
-    }
-
     public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             cur = new ArrayList<>();
@@ -537,5 +582,9 @@ public class ArrayUtils {
             collection.remove(i);
         }
         return size - leftIdx;
+    }
+
+    public static @NonNull String[] defeatNullable(@Nullable String[] val) {
+        return (val != null) ? val : EmptyArray.STRING;
     }
 }

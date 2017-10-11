@@ -16,6 +16,7 @@
 
 #include "FrameBuilder.h"
 
+#include "DeferredLayerUpdater.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
@@ -77,7 +78,7 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
     // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
-        RenderNode* layerNode = layers.entries()[i].renderNode;
+        RenderNode* layerNode = layers.entries()[i].renderNode.get();
         // only schedule repaint if node still on layer - possible it may have been
         // removed during a dropped frame, but layers may still remain scheduled so
         // as not to lose info on what portion is damaged
@@ -120,7 +121,7 @@ void FrameBuilder::deferRenderNode(float tx, float ty, Rect clipRect, RenderNode
     mCanvasState.save(SaveFlags::MatrixClip);
     mCanvasState.translate(tx, ty);
     mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-            SkRegion::kIntersect_Op);
+            SkClipOp::kIntersect);
     deferNodePropsAndOps(renderNode);
     mCanvasState.restore();
 }
@@ -180,16 +181,18 @@ void FrameBuilder::deferRenderNodeScene(const std::vector< sp<RenderNode> >& nod
         }
     }
 
-    if (!backdrop.isEmpty()) {
-        // content node translation to catch up with backdrop
-        float dx = contentDrawBounds.left - backdrop.left;
-        float dy = contentDrawBounds.top - backdrop.top;
+    if (!nodes[1]->nothingToDraw()) {
+        if (!backdrop.isEmpty()) {
+            // content node translation to catch up with backdrop
+            float dx = contentDrawBounds.left - backdrop.left;
+            float dy = contentDrawBounds.top - backdrop.top;
 
-        Rect contentLocalClip = backdrop;
-        contentLocalClip.translate(dx, dy);
-        deferRenderNode(-dx, -dy, contentLocalClip, *nodes[1]);
-    } else {
-        deferRenderNode(*nodes[1]);
+            Rect contentLocalClip = backdrop;
+            contentLocalClip.translate(dx, dy);
+            deferRenderNode(-dx, -dy, contentLocalClip, *nodes[1]);
+        } else {
+            deferRenderNode(*nodes[1]);
+        }
     }
 
     // remaining overlay nodes, simply defer
@@ -262,7 +265,7 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
         Rect clipRect;
         properties.getClippingRectForFlags(clipFlags, &clipRect);
         mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-                SkRegion::kIntersect_Op);
+                SkClipOp::kIntersect);
     }
 
     if (properties.getRevealClip().willClip()) {
@@ -477,7 +480,7 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
         projectionReceiverOutline->transform(
                 skCurrentTransform,
                 &transformedMaskPath);
-        mCanvasState.setProjectionPathMask(mAllocator, &transformedMaskPath);
+        mCanvasState.setProjectionPathMask(&transformedMaskPath);
     }
 
     for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {
@@ -559,10 +562,11 @@ void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
  * for paint's style on the bounds being computed.
  */
 BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
-        BakedOpState::StrokeBehavior strokeBehavior) {
+        BakedOpState::StrokeBehavior strokeBehavior, bool expandForPathTexture) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior);
+            mAllocator, *mCanvasState.writableSnapshot(), op,
+            strokeBehavior, expandForPathTexture);
     if (!bakedState) return nullptr; // quick rejected
 
     if (op.opId == RecordedOpId::RectOp && op.paint->getStyle() != SkPaint::kStroke_Style) {
@@ -587,7 +591,10 @@ static batchid_t tessBatchId(const RecordedOp& op) {
 }
 
 void FrameBuilder::deferArcOp(const ArcOp& op) {
-    deferStrokeableOp(op, tessBatchId(op));
+    // Pass true below since arcs have a tendency to draw outside their expected bounds within
+    // their path textures. Passing true makes it more likely that we'll scissor, instead of
+    // corrupting the frame by drawing outside of clip bounds.
+    deferStrokeableOp(op, tessBatchId(op), BakedOpState::StrokeBehavior::StyleDefined, true);
 }
 
 static bool hasMergeableClip(const BakedOpState& state) {
@@ -608,11 +615,10 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     // MergingDrawBatch::canMergeWith()
     if (bakedState->computedState.transform.isSimple()
             && bakedState->computedState.transform.positiveScale()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && op.bitmap->colorType() != kAlpha_8_SkColorType
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
-        // TODO: AssetAtlas in mergeId
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::Bitmap, mergeId);
     } else {
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
@@ -632,7 +638,7 @@ void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
 }
 
 void FrameBuilder::deferVectorDrawableOp(const VectorDrawableOp& op) {
-    const SkBitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
+    Bitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
     SkPaint* paint = op.vectorDrawable->getPaint();
     const BitmapRectOp* resolvedOp = mAllocator.create_trivial<BitmapRectOp>(op.unmappedBounds,
             op.localMatrix,
@@ -684,10 +690,9 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
     if (!bakedState) return; // quick rejected
 
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
-        // TODO: AssetAtlas in mergeId
 
         // Only use the MergedPatch batchId when merged, so Bitmap+Patch don't try to merge together
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::MergedPatch, mergeId);
@@ -747,12 +752,12 @@ static batchid_t textBatchId(const SkPaint& paint) {
 void FrameBuilder::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
             mAllocator, *mCanvasState.writableSnapshot(), op,
-            BakedOpState::StrokeBehavior::StyleDefined);
+            BakedOpState::StrokeBehavior::StyleDefined, false);
     if (!bakedState) return; // quick rejected
 
     batchid_t batchId = textBatchId(*(op.paint));
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
             && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
         currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
@@ -784,14 +789,15 @@ void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
-    if (CC_UNLIKELY(!op.layer->isRenderable())) return;
+    GlLayer* layer = static_cast<GlLayer*>(op.layerHandle->backingLayer());
+    if (CC_UNLIKELY(!layer || !layer->isRenderable())) return;
 
     const TextureLayerOp* textureLayerOp = &op;
     // Now safe to access transform (which was potentially unready at record time)
-    if (!op.layer->getTransform().isIdentity()) {
+    if (!layer->getTransform().isIdentity()) {
         // non-identity transform present, so 'inject it' into op by copying + replacing matrix
         Matrix4 combinedMatrix(op.localMatrix);
-        combinedMatrix.multiply(op.layer->getTransform());
+        combinedMatrix.multiply(layer->getTransform());
         textureLayerOp = mAllocator.create<TextureLayerOp>(op, combinedMatrix);
     }
     BakedOpState* bakedState = tryBakeOpState(*textureLayerOp);

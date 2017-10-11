@@ -189,17 +189,20 @@ static const JNINativeMethod gMethods[] = {
     {"nCreateAnimatorSet", "()J", (void*)createAnimatorSet},
     {"nSetVectorDrawableTarget", "(JJ)V", (void*)setVectorDrawableTarget},
     {"nAddAnimator", "(JJJJJII)V", (void*)addAnimator},
-    {"nCreateGroupPropertyHolder", "!(JIFF)J", (void*)createGroupPropertyHolder},
-    {"nCreatePathDataPropertyHolder", "!(JJJ)J", (void*)createPathDataPropertyHolder},
-    {"nCreatePathColorPropertyHolder", "!(JIII)J", (void*)createPathColorPropertyHolder},
-    {"nCreatePathPropertyHolder", "!(JIFF)J", (void*)createPathPropertyHolder},
-    {"nCreateRootAlphaPropertyHolder", "!(JFF)J", (void*)createRootAlphaPropertyHolder},
     {"nSetPropertyHolderData", "(J[FI)V", (void*)setFloatPropertyHolderData},
     {"nSetPropertyHolderData", "(J[II)V", (void*)setIntPropertyHolderData},
     {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)start},
     {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)reverse},
-    {"nEnd", "!(J)V", (void*)end},
-    {"nReset", "!(J)V", (void*)reset},
+
+    // ------------- @FastNative -------------------
+
+    {"nCreateGroupPropertyHolder", "(JIFF)J", (void*)createGroupPropertyHolder},
+    {"nCreatePathDataPropertyHolder", "(JJJ)J", (void*)createPathDataPropertyHolder},
+    {"nCreatePathColorPropertyHolder", "(JIII)J", (void*)createPathColorPropertyHolder},
+    {"nCreatePathPropertyHolder", "(JIFF)J", (void*)createPathPropertyHolder},
+    {"nCreateRootAlphaPropertyHolder", "(JFF)J", (void*)createRootAlphaPropertyHolder},
+    {"nEnd", "(J)V", (void*)end},
+    {"nReset", "(J)V", (void*)reset},
 };
 
 const char* const kClassPathName = "android/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT";

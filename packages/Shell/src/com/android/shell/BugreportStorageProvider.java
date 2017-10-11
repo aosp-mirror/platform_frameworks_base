@@ -27,7 +27,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
-import android.support.provider.DocumentArchiveHelper;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
@@ -48,12 +47,10 @@ public class BugreportStorageProvider extends DocumentsProvider {
     };
 
     private File mRoot;
-    private DocumentArchiveHelper mArchiveHelper;
 
     @Override
     public boolean onCreate() {
         mRoot = new File(getContext().getFilesDir(), "bugreports");
-        mArchiveHelper = new DocumentArchiveHelper(this, (char) 0);
         return true;
     }
 
@@ -72,10 +69,6 @@ public class BugreportStorageProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
-        if (mArchiveHelper.isArchivedDocument(documentId)) {
-            return mArchiveHelper.queryDocument(documentId, projection);
-        }
-
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         if (DOC_ID_ROOT.equals(documentId)) {
             final RowBuilder row = result.newRow();
@@ -94,11 +87,6 @@ public class BugreportStorageProvider extends DocumentsProvider {
     public Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
-        if (mArchiveHelper.isArchivedDocument(parentDocumentId) ||
-                mArchiveHelper.isSupportedArchiveType(getDocumentType(parentDocumentId))) {
-            return mArchiveHelper.queryChildDocuments(parentDocumentId, projection, sortOrder);
-        }
-
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         if (DOC_ID_ROOT.equals(parentDocumentId)) {
             final File[] files = mRoot.listFiles();
@@ -116,10 +104,6 @@ public class BugreportStorageProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        if (mArchiveHelper.isArchivedDocument(documentId)) {
-            return mArchiveHelper.openDocument(documentId, mode, signal);
-        }
-
         if (ParcelFileDescriptor.parseMode(mode) != ParcelFileDescriptor.MODE_READ_ONLY) {
             throw new FileNotFoundException("Failed to open: " + documentId + ", mode = " + mode);
         }
@@ -182,10 +166,6 @@ public class BugreportStorageProvider extends DocumentsProvider {
     private void addFileRow(MatrixCursor result, File file) {
         String mimeType = getTypeForName(file.getName());
         int flags = Document.FLAG_SUPPORTS_DELETE;
-        if (mArchiveHelper.isSupportedArchiveType(mimeType)) {
-            flags |= Document.FLAG_ARCHIVE;
-        }
-
         final RowBuilder row = result.newRow();
         row.add(Document.COLUMN_DOCUMENT_ID, getDocIdForFile(file));
         row.add(Document.COLUMN_MIME_TYPE, mimeType);

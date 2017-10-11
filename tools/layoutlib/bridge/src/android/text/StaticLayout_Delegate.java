@@ -53,8 +53,9 @@ public class StaticLayout_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nLoadHyphenator(ByteBuffer buf, int offset) {
-        return Hyphenator_Delegate.loadHyphenator(buf, offset);
+    /*package*/ static long nLoadHyphenator(ByteBuffer buf, int offset, int minPrefix,
+            int minSuffix) {
+        return Hyphenator_Delegate.loadHyphenator(buf, offset, minPrefix, minSuffix);
     }
 
     @LayoutlibDelegate
@@ -75,7 +76,8 @@ public class StaticLayout_Delegate {
     /*package*/ static void nSetupParagraph(long nativeBuilder, char[] text, int length,
             float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, int breakStrategy,
-            int hyphenationFrequency) {
+            int hyphenationFrequency, boolean isJustified) {
+        // TODO: implement justified alignment
         Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         if (builder == null) {
             return;
@@ -162,7 +164,9 @@ public class StaticLayout_Delegate {
                         builder.mTabStopCalculator);
                 break;
             default:
-                throw new AssertionError("Unknown break strategy: " + builder.mBreakStrategy);
+                assert false : "Unknown break strategy: " + builder.mBreakStrategy;
+                builder.mLineBreaker = new GreedyLineBreaker(primitives, builder.mLineWidth,
+                        builder.mTabStopCalculator);
         }
         builder.mLineBreaker.computeBreaks(recycle);
         return recycle.breaks.length;

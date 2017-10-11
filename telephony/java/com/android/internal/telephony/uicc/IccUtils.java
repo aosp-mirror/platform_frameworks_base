@@ -64,7 +64,7 @@ public class IccUtils {
     /**
      * PLMN (MCC/MNC) is encoded as per 24.008 10.5.1.3
      * Returns a concatenated string of MCC+MNC, stripping
-     * a trailing character for a 2-digit MNC
+     * all invalid character 'f'
      */
     public static String bcdPlmnToString(byte[] data, int offset) {
         if (offset + 3 > data.length) {
@@ -76,9 +76,9 @@ public class IccUtils {
         trans[2] = (byte) ((data[2 + offset] & 0xF0) | ((data[1 + offset] >> 4) & 0xF));
         String ret = bytesToHexString(trans);
 
-        // For a 2-digit MNC we trim the trailing 'f'
-        if (ret.endsWith("f")) {
-            ret = ret.substring(0, ret.length() - 1);
+        // For a valid plmn we trim all character 'f'
+        if (ret.contains("f")) {
+            ret = ret.replaceAll("f", "");
         }
         return ret;
     }

@@ -115,6 +115,16 @@ final class AccessibilityController {
         }
     }
 
+    public void performComputeChangedWindowsNotLocked() {
+        WindowsForAccessibilityObserver observer = null;
+        synchronized (mWindowManagerService) {
+            observer = mWindowsForAccessibilityObserver;
+        }
+        if (observer != null) {
+            observer.performComputeChangedWindowsNotLocked();
+        }
+    }
+
     public void setMagnificationSpecLocked(MagnificationSpec spec) {
         if (mDisplayMagnifier != null) {
             mDisplayMagnifier.setMagnificationSpecLocked(spec);
@@ -146,9 +156,9 @@ final class AccessibilityController {
         }
     }
 
-    public void onRotationChangedLocked(DisplayContent displayContent, int rotation) {
+    public void onRotationChangedLocked(DisplayContent displayContent) {
         if (mDisplayMagnifier != null) {
-            mDisplayMagnifier.onRotationChangedLocked(displayContent, rotation);
+            mDisplayMagnifier.onRotationChangedLocked(displayContent);
         }
         if (mWindowsForAccessibilityObserver != null) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
@@ -212,12 +222,19 @@ final class AccessibilityController {
                 || mWindowsForAccessibilityObserver != null);
     }
 
+    public void setForceShowMagnifiableBoundsLocked(boolean show) {
+        if (mDisplayMagnifier != null) {
+            mDisplayMagnifier.setForceShowMagnifiableBoundsLocked(show);
+            mDisplayMagnifier.showMagnificationBoundsIfNeeded();
+        }
+    }
+
     private static void populateTransformationMatrixLocked(WindowState windowState,
             Matrix outMatrix) {
         sTempFloats[Matrix.MSCALE_X] = windowState.mWinAnimator.mDsDx;
         sTempFloats[Matrix.MSKEW_Y] = windowState.mWinAnimator.mDtDx;
-        sTempFloats[Matrix.MSKEW_X] = windowState.mWinAnimator.mDsDy;
-        sTempFloats[Matrix.MSCALE_Y] = windowState.mWinAnimator.mDtDy;
+        sTempFloats[Matrix.MSKEW_X] = windowState.mWinAnimator.mDtDy;
+        sTempFloats[Matrix.MSCALE_Y] = windowState.mWinAnimator.mDsDy;
         sTempFloats[Matrix.MTRANS_X] = windowState.mShownPosition.x;
         sTempFloats[Matrix.MTRANS_Y] = windowState.mShownPosition.y;
         sTempFloats[Matrix.MPERSP_0] = 0;
@@ -256,6 +273,8 @@ final class AccessibilityController {
 
         private final long mLongAnimationDuration;
 
+        private boolean mForceShowMagnifiableBounds = false;
+
         public DisplayMagnifier(WindowManagerService windowManagerService,
                 MagnificationCallbacks callbacks) {
             mContext = windowManagerService.mContext;
@@ -271,6 +290,15 @@ final class AccessibilityController {
             mMagnifedViewport.updateMagnificationSpecLocked(spec);
             mMagnifedViewport.recomputeBoundsLocked();
             mWindowManagerService.scheduleAnimationLocked();
+        }
+
+        public void setForceShowMagnifiableBoundsLocked(boolean show) {
+            mForceShowMagnifiableBounds = show;
+            mMagnifedViewport.setMagnifiedRegionBorderShownLocked(show, true);
+        }
+
+        public boolean isForceShowingMagnifiableBoundsLocked() {
+            return mForceShowMagnifiableBounds;
         }
 
         public void onRectangleOnScreenRequestedLocked(Rect rectangle) {
@@ -302,9 +330,10 @@ final class AccessibilityController {
             mWindowManagerService.scheduleAnimationLocked();
         }
 
-        public void onRotationChangedLocked(DisplayContent displayContent, int rotation) {
+        public void onRotationChangedLocked(DisplayContent displayContent) {
             if (DEBUG_ROTATION) {
-                Slog.i(LOG_TAG, "Rotaton: " + Surface.rotationToString(rotation)
+                final int rotation = displayContent.getRotation();
+                Slog.i(LOG_TAG, "Rotation: " + Surface.rotationToString(rotation)
                         + " displayId: " + displayContent.getDisplayId());
             }
             mMagnifedViewport.onRotationChangedLocked();
@@ -359,6 +388,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                         case WindowManager.LayoutParams.TYPE_TOAST:
                         case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
+                        case WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:
                         case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
                         case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
                         case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
@@ -390,7 +420,7 @@ final class AccessibilityController {
             if (spec != null && !spec.isNop()) {
                 WindowManagerPolicy policy = mWindowManagerService.mPolicy;
                 final int windowType = windowState.mAttrs.type;
-                if (!policy.isTopLevelWindow(windowType) && windowState.mAttachedWindow != null
+                if (!policy.isTopLevelWindow(windowType) && windowState.isChildWindow()
                         && !policy.canMagnifyWindow(windowType)) {
                     return null;
                 }
@@ -407,6 +437,12 @@ final class AccessibilityController {
 
         public void destroyLocked() {
             mMagnifedViewport.destroyWindow();
+        }
+
+        // Can be called outside of a surface transaction
+        public void showMagnificationBoundsIfNeeded() {
+            mHandler.obtainMessage(MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)
+                    .sendToTarget();
         }
 
         /** NOTE: This has to be called within a surface transaction. */
@@ -476,7 +512,8 @@ final class AccessibilityController {
                 // to show the border. We will do so when the pending message is handled.
                 if (!mHandler.hasMessages(
                         MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
-                    setMagnifiedRegionBorderShownLocked(isMagnifyingLocked(), true);
+                    setMagnifiedRegionBorderShownLocked(
+                            isMagnifyingLocked() || isForceShowingMagnifiableBoundsLocked(), true);
                 }
             }
 
@@ -588,11 +625,11 @@ final class AccessibilityController {
             }
 
             public void onRotationChangedLocked() {
-                // If we are magnifying, hide the magnified border window immediately so
+                // If we are showing the magnification border, hide it immediately so
                 // the user does not see strange artifacts during rotation. The screenshot
-                // used for rotation has already the border. After the rotation is complete
+                // used for rotation already has the border. After the rotation is complete
                 // we will show the border.
-                if (isMagnifyingLocked()) {
+                if (isMagnifyingLocked() || isForceShowingMagnifiableBoundsLocked()) {
                     setMagnifiedRegionBorderShownLocked(false, false);
                     final long delay = (long) (mLongAnimationDuration
                             * mWindowManagerService.getWindowAnimationScaleLocked());
@@ -638,17 +675,13 @@ final class AccessibilityController {
             }
 
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-                DisplayContent displayContent = mWindowManagerService
-                        .getDefaultDisplayContentLocked();
-                WindowList windowList = displayContent.getWindowList();
-                final int windowCount = windowList.size();
-                for (int i = 0; i < windowCount; i++) {
-                    WindowState windowState = windowList.get(i);
-                    if (windowState.isOnScreen() && windowState.isVisibleLw() &&
-                            !windowState.mWinAnimator.mEnterAnimationPending) {
-                        outWindows.put(windowState.mLayer, windowState);
+                final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+                dc.forAllWindows((w) -> {
+                    if (w.isOnScreen() && w.isVisibleLw()
+                            && !w.mWinAnimator.mEnterAnimationPending) {
+                        outWindows.put(w.mLayer, w);
                     }
-                }
+                }, false /* traverseTopToBottom */ );
             }
 
             private final class ViewportWindow {
@@ -681,7 +714,7 @@ final class AccessibilityController {
                     mSurfaceControl = surfaceControl;
                     mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay()
                             .getLayerStack());
-                    mSurfaceControl.setLayer(mWindowManagerService.mPolicy.windowTypeToLayerLw(
+                    mSurfaceControl.setLayer(mWindowManagerService.mPolicy.getWindowLayerFromTypeLw(
                             WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY)
                             * WindowManagerService.TYPE_LAYER_MULTIPLIER);
                     mSurfaceControl.setPosition(0, 0);
@@ -918,7 +951,8 @@ final class AccessibilityController {
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
                         synchronized (mWindowManagerService.mWindowMap) {
-                            if (mMagnifedViewport.isMagnifyingLocked()) {
+                            if (mMagnifedViewport.isMagnifyingLocked()
+                                    || isForceShowingMagnifiableBoundsLocked()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShownLocked(true, true);
                                 mWindowManagerService.scheduleAnimationLocked();
                             }
@@ -1017,16 +1051,14 @@ final class AccessibilityController {
                 Region unaccountedSpace = mTempRegion;
                 unaccountedSpace.set(0, 0, screenWidth, screenHeight);
 
-                SparseArray<WindowState> visibleWindows = mTempWindowStates;
+                final SparseArray<WindowState> visibleWindows = mTempWindowStates;
                 populateVisibleWindowsOnScreenLocked(visibleWindows);
-
                 Set<IBinder> addedWindows = mTempBinderSet;
                 addedWindows.clear();
 
                 boolean focusedWindowAdded = false;
 
                 final int visibleWindowCount = visibleWindows.size();
-                int skipRemainingWindowsForTaskId = -1;
                 HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
@@ -1202,34 +1234,10 @@ final class AccessibilityController {
                     (int) windowFrame.right, (int) windowFrame.bottom);
         }
 
-        private static WindowInfo obtainPopulatedWindowInfo(WindowState windowState,
-                Rect boundsInScreen) {
-            WindowInfo window = WindowInfo.obtain();
-            window.type = windowState.mAttrs.type;
-            window.layer = windowState.mLayer;
-            window.token = windowState.mClient.asBinder();
-            window.title = windowState.mAttrs.accessibilityTitle;
-            window.accessibilityIdOfAnchor = windowState.mAttrs.accessibilityIdOfAnchor;
-
-            WindowState attachedWindow = windowState.mAttachedWindow;
-            if (attachedWindow != null) {
-                window.parentToken = attachedWindow.mClient.asBinder();
-            }
-
-            window.focused = windowState.isFocused();
+        private static WindowInfo obtainPopulatedWindowInfo(
+                WindowState windowState, Rect boundsInScreen) {
+            final WindowInfo window = windowState.getWindowInfo();
             window.boundsInScreen.set(boundsInScreen);
-
-            final int childCount = windowState.mChildWindows.size();
-            if (childCount > 0) {
-                if (window.childTokens == null) {
-                    window.childTokens = new ArrayList<IBinder>();
-                }
-                for (int j = 0; j < childCount; j++) {
-                    WindowState child = windowState.mChildWindows.get(j);
-                    window.childTokens.add(child.mClient.asBinder());
-                }
-            }
-
             return window;
         }
 
@@ -1299,8 +1307,7 @@ final class AccessibilityController {
         }
 
         private static boolean isReportedWindowType(int windowType) {
-            return (windowType != WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM
-                    && windowType != WindowManager.LayoutParams.TYPE_WALLPAPER
+            return (windowType != WindowManager.LayoutParams.TYPE_WALLPAPER
                     && windowType != WindowManager.LayoutParams.TYPE_BOOT_PROGRESS
                     && windowType != WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_DRAG
@@ -1313,16 +1320,12 @@ final class AccessibilityController {
         }
 
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-            DisplayContent displayContent = mWindowManagerService
-                    .getDefaultDisplayContentLocked();
-            WindowList windowList = displayContent.getWindowList();
-            final int windowCount = windowList.size();
-            for (int i = 0; i < windowCount; i++) {
-                WindowState windowState = windowList.get(i);
-                if (windowState.isVisibleLw()) {
-                    outWindows.put(windowState.mLayer, windowState);
+            final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+            dc.forAllWindows((w) -> {
+                if (w.isVisibleLw()) {
+                    outWindows.put(w.mLayer, w);
                 }
-            }
+            }, false /* traverseTopToBottom */ );
         }
 
         private class MyHandler extends Handler {

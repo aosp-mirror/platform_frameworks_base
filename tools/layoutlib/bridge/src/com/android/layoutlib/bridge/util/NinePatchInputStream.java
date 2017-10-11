@@ -34,12 +34,9 @@ public class NinePatchInputStream extends FileInputStream {
 
     @Override
     public boolean markSupported() {
-        if (mFakeMarkSupport) {
-            // this is needed so that BitmapFactory doesn't wrap this in a BufferedInputStream.
-            return true;
-        }
+        // this is needed so that BitmapFactory doesn't wrap this in a BufferedInputStream.
+        return mFakeMarkSupport || super.markSupported();
 
-        return super.markSupported();
     }
 
     public void disableFakeMarkSupport() {

@@ -19,7 +19,6 @@
         android:propertyXName="scaleX"
         android:propertyYName="scaleY"
         android:pathData="M 1 1 l -0.1 -0.1 "
-        android:valueType="pathType"
         android:interpolator="@interpolator/ic_rotate_2_portrait_v2_arrows_1_scalex_interpolator" />
     <objectAnimator
         android:duration="617"

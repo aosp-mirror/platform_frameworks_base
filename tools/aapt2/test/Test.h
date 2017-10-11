@@ -17,16 +17,11 @@
 #ifndef AAPT_TEST_TEST_H
 #define AAPT_TEST_TEST_H
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 #include "test/Builders.h"
 #include "test/Common.h"
 #include "test/Context.h"
 
-#include <gtest/gtest.h>
-
-namespace aapt {
-namespace test {
-
-} // namespace test
-} // namespace aapt
-
-#endif // AAPT_TEST_TEST_H
+#endif  // AAPT_TEST_TEST_H

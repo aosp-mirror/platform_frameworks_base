@@ -18,6 +18,7 @@ package android.view;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+import com.android.tools.layoutlib.java.System_Delegate;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,8 +55,8 @@ public class Choreographer_Delegate {
     public static void doFrame(long frameTimeNanos) {
         Choreographer thisChoreographer = Choreographer.getInstance();
 
-        thisChoreographer.mLastFrameTimeNanos = frameTimeNanos;
-
+        thisChoreographer.mLastFrameTimeNanos = frameTimeNanos - thisChoreographer
+                .getFrameIntervalNanos();
         thisChoreographer.mFrameInfo.markInputHandlingStart();
         thisChoreographer.doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
 

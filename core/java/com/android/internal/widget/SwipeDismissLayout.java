@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ReceiverCallNotAllowedException;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -86,24 +87,7 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
-    private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
-        private Runnable mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mDismissed) {
-                    dismiss();
-                } else {
-                    cancel();
-                }
-                resetMembers();
-            }
-        };
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            post(mRunnable);
-        }
-    };
+    private BroadcastReceiver mScreenOffReceiver;
     private IntentFilter mScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 
 
@@ -146,12 +130,36 @@ public class SwipeDismissLayout extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        getContext().registerReceiver(mScreenOffReceiver, mScreenOffFilter);
+        try {
+            mScreenOffReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    post(() -> {
+                        if (mDismissed) {
+                            dismiss();
+                        } else {
+                            cancel();
+                        }
+                        resetMembers();
+                    });
+                }
+            };
+            getContext().registerReceiver(mScreenOffReceiver, mScreenOffFilter);
+        } catch (ReceiverCallNotAllowedException e) {
+            /* Exception is thrown if the context is a ReceiverRestrictedContext object. As
+             * ReceiverRestrictedContext is not public, the context type cannot be checked before
+             * calling registerReceiver. The most likely scenario in which the exception would be
+             * thrown would be when a BroadcastReceiver creates a dialog to show the user. */
+            mScreenOffReceiver = null; // clear receiver since it was not used.
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        getContext().unregisterReceiver(mScreenOffReceiver);
+        if (mScreenOffReceiver != null) {
+            getContext().unregisterReceiver(mScreenOffReceiver);
+            mScreenOffReceiver = null;
+        }
         super.onDetachedFromWindow();
     }
 

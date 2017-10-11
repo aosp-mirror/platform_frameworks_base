@@ -262,6 +262,10 @@ public class TaskStackViewScroller {
         return !mScroller.isFinished();
     }
 
+    float getScrollVelocity() {
+        return mScroller.getCurrVelocity();
+    }
+
     /** Stops the scroller and any current fling. */
     void stopScroller() {
         if (!mScroller.isFinished()) {

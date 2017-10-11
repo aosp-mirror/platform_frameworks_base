@@ -381,7 +381,7 @@ public final class UiAutomation {
      */
     public AccessibilityNodeInfo findFocus(int focus) {
         return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId,
-                AccessibilityNodeInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
+                AccessibilityWindowInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID, focus);
     }
 
     /**
@@ -580,37 +580,46 @@ public final class UiAutomation {
         command.run();
 
         // Acquire the lock and wait for the event.
-        synchronized (mLock) {
-            try {
-                // Wait for the event.
-                final long startTimeMillis = SystemClock.uptimeMillis();
-                while (true) {
-                    // Drain the event queue
-                    while (!mEventQueue.isEmpty()) {
-                        AccessibilityEvent event = mEventQueue.remove(0);
-                        // Ignore events from previous interactions.
-                        if (event.getEventTime() < executionStartTimeMillis) {
-                            continue;
-                        }
-                        if (filter.accept(event)) {
-                            return event;
-                        }
-                        event.recycle();
+        try {
+            // Wait for the event.
+            final long startTimeMillis = SystemClock.uptimeMillis();
+            while (true) {
+                List<AccessibilityEvent> localEvents = new ArrayList<>();
+                synchronized (mLock) {
+                    localEvents.addAll(mEventQueue);
+                    mEventQueue.clear();
+                }
+                // Drain the event queue
+                while (!localEvents.isEmpty()) {
+                    AccessibilityEvent event = localEvents.remove(0);
+                    // Ignore events from previous interactions.
+                    if (event.getEventTime() < executionStartTimeMillis) {
+                        continue;
                     }
-                    // Check if timed out and if not wait.
-                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
-                    if (remainingTimeMillis <= 0) {
-                        throw new TimeoutException("Expected event not received within: "
-                                + timeoutMillis + " ms.");
+                    if (filter.accept(event)) {
+                        return event;
                     }
-                    try {
-                        mLock.wait(remainingTimeMillis);
-                    } catch (InterruptedException ie) {
-                        /* ignore */
+                    event.recycle();
+                }
+                // Check if timed out and if not wait.
+                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
+                if (remainingTimeMillis <= 0) {
+                    throw new TimeoutException("Expected event not received within: "
+                            + timeoutMillis + " ms.");
+                }
+                synchronized (mLock) {
+                    if (mEventQueue.isEmpty()) {
+                        try {
+                            mLock.wait(remainingTimeMillis);
+                        } catch (InterruptedException ie) {
+                            /* ignore */
+                        }
                     }
                 }
-            } finally {
+            }
+        } finally {
+            synchronized (mLock) {
                 mWaitingForEventDelivery = false;
                 mEventQueue.clear();
                 mLock.notifyAll();
@@ -759,7 +768,7 @@ public final class UiAutomation {
             throwIfNotConnectedLocked();
         }
         try {
-            ActivityManagerNative.getDefault().setUserIsMonkey(enable);
+            ActivityManager.getService().setUserIsMonkey(enable);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while setting run as monkey!", re);
         }
@@ -1097,6 +1106,26 @@ public final class UiAutomation {
 
                 @Override
                 public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onFingerprintCapturingGesturesChanged(boolean active) {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onFingerprintGesture(int gesture) {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onAccessibilityButtonClicked() {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onAccessibilityButtonAvailabilityChanged(boolean available) {
                     /* do nothing */
                 }
             });

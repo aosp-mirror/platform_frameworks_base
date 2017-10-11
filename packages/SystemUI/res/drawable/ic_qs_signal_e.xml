@@ -14,11 +14,15 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="6.6666665dp"
-        android:height="32dp"
-        android:viewportWidth="5.0"
-        android:viewportHeight="24.0">
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0"
+        android:tint="?android:attr/colorControlNormal">
+  <group
+    android:translateX="3.5" >
     <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M4.400000,7.300000L1.700000,7.300000l0.000000,2.400000l3.300000,0.000000L5.000000,11.000000L0.000000,11.000000L0.000000,2.500000l4.900000,0.000000l0.000000,1.300000L1.700000,3.800000l0.000000,2.100000l2.800000,0.000000L4.500000,7.300000z"/>
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M4.400000,7.300000L1.700000,7.300000l0.000000,2.400000l3.300000,0.000000L5.000000,11.000000L0.000000,11.000000L0.000000,2.500000l4.900000,0.000000l0.000000,1.300000L1.700000,3.800000l0.000000,2.100000l2.800000,0.000000L4.500000,7.300000z"/>
+  </group>
 </vector>

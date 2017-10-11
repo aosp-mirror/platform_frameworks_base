@@ -1,0 +1,94 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.service.diskstats;
+
+option java_multiple_files = true;
+option java_outer_classname = "DiskStatsServiceProto";
+
+message DiskStatsServiceDumpProto {
+    enum EncryptionType {
+        // Unknown encryption type
+        ENCRYPTION_UNKNOWN = 0;
+        // No encryption
+        ENCRYPTION_NONE = 1;
+        // Full disk encryption
+        ENCRYPTION_FULL_DISK = 2;
+        // File-based encryption
+        ENCRYPTION_FILE_BASED = 3;
+    }
+    // Whether the latency test resulted in an error
+    bool has_test_error = 1;
+    // If the test errored, error message is contained here
+    string error_message = 2;
+    // 512B write latency in milliseconds, if the test was successful
+    int32 write_512b_latency_millis = 3;
+    // Free Space in the major partitions
+    repeated DiskStatsFreeSpaceProto partitions_free_space = 4;
+    // Is the device using file-based encryption, full disk encryption or other
+    EncryptionType encryption = 5;
+    // Cached values of folder sizes, etc.
+    DiskStatsCachedValuesProto cached_folder_sizes = 6;
+}
+
+message DiskStatsCachedValuesProto {
+    // Total app data size, in kilobytes
+    int64 agg_apps_size = 1;
+    // Total app cache size, in kilobytes
+    int64 agg_apps_cache_size = 2;
+    // Size of image files, in kilobytes
+    int64 photos_size = 3;
+    // Size of video files, in kilobytes
+    int64 videos_size = 4;
+    // Size of audio files, in kilobytes
+    int64 audio_size = 5;
+    // Size of downloads, in kilobytes
+    int64 downloads_size = 6;
+    // Size of system directory, in kilobytes
+    int64 system_size = 7;
+    // Size of other files, in kilobytes
+    int64 other_size = 8;
+    // Sizes of individual packages
+    repeated DiskStatsAppSizesProto app_sizes = 9;
+}
+
+message DiskStatsAppSizesProto {
+    // Name of the package
+    string package_name = 1;
+    // App's data size in kilobytes
+    int64 app_size = 2;
+    // App's cache size in kilobytes
+    int64 cache_size = 3;
+}
+
+message DiskStatsFreeSpaceProto {
+    enum Folder {
+        // Data folder
+        FOLDER_DATA = 0;
+        // Cache folder
+        FOLDER_CACHE = 1;
+        // System folder
+        FOLDER_SYSTEM = 2;
+    }
+    // Which folder?
+    Folder folder = 1;
+    // Available space, in kilobytes
+    int64 available_space = 2;
+    // Total space, in kilobytes
+    int64 total_space = 3;
+}

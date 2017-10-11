@@ -77,6 +77,8 @@ public class DimLayer {
         boolean dimFullscreen();
         /** Returns the display info. of the dim layer user. */
         DisplayInfo getDisplayInfo();
+        /** Returns true if the dim layer user is currently attached to a display */
+        boolean isAttachedToDisplay();
         /** Gets the bounds of the dim layer user. */
         void getDimBounds(Rect outBounds);
         String toShortString();
@@ -95,7 +97,7 @@ public class DimLayer {
     }
 
     private void constructSurface(WindowManagerService service) {
-        SurfaceControl.openTransaction();
+        service.openSurfaceTransaction();
         try {
             if (DEBUG_SURFACE_TRACE) {
                 mDimSurface = new WindowSurfaceController.SurfaceTrace(service.mFxSession,
@@ -116,7 +118,7 @@ public class DimLayer {
         } catch (Exception e) {
             Slog.e(TAG_WM, "Exception creating Dim surface", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            service.closeSurfaceTransaction();
         }
     }
 
@@ -227,12 +229,12 @@ public class DimLayer {
         mBounds.set(bounds);
         if (isDimming() && !mLastBounds.equals(bounds)) {
             try {
-                SurfaceControl.openTransaction();
+                mService.openSurfaceTransaction();
                 adjustBounds();
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size", e);
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
             }
         }
     }

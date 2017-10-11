@@ -21,6 +21,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:gravity="center"
     android:background="@drawable/system_bar_background">
 
     <!-- phone.NavigationBarView has rot0 and rot90 but we expect the car head unit to have a fixed
@@ -28,7 +29,7 @@
     -->
     <LinearLayout
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/car_navigation_bar_width"
         android:orientation="horizontal"
         android:clipChildren="false"
         android:clipToPadding="false"

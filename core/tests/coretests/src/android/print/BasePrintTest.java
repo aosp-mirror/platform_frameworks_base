@@ -16,6 +16,9 @@
 
 package android.print;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -26,173 +29,134 @@ import android.annotation.NonNull;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.CancellationSignal;
-import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintManager;
-import android.print.PrinterId;
 import android.print.mockservice.PrintServiceCallbacks;
 import android.print.mockservice.PrinterDiscoverySessionCallbacks;
 import android.print.mockservice.StubbablePrinterDiscoverySession;
 import android.printservice.CustomPrinterIconCallback;
 import android.printservice.PrintJob;
 import android.printservice.PrintService;
-import android.test.InstrumentationTestCase;
-import android.util.DisplayMetrics;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
+import android.support.test.rule.ActivityTestRule;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.mockito.stubbing.Answer;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 /**
  * This is the base class for print tests.
  */
-public abstract class BasePrintTest extends InstrumentationTestCase {
-
-    private static final long OPERATION_TIMEOUT = 30000;
+abstract class BasePrintTest {
+    protected static final long OPERATION_TIMEOUT = 30000;
     private static final String PM_CLEAR_SUCCESS_OUTPUT = "Success";
-    private static final String COMMAND_LIST_ENABLED_IME_COMPONENTS = "ime list -s";
-    private static final String COMMAND_PREFIX_ENABLE_IME = "ime enable ";
-    private static final String COMMAND_PREFIX_DISABLE_IME = "ime disable ";
     private static final int CURRENT_USER_ID = -2; // Mirrors UserHandle.USER_CURRENT
 
-    private PrintTestActivity mActivity;
     private android.print.PrintJob mPrintJob;
-
-    private LocaleList mOldLocale;
 
     private CallCounter mStartCallCounter;
     private CallCounter mStartSessionCallCounter;
 
-    private String[] mEnabledImes;
+    private static Instrumentation sInstrumentation;
+    private static UiDevice sUiDevice;
 
-    private String[] getEnabledImes() throws IOException {
-        List<String> imeList = new ArrayList<>();
+    @Rule
+    public ActivityTestRule<PrintTestActivity> mActivityRule =
+            new ActivityTestRule<>(PrintTestActivity.class, false, true);
 
-        ParcelFileDescriptor pfd = getInstrumentation().getUiAutomation()
-                .executeShellCommand(COMMAND_LIST_ENABLED_IME_COMPONENTS);
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(pfd.getFileDescriptor())))) {
+    /**
+     * {@link Runnable} that can throw and {@link Exception}
+     */
+    interface Invokable {
+        /**
+         * Execute the invokable
+         *
+         * @throws Exception
+         */
+        void run() throws Exception;
+    }
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                imeList.add(line);
+    /**
+     * Assert that the invokable throws an expectedException
+     *
+     * @param invokable The {@link Invokable} to run
+     * @param expectedClass The {@link Exception} that is supposed to be thrown
+     */
+    void assertException(Invokable invokable, Class<? extends Exception> expectedClass)
+            throws Exception {
+        try {
+            invokable.run();
+        } catch (Exception e) {
+            if (e.getClass().isAssignableFrom(expectedClass)) {
+                return;
+            } else {
+                throw e;
             }
         }
 
-        String[] imeArray = new String[imeList.size()];
-        imeList.toArray(imeArray);
-
-        return imeArray;
+        throw new AssertionError("No exception thrown");
     }
 
-    private void disableImes() throws Exception {
-        mEnabledImes = getEnabledImes();
-        for (String ime : mEnabledImes) {
-            String disableImeCommand = COMMAND_PREFIX_DISABLE_IME + ime;
-            runShellCommand(getInstrumentation(), disableImeCommand);
-        }
+    /**
+     * Return the UI device
+     *
+     * @return the UI device
+     */
+    public UiDevice getUiDevice() {
+        return sUiDevice;
     }
 
-    private void enableImes() throws Exception {
-        for (String ime : mEnabledImes) {
-            String enableImeCommand = COMMAND_PREFIX_ENABLE_IME + ime;
-            runShellCommand(getInstrumentation(), enableImeCommand);
-        }
-        mEnabledImes = null;
+    protected static Instrumentation getInstrumentation() {
+        return sInstrumentation;
     }
 
-    @Override
-    protected void runTest() throws Throwable {
-        // Do nothing if the device does not support printing.
-        if (supportsPrinting()) {
-            super.runTest();
-        }
-    }
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        sInstrumentation = InstrumentationRegistry.getInstrumentation();
+        assumeTrue(sInstrumentation.getContext().getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_PRINTING));
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        if (!supportsPrinting()) {
-            return;
-        }
+        sUiDevice = UiDevice.getInstance(sInstrumentation);
 
         // Make sure we start with a clean slate.
         clearPrintSpoolerData();
-        disableImes();
 
         // Workaround for dexmaker bug: https://code.google.com/p/dexmaker/issues/detail?id=2
         // Dexmaker is used by mockito.
         System.setProperty("dexmaker.dexcache", getInstrumentation()
                 .getTargetContext().getCacheDir().getPath());
+    }
 
-        // Set to US locale.
-        Resources resources = getInstrumentation().getTargetContext().getResources();
-        Configuration oldConfiguration = resources.getConfiguration();
-        if (!oldConfiguration.getLocales().get(0).equals(Locale.US)) {
-            mOldLocale = oldConfiguration.getLocales();
-            DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-            Configuration newConfiguration = new Configuration(oldConfiguration);
-            newConfiguration.setLocale(Locale.US);
-            resources.updateConfiguration(newConfiguration, displayMetrics);
-        }
-
+    @Before
+    public void initCounters() throws Exception {
         // Initialize the latches.
         mStartCallCounter = new CallCounter();
         mStartSessionCallCounter = new CallCounter();
-
-        // Create the activity for the right locale.
-        createActivity();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        if (!supportsPrinting()) {
-            return;
-        }
-
-        // Done with the activity.
-        getActivity().finish();
-        enableImes();
-
-        // Restore the locale if needed.
-        if (mOldLocale != null) {
-            Resources resources = getInstrumentation().getTargetContext().getResources();
-            DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-            Configuration newConfiguration = new Configuration(resources.getConfiguration());
-            newConfiguration.setLocales(mOldLocale);
-            mOldLocale = null;
-            resources.updateConfiguration(newConfiguration, displayMetrics);
-        }
-
-        // Make sure the spooler is cleaned, this also un-approves all services
-        clearPrintSpoolerData();
-
-        super.tearDown();
+    @After
+    public void exitActivities() throws Exception {
+        // Exit print spooler
+        getUiDevice().pressBack();
+        getUiDevice().pressBack();
     }
 
     protected android.print.PrintJob print(@NonNull final PrintDocumentAdapter adapter,
             final PrintAttributes attributes) {
         // Initiate printing as if coming from the app.
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                PrintManager printManager = (PrintManager) getActivity()
-                        .getSystemService(Context.PRINT_SERVICE);
-                mPrintJob = printManager.print("Print job", adapter, attributes);
-            }
+        getInstrumentation().runOnMainSync(() -> {
+            PrintManager printManager = (PrintManager) getActivity()
+                    .getSystemService(Context.PRINT_SERVICE);
+            mPrintJob = printManager.print("Print job", adapter, attributes);
         });
 
         return mPrintJob;
@@ -215,7 +179,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         waitForCallbackCallCount(mStartCallCounter, 1, "Did not get expected call to start.");
     }
 
-    private void waitForCallbackCallCount(CallCounter counter, int count, String message) {
+    private static void waitForCallbackCallCount(CallCounter counter, int count, String message) {
         try {
             counter.waitForCount(count, OPERATION_TIMEOUT);
         } catch (TimeoutException te) {
@@ -224,12 +188,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
     }
 
     protected PrintTestActivity getActivity() {
-        return mActivity;
-    }
-
-    protected void createActivity() {
-        mActivity = launchActivity(getInstrumentation().getTargetContext().getPackageName(),
-                PrintTestActivity.class, null);
+        return mActivityRule.getActivity();
     }
 
     public static String runShellCommand(Instrumentation instrumentation, String cmd)
@@ -238,7 +197,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         byte[] buf = new byte[512];
         int bytesRead;
         FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-        StringBuffer stdout = new StringBuffer();
+        StringBuilder stdout = new StringBuilder();
         while ((bytesRead = fis.read(buf)) != -1) {
             stdout.append(new String(buf, 0, bytesRead));
         }
@@ -246,7 +205,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         return stdout.toString();
     }
 
-    protected void clearPrintSpoolerData() throws Exception {
+    protected static void clearPrintSpoolerData() throws Exception {
         assertTrue("failed to clear print spooler data",
                 runShellCommand(getInstrumentation(), String.format(
                         "pm clear --user %d %s", CURRENT_USER_ID,
@@ -319,7 +278,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         return service;
     }
 
-    protected final class CallCounter {
+    private static final class CallCounter {
         private final Object mLock = new Object();
 
         private int mCallCount;
@@ -331,7 +290,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
             }
         }
 
-        public int getCallCount() {
+        int getCallCount() {
             synchronized (mLock) {
                 return mCallCount;
             }
@@ -354,10 +313,5 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
                 }
             }
         }
-    }
-
-    protected boolean supportsPrinting() {
-        return getInstrumentation().getContext().getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_PRINTING);
     }
 }

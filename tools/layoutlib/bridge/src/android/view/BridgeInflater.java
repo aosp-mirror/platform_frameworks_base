@@ -38,12 +38,32 @@ import org.xmlpull.v1.XmlPullParser;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.ImageView;
+import android.widget.NumberPicker;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import static com.android.SdkConstants.AUTO_COMPLETE_TEXT_VIEW;
+import static com.android.SdkConstants.BUTTON;
+import static com.android.SdkConstants.CHECKED_TEXT_VIEW;
+import static com.android.SdkConstants.CHECK_BOX;
+import static com.android.SdkConstants.EDIT_TEXT;
+import static com.android.SdkConstants.IMAGE_BUTTON;
+import static com.android.SdkConstants.IMAGE_VIEW;
+import static com.android.SdkConstants.MULTI_AUTO_COMPLETE_TEXT_VIEW;
+import static com.android.SdkConstants.RADIO_BUTTON;
+import static com.android.SdkConstants.SEEK_BAR;
+import static com.android.SdkConstants.SPINNER;
+import static com.android.SdkConstants.TEXT_VIEW;
 import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 
 /**
@@ -52,12 +72,36 @@ import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 public final class BridgeInflater extends LayoutInflater {
 
     private final LayoutlibCallback mLayoutlibCallback;
+    /**
+     * If true, the inflater will try to replace the framework widgets with the AppCompat versions.
+     * Ideally, this should be based on the activity being an AppCompat activity but since that is
+     * not trivial to check from layoutlib, we currently base the decision on the current theme
+     * being an AppCompat theme.
+     */
+    private boolean mLoadAppCompatViews;
+    /**
+     * This set contains the framework views that have an AppCompat version but failed to load.
+     * This might happen because not all widgets are contained in all versions of the support
+     * library.
+     * This will help us to avoid trying to load the AppCompat version multiple times if it
+     * doesn't exist.
+     */
+    private Set<String> mFailedAppCompatViews = new HashSet<>();
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
     private Map<View, String> mOpenDrawerLayouts;
 
     // Keep in sync with the same value in LayoutInflater.
     private static final int[] ATTRS_THEME = new int[] {com.android.internal.R.attr.theme };
+
+    private static final String APPCOMPAT_WIDGET_PREFIX = "android.support.v7.widget.AppCompat";
+    /** List of platform widgets that have an AppCompat version */
+    private static final Set<String> APPCOMPAT_VIEWS = Collections.unmodifiableSet(
+            new HashSet<>(
+                    Arrays.asList(TEXT_VIEW, IMAGE_VIEW, BUTTON, EDIT_TEXT, SPINNER,
+                            IMAGE_BUTTON, CHECK_BOX, RADIO_BUTTON, CHECKED_TEXT_VIEW,
+                            AUTO_COMPLETE_TEXT_VIEW, MULTI_AUTO_COMPLETE_TEXT_VIEW, "RatingBar",
+                            SEEK_BAR)));
 
     /**
      * List of class prefixes which are tried first by default.
@@ -74,13 +118,15 @@ public final class BridgeInflater extends LayoutInflater {
         return sClassPrefixList;
     }
 
-    protected BridgeInflater(LayoutInflater original, Context newContext) {
+    private BridgeInflater(LayoutInflater original, Context newContext) {
         super(original, newContext);
         newContext = getBaseContext(newContext);
         if (newContext instanceof BridgeContext) {
             mLayoutlibCallback = ((BridgeContext) newContext).getLayoutlibCallback();
+            mLoadAppCompatViews = ((BridgeContext) newContext).isAppCompatTheme();
         } else {
             mLayoutlibCallback = null;
+            mLoadAppCompatViews = false;
         }
     }
 
@@ -90,10 +136,11 @@ public final class BridgeInflater extends LayoutInflater {
      * @param context The Android application context.
      * @param layoutlibCallback the {@link LayoutlibCallback} object.
      */
-    public BridgeInflater(Context context, LayoutlibCallback layoutlibCallback) {
+    public BridgeInflater(BridgeContext context, LayoutlibCallback layoutlibCallback) {
         super(context);
         mLayoutlibCallback = layoutlibCallback;
         mConstructorArgs[0] = context;
+        mLoadAppCompatViews = context.isAppCompatTheme();
     }
 
     @Override
@@ -101,26 +148,39 @@ public final class BridgeInflater extends LayoutInflater {
         View view = null;
 
         try {
-            // First try to find a class using the default Android prefixes
-            for (String prefix : sClassPrefixList) {
-                try {
-                    view = createView(name, prefix, attrs);
-                    if (view != null) {
-                        break;
-                    }
-                } catch (ClassNotFoundException e) {
-                    // Ignore. We'll try again using the base class below.
+            if (mLoadAppCompatViews
+                    && APPCOMPAT_VIEWS.contains(name)
+                    && !mFailedAppCompatViews.contains(name)) {
+                // We are using an AppCompat theme so try to load the appcompat views
+                view = loadCustomView(APPCOMPAT_WIDGET_PREFIX + name, attrs, true);
+
+                if (view == null) {
+                    mFailedAppCompatViews.add(name); // Do not try this one anymore
                 }
             }
 
-            // Next try using the parent loader. This will most likely only work for
-            // fully-qualified class names.
-            try {
-                if (view == null) {
-                    view = super.onCreateView(name, attrs);
+            if (view == null) {
+                // First try to find a class using the default Android prefixes
+                for (String prefix : sClassPrefixList) {
+                    try {
+                        view = createView(name, prefix, attrs);
+                        if (view != null) {
+                            break;
+                        }
+                    } catch (ClassNotFoundException e) {
+                        // Ignore. We'll try again using the base class below.
+                    }
                 }
-            } catch (ClassNotFoundException e) {
-                // Ignore. We'll try again using the custom view loader below.
+
+                // Next try using the parent loader. This will most likely only work for
+                // fully-qualified class names.
+                try {
+                    if (view == null) {
+                        view = super.onCreateView(name, attrs);
+                    }
+                } catch (ClassNotFoundException e) {
+                    // Ignore. We'll try again using the custom view loader below.
+                }
             }
 
             // Finally try again using the custom view loader
@@ -144,9 +204,26 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
             boolean ignoreThemeAttr) {
-        View view;
+        View view = null;
+        if (name.equals("view")) {
+            // This is usually done by the superclass but this allows us catching the error and
+            // reporting something useful.
+            name = attrs.getAttributeValue(null, "class");
+
+            if (name == null) {
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Unable to inflate view tag without " +
+                  "class attribute", null);
+                // We weren't able to resolve the view so we just pass a mock View to be able to
+                // continue rendering.
+                view = new MockView(context, attrs);
+                ((MockView) view).setText("view");
+            }
+        }
+
         try {
-            view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttr);
+            if (view == null) {
+                view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttr);
+            }
         } catch (InflateException e) {
             // Creation of ContextThemeWrapper code is same as in the super method.
             // Apply a theme wrapper, if allowed and one is specified.
@@ -235,17 +312,29 @@ public final class BridgeInflater extends LayoutInflater {
         return null;
     }
 
-    private View loadCustomView(String name, AttributeSet attrs) throws Exception {
+    /**
+     * Instantiates the given view name and returns the instance. If the view doesn't exist, a
+     * MockView or null might be returned.
+     * @param name the custom view name
+     * @param attrs the {@link AttributeSet} to be passed to the view constructor
+     * @param silent if true, errors while loading the view won't be reported and, if the view
+     * doesn't exist, null will be returned.
+     */
+    private View loadCustomView(String name, AttributeSet attrs, boolean silent) throws Exception {
         if (mLayoutlibCallback != null) {
             // first get the classname in case it's not the node name
             if (name.equals("view")) {
                 name = attrs.getAttributeValue(null, "class");
+                if (name == null) {
+                    return null;
+                }
             }
 
             mConstructorArgs[1] = attrs;
 
-            Object customView = mLayoutlibCallback.loadView(name, mConstructorSignature,
-                    mConstructorArgs);
+            Object customView = silent ?
+                    mLayoutlibCallback.loadClass(name, mConstructorSignature, mConstructorArgs)
+                    : mLayoutlibCallback.loadView(name, mConstructorSignature, mConstructorArgs);
 
             if (customView instanceof View) {
                 return (View)customView;
@@ -253,6 +342,10 @@ public final class BridgeInflater extends LayoutInflater {
         }
 
         return null;
+    }
+
+    private View loadCustomView(String name, AttributeSet attrs) throws Exception {
+        return loadCustomView(name, attrs, false);
     }
 
     private void setupViewInContext(View view, AttributeSet attrs) {
@@ -298,6 +391,26 @@ public final class BridgeInflater extends LayoutInflater {
                         BridgeConstants.ATTR_OPEN_DRAWER);
                 if (attrVal != null) {
                     getDrawerLayoutMap().put(view, attrVal);
+                }
+            }
+            else if (view instanceof NumberPicker) {
+                NumberPicker numberPicker = (NumberPicker) view;
+                String minValue = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI, "minValue");
+                if (minValue != null) {
+                    numberPicker.setMinValue(Integer.parseInt(minValue));
+                }
+                String maxValue = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI, "maxValue");
+                if (maxValue != null) {
+                    numberPicker.setMaxValue(Integer.parseInt(maxValue));
+                }
+            }
+            else if (view instanceof ImageView) {
+                ImageView img = (ImageView) view;
+                Drawable drawable = img.getDrawable();
+                if (drawable instanceof Animatable) {
+                    if (!((Animatable) drawable).isRunning()) {
+                        ((Animatable) drawable).start();
+                    }
                 }
             }
 

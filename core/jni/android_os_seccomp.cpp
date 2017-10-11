@@ -15,7 +15,7 @@
  */
 
 #include "core_jni_helpers.h"
-#include "JniConstants.h"
+#include <nativehelper/JniConstants.h>
 #include "utils/Log.h"
 #include <selinux/selinux.h>
 

@@ -29,8 +29,8 @@
 #include <string>
 
 #include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedPrimitiveArray.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
@@ -193,6 +193,9 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
     if (deviceNameStr == NULL) {
         return JNI_FALSE;
     }
+
+    // The passed in fd is maintained by the UsbDeviceConnection
+    fd = dup(fd);
 
     MtpDevice* device = MtpDevice::open(deviceNameStr, fd);
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
@@ -601,12 +604,12 @@ android_mtp_MtpDevice_send_object_info(JNIEnv *env, jobject thiz, jobject info)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device) {
-        return JNI_FALSE;
+        return NULL;
     }
 
     // Updating existing objects is not supported.
     if (env->GetIntField(info, field_objectInfo_handle) != -1) {
-        return JNI_FALSE;
+        return NULL;
     }
 
     MtpObjectInfo* object_info = new MtpObjectInfo(-1);

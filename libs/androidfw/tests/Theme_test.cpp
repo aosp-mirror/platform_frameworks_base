@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,55 +14,268 @@
  * limitations under the License.
  */
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/AssetManager2.h"
 
-#include <utils/String8.h>
-#include <utils/String16.h>
+#include "android-base/logging.h"
+
 #include "TestHelpers.h"
-#include "data/system/R.h"
-#include "data/app/R.h"
+#include "androidfw/ResourceUtils.h"
+#include "data/lib_one/R.h"
+#include "data/libclient/R.h"
+#include "data/styles/R.h"
 
-#include <gtest/gtest.h>
+namespace app = com::android::app;
+namespace lib_one = com::android::lib_one;
+namespace libclient = com::android::libclient;
 
-using namespace android;
+namespace android {
 
-namespace {
+class ThemeTest : public ::testing::Test {
+ public:
+  void SetUp() override {
+    style_assets_ = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
+    ASSERT_NE(nullptr, style_assets_);
 
-#include "data/system/system_arsc.h"
-#include "data/app/app_arsc.h"
+    libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
+    ASSERT_NE(nullptr, libclient_assets_);
 
-enum { MAY_NOT_BE_BAG = false };
+    lib_one_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_one/lib_one.apk");
+    ASSERT_NE(nullptr, lib_one_assets_);
 
-/**
- * TODO(adamlesinski): Enable when fixed.
- */
-TEST(ThemeTest, DISABLED_shouldCopyThemeFromDifferentResTable) {
-    ResTable table;
-    ASSERT_EQ(NO_ERROR, table.add(system_arsc, system_arsc_len));
-    ASSERT_EQ(NO_ERROR, table.add(app_arsc, app_arsc_len));
+    lib_two_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_two/lib_two.apk");
+    ASSERT_NE(nullptr, lib_two_assets_);
+  }
 
-    ResTable::Theme theme1(table);
-    ASSERT_EQ(NO_ERROR, theme1.applyStyle(app::R::style::Theme_One));
-    Res_value val;
-    ASSERT_GE(theme1.getAttribute(android::R::attr::background, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
-    ASSERT_EQ(uint32_t(0xffff0000), val.data);
-    ASSERT_GE(theme1.getAttribute(app::R::attr::number, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
-    ASSERT_EQ(uint32_t(1), val.data);
+ protected:
+  std::unique_ptr<const ApkAssets> style_assets_;
+  std::unique_ptr<const ApkAssets> libclient_assets_;
+  std::unique_ptr<const ApkAssets> lib_one_assets_;
+  std::unique_ptr<const ApkAssets> lib_two_assets_;
+};
 
-    ResTable table2;
-    ASSERT_EQ(NO_ERROR, table2.add(system_arsc, system_arsc_len));
-    ASSERT_EQ(NO_ERROR, table2.add(app_arsc, app_arsc_len));
+TEST_F(ThemeTest, EmptyTheme) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
 
-    ResTable::Theme theme2(table2);
-    ASSERT_EQ(NO_ERROR, theme2.setTo(theme1));
-    ASSERT_GE(theme2.getAttribute(android::R::attr::background, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_COLOR_RGB8, val.dataType);
-    ASSERT_EQ(uint32_t(0xffff0000), val.data);
-    ASSERT_GE(theme2.getAttribute(app::R::attr::number, &val), 0);
-    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
-    ASSERT_EQ(uint32_t(1), val.data);
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  EXPECT_EQ(0u, theme->GetChangingConfigurations());
+  EXPECT_EQ(&assetmanager, theme->GetAssetManager());
+
+  Res_value value;
+  uint32_t flags;
+  EXPECT_EQ(kInvalidCookie, theme->GetAttribute(app::R::attr::attr_one, &value, &flags));
 }
 
+TEST_F(ThemeTest, SingleThemeNoParent) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleOne));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  cookie = theme->GetAttribute(app::R::attr::attr_two, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(2u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
+
+TEST_F(ThemeTest, SingleThemeWithParent) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  cookie = theme->GetAttribute(app::R::attr::attr_two, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_STRING, value.dataType);
+  EXPECT_EQ(0, cookie);
+  EXPECT_EQ(std::string("string"),
+            GetStringFromPool(assetmanager.GetStringPoolForCookie(0), value.data));
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // This attribute should point to an attr_indirect, so the result should be 3.
+  cookie = theme->GetAttribute(app::R::attr::attr_three, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(3u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  // attr_one is still here from the base.
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // check for the new attr_six
+  cookie = theme->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // check for the old attr_five (force=true was not used).
+  cookie = theme->GetAttribute(app::R::attr::attr_five, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(app::R::string::string_one, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree, true /* force */));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  // attr_one is still here from the base.
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // check for the new attr_six
+  cookie = theme->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // check for the new attr_five (force=true was used).
+  cookie = theme->GetAttribute(app::R::attr::attr_five, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(5u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets(
+      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(libclient::R::style::Theme, false /*force*/));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  // The attribute should be resolved to the final value.
+  cookie = theme->GetAttribute(libclient::R::attr::foo, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(700u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // The reference should be resolved to a TYPE_REFERENCE.
+  cookie = theme->GetAttribute(libclient::R::attr::bar, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+
+  // lib_one is assigned package ID 0x03.
+  EXPECT_EQ(3u, get_package_id(value.data));
+  EXPECT_EQ(get_type_id(lib_one::R::string::foo), get_type_id(value.data));
+  EXPECT_EQ(get_entry_id(lib_one::R::string::foo), get_entry_id(value.data));
+}
+
+TEST_F(ThemeTest, CopyThemeSameAssetManager) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme_one = assetmanager.NewTheme();
+  ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  // attr_one is still here from the base.
+  cookie = theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // attr_six is not here.
+  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_six, &value, &flags));
+
+  std::unique_ptr<Theme> theme_two = assetmanager.NewTheme();
+  ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleThree));
+
+  // Copy the theme to theme_one.
+  ASSERT_TRUE(theme_one->SetTo(*theme_two));
+
+  // Clear theme_two to make sure we test that there WAS a copy.
+  theme_two->Clear();
+
+  // attr_one is now not here.
+  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags));
+
+  // attr_six is now here because it was copied.
+  cookie = theme_one->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, FailToCopyThemeWithDifferentAssetManager) {
+  AssetManager2 assetmanager_one;
+  assetmanager_one.SetApkAssets({style_assets_.get()});
+
+  AssetManager2 assetmanager_two;
+  assetmanager_two.SetApkAssets({style_assets_.get()});
+
+  auto theme_one = assetmanager_one.NewTheme();
+  ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne));
+
+  auto theme_two = assetmanager_two.NewTheme();
+  ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleTwo));
+
+  EXPECT_FALSE(theme_one->SetTo(*theme_two));
+}
+
+}  // namespace android

@@ -17,71 +17,64 @@
 #ifndef AAPT_FLATTEN_CHUNKWRITER_H
 #define AAPT_FLATTEN_CHUNKWRITER_H
 
+#include "android-base/macros.h"
+#include "androidfw/ResourceTypes.h"
+
 #include "util/BigBuffer.h"
 #include "util/Util.h"
-
-#include <androidfw/ResourceTypes.h>
 
 namespace aapt {
 
 class ChunkWriter {
-private:
-    BigBuffer* mBuffer;
-    size_t mStartSize = 0;
-    android::ResChunk_header* mHeader = nullptr;
+ public:
+  explicit inline ChunkWriter(BigBuffer* buffer) : buffer_(buffer) {}
+  ChunkWriter(ChunkWriter&&) = default;
+  ChunkWriter& operator=(ChunkWriter&&) = default;
 
-public:
-    explicit inline ChunkWriter(BigBuffer* buffer) : mBuffer(buffer) {
-    }
+  template <typename T>
+  inline T* StartChunk(uint16_t type) {
+    start_size_ = buffer_->size();
+    T* chunk = buffer_->NextBlock<T>();
+    header_ = &chunk->header;
+    header_->type = util::HostToDevice16(type);
+    header_->headerSize = util::HostToDevice16(sizeof(T));
+    return chunk;
+  }
 
-    ChunkWriter(const ChunkWriter&) = delete;
-    ChunkWriter& operator=(const ChunkWriter&) = delete;
-    ChunkWriter(ChunkWriter&&) = default;
-    ChunkWriter& operator=(ChunkWriter&&) = default;
+  template <typename T>
+  inline T* NextBlock(size_t count = 1) {
+    return buffer_->NextBlock<T>(count);
+  }
 
-    template <typename T>
-    inline T* startChunk(uint16_t type) {
-        mStartSize = mBuffer->size();
-        T* chunk = mBuffer->nextBlock<T>();
-        mHeader = &chunk->header;
-        mHeader->type = util::hostToDevice16(type);
-        mHeader->headerSize = util::hostToDevice16(sizeof(T));
-        return chunk;
-    }
+  inline BigBuffer* buffer() { return buffer_; }
 
-    template <typename T>
-    inline T* nextBlock(size_t count = 1) {
-        return mBuffer->nextBlock<T>(count);
-    }
+  inline android::ResChunk_header* chunk_header() { return header_; }
 
-    inline BigBuffer* getBuffer() {
-        return mBuffer;
-    }
+  inline size_t size() { return buffer_->size() - start_size_; }
 
-    inline android::ResChunk_header* getChunkHeader() {
-        return mHeader;
-    }
+  inline android::ResChunk_header* Finish() {
+    buffer_->Align4();
+    header_->size = util::HostToDevice32(buffer_->size() - start_size_);
+    return header_;
+  }
 
-    inline size_t size() {
-        return mBuffer->size() - mStartSize;
-    }
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ChunkWriter);
 
-    inline android::ResChunk_header* finish() {
-        mBuffer->align4();
-        mHeader->size = util::hostToDevice32(mBuffer->size() - mStartSize);
-        return mHeader;
-    }
+  BigBuffer* buffer_;
+  size_t start_size_ = 0;
+  android::ResChunk_header* header_ = nullptr;
 };
 
 template <>
-inline android::ResChunk_header* ChunkWriter::startChunk(uint16_t type) {
-    mStartSize = mBuffer->size();
-    mHeader = mBuffer->nextBlock<android::ResChunk_header>();
-    mHeader->type = util::hostToDevice16(type);
-    mHeader->headerSize = util::hostToDevice16(sizeof(android::ResChunk_header));
-    return mHeader;
+inline android::ResChunk_header* ChunkWriter::StartChunk(uint16_t type) {
+  start_size_ = buffer_->size();
+  header_ = buffer_->NextBlock<android::ResChunk_header>();
+  header_->type = util::HostToDevice16(type);
+  header_->headerSize = util::HostToDevice16(sizeof(android::ResChunk_header));
+  return header_;
 }
 
-} // namespace aapt
+}  // namespace aapt
 
 #endif /* AAPT_FLATTEN_CHUNKWRITER_H */

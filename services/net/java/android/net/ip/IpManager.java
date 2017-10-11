@@ -20,20 +20,24 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 
 import android.content.Context;
-import android.net.apf.ApfCapabilities;
-import android.net.apf.ApfFilter;
 import android.net.DhcpResults;
-import android.net.InterfaceConfiguration;
+import android.net.INetd;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.LinkProperties;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
+import android.net.apf.ApfCapabilities;
+import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.NetdService;
+import android.net.util.NetworkConstants;
+import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
@@ -45,19 +49,30 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.R;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.net.NetlinkTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 /**
@@ -76,7 +91,6 @@ import java.util.StringJoiner;
  */
 public class IpManager extends StateMachine {
     private static final boolean DBG = false;
-    private static final boolean VDBG = false;
 
     // For message logging.
     private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
@@ -184,7 +198,7 @@ public class IpManager extends StateMachine {
         }
 
         private void log(String msg) {
-            mLocalLog.log(PREFIX + msg);
+            mLog.log(PREFIX + msg);
         }
 
         @Override
@@ -304,6 +318,11 @@ public class IpManager extends StateMachine {
                 return this;
             }
 
+            public Builder withInitialConfiguration(InitialConfiguration initialConfig) {
+                mConfig.mInitialConfig = initialConfig;
+                return this;
+            }
+
             public Builder withStaticConfiguration(StaticIpConfiguration staticConfig) {
                 mConfig.mStaticIpConfig = staticConfig;
                 return this;
@@ -319,6 +338,16 @@ public class IpManager extends StateMachine {
                 return this;
             }
 
+            public Builder withIPv6AddrGenModeEUI64() {
+                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_EUI64;
+                return this;
+            }
+
+            public Builder withIPv6AddrGenModeStablePrivacy() {
+                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
+                return this;
+            }
+
             public ProvisioningConfiguration build() {
                 return new ProvisioningConfiguration(mConfig);
             }
@@ -328,17 +357,20 @@ public class IpManager extends StateMachine {
         /* package */ boolean mEnableIPv6 = true;
         /* package */ boolean mUsingIpReachabilityMonitor = true;
         /* package */ int mRequestedPreDhcpActionMs;
+        /* package */ InitialConfiguration mInitialConfig;
         /* package */ StaticIpConfiguration mStaticIpConfig;
         /* package */ ApfCapabilities mApfCapabilities;
         /* package */ int mProvisioningTimeoutMs = DEFAULT_TIMEOUT_MS;
+        /* package */ int mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
 
-        public ProvisioningConfiguration() {}
+        public ProvisioningConfiguration() {} // used by Builder
 
         public ProvisioningConfiguration(ProvisioningConfiguration other) {
             mEnableIPv4 = other.mEnableIPv4;
             mEnableIPv6 = other.mEnableIPv6;
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
             mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
+            mInitialConfig = InitialConfiguration.copy(other.mInitialConfig);
             mStaticIpConfig = other.mStaticIpConfig;
             mApfCapabilities = other.mApfCapabilities;
             mProvisioningTimeoutMs = other.mProvisioningTimeoutMs;
@@ -351,27 +383,157 @@ public class IpManager extends StateMachine {
                     .add("mEnableIPv6: " + mEnableIPv6)
                     .add("mUsingIpReachabilityMonitor: " + mUsingIpReachabilityMonitor)
                     .add("mRequestedPreDhcpActionMs: " + mRequestedPreDhcpActionMs)
+                    .add("mInitialConfig: " + mInitialConfig)
                     .add("mStaticIpConfig: " + mStaticIpConfig)
                     .add("mApfCapabilities: " + mApfCapabilities)
                     .add("mProvisioningTimeoutMs: " + mProvisioningTimeoutMs)
+                    .add("mIPv6AddrGenMode: " + mIPv6AddrGenMode)
                     .toString();
+        }
+
+        public boolean isValid() {
+            return (mInitialConfig == null) || mInitialConfig.isValid();
+        }
+    }
+
+    public static class InitialConfiguration {
+        public final Set<LinkAddress> ipAddresses = new HashSet<>();
+        public final Set<IpPrefix> directlyConnectedRoutes = new HashSet<>();
+        public final Set<InetAddress> dnsServers = new HashSet<>();
+        public Inet4Address gateway; // WiFi legacy behavior with static ipv4 config
+
+        public static InitialConfiguration copy(InitialConfiguration config) {
+            if (config == null) {
+                return null;
+            }
+            InitialConfiguration configCopy = new InitialConfiguration();
+            configCopy.ipAddresses.addAll(config.ipAddresses);
+            configCopy.directlyConnectedRoutes.addAll(config.directlyConnectedRoutes);
+            configCopy.dnsServers.addAll(config.dnsServers);
+            return configCopy;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "InitialConfiguration(IPs: {%s}, prefixes: {%s}, DNS: {%s}, v4 gateway: %s)",
+                    join(", ", ipAddresses), join(", ", directlyConnectedRoutes),
+                    join(", ", dnsServers), gateway);
+        }
+
+        public boolean isValid() {
+            if (ipAddresses.isEmpty()) {
+                return false;
+            }
+
+            // For every IP address, there must be at least one prefix containing that address.
+            for (LinkAddress addr : ipAddresses) {
+                if (!any(directlyConnectedRoutes, (p) -> p.contains(addr.getAddress()))) {
+                    return false;
+                }
+            }
+            // For every dns server, there must be at least one prefix containing that address.
+            for (InetAddress addr : dnsServers) {
+                if (!any(directlyConnectedRoutes, (p) -> p.contains(addr))) {
+                    return false;
+                }
+            }
+            // All IPv6 LinkAddresses have an RFC7421-suitable prefix length
+            // (read: compliant with RFC4291#section2.5.4).
+            if (any(ipAddresses, not(InitialConfiguration::isPrefixLengthCompliant))) {
+                return false;
+            }
+            // If directlyConnectedRoutes contains an IPv6 default route
+            // then ipAddresses MUST contain at least one non-ULA GUA.
+            if (any(directlyConnectedRoutes, InitialConfiguration::isIPv6DefaultRoute)
+                    && all(ipAddresses, not(InitialConfiguration::isIPv6GUA))) {
+                return false;
+            }
+            // The prefix length of routes in directlyConnectedRoutes be within reasonable
+            // bounds for IPv6: /48-/64 just as we’d accept in RIOs.
+            if (any(directlyConnectedRoutes, not(InitialConfiguration::isPrefixLengthCompliant))) {
+                return false;
+            }
+            // There no more than one IPv4 address
+            if (ipAddresses.stream().filter(Inet4Address.class::isInstance).count() > 1) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * @return true if the given list of addressess and routes satisfies provisioning for this
+         * InitialConfiguration. LinkAddresses and RouteInfo objects are not compared with equality
+         * because addresses and routes seen by Netlink will contain additional fields like flags,
+         * interfaces, and so on. If this InitialConfiguration has no IP address specified, the
+         * provisioning check always fails.
+         *
+         * If the given list of routes is null, only addresses are taken into considerations.
+         */
+        public boolean isProvisionedBy(List<LinkAddress> addresses, List<RouteInfo> routes) {
+            if (ipAddresses.isEmpty()) {
+                return false;
+            }
+
+            for (LinkAddress addr : ipAddresses) {
+                if (!any(addresses, (addrSeen) -> addr.isSameAddressAs(addrSeen))) {
+                    return false;
+                }
+            }
+
+            if (routes != null) {
+                for (IpPrefix prefix : directlyConnectedRoutes) {
+                    if (!any(routes, (routeSeen) -> isDirectlyConnectedRoute(routeSeen, prefix))) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static boolean isDirectlyConnectedRoute(RouteInfo route, IpPrefix prefix) {
+            return !route.hasGateway() && prefix.equals(route.getDestination());
+        }
+
+        private static boolean isPrefixLengthCompliant(LinkAddress addr) {
+            return addr.isIPv4() || isCompliantIPv6PrefixLength(addr.getPrefixLength());
+        }
+
+        private static boolean isPrefixLengthCompliant(IpPrefix prefix) {
+            return prefix.isIPv4() || isCompliantIPv6PrefixLength(prefix.getPrefixLength());
+        }
+
+        private static boolean isCompliantIPv6PrefixLength(int prefixLength) {
+            return (NetworkConstants.RFC6177_MIN_PREFIX_LENGTH <= prefixLength)
+                    && (prefixLength <= NetworkConstants.RFC7421_PREFIX_LENGTH);
+        }
+
+        private static boolean isIPv6DefaultRoute(IpPrefix prefix) {
+            return prefix.getAddress().equals(Inet6Address.ANY);
+        }
+
+        private static boolean isIPv6GUA(LinkAddress addr) {
+            return addr.isIPv6() && addr.isGlobalPreferred();
         }
     }
 
     public static final String DUMP_ARG = "ipmanager";
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
-    private static final int CMD_STOP = 1;
-    private static final int CMD_START = 2;
-    private static final int CMD_CONFIRM = 3;
-    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 4;
+    private static final int CMD_TERMINATE_AFTER_STOP             = 1;
+    private static final int CMD_STOP                             = 2;
+    private static final int CMD_START                            = 3;
+    private static final int CMD_CONFIRM                          = 4;
+    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE       = 5;
     // Sent by NetlinkTracker to communicate netlink events.
-    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
-    private static final int CMD_UPDATE_TCP_BUFFER_SIZES = 6;
-    private static final int CMD_UPDATE_HTTP_PROXY = 7;
-    private static final int CMD_SET_MULTICAST_FILTER = 8;
-    private static final int EVENT_PROVISIONING_TIMEOUT = 9;
-    private static final int EVENT_DHCPACTION_TIMEOUT = 10;
+    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 6;
+    private static final int CMD_UPDATE_TCP_BUFFER_SIZES          = 7;
+    private static final int CMD_UPDATE_HTTP_PROXY                = 8;
+    private static final int CMD_SET_MULTICAST_FILTER             = 9;
+    private static final int EVENT_PROVISIONING_TIMEOUT           = 10;
+    private static final int EVENT_DHCPACTION_TIMEOUT             = 11;
 
     private static final int MAX_LOG_RECORDS = 500;
     private static final int MAX_PACKET_RECORDS = 100;
@@ -399,10 +561,11 @@ public class IpManager extends StateMachine {
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
-    private final LocalLog mLocalLog;
+    private final SharedLog mLog;
     private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final InterfaceController mInterfaceCtrl;
 
     private NetworkInterface mNetworkInterface;
 
@@ -420,17 +583,24 @@ public class IpManager extends StateMachine {
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
-    public IpManager(Context context, String ifName, Callback callback)
-                throws IllegalArgumentException {
+    public IpManager(Context context, String ifName, Callback callback) {
         this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)));
+                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
+                NetdService.getInstance());
     }
 
     /**
      * An expanded constructor, useful for dependency injection.
+     * TODO: migrate all test users to mock IpManager directly and remove this ctor.
      */
     public IpManager(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService) throws IllegalArgumentException {
+            INetworkManagementService nwService) {
+        this(context, ifName, callback, nwService, NetdService.getInstance());
+    }
+
+    @VisibleForTesting
+    IpManager(Context context, String ifName, Callback callback,
+            INetworkManagementService nwService, INetd netd) {
         super(IpManager.class.getSimpleName() + "." + ifName);
         mTag = getName();
 
@@ -440,9 +610,11 @@ public class IpManager extends StateMachine {
         mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
 
-        mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+        mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
         mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
         mMsgStateLogger = new MessageHandlingLogger();
+
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, netd, mLog);
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
@@ -485,7 +657,7 @@ public class IpManager extends StateMachine {
 
             private void logMsg(String msg) {
                 Log.d(mTag, msg);
-                getHandler().post(() -> { mLocalLog.log("OBSERVED " + msg); });
+                getHandler().post(() -> { mLog.log("OBSERVED " + msg); });
             }
         };
 
@@ -493,7 +665,7 @@ public class IpManager extends StateMachine {
         mLinkProperties.setInterfaceName(mInterfaceName);
 
         mMultinetworkPolicyTracker = new MultinetworkPolicyTracker(mContext, getHandler(),
-                () -> { mLocalLog.log("OBSERVED AvoidBadWifi changed"); });
+                () -> { mLog.log("OBSERVED AvoidBadWifi changed"); });
 
         mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
                 mTag + ".EVENT_PROVISIONING_TIMEOUT", EVENT_PROVISIONING_TIMEOUT);
@@ -530,6 +702,16 @@ public class IpManager extends StateMachine {
         mMultinetworkPolicyTracker.start();
     }
 
+    private void stopStateMachineUpdaters() {
+        try {
+            mNwService.unregisterObserver(mNetlinkTracker);
+        } catch (RemoteException e) {
+            logError("Couldn't unregister NetlinkTracker: %s", e);
+        }
+
+        mMultinetworkPolicyTracker.shutdown();
+    }
+
     @Override
     protected void onQuitting() {
         mCallback.onQuit();
@@ -538,8 +720,7 @@ public class IpManager extends StateMachine {
     // Shut down this IpManager instance altogether.
     public void shutdown() {
         stop();
-        mMultinetworkPolicyTracker.shutdown();
-        quit();
+        sendMessage(CMD_TERMINATE_AFTER_STOP);
     }
 
     public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {
@@ -547,6 +728,11 @@ public class IpManager extends StateMachine {
     }
 
     public void startProvisioning(ProvisioningConfiguration req) {
+        if (!req.isValid()) {
+            doImmediateProvisioningFailure(IpManagerEvent.ERROR_INVALID_PROVISIONING);
+            return;
+        }
+
         getNetworkInterface();
 
         mCallback.setNeighborDiscoveryOffload(true);
@@ -643,7 +829,7 @@ public class IpManager extends StateMachine {
         pw.println();
         pw.println(mTag + " StateMachine dump:");
         pw.increaseIndent();
-        mLocalLog.readOnlyLocalLog().dump(fd, pw, args);
+        mLog.dump(fd, pw, args);
         pw.decreaseIndent();
 
         pw.println();
@@ -678,8 +864,8 @@ public class IpManager extends StateMachine {
                 msg.arg1, msg.arg2, Objects.toString(msg.obj), mMsgStateLogger);
 
         final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
-        mLocalLog.log(richerLogLine);
-        if (VDBG) {
+        mLog.log(richerLogLine);
+        if (DBG) {
             Log.d(mTag, richerLogLine);
         }
 
@@ -699,11 +885,10 @@ public class IpManager extends StateMachine {
         return shouldLog;
     }
 
-    // TODO: Migrate all Log.e(...) to logError(...).
     private void logError(String fmt, Object... args) {
         final String msg = "ERROR " + String.format(fmt, args);
         Log.e(mTag, msg);
-        mLocalLog.log(msg);
+        mLog.log(msg);
     }
 
     private void getNetworkInterface() {
@@ -733,14 +918,24 @@ public class IpManager extends StateMachine {
     private void recordMetric(final int type) {
         if (mStartTimeMillis <= 0) { Log.wtf(mTag, "Start time undefined!"); }
         final long duration = SystemClock.elapsedRealtime() - mStartTimeMillis;
-        mMetricsLog.log(new IpManagerEvent(mInterfaceName, type, duration));
+        mMetricsLog.log(mInterfaceName, new IpManagerEvent(type, duration));
     }
 
     // For now: use WifiStateMachine's historical notion of provisioned.
-    private static boolean isProvisioned(LinkProperties lp) {
+    @VisibleForTesting
+    static boolean isProvisioned(LinkProperties lp, InitialConfiguration config) {
         // For historical reasons, we should connect even if all we have is
         // an IPv4 address and nothing else.
-        return lp.isProvisioned() || lp.hasIPv4Address();
+        if (lp.hasIPv4Address() || lp.isProvisioned()) {
+            return true;
+        }
+        if (config == null) {
+            return false;
+        }
+
+        // When an InitialConfiguration is specified, ignore any difference with previous
+        // properties and instead check if properties observed match the desired properties.
+        return config.isProvisionedBy(lp.getLinkAddresses(), lp.getRoutes());
     }
 
     // TODO: Investigate folding all this into the existing static function
@@ -749,12 +944,11 @@ public class IpManager extends StateMachine {
     // object that is a correct and complete assessment of what changed, taking
     // account of the asymmetries described in the comments in this function.
     // Then switch to using it everywhere (IpReachabilityMonitor, etc.).
-    private ProvisioningChange compareProvisioning(
-            LinkProperties oldLp, LinkProperties newLp) {
+    private ProvisioningChange compareProvisioning(LinkProperties oldLp, LinkProperties newLp) {
         ProvisioningChange delta;
-
-        final boolean wasProvisioned = isProvisioned(oldLp);
-        final boolean isProvisioned = isProvisioned(newLp);
+        InitialConfiguration config = mConfiguration != null ? mConfiguration.mInitialConfig : null;
+        final boolean wasProvisioned = isProvisioned(oldLp, config);
+        final boolean isProvisioned = isProvisioned(newLp, config);
 
         if (!wasProvisioned && isProvisioned) {
             delta = ProvisioningChange.GAINED_PROVISIONING;
@@ -826,19 +1020,19 @@ public class IpManager extends StateMachine {
     private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
         switch (delta) {
             case GAINED_PROVISIONING:
-                if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
+                if (DBG) { Log.d(mTag, "onProvisioningSuccess()"); }
                 recordMetric(IpManagerEvent.PROVISIONING_OK);
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
             case LOST_PROVISIONING:
-                if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
+                if (DBG) { Log.d(mTag, "onProvisioningFailure()"); }
                 recordMetric(IpManagerEvent.PROVISIONING_FAIL);
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
             default:
-                if (VDBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
+                if (DBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
                 mCallback.onLinkPropertiesChange(newLp);
                 break;
         }
@@ -865,10 +1059,6 @@ public class IpManager extends StateMachine {
         }
 
         return delta;
-    }
-
-    private boolean linkPropertiesUnchanged(LinkProperties newLp) {
-        return Objects.equals(newLp, mLinkProperties);
     }
 
     private LinkProperties assembleLinkProperties() {
@@ -917,9 +1107,26 @@ public class IpManager extends StateMachine {
             newLp.setHttpProxy(mHttpProxy);
         }
 
-        if (VDBG) {
-            Log.d(mTag, "newLp{" + newLp + "}");
+        // [5] Add data from InitialConfiguration
+        if (mConfiguration != null && mConfiguration.mInitialConfig != null) {
+            InitialConfiguration config = mConfiguration.mInitialConfig;
+            // Add InitialConfiguration routes and dns server addresses once all addresses
+            // specified in the InitialConfiguration have been observed with Netlink.
+            if (config.isProvisionedBy(newLp.getLinkAddresses(), null)) {
+                for (IpPrefix prefix : config.directlyConnectedRoutes) {
+                    newLp.addRoute(new RouteInfo(prefix, null, mInterfaceName));
+                }
+            }
+            addAllReachableDnsServers(newLp, config.dnsServers);
         }
+        final LinkProperties oldLp = mLinkProperties;
+        if (DBG) {
+            Log.d(mTag, String.format("Netlink-seen LPs: %s, new LPs: %s; old LPs: %s",
+                    netlinkLinkProperties, newLp, oldLp));
+        }
+
+        // TODO: also learn via netlink routes specified by an InitialConfiguration and specified
+        // from a static IP v4 config instead of manually patching them in in steps [3] and [5].
         return newLp;
     }
 
@@ -938,7 +1145,7 @@ public class IpManager extends StateMachine {
     // Returns false if we have lost provisioning, true otherwise.
     private boolean handleLinkPropertiesUpdate(boolean sendCallbacks) {
         final LinkProperties newLp = assembleLinkProperties();
-        if (linkPropertiesUnchanged(newLp)) {
+        if (Objects.equals(newLp, mLinkProperties)) {
             return true;
         }
         final ProvisioningChange delta = setLinkProperties(newLp);
@@ -948,35 +1155,12 @@ public class IpManager extends StateMachine {
         return (delta != ProvisioningChange.LOST_PROVISIONING);
     }
 
-    private boolean setIPv4Address(LinkAddress address) {
-        final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-        ifcg.setLinkAddress(address);
-        try {
-            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-            if (VDBG) Log.d(mTag, "IPv4 configuration succeeded");
-        } catch (IllegalStateException | RemoteException e) {
-            logError("IPv4 configuration failed: %s", e);
-            return false;
-        }
-        return true;
-    }
-
-    private void clearIPv4Address() {
-        try {
-            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-            ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
-            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-        } catch (IllegalStateException | RemoteException e) {
-            logError("Failed to clear IPv4 address on interface %s: %s", mInterfaceName, e);
-        }
-    }
-
     private void handleIPv4Success(DhcpResults dhcpResults) {
         mDhcpResults = new DhcpResults(dhcpResults);
         final LinkProperties newLp = assembleLinkProperties();
         final ProvisioningChange delta = setLinkProperties(newLp);
 
-        if (VDBG) {
+        if (DBG) {
             Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
@@ -990,9 +1174,9 @@ public class IpManager extends StateMachine {
         // that could trigger a call to this function. If we missed handling
         // that message in StartedState for some reason we would still clear
         // any addresses upon entry to StoppedState.
-        clearIPv4Address();
+        mInterfaceCtrl.clearIPv4Address();
         mDhcpResults = null;
-        if (VDBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
+        if (DBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
         mCallback.onNewDhcpResults(null);
 
         handleProvisioningFailure();
@@ -1020,7 +1204,7 @@ public class IpManager extends StateMachine {
     }
 
     private void doImmediateProvisioningFailure(int failureType) {
-        if (DBG) { Log.e(mTag, "onProvisioningFailure(): " + failureType); }
+        logError("onProvisioningFailure(): %s", failureType);
         recordMetric(failureType);
         mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
     }
@@ -1029,7 +1213,7 @@ public class IpManager extends StateMachine {
         // If we have a StaticIpConfiguration attempt to apply it and
         // handle the result accordingly.
         if (mConfiguration.mStaticIpConfig != null) {
-            if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
+            if (mInterfaceCtrl.setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
                 handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
             } else {
                 return false;
@@ -1045,16 +1229,15 @@ public class IpManager extends StateMachine {
     }
 
     private boolean startIPv6() {
-        // Set privacy extensions.
-        try {
-            mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
-            mNwService.enableIpv6(mInterfaceName);
-        } catch (RemoteException re) {
-            logError("Unable to change interface settings: %s", re);
-            return false;
-        } catch (IllegalStateException ie) {
-            logError("Unable to change interface settings: %s", ie);
-            return false;
+        return mInterfaceCtrl.setIPv6PrivacyExtensions(true) &&
+               mInterfaceCtrl.setIPv6AddrGenModeIfSupported(mConfiguration.mIPv6AddrGenMode) &&
+               mInterfaceCtrl.enableIPv6();
+    }
+
+    private boolean applyInitialConfig(InitialConfiguration config) {
+        // TODO: also support specifying a static IPv4 configuration in InitialConfiguration.
+        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIPv6)) {
+            if (!mInterfaceCtrl.addAddress(addr)) return false;
         }
 
         return true;
@@ -1065,6 +1248,7 @@ public class IpManager extends StateMachine {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
                     mInterfaceName,
+                    mLog,
                     new IpReachabilityMonitor.Callback() {
                         @Override
                         public void notifyLost(InetAddress ip, String logMsg) {
@@ -1090,17 +1274,8 @@ public class IpManager extends StateMachine {
         //     - we don't get IPv4 routes from netlink
         // so we neither react to nor need to wait for changes in either.
 
-        try {
-            mNwService.disableIpv6(mInterfaceName);
-        } catch (Exception e) {
-            logError("Failed to disable IPv6: %s", e);
-        }
-
-        try {
-            mNwService.clearInterfaceAddresses(mInterfaceName);
-        } catch (Exception e) {
-            logError("Failed to clear addresses: %s", e);
-        }
+        mInterfaceCtrl.disableIPv6();
+        mInterfaceCtrl.clearAllAddresses();
     }
 
     class StoppedState extends State {
@@ -1118,6 +1293,11 @@ public class IpManager extends StateMachine {
         @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
+                case CMD_TERMINATE_AFTER_STOP:
+                    stopStateMachineUpdaters();
+                    quit();
+                    break;
+
                 case CMD_STOP:
                     break;
 
@@ -1146,7 +1326,7 @@ public class IpManager extends StateMachine {
 
                 case DhcpClient.CMD_ON_QUIT:
                     // Everything is already stopped.
-                    Log.e(mTag, "Unexpected CMD_ON_QUIT (already stopped).");
+                    logError("Unexpected CMD_ON_QUIT (already stopped).");
                     break;
 
                 default:
@@ -1174,7 +1354,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpClient.CMD_CLEAR_LINKADDRESS:
-                    clearIPv4Address();
+                    mInterfaceCtrl.clearIPv4Address();
                     break;
 
                 case DhcpClient.CMD_ON_QUIT:
@@ -1260,8 +1440,15 @@ public class IpManager extends StateMachine {
 
         @Override
         public void enter() {
+            // Get the Configuration for ApfFilter from Context
+            boolean filter802_3Frames =
+                    mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
+
+            int[] ethTypeBlackList = mContext.getResources().getIntArray(
+                    R.array.config_apfEthTypeBlackList);
+
             mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
-                    mCallback, mMulticastFiltering);
+                    mCallback, mMulticastFiltering, filter802_3Frames, ethTypeBlackList);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {
@@ -1279,6 +1466,14 @@ public class IpManager extends StateMachine {
 
             if (mConfiguration.mEnableIPv4 && !startIPv4()) {
                 doImmediateProvisioningFailure(IpManagerEvent.ERROR_STARTING_IPV4);
+                transitionTo(mStoppingState);
+                return;
+            }
+
+            InitialConfiguration config = mConfiguration.mInitialConfig;
+            if ((config != null) && !applyInitialConfig(config)) {
+                // TODO introduce a new IpManagerEvent constant to distinguish this error case.
+                doImmediateProvisioningFailure(IpManagerEvent.ERROR_INVALID_PROVISIONING);
                 transitionTo(mStoppingState);
                 return;
             }
@@ -1320,7 +1515,8 @@ public class IpManager extends StateMachine {
 
         private ConnectivityPacketTracker createPacketTracker() {
             try {
-                return new ConnectivityPacketTracker(mNetworkInterface, mConnectivityPacketLog);
+                return new ConnectivityPacketTracker(
+                        getHandler(), mNetworkInterface, mConnectivityPacketLog);
             } catch (IllegalArgumentException e) {
                 return null;
             }
@@ -1352,7 +1548,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case CMD_START:
-                    Log.e(mTag, "ALERT: START received in StartedState. Please fix caller.");
+                    logError("ALERT: START received in StartedState. Please fix caller.");
                     break;
 
                 case CMD_CONFIRM:
@@ -1415,12 +1611,12 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpClient.CMD_CLEAR_LINKADDRESS:
-                    clearIPv4Address();
+                    mInterfaceCtrl.clearIPv4Address();
                     break;
 
                 case DhcpClient.CMD_CONFIGURE_LINKADDRESS: {
                     final LinkAddress ipAddress = (LinkAddress) msg.obj;
-                    if (setIPv4Address(ipAddress)) {
+                    if (mInterfaceCtrl.setIPv4Address(ipAddress)) {
                         mDhcpClient.sendMessage(DhcpClient.EVENT_LINKADDRESS_CONFIGURED);
                     } else {
                         logError("Failed to set IPv4 address.");
@@ -1451,13 +1647,13 @@ public class IpManager extends StateMachine {
                             handleIPv4Failure();
                             break;
                         default:
-                            Log.e(mTag, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
+                            logError("Unknown CMD_POST_DHCP_ACTION status: %s", msg.arg1);
                     }
                     break;
 
                 case DhcpClient.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
-                    Log.e(mTag, "Unexpected CMD_ON_QUIT.");
+                    logError("Unexpected CMD_ON_QUIT.");
                     mDhcpClient = null;
                     break;
 
@@ -1488,5 +1684,40 @@ public class IpManager extends StateMachine {
             return String.format("rcvd_in=%s, proc_in=%s",
                                  receivedInState, processedInState);
         }
+    }
+
+    // TODO: extract out into CollectionUtils.
+    static <T> boolean any(Iterable<T> coll, Predicate<T> fn) {
+        for (T t : coll) {
+            if (fn.test(t)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static <T> boolean all(Iterable<T> coll, Predicate<T> fn) {
+        return !any(coll, not(fn));
+    }
+
+    static <T> Predicate<T> not(Predicate<T> fn) {
+        return (t) -> !fn.test(t);
+    }
+
+    static <T> String join(String delimiter, Collection<T> coll) {
+        return coll.stream().map(Object::toString).collect(Collectors.joining(delimiter));
+    }
+
+    static <T> T find(Iterable<T> coll, Predicate<T> fn) {
+        for (T t: coll) {
+            if (fn.test(t)) {
+              return t;
+            }
+        }
+        return null;
+    }
+
+    static <T> List<T> findAll(Collection<T> coll, Predicate<T> fn) {
+        return coll.stream().filter(fn).collect(Collectors.toList());
     }
 }

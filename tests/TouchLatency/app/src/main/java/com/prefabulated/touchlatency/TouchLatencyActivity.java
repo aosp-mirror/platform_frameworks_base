@@ -21,7 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.CountDownTimer;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.Touch;
 import android.util.AttributeSet;
@@ -173,14 +173,14 @@ class TouchLatencyView extends View implements View.OnTouchListener {
     private float mVelocityX, mVelocityY;
 }
 
-public class TouchLatencyActivity extends ActionBarActivity {
+public class TouchLatencyActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_touch_latency);
 
-        mTouchView = (TouchLatencyView) findViewById(R.id.canvasView);
+        mTouchView = findViewById(R.id.canvasView);
     }
 
 

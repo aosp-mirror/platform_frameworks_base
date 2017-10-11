@@ -16,12 +16,20 @@
 
 package android.text;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.support.test.runner.AndroidJUnit4;
 import com.google.android.collect.Lists;
 
-import android.test.MoreAsserts;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.LargeTest;
+import android.support.test.filters.SmallTest;
+import android.test.MoreAsserts;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
@@ -30,16 +38,18 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * TextUtilsTest tests {@link TextUtils}.
  */
-public class TextUtilsTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class TextUtilsTest {
 
-    @SmallTest
-    public void testBasic() throws Exception {
+    @Test
+    public void testBasic() {
         assertEquals("", TextUtils.concat());
         assertEquals("foo", TextUtils.concat("foo"));
         assertEquals("foobar", TextUtils.concat("foo", "bar"));
@@ -71,8 +81,8 @@ public class TextUtilsTest extends TestCase {
         assertTrue(TextUtils.concat(foo, bar) instanceof SpannedString);
     }
 
-    @SmallTest
-    public void testTemplateString() throws Exception {
+    @Test
+    public void testTemplateString() {
         CharSequence result;
 
         result = TextUtils.expandTemplate("This is a ^1 of the ^2 broadcast ^3.",
@@ -136,7 +146,7 @@ public class TextUtilsTest extends TestCase {
 
     /** Fail unless text+spans contains a span 'spanName' with the given start and end. */
     private void checkContains(Spanned text, String[] spans, String spanName,
-                               int start, int end) throws Exception {
+                               int start, int end) {
         for (String i: spans) {
             if (i.equals(spanName)) {
                 assertEquals(start, text.getSpanStart(i));
@@ -147,8 +157,8 @@ public class TextUtilsTest extends TestCase {
         fail();
     }
 
-    @SmallTest
-    public void testTemplateSpan() throws Exception {
+    @Test
+    public void testTemplateSpan() {
         SpannableString template;
         Spanned result;
         String[] spans;
@@ -186,27 +196,27 @@ public class TextUtilsTest extends TestCase {
         checkContains(result, spans, "during+after", 1, 2);
     }
 
-    @SmallTest
+    @Test
     public void testStringSplitterSimple() {
         stringSplitterTestHelper("a,b,cde", new String[] {"a", "b", "cde"});
     }
 
-    @SmallTest
+    @Test
     public void testStringSplitterEmpty() {
         stringSplitterTestHelper("", new String[] {});
     }
 
-    @SmallTest
+    @Test
     public void testStringSplitterWithLeadingEmptyString() {
         stringSplitterTestHelper(",a,b,cde", new String[] {"", "a", "b", "cde"});
     }
 
-    @SmallTest
+    @Test
     public void testStringSplitterWithInternalEmptyString() {
         stringSplitterTestHelper("a,b,,cde", new String[] {"a", "b", "", "cde"});
     }
 
-    @SmallTest
+    @Test
     public void testStringSplitterWithTrailingEmptyString() {
         // A single trailing emtpy string should be ignored.
         stringSplitterTestHelper("a,b,cde,", new String[] {"a", "b", "cde"});
@@ -222,7 +232,7 @@ public class TextUtilsTest extends TestCase {
         MoreAsserts.assertEquals(expectedStrings, strings.toArray(new String[]{}));
     }
 
-    @SmallTest
+    @Test
     public void testTrim() {
         String[] strings = { "abc", " abc", "  abc", "abc ", "abc  ",
                              " abc ", "  abc  ", "\nabc\n", "\nabc", "abc\n" };
@@ -232,7 +242,7 @@ public class TextUtilsTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testRfc822TokenizerFullAddress() {
         Rfc822Token[] tokens = Rfc822Tokenizer.tokenize("Foo Bar (something) <foo@google.com>");
         assertNotNull(tokens);
@@ -242,7 +252,7 @@ public class TextUtilsTest extends TestCase {
         assertEquals("something",tokens[0].getComment());
     }
 
-    @SmallTest
+    @Test
     public void testRfc822TokenizeItemWithError() {
         Rfc822Token[] tokens = Rfc822Tokenizer.tokenize("\"Foo Bar\\");
         assertNotNull(tokens);
@@ -250,7 +260,7 @@ public class TextUtilsTest extends TestCase {
         assertEquals("Foo Bar", tokens[0].getAddress());
     }
 
-    @SmallTest
+    @Test
     public void testRfc822FindToken() {
         Rfc822Tokenizer tokenizer = new Rfc822Tokenizer();
         //                0           1         2           3         4
@@ -262,12 +272,13 @@ public class TextUtilsTest extends TestCase {
         assertEquals(46, tokenizer.findTokenEnd(address, 25));
     }
 
-    @SmallTest
+    @Test
     public void testRfc822FindTokenWithError() {
         assertEquals(9, new Rfc822Tokenizer().findTokenEnd("\"Foo Bar\\", 0));
     }
 
     @LargeTest
+    @Test
     public void testEllipsize() {
         CharSequence s1 = "The quick brown fox jumps over \u00FEhe lazy dog.";
         CharSequence s2 = new Wrapper(s1);
@@ -327,7 +338,7 @@ public class TextUtilsTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testDelimitedStringContains() {
         assertFalse(TextUtils.delimitedStringContains("", ',', null));
         assertFalse(TextUtils.delimitedStringContains(null, ',', ""));
@@ -347,7 +358,7 @@ public class TextUtilsTest extends TestCase {
         assertFalse(TextUtils.delimitedStringContains("network,mock,gpsx", ',', "gps"));
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceCreator() {
         Parcel p = Parcel.obtain();
         TextUtils.writeToParcel(null, p, 0);
@@ -360,7 +371,7 @@ public class TextUtilsTest extends TestCase {
         assertEquals("conversion to/from parcel failed", "test", text);
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceCreatorNull() {
         Parcel p;
         CharSequence text;
@@ -371,7 +382,7 @@ public class TextUtilsTest extends TestCase {
         assertNull("null CharSequence should generate null from parcel", text);
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceCreatorSpannable() {
         Parcel p;
         CharSequence text;
@@ -382,7 +393,7 @@ public class TextUtilsTest extends TestCase {
         assertEquals("conversion to/from parcel failed", "test", text.toString());
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceCreatorString() {
         Parcel p;
         CharSequence text;
@@ -404,10 +415,12 @@ public class TextUtilsTest extends TestCase {
             mString = s;
         }
 
+        @Override
         public int length() {
             return mString.length();
         }
 
+        @Override
         public char charAt(int off) {
             return mString.charAt(off);
         }
@@ -417,12 +430,13 @@ public class TextUtilsTest extends TestCase {
             return mString.toString();
         }
 
+        @Override
         public CharSequence subSequence(int start, int end) {
             return new Wrapper(mString.subSequence(start, end));
         }
     }
 
-    @LargeTest
+    @Test
     public void testRemoveEmptySpans() {
         MockSpanned spanned = new MockSpanned();
 
@@ -484,14 +498,17 @@ public class TextUtilsTest extends TestCase {
             }
         }
 
+        @Override
         public char charAt(int arg0) {
             return 0;
         }
 
+        @Override
         public int length() {
             return 0;
         }
 
+        @Override
         public CharSequence subSequence(int arg0, int arg1) {
             return null;
         }
@@ -522,7 +539,7 @@ public class TextUtilsTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testGetLayoutDirectionFromLocale() {
         assertEquals(View.LAYOUT_DIRECTION_LTR, TextUtils.getLayoutDirectionFromLocale(null));
         assertEquals(View.LAYOUT_DIRECTION_LTR,

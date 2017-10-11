@@ -22,10 +22,10 @@
 
 #include <log/log.h>
 
-#include "JNIHelp.h"
-#include "JniConstants.h"
-#include "ScopedLocalRef.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JniConstants.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include "ziparchive/zip_archive.h"
 

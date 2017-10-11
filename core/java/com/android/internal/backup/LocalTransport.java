@@ -73,6 +73,8 @@ public class LocalTransport extends BackupTransport {
     // Full backup size quota is set to reasonable value.
     private static final long FULL_BACKUP_SIZE_QUOTA = 25 * 1024 * 1024;
 
+    private static final long KEY_VALUE_BACKUP_SIZE_QUOTA = 5 * 1024 * 1024;
+
     private Context mContext;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
     private File mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
@@ -712,6 +714,6 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public long getBackupQuota(String packageName, boolean isFullBackup) {
-        return isFullBackup ? FULL_BACKUP_SIZE_QUOTA : Long.MAX_VALUE;
+        return isFullBackup ? FULL_BACKUP_SIZE_QUOTA : KEY_VALUE_BACKUP_SIZE_QUOTA;
     }
 }

@@ -22,6 +22,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 
 /**
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
@@ -68,6 +69,8 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private AccelerateInterpolator mAccelerateInterpolator = new AccelerateInterpolator();
+    private int mClockBottom;
+    private float mDarkAmount;
 
     /**
      * Refreshes the dimension values.
@@ -80,13 +83,14 @@ public class KeyguardClockPositionAlgorithm {
         mClockYFractionMin = res.getFraction(R.fraction.keyguard_clock_y_fraction_min, 1, 1);
         mClockYFractionMax = res.getFraction(R.fraction.keyguard_clock_y_fraction_max, 1, 1);
         mMoreCardNotificationAmount =
-                (float) res.getDimensionPixelSize(R.dimen.notification_summary_height) /
+                (float) res.getDimensionPixelSize(R.dimen.notification_shelf_height) /
                         res.getDimensionPixelSize(R.dimen.notification_min_height);
         mDensity = res.getDisplayMetrics().density;
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
-            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount) {
+            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount,
+            int clockBottom, float dark) {
         mMaxKeyguardNotifications = maxKeyguardNotifications;
         mMaxPanelHeight = maxPanelHeight;
         mExpandedHeight = expandedHeight;
@@ -94,6 +98,8 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = height;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mEmptyDragAmount = emptyDragAmount;
+        mClockBottom = clockBottom;
+        mDarkAmount = dark;
     }
 
     public float getMinStackScrollerPadding(int height, int keyguardStatusHeight) {
@@ -115,6 +121,11 @@ public class KeyguardClockPositionAlgorithm {
                 result.clockY,
                 y + getClockNotificationsPadding() + mKeyguardStatusHeight);
         result.clockAlpha = getClockAlpha(result.clockScale);
+
+        result.stackScrollerPadding = (int) NotificationUtils.interpolate(
+                result.stackScrollerPadding,
+                mClockBottom + y,
+                mDarkAmount);
     }
 
     private float getClockScale(int notificationPadding, int clockY, int startPadding) {
@@ -141,7 +152,11 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getClockY() {
-        return (int) (getClockYFraction() * mHeight);
+        // Dark: Align the bottom edge of the clock at one third:
+        // clockBottomEdge = result - mKeyguardStatusHeight / 2 + mClockBottom
+        float clockYDark = (0.33f * mHeight + (float) mKeyguardStatusHeight / 2 - mClockBottom);
+        float clockYRegular = getClockYFraction() * mHeight;
+        return (int) NotificationUtils.interpolate(clockYRegular, clockYDark, mDarkAmount);
     }
 
     private float getClockYExpansionAdjustment() {

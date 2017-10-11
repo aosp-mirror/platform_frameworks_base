@@ -84,7 +84,7 @@ public class TransparentListActivity extends Activity {
 
         ListAdapter adapter = new SimpleListAdapter(this);
 
-        ListView list = (ListView) findViewById(R.id.list);
+        ListView list = findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setCacheColorHint(0);
         list.setVerticalFadingEdgeEnabled(true);

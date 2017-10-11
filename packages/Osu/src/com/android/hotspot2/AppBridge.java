@@ -2,12 +2,8 @@ package com.android.hotspot2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.UserHandle;
 
-import com.android.hotspot2.osu.OSUInfo;
 import com.android.hotspot2.osu.OSUOperationStatus;
-
-import java.util.List;
 
 public class AppBridge {
     public static final String ACTION_OSU_NOTIFICATION = "com.android.hotspot2.OSU_NOTIFICATION";
@@ -28,7 +24,7 @@ public class AppBridge {
         mContext = context;
     }
 
-    public void showOsuCount(int osuCount, List<OSUInfo> osus) {
+    public void showOsuCount(int osuCount) {
         Intent intent = new Intent(ACTION_OSU_NOTIFICATION);
         intent.putExtra(OSU_COUNT, osuCount);
         intent.setFlags(

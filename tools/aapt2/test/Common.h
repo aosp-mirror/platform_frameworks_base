@@ -17,20 +17,26 @@
 #ifndef AAPT_TEST_COMMON_H
 #define AAPT_TEST_COMMON_H
 
+#include <iostream>
+
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 #include "ConfigDescription.h"
 #include "Debug.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
+#include "ResourceValues.h"
 #include "ValueVisitor.h"
 #include "io/File.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/StringPiece.h"
-
-#include <gtest/gtest.h>
-#include <iostream>
 
 //
-// GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to fail to compile.
+// GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to
+// fail to compile.
 //
 #define AAPT_ASSERT_TRUE(v) ASSERT_TRUE(bool(v))
 #define AAPT_ASSERT_FALSE(v) ASSERT_FALSE(bool(v))
@@ -40,82 +46,117 @@
 namespace aapt {
 namespace test {
 
-struct DummyDiagnosticsImpl : public IDiagnostics {
-    void log(Level level, DiagMessageActual& actualMsg) override {
-        switch (level) {
-        case Level::Note:
-            return;
+IDiagnostics* GetDiagnostics();
 
-        case Level::Warn:
-            std::cerr << actualMsg.source << ": warn: " << actualMsg.message << "." << std::endl;
-            break;
+inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
+  ResourceNameRef ref;
+  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name";
+  return ref.ToResourceName();
+}
 
-        case Level::Error:
-            std::cerr << actualMsg.source << ": error: " << actualMsg.message << "." << std::endl;
-            break;
-        }
+inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
+  ConfigDescription config;
+  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration";
+  return config;
+}
+
+template <typename T = Value>
+T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
+                               const ConfigDescription& config,
+                               const android::StringPiece& product) {
+  Maybe<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
+  if (result) {
+    ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);
+    if (config_value) {
+      return ValueCast<T>(config_value->value.get());
     }
-};
-
-inline IDiagnostics* getDiagnostics() {
-    static DummyDiagnosticsImpl diag;
-    return &diag;
+  }
+  return nullptr;
 }
 
-inline ResourceName parseNameOrDie(const StringPiece16& str) {
-    ResourceNameRef ref;
-    bool result = ResourceUtils::tryParseReference(str, &ref);
-    assert(result && "invalid resource name");
-    return ref.toResourceName();
+template <>
+Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
+                                          const android::StringPiece& res_name,
+                                          const ConfigDescription& config,
+                                          const android::StringPiece& product);
+
+template <typename T = Value>
+T* GetValueForConfig(ResourceTable* table, const android::StringPiece& res_name,
+                     const ConfigDescription& config) {
+  return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
-inline ConfigDescription parseConfigOrDie(const StringPiece& str) {
-    ConfigDescription config;
-    bool result = ConfigDescription::parse(str, &config);
-    assert(result && "invalid configuration");
-    return config;
-}
-
-template <typename T> T* getValueForConfigAndProduct(ResourceTable* table,
-                                                     const StringPiece16& resName,
-                                                     const ConfigDescription& config,
-                                                     const StringPiece& product) {
-    Maybe<ResourceTable::SearchResult> result = table->findResource(parseNameOrDie(resName));
-    if (result) {
-        ResourceConfigValue* configValue = result.value().entry->findValue(config, product);
-        if (configValue) {
-            return valueCast<T>(configValue->value.get());
-        }
-    }
-    return nullptr;
-}
-
-template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece16& resName,
-                                           const ConfigDescription& config) {
-    return getValueForConfigAndProduct<T>(table, resName, config, {});
-}
-
-template <typename T> T* getValue(ResourceTable* table, const StringPiece16& resName) {
-    return getValueForConfig<T>(table, resName, {});
+template <typename T = Value>
+T* GetValue(ResourceTable* table, const android::StringPiece& res_name) {
+  return GetValueForConfig<T>(table, res_name, {});
 }
 
 class TestFile : public io::IFile {
-private:
-    Source mSource;
+ public:
+  explicit TestFile(const android::StringPiece& path) : source_(path) {}
 
-public:
-    TestFile(const StringPiece& path) : mSource(path) {}
+  std::unique_ptr<io::IData> OpenAsData() override {
+    return {};
+  }
 
-    std::unique_ptr<io::IData> openAsData() override {
-        return {};
-    }
+  const Source& GetSource() const override {
+    return source_;
+  }
 
-    const Source& getSource() const override {
-        return mSource;
-    }
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TestFile);
+
+  Source source_;
 };
 
-} // namespace test
-} // namespace aapt
+}  // namespace test
+
+// Workaround gtest bug (https://github.com/google/googletest/issues/443)
+// that does not select base class operator<< for derived class T.
+template <typename T>
+typename std::enable_if<std::is_base_of<Value, T>::value, std::ostream&>::type operator<<(
+    std::ostream& out, const T& value) {
+  value.Print(&out);
+  return out;
+}
+
+template std::ostream& operator<<<Item>(std::ostream&, const Item&);
+template std::ostream& operator<<<Reference>(std::ostream&, const Reference&);
+template std::ostream& operator<<<Id>(std::ostream&, const Id&);
+template std::ostream& operator<<<RawString>(std::ostream&, const RawString&);
+template std::ostream& operator<<<String>(std::ostream&, const String&);
+template std::ostream& operator<<<StyledString>(std::ostream&, const StyledString&);
+template std::ostream& operator<<<FileReference>(std::ostream&, const FileReference&);
+template std::ostream& operator<<<BinaryPrimitive>(std::ostream&, const BinaryPrimitive&);
+template std::ostream& operator<<<Attribute>(std::ostream&, const Attribute&);
+template std::ostream& operator<<<Style>(std::ostream&, const Style&);
+template std::ostream& operator<<<Array>(std::ostream&, const Array&);
+template std::ostream& operator<<<Plural>(std::ostream&, const Plural&);
+
+// Add a print method to Maybe.
+template <typename T>
+void PrintTo(const Maybe<T>& value, std::ostream* out) {
+  if (value) {
+    *out << ::testing::PrintToString(value.value());
+  } else {
+    *out << "Nothing";
+  }
+}
+
+namespace test {
+
+MATCHER_P(StrEq, a,
+          std::string(negation ? "isn't" : "is") + " equal to " +
+              ::testing::PrintToString(android::StringPiece16(a))) {
+  return android::StringPiece16(arg) == a;
+}
+
+MATCHER_P(ValueEq, a,
+          std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
+  return arg.Equals(&a);
+}
+
+}  // namespace test
+}  // namespace aapt
 
 #endif /* AAPT_TEST_COMMON_H */

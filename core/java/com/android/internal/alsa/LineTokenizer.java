@@ -23,7 +23,7 @@ package com.android.internal.alsa;
 public class LineTokenizer {
     public static final int kTokenNotFound = -1;
 
-    private String mDelimiters = "";
+    private final String mDelimiters;
 
     public LineTokenizer(String delimiters) {
         mDelimiters = delimiters;

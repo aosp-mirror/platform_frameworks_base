@@ -7,8 +7,6 @@ cc_library_shared {
         "-Wno-maybe-uninitialized",
         "-Wno-parentheses",
 
-        "-DHWUI_NEW_OPS",
-
         "-DGL_GLEXT_PROTOTYPES",
         "-DEGL_EGLEXT_PROTOTYPES",
 
@@ -23,6 +21,10 @@ cc_library_shared {
         // necessary for Clang as the GL bindings need to turn
         // off a GCC warning that Clang doesn't know.
         "-Wno-unknown-pragmas",
+
+        // TODO: Linear blending should be enabled by default, but we are
+        // TODO: making it an opt-in while it's a work in progress
+        //"-DANDROID_ENABLE_LINEAR_BLENDING",
     ],
 
     cppflags: ["-Wno-conversion-null"],
@@ -56,7 +58,6 @@ cc_library_shared {
         "android_graphics_drawable_VectorDrawable.cpp",
         "android_view_DisplayEventReceiver.cpp",
         "android_view_DisplayListCanvas.cpp",
-        "android_view_GraphicBuffer.cpp",
         "android_view_HardwareLayer.cpp",
         "android_view_InputChannel.cpp",
         "android_view_InputDevice.cpp",
@@ -118,13 +119,17 @@ cc_library_shared {
         "android/graphics/ColorFilter.cpp",
         "android/graphics/DrawFilter.cpp",
         "android/graphics/FontFamily.cpp",
+        "android/graphics/FontUtils.cpp",
         "android/graphics/CreateJavaOutputStreamAdaptor.cpp",
+        "android/graphics/GIFMovie.cpp",
+        "android/graphics/GraphicBuffer.cpp",
         "android/graphics/Graphics.cpp",
         "android/graphics/HarfBuzzNGFaceSkia.cpp",
         "android/graphics/Interpolator.cpp",
         "android/graphics/MaskFilter.cpp",
         "android/graphics/Matrix.cpp",
         "android/graphics/Movie.cpp",
+        "android/graphics/MovieImpl.cpp",
         "android/graphics/NinePatch.cpp",
         "android/graphics/NinePatchPeeker.cpp",
         "android/graphics/Paint.cpp",
@@ -132,19 +137,17 @@ cc_library_shared {
         "android/graphics/PathMeasure.cpp",
         "android/graphics/PathEffect.cpp",
         "android/graphics/Picture.cpp",
-        "android/graphics/PorterDuff.cpp",
         "android/graphics/BitmapRegionDecoder.cpp",
-        "android/graphics/Rasterizer.cpp",
         "android/graphics/Region.cpp",
         "android/graphics/Shader.cpp",
         "android/graphics/SurfaceTexture.cpp",
         "android/graphics/Typeface.cpp",
         "android/graphics/Utils.cpp",
-        "android/graphics/Xfermode.cpp",
         "android/graphics/YuvToJpegEncoder.cpp",
         "android/graphics/pdf/PdfDocument.cpp",
         "android/graphics/pdf/PdfEditor.cpp",
         "android/graphics/pdf/PdfRenderer.cpp",
+        "android/graphics/pdf/PdfUtils.cpp",
         "android_media_AudioRecord.cpp",
         "android_media_AudioSystem.cpp",
         "android_media_AudioTrack.cpp",
@@ -157,6 +160,8 @@ cc_library_shared {
         "android_hardware_camera2_legacy_LegacyCameraDevice.cpp",
         "android_hardware_camera2_legacy_PerfMeasurement.cpp",
         "android_hardware_camera2_DngCreator.cpp",
+        "android_hardware_display_DisplayViewport.cpp",
+        "android_hardware_HardwareBuffer.cpp",
         "android_hardware_Radio.cpp",
         "android_hardware_SensorManager.cpp",
         "android_hardware_SerialPort.cpp",
@@ -164,7 +169,6 @@ cc_library_shared {
         "android_hardware_UsbDevice.cpp",
         "android_hardware_UsbDeviceConnection.cpp",
         "android_hardware_UsbRequest.cpp",
-        "android_hardware_location_ContextHubService.cpp",
         "android_hardware_location_ActivityRecognitionHardware.cpp",
         "android_util_FileObserver.cpp",
         "android/opengl/poly_clip.cpp", // TODO: .arm
@@ -181,6 +185,7 @@ cc_library_shared {
         "android_content_res_Configuration.cpp",
         "android_animation_PropertyValuesHolder.cpp",
         "com_android_internal_net_NetworkStatsFactory.cpp",
+        "com_android_internal_os_FuseAppLoop.cpp",
         "com_android_internal_os_PathClassLoaderFactory.cpp",
         "com_android_internal_os_Zygote.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
@@ -194,38 +199,42 @@ cc_library_shared {
         // <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
         "bionic/libc/private",
 
-        "frameworks/native/opengl/libs",
-
         "external/skia/include/private",
+        "external/skia/src/codec",
         "external/skia/src/core",
         "external/skia/src/effects",
+        "external/skia/src/image",
         "external/skia/src/images",
         "frameworks/base/media/jni",
         "libcore/include",
-   ],
+        "system/media/camera/include",
+        "system/media/private/camera/include",
+    ],
 
     static_libs: [
+        "libgif",
         "libseccomp_policy",
         "libselinux",
-        "libcrypto",
+        "libgrallocusage",
     ],
 
     shared_libs: [
         "libmemtrack",
         "libandroidfw",
+        "libappfuse",
         "libbase",
-        "libexpat",
+        "libcrypto",
         "libnativehelper",
         "liblog",
         "libcutils",
         "libdebuggerd_client",
         "libutils",
         "libbinder",
-        "libnetutils",
         "libui",
+        "libgraphicsenv",
         "libgui",
+        "libsensor",
         "libinput",
-        "libinputflinger",
         "libcamera_client",
         "libcamera_metadata",
         "libskia",
@@ -234,22 +243,18 @@ cc_library_shared {
         "libGLESv1_CM",
         "libGLESv2",
         "libvulkan",
+        "libziparchive",
         "libETC1",
         "libhardware",
         "libhardware_legacy",
         "libselinux",
-        "libsonivox",
-        "libcrypto",
-        "libssl",
         "libicuuc",
-        "libicui18n",
         "libmedia",
         "libaudioclient",
         "libjpeg",
         "libusbhost",
         "libharfbuzz_ng",
         "libz",
-        "libaudioutils",
         "libpdfium",
         "libimg_utils",
         "libnetd_client",
@@ -265,6 +270,7 @@ cc_library_shared {
         "libhidltransport",
         "libhwbinder",
         "libvintf",
+        "libnativewindow",
 
         "libhwui",
         "libdl",
@@ -278,6 +284,9 @@ cc_library_shared {
     export_shared_lib_headers: [
         // AndroidRuntime.h depends on nativehelper/jni.h
         "libnativehelper",
+
+        // our headers include libnativewindow's public headers
+        "libnativewindow",
 
         // GraphicsJNI.h includes hwui headers
         "libhwui",

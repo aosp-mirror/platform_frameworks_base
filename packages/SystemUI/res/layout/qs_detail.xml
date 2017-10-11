@@ -20,30 +20,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/qs_detail_background"
-    android:paddingBottom="8dp"
+    android:elevation="4dp"
     android:clickable="true"
-    android:visibility="invisible"
-    android:orientation="vertical">
-
-    <com.android.systemui.ResizingSpace
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_detail_margin_top" />
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:visibility="invisible">
 
     <include
         android:id="@+id/qs_detail_header"
         layout="@layout/qs_detail_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
-        android:src="@drawable/indeterminate_anim"
-        android:alpha="0"
-        android:background="@color/qs_detail_progress_track"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:src="@drawable/indeterminate_anim"
         android:scaleType="fitXY"
-        android:translationY="8dp"
+        android:translationY="16dp"
         />
 
     <com.android.systemui.qs.NonInterceptingScrollView
@@ -51,6 +49,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:fillViewport="true">
+
         <FrameLayout
             android:id="@android:id/content"
             android:layout_width="match_parent"

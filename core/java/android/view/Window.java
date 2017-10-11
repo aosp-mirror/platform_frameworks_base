@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -24,8 +26,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
-import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -43,8 +45,6 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
-
-import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
 import java.util.List;
 
@@ -574,6 +574,13 @@ public abstract class Window {
          */
         default public void onProvideKeyboardShortcuts(
                 List<KeyboardShortcutGroup> data, @Nullable Menu menu, int deviceId) { };
+
+        /**
+         * Called when pointer capture is enabled or disabled for the current window.
+         *
+         * @param hasCapture True if the window has pointer capture.
+         */
+        default public void onPointerCaptureChanged(boolean hasCapture) { };
     }
 
     /** @hide */
@@ -617,6 +624,9 @@ public abstract class Window {
 
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
+
+        /** Returns whether the window belongs to the task root. */
+        boolean isTaskRoot();
     }
 
     /**
@@ -1129,6 +1139,28 @@ public abstract class Window {
     }
 
     /**
+     * <p>Set the color mode of the window. Setting the color mode might
+     * override the window's pixel {@link WindowManager.LayoutParams#format format}.</p>
+     *
+     * <p>The color mode must be one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+     * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.</p>
+     */
+    public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setColorMode(colorMode);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * Returns the color mode of the window, one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+     * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.
+     */
+    @ActivityInfo.ColorMode
+    public int getColorMode() {
+        return getAttributes().getColorMode();
+    }
+
+    /**
      * Set the amount of dim behind the window when using
      * {@link WindowManager.LayoutParams#FLAG_DIM_BEHIND}.  This overrides
      * the default dim amount of that is selected by the Window based on
@@ -1279,15 +1311,22 @@ public abstract class Window {
     }
 
     /**
-     * Finds a view that was identified by the id attribute from the XML that
-     * was processed in {@link android.app.Activity#onCreate}.  This will
-     * implicitly call {@link #getDecorView} for you, with all of the
-     * associated side-effects.
+     * Finds a view that was identified by the {@code android:id} XML attribute
+     * that was processed in {@link android.app.Activity#onCreate}. This will
+     * implicitly call {@link #getDecorView} with all of the associated
+     * side-effects.
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
      *
-     * @return The view if found or null otherwise.
+     * @param id the ID to search for
+     * @return a view with given ID if found, or {@code null} otherwise
+     * @see View#findViewById(int)
      */
     @Nullable
-    public View findViewById(@IdRes int id) {
+    public <T extends View> T findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
 
@@ -1895,7 +1934,7 @@ public abstract class Window {
     public Transition getEnterTransition() { return null; }
 
     /**
-     * Returns he Transition that will be used to move Views out of the scene when the Window is
+     * Returns the Transition that will be used to move Views out of the scene when the Window is
      * preparing to close, for example after a call to
      * {@link android.app.Activity#finishAfterTransition()}. The exiting
      * Views will be those that are regular Views or ViewGroups that have
@@ -2036,7 +2075,7 @@ public abstract class Window {
      * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
      * transition of the calling Activity. When true, the transition will start as soon as possible.
      * When false, the transition will wait until the remote exiting transition completes before
-     * starting.
+     * starting. The default value is true.
      *
      * @param allow true to start the enter transition when possible or false to
      *              wait until the exiting transition completes.
@@ -2049,7 +2088,7 @@ public abstract class Window {
      * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
      * transition of the calling Activity. When true, the transition will start as soon as possible.
      * When false, the transition will wait until the remote exiting transition completes before
-     * starting.
+     * starting. The default value is true.
      *
      * @return true when the enter transition should start as soon as possible or false to
      * when it should wait until the exiting transition completes.
@@ -2063,6 +2102,7 @@ public abstract class Window {
      * transition of the called Activity when reentering after if finishes. When true,
      * the transition will start as soon as possible. When false, the transition will wait
      * until the called Activity's exiting transition completes before starting.
+     * The default value is true.
      *
      * @param allow true to start the transition when possible or false to wait until the
      *              called Activity's exiting transition completes.
@@ -2076,6 +2116,7 @@ public abstract class Window {
      * transition of the called Activity when reentering after if finishes. When true,
      * the transition will start as soon as possible. When false, the transition will wait
      * until the called Activity's exiting transition completes before starting.
+     * The default value is true.
      *
      * @return true when the transition should start when possible or false when it should wait
      * until the called Activity's exiting transition completes.
@@ -2231,6 +2272,12 @@ public abstract class Window {
      * @hide
      */
     public abstract void onMultiWindowModeChanged();
+
+    /**
+     * Called when the activity changes to/from picture-in-picture mode.
+     * @hide
+     */
+    public abstract void onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
 
     /**
      * Called when the activity just relaunched.

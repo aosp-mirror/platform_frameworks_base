@@ -25,7 +25,7 @@ import android.view.Surface;
 
 /** @hide */
 interface IActivityContainer {
-    void attachToDisplay(int displayId);
+    void addToDisplay(int displayId);
     void setSurface(in Surface surface, int width, int height, int density);
     int startActivity(in Intent intent);
     int startActivityIntentSender(in IIntentSender intentSender);

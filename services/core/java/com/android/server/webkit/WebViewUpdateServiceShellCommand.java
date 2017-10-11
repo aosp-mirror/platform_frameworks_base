@@ -43,6 +43,10 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
                     return enableFallbackLogic(true);
                 case "set-webview-implementation":
                     return setWebViewImplementation();
+                case "enable-multiprocess":
+                    return enableMultiProcess(true);
+                case "disable-multiprocess":
+                    return enableMultiProcess(false);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -74,6 +78,13 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         }
     }
 
+    private int enableMultiProcess(boolean enable) throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        mInterface.enableMultiProcess(enable);
+        pw.println("Success");
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -90,6 +101,10 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         pw.println("    package is available.");
         pw.println("  set-webview-implementation PACKAGE");
         pw.println("    Set the WebView implementation to the specified package.");
+        pw.println("  enable-multiprocess");
+        pw.println("    Enable multi-process mode for WebView");
+        pw.println("  disable-multiprocess");
+        pw.println("    Disable multi-process mode for WebView");
         pw.println();
     }
 }

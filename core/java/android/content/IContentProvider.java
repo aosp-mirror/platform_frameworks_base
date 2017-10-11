@@ -35,9 +35,9 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    public Cursor query(String callingPkg, Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, ICancellationSignal cancellationSignal)
-                    throws RemoteException;
+    public Cursor query(String callingPkg, Uri url, @Nullable String[] projection,
+            @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
+            throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(String callingPkg, Uri url, ContentValues initialValues)
             throws RemoteException;
@@ -65,6 +65,9 @@ public interface IContentProvider extends IInterface {
     public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException;
     public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException;
 
+    public boolean refresh(String callingPkg, Uri url, @Nullable Bundle args,
+            ICancellationSignal cancellationSignal) throws RemoteException;
+
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
     public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
@@ -88,4 +91,5 @@ public interface IContentProvider extends IInterface {
     static final int CREATE_CANCELATION_SIGNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 23;
     static final int CANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 24;
     static final int UNCANONICALIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 25;
+    static final int REFRESH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 26;
 }

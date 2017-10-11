@@ -16,19 +16,18 @@
 
 package android.transition;
 
-import android.animation.AnimatorSet;
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.PointF;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.RectEvaluator;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -225,6 +224,7 @@ public class ChangeBounds extends Transition {
      * @deprecated Use {@link android.transition.ChangeTransform} to handle
      * transitions between different parents.
      */
+    @Deprecated
     public void setReparent(boolean reparent) {
         mReparent = reparent;
     }
@@ -415,6 +415,7 @@ public class ChangeBounds extends Transition {
                             if (!mCanceled) {
                                 parent.suppressLayout(false);
                             }
+                            transition.removeListener(this);
                         }
 
                         @Override
@@ -471,9 +472,9 @@ public class ChangeBounds extends Transition {
         private int mTop;
         private int mRight;
         private int mBottom;
-        private boolean mIsTopLeftSet;
-        private boolean mIsBottomRightSet;
         private View mView;
+        private int mTopLeftCalls;
+        private int mBottomRightCalls;
 
         public ViewBounds(View view) {
             mView = view;
@@ -482,8 +483,8 @@ public class ChangeBounds extends Transition {
         public void setTopLeft(PointF topLeft) {
             mLeft = Math.round(topLeft.x);
             mTop = Math.round(topLeft.y);
-            mIsTopLeftSet = true;
-            if (mIsBottomRightSet) {
+            mTopLeftCalls++;
+            if (mTopLeftCalls == mBottomRightCalls) {
                 setLeftTopRightBottom();
             }
         }
@@ -491,16 +492,16 @@ public class ChangeBounds extends Transition {
         public void setBottomRight(PointF bottomRight) {
             mRight = Math.round(bottomRight.x);
             mBottom = Math.round(bottomRight.y);
-            mIsBottomRightSet = true;
-            if (mIsTopLeftSet) {
+            mBottomRightCalls++;
+            if (mTopLeftCalls == mBottomRightCalls) {
                 setLeftTopRightBottom();
             }
         }
 
         private void setLeftTopRightBottom() {
             mView.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
-            mIsTopLeftSet = false;
-            mIsBottomRightSet = false;
+            mTopLeftCalls = 0;
+            mBottomRightCalls = 0;
         }
     }
 }

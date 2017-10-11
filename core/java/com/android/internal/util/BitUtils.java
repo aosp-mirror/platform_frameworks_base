@@ -91,6 +91,10 @@ public final class BitUtils {
         return s & 0xffff;
     }
 
+    public static int uint16(byte hi, byte lo) {
+        return ((hi & 0xff) << 8) | (lo & 0xff);
+    }
+
     public static long uint32(int i) {
         return i & 0xffffffffL;
     }

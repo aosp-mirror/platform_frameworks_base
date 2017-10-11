@@ -19,6 +19,7 @@
 
 #include "Rect.h"
 #include "utils/Macros.h"
+#include <utils/StrongPointer.h>
 
 #include <vector>
 #include <unordered_map>
@@ -35,7 +36,7 @@ public:
         Entry(RenderNode* renderNode, const Rect& damage)
                 : renderNode(renderNode)
                 , damage(damage) {}
-        RenderNode* renderNode;
+        sp<RenderNode> renderNode;
         Rect damage;
     };
 

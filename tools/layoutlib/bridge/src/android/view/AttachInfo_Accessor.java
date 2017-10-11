@@ -34,7 +34,7 @@ public class AttachInfo_Accessor {
         Display display = wm.getDefaultDisplay();
         ViewRootImpl root = new ViewRootImpl(context, display);
         AttachInfo info = new AttachInfo(new BridgeWindowSession(), new BridgeWindow(),
-                display, root, new Handler(), null);
+                display, root, new Handler(), null, context);
         info.mHasWindowFocus = true;
         info.mWindowVisibility = View.VISIBLE;
         info.mInTouchMode = false; // this is so that we can display selections.
@@ -50,5 +50,9 @@ public class AttachInfo_Accessor {
         if (view != null) {
             view.dispatchDetachedFromWindow();
         }
+    }
+
+    public static ViewRootImpl getRootView(View view) {
+        return view.mAttachInfo != null ? view.mAttachInfo.mViewRootImpl : null;
     }
 }

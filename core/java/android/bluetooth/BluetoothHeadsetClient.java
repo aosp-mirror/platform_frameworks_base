@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,7 +28,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Public API to control Hands Free Profile (HFP role only).
@@ -37,7 +37,7 @@ import java.util.UUID;
  * <p>
  *
  * @hide
- * */
+ */
 public final class BluetoothHeadsetClient implements BluetoothProfile {
     private static final String TAG = "BluetoothHeadsetClient";
     private static final boolean DBG = true;
@@ -70,14 +70,14 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * and not supported ones are <strong>not</strong> being sent at all.</p>
      */
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Intent sent whenever audio state changes.
      *
      * <p>It includes two mandatory extras:
-     * {@link BluetoothProfile.EXTRA_STATE},
-     * {@link BluetoothProfile.EXTRA_PREVIOUS_STATE},
+     * {@link BluetoothProfile#EXTRA_STATE},
+     * {@link BluetoothProfile#EXTRA_PREVIOUS_STATE},
      * with possible values:
      * {@link #STATE_AUDIO_CONNECTING},
      * {@link #STATE_AUDIO_CONNECTED},
@@ -88,7 +88,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * indicating wide band speech support.</p>
      */
     public static final String ACTION_AUDIO_STATE_CHANGED =
-        "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
+            "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
 
     /**
      * Intent sending updates of the Audio Gateway state.
@@ -145,7 +145,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Extra with information if connected audio is WBS.
      * <p>Possible values: <code>true</code>,
-     *                     <code>false</code>.</p>
+     * <code>false</code>.</p>
      */
     public static final String EXTRA_AUDIO_WBS =
             "android.bluetooth.headsetclient.extra.AUDIO_WBS";
@@ -153,7 +153,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Extra for AG_EVENT indicates network status.
      * <p>Value: 0 - network unavailable,
-     *           1 - network available </p>
+     * 1 - network available </p>
      */
     public static final String EXTRA_NETWORK_STATUS =
             "android.bluetooth.headsetclient.extra.NETWORK_STATUS";
@@ -166,7 +166,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Extra for AG_EVENT intent indicates roaming state.
      * <p>Value: 0 - no roaming
-     *           1 - active roaming</p>
+     * 1 - active roaming</p>
      */
     public static final String EXTRA_NETWORK_ROAMING =
             "android.bluetooth.headsetclient.extra.NETWORK_ROAMING";
@@ -185,16 +185,16 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Extra for AG_EVENT intent indicates voice recognition state.
      * <p>Value:
-     *          0 - voice recognition stopped,
-     *          1 - voice recognition started.</p>
+     * 0 - voice recognition stopped,
+     * 1 - voice recognition started.</p>
      */
     public static final String EXTRA_VOICE_RECOGNITION =
             "android.bluetooth.headsetclient.extra.VOICE_RECOGNITION";
     /**
      * Extra for AG_EVENT intent indicates in band ring state.
      * <p>Value:
-     *          0 - in band ring tone not supported, or
-     *          1 - in band ring tone supported.</p>
+     * 0 - in band ring tone not supported, or
+     * 1 - in band ring tone supported.</p>
      */
     public static final String EXTRA_IN_BAND_RING =
             "android.bluetooth.headsetclient.extra.IN_BAND_RING";
@@ -207,8 +207,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
             "android.bluetooth.headsetclient.extra.SUBSCRIBER_INFO";
 
     /**
-     *  Extra for AG_CALL_CHANGED intent indicates the
-     *  {@link BluetoothHeadsetClientCall} object that has changed.
+     * Extra for AG_CALL_CHANGED intent indicates the
+     * {@link BluetoothHeadsetClientCall} object that has changed.
      */
     public static final String EXTRA_CALL =
             "android.bluetooth.headsetclient.extra.CALL";
@@ -250,53 +250,53 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * AG feature: three way calling.
      */
-    public final static String EXTRA_AG_FEATURE_3WAY_CALLING =
+    public static final String EXTRA_AG_FEATURE_3WAY_CALLING =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_3WAY_CALLING";
     /**
      * AG feature: voice recognition.
      */
-    public final static String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
+    public static final String EXTRA_AG_FEATURE_VOICE_RECOGNITION =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_VOICE_RECOGNITION";
     /**
      * AG feature: fetching phone number for voice tagging procedure.
      */
-    public final static String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
+    public static final String EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT";
     /**
      * AG feature: ability to reject incoming call.
      */
-    public final static String EXTRA_AG_FEATURE_REJECT_CALL =
+    public static final String EXTRA_AG_FEATURE_REJECT_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_REJECT_CALL";
     /**
      * AG feature: enhanced call handling (terminate specific call, private consultation).
      */
-    public final static String EXTRA_AG_FEATURE_ECC =
+    public static final String EXTRA_AG_FEATURE_ECC =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ECC";
     /**
      * AG feature: response and hold.
      */
-    public final static String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
+    public static final String EXTRA_AG_FEATURE_RESPONSE_AND_HOLD =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RESPONSE_AND_HOLD";
     /**
      * AG call handling feature: accept held or waiting call in three way calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
+    public static final String EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_ACCEPT_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release held or waiting call in three way calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
+    public static final String EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_HELD_OR_WAITING_CALL";
     /**
      * AG call handling feature: release active call and accept held or waiting call in three way
      * calling scenarios.
      */
-    public final static String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
+    public static final String EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_RELEASE_AND_ACCEPT";
     /**
      * AG call handling feature: merge two calls, held and active - multi party conference mode.
      */
-    public final static String EXTRA_AG_FEATURE_MERGE =
+    public static final String EXTRA_AG_FEATURE_MERGE =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE";
     /**
      * AG call handling feature: merge calls and disconnect from multi party
@@ -304,61 +304,61 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Note that this feature needs to be supported by mobile network operator
      * as it requires connection and billing transfer.
      */
-    public final static String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
+    public static final String EXTRA_AG_FEATURE_MERGE_AND_DETACH =
             "android.bluetooth.headsetclient.extra.EXTRA_AG_FEATURE_MERGE_AND_DETACH";
 
     /* Action result codes */
-    public final static int ACTION_RESULT_OK = 0;
-    public final static int ACTION_RESULT_ERROR = 1;
-    public final static int ACTION_RESULT_ERROR_NO_CARRIER = 2;
-    public final static int ACTION_RESULT_ERROR_BUSY = 3;
-    public final static int ACTION_RESULT_ERROR_NO_ANSWER = 4;
-    public final static int ACTION_RESULT_ERROR_DELAYED = 5;
-    public final static int ACTION_RESULT_ERROR_BLACKLISTED = 6;
-    public final static int ACTION_RESULT_ERROR_CME = 7;
+    public static final int ACTION_RESULT_OK = 0;
+    public static final int ACTION_RESULT_ERROR = 1;
+    public static final int ACTION_RESULT_ERROR_NO_CARRIER = 2;
+    public static final int ACTION_RESULT_ERROR_BUSY = 3;
+    public static final int ACTION_RESULT_ERROR_NO_ANSWER = 4;
+    public static final int ACTION_RESULT_ERROR_DELAYED = 5;
+    public static final int ACTION_RESULT_ERROR_BLACKLISTED = 6;
+    public static final int ACTION_RESULT_ERROR_CME = 7;
 
     /* Detailed CME error codes */
-    public final static int CME_PHONE_FAILURE                           = 0;
-    public final static int CME_NO_CONNECTION_TO_PHONE                  = 1;
-    public final static int CME_OPERATION_NOT_ALLOWED                   = 3;
-    public final static int CME_OPERATION_NOT_SUPPORTED                 = 4;
-    public final static int CME_PHSIM_PIN_REQUIRED                      = 5;
-    public final static int CME_PHFSIM_PIN_REQUIRED                     = 6;
-    public final static int CME_PHFSIM_PUK_REQUIRED                     = 7;
-    public final static int CME_SIM_NOT_INSERTED                        = 10;
-    public final static int CME_SIM_PIN_REQUIRED                        = 11;
-    public final static int CME_SIM_PUK_REQUIRED                        = 12;
-    public final static int CME_SIM_FAILURE                             = 13;
-    public final static int CME_SIM_BUSY                                = 14;
-    public final static int CME_SIM_WRONG                               = 15;
-    public final static int CME_INCORRECT_PASSWORD                      = 16;
-    public final static int CME_SIM_PIN2_REQUIRED                       = 17;
-    public final static int CME_SIM_PUK2_REQUIRED                       = 18;
-    public final static int CME_MEMORY_FULL                             = 20;
-    public final static int CME_INVALID_INDEX                           = 21;
-    public final static int CME_NOT_FOUND                               = 22;
-    public final static int CME_MEMORY_FAILURE                          = 23;
-    public final static int CME_TEXT_STRING_TOO_LONG                    = 24;
-    public final static int CME_INVALID_CHARACTER_IN_TEXT_STRING        = 25;
-    public final static int CME_DIAL_STRING_TOO_LONG                    = 26;
-    public final static int CME_INVALID_CHARACTER_IN_DIAL_STRING        = 27;
-    public final static int CME_NO_NETWORK_SERVICE                      = 30;
-    public final static int CME_NETWORK_TIMEOUT                         = 31;
-    public final static int CME_EMERGENCY_SERVICE_ONLY                  = 32;
-    public final static int CME_NO_SIMULTANOUS_VOIP_CS_CALLS            = 33;
-    public final static int CME_NOT_SUPPORTED_FOR_VOIP                  = 34;
-    public final static int CME_SIP_RESPONSE_CODE                       = 35;
-    public final static int CME_NETWORK_PERSONALIZATION_PIN_REQUIRED    = 40;
-    public final static int CME_NETWORK_PERSONALIZATION_PUK_REQUIRED    = 41;
-    public final static int CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED   = 42;
-    public final static int CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED   = 43;
-    public final static int CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
-    public final static int CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
-    public final static int CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED  = 46;
-    public final static int CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED  = 47;
-    public final static int CME_HIDDEN_KEY_REQUIRED                     = 48;
-    public final static int CME_EAP_NOT_SUPPORTED                       = 49;
-    public final static int CME_INCORRECT_PARAMETERS                    = 50;
+    public static final int CME_PHONE_FAILURE = 0;
+    public static final int CME_NO_CONNECTION_TO_PHONE = 1;
+    public static final int CME_OPERATION_NOT_ALLOWED = 3;
+    public static final int CME_OPERATION_NOT_SUPPORTED = 4;
+    public static final int CME_PHSIM_PIN_REQUIRED = 5;
+    public static final int CME_PHFSIM_PIN_REQUIRED = 6;
+    public static final int CME_PHFSIM_PUK_REQUIRED = 7;
+    public static final int CME_SIM_NOT_INSERTED = 10;
+    public static final int CME_SIM_PIN_REQUIRED = 11;
+    public static final int CME_SIM_PUK_REQUIRED = 12;
+    public static final int CME_SIM_FAILURE = 13;
+    public static final int CME_SIM_BUSY = 14;
+    public static final int CME_SIM_WRONG = 15;
+    public static final int CME_INCORRECT_PASSWORD = 16;
+    public static final int CME_SIM_PIN2_REQUIRED = 17;
+    public static final int CME_SIM_PUK2_REQUIRED = 18;
+    public static final int CME_MEMORY_FULL = 20;
+    public static final int CME_INVALID_INDEX = 21;
+    public static final int CME_NOT_FOUND = 22;
+    public static final int CME_MEMORY_FAILURE = 23;
+    public static final int CME_TEXT_STRING_TOO_LONG = 24;
+    public static final int CME_INVALID_CHARACTER_IN_TEXT_STRING = 25;
+    public static final int CME_DIAL_STRING_TOO_LONG = 26;
+    public static final int CME_INVALID_CHARACTER_IN_DIAL_STRING = 27;
+    public static final int CME_NO_NETWORK_SERVICE = 30;
+    public static final int CME_NETWORK_TIMEOUT = 31;
+    public static final int CME_EMERGENCY_SERVICE_ONLY = 32;
+    public static final int CME_NO_SIMULTANOUS_VOIP_CS_CALLS = 33;
+    public static final int CME_NOT_SUPPORTED_FOR_VOIP = 34;
+    public static final int CME_SIP_RESPONSE_CODE = 35;
+    public static final int CME_NETWORK_PERSONALIZATION_PIN_REQUIRED = 40;
+    public static final int CME_NETWORK_PERSONALIZATION_PUK_REQUIRED = 41;
+    public static final int CME_NETWORK_SUBSET_PERSONALIZATION_PIN_REQUIRED = 42;
+    public static final int CME_NETWORK_SUBSET_PERSONALIZATION_PUK_REQUIRED = 43;
+    public static final int CME_SERVICE_PROVIDER_PERSONALIZATION_PIN_REQUIRED = 44;
+    public static final int CME_SERVICE_PROVIDER_PERSONALIZATION_PUK_REQUIRED = 45;
+    public static final int CME_CORPORATE_PERSONALIZATION_PIN_REQUIRED = 46;
+    public static final int CME_CORPORATE_PERSONALIZATION_PUK_REQUIRED = 47;
+    public static final int CME_HIDDEN_KEY_REQUIRED = 48;
+    public static final int CME_EAP_NOT_SUPPORTED = 49;
+    public static final int CME_INCORRECT_PARAMETERS = 50;
 
     /* Action policy for other calls when accepting call */
     public static final int CALL_ACCEPT_NONE = 0;
@@ -367,39 +367,40 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
 
     private Context mContext;
     private ServiceListener mServiceListener;
-    private IBluetoothHeadsetClient mService;
+    private volatile IBluetoothHeadsetClient mService;
     private BluetoothAdapter mAdapter;
 
-    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 @Override
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (VDBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG, "Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
                                 mContext.unbindService(mConnection);
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     } else {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (VDBG) Log.d(TAG,"Binding service...");
-                                    Intent intent = new Intent(IBluetoothHeadsetClient.class.getName());
+                                    if (VDBG) Log.d(TAG, "Binding service...");
+                                    Intent intent = new Intent(
+                                            IBluetoothHeadsetClient.class.getName());
                                     doBind();
                                 }
                             } catch (Exception re) {
-                                Log.e(TAG,"",re);
+                                Log.e(TAG, "", re);
                             }
                         }
                     }
                 }
-        };
+            };
 
     /**
      * Create a BluetoothHeadsetClient proxy object.
@@ -414,7 +415,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
             try {
                 mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (RemoteException e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
 
@@ -426,7 +427,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                 android.os.Process.myUserHandle())) {
+                android.os.Process.myUserHandle())) {
             Log.e(TAG, "Could not bind to Bluetooth Headset Client Service with " + intent);
             return false;
         }
@@ -447,7 +448,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
             try {
                 mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
             } catch (Exception e) {
-                Log.e(TAG,"",e);
+                Log.e(TAG, "", e);
             }
         }
 
@@ -457,7 +458,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
                     mService = null;
                     mContext.unbindService(mConnection);
                 } catch (Exception re) {
-                    Log.e(TAG,"",re);
+                    Log.e(TAG, "", re);
                 }
             }
         }
@@ -471,48 +472,44 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * second connection, this implementation will disconnect already connected
      * device automatically and will process the new one.
      *
-     * @param device    a remote device we want connect to
-     * @return <code>true</code> if command has been issued successfully;
-     *          <code>false</code> otherwise;
-     *          upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
-     *          intent.
+     * @param device a remote device we want connect to
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.connect(device);
+                return service.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Disconnects remote device
      *
-     * @param device    a remote device we want disconnect
-     * @return          <code>true</code> if command has been issued successfully;
-     *                  <code>false</code> otherwise;
-     *                  upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED}
-     *                  intent.
+     * @param device a remote device we want disconnect
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CONNECTION_STATE_CHANGED} intent.
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.disconnect(device);
+                return service.disconnect(device);
             } catch (RemoteException e) {
-              Log.e(TAG, Log.getStackTraceString(new Throwable()));
-              return false;
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -524,60 +521,61 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getConnectedDevices();
+                return service.getConnectedDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
     }
 
     /**
      * Returns list of remote devices in a particular state
      *
-     * @param states    collection of states
-     * @return          list of devices that state matches the states listed in
-     *                  <code>states</code>; empty list if nothing matches the
-     *                  <code>states</code>
+     * @param states collection of states
+     * @return list of devices that state matches the states listed in <code>states</code>; empty
+     * list if nothing matches the <code>states</code>
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getDevicesMatchingConnectionStates(states);
+                return service.getDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
     }
 
     /**
      * Returns state of the <code>device</code>
      *
-     * @param device    a remote device
-     * @return          the state of connection of the device
+     * @param device a remote device
+     * @return the state of connection of the device
      */
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getConnectionState(device);
+                return service.getConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return BluetoothProfile.STATE_DISCONNECTED;
     }
 
@@ -588,20 +586,20 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
-            if (priority != BluetoothProfile.PRIORITY_OFF &&
-                    priority != BluetoothProfile.PRIORITY_ON) {
-              return false;
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
+                return false;
             }
             try {
-                return mService.setPriority(device, priority);
+                return service.setPriority(device, priority);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -610,187 +608,175 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getPriority(device);
+                return service.getPriority(device);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return PRIORITY_OFF;
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return PRIORITY_OFF;
     }
 
     /**
      * Starts voice recognition.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
-     *                   intent.
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_AG_EVENT} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_VOICE_RECOGNITION}. This method invocation will fail silently when feature
+     * is not supported.</p>
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.startVoiceRecognition(device);
+                return service.startVoiceRecognition(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Stops voice recognition.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_AG_EVENT}
-     *                   intent.
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_AG_EVENT} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_VOICE_RECOGNITION}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_VOICE_RECOGNITION}. This method invocation will fail silently when feature
+     * is not supported.</p>
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.stopVoiceRecognition(device);
+                return service.stopVoiceRecognition(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Returns list of all calls in any state.
      *
-     * @param device    remote device
-     * @return          list of calls; empty list if none call exists
+     * @param device remote device
+     * @return list of calls; empty list if none call exists
      */
     public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getCurrentCalls(device);
+                return service.getCurrentCalls(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return null;
     }
 
     /**
      * Returns list of current values of AG indicators.
      *
-     * @param device    remote device
-     * @return          bundle of AG  indicators; null if device is not in
-     *                  CONNECTED state
+     * @param device remote device
+     * @return bundle of AG  indicators; null if device is not in CONNECTED state
      */
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getCurrentAgEvents(device);
+                return service.getCurrentAgEvents(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return null;
     }
 
     /**
      * Accepts a call
      *
-     * @param device    remote device
-     * @param flag      action policy while accepting a call. Possible values
-     *                   {@link #CALL_ACCEPT_NONE}, {@link #CALL_ACCEPT_HOLD},
-     *                   {@link #CALL_ACCEPT_TERMINATE}
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @param flag action policy while accepting a call. Possible values {@link #CALL_ACCEPT_NONE},
+     * {@link #CALL_ACCEPT_HOLD}, {@link #CALL_ACCEPT_TERMINATE}
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      */
     public boolean acceptCall(BluetoothDevice device, int flag) {
         if (DBG) log("acceptCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.acceptCall(device, flag);
+                return service.acceptCall(device, flag);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Holds a call.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      */
     public boolean holdCall(BluetoothDevice device) {
         if (DBG) log("holdCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.holdCall(device);
+                return service.holdCall(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Rejects a call.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_REJECT_CALL}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_REJECT_CALL}. This method invocation will fail silently when feature is not
+     * supported.</p>
      */
     public boolean rejectCall(BluetoothDevice device) {
         if (DBG) log("rejectCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.rejectCall(device);
+                return service.rejectCall(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -799,30 +785,28 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * Works only when Extended Call Control is supported by Audio Gateway.
      *
-     * @param device    remote device
-     * @param call      Handle of call obtained in {@link dial()} or obtained via
-     *                  {@link ACTION_CALL_CHANGED}. {@code call} may be null in which
-     *                  case we will hangup all active calls.
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @param call Handle of call obtained in {@link #dial(BluetoothDevice, String)} or obtained via
+     * {@link #ACTION_CALL_CHANGED}. {@code call} may be null in which case we will hangup all active
+     * calls.
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_ECC}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_ECC}. This method invocation will fail silently when feature is not
+     * supported.</p>
      */
     public boolean terminateCall(BluetoothDevice device, BluetoothHeadsetClientCall call) {
         if (DBG) log("terminateCall()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.terminateCall(device, call);
+                return service.terminateCall(device, call);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -831,28 +815,26 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * Works only when Extended Call Control is supported by Audio Gateway.
      *
-     * @param device    remote device
-     * @param index     index of the call to connect in private mode
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @param index index of the call to connect in private mode
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_ECC}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_ECC}. This method invocation will fail silently when feature is not
+     * supported.</p>
      */
     public boolean enterPrivateMode(BluetoothDevice device, int index) {
         if (DBG) log("enterPrivateMode()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.enterPrivateMode(device, index);
+                return service.enterPrivateMode(device, index);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -861,53 +843,48 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * That means connect other calls and disconnect.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                   intent.
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_MERGE_AND_DETACH}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_MERGE_AND_DETACH}. This method invocation will fail silently when feature
+     * is not supported.</p>
      */
     public boolean explicitCallTransfer(BluetoothDevice device) {
         if (DBG) log("explicitCallTransfer()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.explicitCallTransfer(device);
+                return service.explicitCallTransfer(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Places a call with specified number.
      *
-     * @param device    remote device
-     * @param number    valid phone number
-     * @return          <code>{@link BluetoothHeadsetClientCall} call</code> if command has been
-     *                  issued successfully;
-     *                  <code>{@link null}</code> otherwise;
-     *                  upon completion HFP sends {@link #ACTION_CALL_CHANGED}
-     *                  intent in case of success; {@link #ACTION_RESULT} is sent
-     *                  otherwise;
+     * @param device remote device
+     * @param number valid phone number
+     * @return <code>{@link BluetoothHeadsetClientCall} call</code> if command has been issued
+     * successfully; <code>{@link null}</code> otherwise; upon completion HFP sends {@link
+     * #ACTION_CALL_CHANGED} intent in case of success; {@link #ACTION_RESULT} is sent otherwise;
      */
     public BluetoothHeadsetClientCall dial(BluetoothDevice device, String number) {
         if (DBG) log("dial()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.dial(device, number);
+                return service.dial(device, number);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return null;
     }
 
@@ -916,50 +893,48 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * Possible code values : 0,1,2,3,4,5,6,7,8,9,A,B,C,D,*,#
      *
-     * @param device    remote device
-     * @param code  ASCII code
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_RESULT} intent;
+     * @param device remote device
+     * @param code ASCII code
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_RESULT} intent;
      */
     public boolean sendDTMF(BluetoothDevice device, byte code) {
         if (DBG) log("sendDTMF()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.sendDTMF(device, code);
+                return service.sendDTMF(device, code);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
     /**
      * Get a number corresponding to last voice tag recorded on AG.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_LAST_VTAG}
-     *                   or {@link #ACTION_RESULT} intent;
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_LAST_VTAG} or {@link #ACTION_RESULT}
+     * intent;
      *
-     * <p>Feature required for successful execution is being reported by:
-     * {@link #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}.
-     * This method invocation will fail silently when feature is not supported.</p>
+     * <p>Feature required for successful execution is being reported by: {@link
+     * #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}. This method invocation will fail silently when
+     * feature is not supported.</p>
      */
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
         if (DBG) log("getLastVoiceTagNumber()");
-        if (mService != null && isEnabled() &&
-                isValidDevice(device)) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.getLastVoiceTagNumber(device);
+                return service.getLastVoiceTagNumber(device);
             } catch (RemoteException e) {
-                Log.e(TAG,  Log.getStackTraceString(new Throwable()));
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
             }
         }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -970,10 +945,13 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getAudioState(device);
-            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+                return service.getAudioState(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -984,16 +962,19 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Sets whether audio routing is allowed.
      *
-     * @param device    remote device
-     * @param allowed   if routing is allowed to the device
-     * Note: This is an internal function and shouldn't be exposed
+     * @param device remote device
+     * @param allowed if routing is allowed to the device Note: This is an internal function and
+     * shouldn't be exposed
      */
     public void setAudioRouteAllowed(BluetoothDevice device, boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                mService.setAudioRouteAllowed(device, allowed);
-            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+                service.setAudioRouteAllowed(device, allowed);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -1002,16 +983,20 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
 
     /**
      * Returns whether audio routing is allowed.
-     * @param device    remote device
-     * @return whether the command succeeded
-     * Note: This is an internal function and shouldn't be exposed
+     *
+     * @param device remote device
+     * @return whether the command succeeded Note: This is an internal function and shouldn't be
+     * exposed
      */
     public boolean getAudioRouteAllowed(BluetoothDevice device) {
         if (VDBG) log("getAudioRouteAllowed");
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getAudioRouteAllowed(device);
-            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+                return service.getAudioRouteAllowed(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -1024,16 +1009,15 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * It setup SCO channel with remote connected Handsfree AG device.
      *
-     * @param device    remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
-     *                   intent;
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
     public boolean connectAudio(BluetoothDevice device) {
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.connectAudio(device);
+                return service.connectAudio(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -1049,16 +1033,15 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * It tears down the SCO channel from remote AG device.
      *
-     * @param   device  remote device
-     * @return          <code>true</code> if command has been issued successfully;
-     *                   <code>false</code> otherwise;
-     *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
-     *                   intent;
+     * @param device remote device
+     * @return <code>true</code> if command has been issued successfully; <code>false</code>
+     * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
     public boolean disconnectAudio(BluetoothDevice device) {
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.disconnectAudio(device);
+                return service.disconnectAudio(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -1072,14 +1055,14 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Get Audio Gateway features
      *
-     * @param device    remote device
-     * @return          bundle of AG features; null if no service or
-     *                  AG not connected
+     * @param device remote device
+     * @return bundle of AG features; null if no service or AG not connected
      */
     public Bundle getCurrentAgFeatures(BluetoothDevice device) {
-        if (mService != null && isEnabled()) {
+        final IBluetoothHeadsetClient service = mService;
+        if (service != null && isEnabled()) {
             try {
-                return mService.getCurrentAgFeatures(device);
+                return service.getCurrentAgFeatures(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -1091,17 +1074,18 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     }
 
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHeadsetClient.Stub.asInterface(service);
+            mService = IBluetoothHeadsetClient.Stub.asInterface(Binder.allowBlocking(service));
 
             if (mServiceListener != null) {
                 mServiceListener.onServiceConnected(BluetoothProfile.HEADSET_CLIENT,
                         BluetoothHeadsetClient.this);
             }
         }
+
         @Override
         public void onServiceDisconnected(ComponentName className) {
             if (DBG) Log.d(TAG, "Proxy object disconnected");
@@ -1113,15 +1097,11 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     };
 
     private boolean isEnabled() {
-       if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
-       return false;
+        return mAdapter.getState() == BluetoothAdapter.STATE_ON;
     }
 
-    private boolean isValidDevice(BluetoothDevice device) {
-       if (device == null) return false;
-
-       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
-       return false;
+    private static boolean isValidDevice(BluetoothDevice device) {
+        return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
     }
 
     private static void log(String msg) {

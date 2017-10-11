@@ -161,7 +161,7 @@ final class RootScanner {
                     try {
                         mDatabase.getMapper().startAddingDocuments(documentId);
                         if (mDatabase.getMapper().putStorageDocuments(
-                                documentId, device.eventsSupported, device.roots)) {
+                                documentId, device.operationsSupported, device.roots)) {
                             changed = true;
                         }
                         if (mDatabase.getMapper().stopAddingDocuments(documentId)) {

@@ -19,16 +19,14 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Random;
-
 /** @hide */
 public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
 
-    final public String name;
-    final public String description;
-    final public String provider;
-    final public byte subclass;
-    final public byte[] descriptors;
+    public final String name;
+    public final String description;
+    public final String provider;
+    public final byte subclass;
+    public final byte[] descriptors;
 
     public BluetoothHidDeviceAppSdpSettings(String name, String description, String provider,
             byte subclass, byte[] descriptors) {
@@ -54,20 +52,20 @@ public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
     }
 
     public static final Parcelable.Creator<BluetoothHidDeviceAppSdpSettings> CREATOR =
-        new Parcelable.Creator<BluetoothHidDeviceAppSdpSettings>() {
+            new Parcelable.Creator<BluetoothHidDeviceAppSdpSettings>() {
 
-        @Override
-        public BluetoothHidDeviceAppSdpSettings createFromParcel(Parcel in) {
+                @Override
+                public BluetoothHidDeviceAppSdpSettings createFromParcel(Parcel in) {
 
-            return new BluetoothHidDeviceAppSdpSettings(in.readString(), in.readString(),
-                    in.readString(), in.readByte(), in.createByteArray());
-        }
+                    return new BluetoothHidDeviceAppSdpSettings(in.readString(), in.readString(),
+                            in.readString(), in.readByte(), in.createByteArray());
+                }
 
-        @Override
-        public BluetoothHidDeviceAppSdpSettings[] newArray(int size) {
-            return new BluetoothHidDeviceAppSdpSettings[size];
-        }
-    };
+                @Override
+                public BluetoothHidDeviceAppSdpSettings[] newArray(int size) {
+                    return new BluetoothHidDeviceAppSdpSettings[size];
+                }
+            };
 
     @Override
     public void writeToParcel(Parcel out, int flags) {

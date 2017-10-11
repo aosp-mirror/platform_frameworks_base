@@ -18,13 +18,13 @@ package com.android.internal.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.Slog;
 
@@ -46,7 +46,6 @@ public final class NightDisplayController {
     private static final String TAG = "NightDisplayController";
     private static final boolean DEBUG = false;
 
-    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ AUTO_MODE_DISABLED, AUTO_MODE_CUSTOM, AUTO_MODE_TWILIGHT })
     public @interface AutoMode {}
@@ -81,7 +80,7 @@ public final class NightDisplayController {
     private Callback mCallback;
 
     public NightDisplayController(@NonNull Context context) {
-        this(context, UserHandle.myUserId());
+        this(context, ActivityManager.getCurrentUser());
     }
 
     public NightDisplayController(@NonNull Context context, int userId) {
@@ -110,14 +109,36 @@ public final class NightDisplayController {
     }
 
     /**
-     * Sets whether Night display should be activated.
+     * Sets whether Night display should be activated. This also sets the last activated time.
      *
      * @param activated {@code true} if Night display should be activated
      * @return {@code true} if the activated value was set successfully
      */
     public boolean setActivated(boolean activated) {
+        if (isActivated() != activated) {
+            Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, System.currentTimeMillis(),
+                    mUserId);
+        }
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_ACTIVATED, activated ? 1 : 0, mUserId);
+    }
+
+    /**
+     * Returns the time when Night display's activation state last changed, or {@code null} if it
+     * has never been changed.
+     */
+    public Calendar getLastActivatedTime() {
+        final ContentResolver cr = mContext.getContentResolver();
+        final long lastActivatedTimeMillis = Secure.getLongForUser(
+                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1, mUserId);
+        if (lastActivatedTimeMillis < 0) {
+            return null;
+        }
+
+        final Calendar lastActivatedTime = Calendar.getInstance();
+        lastActivatedTime.setTimeInMillis(lastActivatedTimeMillis);
+        return lastActivatedTime;
     }
 
     /**
@@ -233,6 +254,65 @@ public final class NightDisplayController {
                 Secure.NIGHT_DISPLAY_CUSTOM_END_TIME, endTime.toMillis(), mUserId);
     }
 
+    /**
+     * Returns the color temperature (in Kelvin) to tint the display when activated.
+     */
+    public int getColorTemperature() {
+        int colorTemperature = Secure.getIntForUser(mContext.getContentResolver(),
+                Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, -1, mUserId);
+        if (colorTemperature == -1) {
+            if (DEBUG) {
+                Slog.d(TAG, "Using default value for setting: "
+                    + Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE);
+            }
+            colorTemperature = getDefaultColorTemperature();
+        }
+        final int minimumTemperature = getMinimumColorTemperature();
+        final int maximumTemperature = getMaximumColorTemperature();
+        if (colorTemperature < minimumTemperature) {
+            colorTemperature = minimumTemperature;
+        } else if (colorTemperature > maximumTemperature) {
+            colorTemperature = maximumTemperature;
+        }
+
+        return colorTemperature;
+    }
+
+    /**
+     * Sets the current temperature.
+     *
+     * @param colorTemperature the temperature, in Kelvin.
+     * @return {@code true} if new temperature was set successfully.
+     */
+    public boolean setColorTemperature(int colorTemperature) {
+        return Secure.putIntForUser(mContext.getContentResolver(),
+            Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, colorTemperature, mUserId);
+    }
+
+    /**
+     * Returns the minimum allowed color temperature (in Kelvin) to tint the display when activated.
+     */
+    public int getMinimumColorTemperature() {
+        return mContext.getResources().getInteger(
+                R.integer.config_nightDisplayColorTemperatureMin);
+    }
+
+    /**
+     * Returns the maximum allowed color temperature (in Kelvin) to tint the display when activated.
+     */
+    public int getMaximumColorTemperature() {
+        return mContext.getResources().getInteger(
+                R.integer.config_nightDisplayColorTemperatureMax);
+    }
+
+    /**
+     * Returns the default color temperature (in Kelvin) to tint the display when activated.
+     */
+    public int getDefaultColorTemperature() {
+        return mContext.getResources().getInteger(
+                R.integer.config_nightDisplayColorTemperatureDefault);
+    }
+
     private void onSettingChanged(@NonNull String setting) {
         if (DEBUG) {
             Slog.d(TAG, "onSettingChanged: " + setting);
@@ -251,6 +331,9 @@ public final class NightDisplayController {
                     break;
                 case Secure.NIGHT_DISPLAY_CUSTOM_END_TIME:
                     mCallback.onCustomEndTimeChanged(getCustomEndTime());
+                    break;
+                case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
+                    mCallback.onColorTemperatureChanged(getColorTemperature());
                     break;
             }
         }
@@ -277,6 +360,8 @@ public final class NightDisplayController {
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_START_TIME),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_CUSTOM_END_TIME),
+                        false /* notifyForDescendants */, mContentObserver, mUserId);
+                cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
             }
         }
@@ -417,5 +502,12 @@ public final class NightDisplayController {
          * @param endTime the local time to automatically deactivate Night display
          */
         default void onCustomEndTimeChanged(LocalTime endTime) {}
+
+        /**
+         * Callback invoked when the color temperature changes.
+         *
+         * @param colorTemperature the color temperature to tint the screen
+         */
+        default void onColorTemperatureChanged(int colorTemperature) {}
     }
 }

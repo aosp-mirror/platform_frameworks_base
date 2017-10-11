@@ -11,17 +11,17 @@
 ** Unless required by applicable law or agreed to in writing, software 
 ** distributed under the License is distributed on an "AS IS" BASIS, 
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
 package android.view;
 
 import android.content.ClipData;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.util.MergedConfiguration;
 import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -83,9 +83,9 @@ interface IWindowSession {
      * treat as real display. Example of such area is a chin in some models of wearable devices.
      * @param outBackdropFrame Rect which is used draw the resizing background during a resize
      * operation.
-     * @param outConfiguration New configuration of window, if it is now
-     * becoming visible and the global configuration has changed since it
-     * was last displayed.
+     * @param outMergedConfiguration New config container that holds global, override and merged
+     * config for window, if it is now becoming visible and the merged configuration has changed
+     * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
@@ -95,33 +95,8 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,
-            out Surface outSurface);
-
-    /**
-     *  Position a window relative to it's parent (attached) window without triggering
-     *  a full relayout. This action may be deferred until a given frame number
-     *  for the parent window appears. This allows for synchronizing movement of a child
-     *  to repainting the contents of the parent.
-     *
-     *  "width" and "height" correspond to the width and height members of
-     *  WindowManager.LayoutParams in the {@link #relayout relayout()} case.
-     *  This may differ from the surface buffer size in the
-     *  case of {@link LayoutParams#FLAG_SCALED} and {@link #relayout relayout()}
-     *  must be used with requestedWidth/height if this must be changed.
-     *
-     *  @param window The window being modified. Must be attached to a parent window
-     *  or this call will fail.
-     *  @param left The new left position
-     *  @param top The new top position
-     *  @param right The new right position
-     *  @param bottom The new bottom position
-     *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
-     *  defer this action until.
-     *  @param outFrame Rect in which is placed the new position/size on screen.
-     */
-    void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, out Rect outFrame);
+            out Rect outOutsets, out Rect outBackdropFrame,
+            out MergedConfiguration outMergedConfiguration, out Surface outSurface);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -132,12 +107,6 @@ interface IWindowSession {
      * (for example when main windows are being reused via preservation).
      */
     void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
-
-    /**
-     * If a call to relayout() asked to have the surface destroy deferred,
-     * it must call this once it is okay to destroy that surface.
-     */
-    void performDeferredDestroy(IWindow window);
 
     /**
      * Called by a client to report that it ran out of graphics memory.

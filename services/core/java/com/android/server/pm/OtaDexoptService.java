@@ -28,6 +28,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -109,9 +110,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new OtaDexoptShellCommand(this)).exec(
-                this, in, out, err, args, resultReceiver);
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     @Override
@@ -134,16 +135,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         for (PackageParser.Package p : important) {
-            // Make sure that core apps are optimized according to their own "reason".
-            // If the core apps are not preopted in the B OTA, and REASON_AB_OTA is not speed
-            // (by default is speed-profile) they will be interepreted/JITed. This in itself is
-            // not a problem as we will end up doing profile guided compilation. However, some
-            // core apps may be loaded by system server which doesn't JIT and we need to make
-            // sure we are not interpreting all their code in that process.
-            int compilationReason = p.coreApp
-                    ? PackageManagerService.REASON_CORE_APP
-                    : PackageManagerService.REASON_AB_OTA;
-            mDexoptCommands.addAll(generatePackageDexopts(p, compilationReason));
+            mDexoptCommands.addAll(generatePackageDexopts(p, PackageManagerService.REASON_AB_OTA));
         }
         for (PackageParser.Package p : others) {
             // We assume here that there are no core apps left.
@@ -160,7 +152,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
             for (PackageParser.Package pkg : others) {
-                deleteOatArtifactsOfPackage(pkg);
+                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.packageName);
             }
         }
         long spaceAvailableNow = getAvailableSpace();
@@ -250,30 +242,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         return usableSpace - lowThreshold;
     }
 
-    private static String getOatDir(PackageParser.Package pkg) {
-        if (!pkg.canHaveOatDir()) {
-            return null;
-        }
-        File codePath = new File(pkg.codePath);
-        if (codePath.isDirectory()) {
-            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
-        }
-        return null;
-    }
-
-    private void deleteOatArtifactsOfPackage(PackageParser.Package pkg) {
-        String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
-        for (String codePath : pkg.getAllCodePaths()) {
-            for (String isa : instructionSets) {
-                try {
-                    mPackageManagerService.mInstaller.deleteOdex(codePath, isa, getOatDir(pkg));
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                }
-            }
-        }
-    }
-
     /**
      * Generate all dexopt commands for the given package.
      */
@@ -282,22 +250,57 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         // Intercept and collect dexopt requests
         final List<String> commands = new ArrayList<String>();
         final Installer collectingInstaller = new Installer(mContext, true) {
+            /**
+             * Encode the dexopt command into a string.
+             *
+             * Note: If you have to change the signature of this function, increase the version
+             *       number, and update the counterpart in
+             *       frameworks/native/cmds/installd/otapreopt.cpp.
+             */
             @Override
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries) throws InstallerException {
-                commands.add(buildCommand("dexopt",
-                        apkPath,
-                        uid,
-                        pkgName,
-                        instructionSet,
-                        dexoptNeeded,
-                        outputPath,
-                        dexFlags,
-                        compilerFilter,
-                        volumeUuid,
-                        sharedLibraries));
+                    @Nullable String sharedLibraries, @Nullable String seInfo) throws InstallerException {
+                final StringBuilder builder = new StringBuilder();
+
+                // The version. Right now it's 2.
+                builder.append("2 ");
+
+                builder.append("dexopt");
+
+                encodeParameter(builder, apkPath);
+                encodeParameter(builder, uid);
+                encodeParameter(builder, pkgName);
+                encodeParameter(builder, instructionSet);
+                encodeParameter(builder, dexoptNeeded);
+                encodeParameter(builder, outputPath);
+                encodeParameter(builder, dexFlags);
+                encodeParameter(builder, compilerFilter);
+                encodeParameter(builder, volumeUuid);
+                encodeParameter(builder, sharedLibraries);
+                encodeParameter(builder, seInfo);
+
+                commands.add(builder.toString());
+            }
+
+            /**
+             * Encode a parameter as necessary for the commands string.
+             */
+            private void encodeParameter(StringBuilder builder, Object arg) {
+                builder.append(' ');
+
+                if (arg == null) {
+                    builder.append('!');
+                    return;
+                }
+
+                String txt = String.valueOf(arg);
+                if (txt.indexOf('\0') != -1 || txt.indexOf(' ') != -1 || "!".equals(txt)) {
+                    throw new IllegalArgumentException(
+                            "Invalid argument while executing " + arg);
+                }
+                builder.append(txt);
             }
         };
 
@@ -437,29 +440,5 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 Context context) {
             super(installer, installLock, context, "*otadexopt*");
         }
-    }
-
-    /**
-     * Cook up argument list in the format that {@code installd} expects.
-     */
-    private static String buildCommand(Object... args) {
-        final StringBuilder builder = new StringBuilder();
-        for (Object arg : args) {
-            String escaped;
-            if (arg == null) {
-                escaped = "";
-            } else {
-                escaped = String.valueOf(arg);
-            }
-            if (escaped.indexOf('\0') != -1 || escaped.indexOf(' ') != -1 || "!".equals(escaped)) {
-                throw new IllegalArgumentException(
-                        "Invalid argument while executing " + Arrays.toString(args));
-            }
-            if (TextUtils.isEmpty(escaped)) {
-                escaped = "!";
-            }
-            builder.append(' ').append(escaped);
-        }
-        return builder.toString();
     }
 }

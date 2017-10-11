@@ -17,7 +17,6 @@
 #include "NinePatchPeeker.h"
 
 #include "SkBitmap.h"
-#include "SkImageDecoder.h"
 
 using namespace android;
 

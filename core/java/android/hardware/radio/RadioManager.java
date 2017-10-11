@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
@@ -32,6 +33,7 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
+@SystemService(Context.RADIO_SERVICE)
 public class RadioManager {
 
     /** Method return status: successful operation */

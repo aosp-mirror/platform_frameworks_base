@@ -16,25 +16,24 @@
 
 package android.view;
 
-import android.graphics.Point;
-import android.graphics.Rect;
-import com.android.internal.app.IAssistScreenshotReceiver;
-import com.android.internal.os.IResultReceiver;
-import com.android.internal.policy.IShortcutService;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
-
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.AppTransitionAnimationSpec;
 
-import java.lang.Override;
+import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IShortcutService;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodClient;
 
 /**
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and
@@ -64,7 +63,7 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- implementation of IWindowManager that we care about ----
 
     @Override
-    public int getRotation() throws RemoteException {
+    public int getDefaultDisplayRotation() throws RemoteException {
         return mRotation;
     }
 
@@ -76,16 +75,7 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
-            boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10,
-            Rect arg11, Configuration arg12, int arg13, boolean arg14, boolean arg15, int arg16,
-            int arg17)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void addWindowToken(IBinder arg0, int arg1) throws RemoteException {
+    public void addWindowToken(IBinder arg0, int arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
@@ -159,12 +149,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public int getAppOrientation(IApplicationToken arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public int getPendingAppTransition() throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
@@ -227,13 +211,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
+    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
         // TODO Auto-generated method stub
@@ -258,12 +242,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void pauseKeyDispatching(IBinder arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void prepareAppTransition(int arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
@@ -276,19 +254,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void removeAppToken(IBinder arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removeWindowToken(IBinder arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void resumeKeyDispatching(IBinder arg0) throws RemoteException {
+    public void removeWindowToken(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
@@ -298,13 +264,6 @@ public class IWindowManagerImpl implements IWindowManager {
             throws RemoteException {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
-            int maxHeight, float frameScale) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -322,43 +281,6 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public float getCurrentAnimatorScale() throws RemoteException {
         return 0;
-    }
-
-    @Override
-    public void setAppTask(IBinder arg0, int arg1, int arg2, Rect arg3, Configuration arg4,
-            int arg5, boolean arg6)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void setAppOrientation(IApplicationToken arg0, int arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean setAppStartingWindow(IBinder arg0, String arg1, int arg2, CompatibilityInfo arg3,
-            CharSequence arg4, int arg5, int arg6, int arg7, int arg8, IBinder arg9, boolean arg10)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void setAppVisibility(IBinder arg0, boolean arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void notifyAppStopped(IBinder token) throws RemoteException {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -412,13 +334,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public int[] setNewConfiguration(Configuration arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Rect getBoundsForNewConfiguration(int stackId) throws RemoteException {
+    public int[] setNewDisplayOverrideConfiguration(Configuration arg0, int displayId)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -444,11 +361,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void startAppFreezingScreen(IBinder arg0, int arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public boolean startViewServer(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
@@ -465,12 +377,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setTvPipVisibility(boolean visible) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void stopAppFreezingScreen(IBinder arg0, boolean arg1) throws RemoteException {
+    public void setPipVisibility(boolean visible) {
         // TODO Auto-generated method stub
     }
 
@@ -486,14 +393,14 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Configuration updateOrientationFromAppTokens(Configuration arg0, IBinder arg1)
+    public Configuration updateOrientationFromAppTokens(Configuration arg0, IBinder arg1, int arg2)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public int watchRotation(IRotationWatcher arg0) throws RemoteException {
+    public int watchRotation(IRotationWatcher arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -514,11 +421,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void dismissKeyguard() {
+    public void dismissKeyguard(IKeyguardDismissCallback callback) throws RemoteException {
     }
 
     @Override
-    public void keyguardGoingAway(int flags) throws RemoteException {
+    public void setSwitchingUser(boolean switching) throws RemoteException {
     }
 
     @Override
@@ -565,19 +472,15 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void cancelTaskWindowTransition(int taskId) {
-    }
-
-    @Override
-    public void cancelTaskThumbnailTransition(int taskId) {
-    }
-
-    @Override
     public void endProlongedAnimations() {
     }
 
     @Override
     public void registerDockedStackListener(IDockedStackListener listener) throws RemoteException {
+    }
+
+    @Override
+    public void registerPinnedStackListener(int displayId, IPinnedStackListener listener) throws RemoteException {
     }
 
     @Override
@@ -595,7 +498,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void getStableInsets(Rect outInsets) throws RemoteException {
+    public void getStableInsets(int displayId, Rect outInsets) throws RemoteException {
     }
 
     @Override
@@ -603,13 +506,24 @@ public class IWindowManagerImpl implements IWindowManager {
         throws RemoteException {}
 
     @Override
-    public void createWallpaperInputConsumer(InputChannel inputChannel) throws RemoteException {}
+    public void createInputConsumer(String name, InputChannel inputChannel)
+            throws RemoteException {}
 
     @Override
-    public void removeWallpaperInputConsumer() throws RemoteException {}
+    public boolean destroyInputConsumer(String name) throws RemoteException {
+        return false;
+    }
 
     @Override
     public Bitmap screenshotWallpaper() throws RemoteException {
         return null;
+    }
+
+    @Override
+    public void enableSurfaceTrace(ParcelFileDescriptor fd) throws RemoteException {
+    }
+
+    @Override
+    public void disableSurfaceTrace() throws RemoteException {
     }
 }

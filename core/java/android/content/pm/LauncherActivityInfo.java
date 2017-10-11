@@ -89,6 +89,7 @@ public class LauncherActivityInfo {
      * @return The label for the activity.
      */
     public CharSequence getLabel() {
+        // TODO: Go through LauncherAppsService
         return mActivityInfo.loadLabel(mPm);
     }
 
@@ -101,6 +102,7 @@ public class LauncherActivityInfo {
      * @return The drawable associated with the activity.
      */
     public Drawable getIcon(int density) {
+        // TODO: Go through LauncherAppsService
         final int iconRes = mActivityInfo.getIconResource();
         Drawable icon = null;
         // Get the preferred density icon from the app's resources
@@ -144,8 +146,9 @@ public class LauncherActivityInfo {
      */
     public long getFirstInstallTime() {
         try {
+            // TODO: Go through LauncherAppsService
             return mPm.getPackageInfo(mActivityInfo.packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES).firstInstallTime;
         } catch (NameNotFoundException nnfe) {
             // Sorry, can't find package
             return 0;
@@ -171,6 +174,7 @@ public class LauncherActivityInfo {
         Drawable originalIcon = getIcon(density);
 
         if (originalIcon instanceof BitmapDrawable) {
+            // TODO: Go through LauncherAppsService
             return mPm.getUserBadgedIcon(originalIcon, mUser);
         } else {
             Log.e(TAG, "Unable to create badged icon for " + mActivityInfo);

@@ -149,6 +149,7 @@
     <dimen name="timepicker_radial_picker_dimen">296dp</dimen>
     <dimen name="timepicker_radial_picker_top_margin">16dp</dimen>
     <dimen name="timepicker_radial_picker_horizontal_margin">16dp</dimen>
+    <dimen name="timepicker_edit_text_size">24sp</dimen>
 
     <!-- Used by RadialTimePicker in clock-style TimePicker. -->
     <dimen name="timepicker_selector_radius">20dp</dimen>

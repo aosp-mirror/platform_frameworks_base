@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.util.Log;
+
 /**
  * This class contains information to describe a MIDI device.
  * For now we only have information that can be retrieved easily for USB devices,
@@ -31,6 +33,11 @@ import android.os.Parcelable;
 public final class MidiDeviceInfo implements Parcelable {
 
     private static final String TAG = "MidiDeviceInfo";
+
+    /*
+     * Please note that constants and (un)marshalling code need to be kept in sync
+     * with the native implementation (MidiDeviceInfo.h|cpp)
+     */
 
     /**
      * Constant representing USB MIDI devices for {@link #getType}
@@ -321,15 +328,17 @@ public final class MidiDeviceInfo implements Parcelable {
     public static final Parcelable.Creator<MidiDeviceInfo> CREATOR =
         new Parcelable.Creator<MidiDeviceInfo>() {
         public MidiDeviceInfo createFromParcel(Parcel in) {
+            // Needs to be kept in sync with code in MidiDeviceInfo.cpp
             int type = in.readInt();
             int id = in.readInt();
-            int inputPorts = in.readInt();
-            int outputPorts = in.readInt();
+            int inputPortCount = in.readInt();
+            int outputPortCount = in.readInt();
             String[] inputPortNames = in.createStringArray();
             String[] outputPortNames = in.createStringArray();
-            Bundle properties = in.readBundle();
             boolean isPrivate = (in.readInt() == 1);
-            return new MidiDeviceInfo(type, id, inputPorts, outputPorts,
+            Bundle basicPropertiesIgnored = in.readBundle();
+            Bundle properties = in.readBundle();
+            return new MidiDeviceInfo(type, id, inputPortCount, outputPortCount,
                     inputPortNames, outputPortNames, properties, isPrivate);
         }
 
@@ -342,14 +351,40 @@ public final class MidiDeviceInfo implements Parcelable {
         return 0;
     }
 
+    private Bundle getBasicProperties(String[] keys) {
+        Bundle basicProperties = new Bundle();
+        for (String key : keys) {
+            Object val = mProperties.get(key);
+            if (val != null) {
+                if (val instanceof String) {
+                    basicProperties.putString(key, (String) val);
+                } else if (val instanceof Integer) {
+                    basicProperties.putInt(key, (Integer) val);
+                } else {
+                    Log.w(TAG, "Unsupported property type: " + val.getClass().getName());
+                }
+            }
+        }
+        return basicProperties;
+    }
+
     public void writeToParcel(Parcel parcel, int flags) {
+        // Needs to be kept in sync with code in MidiDeviceInfo.cpp
         parcel.writeInt(mType);
         parcel.writeInt(mId);
         parcel.writeInt(mInputPortCount);
         parcel.writeInt(mOutputPortCount);
         parcel.writeStringArray(mInputPortNames);
         parcel.writeStringArray(mOutputPortNames);
-        parcel.writeBundle(mProperties);
         parcel.writeInt(mIsPrivate ? 1 : 0);
+        // "Basic" properties only contain properties of primitive types
+        // and thus can be read back by native code. "Extra" properties is
+        // a superset that contains all properties.
+        parcel.writeBundle(getBasicProperties(new String[] {
+            PROPERTY_NAME, PROPERTY_MANUFACTURER, PROPERTY_PRODUCT, PROPERTY_VERSION,
+            PROPERTY_SERIAL_NUMBER, PROPERTY_ALSA_CARD, PROPERTY_ALSA_DEVICE
+        }));
+        // Must be serialized last so native code can safely ignore it.
+        parcel.writeBundle(mProperties);
    }
 }

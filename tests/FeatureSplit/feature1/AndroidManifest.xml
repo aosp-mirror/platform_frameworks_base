@@ -16,7 +16,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.test.split.feature"
-    featureName="feature1">
+    featureSplit="feature1">
 
     <uses-sdk android:minSdkVersion="21" />
 

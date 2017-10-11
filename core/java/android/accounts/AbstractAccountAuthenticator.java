@@ -175,6 +175,9 @@ public abstract class AbstractAccountAuthenticator {
                 }
                 if (result != null) {
                     response.onResult(result);
+                } else {
+                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                            "null bundle returned");
                 }
             } catch (Exception e) {
                 handleException(response, "addAccount", accountType, e);
@@ -782,9 +785,7 @@ public abstract class AbstractAccountAuthenticator {
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
      * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
-     * @hide
      */
-    @SystemApi
     public Bundle startAddAccountSession(
             final AccountAuthenticatorResponse response,
             final String accountType,
@@ -840,9 +841,7 @@ public abstract class AbstractAccountAuthenticator {
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
      * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
-     * @hide
      */
-    @SystemApi
     public Bundle startUpdateCredentialsSession(
             final AccountAuthenticatorResponse response,
             final Account account,
@@ -888,16 +887,16 @@ public abstract class AbstractAccountAuthenticator {
      *         <li>{@link AccountManager#KEY_INTENT}, or
      *         <li>{@link AccountManager#KEY_ACCOUNT_NAME} and
      *         {@link AccountManager#KEY_ACCOUNT_TYPE} of the account that was
-     *         added or local credentials were updated, or
+     *         added or local credentials were updated, and optional
+     *         {@link AccountManager#KEY_ACCOUNT_STATUS_TOKEN} for checking
+     *         the status of the account later, or
      *         <li>{@link AccountManager#KEY_ERROR_CODE} and
      *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
      *         </ul>
      * @throws NetworkErrorException if the authenticator could not honor the request due to a
      *             network error
      * @see #startAddAccountSession and #startUpdateCredentialsSession
-     * @hide
      */
-    @SystemApi
     public Bundle finishSession(
             final AccountAuthenticatorResponse response,
             final String accountType,
@@ -981,9 +980,7 @@ public abstract class AbstractAccountAuthenticator {
      *         </ul>
      * @throws NetworkErrorException if the authenticator could not honor the request due to a
      *             network error
-     * @hide
      */
-    @SystemApi
     public Bundle isCredentialsUpdateSuggested(
             final AccountAuthenticatorResponse response,
             Account account,

@@ -445,7 +445,10 @@ public final class UidHealthStats {
 
     /**
      * An estimate of the number of milliamp-microsends used by this uid.
+     *
+     * @deprecated this measurement is vendor-dependent and not reliable.
      */
+    @Deprecated
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_CPU_POWER_MAMS = HealthKeys.BASE_UID + 64;
 

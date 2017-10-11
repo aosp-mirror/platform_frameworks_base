@@ -19,45 +19,43 @@ package android.content;
 import android.view.KeyEvent;
 
 /**
- * 
+ * Interface that defines a dialog-type class that can be shown, dismissed, or
+ * canceled, and may have buttons that can be clicked.
  */
-public interface DialogInterface {    
-    /**
-     * The identifier for the positive button.
-     */
-    public static final int BUTTON_POSITIVE = -1;
+public interface DialogInterface {
+    /** The identifier for the positive button. */
+    int BUTTON_POSITIVE = -1;
 
-    /**
-     * The identifier for the negative button. 
-     */
-    public static final int BUTTON_NEGATIVE = -2;
+    /** The identifier for the negative button. */
+    int BUTTON_NEGATIVE = -2;
 
-    /**
-     * The identifier for the neutral button. 
-     */
-    public static final int BUTTON_NEUTRAL = -3;
+    /** The identifier for the neutral button. */
+    int BUTTON_NEUTRAL = -3;
 
-    /**
-     * @deprecated Use {@link #BUTTON_POSITIVE}
-     */
+    /** @deprecated Use {@link #BUTTON_POSITIVE} */
     @Deprecated
-    public static final int BUTTON1 = BUTTON_POSITIVE;
+    int BUTTON1 = BUTTON_POSITIVE;
+
+    /** @deprecated Use {@link #BUTTON_NEGATIVE} */
+    @Deprecated
+    int BUTTON2 = BUTTON_NEGATIVE;
+
+    /** @deprecated Use {@link #BUTTON_NEUTRAL} */
+    @Deprecated
+    int BUTTON3 = BUTTON_NEUTRAL;
 
     /**
-     * @deprecated Use {@link #BUTTON_NEGATIVE}
+     * Cancels the dialog, invoking the {@link OnCancelListener}.
+     * <p>
+     * The {@link OnDismissListener} may also be called if cancellation
+     * dismisses the dialog.
      */
-    @Deprecated
-    public static final int BUTTON2 = BUTTON_NEGATIVE;
+    void cancel();
 
     /**
-     * @deprecated Use {@link #BUTTON_NEUTRAL}
+     * Dismisses the dialog, invoking the {@link OnDismissListener}.
      */
-    @Deprecated
-    public static final int BUTTON3 = BUTTON_NEUTRAL;
-    
-    public void cancel();
-
-    public void dismiss();
+    void dismiss();
 
     /**
      * Interface used to allow the creator of a dialog to run some code when the
@@ -70,11 +68,11 @@ public interface DialogInterface {
     interface OnCancelListener {
         /**
          * This method will be invoked when the dialog is canceled.
-         * 
-         * @param dialog The dialog that was canceled will be passed into the
-         *            method.
+         *
+         * @param dialog the dialog that was canceled will be passed into the
+         *               method
          */
-        public void onCancel(DialogInterface dialog);
+        void onCancel(DialogInterface dialog);
     }
 
     /**
@@ -84,11 +82,11 @@ public interface DialogInterface {
     interface OnDismissListener {
         /**
          * This method will be invoked when the dialog is dismissed.
-         * 
-         * @param dialog The dialog that was dismissed will be passed into the
-         *            method.
+         *
+         * @param dialog the dialog that was dismissed will be passed into the
+         *               method
          */
-        public void onDismiss(DialogInterface dialog);
+        void onDismiss(DialogInterface dialog);
     }
 
     /**
@@ -99,29 +97,28 @@ public interface DialogInterface {
         /**
          * This method will be invoked when the dialog is shown.
          *
-         * @param dialog The dialog that was shown will be passed into the
-         *            method.
+         * @param dialog the dialog that was shown will be passed into the
+         *               method
          */
-        public void onShow(DialogInterface dialog);
+        void onShow(DialogInterface dialog);
     }
 
     /**
      * Interface used to allow the creator of a dialog to run some code when an
-     * item on the dialog is clicked..
+     * item on the dialog is clicked.
      */
     interface OnClickListener {
         /**
          * This method will be invoked when a button in the dialog is clicked.
-         * 
-         * @param dialog The dialog that received the click.
-         * @param which The button that was clicked (e.g.
-         *            {@link DialogInterface#BUTTON1}) or the position
-         *            of the item clicked.
+         *
+         * @param dialog the dialog that received the click
+         * @param which the button that was clicked (ex.
+         *              {@link DialogInterface#BUTTON_POSITIVE}) or the position
+         *              of the item clicked
          */
-        /* TODO: Change to use BUTTON_POSITIVE after API council */
-        public void onClick(DialogInterface dialog, int which);
+        void onClick(DialogInterface dialog, int which);
     }
-    
+
     /**
      * Interface used to allow the creator of a dialog to run some code when an
      * item in a multi-choice dialog is clicked.
@@ -129,14 +126,15 @@ public interface DialogInterface {
     interface OnMultiChoiceClickListener {
         /**
          * This method will be invoked when an item in the dialog is clicked.
-         * 
-         * @param dialog The dialog where the selection was made.
-         * @param which The position of the item in the list that was clicked.
-         * @param isChecked True if the click checked the item, else false.
+         *
+         * @param dialog the dialog where the selection was made
+         * @param which the position of the item in the list that was clicked
+         * @param isChecked {@code true} if the click checked the item, else
+         *                  {@code false}
          */
-        public void onClick(DialogInterface dialog, int which, boolean isChecked);
+        void onClick(DialogInterface dialog, int which, boolean isChecked);
     }
-    
+
     /**
      * Interface definition for a callback to be invoked when a key event is
      * dispatched to this dialog. The callback will be invoked before the key
@@ -146,13 +144,14 @@ public interface DialogInterface {
         /**
          * Called when a key is dispatched to a dialog. This allows listeners to
          * get a chance to respond before the dialog.
-         * 
-         * @param dialog The dialog the key has been dispatched to.
-         * @param keyCode The code for the physical key that was pressed
-         * @param event The KeyEvent object containing full information about
-         *            the event.
-         * @return True if the listener has consumed the event, false otherwise.
+         *
+         * @param dialog the dialog the key has been dispatched to
+         * @param keyCode the code for the physical key that was pressed
+         * @param event the KeyEvent object containing full information about
+         *              the event
+         * @return {@code true} if the listener has consumed the event,
+         *         {@code false} otherwise
          */
-        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event);
+        boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event);
     }
 }

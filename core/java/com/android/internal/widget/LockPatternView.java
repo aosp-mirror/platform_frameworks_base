@@ -278,7 +278,8 @@ public class LockPatternView extends View {
     public LockPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView,
+                R.attr.lockPatternStyle, R.style.Widget_LockPatternView);
 
         final String aspect = a.getString(R.styleable.LockPatternView_aspect);
 
@@ -298,12 +299,9 @@ public class LockPatternView extends View {
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
 
-        mRegularColor = context.getColor(R.color.lock_pattern_view_regular_color);
-        mErrorColor = context.getColor(R.color.lock_pattern_view_error_color);
-        mSuccessColor = context.getColor(R.color.lock_pattern_view_success_color);
-        mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, mRegularColor);
-        mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, mErrorColor);
-        mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, mSuccessColor);
+        mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, 0);
+        mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, 0);
+        mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, 0);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
@@ -1489,21 +1487,10 @@ public class LockPatternView extends View {
             return bounds;
         }
 
-        private boolean shouldSpeakPassword() {
-            final boolean speakPassword = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                    UserHandle.USER_CURRENT_OR_SELF) != 0;
-            final boolean hasHeadphones = mAudioManager != null ?
-                    (mAudioManager.isWiredHeadsetOn() || mAudioManager.isBluetoothA2dpOn())
-                    : false;
-            return speakPassword || hasHeadphones;
-        }
-
         private CharSequence getTextForVirtualView(int virtualViewId) {
             final Resources res = getResources();
-            return shouldSpeakPassword() ? res.getString(
-                R.string.lockscreen_access_pattern_cell_added_verbose, virtualViewId)
-                : res.getString(R.string.lockscreen_access_pattern_cell_added);
+            return res.getString(R.string.lockscreen_access_pattern_cell_added_verbose,
+                    virtualViewId);
         }
 
         /**

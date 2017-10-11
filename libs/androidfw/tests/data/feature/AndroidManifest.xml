@@ -15,5 +15,6 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.test.basic">
+    package="com.android.basic"
+    featureName="feature">
 </manifest>

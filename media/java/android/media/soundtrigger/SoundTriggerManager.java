@@ -18,7 +18,9 @@ package android.media.soundtrigger;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.os.Handler;
@@ -39,6 +41,7 @@ import java.util.UUID;
  * @hide
  */
 @SystemApi
+@SystemService(Context.SOUND_TRIGGER_SERVICE)
 public final class SoundTriggerManager {
     private static final boolean DBG = false;
     private static final String TAG = "SoundTriggerManager";
@@ -65,6 +68,7 @@ public final class SoundTriggerManager {
     /**
      * Updates the given sound trigger model.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public void updateModel(Model model) {
         try {
             mSoundTriggerService.updateSoundModel(model.getGenericSoundModel());
@@ -77,6 +81,7 @@ public final class SoundTriggerManager {
      * Returns the sound trigger model represented by the given UUID. An instance of {@link Model}
      * is returned.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public Model getModel(UUID soundModelId) {
         try {
             return new Model(mSoundTriggerService.getSoundModel(
@@ -89,6 +94,7 @@ public final class SoundTriggerManager {
     /**
      * Deletes the sound model represented by the provided UUID.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public void deleteModel(UUID soundModelId) {
         try {
             mSoundTriggerService.deleteSoundModel(new ParcelUuid(soundModelId));
@@ -110,6 +116,7 @@ public final class SoundTriggerManager {
      * @return Instance of {@link SoundTriggerDetector} or null on error.
      */
     @Nullable
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public SoundTriggerDetector createSoundTriggerDetector(UUID soundModelId,
             @NonNull SoundTriggerDetector.Callback callback, @Nullable Handler handler) {
         if (soundModelId == null) {

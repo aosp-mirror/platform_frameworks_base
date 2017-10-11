@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views.grid;
 
+import static com.android.systemui.recents.views.TaskStackLayoutAlgorithm.*;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -26,8 +28,11 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewTransform;
+
+import java.util.ArrayList;
 
 public class TaskGridLayoutAlgorithm  {
 
@@ -312,5 +317,10 @@ public class TaskGridLayoutAlgorithm  {
 
     public int getFocusFrameThickness() {
         return mFocusedFrameThickness;
+    }
+
+    public VisibilityReport computeStackVisibilityReport(ArrayList<Task> tasks) {
+        int visibleCount = Math.min(TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT, tasks.size());
+        return new VisibilityReport(visibleCount, visibleCount);
     }
 }

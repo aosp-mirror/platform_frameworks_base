@@ -38,7 +38,7 @@ import java.util.ListIterator;
  * This class sets an alarm for the next expiring job, and determines whether a job's minimum
  * delay has been satisfied.
  */
-public class TimeController extends StateController {
+public final class TimeController extends StateController {
     private static final String TAG = "JobScheduler.Time";
 
     /** Deadline alarm tag for logging purposes */
@@ -51,7 +51,7 @@ public class TimeController extends StateController {
 
     private AlarmManager mAlarmService = null;
     /** List of tracked jobs, sorted asc. by deadline */
-    private final List<JobStatus> mTrackedJobs = new LinkedList<JobStatus>();
+    private final List<JobStatus> mTrackedJobs = new LinkedList<>();
     /** Singleton. */
     private static TimeController mSingleton;
 
@@ -78,6 +78,20 @@ public class TimeController extends StateController {
     public void maybeStartTrackingJobLocked(JobStatus job, JobStatus lastJob) {
         if (job.hasTimingDelayConstraint() || job.hasDeadlineConstraint()) {
             maybeStopTrackingJobLocked(job, null, false);
+
+            // First: check the constraints now, because if they are already satisfied
+            // then there is no need to track it.  This gives us a fast path for a common
+            // pattern of having a job with a 0 deadline constraint ("run immediately").
+            // Unlike most controllers, once one of our constraints has been satisfied, it
+            // will never be unsatisfied (our time base can not go backwards).
+            final long nowElapsedMillis = SystemClock.elapsedRealtime();
+            if (job.hasDeadlineConstraint() && evaluateDeadlineConstraint(job, nowElapsedMillis)) {
+                return;
+            } else if (job.hasTimingDelayConstraint() && evaluateTimingDelayConstraint(job,
+                    nowElapsedMillis)) {
+                return;
+            }
+
             boolean isInsert = false;
             ListIterator<JobStatus> it = mTrackedJobs.listIterator(mTrackedJobs.size());
             while (it.hasPrevious()) {
@@ -92,6 +106,7 @@ public class TimeController extends StateController {
                 it.next();
             }
             it.add(job);
+            job.setTrackingController(JobStatus.TRACKING_TIME);
             maybeUpdateAlarmsLocked(
                     job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE,
                     job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE,
@@ -102,13 +117,15 @@ public class TimeController extends StateController {
     /**
      * When we stop tracking a job, we only need to update our alarms if the job we're no longer
      * tracking was the one our alarms were based off of.
-     * Really an == comparison should be enough, but why play with fate? We'll do <=.
      */
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus job, JobStatus incomingJob, boolean forUpdate) {
-        if (mTrackedJobs.remove(job)) {
-            checkExpiredDelaysAndResetAlarm();
-            checkExpiredDeadlinesAndResetAlarm();
+    public void maybeStopTrackingJobLocked(JobStatus job, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (job.clearTrackingController(JobStatus.TRACKING_TIME)) {
+            if (mTrackedJobs.remove(job)) {
+                checkExpiredDelaysAndResetAlarm();
+                checkExpiredDeadlinesAndResetAlarm();
+            }
         }
     }
 
@@ -147,23 +164,31 @@ public class TimeController extends StateController {
                 if (!job.hasDeadlineConstraint()) {
                     continue;
                 }
-                final long jobDeadline = job.getLatestRunTimeElapsed();
 
-                if (jobDeadline <= nowElapsedMillis) {
-                    if (job.hasTimingDelayConstraint()) {
-                        job.setTimingDelayConstraintSatisfied(true);
-                    }
-                    job.setDeadlineConstraintSatisfied(true);
+                if (evaluateDeadlineConstraint(job, nowElapsedMillis)) {
                     mStateChangedListener.onRunJobNow(job);
                     it.remove();
                 } else {  // Sorted by expiry time, so take the next one and stop.
-                    nextExpiryTime = jobDeadline;
+                    nextExpiryTime = job.getLatestRunTimeElapsed();
                     nextExpiryUid = job.getSourceUid();
                     break;
                 }
             }
             setDeadlineExpiredAlarmLocked(nextExpiryTime, nextExpiryUid);
         }
+    }
+
+    private boolean evaluateDeadlineConstraint(JobStatus job, long nowElapsedMillis) {
+        final long jobDeadline = job.getLatestRunTimeElapsed();
+
+        if (jobDeadline <= nowElapsedMillis) {
+            if (job.hasTimingDelayConstraint()) {
+                job.setTimingDelayConstraintSatisfied(true);
+            }
+            job.setDeadlineConstraintSatisfied(true);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -182,9 +207,7 @@ public class TimeController extends StateController {
                 if (!job.hasTimingDelayConstraint()) {
                     continue;
                 }
-                final long jobDelayTime = job.getEarliestRunTime();
-                if (jobDelayTime <= nowElapsedMillis) {
-                    job.setTimingDelayConstraintSatisfied(true);
+                if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
                     if (canStopTrackingJobLocked(job)) {
                         it.remove();
                     }
@@ -194,6 +217,7 @@ public class TimeController extends StateController {
                 } else if (!job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY)) {
                     // If this job still doesn't have its delay constraint satisfied,
                     // then see if it is the next upcoming delay time for the alarm.
+                    final long jobDelayTime = job.getEarliestRunTime();
                     if (nextDelayTime > jobDelayTime) {
                         nextDelayTime = jobDelayTime;
                         nextDelayUid = job.getSourceUid();
@@ -205,6 +229,15 @@ public class TimeController extends StateController {
             }
             setDelayExpiredAlarmLocked(nextDelayTime, nextDelayUid);
         }
+    }
+
+    private boolean evaluateTimingDelayConstraint(JobStatus job, long nowElapsedMillis) {
+        final long jobDelayTime = job.getEarliestRunTime();
+        if (jobDelayTime <= nowElapsedMillis) {
+            job.setTimingDelayConstraintSatisfied(true);
+            return true;
+        }
+        return false;
     }
 
     private void maybeUpdateAlarmsLocked(long delayExpiredElapsed, long deadlineExpiredElapsed,

@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TESTS_TESTSCENE_H
-#define TESTS_TESTSCENE_H
+
+#pragma once
 
 #include <string>
 #include <unordered_map>
 
 namespace android {
+
+class Canvas;
+
 namespace uirenderer {
 class RenderNode;
-
-#if HWUI_NEW_OPS
 class RecordingCanvas;
-typedef RecordingCanvas TestCanvas;
-#else
-class DisplayListCanvas;
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 namespace test {
 
@@ -38,6 +34,7 @@ public:
     struct Options {
         int count = 0;
         int reportFrametimeWeight = 0;
+        bool renderOffscreen = true;
     };
 
     template <class T>
@@ -65,7 +62,7 @@ public:
     };
 
     virtual ~TestScene() {}
-    virtual void createContent(int width, int height, TestCanvas& renderer) = 0;
+    virtual void createContent(int width, int height, Canvas& renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     static std::unordered_map<std::string, Info>& testMap();
@@ -75,5 +72,3 @@ public:
 } // namespace test
 } // namespace uirenderer
 } // namespace android
-
-#endif /* TESTS_TESTSCENE_H */

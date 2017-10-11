@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_FONT_RENDERER_H
-#define ANDROID_HWUI_FONT_RENDERER_H
+#pragma once
 
 #include "font/FontUtil.h"
 #include "font/CacheTexture.h"
@@ -35,7 +34,6 @@
 
 #include <vector>
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"
 namespace RSC {
     class Element;
@@ -43,36 +41,25 @@ namespace RSC {
     class ScriptIntrinsicBlur;
     class sp;
 }
-#endif
 
 namespace android {
 namespace uirenderer {
 
-#if HWUI_NEW_OPS
 class BakedOpState;
 class BakedOpRenderer;
 struct ClipBase;
-#else
-class OpenGLRenderer;
-#endif
 
 class TextDrawFunctor {
 public:
     TextDrawFunctor(
-#if HWUI_NEW_OPS
             BakedOpRenderer* renderer,
             const BakedOpState* bakedState,
             const ClipBase* clip,
-#else
-            OpenGLRenderer* renderer,
-#endif
             float x, float y, bool pureTranslate,
-            int alpha, SkXfermode::Mode mode, const SkPaint* paint)
+            int alpha, SkBlendMode mode, const SkPaint* paint)
         : renderer(renderer)
-#if HWUI_NEW_OPS
         , bakedState(bakedState)
         , clip(clip)
-#endif
         , x(x)
         , y(y)
         , pureTranslate(pureTranslate)
@@ -83,18 +70,14 @@ public:
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
-#if HWUI_NEW_OPS
     BakedOpRenderer* renderer;
     const BakedOpState* bakedState;
     const ClipBase* clip;
-#else
-    OpenGLRenderer* renderer;
-#endif
     float x;
     float y;
     bool pureTranslate;
     int alpha;
-    SkXfermode::Mode mode;
+    SkBlendMode mode;
     const SkPaint* paint;
 };
 
@@ -216,12 +199,10 @@ private:
     FontCacheHistoryTracker mHistoryTracker;
 #endif
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // RS constructs
     RSC::sp<RSC::RS> mRs;
     RSC::sp<const RSC::Element> mRsElement;
     RSC::sp<RSC::ScriptIntrinsicBlur> mRsScript;
-#endif
 
     static void computeGaussianWeights(float* weights, int32_t radius);
     static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
@@ -235,5 +216,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_FONT_RENDERER_H

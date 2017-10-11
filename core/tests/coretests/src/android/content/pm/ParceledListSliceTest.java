@@ -91,6 +91,28 @@ public class ParceledListSliceTest extends TestCase {
         }
     }
 
+    public void testStringList() throws Exception {
+        final int objectCount = 400;
+        List<String> list = new ArrayList<String>();
+        for (long i = 0; i < objectCount; i++) {
+            list.add(Long.toString(i * (6 - i)));
+        }
+
+        StringParceledListSlice slice;
+        Parcel parcel = Parcel.obtain();
+        try {
+            parcel.writeParcelable(new StringParceledListSlice(list), 0);
+            parcel.setDataPosition(0);
+            slice = parcel.readParcelable(getClass().getClassLoader());
+        } finally {
+            parcel.recycle();
+        }
+
+        assertNotNull(slice);
+        assertNotNull(slice.getList());
+        assertEquals(list, slice.getList());
+    }
+
     /**
      * Test that only homogeneous elements may be unparceled.
      */

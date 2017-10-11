@@ -21,26 +21,41 @@
 LOCAL_PATH:= $(call my-dir)
 
 testFiles := \
+    ApkAssets_test.cpp \
     AppAsLib_test.cpp \
     Asset_test.cpp \
+    AssetManager2_test.cpp \
     AttributeFinder_test.cpp \
+    AttributeResolution_test.cpp \
     ByteBucketArray_test.cpp \
     Config_test.cpp \
     ConfigLocale_test.cpp \
     Idmap_test.cpp \
+    LoadedArsc_test.cpp \
+    ResourceUtils_test.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
+    StringPiece_test.cpp \
     TestHelpers.cpp \
+    TestMain.cpp \
     Theme_test.cpp \
     TypeWrappers_test.cpp \
     ZipUtils_test.cpp
+
+benchmarkFiles := \
+    AssetManager2_bench.cpp \
+    BenchMain.cpp \
+    BenchmarkHelpers.cpp \
+    SparseEntry_bench.cpp \
+    TestHelpers.cpp \
+    Theme_bench.cpp
 
 androidfw_test_cflags := \
     -Wall \
     -Werror \
     -Wunused \
     -Wunreachable-code \
-    -Wno-missing-field-initializers \
+    -Wno-missing-field-initializers
 
 # gtest is broken.
 androidfw_test_cflags += -Wno-unnamed-type-template-args
@@ -55,10 +70,13 @@ LOCAL_CFLAGS := $(androidfw_test_cflags)
 LOCAL_SRC_FILES := $(testFiles)
 LOCAL_STATIC_LIBRARIES := \
     libandroidfw \
+    libbase \
     libutils \
     libcutils \
     liblog \
     libz \
+    libziparchive
+LOCAL_PICKUP_FILES := $(LOCAL_PATH)/data
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -76,9 +94,32 @@ LOCAL_SRC_FILES := $(testFiles) \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroidfw \
+    libbase \
     libcutils \
     libutils \
     libui \
+    libziparchive 
+LOCAL_PICKUP_FILES := $(LOCAL_PATH)/data
+
+include $(BUILD_NATIVE_TEST)
+
+# ==========================================================
+# Build the device benchmarks: libandroidfw_benchmarks
+# ==========================================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libandroidfw_benchmarks
+LOCAL_CFLAGS := $(androidfw_test_cflags)
+LOCAL_SRC_FILES := $(benchmarkFiles)
+LOCAL_STATIC_LIBRARIES := \
+    libgoogle-benchmark
+LOCAL_SHARED_LIBRARIES := \
+    libandroidfw \
+    libbase \
+    libcutils \
+    libutils \
+    libziparchive
+LOCAL_PICKUP_FILES := $(LOCAL_PATH)/data
 
 include $(BUILD_NATIVE_TEST)
 endif # Not SDK_ONLY

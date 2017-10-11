@@ -284,6 +284,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
 
     // C function EGLSurface eglCreatePixmapSurface ( EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list )
 
+    @Deprecated
     public static native EGLSurface eglCreatePixmapSurface(
         EGLDisplay dpy,
         EGLConfig config,

@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,10 +30,18 @@
 
     <!-- Recents theme -->
     <style name="RecentsTheme.Wallpaper">
-        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowBackground">@*android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowDisablePreview">true</item>
+        <item name="clearAllStyle">@style/ClearAllButtonDefaultMargins</item>
+    </style>
+
+    <style name="ClearAllButtonDefaultMargins">
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
     </style>
 
     <!-- Performance optimized Recents theme (no wallpaper) -->
@@ -44,7 +52,7 @@
     <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
     <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@drawable/forced_resizable_background</item>
-        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:statusBarColor">@*android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
     </style>
 
@@ -55,6 +63,74 @@
         <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
         <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
+
+    <style name="PipPhoneOverlayControlTheme" parent="@android:style/Theme.Material">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:statusBarColor">@*android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.PipPhoneOverlayControl</item>
+    </style>
+
+    <style name="Animation.PipPhoneOverlayControl" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
+
+        <!-- If the target stack doesn't have focus, we do a task to front animation. -->
+        <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
+    </style>
+
+    <!-- HybridNotification themes and styles -->
+
+    <style name="HybridNotification">
+        <item name="hybridNotificationStyle">@style/hybrid_notification</item>
+        <item name="hybridNotificationTitleStyle">@style/hybrid_notification_title</item>
+        <item name="hybridNotificationTextStyle">@style/hybrid_notification_text</item>
+    </style>
+
+    <style name="HybridNotification.Ambient">
+        <item name="hybridNotificationStyle">@style/hybrid_notification_ambient</item>
+        <item name="hybridNotificationTitleStyle">@style/hybrid_notification_title_ambient</item>
+        <item name="hybridNotificationTextStyle">@style/hybrid_notification_text_ambient</item>
+    </style>
+
+    <style name="hybrid_notification_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_extra_margin_ambient</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_extra_margin_ambient</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingBottom">23.5dp</item>
+    </style>
+
+    <style name="hybrid_notification">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">12dp</item>
+    </style>
+
+    <style name="hybrid_notification_title_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#ffffffff</item>
+    </style>
+
+    <style name="hybrid_notification_title">
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+
+    <style name="hybrid_notification_text_ambient">
+        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
+        <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#eeffffff</item>
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <style name="hybrid_notification_text">
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+
 
     <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
@@ -67,37 +143,34 @@
         <item name="android:textColor">#FF808080</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.TextButton"
-        parent="@*android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FFFFFFFF</item>
-    </style>
-
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
+    <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+    </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textStyle">normal</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
+        <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#b2ffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
         <item name="android:textSize">@dimen/qs_emergency_calls_only_text_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#66ffffff</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
@@ -109,7 +182,7 @@
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/qs_user_detail_name</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.UserName" />
 
@@ -117,7 +190,7 @@
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/qs_text</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
@@ -141,12 +214,12 @@
 
     <style name="TextAppearance.QS.Warning">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/system_warning_color</item>
+        <item name="android:textColor">?android:attr/colorError</item>
     </style>
 
     <style name="TextAppearance.QS.DetailButton">
         <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
-        <item name="android:textColor">@color/qs_detail_button</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:gravity">center</item>
@@ -158,7 +231,7 @@
 
     <style name="TextAppearance.QS.DetailEmpty">
         <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
-        <item name="android:textColor">@color/qs_subhead</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.QS.Subhead">
@@ -181,7 +254,7 @@
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Secondary">
-        <item name="android:textColor">@color/data_usage_secondary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel">
@@ -217,7 +290,14 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.Settings.Dark" />
+    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+        <item name="lightIconTheme">@style/DualToneLightTheme</item>
+        <item name="darkIconTheme">@style/DualToneDarkTheme</item>
+    </style>
+    <style name="qs_theme" parent="systemui_theme">
+        <item name="lightIconTheme">@style/QSIconTheme</item>
+        <item name="darkIconTheme">@style/QSIconTheme</item>
+    </style>
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
@@ -250,6 +330,9 @@
         <item name="numColumns">3</item>
     </style>
 
+    <style name="AutoSizingList">
+        <item name="enableAutoSizing">true</item>
+    </style>
     <style name="Theme.AlertDialogHost" parent="android:Theme.DeviceDefault">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -270,16 +353,21 @@
         <item name="fillColor">@color/dark_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_icon_color_single_tone</item>
     </style>
+    <style name="QSIconTheme">
+        <item name="backgroundColor">?android:attr/textColorHint</item>
+        <item name="fillColor">?android:attr/textColorPrimary</item>
+        <item name="singleToneColor">?android:attr/textColorPrimary</item>
+    </style>
 
     <style name="TextAppearance.Volume">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="TextAppearance.Volume.Header">
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">@color/volume_slider_inactive</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Volume.ZenSummary">
@@ -290,7 +378,7 @@
     <style name="TextAppearance.Volume.ZenDetail">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">@*android:color/quaternary_device_default_settings</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
@@ -323,39 +411,44 @@
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">roboto-regular</item>
+    <style name="TextAppearance.NotificationInfo">
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Header">
-        <item name="android:alpha">.38</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="TextAppearance.NotificationGuts.Secondary">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.NotificationGuts.Primary">
+    <style name="TextAppearance.NotificationInfo.Primary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">16sp</item>
+        <item name="android:alpha">0.87</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Radio">
+    <style name="TextAppearance.NotificationInfo.Secondary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">0.54</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Button">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:gravity">center</item>
+    <style name="TextAppearance.NotificationInfo.Secondary.Warning">
+        <item name="android:textColor">?android:attr/colorError</item>
+    </style>
+
+    <style name="TextAppearance.NotificationInfo.Secondary.Link">
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
-    <style name="edit_theme" parent="@*android:style/Theme.DeviceDefault.Settings.Dark">
+    <style name="TextAppearance.NotificationInfo.Button">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:gravity">center</item>
+        <item name="android:focusable">true</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+
+    <style name="edit_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 

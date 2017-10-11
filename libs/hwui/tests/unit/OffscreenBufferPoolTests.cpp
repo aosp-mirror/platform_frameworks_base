@@ -30,7 +30,7 @@ TEST(OffscreenBuffer, computeIdealDimension) {
     EXPECT_EQ(1024u, OffscreenBuffer::computeIdealDimension(1000));
 }
 
-RENDERTHREAD_TEST(OffscreenBuffer, construct) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, construct) {
     OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 49u, 149u);
     EXPECT_EQ(49u, layer.viewportWidth);
     EXPECT_EQ(149u, layer.viewportHeight);
@@ -41,7 +41,7 @@ RENDERTHREAD_TEST(OffscreenBuffer, construct) {
     EXPECT_EQ(64u * 192u * 4u, layer.getSizeInBytes());
 }
 
-RENDERTHREAD_TEST(OffscreenBuffer, getTextureCoordinates) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, getTextureCoordinates) {
     OffscreenBuffer layerAligned(renderThread.renderState(), Caches::getInstance(), 256u, 256u);
     EXPECT_EQ(Rect(0, 1, 1, 0),
             layerAligned.getTextureCoordinates());
@@ -51,7 +51,7 @@ RENDERTHREAD_TEST(OffscreenBuffer, getTextureCoordinates) {
             layerUnaligned.getTextureCoordinates());
 }
 
-RENDERTHREAD_TEST(OffscreenBuffer, dirty) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, dirty) {
     OffscreenBuffer buffer(renderThread.renderState(), Caches::getInstance(), 256u, 256u);
     buffer.dirty(Rect(-100, -100, 100, 100));
     EXPECT_EQ(android::Rect(100, 100), buffer.region.getBounds());
@@ -65,7 +65,7 @@ RENDERTHREAD_TEST(OffscreenBufferPool, construct) {
             << "pool must read size from Properties";
 }
 
-RENDERTHREAD_TEST(OffscreenBufferPool, getPutClear) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, getPutClear) {
     OffscreenBufferPool pool;
 
     auto layer = pool.get(renderThread.renderState(), 100u, 200u);
@@ -88,7 +88,7 @@ RENDERTHREAD_TEST(OffscreenBufferPool, getPutClear) {
     EXPECT_EQ(0u, pool.getCount());
 }
 
-RENDERTHREAD_TEST(OffscreenBufferPool, resize) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, resize) {
     OffscreenBufferPool pool;
 
     auto layer = pool.get(renderThread.renderState(), 64u, 64u);
@@ -123,7 +123,7 @@ RENDERTHREAD_TEST(OffscreenBufferPool, resize) {
     pool.putOrDelete(layer2);
 }
 
-RENDERTHREAD_TEST(OffscreenBufferPool, putAndDestroy) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, putAndDestroy) {
     OffscreenBufferPool pool;
     // layer too big to return to the pool
     // Note: this relies on the fact that the pool won't reject based on max texture size
@@ -133,7 +133,7 @@ RENDERTHREAD_TEST(OffscreenBufferPool, putAndDestroy) {
     EXPECT_EQ(0u, pool.getCount()); // failed to put (so was destroyed instead)
 }
 
-RENDERTHREAD_TEST(OffscreenBufferPool, clear) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, clear) {
     EXPECT_EQ(0, GpuMemoryTracker::getInstanceCount(GpuObjectType::OffscreenBuffer));
     OffscreenBufferPool pool;
 

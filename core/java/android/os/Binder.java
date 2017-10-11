@@ -16,14 +16,18 @@
 
 package android.os;
 
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
+
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
@@ -67,7 +71,8 @@ public class Binder implements IBinder {
      * of classes can potentially create leaks.
      */
     private static final boolean FIND_POTENTIAL_LEAKS = false;
-    private static final boolean CHECK_PARCEL_SIZE = false;
+    /** @hide */
+    public static final boolean CHECK_PARCEL_SIZE = false;
     static final String TAG = "Binder";
 
     /** @hide */
@@ -76,36 +81,35 @@ public class Binder implements IBinder {
     /**
      * Control whether dump() calls are allowed.
      */
-    private static String sDumpDisabled = null;
+    private static volatile String sDumpDisabled = null;
 
     /**
      * Global transaction tracker instance for this process.
      */
-    private static TransactionTracker sTransactionTracker = null;
+    private static volatile TransactionTracker sTransactionTracker = null;
 
     // Transaction tracking code.
 
     /**
      * Flag indicating whether we should be tracing transact calls.
-     *
      */
-    private static boolean sTracingEnabled = false;
+    private static volatile boolean sTracingEnabled = false;
 
     /**
      * Enable Binder IPC tracing.
      *
      * @hide
      */
-    public static void  enableTracing() {
+    public static void enableTracing() {
         sTracingEnabled = true;
-    };
+    }
 
     /**
      * Disable Binder IPC tracing.
      *
      * @hide
      */
-    public static void  disableTracing() {
+    public static void disableTracing() {
         sTracingEnabled = false;
     }
 
@@ -129,15 +133,57 @@ public class Binder implements IBinder {
         return sTransactionTracker;
     }
 
-    /** @hide */
+    /** {@hide} */
+    static volatile boolean sWarnOnBlocking = false;
+
+    /**
+     * Warn if any blocking binder transactions are made out from this process.
+     * This is typically only useful for the system process, to prevent it from
+     * blocking on calls to external untrusted code. Instead, all outgoing calls
+     * that require a result must be sent as {@link IBinder#FLAG_ONEWAY} calls
+     * which deliver results through a callback interface.
+     *
+     * @hide
+     */
+    public static void setWarnOnBlocking(boolean warnOnBlocking) {
+        sWarnOnBlocking = warnOnBlocking;
+    }
+
+    /**
+     * Allow blocking calls on the given interface, overriding the requested
+     * value of {@link #setWarnOnBlocking(boolean)}.
+     * <p>
+     * This should only be rarely called when you are <em>absolutely sure</em>
+     * the remote interface is a built-in system component that can never be
+     * upgraded. In particular, this <em>must never</em> be called for
+     * interfaces hosted by package that could be upgraded or replaced,
+     * otherwise you risk system instability if that remote interface wedges.
+     *
+     * @hide
+     */
     public static IBinder allowBlocking(IBinder binder) {
-        // NOTE: real implementation on internal branch
+        try {
+            if (binder instanceof BinderProxy) {
+                ((BinderProxy) binder).mWarnOnBlocking = false;
+            } else if (binder != null
+                    && binder.queryLocalInterface(binder.getInterfaceDescriptor()) == null) {
+                Log.w(TAG, "Unable to allow blocking on interface " + binder);
+            }
+        } catch (RemoteException ignored) {
+        }
         return binder;
     }
 
-    /** @hide */
+    /**
+     * Inherit the current {@link #allowBlocking(IBinder)} value from one given
+     * interface to another.
+     *
+     * @hide
+     */
     public static void copyAllowBlocking(IBinder fromBinder, IBinder toBinder) {
-        // NOTE: real implementation on internal branch
+        if (fromBinder instanceof BinderProxy && toBinder instanceof BinderProxy) {
+            ((BinderProxy) toBinder).mWarnOnBlocking = ((BinderProxy) fromBinder).mWarnOnBlocking;
+        }
     }
 
     /* mObject is used by native code, do not remove or rename */
@@ -153,7 +199,7 @@ public class Binder implements IBinder {
      * then its own pid is returned.
      */
     public static final native int getCallingPid();
-    
+
     /**
      * Return the Linux uid assigned to the process that sent you the
      * current transaction that is being processed.  This uid can be used with
@@ -206,6 +252,55 @@ public class Binder implements IBinder {
     public static final native void restoreCallingIdentity(long token);
 
     /**
+     * Convenience method for running the provided action enclosed in
+     * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity}
+     *
+     * Any exception thrown by the given action will be caught and rethrown after the call to
+     * {@link #restoreCallingIdentity}
+     *
+     * @hide
+     */
+    public static final void withCleanCallingIdentity(ThrowingRunnable action) {
+        long callingIdentity = clearCallingIdentity();
+        Throwable throwableToPropagate = null;
+        try {
+            action.run();
+        } catch (Throwable throwable) {
+            throwableToPropagate = throwable;
+        } finally {
+            restoreCallingIdentity(callingIdentity);
+            if (throwableToPropagate != null) {
+                throw ExceptionUtils.propagate(throwableToPropagate);
+            }
+        }
+    }
+
+    /**
+     * Convenience method for running the provided action enclosed in
+     * {@link #clearCallingIdentity}/{@link #restoreCallingIdentity} returning the result
+     *
+     * Any exception thrown by the given action will be caught and rethrown after the call to
+     * {@link #restoreCallingIdentity}
+     *
+     * @hide
+     */
+    public static final <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
+        long callingIdentity = clearCallingIdentity();
+        Throwable throwableToPropagate = null;
+        try {
+            return action.get();
+        } catch (Throwable throwable) {
+            throwableToPropagate = throwable;
+            return null; // overridden by throwing in finally block
+        } finally {
+            restoreCallingIdentity(callingIdentity);
+            if (throwableToPropagate != null) {
+                throw ExceptionUtils.propagate(throwableToPropagate);
+            }
+        }
+    }
+
+    /**
      * Sets the native thread-local StrictMode policy mask.
      *
      * <p>The StrictMode settings are kept in two places: a Java-level
@@ -237,7 +332,7 @@ public class Binder implements IBinder {
      * it needs to.
      */
     public static final native void flushPendingCommands();
-    
+
     /**
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
@@ -274,7 +369,7 @@ public class Binder implements IBinder {
             }
         }
     }
-    
+
     /**
      * Convenience method for associating a specific interface with the Binder.
      * After calling, queryLocalInterface() will be implemented for you
@@ -285,7 +380,7 @@ public class Binder implements IBinder {
         mOwner = owner;
         mDescriptor = descriptor;
     }
-    
+
     /**
      * Default implementation returns an empty interface name.
      */
@@ -310,7 +405,7 @@ public class Binder implements IBinder {
     public boolean isBinderAlive() {
         return true;
     }
-    
+
     /**
      * Use information supplied to attachInterface() to return the
      * associated IInterface if it matches the requested
@@ -334,9 +429,7 @@ public class Binder implements IBinder {
      * re-enabled.
      */
     public static void setDumpDisabled(String msg) {
-        synchronized (Binder.class) {
-            sDumpDisabled = msg;
-        }
+        sDumpDisabled = msg;
     }
 
     /**
@@ -372,13 +465,14 @@ public class Binder implements IBinder {
             ParcelFileDescriptor out = data.readFileDescriptor();
             ParcelFileDescriptor err = data.readFileDescriptor();
             String[] args = data.readStringArray();
+            ShellCallback shellCallback = ShellCallback.CREATOR.createFromParcel(data);
             ResultReceiver resultReceiver = ResultReceiver.CREATOR.createFromParcel(data);
             try {
                 if (out != null) {
                     shellCommand(in != null ? in.getFileDescriptor() : null,
                             out.getFileDescriptor(),
                             err != null ? err.getFileDescriptor() : out.getFileDescriptor(),
-                            args, resultReceiver);
+                            args, shellCallback, resultReceiver);
                 }
             } finally {
                 IoUtils.closeQuietly(in);
@@ -411,10 +505,7 @@ public class Binder implements IBinder {
     }
 
     void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final String disabled;
-        synchronized (Binder.class) {
-            disabled = sDumpDisabled;
-        }
+        final String disabled = sDumpDisabled;
         if (disabled == null) {
             try {
                 dump(fd, pw, args);
@@ -470,13 +561,15 @@ public class Binder implements IBinder {
      * @param out The raw file descriptor that normal command messages should be written to.
      * @param err The raw file descriptor that command error messages should be written to.
      * @param args Command-line arguments.
+     * @param callback Callback through which to interact with the invoking shell.
      * @param resultReceiver Called when the command has finished executing, with the result code.
      * @throws RemoteException
      * @hide
      */
     public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
-        onShellCommand(in, out, err, args, resultReceiver);
+            String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) throws RemoteException {
+        onShellCommand(in, out, err, args, callback, resultReceiver);
     }
 
     /**
@@ -488,7 +581,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) throws RemoteException {
         FileOutputStream fout = new FileOutputStream(err != null ? err : out);
         PrintWriter pw = new FastPrintWriter(fout);
         pw.println("No shell command implementation.");
@@ -513,7 +606,7 @@ public class Binder implements IBinder {
         }
         return r;
     }
-    
+
     /**
      * Local implementation is a no-op.
      */
@@ -526,10 +619,10 @@ public class Binder implements IBinder {
     public boolean unlinkToDeath(DeathRecipient recipient, int flags) {
         return true;
     }
-    
+
     protected void finalize() throws Throwable {
         try {
-            destroy();
+            destroyBinder();
         } finally {
             super.finalize();
         }
@@ -559,7 +652,7 @@ public class Binder implements IBinder {
     }
 
     private native final void init();
-    private native final void destroy();
+    private native final void destroyBinder();
 
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
@@ -572,7 +665,11 @@ public class Binder implements IBinder {
         boolean res;
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
+        final boolean tracingEnabled = Binder.isTracingEnabled();
         try {
+            if (tracingEnabled) {
+                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":" + code);
+            }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
             if (LOG_RUNTIME_EXCEPTION) {
@@ -596,6 +693,10 @@ public class Binder implements IBinder {
             reply.setDataPosition(0);
             reply.writeException(re);
             res = true;
+        } finally {
+            if (tracingEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
+            }
         }
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
         reply.recycle();
@@ -612,7 +713,18 @@ public class Binder implements IBinder {
     }
 }
 
+/**
+ * Java proxy for a native IBinder object.
+ * Allocated and constructed by the native javaObjectforIBinder function. Never allocated
+ * directly from Java code.
+ */
 final class BinderProxy implements IBinder {
+    // See android_util_Binder.cpp for the native half of this.
+    // TODO: Consider using NativeAllocationRegistry instead of finalization.
+
+    // Assume the process-wide default value when created
+    volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
+
     public native boolean pingBinder();
     public native boolean isBinderAlive();
 
@@ -622,8 +734,30 @@ final class BinderProxy implements IBinder {
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
-        if (Binder.isTracingEnabled()) { Binder.getTransactionTracker().addTrace(); }
-        return transactNative(code, data, reply, flags);
+
+        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)) {
+            // For now, avoid spamming the log by disabling after we've logged
+            // about this interface at least once
+            mWarnOnBlocking = false;
+            Log.w(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                    new Throwable());
+        }
+
+        final boolean tracingEnabled = Binder.isTracingEnabled();
+        if (tracingEnabled) {
+            final Throwable tr = new Throwable();
+            Binder.getTransactionTracker().addTrace(tr);
+            StackTraceElement stackTraceElement = tr.getStackTrace()[1];
+            Trace.traceBegin(Trace.TRACE_TAG_ALWAYS,
+                    stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName());
+        }
+        try {
+            return transactNative(code, data, reply, flags);
+        } finally {
+            if (tracingEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
+            }
+        }
     }
 
     public native String getInterfaceDescriptor() throws RemoteException;
@@ -646,7 +780,7 @@ final class BinderProxy implements IBinder {
             reply.recycle();
         }
     }
-    
+
     public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -661,13 +795,15 @@ final class BinderProxy implements IBinder {
     }
 
     public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeFileDescriptor(in);
         data.writeFileDescriptor(out);
         data.writeFileDescriptor(err);
         data.writeStringArray(args);
+        ShellCallback.writeToParcel(callback, data);
         resultReceiver.writeToParcel(data, 0);
         try {
             transact(SHELL_COMMAND_TRANSACTION, data, reply, 0);
@@ -681,7 +817,7 @@ final class BinderProxy implements IBinder {
     BinderProxy() {
         mSelf = new WeakReference(this);
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -690,9 +826,9 @@ final class BinderProxy implements IBinder {
             super.finalize();
         }
     }
-    
+
     private native final void destroy();
-    
+
     private static final void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
@@ -703,8 +839,20 @@ final class BinderProxy implements IBinder {
                     exc);
         }
     }
-    
+
+    // This WeakReference to "this" is used only by native code to "attach" to the
+    // native IBinder object.
+    // Using WeakGlobalRefs instead currently appears unsafe, in that they can yield a
+    // non-null value after the BinderProxy is enqueued for finalization.
+    // Used only once immediately after construction.
+    // TODO: Consider making the extra native-to-java call to compute this on the fly.
     final private WeakReference mSelf;
+
+    // Native pointer to the wrapped native IBinder object. Counted as strong reference.
     private long mObject;
+
+    // Native pointer to native DeathRecipientList. Counted as strong reference.
+    // Basically owned by the JavaProxy object. Reference counted only because DeathRecipients
+    // hold a weak reference that can be temporarily promoted.
     private long mOrgue;
 }

@@ -18,11 +18,17 @@ package android.graphics.drawable;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.graphics.Canvas;
 import android.graphics.drawable.AnimatedVectorDrawable.VectorDrawableAnimatorRT;
 
 public class AnimatedVectorDrawable_VectorDrawableAnimatorRT_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean useLastSeenTarget(VectorDrawableAnimatorRT thisDrawableAnimator) {
         return true;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void onDraw(VectorDrawableAnimatorRT thisDrawableAnimator, Canvas canvas) {
+        // Do not attempt to record as we are not using a DisplayListCanvas
     }
 }

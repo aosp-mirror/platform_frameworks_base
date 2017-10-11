@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.util.ArraySet;
+import android.support.v4.util.ArraySet;
 import android.view.View;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -38,7 +38,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     private boolean mReorderingAllowed;
     private VisibilityLocationProvider mVisibilityLocationProvider;
     private ArraySet<View> mAllowedReorderViews = new ArraySet<>();
+    private ArraySet<View> mLowPriorityReorderingViews = new ArraySet<>();
     private ArraySet<View> mAddedChildren = new ArraySet<>();
+    private boolean mPulsing;
 
     /**
      * Add a callback to invoke when reordering is allowed again.
@@ -67,8 +69,19 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         updateReorderingAllowed();
     }
 
+    /**
+     * @param pulsing whether we are currently pulsing for ambient display.
+     */
+    public void setPulsing(boolean pulsing) {
+        if (mPulsing == pulsing) {
+            return;
+        }
+        mPulsing = pulsing;
+        updateReorderingAllowed();
+    }
+
     private void updateReorderingAllowed() {
-        boolean reorderingAllowed = !mScreenOn || !mPanelExpanded;
+        boolean reorderingAllowed = (!mScreenOn || !mPanelExpanded) && !mPulsing;
         boolean changed = reorderingAllowed && !mReorderingAllowed;
         mReorderingAllowed = reorderingAllowed;
         if (changed) {
@@ -103,6 +116,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         if (mAddedChildren.contains(row)) {
             return true;
         }
+        if (mLowPriorityReorderingViews.contains(row)) {
+            return true;
+        }
         if (mAllowedReorderViews.contains(row)
                 && !mVisibilityLocationProvider.isInVisibleLocation(row)) {
             return true;
@@ -118,6 +134,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     public void onReorderingFinished() {
         mAllowedReorderViews.clear();
         mAddedChildren.clear();
+        mLowPriorityReorderingViews.clear();
     }
 
     @Override
@@ -127,6 +144,10 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
             // view and stay at the current location if they aren't.
             mAllowedReorderViews.add(entry.row);
         }
+    }
+
+    public void onLowPriorityUpdated(NotificationData.Entry entry) {
+        mLowPriorityReorderingViews.add(entry.row);
     }
 
     /**

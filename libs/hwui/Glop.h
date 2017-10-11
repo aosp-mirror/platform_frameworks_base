@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_GLOP_H
-#define ANDROID_HWUI_GLOP_H
+#pragma once
 
 #include "FloatColor.h"
 #include "Matrix.h"
@@ -26,7 +25,6 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <SkXfermode.h>
 
 namespace android {
 namespace uirenderer {
@@ -68,7 +66,7 @@ namespace TransformFlags {
         OffsetByFudgeFactor = 1 << 0,
 
         // Canvas transform isn't applied to the mesh at draw time,
-        //since it's already built in.
+        // since it's already built in.
         MeshIgnoresCanvasTransform = 1 << 1, // TODO: remove for HWUI_NEW_OPS
     };
 };
@@ -121,7 +119,6 @@ public:
 
         struct TextureData {
             Texture* texture;
-            GLenum target;
             GLenum filter;
             GLenum clamp;
             Matrix4* textureTransform;
@@ -169,14 +166,6 @@ public:
         GLenum dst;
     } blend;
 
-#if !HWUI_NEW_OPS
-    /**
-     * Bounds of the drawing command in layer space. Only mapped into layer
-     * space once GlopBuilder::build() is called.
-     */
-    Rect bounds; // TODO: remove for HWUI_NEW_OPS
-#endif
-
     /**
      * Additional render state to enumerate:
      * - scissor + (bits for whether each of LTRB needed?)
@@ -186,5 +175,3 @@ public:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif // ANDROID_HWUI_GLOP_H

@@ -16,24 +16,21 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
+import android.app.Notification;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
-import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.internal.widget.NotificationExpandButton;
+import com.android.systemui.Interpolators;
 import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -42,40 +39,82 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.Stack;
 
+import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
+
 /**
  * Wraps a notification header view.
  */
 public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
-    private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
-            0, PorterDuff.Mode.SRC_ATOP);
-    private final int mIconDarkAlpha;
-    private final int mIconDarkColor = 0xffffffff;
-    protected final ViewInvertHelper mInvertHelper;
+    private static final Interpolator LOW_PRIORITY_HEADER_CLOSE
+            = new PathInterpolator(0.4f, 0f, 0.7f, 1f);
 
+    protected final ViewInvertHelper mInvertHelper;
     protected final ViewTransformationHelper mTransformationHelper;
 
     protected int mColor;
     private ImageView mIcon;
 
-    private ImageView mExpandButton;
+    private NotificationExpandButton mExpandButton;
     private NotificationHeaderView mNotificationHeader;
+    private TextView mHeaderText;
+    private ImageView mWorkProfileImage;
+    private boolean mIsLowPriority;
+    private boolean mTransformLowPriorityTitle;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
-        super(view, row);
-        mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
+        super(ctx, view, row);
         mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
+
+        // we want to avoid that the header clashes with the other text when transforming
+        // low-priority
+        mTransformationHelper.setCustomTransformation(
+                new CustomInterpolatorTransformation(TRANSFORMING_VIEW_TITLE) {
+
+                    @Override
+                    public Interpolator getCustomInterpolator(int interpolationType,
+                            boolean isFrom) {
+                        boolean isLowPriority = mView instanceof NotificationHeaderView;
+                        if (interpolationType == TRANSFORM_Y) {
+                            if (isLowPriority && !isFrom
+                                    || !isLowPriority && isFrom) {
+                                return Interpolators.LINEAR_OUT_SLOW_IN;
+                            } else {
+                                return LOW_PRIORITY_HEADER_CLOSE;
+                            }
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected boolean hasCustomTransformation() {
+                        return mIsLowPriority && mTransformLowPriorityTitle;
+                    }
+                }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         updateInvertHelper();
     }
 
+    @Override
+    protected NotificationDozeHelper createDozer(Context ctx) {
+        return new NotificationIconDozeHelper(ctx);
+    }
+
+    @Override
+    protected NotificationIconDozeHelper getDozer() {
+        return (NotificationIconDozeHelper) super.getDozer();
+    }
+
     protected void resolveHeaderViews() {
-        mIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
-        mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
+        mIcon = mView.findViewById(com.android.internal.R.id.icon);
+        mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
+        mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
+        mExpandButton.setLabeledBy(mRow);
+        mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mColor = resolveColor(mExpandButton);
-        mNotificationHeader = (NotificationHeaderView) mView.findViewById(
-                com.android.internal.R.id.notification_header);
+        mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
+        getDozer().setColor(mColor);
     }
 
     private int resolveColor(ImageView icon) {
@@ -89,9 +128,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void notifyContentUpdated(StatusBarNotification notification) {
-        super.notifyContentUpdated(notification);
-
+    public void onContentUpdated(ExpandableNotificationRow row) {
+        super.onContentUpdated(row);
+        mIsLowPriority = row.isLowPriority();
+        mTransformLowPriorityTitle = !row.isChildInGroup() && !row.isSummaryWithChildren();
         ArraySet<View> previousViews = mTransformationHelper.getAllTransformingViews();
 
         // Reinspect the notification.
@@ -100,6 +140,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
+        Notification notification = row.getStatusBarNotification().getNotification();
+        mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        // The work profile image is always the same lets just set the icon tag for it not to
+        // animate
+        mWorkProfileImage.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -154,8 +199,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_HEADER,
-                mNotificationHeader);
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
+        if (mIsLowPriority) {
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
+                    mHeaderText);
+        }
     }
 
     @Override
@@ -174,90 +222,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             // It also may lead to bugs where the icon isn't correctly greyed out.
             boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
                     != NotificationHeaderView.NO_COLOR;
-            if (fade) {
-                if (hadColorFilter) {
-                    fadeIconColorFilter(mIcon, dark, delay);
-                    fadeIconAlpha(mIcon, dark, delay);
-                } else {
-                    fadeGrayscale(mIcon, dark, delay);
-                }
-            } else {
-                if (hadColorFilter) {
-                    updateIconColorFilter(mIcon, dark);
-                    updateIconAlpha(mIcon, dark);
-                } else {
-                    updateGrayscale(mIcon, dark);
-                }
-            }
-        }
-    }
 
-    private void fadeIconColorFilter(final ImageView target, boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateIconColorFilter(target, (Float) animation.getAnimatedValue());
-            }
-        }, dark, delay, null /* listener */);
-    }
-
-    private void fadeIconAlpha(final ImageView target, boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (float) animation.getAnimatedValue();
-                target.setImageAlpha((int) (255 * (1f - t) + mIconDarkAlpha * t));
-            }
-        }, dark, delay, null /* listener */);
-    }
-
-    protected void fadeGrayscale(final ImageView target, final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscaleMatrix((float) animation.getAnimatedValue());
-                target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
-            }
-        }, dark, delay, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!dark) {
-                    target.setColorFilter(null);
-                }
-            }
-        });
-    }
-
-    private void updateIconColorFilter(ImageView target, boolean dark) {
-        updateIconColorFilter(target, dark ? 1f : 0f);
-    }
-
-    private void updateIconColorFilter(ImageView target, float intensity) {
-        int color = interpolateColor(mColor, mIconDarkColor, intensity);
-        mIconColorFilter.setColor(color);
-        Drawable iconDrawable = target.getDrawable();
-
-        // Also, the notification might have been modified during the animation, so background
-        // might be null here.
-        if (iconDrawable != null) {
-            Drawable d = iconDrawable.mutate();
-            // DrawableContainer ignores the color filter if it's already set, so clear it first to
-            // get it set and invalidated properly.
-            d.setColorFilter(null);
-            d.setColorFilter(mIconColorFilter);
-        }
-    }
-
-    private void updateIconAlpha(ImageView target, boolean dark) {
-        target.setImageAlpha(dark ? mIconDarkAlpha : 255);
-    }
-
-    protected void updateGrayscale(ImageView target, boolean dark) {
-        if (dark) {
-            updateGrayscaleMatrix(1f);
-            target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
-        } else {
-            target.setColorFilter(null);
+            getDozer().setImageDark(mIcon, dark, fade, delay, !hadColorFilter);
         }
     }
 
@@ -265,22 +231,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
-    }
-
-    private static int interpolateColor(int source, int target, float t) {
-        int aSource = Color.alpha(source);
-        int rSource = Color.red(source);
-        int gSource = Color.green(source);
-        int bSource = Color.blue(source);
-        int aTarget = Color.alpha(target);
-        int rTarget = Color.red(target);
-        int gTarget = Color.green(target);
-        int bTarget = Color.blue(target);
-        return Color.argb(
-                (int) (aSource * (1f - t) + aTarget * t),
-                (int) (rSource * (1f - t) + rTarget * t),
-                (int) (gSource * (1f - t) + gTarget * t),
-                (int) (bSource * (1f - t) + bTarget * t));
     }
 
     @Override
@@ -311,6 +261,12 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public void transformFrom(TransformableView notification, float transformationAmount) {
         mTransformationHelper.transformFrom(notification, transformationAmount);
+    }
+
+    @Override
+    public void setIsChildInGroup(boolean isChildInGroup) {
+        super.setIsChildInGroup(isChildInGroup);
+        mTransformLowPriorityTitle = !isChildInGroup;
     }
 
     @Override

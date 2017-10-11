@@ -32,6 +32,10 @@ public class CarrierDefaultBroadcastReceiver extends BroadcastReceiver{
             Log.d(TAG, "skip carrier actions during provisioning");
             return;
         }
+        if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+            CarrierActionUtils.createNotificationChannels(context);
+            return;
+        }
         List<Integer> actionList = CustomConfigLoader.loadCarrierActionList(context, intent);
         for (int actionIdx : actionList) {
             Log.d(TAG, "apply carrier action idx: " + actionIdx);

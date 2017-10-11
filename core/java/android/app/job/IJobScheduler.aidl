@@ -17,6 +17,7 @@
 package android.app.job;
 
 import android.app.job.JobInfo;
+import android.app.job.JobWorkItem;
 
  /**
   * IPC interface that supports the app-facing {@link #JobScheduler} api.
@@ -24,6 +25,7 @@ import android.app.job.JobInfo;
   */
 interface IJobScheduler {
     int schedule(in JobInfo job);
+    int enqueue(in JobInfo job, in JobWorkItem work);
     int scheduleAsPackage(in JobInfo job, String packageName, int userId, String tag);
     void cancel(int jobId);
     void cancelAll();

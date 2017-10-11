@@ -244,12 +244,12 @@ public class TaskViewHeader extends FrameLayout
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Initialize the icon and description views
-        mIconView = (ImageView) findViewById(R.id.icon);
+        mIconView = findViewById(R.id.icon);
         mIconView.setOnLongClickListener(this);
-        mTitleView = (TextView) findViewById(R.id.title);
-        mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
+        mTitleView = findViewById(R.id.title);
+        mDismissButton = findViewById(R.id.dismiss_task);
         if (ssp.hasFreeformWorkspaceSupport()) {
-            mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
+            mMoveTaskButton = findViewById(R.id.move_task);
         }
 
         onConfigurationChanged();
@@ -524,7 +524,7 @@ public class TaskViewHeader extends FrameLayout
      * changes.
      */
     public void onTaskDataLoaded() {
-        if (mTask.icon != null) {
+        if (mTask != null && mTask.icon != null) {
             mIconView.setImageDrawable(mTask.icon);
         }
     }

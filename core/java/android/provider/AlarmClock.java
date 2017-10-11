@@ -29,6 +29,8 @@ import android.annotation.SdkConstant.SdkConstantType;
  * new alarm or timer should use
  * {@link android.content.Context#startActivity Context.startActivity()} so that
  * the user has the option of choosing which alarm clock application to use.
+ *
+ * Android TV devices may not support the alarm intents.
  */
 public final class AlarmClock {
     /**
@@ -151,6 +153,15 @@ public final class AlarmClock {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
+
+    /**
+     * Activity Action: Show the timers.
+     * <p>
+     * This action opens the timers page.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_TIMERS = "android.intent.action.SHOW_TIMERS";
 
     /**
      * Activity Action: Show the alarms.

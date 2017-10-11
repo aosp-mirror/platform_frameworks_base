@@ -30,8 +30,9 @@ import android.widget.TextView;
 import android.transition.AutoTransition;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
-import android.transition.TransitionSet;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,9 +47,9 @@ public class ListViewAddRemove extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view_add_remove);
 
-        final LinearLayout container = (LinearLayout) findViewById(R.id.container);
+        final LinearLayout container = findViewById(R.id.container);
 
-        final ListView listview = (ListView) findViewById(R.id.listview);
+        final ListView listview = findViewById(R.id.listview);
         for (int i = 0; i < 200; ++i) {
             numList.add(Integer.toString(i));
         }
@@ -84,7 +85,7 @@ public class ListViewAddRemove extends Activity {
         fadeIn.setDuration(50);
         noFadeIn.addTransition(new Fade(Fade.OUT)).addTransition(new ChangeBounds()).addTransition(fadeIn);
 
-        myTransition.addListener(new Transition.TransitionListenerAdapter() {
+        myTransition.addListener(new TransitionListenerAdapter() {
             @Override
             public void onTransitionStart(Transition transition) {
                 System.out.println("---------ListView Tops: Before--------");

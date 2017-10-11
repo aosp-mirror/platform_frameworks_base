@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DeferredLayerUpdater.h"
+#include "GlLayer.h"
+#include "VkLayer.h"
 #include <GpuMemoryTracker.h>
 #include "renderstate/RenderState.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
+
 #include <algorithm>
+
+#include <ui/ColorSpace.h>
 
 namespace android {
 namespace uirenderer {
@@ -40,7 +46,7 @@ RenderState::~RenderState() {
 void RenderState::onGLContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
-    GpuMemoryTracker::onGLContextCreated();
+    GpuMemoryTracker::onGpuContextCreated();
 
     mBlend = new Blend();
     mMeshState = new MeshState();
@@ -52,51 +58,19 @@ void RenderState::onGLContextCreated() {
         mCaches = &Caches::createInstance(*this);
     }
     mCaches->init();
-    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
 
 static void layerLostGlContext(Layer* layer) {
-    layer->onGlContextLost();
+    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL,
+            "layerLostGlContext on non GL layer");
+    static_cast<GlLayer*>(layer)->onGlContextLost();
 }
 
 void RenderState::onGLContextDestroyed() {
-/*
-    size_t size = mActiveLayers.size();
-    if (CC_UNLIKELY(size != 0)) {
-        ALOGE("Crashing, have %d contexts and %d layers at context destruction. isempty %d",
-                mRegisteredContexts.size(), size, mActiveLayers.empty());
-        mCaches->dumpMemoryUsage();
-        for (std::set<renderthread::CanvasContext*>::iterator cit = mRegisteredContexts.begin();
-                cit != mRegisteredContexts.end(); cit++) {
-            renderthread::CanvasContext* context = *cit;
-            ALOGE("Context: %p (root = %p)", context, context->mRootRenderNode.get());
-            ALOGE("  Prefeteched layers: %zu", context->mPrefetechedLayers.size());
-            for (std::set<RenderNode*>::iterator pit = context->mPrefetechedLayers.begin();
-                    pit != context->mPrefetechedLayers.end(); pit++) {
-                (*pit)->debugDumpLayers("    ");
-            }
-            context->mRootRenderNode->debugDumpLayers("  ");
-        }
-
-
-        if (mActiveLayers.begin() == mActiveLayers.end()) {
-            ALOGE("set has become empty. wat.");
-        }
-        for (std::set<const Layer*>::iterator lit = mActiveLayers.begin();
-             lit != mActiveLayers.end(); lit++) {
-            const Layer* layer = *(lit);
-            ALOGE("Layer %p, state %d, texlayer %d, fbo %d, buildlayered %d",
-                    layer, layer->state, layer->isTextureLayer(), layer->getFbo(), layer->wasBuildLayered);
-        }
-        LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
-    }
-*/
-
     mLayerPool.clear();
 
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
-    mAssetAtlas.terminate();
 
     mCaches->terminate();
 
@@ -109,7 +83,30 @@ void RenderState::onGLContextDestroyed() {
     delete mStencil;
     mStencil = nullptr;
 
-    GpuMemoryTracker::onGLContextDestroyed();
+    destroyLayersInUpdater();
+    GpuMemoryTracker::onGpuContextDestroyed();
+}
+
+void RenderState::onVkContextCreated() {
+    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
+            "State object lifecycle not managed correctly");
+    GpuMemoryTracker::onGpuContextCreated();
+}
+
+static void layerDestroyedVkContext(Layer* layer) {
+    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::Vulkan,
+                        "layerLostVkContext on non Vulkan layer");
+    static_cast<VkLayer*>(layer)->onVkContextDestroyed();
+}
+
+void RenderState::onVkContextDestroyed() {
+    mLayerPool.clear();
+    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
+    GpuMemoryTracker::onGpuContextDestroyed();
+}
+
+GrContext* RenderState::getGrContext() const {
+    return mRenderThread.getGrContext();
 }
 
 void RenderState::flush(Caches::FlushMode mode) {
@@ -123,6 +120,13 @@ void RenderState::flush(Caches::FlushMode mode) {
             break;
     }
     mCaches->flush(mode);
+}
+
+void RenderState::onBitmapDestroyed(uint32_t pixelRefId) {
+    if (mCaches && mCaches->textureCache.destroyTexture(pixelRefId)) {
+        glFlush();
+        GL_CHECKPOINT(MODERATE);
+    }
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
@@ -179,9 +183,19 @@ void RenderState::interruptForFunctorInvoke() {
     meshState().resetVertexPointers();
     meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
+    // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
+    if (mCaches->extensions().hasLinearBlending() &&
+            mCaches->extensions().hasSRGBWriteControl()) {
+        glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+    }
 }
 
 void RenderState::resumeFromFunctorInvoke() {
+    if (mCaches->extensions().hasLinearBlending() &&
+            mCaches->extensions().hasSRGBWriteControl()) {
+        glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+    }
+
     glViewport(0, 0, mViewportWidth, mViewportHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
     debugOverdraw(false, false);
@@ -207,6 +221,14 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
             stencil().disable();
         }
     }
+}
+
+static void destroyLayerInUpdater(DeferredLayerUpdater* layerUpdater) {
+    layerUpdater->destroyLayer();
+}
+
+void RenderState::destroyLayersInUpdater() {
+    std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
 }
 
 class DecStrongTask : public renderthread::RenderTask {
@@ -310,12 +332,12 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
-        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
+        mCaches->textureState().bindTexture(texture.texture->target(), texture.texture->id());
         if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, false, false, texture.target);
+            texture.texture->setWrap(texture.clamp, false, false);
         }
         if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, false, false, texture.target);
+            texture.texture->setFilter(texture.filter, false, false);
         }
 
         if (texture.textureTransform) {
@@ -346,12 +368,46 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         glVertexAttribPointer(alphaLocation, 1, GL_FLOAT, GL_FALSE, vertices.stride, alphaCoords);
     }
     // Shader uniforms
-    SkiaShader::apply(*mCaches, fill.skiaShaderData);
+    SkiaShader::apply(*mCaches, fill.skiaShaderData, mViewportWidth, mViewportHeight);
 
     GL_CHECKPOINT(MODERATE);
     Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?
             fill.skiaShaderData.bitmapData.bitmapTexture : nullptr;
     const AutoTexture autoCleanup(texture);
+
+    // If we have a shader and a base texture, the base texture is assumed to be an alpha mask
+    // which means the color space conversion applies to the shader's bitmap
+    Texture* colorSpaceTexture = texture != nullptr ? texture : fill.texture.texture;
+    if (colorSpaceTexture != nullptr) {
+        if (colorSpaceTexture->hasColorSpaceConversion()) {
+            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
+            glUniformMatrix3fv(fill.program->getUniform("colorSpaceMatrix"), 1,
+                    GL_FALSE, connector->getTransform().asArray());
+        }
+
+        TransferFunctionType transferFunction = colorSpaceTexture->getTransferFunctionType();
+        if (transferFunction != TransferFunctionType::None) {
+            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
+            const ColorSpace& source = connector->getSource();
+
+            switch (transferFunction) {
+                case TransferFunctionType::None:
+                    break;
+                case TransferFunctionType::Full:
+                    glUniform1fv(fill.program->getUniform("transferFunction"), 7,
+                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                    break;
+                case TransferFunctionType::Limited:
+                    glUniform1fv(fill.program->getUniform("transferFunction"), 5,
+                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                    break;
+                case TransferFunctionType::Gamma:
+                    glUniform1f(fill.program->getUniform("transferFunctionGamma"),
+                            source.getTransferParameters().g);
+                    break;
+            }
+        }
+    }
 
     // ------------------------------------
     // ---------- GL state setup ----------

@@ -27,7 +27,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
 public abstract class Callback {
 
     @Retention(RetentionPolicy.SOURCE)

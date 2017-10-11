@@ -19,13 +19,7 @@
     android:id="@+id/notification_icon_area_inner"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    <com.android.systemui.statusbar.StatusBarIconView
-        android:id="@+id/moreIcon"
-        android:layout_width="@dimen/status_bar_icon_size"
-        android:layout_height="match_parent"
-        android:src="@drawable/stat_notify_more"
-        android:visibility="gone" />
-    <com.android.systemui.statusbar.phone.IconMerger
+    <com.android.systemui.statusbar.phone.NotificationIconContainer
         android:id="@+id/notificationIcons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

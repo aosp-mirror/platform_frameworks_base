@@ -55,7 +55,7 @@ public class AnimatedImageView extends ImageView {
 
     private void updateAnimating() {
         if (mDrawable != null) {
-            if (isShown() && mAnimating) {
+            if (getVisibility() == View.VISIBLE && mAnimating) {
                 mDrawable.start();
             } else {
                 mDrawable.stop();

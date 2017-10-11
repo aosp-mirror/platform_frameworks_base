@@ -16,6 +16,11 @@
 
 package android.content.res;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.DisplayInfo;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -100,6 +105,68 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @hide
      */
     public boolean userSetLocale;
+
+
+    /** Constant for {@link #colorMode}: bits that encode whether the screen is wide gamut. */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT_MASK = 0x3;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that it is unknown whether or not the screen is wide gamut.
+     */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT_UNDEFINED = 0x0;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that the screen is not wide gamut.
+     * <p>Corresponds to the <code>-nowidecg</code> resource qualifier.</p>
+     */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT_NO = 0x1;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that the screen is wide gamut.
+     * <p>Corresponds to the <code>-widecg</code> resource qualifier.</p>
+     */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT_YES = 0x2;
+
+    /** Constant for {@link #colorMode}: bits that encode the dynamic range of the screen. */
+    public static final int COLOR_MODE_HDR_MASK = 0xc;
+    /** Constant for {@link #colorMode}: bits shift to get the screen dynamic range. */
+    public static final int COLOR_MODE_HDR_SHIFT = 2;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_HDR_MASK} value
+     * indicating that it is unknown whether or not the screen is HDR.
+     */
+    public static final int COLOR_MODE_HDR_UNDEFINED = 0x0;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_HDR_MASK} value
+     * indicating that the screen is not HDR (low/standard dynamic range).
+     * <p>Corresponds to the <code>-lowdr</code> resource qualifier.</p>
+     */
+    public static final int COLOR_MODE_HDR_NO = 0x1 << COLOR_MODE_HDR_SHIFT;
+    /**
+     * Constant for {@link #colorMode}: a {@link #COLOR_MODE_HDR_MASK} value
+     * indicating that the screen is HDR (dynamic range).
+     * <p>Corresponds to the <code>-highdr</code> resource qualifier.</p>
+     */
+    public static final int COLOR_MODE_HDR_YES = 0x2 << COLOR_MODE_HDR_SHIFT;
+
+    /** Constant for {@link #colorMode}: a value indicating that the color mode is undefined */
+    @SuppressWarnings("PointlessBitwiseExpression")
+    public static final int COLOR_MODE_UNDEFINED = COLOR_MODE_WIDE_COLOR_GAMUT_UNDEFINED |
+            COLOR_MODE_HDR_UNDEFINED;
+
+    /**
+     * Bit mask of color capabilities of the screen. Currently there are two fields:
+     * <p>The {@link #COLOR_MODE_WIDE_COLOR_GAMUT_MASK} bits define the color gamut of
+     * the screen. They may be one of
+     * {@link #COLOR_MODE_WIDE_COLOR_GAMUT_NO} or {@link #COLOR_MODE_WIDE_COLOR_GAMUT_YES}.</p>
+     *
+     * <p>The {@link #COLOR_MODE_HDR_MASK} defines the dynamic range of the screen. They may be
+     * one of {@link #COLOR_MODE_HDR_NO} or {@link #COLOR_MODE_HDR_YES}.</p>
+     *
+     * <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information.</p>
+     */
+    public int colorMode;
 
     /** Constant for {@link #screenLayout}: bits that encode the size. */
     public static final int SCREENLAYOUT_SIZE_MASK = 0x0f;
@@ -231,6 +298,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int screenLayout;
 
+    /**
+     * @hide
+     * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
+     * {@link DisplayInfo#appHeight} and {@link DisplayInfo#appWidth} and mirrors these values at
+     * the display level. Lower levels can override these values to provide custom bounds to enforce
+     * features such as a max aspect ratio.
+     * TODO(b/36812336): Move appBounds out of {@link Configuration}.
+     */
+    public Rect appBounds;
+
     /** @hide */
     static public int resetScreenLayout(int curLayout) {
         return (curLayout&~(SCREENLAYOUT_LONG_MASK | SCREENLAYOUT_SIZE_MASK
@@ -331,6 +408,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_SCREEN_LAYOUT) != 0) {
             list.add("CONFIG_SCREEN_LAYOUT");
         }
+        if ((diff & ActivityInfo.CONFIG_COLOR_MODE) != 0) {
+            list.add("CONFIG_COLOR_MODE");
+        }
         if ((diff & ActivityInfo.CONFIG_UI_MODE) != 0) {
             list.add("CONFIG_UI_MODE");
         }
@@ -345,6 +425,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((diff & ActivityInfo.CONFIG_FONT_SCALE) != 0) {
             list.add("CONFIG_FONT_SCALE");
+        }
+        if ((diff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+            list.add("CONFIG_ASSETS_PATHS");
         }
         StringBuilder builder = new StringBuilder("{");
         for (int i = 0, n = list.size(); i < n; i++) {
@@ -552,6 +635,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">watch</a>
      * resource qualifier. */
     public static final int UI_MODE_TYPE_WATCH = 0x06;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">vrheadset</a>
+     * resource qualifier. */
+    public static final int UI_MODE_TYPE_VR_HEADSET = 0x07;
 
     /** Constant for {@link #uiMode}: bits that encode the night mode. */
     public static final int UI_MODE_NIGHT_MASK = 0x30;
@@ -575,7 +663,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * device. They may be one of {@link #UI_MODE_TYPE_UNDEFINED},
      * {@link #UI_MODE_TYPE_NORMAL}, {@link #UI_MODE_TYPE_DESK},
      * {@link #UI_MODE_TYPE_CAR}, {@link #UI_MODE_TYPE_TELEVISION},
-     * {@link #UI_MODE_TYPE_APPLIANCE}, or {@link #UI_MODE_TYPE_WATCH}.
+     * {@link #UI_MODE_TYPE_APPLIANCE}, {@link #UI_MODE_TYPE_WATCH},
+     * or {@link #UI_MODE_TYPE_VR_HEADSET}.
      *
      * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
      * is in a special mode. They may be one of {@link #UI_MODE_NIGHT_UNDEFINED},
@@ -665,6 +754,21 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int compatSmallestScreenWidthDp;
 
     /**
+     * An undefined assetsSeq. This will not override an existing assetsSeq.
+     * @hide
+     */
+    public static final int ASSETS_SEQ_UNDEFINED = 0;
+
+    /**
+     * Internal counter that allows us to piggyback off the configuration change mechanism to
+     * signal to apps that the the assets for an Application have changed. A difference in these
+     * between two Configurations will yield a diff flag of
+     * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
+     * @hide
+     */
+    public int assetsSeq;
+
+    /**
      * @hide Internal book-keeping.
      */
     public int seq;
@@ -687,6 +791,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                     NATIVE_CONFIG_UI_MODE,
                     NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
                     NATIVE_CONFIG_LAYOUTDIR,
+                    NATIVE_CONFIG_COLOR_MODE,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NativeConfig {}
@@ -723,13 +828,27 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int NATIVE_CONFIG_SMALLEST_SCREEN_SIZE = 0x2000;
     /** @hide Native-specific bit mask for LAYOUTDIR config ; DO NOT USE UNLESS YOU ARE SURE.*/
     public static final int NATIVE_CONFIG_LAYOUTDIR = 0x4000;
+    /** @hide Native-specific bit mask for COLOR_MODE config ; DO NOT USE UNLESS YOU ARE SURE.*/
+    public static final int NATIVE_CONFIG_COLOR_MODE = 0x10000;
 
     /**
-     * Construct an invalid Configuration.  You must call {@link #setToDefaults}
-     * for this object to be valid.  {@more}
+     * <p>Construct an invalid Configuration. This state is only suitable for constructing a
+     * Configuration delta that will be applied to some valid Configuration object. In order to
+     * create a valid standalone Configuration, you must call {@link #setToDefaults}. </p>
+     *
+     * <p>Example:</p>
+     * <pre class="prettyprint">
+     *     Configuration validConfig = new Configuration();
+     *     validConfig.setToDefaults();
+     *
+     *     Configuration deltaOnlyConfig = new Configuration();
+     *     deltaOnlyConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
+     *
+     *     validConfig.updateFrom(deltaOnlyConfig);
+     * </pre>
      */
     public Configuration() {
-        setToDefaults();
+        unset();
     }
 
     /**
@@ -748,6 +867,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
     }
 
+    /**
+     * Sets the fields in this object to those in the given Configuration.
+     *
+     * @param o The Configuration object used to set the values of this Configuration's fields.
+     */
     public void setTo(Configuration o) {
         fontScale = o.fontScale;
         mcc = o.mcc;
@@ -764,6 +888,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = o.navigationHidden;
         orientation = o.orientation;
         screenLayout = o.screenLayout;
+        colorMode = o.colorMode;
         uiMode = o.uiMode;
         screenWidthDp = o.screenWidthDp;
         screenHeightDp = o.screenHeightDp;
@@ -772,6 +897,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = o.compatScreenWidthDp;
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
+        setAppBounds(o.appBounds);
+        assetsSeq = o.assetsSeq;
         seq = o.seq;
     }
 
@@ -843,6 +970,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             default: sb.append(" layoutLong=");
                     sb.append(screenLayout&SCREENLAYOUT_LONG_MASK); break;
         }
+        switch ((colorMode &COLOR_MODE_HDR_MASK)) {
+            case COLOR_MODE_HDR_UNDEFINED: sb.append(" ?ldr"); break; // most likely not HDR
+            case COLOR_MODE_HDR_NO: /* ldr is not interesting to print */ break;
+            case COLOR_MODE_HDR_YES: sb.append(" hdr"); break;
+            default: sb.append(" dynamicRange=");
+                sb.append(colorMode &COLOR_MODE_HDR_MASK); break;
+        }
+        switch ((colorMode &COLOR_MODE_WIDE_COLOR_GAMUT_MASK)) {
+            case COLOR_MODE_WIDE_COLOR_GAMUT_UNDEFINED: sb.append(" ?wideColorGamut"); break;
+            case COLOR_MODE_WIDE_COLOR_GAMUT_NO: /* not wide is not interesting to print */ break;
+            case COLOR_MODE_WIDE_COLOR_GAMUT_YES: sb.append(" widecg"); break;
+            default: sb.append(" wideColorGamut=");
+                sb.append(colorMode &COLOR_MODE_WIDE_COLOR_GAMUT_MASK); break;
+        }
         switch (orientation) {
             case ORIENTATION_UNDEFINED: sb.append(" ?orien"); break;
             case ORIENTATION_LANDSCAPE: sb.append(" land"); break;
@@ -857,6 +998,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case UI_MODE_TYPE_TELEVISION: sb.append(" television"); break;
             case UI_MODE_TYPE_APPLIANCE: sb.append(" appliance"); break;
             case UI_MODE_TYPE_WATCH: sb.append(" watch"); break;
+            case UI_MODE_TYPE_VR_HEADSET: sb.append(" vrheadset"); break;
             default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
         }
         switch ((uiMode&UI_MODE_NIGHT_MASK)) {
@@ -906,9 +1048,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
+        if (appBounds != null) {
+            sb.append(" appBounds="); sb.append(appBounds);
+        }
+        if (assetsSeq != 0) {
+            sb.append(" as.").append(assetsSeq);
+        }
         if (seq != 0) {
-            sb.append(" s.");
-            sb.append(seq);
+            sb.append(" s.").append(seq);
         }
         sb.append('}');
         return sb.toString();
@@ -931,12 +1078,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = NAVIGATIONHIDDEN_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_UNDEFINED;
+        colorMode = COLOR_MODE_UNDEFINED;
         uiMode = UI_MODE_TYPE_UNDEFINED;
         screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
+        assetsSeq = ASSETS_SEQ_UNDEFINED;
+        appBounds = null;
         seq = 0;
+    }
+
+    /**
+     * Set this object to completely undefined.
+     * @hide
+     */
+    public void unset() {
+        setToDefaults();
+        fontScale = 0;
     }
 
     /** {@hide} */
@@ -1026,18 +1185,53 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ORIENTATION;
             orientation = delta.orientation;
         }
-        if (getScreenLayoutNoDirection(delta.screenLayout) !=
-                    (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED)
-                && (getScreenLayoutNoDirection(screenLayout) !=
-                    getScreenLayoutNoDirection(delta.screenLayout))) {
+
+        if (((delta.screenLayout & SCREENLAYOUT_SIZE_MASK) != SCREENLAYOUT_SIZE_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_SIZE_MASK)
+                != (screenLayout & SCREENLAYOUT_SIZE_MASK)) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
-            // We need to preserve the previous layout dir bits if they were defined
-            if ((delta.screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK) == 0) {
-                screenLayout = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK)|delta.screenLayout;
-            } else {
-                screenLayout = delta.screenLayout;
-            }
+            screenLayout = (screenLayout & ~SCREENLAYOUT_SIZE_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_SIZE_MASK);
         }
+        if (((delta.screenLayout & SCREENLAYOUT_LONG_MASK) != SCREENLAYOUT_LONG_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_LONG_MASK)
+                != (screenLayout & SCREENLAYOUT_LONG_MASK)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_LONG_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_LONG_MASK);
+        }
+        if (((delta.screenLayout & SCREENLAYOUT_ROUND_MASK) != SCREENLAYOUT_ROUND_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_ROUND_MASK)
+                != (screenLayout & SCREENLAYOUT_ROUND_MASK)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_ROUND_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_ROUND_MASK);
+        }
+        if ((delta.screenLayout & SCREENLAYOUT_COMPAT_NEEDED)
+                != (screenLayout & SCREENLAYOUT_COMPAT_NEEDED)
+                && delta.screenLayout != 0) {
+            changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_COMPAT_NEEDED)
+                | (delta.screenLayout & SCREENLAYOUT_COMPAT_NEEDED);
+        }
+
+        if (((delta.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) !=
+                     COLOR_MODE_WIDE_COLOR_GAMUT_UNDEFINED)
+                && (delta.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK)
+                != (colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLOR_MODE;
+            colorMode = (colorMode & ~COLOR_MODE_WIDE_COLOR_GAMUT_MASK)
+                    | (delta.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK);
+        }
+
+        if (((delta.colorMode & COLOR_MODE_HDR_MASK) != COLOR_MODE_HDR_UNDEFINED)
+                && (delta.colorMode & COLOR_MODE_HDR_MASK)
+                != (colorMode & COLOR_MODE_HDR_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLOR_MODE;
+            colorMode = (colorMode & ~COLOR_MODE_HDR_MASK)
+                    | (delta.colorMode & COLOR_MODE_HDR_MASK);
+        }
+
         if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
@@ -1079,6 +1273,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
+        if (delta.appBounds != null && !delta.appBounds.equals(appBounds)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            setAppBounds(delta.appBounds);
+        }
+        if (delta.assetsSeq != ASSETS_SEQ_UNDEFINED) {
+            changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
+            assetsSeq = delta.assetsSeq;
+        }
         if (delta.seq != 0) {
             seq = delta.seq;
         }
@@ -1118,80 +1320,114 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
      */
     public int diff(Configuration delta) {
+        return diff(delta, false /* compareUndefined */);
+    }
+
+    /**
+     * Variation of {@link #diff(Configuration)} with an option to skip checks for undefined values.
+     *
+     * @hide
+     */
+    public int diff(Configuration delta, boolean compareUndefined) {
         int changed = 0;
-        if (delta.fontScale > 0 && fontScale != delta.fontScale) {
+        if ((compareUndefined || delta.fontScale > 0) && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
         }
-        if (delta.mcc != 0 && mcc != delta.mcc) {
+        if ((compareUndefined || delta.mcc != 0) && mcc != delta.mcc) {
             changed |= ActivityInfo.CONFIG_MCC;
         }
-        if (delta.mnc != 0 && mnc != delta.mnc) {
+        if ((compareUndefined || delta.mnc != 0) && mnc != delta.mnc) {
             changed |= ActivityInfo.CONFIG_MNC;
         }
         fixUpLocaleList();
         delta.fixUpLocaleList();
-        if (!delta.mLocaleList.isEmpty() && !mLocaleList.equals(delta.mLocaleList)) {
+        if ((compareUndefined || !delta.mLocaleList.isEmpty())
+                && !mLocaleList.equals(delta.mLocaleList)) {
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
         final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
-        if (deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED &&
-                deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
+        if ((compareUndefined || deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED)
+                && deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
-        if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
+        if ((compareUndefined || delta.touchscreen != TOUCHSCREEN_UNDEFINED)
                 && touchscreen != delta.touchscreen) {
             changed |= ActivityInfo.CONFIG_TOUCHSCREEN;
         }
-        if (delta.keyboard != KEYBOARD_UNDEFINED
+        if ((compareUndefined || delta.keyboard != KEYBOARD_UNDEFINED)
                 && keyboard != delta.keyboard) {
             changed |= ActivityInfo.CONFIG_KEYBOARD;
         }
-        if (delta.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED)
                 && keyboardHidden != delta.keyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED)
                 && hardKeyboardHidden != delta.hardKeyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.navigation != NAVIGATION_UNDEFINED
+        if ((compareUndefined || delta.navigation != NAVIGATION_UNDEFINED)
                 && navigation != delta.navigation) {
             changed |= ActivityInfo.CONFIG_NAVIGATION;
         }
-        if (delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED)
                 && navigationHidden != delta.navigationHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.orientation != ORIENTATION_UNDEFINED
+        if ((compareUndefined || delta.orientation != ORIENTATION_UNDEFINED)
                 && orientation != delta.orientation) {
             changed |= ActivityInfo.CONFIG_ORIENTATION;
         }
-        if (getScreenLayoutNoDirection(delta.screenLayout) !=
-                    (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED)
+        if ((compareUndefined || getScreenLayoutNoDirection(delta.screenLayout) !=
+                (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED))
                 && getScreenLayoutNoDirection(screenLayout) !=
-                    getScreenLayoutNoDirection(delta.screenLayout)) {
+                getScreenLayoutNoDirection(delta.screenLayout)) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }
-        if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
+        if ((compareUndefined ||
+                     (delta.colorMode & COLOR_MODE_HDR_MASK) != COLOR_MODE_HDR_UNDEFINED)
+                && (colorMode & COLOR_MODE_HDR_MASK) !=
+                        (delta.colorMode & COLOR_MODE_HDR_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLOR_MODE;
+        }
+        if ((compareUndefined ||
+                     (delta.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) !=
+                             COLOR_MODE_WIDE_COLOR_GAMUT_UNDEFINED)
+                && (colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) !=
+                        (delta.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLOR_MODE;
+        }
+        if ((compareUndefined || delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED))
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
         }
-        if (delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED
+        if ((compareUndefined || delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED)
                 && screenWidthDp != delta.screenWidthDp) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
-        if (delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED
+        if ((compareUndefined || delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED)
                 && screenHeightDp != delta.screenHeightDp) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
-        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+        if ((compareUndefined || delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED)
                 && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
             changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
-        if (delta.densityDpi != DENSITY_DPI_UNDEFINED
+        if ((compareUndefined || delta.densityDpi != DENSITY_DPI_UNDEFINED)
                 && densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
+        }
+        if ((compareUndefined || delta.assetsSeq != ASSETS_SEQ_UNDEFINED)
+                && assetsSeq != delta.assetsSeq) {
+            changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
+        }
+
+        // Make sure that one of the values is not null and that they are not equal.
+        if ((compareUndefined || delta.appBounds != null)
+                && appBounds != delta.appBounds
+                && (appBounds == null || !appBounds.equals(delta.appBounds))) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
 
         return changed;
@@ -1211,7 +1447,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public static boolean needNewResources(@Config int configChanges,
             @Config int interestingChanges) {
-        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
+        // CONFIG_ASSETS_PATHS and CONFIG_FONT_SCALE are higher level configuration changes that
+        // all resources are subject to change with.
+        interestingChanges = interestingChanges | ActivityInfo.CONFIG_ASSETS_PATHS
+                | ActivityInfo.CONFIG_FONT_SCALE;
+        return (configChanges & interestingChanges) != 0;
     }
 
     /**
@@ -1276,6 +1516,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(navigationHidden);
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
+        dest.writeInt(colorMode);
         dest.writeInt(uiMode);
         dest.writeInt(screenWidthDp);
         dest.writeInt(screenHeightDp);
@@ -1284,6 +1525,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
+        dest.writeValue(appBounds);
+        dest.writeInt(assetsSeq);
         dest.writeInt(seq);
     }
 
@@ -1309,6 +1552,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = source.readInt();
         orientation = source.readInt();
         screenLayout = source.readInt();
+        colorMode = source.readInt();
         uiMode = source.readInt();
         screenWidthDp = source.readInt();
         screenHeightDp = source.readInt();
@@ -1317,6 +1561,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
+        appBounds = (Rect) source.readValue(null);
+        assetsSeq = source.readInt();
         seq = source.readInt();
     }
 
@@ -1389,6 +1635,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.orientation - that.orientation;
         if (n != 0) return n;
+        n = this.colorMode - that.colorMode;
+        if (n != 0) return n;
         n = this.screenLayout - that.screenLayout;
         if (n != 0) return n;
         n = this.uiMode - that.uiMode;
@@ -1400,6 +1648,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         if (n != 0) return n;
         n = this.densityDpi - that.densityDpi;
+        if (n != 0) return n;
+        n = this.assetsSeq - that.assetsSeq;
         //if (n != 0) return n;
         return n;
     }
@@ -1432,11 +1682,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + navigationHidden;
         result = 31 * result + orientation;
         result = 31 * result + screenLayout;
+        result = 31 * result + colorMode;
         result = 31 * result + uiMode;
         result = 31 * result + screenWidthDp;
         result = 31 * result + screenHeightDp;
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
+        result = 31 * result + assetsSeq;
         return result;
     }
 
@@ -1482,6 +1734,33 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public void setLocale(@Nullable Locale loc) {
         setLocales(loc == null ? LocaleList.getEmptyLocaleList() : new LocaleList(loc));
+    }
+
+    /**
+     * @hide
+     *
+     * Helper method for setting the app bounds.
+     */
+    public void setAppBounds(Rect rect) {
+        if (rect == null) {
+            appBounds = null;
+            return;
+        }
+
+        setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
+     * @hide
+     *
+     * Helper method for setting the app bounds.
+     */
+    public void setAppBounds(int left, int top, int right, int bottom) {
+        if (appBounds == null) {
+            appBounds = new Rect();
+        }
+
+        appBounds.set(left, top, right, bottom);
     }
 
     /**
@@ -1536,6 +1815,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean isScreenRound() {
         return (screenLayout & SCREENLAYOUT_ROUND_MASK) == SCREENLAYOUT_ROUND_YES;
+    }
+
+    /**
+     * Return whether the screen has a wide color gamut.
+     *
+     * @return true if the screen has a wide color gamut, false otherwise
+     */
+    public boolean isScreenWideColorGamut() {
+        return (colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) == COLOR_MODE_WIDE_COLOR_GAMUT_YES;
+    }
+
+    /**
+     * Return whether the screen has a high dynamic range.
+     *
+     * @return true if the screen has a high dynamic range, false otherwise
+     */
+    public boolean isScreenHdr() {
+        return (colorMode & COLOR_MODE_HDR_MASK) == COLOR_MODE_HDR_YES;
     }
 
     /**
@@ -1670,6 +1967,28 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
+        switch (config.colorMode & Configuration.COLOR_MODE_HDR_MASK) {
+            case Configuration.COLOR_MODE_HDR_YES:
+                parts.add("highdr");
+                break;
+            case Configuration.COLOR_MODE_HDR_NO:
+                parts.add("lowdr");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.colorMode & Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_MASK) {
+            case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES:
+                parts.add("widecg");
+                break;
+            case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO:
+                parts.add("nowidecg");
+                break;
+            default:
+                break;
+        }
+
         switch (config.orientation) {
             case Configuration.ORIENTATION_LANDSCAPE:
                 parts.add("land");
@@ -1696,6 +2015,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case Configuration.UI_MODE_TYPE_WATCH:
                 parts.add("watch");
+                break;
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                parts.add("vrheadset");
                 break;
             default:
                 break;
@@ -1892,6 +2214,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             delta.screenLayout |= change.screenLayout & SCREENLAYOUT_ROUND_MASK;
         }
 
+        if ((base.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) !=
+                (change.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK)) {
+            delta.colorMode |= change.colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK;
+        }
+
+        if ((base.colorMode & COLOR_MODE_HDR_MASK) !=
+                (change.colorMode & COLOR_MODE_HDR_MASK)) {
+            delta.colorMode |= change.colorMode & COLOR_MODE_HDR_MASK;
+        }
+
         if ((base.uiMode & UI_MODE_TYPE_MASK) != (change.uiMode & UI_MODE_TYPE_MASK)) {
             delta.uiMode |= change.uiMode & UI_MODE_TYPE_MASK;
         }
@@ -1915,6 +2247,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (base.densityDpi != change.densityDpi) {
             delta.densityDpi = change.densityDpi;
         }
+
+        if (base.assetsSeq != change.assetsSeq) {
+            delta.assetsSeq = change.assetsSeq;
+        }
         return delta;
     }
 
@@ -1930,11 +2266,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_NAVIGATION_HIDDEN = "navHid";
     private static final String XML_ATTR_ORIENTATION = "ori";
     private static final String XML_ATTR_SCREEN_LAYOUT = "scrLay";
+    private static final String XML_ATTR_COLOR_MODE = "clrMod";
     private static final String XML_ATTR_UI_MODE = "ui";
     private static final String XML_ATTR_SCREEN_WIDTH = "width";
     private static final String XML_ATTR_SCREEN_HEIGHT = "height";
     private static final String XML_ATTR_SMALLEST_WIDTH = "sw";
     private static final String XML_ATTR_DENSITY = "density";
+    private static final String XML_ATTR_APP_BOUNDS = "app_bounds";
 
     /**
      * Reads the attributes corresponding to Configuration member fields from the Xml parser.
@@ -1972,6 +2310,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 ORIENTATION_UNDEFINED);
         configOut.screenLayout = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_LAYOUT,
                 SCREENLAYOUT_UNDEFINED);
+        configOut.colorMode = XmlUtils.readIntAttribute(parser, XML_ATTR_COLOR_MODE,
+                COLOR_MODE_UNDEFINED);
         configOut.uiMode = XmlUtils.readIntAttribute(parser, XML_ATTR_UI_MODE, 0);
         configOut.screenWidthDp = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_WIDTH,
                 SCREEN_WIDTH_DP_UNDEFINED);
@@ -1982,6 +2322,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
+        configOut.appBounds =
+            Rect.unflattenFromString(XmlUtils.readStringAttribute(parser, XML_ATTR_APP_BOUNDS));
+
+        // For persistence, we don't care about assetsSeq, so do not read it out.
     }
 
 
@@ -2032,6 +2376,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (config.screenLayout != SCREENLAYOUT_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_LAYOUT, config.screenLayout);
         }
+        if (config.colorMode != COLOR_MODE_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_COLOR_MODE, config.colorMode);
+        }
         if (config.uiMode != 0) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_UI_MODE, config.uiMode);
         }
@@ -2047,5 +2394,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
         }
+
+        if (config.appBounds != null) {
+            XmlUtils.writeStringAttribute(xml, XML_ATTR_APP_BOUNDS,
+                config.appBounds.flattenToString());
+        }
+
+        // For persistence, we do not care about assetsSeq, so do not write it out.
     }
 }

@@ -33,29 +33,17 @@ mainDexList:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
-LOCAL_JACK_FLAGS := -D jack.dex.output.policy=minimal-multidex -D jack.preprocessor=true\
-    -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
-
-#################################
-include $(BUILD_SYSTEM)/configure_local_jack.mk
-#################################
-
-ifdef LOCAL_JACK_ENABLED
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
-endif
 
 LOCAL_MIN_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
 
-ifndef LOCAL_JACK_ENABLED
 $(mainDexList): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
-endif
 
 ## The application with a full main dex
 include $(CLEAR_VARS)
@@ -76,26 +64,14 @@ mainDexList2:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList2)
-LOCAL_JACK_FLAGS := -D jack.dex.output.policy=multidex -D jack.preprocessor=true\
-    -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
-
-#################################
-include $(BUILD_SYSTEM)/configure_local_jack.mk
-#################################
-
-ifdef LOCAL_JACK_ENABLED
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
-endif
 
 LOCAL_MIN_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
 
-ifndef LOCAL_JACK_ENABLED
 $(mainDexList2): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList2)
-endif

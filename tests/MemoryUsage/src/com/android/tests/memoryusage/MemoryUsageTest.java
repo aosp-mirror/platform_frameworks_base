@@ -18,7 +18,6 @@ package com.android.tests.memoryusage;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
-import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.UiAutomation;
 import android.content.Context;
@@ -84,7 +83,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
         MemoryUsageInstrumentation instrumentation =
                 (MemoryUsageInstrumentation) getInstrumentation();
         Bundle args = instrumentation.getBundle();
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
 
         createMappings();
         parseArgs(args);

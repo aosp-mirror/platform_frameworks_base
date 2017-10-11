@@ -91,7 +91,7 @@ class Method():
             while r in raw: raw.remove(r)
         self.split = list(raw)
 
-        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract"]:
+        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default"]:
             while r in raw: raw.remove(r)
 
         self.typ = raw[0]
@@ -259,14 +259,19 @@ def error(clazz, detail, rule, msg):
 def verify_constants(clazz):
     """All static final constants must be FOO_NAME style."""
     if re.match("android\.R\.[a-z]+", clazz.fullname): return
+    if clazz.fullname.startswith("android.os.Build"): return
+    if clazz.fullname == "android.system.OsConstants": return
 
+    req = ["java.lang.String","byte","short","int","long","float","double","boolean","char"]
     for f in clazz.fields:
         if "static" in f.split and "final" in f.split:
             if re.match("[A-Z0-9_]+", f.name) is None:
                 error(clazz, f, "C2", "Constant field names must be FOO_NAME")
-            elif f.typ != "java.lang.String":
+            if f.typ != "java.lang.String":
                 if f.name.startswith("MIN_") or f.name.startswith("MAX_"):
                     warn(clazz, f, "C8", "If min/max could change in future, make them dynamic methods")
+            if f.typ in req and f.value is None:
+                error(clazz, f, None, "All constants must be defined at compile time")
 
 
 def verify_enums(clazz):
@@ -352,6 +357,7 @@ def verify_actions(clazz):
         if f.value is None: continue
         if f.name.startswith("EXTRA_"): continue
         if f.name == "SERVICE_INTERFACE" or f.name == "PROVIDER_INTERFACE": continue
+        if "INTERACTION" in f.name: continue
 
         if "static" in f.split and "final" in f.split and f.typ == "java.lang.String":
             if "_ACTION" in f.name or "ACTION_" in f.name or ".action." in f.value.lower():
@@ -403,9 +409,12 @@ def verify_extras(clazz):
 
 def verify_equals(clazz):
     """Verify that equals() and hashCode() must be overridden together."""
-    methods = [ m.name for m in clazz.methods ]
-    eq = "equals" in methods
-    hc = "hashCode" in methods
+    eq = False
+    hc = False
+    for m in clazz.methods:
+        if " static " in m.raw: continue
+        if "boolean equals(java.lang.Object)" in m.raw: eq = True
+        if "int hashCode()" in m.raw: hc = True
     if eq != hc:
         error(clazz, None, "M8", "Must override both equals and hashCode; missing one")
 
@@ -444,10 +453,14 @@ def verify_fields(clazz):
         "android.app.Notification",
         "android.content.pm.ActivityInfo",
         "android.content.pm.ApplicationInfo",
+        "android.content.pm.ComponentInfo",
+        "android.content.pm.ResolveInfo",
         "android.content.pm.FeatureGroupInfo",
         "android.content.pm.InstrumentationInfo",
         "android.content.pm.PackageInfo",
         "android.content.pm.PackageItemInfo",
+        "android.content.res.Configuration",
+        "android.graphics.BitmapFactory.Options",
         "android.os.Message",
         "android.system.StructPollfd",
     ]
@@ -783,6 +796,10 @@ def verify_manager(clazz):
     for c in clazz.ctors:
         error(clazz, c, None, "Managers must always be obtained from Context; no direct constructors")
 
+    for m in clazz.methods:
+        if m.typ == clazz.fullname:
+            error(clazz, m, None, "Managers must always be obtained from Context")
+
 
 def verify_boxed(clazz):
     """Verifies that methods avoid boxed primitives."""
@@ -809,17 +826,19 @@ def verify_boxed(clazz):
 def verify_static_utils(clazz):
     """Verifies that helper classes can't be constructed."""
     if clazz.fullname.startswith("android.opengl"): return
-    if re.match("android\.R\.[a-z]+", clazz.fullname): return
+    if clazz.fullname.startswith("android.R"): return
 
-    if len(clazz.fields) > 0: return
-    if len(clazz.methods) == 0: return
+    # Only care about classes with default constructors
+    if len(clazz.ctors) == 1 and len(clazz.ctors[0].args) == 0:
+        test = []
+        test.extend(clazz.fields)
+        test.extend(clazz.methods)
 
-    for m in clazz.methods:
-        if "static" not in m.split:
-            return
+        if len(test) == 0: return
+        for t in test:
+            if "static" not in t.split:
+                return
 
-    # At this point, we have no fields, and all methods are static
-    if len(clazz.ctors) > 0:
         error(clazz, None, None, "Fully-static utility classes must not have constructor")
 
 
@@ -917,6 +936,9 @@ def verify_context_first(clazz):
         if len(m.args) > 1 and m.args[0] != "android.content.Context":
             if "android.content.Context" in m.args[1:]:
                 error(clazz, m, "M3", "Context is distinct, so it must be the first argument")
+        if len(m.args) > 1 and m.args[0] != "android.content.ContentResolver":
+            if "android.content.ContentResolver" in m.args[1:]:
+                error(clazz, m, "M3", "ContentResolver is distinct, so it must be the first argument")
 
 
 def verify_listener_last(clazz):
@@ -990,6 +1012,120 @@ def verify_manager_list(clazz):
             warn(clazz, m, None, "Methods should return List<? extends Parcelable> instead of Parcelable[] to support ParceledListSlice under the hood")
 
 
+def verify_abstract_inner(clazz):
+    """Verifies that abstract inner classes are static."""
+
+    if re.match(".+?\.[A-Z][^\.]+\.[A-Z]", clazz.fullname):
+        if " abstract " in clazz.raw and " static " not in clazz.raw:
+            warn(clazz, None, None, "Abstract inner classes should be static to improve testability")
+
+
+def verify_runtime_exceptions(clazz):
+    """Verifies that runtime exceptions aren't listed in throws."""
+
+    banned = [
+        "java.lang.NullPointerException",
+        "java.lang.ClassCastException",
+        "java.lang.IndexOutOfBoundsException",
+        "java.lang.reflect.UndeclaredThrowableException",
+        "java.lang.reflect.MalformedParametersException",
+        "java.lang.reflect.MalformedParameterizedTypeException",
+        "java.lang.invoke.WrongMethodTypeException",
+        "java.lang.EnumConstantNotPresentException",
+        "java.lang.IllegalMonitorStateException",
+        "java.lang.SecurityException",
+        "java.lang.UnsupportedOperationException",
+        "java.lang.annotation.AnnotationTypeMismatchException",
+        "java.lang.annotation.IncompleteAnnotationException",
+        "java.lang.TypeNotPresentException",
+        "java.lang.IllegalStateException",
+        "java.lang.ArithmeticException",
+        "java.lang.IllegalArgumentException",
+        "java.lang.ArrayStoreException",
+        "java.lang.NegativeArraySizeException",
+        "java.util.MissingResourceException",
+        "java.util.EmptyStackException",
+        "java.util.concurrent.CompletionException",
+        "java.util.concurrent.RejectedExecutionException",
+        "java.util.IllformedLocaleException",
+        "java.util.ConcurrentModificationException",
+        "java.util.NoSuchElementException",
+        "java.io.UncheckedIOException",
+        "java.time.DateTimeException",
+        "java.security.ProviderException",
+        "java.nio.BufferUnderflowException",
+        "java.nio.BufferOverflowException",
+    ]
+
+    test = []
+    test.extend(clazz.ctors)
+    test.extend(clazz.methods)
+
+    for t in test:
+        if " throws " not in t.raw: continue
+        throws = t.raw[t.raw.index(" throws "):]
+        for b in banned:
+            if b in throws:
+                error(clazz, t, None, "Methods must not mention RuntimeException subclasses in throws clauses")
+
+
+def verify_error(clazz):
+    """Verifies that we always use Exception instead of Error."""
+    if not clazz.extends: return
+    if clazz.extends.endswith("Error"):
+        error(clazz, None, None, "Trouble must be reported through an Exception, not Error")
+    if clazz.extends.endswith("Exception") and not clazz.name.endswith("Exception"):
+        error(clazz, None, None, "Exceptions must be named FooException")
+
+
+def verify_units(clazz):
+    """Verifies that we use consistent naming for units."""
+
+    # If we find K, recommend replacing with V
+    bad = {
+        "Ns": "Nanos",
+        "Ms": "Millis or Micros",
+        "Sec": "Seconds", "Secs": "Seconds",
+        "Hr": "Hours", "Hrs": "Hours",
+        "Mo": "Months", "Mos": "Months",
+        "Yr": "Years", "Yrs": "Years",
+        "Byte": "Bytes", "Space": "Bytes",
+    }
+
+    for m in clazz.methods:
+        if m.typ not in ["short","int","long"]: continue
+        for k, v in bad.iteritems():
+            if m.name.endswith(k):
+                error(clazz, m, None, "Expected method name units to be " + v)
+        if m.name.endswith("Nanos") or m.name.endswith("Micros"):
+            warn(clazz, m, None, "Returned time values are strongly encouraged to be in milliseconds unless you need the extra precision")
+        if m.name.endswith("Seconds"):
+            error(clazz, m, None, "Returned time values must be in milliseconds")
+
+    for m in clazz.methods:
+        typ = m.typ
+        if typ == "void":
+            if len(m.args) != 1: continue
+            typ = m.args[0]
+
+        if m.name.endswith("Fraction") and typ != "float":
+            error(clazz, m, None, "Fractions must use floats")
+        if m.name.endswith("Percentage") and typ != "int":
+            error(clazz, m, None, "Percentage must use ints")
+
+
+def verify_closable(clazz):
+    """Verifies that classes are AutoClosable."""
+    if "implements java.lang.AutoCloseable" in clazz.raw: return
+    if "implements java.io.Closeable" in clazz.raw: return
+
+    for m in clazz.methods:
+        if len(m.args) > 0: continue
+        if m.name in ["close","release","destroy","finish","finalize","disconnect","shutdown","stop","free","quit"]:
+            warn(clazz, m, None, "Classes that release resources should implement AutoClosable and CloseGuard")
+            return
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
     if clazz.pkg.name.startswith("java"): return
@@ -1036,6 +1172,11 @@ def examine_clazz(clazz):
     verify_resource_names(clazz)
     verify_files(clazz)
     verify_manager_list(clazz)
+    verify_abstract_inner(clazz)
+    verify_runtime_exceptions(clazz)
+    verify_error(clazz)
+    verify_units(clazz)
+    verify_closable(clazz)
 
 
 def examine_stream(stream):

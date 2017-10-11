@@ -30,7 +30,9 @@ limitations under the License.
     <string name="persisted_caption">Persisted:</string>
     <string name="constraints">Constraints</string>
     <string name="connectivity">Connectivity:</string>
+    <string name="none">None</string>
     <string name="any">Any</string>
+    <string name="metered">Metered</string>
     <string name="unmetered">WiFi</string>
     <string name="timing">Timing:</string>
     <string name="delay">Delay:</string>

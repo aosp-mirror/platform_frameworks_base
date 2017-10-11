@@ -35,7 +35,7 @@ public abstract class CookieManager {
      *
      * @return the singleton CookieManager instance
      */
-    public static synchronized CookieManager getInstance() {
+    public static CookieManager getInstance() {
         return WebViewFactory.getProvider().getCookieManager();
     }
 
@@ -158,6 +158,7 @@ public abstract class CookieManager {
      * date.
      * @deprecated use {@link #removeSessionCookies(ValueCallback)} instead.
      */
+    @Deprecated
     public abstract void removeSessionCookie();
 
     /**

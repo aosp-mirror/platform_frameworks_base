@@ -17,17 +17,23 @@ package com.android.server.devicepolicy;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.media.IAudioService;
+import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.security.KeyChain;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -36,6 +42,7 @@ import android.view.IWindowManager;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -48,17 +55,17 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     public static class OwnersTestable extends Owners {
         public static final String LEGACY_FILE = "legacy.xml";
         public static final String DEVICE_OWNER_FILE = "device_owner2.xml";
-        public static final String PROFILE_OWNER_FILE_BASE = "profile_owner.xml";
+        public static final String PROFILE_OWNER_FILE = "profile_owner.xml";
 
         private final File mLegacyFile;
         private final File mDeviceOwnerFile;
-        private final File mProfileOwnerBase;
+        private final File mUsersDataDir;
 
         public OwnersTestable(DpmMockContext context) {
             super(context.userManager, context.userManagerInternal, context.packageManagerInternal);
             mLegacyFile = new File(context.dataDir, LEGACY_FILE);
             mDeviceOwnerFile = new File(context.dataDir, DEVICE_OWNER_FILE);
-            mProfileOwnerBase = new File(context.dataDir, PROFILE_OWNER_FILE_BASE);
+            mUsersDataDir = new File(context.dataDir, "users");
         }
 
         @Override
@@ -73,7 +80,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         File getProfileOwnerFileWithTestOverride(int userId) {
-            return new File(mDeviceOwnerFile.getAbsoluteFile() + "-" + userId);
+            final File userDir = new File(mUsersDataDir, String.valueOf(userId));
+            return new File(userDir, PROFILE_OWNER_FILE);
         }
     }
 
@@ -150,6 +158,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         NotificationManager getNotificationManager() {
             return context.notificationManager;
+        }
+
+        @Override
+        IIpConnectivityMetrics getIIpConnectivityMetrics() {
+            return context.iipConnectivityMetrics;
         }
 
         @Override
@@ -258,6 +271,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force)
+                throws IOException {
+            context.recoverySystem.rebootWipeUserData(shutdown, reason, force);
+        }
+
+        @Override
         boolean systemPropertiesGetBoolean(String key, boolean def) {
             return context.systemProperties.getBoolean(key, def);
         }
@@ -288,6 +307,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        PendingIntent pendingIntentGetActivityAsUser(Context context, int requestCode,
+                Intent intent, int flags, Bundle options, UserHandle user) {
+            return null;
+        }
+
+        @Override
         void registerContentObserver(Uri uri, boolean notifyForDescendents,
                 ContentObserver observer, int userHandle) {
             mContentObservers.put(new Pair<Uri, Integer>(uri, userHandle), observer);
@@ -296,6 +321,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         int settingsSecureGetIntForUser(String name, int def, int userHandle) {
             return context.settings.settingsSecureGetIntForUser(name, def, userHandle);
+        }
+
+        @Override
+        String settingsSecureGetStringForUser(String name, int userHandle) {
+            return context.settings.settingsSecureGetStringForUser(name, userHandle);
         }
 
         @Override
@@ -339,6 +369,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        String settingsGlobalGetString(String name) {
+            return context.settings.settingsGlobalGetString(name);
+        }
+
+        @Override
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
             context.settings.securityLogSetLoggingEnabledProperty(enabled);
         }
@@ -356,6 +391,16 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         TelephonyManager getTelephonyManager() {
             return context.telephonyManager;
+        }
+
+        @Override
+        boolean isBuildDebuggable() {
+            return context.buildMock.isDebuggable;
+        }
+
+        @Override
+        KeyChain.KeyChainConnection keyChainBindAsUser(UserHandle user) {
+            return context.keyChainConnection;
         }
     }
 }

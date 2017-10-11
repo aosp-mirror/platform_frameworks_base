@@ -17,10 +17,13 @@
 package android.app.backup;
 
 import android.app.backup.IBackupObserver;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.app.backup.ISelectBackupTransportCallback;
 import android.os.ParcelFileDescriptor;
 import android.content.Intent;
+import android.content.ComponentName;
 
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
@@ -141,9 +144,10 @@ interface IBackupManager {
     void backupNow();
 
     /**
-     * Write a full backup of the given package to the supplied file descriptor.
+     * Write a backup of the given package to the supplied file descriptor.
      * The fd may be a socket or other non-seekable destination.  If no package names
      * are supplied, then every application on the device will be backed up to the output.
+     * Currently only used by the 'adb backup' command.
      *
      * <p>This method is <i>synchronous</i> -- it does not return until the backup has
      * completed.
@@ -164,12 +168,14 @@ interface IBackupManager {
      *     as including packages pre-installed as part of the system. If {@code false},
      *     then setting {@code allApps} to {@code true} will mean only that all 3rd-party
      *     applications will be included in the dataset.
+     * @param doKeyValue If {@code true}, also packages supporting key-value backup will be backed
+     *     up. If {@code false}, key-value packages will be skipped.
      * @param packageNames The package names of the apps whose data (and optionally .apk files)
      *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
      */
-    void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+    void adbBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps, boolean allIncludesSystem,
-            boolean doCompress, in String[] packageNames);
+            boolean doCompress, boolean doKeyValue, in String[] packageNames);
 
     /**
      * Perform a full-dataset backup of the given applications via the currently active
@@ -181,11 +187,12 @@ interface IBackupManager {
 
     /**
      * Restore device content from the data stream passed through the given socket.  The
-     * data stream must be in the format emitted by fullBackup().
+     * data stream must be in the format emitted by adbBackup().
+     * Currently only used by the 'adb restore' command.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
-    void fullRestore(in ParcelFileDescriptor fd);
+    void adbRestore(in ParcelFileDescriptor fd);
 
     /**
      * Confirm that the requested full backup/restore operation can proceed.  The system will
@@ -217,6 +224,8 @@ interface IBackupManager {
      */
     String[] listAllTransports();
 
+    ComponentName[] listAllTransportComponents();
+
     /**
      * Retrieve the list of whitelisted transport components.  Callers do </i>not</i> need
      * any special permission.
@@ -236,6 +245,21 @@ interface IBackupManager {
      *   the current transport setting and the method returns null.
      */
     String selectBackupTransport(String transport);
+
+    /**
+     * Specify the current backup transport and get notified when the transport is ready to be used.
+     * This method is async because BackupManager might need to bind to the specified transport
+     * which is in a separate process.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param transport ComponentName of the service hosting the transport. This is different from
+     *                  the transport's name that is returned by {@link BackupTransport#name()}.
+     * @param listener A listener object to get a callback on the transport being selected.
+     *
+     * @hide
+     */
+    void selectBackupTransportAsync(in ComponentName transport, ISelectBackupTransportCallback listener);
 
     /**
      * Get the configuration Intent, if any, from the given transport.  Callers must
@@ -357,7 +381,19 @@ interface IBackupManager {
      * @param observer The {@link BackupObserver} to receive callbacks during the backup
      * operation.
      *
+     * @param monitor the {@link BackupManagerMonitor} to receive callbacks about important events
+     * during the backup operation.
+     *
+     * @param flags {@link BackupManager#FLAG_NON_INCREMENTAL_BACKUP}.
+     *
      * @return Zero on success; nonzero on error.
      */
-    int requestBackup(in String[] packages, IBackupObserver observer);
+    int requestBackup(in String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor,
+        int flags);
+
+    /**
+     * Cancel all running backups. After this call returns, no currently running backups will
+     * interact with the selected transport.
+     */
+    void cancelBackups();
 }

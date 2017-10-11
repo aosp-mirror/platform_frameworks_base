@@ -17,86 +17,107 @@
 #ifndef AAPT_JAVA_CLASS_GENERATOR_H
 #define AAPT_JAVA_CLASS_GENERATOR_H
 
+#include <ostream>
+#include <string>
+
+#include "androidfw/StringPiece.h"
+
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/StringPiece.h"
-
-#include <ostream>
-#include <string>
+#include "process/SymbolTable.h"
 
 namespace aapt {
 
 class AnnotationProcessor;
 class ClassDefinition;
+class MethodDefinition;
 
-struct JavaClassGeneratorOptions {
-    /*
-     * Specifies whether to use the 'final' modifier
-     * on resource entries. Default is true.
-     */
-    bool useFinal = true;
-
-    enum class SymbolTypes {
-        kAll,
-        kPublicPrivate,
-        kPublic,
-    };
-
-    SymbolTypes types = SymbolTypes::kAll;
-
-    /**
-     * A list of JavaDoc annotations to add to the comments of all generated classes.
-     */
-    std::vector<std::string> javadocAnnotations;
+// Options for generating onResourcesLoaded callback in R.java.
+struct OnResourcesLoadedCallbackOptions {
+  // Other R classes to delegate the same callback to (with the same package ID).
+  std::vector<std::string> packages_to_callback;
 };
 
-/*
- * Generates the R.java file for a resource table.
- */
+struct JavaClassGeneratorOptions {
+  // Specifies whether to use the 'final' modifier on resource entries. Default is true.
+  bool use_final = true;
+
+  // If set, generates code to rewrite the package ID of resources.
+  // Implies use_final == true. Default is unset.
+  Maybe<OnResourcesLoadedCallbackOptions> rewrite_callback_options;
+
+  enum class SymbolTypes {
+    kAll,
+    kPublicPrivate,
+    kPublic,
+  };
+
+  SymbolTypes types = SymbolTypes::kAll;
+
+  // A list of JavaDoc annotations to add to the comments of all generated classes.
+  std::vector<std::string> javadoc_annotations;
+};
+
+// Generates the R.java file for a resource table and optionally an R.txt file.
 class JavaClassGenerator {
-public:
-    JavaClassGenerator(IAaptContext* context, ResourceTable* table,
-                       const JavaClassGeneratorOptions& options);
+ public:
+  JavaClassGenerator(IAaptContext* context, ResourceTable* table,
+                     const JavaClassGeneratorOptions& options);
 
-    /*
-     * Writes the R.java file to `out`. Only symbols belonging to `package` are written.
-     * All symbols technically belong to a single package, but linked libraries will
-     * have their names mangled, denoting that they came from a different package.
-     * We need to generate these symbols in a separate file.
-     * Returns true on success.
-     */
-    bool generate(const StringPiece16& packageNameToGenerate, std::ostream* out);
+  // Writes the R.java file to `out`. Only symbols belonging to `package` are written.
+  // All symbols technically belong to a single package, but linked libraries will
+  // have their names mangled, denoting that they came from a different package.
+  // We need to generate these symbols in a separate file. Returns true on success.
+  bool Generate(const android::StringPiece& package_name_to_generate, std::ostream* out,
+                std::ostream* out_r_txt = nullptr);
 
-    bool generate(const StringPiece16& packageNameToGenerate,
-                  const StringPiece16& outputPackageName,
-                  std::ostream* out);
+  bool Generate(const android::StringPiece& package_name_to_generate,
+                const android::StringPiece& output_package_name, std::ostream* out,
+                std::ostream* out_r_txt = nullptr);
 
-    const std::string& getError() const;
+  const std::string& getError() const;
 
-private:
-    bool addMembersToTypeClass(const StringPiece16& packageNameToGenerate,
-                               const ResourceTablePackage* package,
-                               const ResourceTableType* type,
-                               ClassDefinition* outTypeClassDef);
+ private:
+  bool SkipSymbol(SymbolState state);
+  bool SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol);
 
-    void addMembersToStyleableClass(const StringPiece16& packageNameToGenerate,
-                                    const std::u16string& entryName,
-                                    const Styleable* styleable,
-                                    ClassDefinition* outStyleableClassDef);
+  // Returns the unmangled resource entry name if the unmangled package is the same as
+  // package_name_to_generate. Returns nothing if the resource should be skipped.
+  Maybe<std::string> UnmangleResource(const android::StringPiece& package_name,
+                                      const android::StringPiece& package_name_to_generate,
+                                      const ResourceEntry& entry);
 
-    bool skipSymbol(SymbolState state);
+  bool ProcessType(const android::StringPiece& package_name_to_generate,
+                   const ResourceTablePackage& package, const ResourceTableType& type,
+                   ClassDefinition* out_type_class_def, MethodDefinition* out_rewrite_method_def,
+                   std::ostream* out_r_txt);
 
-    IAaptContext* mContext;
-    ResourceTable* mTable;
-    JavaClassGeneratorOptions mOptions;
-    std::string mError;
+  // Writes a resource to the R.java file, optionally writing out a rewrite rule for its package
+  // ID if `out_rewrite_method` is not nullptr.
+  void ProcessResource(const ResourceNameRef& name, const ResourceId& id,
+                       const ResourceEntry& entry, ClassDefinition* out_class_def,
+                       MethodDefinition* out_rewrite_method, std::ostream* out_r_txt);
+
+  // Writes a styleable resource to the R.java file, optionally writing out a rewrite rule for
+  // its package ID if `out_rewrite_method` is not nullptr.
+  // `package_name_to_generate` is the package
+  void ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
+                        const Styleable& styleable,
+                        const android::StringPiece& package_name_to_generate,
+                        ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method,
+                        std::ostream* out_r_txt);
+
+  IAaptContext* context_;
+  ResourceTable* table_;
+  JavaClassGeneratorOptions options_;
+  std::string error_;
 };
 
 inline const std::string& JavaClassGenerator::getError() const {
-    return mError;
+  return error_;
 }
 
-} // namespace aapt
+}  // namespace aapt
 
-#endif // AAPT_JAVA_CLASS_GENERATOR_H
+#endif  // AAPT_JAVA_CLASS_GENERATOR_H

@@ -30,17 +30,17 @@ static TestScene::Registrar _Shapes(TestScene::Info{
 class ShapeAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         card = TestUtils::createNode(0, 0, width, height,
-                [width](RenderProperties& props, TestCanvas& canvas) {
-            std::function<void(TestCanvas&, float, const SkPaint&)> ops[] = {
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [width](RenderProperties& props, Canvas& canvas) {
+            std::function<void(Canvas&, float, const SkPaint&)> ops[] = {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     canvas.drawArc(0, 0, size, size, 50, 189, true, paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     canvas.drawOval(0, 0, size, size, paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     SkPath diamondPath;
                     diamondPath.moveTo(size / 2, 0);
                     diamondPath.lineTo(size, size / 2);
@@ -49,18 +49,18 @@ public:
                     diamondPath.close();
                     canvas.drawPath(diamondPath, paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     float data[] = {0, 0, size, size, 0, size, size, 0 };
                     canvas.drawLines(data, sizeof(data) / sizeof(float), paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     float data[] = {0, 0, size, size, 0, size, size, 0 };
                     canvas.drawPoints(data, sizeof(data) / sizeof(float), paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     canvas.drawRect(0, 0, size, size, paint);
                 },
-                [](TestCanvas& canvas, float size, const SkPaint& paint) {
+                [](Canvas& canvas, float size, const SkPaint& paint) {
                     float rad = size / 4;
                     canvas.drawRoundRect(0, 0, size, size, rad, rad, paint);
                 }
@@ -82,8 +82,8 @@ public:
                     int middleCount = canvas.save(SaveFlags::MatrixClip);
                     for (auto op : ops) {
                         int innerCount = canvas.save(SaveFlags::MatrixClip);
-                        canvas.clipRect(0, 0, cellSize, cellSize, SkRegion::kIntersect_Op);
-                        canvas.drawColor(Color::White, SkXfermode::Mode::kSrcOver_Mode);
+                        canvas.clipRect(0, 0, cellSize, cellSize, SkClipOp::kIntersect);
+                        canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
                         op(canvas, cellSize, paint);
                         canvas.restoreToCount(innerCount);
                         canvas.translate(cellSize + cellSpace, 0);
@@ -94,7 +94,7 @@ public:
             }
             canvas.restoreToCount(outerCount);
         });
-        canvas.drawColor(Color::Grey_500, SkXfermode::Mode::kSrcOver_Mode);
+        canvas.drawColor(Color::Grey_500, SkBlendMode::kSrcOver);
         canvas.drawRenderNode(card.get());
     }
 

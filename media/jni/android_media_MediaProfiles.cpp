@@ -22,7 +22,7 @@
 #include <utils/threads.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include <media/MediaProfiles.h>
 

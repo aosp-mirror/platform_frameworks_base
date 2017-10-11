@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -24,7 +25,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.ChangedPackages;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -42,14 +44,16 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 import java.util.List;
@@ -67,6 +71,23 @@ public class BridgePackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public PackageInfo getPackageInfo(VersionedPackage versionedPackage,
+            @PackageInfoFlags int flags) throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public List<SharedLibraryInfo> getSharedLibraries(@InstallFlags int flags) {
+        return null;
+    }
+
+    @Override
+    public List<SharedLibraryInfo> getSharedLibrariesAsUser(@InstallFlags int flags,
+            int userId) {
         return null;
     }
 
@@ -277,32 +298,58 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+    public List<ApplicationInfo> getInstalledApplicationsAsUser(int flags, int userId) {
         return null;
     }
 
     @Override
-    public Drawable getEphemeralApplicationIcon(String packageName) {
-        throw new UnsupportedOperationException();
+    public List<InstantAppInfo> getInstantApps() {
+        return null;
     }
 
     @Override
-    public byte[] getEphemeralCookie() {
+    public Drawable getInstantAppIcon(String packageName) {
+        assert false : "Unsupported operation";
+        return new ColorDrawable();
+    }
+
+    @Override
+    public byte[] getInstantAppCookie() {
         return new byte[0];
     }
 
     @Override
-    public boolean isEphemeralApplication() {
+    public boolean isInstantApp() {
         return false;
     }
 
     @Override
-    public int getEphemeralCookieMaxSizeBytes() {
+    public boolean isInstantApp(String packageName) {
+        return false;
+    }
+
+    @Override
+    public int getInstantAppCookieMaxBytes() {
         return 0;
     }
 
     @Override
-    public boolean setEphemeralCookie(@NonNull byte[] cookie) {
+    public int getInstantAppCookieMaxSize() {
+        return 0;
+    }
+
+    @Override
+    public void clearInstantAppCookie() {;
+
+    }
+
+    @Override
+    public void updateInstantAppCookie(@Nullable byte[] cookie) {
+
+    }
+
+    @Override
+    public boolean setInstantAppCookie(@NonNull byte[] cookie) {
         return false;
     }
 
@@ -495,12 +542,6 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
-        int badgeDensity) {
-        return null;
-    }
-
-    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         return null;
     }
@@ -580,6 +621,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         return 0;
@@ -631,6 +678,10 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
+    }
+
+    @Override
+    public void setUpdateAvailable(String packageName, boolean updateAvailable) {
     }
 
     @Override
@@ -790,6 +841,10 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void setApplicationCategoryHint(String packageName, int categoryHint) {
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         return 0;
     }
@@ -838,6 +893,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public ChangedPackages getChangedPackages(int sequenceNumber) {
+        return null;
+    }
+
+    @Override
     public boolean isUpgrade() {
         return false;
     }
@@ -869,5 +929,30 @@ public class BridgePackageManager extends PackageManager {
     @Override
     public boolean isPackageAvailable(String packageName) {
         return false;
+    }
+
+    @Override
+    public int getInstallReason(String packageName, UserHandle user) {
+        return INSTALL_REASON_UNKNOWN;
+    }
+
+    @Override
+    public boolean canRequestPackageInstalls() {
+        return false;
+    }
+
+    @Override
+    public ComponentName getInstantAppResolverSettingsComponent() {
+        return null;
+    }
+
+    @Override
+    public ComponentName getInstantAppInstallerComponent() {
+        return null;
+    }
+
+    @Override
+    public String getInstantAppAndroidId(String packageName, UserHandle user) {
+        return null;
     }
 }

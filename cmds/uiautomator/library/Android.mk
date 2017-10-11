@@ -49,7 +49,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
     -api $(uiautomator_internal_api_file) \
     -removedApi $(uiautomator_internal_removed_api_file)
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := external/doclava/res/assets/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
 
 LOCAL_MODULE := uiautomator-stubs

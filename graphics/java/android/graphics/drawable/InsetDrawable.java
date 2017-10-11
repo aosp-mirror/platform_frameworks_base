@@ -33,11 +33,12 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 import java.io.IOException;
 
 /**
- * A Drawable that insets another Drawable by a specified distance.
+ * A Drawable that insets another Drawable by a specified distance or fraction of the content bounds.
  * This is used when a View needs a background that is smaller than
  * the View's actual bounds.
  *
@@ -54,6 +55,7 @@ import java.io.IOException;
  */
 public class InsetDrawable extends DrawableWrapper {
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpInsetRect = new Rect();
 
     private InsetState mState;
 
@@ -75,7 +77,17 @@ public class InsetDrawable extends DrawableWrapper {
     }
 
     /**
-     * Creates a new inset drawable with the specified insets.
+     * Creates a new inset drawable with the specified inset.
+     *
+     * @param drawable The drawable to inset.
+     * @param inset Inset in fraction (range: [0, 1)) of the inset content bounds.
+     */
+    public InsetDrawable(@Nullable Drawable drawable, float inset) {
+        this(drawable, inset, inset, inset, inset);
+    }
+
+    /**
+     * Creates a new inset drawable with the specified insets in pixels.
      *
      * @param drawable The drawable to inset.
      * @param insetLeft Left inset in pixels.
@@ -87,10 +99,31 @@ public class InsetDrawable extends DrawableWrapper {
             int insetRight, int insetBottom) {
         this(new InsetState(null, null), null);
 
-        mState.mInsetLeft = insetLeft;
-        mState.mInsetTop = insetTop;
-        mState.mInsetRight = insetRight;
-        mState.mInsetBottom = insetBottom;
+        mState.mInsetLeft = new InsetValue(0f, insetLeft);
+        mState.mInsetTop = new InsetValue(0f, insetTop);
+        mState.mInsetRight = new InsetValue(0f, insetRight);
+        mState.mInsetBottom = new InsetValue(0f, insetBottom);
+
+        setDrawable(drawable);
+    }
+
+    /**
+     * Creates a new inset drawable with the specified insets in fraction of the view bounds.
+     *
+     * @param drawable The drawable to inset.
+     * @param insetLeftFraction Left inset in fraction (range: [0, 1)) of the inset content bounds.
+     * @param insetTopFraction Top inset in fraction (range: [0, 1)) of the inset content bounds.
+     * @param insetRightFraction Right inset in fraction (range: [0, 1)) of the inset content bounds.
+     * @param insetBottomFraction Bottom inset in fraction (range: [0, 1)) of the inset content bounds.
+     */
+    public InsetDrawable(@Nullable Drawable drawable, float insetLeftFraction,
+        float insetTopFraction, float insetRightFraction, float insetBottomFraction) {
+        this(new InsetState(null, null), null);
+
+        mState.mInsetLeft = new InsetValue(insetLeftFraction, 0);
+        mState.mInsetTop = new InsetValue(insetTopFraction, 0);
+        mState.mInsetRight = new InsetValue(insetRightFraction, 0);
+        mState.mInsetBottom = new InsetValue(insetBottomFraction, 0);
 
         setDrawable(drawable);
     }
@@ -155,52 +188,78 @@ public class InsetDrawable extends DrawableWrapper {
 
         // Inset attribute may be overridden by more specific attributes.
         if (a.hasValue(R.styleable.InsetDrawable_inset)) {
-            final int inset = a.getDimensionPixelOffset(R.styleable.InsetDrawable_inset, 0);
+            final InsetValue inset = getInset(a, R.styleable.InsetDrawable_inset, new InsetValue());
             state.mInsetLeft = inset;
             state.mInsetTop = inset;
             state.mInsetRight = inset;
             state.mInsetBottom = inset;
         }
+        state.mInsetLeft = getInset(a, R.styleable.InsetDrawable_insetLeft, state.mInsetLeft);
+        state.mInsetTop = getInset(a, R.styleable.InsetDrawable_insetTop, state.mInsetTop);
+        state.mInsetRight = getInset(a, R.styleable.InsetDrawable_insetRight, state.mInsetRight);
+        state.mInsetBottom = getInset(a, R.styleable.InsetDrawable_insetBottom, state.mInsetBottom);
+    }
 
-        state.mInsetLeft = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetLeft, state.mInsetLeft);
-        state.mInsetRight = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetRight, state.mInsetRight);
-        state.mInsetTop = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetTop, state.mInsetTop);
-        state.mInsetBottom = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetBottom, state.mInsetBottom);
+    private InsetValue getInset(@NonNull TypedArray a, int index, InsetValue defaultValue) {
+        if (a.hasValue(index)) {
+            TypedValue tv = a.peekValue(index);
+            if (tv.type == TypedValue.TYPE_FRACTION) {
+                float f = tv.getFraction(1.0f, 1.0f);
+                if (f >= 1f) {
+                    throw new IllegalStateException("Fraction cannot be larger than 1");
+                }
+                return new InsetValue(f, 0);
+            } else {
+                int dimension = a.getDimensionPixelOffset(index, 0);
+                if (dimension != 0) {
+                    return new InsetValue(0, dimension);
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    private void getInsets(Rect out) {
+        final Rect b = getBounds();
+        out.left = mState.mInsetLeft.getDimension(b.width());
+        out.right = mState.mInsetRight.getDimension(b.width());
+        out.top = mState.mInsetTop.getDimension(b.height());
+        out.bottom = mState.mInsetBottom.getDimension(b.height());
     }
 
     @Override
     public boolean getPadding(Rect padding) {
         final boolean pad = super.getPadding(padding);
+        getInsets(mTmpInsetRect);
+        padding.left += mTmpInsetRect.left;
+        padding.right += mTmpInsetRect.right;
+        padding.top += mTmpInsetRect.top;
+        padding.bottom += mTmpInsetRect.bottom;
 
-        padding.left += mState.mInsetLeft;
-        padding.right += mState.mInsetRight;
-        padding.top += mState.mInsetTop;
-        padding.bottom += mState.mInsetBottom;
-
-        return pad || (mState.mInsetLeft | mState.mInsetRight
-                | mState.mInsetTop | mState.mInsetBottom) != 0;
+        return pad || (mTmpInsetRect.left | mTmpInsetRect.right
+                | mTmpInsetRect.top | mTmpInsetRect.bottom) != 0;
     }
 
     /** @hide */
     @Override
     public Insets getOpticalInsets() {
         final Insets contentInsets = super.getOpticalInsets();
-        return Insets.of(contentInsets.left + mState.mInsetLeft,
-                contentInsets.top + mState.mInsetTop,
-                contentInsets.right + mState.mInsetRight,
-                contentInsets.bottom + mState.mInsetBottom);
+        getInsets(mTmpInsetRect);
+        return Insets.of(
+                contentInsets.left + mTmpInsetRect.left,
+                contentInsets.top + mTmpInsetRect.top,
+                contentInsets.right + mTmpInsetRect.right,
+                contentInsets.bottom + mTmpInsetRect.bottom);
     }
 
     @Override
     public int getOpacity() {
         final InsetState state = mState;
         final int opacity = getDrawable().getOpacity();
-        if (opacity == PixelFormat.OPAQUE && (state.mInsetLeft > 0 || state.mInsetTop > 0
-                || state.mInsetRight > 0 || state.mInsetBottom > 0)) {
+        getInsets(mTmpInsetRect);
+        if (opacity == PixelFormat.OPAQUE &&
+            (mTmpInsetRect.left > 0 || mTmpInsetRect.top > 0 || mTmpInsetRect.right > 0
+                || mTmpInsetRect.bottom > 0)) {
             return PixelFormat.TRANSLUCENT;
         }
         return opacity;
@@ -211,10 +270,10 @@ public class InsetDrawable extends DrawableWrapper {
         final Rect r = mTmpRect;
         r.set(bounds);
 
-        r.left += mState.mInsetLeft;
-        r.top += mState.mInsetTop;
-        r.right -= mState.mInsetRight;
-        r.bottom -= mState.mInsetBottom;
+        r.left += mState.mInsetLeft.getDimension(bounds.width());
+        r.top += mState.mInsetTop.getDimension(bounds.height());
+        r.right -= mState.mInsetRight.getDimension(bounds.width());
+        r.bottom -= mState.mInsetBottom.getDimension(bounds.height());
 
         // Apply inset bounds to the wrapped drawable.
         super.onBoundsChange(r);
@@ -223,19 +282,23 @@ public class InsetDrawable extends DrawableWrapper {
     @Override
     public int getIntrinsicWidth() {
         final int childWidth = getDrawable().getIntrinsicWidth();
-        if (childWidth < 0) {
+        final float fraction = mState.mInsetLeft.mFraction + mState.mInsetRight.mFraction;
+        if (childWidth < 0 || fraction >= 1) {
             return -1;
         }
-        return childWidth + mState.mInsetLeft + mState.mInsetRight;
+        return (int) (childWidth / (1 - fraction)) + mState.mInsetLeft.mDimension
+            + mState.mInsetRight.mDimension;
     }
 
     @Override
     public int getIntrinsicHeight() {
         final int childHeight = getDrawable().getIntrinsicHeight();
-        if (childHeight < 0) {
+        final float fraction = mState.mInsetTop.mFraction + mState.mInsetBottom.mFraction;
+        if (childHeight < 0 || fraction >= 1) {
             return -1;
         }
-        return childHeight + mState.mInsetTop + mState.mInsetBottom;
+        return (int) (childHeight / (1 - fraction)) + mState.mInsetTop.mDimension
+            + mState.mInsetBottom.mDimension;
     }
 
     @Override
@@ -252,23 +315,28 @@ public class InsetDrawable extends DrawableWrapper {
     static final class InsetState extends DrawableWrapper.DrawableWrapperState {
         private int[] mThemeAttrs;
 
-        int mInsetLeft = 0;
-        int mInsetTop = 0;
-        int mInsetRight = 0;
-        int mInsetBottom = 0;
+        InsetValue mInsetLeft;
+        InsetValue mInsetTop;
+        InsetValue mInsetRight;
+        InsetValue mInsetBottom;
 
         InsetState(@Nullable InsetState orig, @Nullable Resources res) {
             super(orig, res);
 
             if (orig != null) {
-                mInsetLeft = orig.mInsetLeft;
-                mInsetTop = orig.mInsetTop;
-                mInsetRight = orig.mInsetRight;
-                mInsetBottom = orig.mInsetBottom;
+                mInsetLeft = orig.mInsetLeft.clone();
+                mInsetTop = orig.mInsetTop.clone();
+                mInsetRight = orig.mInsetRight.clone();
+                mInsetBottom = orig.mInsetBottom.clone();
 
                 if (orig.mDensity != mDensity) {
                     applyDensityScaling(orig.mDensity, mDensity);
                 }
+            } else {
+                mInsetLeft = new InsetValue();
+                mInsetTop = new InsetValue();
+                mInsetRight = new InsetValue();
+                mInsetBottom = new InsetValue();
             }
         }
 
@@ -287,10 +355,10 @@ public class InsetDrawable extends DrawableWrapper {
          * @param targetDensity the new constant state density
          */
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
-            mInsetLeft = Bitmap.scaleFromDensity(mInsetLeft, sourceDensity, targetDensity);
-            mInsetTop = Bitmap.scaleFromDensity(mInsetTop, sourceDensity, targetDensity);
-            mInsetRight = Bitmap.scaleFromDensity(mInsetRight, sourceDensity, targetDensity);
-            mInsetBottom = Bitmap.scaleFromDensity(mInsetBottom, sourceDensity, targetDensity);
+            mInsetLeft.scaleFromDensity(sourceDensity, targetDensity);
+            mInsetTop.scaleFromDensity(sourceDensity, targetDensity);
+            mInsetRight.scaleFromDensity(sourceDensity, targetDensity);
+            mInsetBottom.scaleFromDensity(sourceDensity, targetDensity);
         }
 
         @Override
@@ -311,6 +379,34 @@ public class InsetDrawable extends DrawableWrapper {
             }
 
             return new InsetDrawable(state, res);
+        }
+    }
+
+    static final class InsetValue implements Cloneable {
+        final float mFraction;
+        int mDimension;
+
+        public InsetValue() {
+            this(0f, 0);
+        }
+
+        public InsetValue(float fraction, int dimension) {
+            mFraction = fraction;
+            mDimension = dimension;
+        }
+        int getDimension(int boundSize) {
+            return (int) (boundSize * mFraction) + mDimension;
+        }
+
+        void scaleFromDensity(int sourceDensity, int targetDensity) {
+            if (mDimension != 0) {
+                mDimension = Bitmap.scaleFromDensity(mDimension, sourceDensity, targetDensity);
+            }
+        }
+
+        @Override
+        public InsetValue clone() {
+            return new InsetValue(mFraction, mDimension);
         }
     }
 

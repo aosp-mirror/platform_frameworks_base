@@ -24,12 +24,13 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter_Delegate;
 import android.graphics.Paint;
 import android.graphics.Paint_Delegate;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region_Delegate;
 import android.graphics.Shader_Delegate;
-import android.graphics.Xfermode_Delegate;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -40,6 +41,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -620,7 +622,8 @@ public class GcSnapshot {
             int y = 0;
             int width;
             int height;
-            Rectangle clipBounds = originalGraphics.getClipBounds();
+            Rectangle clipBounds = originalGraphics.getClip() != null ? originalGraphics
+                    .getClipBounds() : null;
             if (clipBounds != null) {
                 if (clipBounds.width == 0 || clipBounds.height == 0) {
                     // Clip is 0 so no need to paint anything.
@@ -825,28 +828,9 @@ public class GcSnapshot {
             g.setComposite(AlphaComposite.getInstance(forceMode, (float) alpha / 255.f));
             return;
         }
-        Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
-        if (xfermodeDelegate != null) {
-            if (xfermodeDelegate.isSupported()) {
-                Composite composite = xfermodeDelegate.getComposite(alpha);
-                assert composite != null;
-                if (composite != null) {
-                    g.setComposite(composite);
-                    return;
-                }
-            } else {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_XFERMODE,
-                        xfermodeDelegate.getSupportMessage(),
-                        null /*throwable*/, null /*data*/);
-            }
-        }
-        // if there was no custom xfermode, but we have alpha (due to a shader and a non
-        // opaque alpha channel in the paint color), then we create an AlphaComposite anyway
-        // that will handle the alpha.
-        if (alpha != 0xFF) {
-            g.setComposite(AlphaComposite.getInstance(
-                    AlphaComposite.SRC_OVER, (float) alpha / 255.f));
-        }
+        Mode mode = PorterDuff.intToMode(paint.getPorterDuffMode());
+        Composite composite = PorterDuffUtility.getComposite(mode, alpha);
+        g.setComposite(composite);
     }
 
     private void mapRect(AffineTransform matrix, RectF dst, RectF src) {
@@ -867,6 +851,35 @@ public class GcSnapshot {
 
         dst.top = Math.min(Math.min(corners[1], corners[3]), Math.min(corners[5], corners[7]));
         dst.bottom = Math.max(Math.max(corners[1], corners[3]), Math.max(corners[5], corners[7]));
+    }
+
+    /**
+     * Returns the clip of the oldest snapshot of the stack, appropriately translated to be
+     * expressed in the coordinate system of the latest snapshot.
+     */
+    public Rectangle getOriginalClip() {
+        GcSnapshot originalSnapshot = this;
+        while (originalSnapshot.mPrevious != null) {
+            originalSnapshot = originalSnapshot.mPrevious;
+        }
+        if (originalSnapshot.mLayers.isEmpty()) {
+            return null;
+        }
+        Graphics2D graphics2D = originalSnapshot.mLayers.get(0).getGraphics();
+        Rectangle bounds = graphics2D.getClipBounds();
+        if (bounds == null) {
+            return null;
+        }
+        try {
+            AffineTransform originalTransform =
+                    ((Graphics2D) graphics2D.create()).getTransform().createInverse();
+            AffineTransform latestTransform = getTransform().createInverse();
+            bounds.x += latestTransform.getTranslateX() - originalTransform.getTranslateX();
+            bounds.y += latestTransform.getTranslateY() - originalTransform.getTranslateY();
+        } catch (NoninvertibleTransformException e) {
+            Bridge.getLog().warning(null, "Non invertible transformation", null);
+        }
+        return bounds;
     }
 
 }

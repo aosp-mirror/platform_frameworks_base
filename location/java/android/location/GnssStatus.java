@@ -51,11 +51,13 @@ public final class GnssStatus {
     public static final int GNSS_SV_FLAGS_HAS_ALMANAC_DATA = (1 << 1);
     /** @hide */
     public static final int GNSS_SV_FLAGS_USED_IN_FIX = (1 << 2);
+    /** @hide */
+    public static final int GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
 
     /** @hide */
-    public static final int SVID_SHIFT_WIDTH = 7;
+    public static final int SVID_SHIFT_WIDTH = 8;
     /** @hide */
-    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 3;
+    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 4;
     /** @hide */
     public static final int CONSTELLATION_TYPE_MASK = 0xf;
 
@@ -101,19 +103,16 @@ public final class GnssStatus {
     /* package */ float[] mElevations;
     /* package */ float[] mAzimuths;
     /* package */ int mSvCount;
+    /* package */ float[] mCarrierFrequencies;
 
     GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths) {
+            float[] azimuths, float[] carrierFrequencies) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
         mCn0DbHz = cn0s;
         mElevations = elevations;
         mAzimuths = azimuths;
-    }
-
-    /** @removed */
-    public int getNumSatellites() {
-        return getSatelliteCount();
+        mCarrierFrequencies = carrierFrequencies;
     }
 
     /**
@@ -191,11 +190,6 @@ public final class GnssStatus {
         return mAzimuths[satIndex];
     }
 
-    /** @removed */
-    public boolean hasEphemeris(int satIndex) {
-        return hasEphemerisData(satIndex);
-    }
-
     /**
      * Reports whether the satellite at the specified index has ephemeris data.
      *
@@ -203,11 +197,6 @@ public final class GnssStatus {
      */
     public boolean hasEphemerisData(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
-    }
-
-    /** @removed */
-    public boolean hasAlmanac(int satIndex) {
-        return hasAlmanacData(satIndex);
     }
 
     /**
@@ -227,5 +216,36 @@ public final class GnssStatus {
      */
     public boolean usedInFix(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+    }
+
+    /**
+     * Reports whether {@link #getCarrierFrequencyHz(int satIndex)} is available (i.e. carrier
+     * frequency is available for the satellite at the specified index).
+     *
+     * @param satIndex the index of the satellite in the list.
+     */
+    public boolean hasCarrierFrequencyHz(int satIndex) {
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
+    }
+
+    /**
+     * Gets the carrier frequency of the signal tracked.
+     *
+     * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60 MHz,
+     * L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
+     * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
+     *
+     * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two measurements
+     * will be reported for this same satellite, in one all the values related to L1 will be filled,
+     * and in the other all of the values related to L5 will be filled.
+     *
+     * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satIndex)} is {@code true}.
+     *
+     * @param satIndex the index of the satellite in the list.
+     *
+     * @return the carrier frequency of the signal tracked in Hz.
+     */
+    public float getCarrierFrequencyHz(int satIndex) {
+        return mCarrierFrequencies[satIndex];
     }
 }

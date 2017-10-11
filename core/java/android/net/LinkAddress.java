@@ -16,6 +16,15 @@
 
 package android.net;
 
+import static android.system.OsConstants.IFA_F_DADFAILED;
+import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_OPTIMISTIC;
+import static android.system.OsConstants.IFA_F_TENTATIVE;
+import static android.system.OsConstants.RT_SCOPE_HOST;
+import static android.system.OsConstants.RT_SCOPE_LINK;
+import static android.system.OsConstants.RT_SCOPE_SITE;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -25,15 +34,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
-
-import static android.system.OsConstants.IFA_F_DADFAILED;
-import static android.system.OsConstants.IFA_F_DEPRECATED;
-import static android.system.OsConstants.IFA_F_OPTIMISTIC;
-import static android.system.OsConstants.IFA_F_TENTATIVE;
-import static android.system.OsConstants.RT_SCOPE_HOST;
-import static android.system.OsConstants.RT_SCOPE_LINK;
-import static android.system.OsConstants.RT_SCOPE_SITE;
-import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 /**
  * Identifies an IP address on a network link.
@@ -76,7 +76,7 @@ public class LinkAddress implements Parcelable {
      * RFC 6724 section 3.2.
      * @hide
      */
-    static int scopeForUnicastAddress(InetAddress addr) {
+    private static int scopeForUnicastAddress(InetAddress addr) {
         if (addr.isAnyLocalAddress()) {
             return RT_SCOPE_HOST;
         }
@@ -101,11 +101,27 @@ public class LinkAddress implements Parcelable {
      * Per RFC 4193 section 8, fc00::/7 identifies these addresses.
      */
     private boolean isIPv6ULA() {
-        if (address != null && address instanceof Inet6Address) {
+        if (isIPv6()) {
             byte[] bytes = address.getAddress();
             return ((bytes[0] & (byte)0xfe) == (byte)0xfc);
         }
         return false;
+    }
+
+    /**
+     * @return true if the address is IPv6.
+     * @hide
+     */
+    public boolean isIPv6() {
+        return address instanceof Inet6Address;
+    }
+
+    /**
+     * @return true if the address is IPv4 or is a mapped IPv4 address.
+     * @hide
+     */
+    public boolean isIPv4() {
+        return address instanceof Inet4Address;
     }
 
     /**
@@ -115,7 +131,7 @@ public class LinkAddress implements Parcelable {
         if (address == null ||
                 address.isMulticastAddress() ||
                 prefixLength < 0 ||
-                ((address instanceof Inet4Address) && prefixLength > 32) ||
+                (address instanceof Inet4Address && prefixLength > 32) ||
                 (prefixLength > 128)) {
             throw new IllegalArgumentException("Bad LinkAddress params " + address +
                     "/" + prefixLength);
@@ -184,6 +200,7 @@ public class LinkAddress implements Parcelable {
      */
     public LinkAddress(String address, int flags, int scope) {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
+        // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
         Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(address);
         init(ipAndMask.first, ipAndMask.second, flags, scope);
     }

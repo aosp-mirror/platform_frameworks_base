@@ -186,31 +186,23 @@ public class WifiP2pServiceResponse implements Parcelable {
     /**
      * Create the list of  WifiP2pServiceResponse instance from supplicant event.
      *
-     * <pre>The format is as follows.
-     * P2P-SERV-DISC-RESP &lt;address&gt; &lt;update indicator&gt; &lt;response data&gt;
-     * e.g) P2P-SERV-DISC-RESP 02:03:7f:11:62:da 1 0300000101
-     *
-     * @param supplicantEvent wpa_supplicant event string.
+     * @param srcAddr source address of the service response
+     * @param tlvsBin byte array containing the binary tlvs data
      * @return if parse failed, return null
      * @hide
      */
-    public static List<WifiP2pServiceResponse> newInstance(String supplicantEvent) {
+    public static List<WifiP2pServiceResponse> newInstance(String srcAddr, byte[] tlvsBin) {
+        //updateIndicator not used, and not passed up from supplicant
 
         List<WifiP2pServiceResponse> respList = new ArrayList<WifiP2pServiceResponse>();
-        String[] args = supplicantEvent.split(" ");
-        if (args.length != 4) {
-            return null;
-        }
         WifiP2pDevice dev = new WifiP2pDevice();
-        String srcAddr = args[1];
         dev.deviceAddress = srcAddr;
-        //String updateIndicator = args[2];//not used.
-        byte[] bin = hexStr2Bin(args[3]);
-        if (bin == null) {
+        if (tlvsBin == null) {
             return null;
         }
 
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bin));
+
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(tlvsBin));
         try {
             while (dis.available() > 0) {
                 /*

@@ -82,7 +82,7 @@ public class NekoLand extends Activity implements PrefsListener {
 
         mPrefs = new PrefState(this);
         mPrefs.setListener(this);
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.holder);
+        final RecyclerView recyclerView = findViewById(R.id.holder);
         mAdapter = new CatAdapter();
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));

@@ -30,6 +30,9 @@ import android.provider.TimeZoneRulesDataContract;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -71,7 +74,7 @@ public class PackageTrackerTest {
 
         // Using the instrumentation context means the database is created in a test app-specific
         // directory. We can use the real thing for this test.
-        mPackageStatusStorage = new PackageStatusStorage(context);
+        mPackageStatusStorage = new PackageStatusStorage(context.getFilesDir());
 
         // For other interactions with the Android framework we create a fake object.
         mFakeIntentHelper = new FakeIntentHelper();
@@ -88,7 +91,7 @@ public class PackageTrackerTest {
     @After
     public void tearDown() throws Exception {
         if (mPackageStatusStorage != null) {
-            mPackageStatusStorage.deleteDatabaseForTests();
+            mPackageStatusStorage.deleteFileForTests();
         }
     }
 
@@ -104,7 +107,7 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertNotInitialized();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
     }
 
     @Test
@@ -116,7 +119,7 @@ public class PackageTrackerTest {
         mPackageTracker.start();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         try {
             // This call should also not be allowed and will throw an exception if tracking is
@@ -126,7 +129,7 @@ public class PackageTrackerTest {
         } catch (IllegalStateException expected) {}
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
     }
 
     @Test
@@ -138,14 +141,14 @@ public class PackageTrackerTest {
         mPackageTracker.start();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Receiving a check result when tracking is disabled should cause the storage to be
         // reset.
         mPackageTracker.recordCheckResult(null /* checkToken */, true /* success */);
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Assert the storage was reset.
         checkPackageStorageStatusIsInitialOrReset();
@@ -163,13 +166,13 @@ public class PackageTrackerTest {
         mPackageTracker.start();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Receiving a check result when tracking is disabled should cause the storage to be reset.
         mPackageTracker.recordCheckResult(createArbitraryCheckToken(), true /* success */);
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Assert the storage was reset.
         checkPackageStorageStatusIsInitialOrReset();
@@ -192,29 +195,28 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertNotInitialized();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
     }
 
-    // TODO(nfuller): Uncomment or delete when it's clear what will happen with http://b/35995024
-    // @Test
-    // public void trackingEnabled_updateAppNotPrivileged() throws Exception {
-    //     // Set up device configuration.
-    //     configureTrackingEnabled();
-    //     configureReliabilityConfigSettingsOk();
-    //     configureUpdateAppPackageNotPrivileged(UPDATE_APP_PACKAGE_NAME);
-    //     configureDataAppPackageOk(DATA_APP_PACKAGE_NAME);
-    //
-    //     try {
-    //         // Initialize the tracker.
-    //         mPackageTracker.start();
-    //         fail();
-    //     } catch (RuntimeException expected) {}
-    //
-    //     mFakeIntentHelper.assertNotInitialized();
-    //
-    //     // Check reliability triggering state.
-    //     mFakeIntentHelper.assertReliabilityTriggeringDisabled();
-    // }
+    @Test
+    public void trackingEnabled_updateAppNotPrivileged() throws Exception {
+        // Set up device configuration.
+        configureTrackingEnabled();
+        configureReliabilityConfigSettingsOk();
+        configureUpdateAppPackageNotPrivileged(UPDATE_APP_PACKAGE_NAME);
+        configureDataAppPackageOk(DATA_APP_PACKAGE_NAME);
+
+        try {
+            // Initialize the tracker.
+            mPackageTracker.start();
+            fail();
+        } catch (RuntimeException expected) {}
+
+        mFakeIntentHelper.assertNotInitialized();
+
+        // Check reliability triggering state.
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
+    }
 
     @Test
     public void trackingEnabled_dataAppConfigMissing() throws Exception {
@@ -233,29 +235,28 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertNotInitialized();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
     }
 
-    // TODO(nfuller): Uncomment or delete when it's clear what will happen with http://b/35995024
-    // @Test
-    // public void trackingEnabled_dataAppNotPrivileged() throws Exception {
-    //     // Set up device configuration.
-    //     configureTrackingEnabled();
-    //     configureReliabilityConfigSettingsOk();
-    //     configureUpdateAppPackageOk(UPDATE_APP_PACKAGE_NAME);
-    //     configureDataAppPackageNotPrivileged(DATA_APP_PACKAGE_NAME);
-    //
-    //     try {
-    //         // Initialize the tracker.
-    //         mPackageTracker.start();
-    //         fail();
-    //     } catch (RuntimeException expected) {}
-    //
-    //     mFakeIntentHelper.assertNotInitialized();
-    //
-    //     // Check reliability triggering state.
-    //     mFakeIntentHelper.assertReliabilityTriggeringDisabled();
-    // }
+    @Test
+    public void trackingEnabled_dataAppNotPrivileged() throws Exception {
+        // Set up device configuration.
+        configureTrackingEnabled();
+        configureReliabilityConfigSettingsOk();
+        configureUpdateAppPackageOk(UPDATE_APP_PACKAGE_NAME);
+        configureDataAppPackageNotPrivileged(DATA_APP_PACKAGE_NAME);
+
+        try {
+            // Initialize the tracker.
+            mPackageTracker.start();
+            fail();
+        } catch (RuntimeException expected) {}
+
+        mFakeIntentHelper.assertNotInitialized();
+
+        // Check reliability triggering state.
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
+     }
 
     @Test
     public void trackingEnabled_packageUpdate_badUpdateAppManifestEntry() throws Exception {
@@ -288,7 +289,7 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertUpdateNotTriggered();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Assert the storage was not touched.
         checkPackageStorageStatusIsInitialOrReset();
@@ -324,7 +325,7 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertUpdateNotTriggered();
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Assert the storage was not touched.
         checkPackageStorageStatusIsInitialOrReset();
@@ -415,7 +416,7 @@ public class PackageTrackerTest {
         mPackageTracker.recordCheckResult(null /* checkToken */, success);
 
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Assert the storage was reset.
         checkPackageStorageStatusIsInitialOrReset();
@@ -626,7 +627,7 @@ public class PackageTrackerTest {
         mPackageTracker.recordCheckResult(token1, true /* success */);
 
         // Reliability triggering should still be enabled.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Check the expected storage state.
         checkPackageStorageStatus(PackageStatus.CHECK_STARTED, packageVersions2);
@@ -742,7 +743,7 @@ public class PackageTrackerTest {
 
         // Under the covers we expect it to fail to update because the storage should recognize that
         // the token is no longer valid.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Peek inside the package tracker to make sure it is tracking failure counts properly.
         assertEquals(1, mPackageTracker.getCheckFailureCountForTests());
@@ -765,7 +766,7 @@ public class PackageTrackerTest {
         checkPackageStorageStatusIsInitialOrReset();
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did trigger an update.
         checkUpdateCheckTriggered(packageVersions);
@@ -802,7 +803,7 @@ public class PackageTrackerTest {
         checkPackageStorageStatus(PackageStatus.CHECK_COMPLETED_SUCCESS, packageVersions);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did not attempt to trigger an update.
         mFakeIntentHelper.assertUpdateNotTriggered();
@@ -842,7 +843,7 @@ public class PackageTrackerTest {
         checkPackageStorageStatus(PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did trigger an update.
         checkUpdateCheckTriggered(currentPackageVersions);
@@ -889,7 +890,7 @@ public class PackageTrackerTest {
 
         for (int i = 0; i < retriesAllowed + 1; i++) {
             // Simulate a reliability trigger.
-            mFakeIntentHelper.simulateReliabilityTrigger();
+            mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
             // Assert the PackageTracker did trigger an update.
             checkUpdateCheckTriggered(currentPackageVersions);
@@ -911,9 +912,9 @@ public class PackageTrackerTest {
 
             // Check reliability triggering is in the correct state.
             if (i <= retriesAllowed) {
-                mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+                mFakeIntentHelper.assertReliabilityTriggerScheduled();
             } else {
-                mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+                mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
             }
         }
     }
@@ -949,7 +950,7 @@ public class PackageTrackerTest {
         // Fail (retries - 1) times.
         for (int i = 0; i < retriesAllowed - 1; i++) {
             // Simulate a reliability trigger.
-            mFakeIntentHelper.simulateReliabilityTrigger();
+            mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
             // Assert the PackageTracker did trigger an update.
             checkUpdateCheckTriggered(currentPackageVersions);
@@ -970,11 +971,11 @@ public class PackageTrackerTest {
                     currentPackageVersions);
 
             // Check reliability triggering is still enabled.
-            mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+            mFakeIntentHelper.assertReliabilityTriggerScheduled();
         }
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did trigger an update.
         checkUpdateCheckTriggered(currentPackageVersions);
@@ -1022,7 +1023,7 @@ public class PackageTrackerTest {
         checkPackageStorageStatus(PackageStatus.CHECK_COMPLETED_FAILURE, oldPackageVersions);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did trigger an update.
         checkUpdateCheckTriggered(currentPackageVersions);
@@ -1032,18 +1033,18 @@ public class PackageTrackerTest {
         mFakeClock.incrementClock(checkDelayMillis - 1);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did not trigger an update.
         mFakeIntentHelper.assertUpdateNotTriggered();
         checkPackageStorageStatus(PackageStatus.CHECK_STARTED, currentPackageVersions);
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Increment the clock slightly more. Should now consider the response overdue.
         mFakeClock.incrementClock(2);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Triggering should have happened.
         checkUpdateCheckTriggered(currentPackageVersions);
@@ -1095,7 +1096,7 @@ public class PackageTrackerTest {
         mFakeClock.incrementClock(checkDelayMillis + 1);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker triggered an update.
         checkUpdateCheckTriggered(newPackageVersions);
@@ -1153,18 +1154,18 @@ public class PackageTrackerTest {
         mFakeClock.incrementClock(checkDelayMillis - 1);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Assert the PackageTracker did not trigger an update.
         mFakeIntentHelper.assertUpdateNotTriggered();
         checkPackageStorageStatus(PackageStatus.CHECK_STARTED, newPackageVersions);
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Increment the clock slightly more. Should now consider the response overdue.
         mFakeClock.incrementClock(2);
 
         // Simulate a reliability trigger.
-        mFakeIntentHelper.simulateReliabilityTrigger();
+        mPackageTracker.triggerUpdateIfNeeded(false /* packageChanged */);
 
         // Triggering should have happened.
         checkUpdateCheckTriggered(newPackageVersions);
@@ -1172,6 +1173,16 @@ public class PackageTrackerTest {
 
         // Check a new token was generated.
         assertFalse(token1.equals(token2));
+    }
+
+    @Test
+    public void dump() {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        mPackageTracker.dump(printWriter);
+
+        assertFalse(stringWriter.toString().isEmpty());
     }
 
     private void simulatePackageInstallation(PackageVersions packageVersions) throws Exception {
@@ -1191,7 +1202,7 @@ public class PackageTrackerTest {
 
         // If an update check was triggered reliability triggering should always be enabled to
         // ensure that it can be completed if it fails.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Check the expected storage state.
         checkPackageStorageStatus(PackageStatus.CHECK_STARTED, packageVersions);
@@ -1199,7 +1210,7 @@ public class PackageTrackerTest {
 
     private void checkUpdateCheckFailed(PackageVersions packageVersions) {
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
 
         // Assert the storage was updated.
         checkPackageStorageStatus(PackageStatus.CHECK_COMPLETED_FAILURE, packageVersions);
@@ -1207,7 +1218,7 @@ public class PackageTrackerTest {
 
     private void checkUpdateCheckSuccessful(PackageVersions packageVersions) {
         // Check reliability triggering state.
-        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+        mFakeIntentHelper.assertReliabilityTriggerNotScheduled();
 
         // Assert the storage was updated.
         checkPackageStorageStatus(PackageStatus.CHECK_COMPLETED_SUCCESS, packageVersions);
@@ -1334,7 +1345,7 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertInitialized(UPDATE_APP_PACKAGE_NAME, DATA_APP_PACKAGE_NAME);
 
         // Assert that reliability tracking is always enabled after initialization.
-        mFakeIntentHelper.assertReliabilityTriggeringEnabled();
+        mFakeIntentHelper.assertReliabilityTriggerScheduled();
     }
 
     private void checkPackageStorageStatus(
@@ -1357,34 +1368,34 @@ public class PackageTrackerTest {
      */
     private static class FakeIntentHelper implements IntentHelper {
 
-        private Listener mListener;
+        private PackageTracker mPackageTracker;
         private String mUpdateAppPackageName;
         private String mDataAppPackageName;
 
         private CheckToken mLastToken;
 
-        private boolean mReliabilityTriggeringEnabled;
+        private boolean mReliabilityTriggerScheduled;
 
         @Override
         public void initialize(String updateAppPackageName, String dataAppPackageName,
-                Listener listener) {
+                PackageTracker packageTracker) {
             assertNotNull(updateAppPackageName);
             assertNotNull(dataAppPackageName);
-            assertNotNull(listener);
-            mListener = listener;
+            assertNotNull(packageTracker);
+            mPackageTracker = packageTracker;
             mUpdateAppPackageName = updateAppPackageName;
             mDataAppPackageName = dataAppPackageName;
         }
 
         public void assertInitialized(
                 String expectedUpdateAppPackageName, String expectedDataAppPackageName) {
-            assertNotNull(mListener);
+            assertNotNull(mPackageTracker);
             assertEquals(expectedUpdateAppPackageName, mUpdateAppPackageName);
             assertEquals(expectedDataAppPackageName, mDataAppPackageName);
         }
 
         public void assertNotInitialized() {
-            assertNull(mListener);
+            assertNull(mPackageTracker);
         }
 
         @Override
@@ -1396,21 +1407,21 @@ public class PackageTrackerTest {
         }
 
         @Override
-        public void enableReliabilityTriggering() {
-            mReliabilityTriggeringEnabled = true;
+        public void scheduleReliabilityTrigger(long minimumDelayMillis) {
+            mReliabilityTriggerScheduled = true;
         }
 
         @Override
-        public void disableReliabilityTriggering() {
-            mReliabilityTriggeringEnabled = false;
+        public void unscheduleReliabilityTrigger() {
+            mReliabilityTriggerScheduled = false;
         }
 
-        public void assertReliabilityTriggeringEnabled() {
-            assertTrue(mReliabilityTriggeringEnabled);
+        public void assertReliabilityTriggerScheduled() {
+            assertTrue(mReliabilityTriggerScheduled);
         }
 
-        public void assertReliabilityTriggeringDisabled() {
-            assertFalse(mReliabilityTriggeringEnabled);
+        public void assertReliabilityTriggerNotScheduled() {
+            assertFalse(mReliabilityTriggerScheduled);
         }
 
         public void assertUpdateTriggered() {
@@ -1429,11 +1440,7 @@ public class PackageTrackerTest {
         }
 
         public void simulatePackageUpdatedEvent() {
-            mListener.triggerUpdateIfNeeded(true);
-        }
-
-        public void simulateReliabilityTrigger() {
-            mListener.triggerUpdateIfNeeded(false);
+            mPackageTracker.triggerUpdateIfNeeded(true /* packageChanged */);
         }
     }
 

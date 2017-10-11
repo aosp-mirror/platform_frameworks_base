@@ -81,7 +81,7 @@ interface IWifiManager
 
     boolean disableNetwork(int netId);
 
-    void startScan(in ScanSettings requested, in WorkSource ws);
+    void startScan(in ScanSettings requested, in WorkSource ws, in String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
@@ -131,6 +131,14 @@ interface IWifiManager
 
     boolean stopSoftAp();
 
+    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, in String packageName);
+
+    void stopLocalOnlyHotspot();
+
+    void startWatchLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+
+    void stopWatchLocalOnlyHotspot();
+
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
@@ -143,7 +151,7 @@ interface IWifiManager
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
 
-    String getWpsNfcConfigurationToken(int netId);
+    String getCurrentNetworkWpsNfcConfigurationToken();
 
     void enableVerboseLogging(int verbose);
 

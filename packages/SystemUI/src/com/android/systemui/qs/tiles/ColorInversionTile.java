@@ -19,16 +19,19 @@ package com.android.systemui.qs.tiles;
 import android.content.Intent;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.SecureSetting;
 
 /** Quick settings tile: Invert colors **/
-public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
+public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     private final AnimationIcon mEnable
             = new AnimationIcon(R.drawable.ic_invert_colors_enable_animation,
@@ -40,7 +43,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     private boolean mListening;
 
-    public ColorInversionTile(Host host) {
+    public ColorInversionTile(QSHost host) {
         super(host);
 
         mSetting = new SecureSetting(mContext, mHandler,
@@ -81,7 +84,6 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mSetting.setValue(mState.value ? 0 : 1);
     }
 
@@ -95,10 +97,10 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
         state.value = enabled;
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
     }
 

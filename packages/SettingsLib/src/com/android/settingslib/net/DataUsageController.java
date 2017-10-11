@@ -32,7 +32,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
-import com.android.settingslib.R;
+import com.android.internal.R;
 
 import java.util.Date;
 import java.util.Locale;

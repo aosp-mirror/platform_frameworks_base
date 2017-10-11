@@ -20,12 +20,12 @@
 #define LOG_TAG "AudioEffects-JNI"
 
 #include <utils/Log.h>
-#include <nativehelper/jni.h>
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "media/AudioEffect.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 
@@ -86,6 +86,7 @@ static jint translateError(int code) {
     case NO_MEMORY:
         return AUDIOEFFECT_ERROR_NO_MEMORY;
     case DEAD_OBJECT:
+    case FAILED_TRANSACTION: // Hidl crash shows as FAILED_TRANSACTION: -2147483646
         return AUDIOEFFECT_ERROR_DEAD_OBJECT;
     default:
         return AUDIOEFFECT_ERROR;
@@ -352,7 +353,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
                                     effectCallback,
                                     &lpJniStorage->mCallbackData,
                                     (audio_session_t) sessionId,
-                                    0);
+                                    AUDIO_IO_HANDLE_NONE);
     if (lpAudioEffect == 0) {
         ALOGE("Error creating AudioEffect");
         goto setup_failure;

@@ -24,9 +24,9 @@
 #include <core_jni_helpers.h>
 #include <jni.h>
 
-#include <ScopedUtfChars.h>
-#include <ScopedLocalRef.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <utils/Log.h>
 #include <utils/misc.h>

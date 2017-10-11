@@ -18,6 +18,7 @@ package com.android.systemui.stackdivider;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -51,6 +52,7 @@ public class DividerWindowManager {
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL
                         | FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
+        mLp.token = new Binder();
         mLp.setTitle(WINDOW_TITLE);
         mLp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN

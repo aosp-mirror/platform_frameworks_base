@@ -16,6 +16,9 @@
 
 package com.android.server.usb;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
@@ -24,13 +27,12 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -59,26 +61,50 @@ public class UsbHostManager {
     private ArrayList<UsbEndpoint> mNewEndpoints;
 
     private final UsbAlsaManager mUsbAlsaManager;
+    private final UsbSettingsManager mSettingsManager;
 
     @GuardedBy("mLock")
-    private UsbSettingsManager mCurrentSettings;
+    private UsbProfileGroupSettingsManager mCurrentSettings;
 
-    public UsbHostManager(Context context, UsbAlsaManager alsaManager) {
+    @GuardedBy("mLock")
+    private ComponentName mUsbDeviceConnectionHandler;
+
+    public UsbHostManager(Context context, UsbAlsaManager alsaManager,
+            UsbSettingsManager settingsManager) {
         mContext = context;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
         mUsbAlsaManager = alsaManager;
+        mSettingsManager = settingsManager;
+        String deviceConnectionHandler = context.getResources().getString(
+                com.android.internal.R.string.config_UsbDeviceConnectionHandling_component);
+        if (!TextUtils.isEmpty(deviceConnectionHandler)) {
+            setUsbDeviceConnectionHandler(ComponentName.unflattenFromString(
+                    deviceConnectionHandler));
+        }
     }
 
-    public void setCurrentSettings(UsbSettingsManager settings) {
+    public void setCurrentUserSettings(UsbProfileGroupSettingsManager settings) {
         synchronized (mLock) {
             mCurrentSettings = settings;
         }
     }
 
-    private UsbSettingsManager getCurrentSettings() {
+    private UsbProfileGroupSettingsManager getCurrentUserSettings() {
         synchronized (mLock) {
             return mCurrentSettings;
+        }
+    }
+
+    public void setUsbDeviceConnectionHandler(@Nullable ComponentName usbDeviceConnectionHandler) {
+        synchronized (mLock) {
+            mUsbDeviceConnectionHandler = usbDeviceConnectionHandler;
+        }
+    }
+
+    private @Nullable ComponentName getUsbDeviceConnectionHandler() {
+        synchronized (mLock) {
+            return mUsbDeviceConnectionHandler;
         }
     }
 
@@ -219,10 +245,20 @@ public class UsbHostManager {
         synchronized (mLock) {
             if (mNewDevice != null) {
                 mNewDevice.setConfigurations(
-                        mNewConfigurations.toArray(new UsbConfiguration[mNewConfigurations.size()]));
+                        mNewConfigurations.toArray(
+                                new UsbConfiguration[mNewConfigurations.size()]));
                 mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
                 Slog.d(TAG, "Added device " + mNewDevice);
-                getCurrentSettings().deviceAttached(mNewDevice);
+
+                // It is fine to call this only for the current user as all broadcasts are sent to
+                // all profiles of the user and the dialogs should only show once.
+                ComponentName usbDeviceConnectionHandler = getUsbDeviceConnectionHandler();
+                if (usbDeviceConnectionHandler == null) {
+                    getCurrentUserSettings().deviceAttached(mNewDevice);
+                } else {
+                    getCurrentUserSettings().deviceAttachedForFixedHandler(mNewDevice,
+                            usbDeviceConnectionHandler);
+                }
                 mUsbAlsaManager.usbDeviceAdded(mNewDevice);
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
@@ -242,7 +278,8 @@ public class UsbHostManager {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
                 mUsbAlsaManager.usbDeviceRemoved(device);
-                getCurrentSettings().deviceDetached(device);
+                mSettingsManager.usbDeviceRemoved(device);
+                getCurrentUserSettings().usbDeviceRemoved(device);
             }
         }
     }
@@ -270,7 +307,7 @@ public class UsbHostManager {
     }
 
     /* Opens the specified USB device */
-    public ParcelFileDescriptor openDevice(String deviceName) {
+    public ParcelFileDescriptor openDevice(String deviceName, UsbUserSettingsManager settings) {
         synchronized (mLock) {
             if (isBlackListed(deviceName)) {
                 throw new SecurityException("USB device is on a restricted bus");
@@ -281,7 +318,7 @@ public class UsbHostManager {
                 throw new IllegalArgumentException(
                         "device " + deviceName + " does not exist or is restricted");
             }
-            getCurrentSettings().checkPermission(device);
+            settings.checkPermission(device);
             return nativeOpenDevice(deviceName);
         }
     }
@@ -291,6 +328,9 @@ public class UsbHostManager {
             pw.println("USB Host State:");
             for (String name : mDevices.keySet()) {
                 pw.println("  " + name + ": " + mDevices.get(name));
+            }
+            if (mUsbDeviceConnectionHandler != null) {
+                pw.println("Default USB Host Connection handler: " + mUsbDeviceConnectionHandler);
             }
         }
     }

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_PATCH_CACHE_H
-#define ANDROID_HWUI_PATCH_CACHE_H
+#pragma once
 
 #include <GLES2/gl2.h>
 
@@ -23,7 +22,6 @@
 
 #include <androidfw/ResourceTypes.h>
 
-#include "AssetAtlas.h"
 #include "Debug.h"
 #include "utils/Pair.h"
 
@@ -48,15 +46,14 @@ class Patch;
 ///////////////////////////////////////////////////////////////////////////////
 
 class Caches;
+class RenderState;
 
 class PatchCache {
 public:
     explicit PatchCache(RenderState& renderState);
     ~PatchCache();
-    void init();
 
-    const Patch* get(const AssetAtlas::Entry* entry,
-            const uint32_t bitmapWidth, const uint32_t bitmapHeight,
+    const Patch* get(const uint32_t bitmapWidth, const uint32_t bitmapHeight,
             const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch);
     void clear();
 
@@ -70,10 +67,6 @@ public:
 
     GLuint getMeshBuffer() const {
         return mMeshBuffer;
-    }
-
-    uint32_t getGenerationId() const {
-        return mGenerationId;
     }
 
     /**
@@ -178,8 +171,6 @@ private:
     // First available free block inside the mesh buffer
     BufferBlock* mFreeBlocks;
 
-    uint32_t mGenerationId;
-
     // Garbage tracking, required to handle GC events on the VM side
     Vector<Res_png_9patch*> mGarbage;
     mutable Mutex mLock;
@@ -187,5 +178,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_PATCH_CACHE_H

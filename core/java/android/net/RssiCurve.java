@@ -184,7 +184,7 @@ public class RssiCurve implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(start, bucketWidth, rssiBuckets, activeNetworkRssiBoost);
+        return Objects.hash(start, bucketWidth, activeNetworkRssiBoost) ^ Arrays.hashCode(rssiBuckets);
     }
 
     @Override

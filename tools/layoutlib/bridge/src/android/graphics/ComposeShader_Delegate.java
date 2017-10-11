@@ -63,22 +63,17 @@ public class ComposeShader_Delegate extends Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nativeCreate1(long native_shaderA, long native_shaderB,
-            long native_mode) {
+    /*package*/ static long nativeCreate(long nativeMatrix, long native_shaderA,
+            long native_shaderB, int native_mode) {
         // FIXME not supported yet.
-        ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
-        return sManager.addNewDelegate(newDelegate);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static long nativeCreate2(long native_shaderA, long native_shaderB,
-            int porterDuffMode) {
-        // FIXME not supported yet.
-        ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
+        ComposeShader_Delegate newDelegate = new ComposeShader_Delegate(nativeMatrix);
         return sManager.addNewDelegate(newDelegate);
     }
 
 
     // ---- Private delegate/helper methods ----
 
+    private ComposeShader_Delegate(long nativeMatrix) {
+        super(nativeMatrix);
+    }
 }

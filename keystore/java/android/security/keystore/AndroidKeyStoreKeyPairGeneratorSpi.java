@@ -18,6 +18,7 @@ package android.security.keystore;
 
 import android.annotation.Nullable;
 import android.security.Credentials;
+import android.security.GateKeeper;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
@@ -346,7 +347,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         mSpec.isUserAuthenticationRequired(),
                         mSpec.getUserAuthenticationValidityDurationSeconds(),
                         mSpec.isUserAuthenticationValidWhileOnBody(),
-                        mSpec.isInvalidatedByBiometricEnrollment());
+                        mSpec.isInvalidatedByBiometricEnrollment(),
+                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -533,7 +535,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 mSpec.isUserAuthenticationRequired(),
                 mSpec.getUserAuthenticationValidityDurationSeconds(),
                 mSpec.isUserAuthenticationValidWhileOnBody(),
-                mSpec.isInvalidatedByBiometricEnrollment());
+                mSpec.isInvalidatedByBiometricEnrollment(),
+                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart());
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
                 mSpec.getKeyValidityForOriginationEnd());

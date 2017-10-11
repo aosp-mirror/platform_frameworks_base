@@ -25,12 +25,12 @@ import android.util.Log;
 
 
 /**
- * AmrInputStream
+ * DO NOT USE
  * @hide
  */
 public final class AmrInputStream extends InputStream {
     private final static String TAG = "AmrInputStream";
-    
+
     // frame is 20 msec at 8.000 khz
     private final static int SAMPLES_PER_FRAME = 8000 * 20 / 1000;
 
@@ -51,10 +51,10 @@ public final class AmrInputStream extends InputStream {
     private byte[] mOneByte = new byte[1];
 
     /**
-     * Create a new AmrInputStream, which converts 16 bit PCM to AMR
-     * @param inputStream InputStream containing 16 bit PCM.
+     * DO NOT USE - use MediaCodec instead
      */
     public AmrInputStream(InputStream inputStream) {
+        Log.w(TAG, "@@@@ AmrInputStream is not a public API @@@@");
         mInputStream = inputStream;
 
         MediaFormat format  = new MediaFormat();
@@ -83,17 +83,26 @@ public final class AmrInputStream extends InputStream {
         mInfo = new BufferInfo();
     }
 
+    /**
+     * DO NOT USE
+     */
     @Override
     public int read() throws IOException {
         int rtn = read(mOneByte, 0, 1);
         return rtn == 1 ? (0xff & mOneByte[0]) : -1;
     }
 
+    /**
+     * DO NOT USE
+     */
     @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
+    /**
+     * DO NOT USE
+     */
     @Override
     public int read(byte[] b, int offset, int length) throws IOException {
         if (mCodec == null) {
@@ -131,19 +140,15 @@ public final class AmrInputStream extends InputStream {
                 }
             }
 
-            // now read encoded data from the encoder (blocking, since we just filled up the
-            // encoder's input with data it should be able to output at least one buffer)
-            while (true) {
-                int index = mCodec.dequeueOutputBuffer(mInfo, -1);
-                if (index >= 0) {
-                    mBufIn = mInfo.size;
-                    ByteBuffer out = mCodec.getOutputBuffer(index);
-                    out.get(mBuf, 0 /* offset */, mBufIn /* length */);
-                    mCodec.releaseOutputBuffer(index,  false /* render */);
-                    if ((mInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                        mSawOutputEOS = true;
-                    }
-                    break;
+            // now read encoded data from the encoder
+            int index = mCodec.dequeueOutputBuffer(mInfo, 0);
+            if (index >= 0) {
+                mBufIn = mInfo.size;
+                ByteBuffer out = mCodec.getOutputBuffer(index);
+                out.get(mBuf, 0 /* offset */, mBufIn /* length */);
+                mCodec.releaseOutputBuffer(index,  false /* render */);
+                if ((mInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    mSawOutputEOS = true;
                 }
             }
         }

@@ -18,7 +18,7 @@
 #undef LOG_TAG
 #define LOG_TAG "DdmHandleNativeHeap"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <jni.h>
 #include "core_jni_helpers.h"
 

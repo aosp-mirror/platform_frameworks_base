@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TREEINFO_H
-#define TREEINFO_H
+
+#pragma once
 
 #include "utils/Macros.h"
 
@@ -31,7 +31,6 @@ class CanvasContext;
 
 class DamageAccumulator;
 class LayerUpdateQueue;
-class OpenGLRenderer;
 class RenderNode;
 class RenderState;
 
@@ -48,9 +47,9 @@ public:
     // Due to the unordered nature of tree pushes, once prepareTree
     // is finished it is possible that the node was "resurrected" and has
     // a non-zero parent count.
-    virtual void onMaybeRemovedFromTree(RenderNode* node) {}
+    virtual void onMaybeRemovedFromTree(RenderNode* node) = 0;
 protected:
-    ~TreeObserver() {}
+    virtual ~TreeObserver() {}
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -89,21 +88,9 @@ public:
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator = nullptr;
 
-#if HWUI_NEW_OPS
     LayerUpdateQueue* layerUpdateQueue = nullptr;
-#else
-    // The renderer that will be drawing the next frame. Use this to push any
-    // layer updates or similar. May be NULL.
-    OpenGLRenderer* renderer = nullptr;
-#endif
     ErrorHandler* errorHandler = nullptr;
 
-    // Optional, may be nullptr. Used to allow things to observe interesting
-    // tree state changes
-    TreeObserver* observer = nullptr;
-
-    int32_t windowInsetLeft = 0;
-    int32_t windowInsetTop = 0;
     bool updateWindowPositions = false;
 
     struct Out {
@@ -123,10 +110,11 @@ public:
         bool canDrawThisFrame = true;
     } out;
 
+    // This flag helps to disable projection for receiver nodes that do not have any backward
+    // projected children.
+    bool hasBackwardProjectedNodes = false;
     // TODO: Damage calculations
 };
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* TREEINFO_H */

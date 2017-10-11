@@ -17,15 +17,15 @@
 package com.android.server.fingerprint;
 
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.Arrays;
 
@@ -78,9 +78,9 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public int start() {
-        IFingerprintDaemon daemon = getFingerprintDaemon();
+        IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "enroll: no fingeprintd!");
+            Slog.w(TAG, "enroll: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
@@ -89,7 +89,7 @@ public abstract class EnrollClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(TAG, "startEnroll failed, result=" + result);
                 MetricsLogger.histogram(getContext(), "fingerprintd_enroll_start_error", result);
-                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -100,13 +100,17 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
-        IFingerprintDaemon daemon = getFingerprintDaemon();
+        if (mAlreadyCancelled) {
+            Slog.w(TAG, "stopEnroll: already cancelled!");
+            return 0;
+        }
+        IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "stopEnrollment: no fingeprintd!");
+            Slog.w(TAG, "stopEnrollment: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
         try {
-            final int result = daemon.cancelEnrollment();
+            final int result = daemon.cancel();
             if (result != 0) {
                 Slog.w(TAG, "startEnrollCancel failed, result = " + result);
                 return result;
@@ -115,19 +119,20 @@ public abstract class EnrollClient extends ClientMonitor {
             Slog.e(TAG, "stopEnrollment failed", e);
         }
         if (initiatedByClient) {
-            onError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
+            onError(FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /* vendorCode */);
         }
+        mAlreadyCancelled = true;
         return 0;
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId) {
+    public boolean onRemoved(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onRemoved() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId) {
+    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for enroll!");
         return true; // Invalid for EnrollClient
     }

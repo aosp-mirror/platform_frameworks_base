@@ -807,7 +807,6 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object on which the setter (and possibly getter) exist.
      */
     void setupSetterAndGetter(Object target) {
-        mKeyframes.invalidateCache();
         if (mProperty != null) {
             // check to make sure that mProperty is on the class of target
             try {

@@ -97,8 +97,8 @@ public class ScoAudioTest extends Activity {
         
         setContentView(R.layout.scoaudiotest);
 
-        mScoStateTxt = (TextView) findViewById(R.id.scoStateTxt);
-        mVdStateTxt = (TextView) findViewById(R.id.vdStateTxt);
+        mScoStateTxt = findViewById(R.id.scoStateTxt);
+        mVdStateTxt = findViewById(R.id.vdStateTxt);
 
         IntentFilter intentFilter =
             new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
@@ -112,7 +112,7 @@ public class ScoAudioTest extends Activity {
         
         mMediaControllers[0] = new SimplePlayerController(this, R.id.playPause1, R.id.stop1,
                 R.raw.sine440_mo_16b_16k, AudioManager.STREAM_BLUETOOTH_SCO);
-        TextView name = (TextView) findViewById(R.id.playPause1Text);
+        TextView name = findViewById(R.id.playPause1Text);
         name.setText("VOICE_CALL stream");
         
         mScoButton = (ToggleButton)findViewById(R.id.ForceScoButton);
@@ -135,7 +135,7 @@ public class ScoAudioTest extends Activity {
         mTtsParams.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,
                 UTTERANCE);
 
-        mSpeakText = (EditText) findViewById(R.id.speakTextEdit);        
+        mSpeakText = findViewById(R.id.speakTextEdit);
         mSpeakText.setOnKeyListener(mSpeakKeyListener);
         mSpeakText.setText("sco audio test sentence");
         mTtsToFileButton = (ToggleButton)findViewById(R.id.TtsToFileButton);
@@ -143,7 +143,7 @@ public class ScoAudioTest extends Activity {
         mTtsToFile = true;
         mTtsToFileButton.setChecked(mTtsToFile);
 
-        mModeSpinner = (Spinner) findViewById(R.id.modeSpinner);
+        mModeSpinner = findViewById(R.id.modeSpinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, mModeStrings);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -208,12 +208,12 @@ public class ScoAudioTest extends Activity {
                 mForceScoOn = isChecked;
                 AudioManager mngr = mAudioManager;
                 boolean useVirtualCall = false;
-                CheckBox box = (CheckBox) findViewById(R.id.useSecondAudioManager);
+                CheckBox box = findViewById(R.id.useSecondAudioManager);
                 if (box.isChecked()) {
                     Log.i(TAG, "Using 2nd audio manager");
                     mngr = mAudioManager2;
                 }
-                box = (CheckBox) findViewById(R.id.useVirtualCallCheckBox);
+                box = findViewById(R.id.useVirtualCallCheckBox);
                 useVirtualCall = box.isChecked();
 
                 if (mForceScoOn) {
@@ -278,8 +278,8 @@ public class ScoAudioTest extends Activity {
             mPlayPauseButtonId = playPausebuttonId;
             mStopButtonId = stopButtonId;
             mFileNameBase = fileName;
-            mPlayPauseButton = (ImageButton) findViewById(playPausebuttonId);
-            ImageButton stop = (ImageButton) findViewById(stopButtonId);
+            mPlayPauseButton = findViewById(playPausebuttonId);
+            ImageButton stop = findViewById(stopButtonId);
 
             mPlayPauseButton.setOnClickListener(this);
             mPlayPauseButton.requestFocus();
@@ -294,8 +294,8 @@ public class ScoAudioTest extends Activity {
             mStopButtonId = stopButtonId;
             mFileNameBase = "";
             mFileResId = fileResId;
-            mPlayPauseButton = (ImageButton) findViewById(playPausebuttonId);
-            ImageButton stop = (ImageButton) findViewById(stopButtonId);
+            mPlayPauseButton = findViewById(playPausebuttonId);
+            ImageButton stop = findViewById(stopButtonId);
 
             mPlayPauseButton.setOnClickListener(this);
             mPlayPauseButton.requestFocus();

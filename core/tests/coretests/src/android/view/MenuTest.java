@@ -16,20 +16,13 @@
 
 package android.view;
 
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.frameworks.coretests.R;
 import com.android.internal.view.menu.MenuBuilder;
 
 import junit.framework.Assert;
-
-import android.test.AndroidTestCase;
-import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.SubMenu;
-
-import com.android.frameworks.coretests.R;
 
 public class MenuTest extends AndroidTestCase {
 
@@ -84,80 +77,6 @@ public class MenuTest extends AndroidTestCase {
         //adding and removing, hiding and showing, etc.
     }
 
-    @SmallTest
-    public void testIsShortcutWithAlpha() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,  0)));
-        Assert.assertFalse(mMenu.isShortcutKey(KeyEvent.KEYCODE_B,
-                                               makeKeyEvent(KeyEvent.KEYCODE_B,  0)));
-    }
-
-    @SmallTest
-    public void testIsShortcutWithNumeric() throws Exception {
-        mMenu.setQwertyMode(false);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_2,
-                                              makeKeyEvent(KeyEvent.KEYCODE_2,  0)));
-        Assert.assertFalse(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                               makeKeyEvent(KeyEvent.KEYCODE_A,  0)));
-    }
-
-    @SmallTest
-    public void testIsShortcutWithAlt() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,
-                                                           KeyEvent.META_ALT_ON)));
-        Assert.assertFalse(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,
-                                                           KeyEvent.META_SYM_ON)));
-    }
-
-    @SmallTest
-    public void testIsNotShortcutWithShift() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertFalse(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,
-                                                           KeyEvent.META_SHIFT_ON)));
-    }
-
-    @SmallTest
-    public void testIsNotShortcutWithSym() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'a');
-        Assert.assertFalse(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,
-                                                           KeyEvent.META_SYM_ON)));
-    }
-    
-    @SmallTest
-    public void testIsShortcutWithUpperCaseAlpha() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', 'A');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_A,
-                                              makeKeyEvent(KeyEvent.KEYCODE_A,  0)));
-    }
-
-    @SmallTest
-    public void testIsShortcutWithBackspace() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', '\b');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_DEL,
-                                              makeKeyEvent(KeyEvent.KEYCODE_DEL,  0)));
-    }
-
-    @SmallTest
-    public void testIsShortcutWithNewline() throws Exception {
-        mMenu.setQwertyMode(true);
-        mMenu.add(0, 0, 0, "test").setShortcut('2', '\n');
-        Assert.assertTrue(mMenu.isShortcutKey(KeyEvent.KEYCODE_ENTER,
-                                              makeKeyEvent(KeyEvent.KEYCODE_ENTER,  0)));
-    }
-    
     @SmallTest
     public void testOrder() {
         final String a = "a", b = "b", c = "c";

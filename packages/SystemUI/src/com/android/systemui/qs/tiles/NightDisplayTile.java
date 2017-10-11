@@ -19,21 +19,24 @@ package com.android.systemui.qs.tiles;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.app.NightDisplayController;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 
-public class NightDisplayTile extends QSTile<QSTile.BooleanState>
+public class NightDisplayTile extends QSTileImpl<BooleanState>
         implements NightDisplayController.Callback {
 
     private NightDisplayController mController;
     private boolean mIsListening;
 
-    public NightDisplayTile(Host host) {
+    public NightDisplayTile(QSHost host) {
         super(host);
         mController = new NightDisplayController(mContext, ActivityManager.getCurrentUser());
     }
@@ -51,7 +54,6 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
     @Override
     protected void handleClick() {
         final boolean activated = !mState.value;
-        MetricsLogger.action(mContext, getMetricsCategory(), activated);
         mController.setActivated(activated);
     }
 
@@ -75,14 +77,12 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean isActivated = mController.isActivated();
         state.value = isActivated;
-        state.label = mContext.getString(R.string.quick_settings_night_display_label);
+        state.label = state.contentDescription =
+                mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(isActivated ? R.drawable.ic_qs_night_display_on
                 : R.drawable.ic_qs_night_display_off);
-        state.contentDescription = mContext.getString(isActivated
-                ? R.string.quick_settings_night_display_summary_on
-                : R.string.quick_settings_night_display_summary_off);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

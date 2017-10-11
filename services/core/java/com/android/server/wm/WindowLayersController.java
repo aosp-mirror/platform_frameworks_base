@@ -19,15 +19,16 @@ package com.android.server.wm;
 import android.util.Slog;
 import android.view.Display;
 
-import java.io.PrintWriter;
 import java.util.ArrayDeque;
+import java.util.function.Consumer;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
 
 /**
@@ -48,130 +49,108 @@ import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER
  * <li>replaced windows, which need to live above their normal level, because they anticipate
  * an animation</li>.
  */
-public class WindowLayersController {
+class WindowLayersController {
     private final WindowManagerService mService;
 
-    private int mInputMethodAnimLayerAdjustment;
-
-    public WindowLayersController(WindowManagerService service) {
+    WindowLayersController(WindowManagerService service) {
         mService = service;
     }
 
     private int mHighestApplicationLayer = 0;
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
+    private ArrayDeque<WindowState> mAssistantWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mInputMethodWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
+    private int mCurBaseLayer;
+    private int mCurLayer;
+    private boolean mAnyLayerChanged;
+    private int mHighestLayerInImeTargetBaseLayer;
+    private WindowState mImeTarget;
+    private boolean mAboveImeTarget;
+    private ArrayDeque<WindowState> mAboveImeTargetAppWindows = new ArrayDeque();
 
-    final void assignLayersLocked(WindowList windows) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
+    private final Consumer<WindowState> mAssignWindowLayersConsumer = w -> {
+        boolean layerChanged = false;
+
+        int oldLayer = w.mLayer;
+        if (w.mBaseLayer == mCurBaseLayer) {
+            mCurLayer += WINDOW_LAYER_MULTIPLIER;
+        } else {
+            mCurBaseLayer = mCurLayer = w.mBaseLayer;
+        }
+        assignAnimLayer(w, mCurLayer);
+
+        // TODO: Preserved old behavior of code here but not sure comparing oldLayer to
+        // mAnimLayer and mLayer makes sense...though the worst case would be unintentional
+        // layer reassignment.
+        if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
+            layerChanged = true;
+            mAnyLayerChanged = true;
+        }
+
+        if (w.mAppToken != null) {
+            mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
+                    w.mWinAnimator.mAnimLayer);
+        }
+        if (mImeTarget != null && w.mBaseLayer == mImeTarget.mBaseLayer) {
+            mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
+                    w.mWinAnimator.mAnimLayer);
+        }
+
+        collectSpecialWindows(w);
+
+        if (layerChanged) {
+            w.scheduleAnimationIfDimming();
+        }
+    };
+
+    final void assignWindowLayers(DisplayContent dc) {
+        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based",
                 new RuntimeException("here").fillInStackTrace());
 
-        clear();
-        int curBaseLayer = 0;
-        int curLayer = 0;
-        boolean anyLayerChanged = false;
-        for (int i = 0, windowCount = windows.size(); i < windowCount; i++) {
-            final WindowState w = windows.get(i);
-            boolean layerChanged = false;
-
-            int oldLayer = w.mLayer;
-            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i > 0 && w.mIsWallpaper)) {
-                curLayer += WINDOW_LAYER_MULTIPLIER;
-            } else {
-                curBaseLayer = curLayer = w.mBaseLayer;
-            }
-            assignAnimLayer(w, curLayer);
-
-            // TODO: Preserved old behavior of code here but not sure comparing
-            // oldLayer to mAnimLayer and mLayer makes sense...though the
-            // worst case would be unintentionalp layer reassignment.
-            if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
-                layerChanged = true;
-                anyLayerChanged = true;
-            }
-
-            if (w.mAppToken != null) {
-                mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
-                        w.mWinAnimator.mAnimLayer);
-            }
-            collectSpecialWindows(w);
-
-            if (layerChanged) {
-                w.scheduleAnimationIfDimming();
-            }
-        }
+        reset();
+        dc.forAllWindows(mAssignWindowLayersConsumer, false /* traverseTopToBottom */);
 
         adjustSpecialWindows();
 
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && anyLayerChanged
-                && windows.get(windows.size() - 1).getDisplayId() == Display.DEFAULT_DISPLAY) {
+        if (mService.mAccessibilityController != null && mAnyLayerChanged
+                && dc.getDisplayId() == DEFAULT_DISPLAY) {
             mService.mAccessibilityController.onWindowLayersChangedLocked();
         }
 
-        if (DEBUG_LAYERS) logDebugLayers(windows);
+        if (DEBUG_LAYERS) logDebugLayers(dc);
     }
 
-    void setInputMethodAnimLayerAdjustment(int adj) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
-        mInputMethodAnimLayerAdjustment = adj;
-        final WindowState imw = mService.mInputMethodWindow;
-        if (imw != null) {
-            imw.mWinAnimator.mAnimLayer = imw.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + imw.mWinAnimator.mAnimLayer);
-            for (int i = imw.mChildWindows.size() - 1; i >= 0; i--) {
-                final WindowState childWindow = imw.mChildWindows.get(i);
-                childWindow.mWinAnimator.mAnimLayer = childWindow.mLayer + adj;
-                if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + childWindow
-                        + " anim layer: " + childWindow.mWinAnimator.mAnimLayer);
-            }
-        }
-        for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
-            final WindowState dialog = mService.mInputMethodDialogs.get(i);
-            dialog.mWinAnimator.mAnimLayer = dialog.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + dialog.mWinAnimator.mAnimLayer);
-        }
-    }
-
-    int getSpecialWindowAnimLayerAdjustment(WindowState win) {
-        if (win.mIsImWindow) {
-            return mInputMethodAnimLayerAdjustment;
-        } else if (win.mIsWallpaper) {
-            return mService.mWallpaperControllerLocked.getAnimLayerAdjustment();
-        }
-        return 0;
-    }
-
-    /**
-     * @return The layer used for dimming the apps when dismissing docked/fullscreen stack. Just
-     *         above all application surfaces.
-     */
-    int getResizeDimLayer() {
-        return (mDockDivider != null) ? mDockDivider.mLayer - 1 : LAYER_OFFSET_DIM;
-    }
-
-    private void logDebugLayers(WindowList windows) {
-        for (int i = 0, n = windows.size(); i < n; i++) {
-            final WindowState w = windows.get(i);
+    private void logDebugLayers(DisplayContent dc) {
+        dc.forAllWindows((w) -> {
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             Slog.v(TAG_WM, "Assign layer " + w + ": " + "mBase=" + w.mBaseLayer
                     + " mLayer=" + w.mLayer + (w.mAppToken == null
-                    ? "" : " mAppLayer=" + w.mAppToken.mAppAnimator.animLayerAdjustment)
+                    ? "" : " mAppLayer=" + w.mAppToken.getAnimLayerAdjustment())
                     + " =mAnimLayer=" + winAnimator.mAnimLayer);
-        }
+        }, false /* traverseTopToBottom */);
     }
 
-    private void clear() {
+    private void reset() {
         mHighestApplicationLayer = 0;
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
         mDockedWindows.clear();
+        mAssistantWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
+
+        mCurBaseLayer = 0;
+        mCurLayer = 0;
+        mAnyLayerChanged = false;
+
+        mImeTarget = mService.mInputMethodTarget;
+        mHighestLayerInImeTargetBaseLayer = (mImeTarget != null) ? mImeTarget.mBaseLayer : 0;
+        mAboveImeTarget = false;
+        mAboveImeTargetAppWindows.clear();
     }
 
     private void collectSpecialWindows(WindowState w) {
@@ -186,7 +165,25 @@ public class WindowLayersController {
             mInputMethodWindows.add(w);
             return;
         }
-        final TaskStack stack = w.getStack();
+        if (mImeTarget != null) {
+            if (w.getParentWindow() == mImeTarget && w.mSubLayer > 0) {
+                // Child windows of the ime target with a positive sub-layer should be placed above
+                // the IME.
+                mAboveImeTargetAppWindows.add(w);
+            } else if (mAboveImeTarget && w.mAppToken != null) {
+                // windows of apps above the IME target should be placed above the IME.
+                mAboveImeTargetAppWindows.add(w);
+            }
+            if (w == mImeTarget) {
+                mAboveImeTarget = true;
+            }
+        }
+
+        final Task task = w.getTask();
+        if (task == null) {
+            return;
+        }
+        final TaskStack stack = task.mStack;
         if (stack == null) {
             return;
         }
@@ -194,6 +191,8 @@ public class WindowLayersController {
             mPinnedWindows.add(w);
         } else if (stack.mStackId == DOCKED_STACK_ID) {
             mDockedWindows.add(w);
+        } else if (stack.mStackId == ASSISTANT_STACK_ID) {
+            mAssistantWindows.add(w);
         }
     }
 
@@ -207,16 +206,6 @@ public class WindowLayersController {
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
 
-        if (mDockDivider != null && mDockDivider.isVisibleLw()) {
-            while (!mInputMethodWindows.isEmpty()) {
-                final WindowState w = mInputMethodWindows.remove();
-                // Only ever move IME windows up, else we brake IME for windows above the divider.
-                if (layer > w.mLayer) {
-                    layer = assignAndIncreaseLayerIfNeeded(w, layer);
-                }
-            }
-        }
-
         // We know that we will be animating a relaunching window in the near future, which will
         // receive a z-order increase. We want the replaced window to immediately receive the same
         // treatment, e.g. to be above the dock divider.
@@ -224,15 +213,41 @@ public class WindowLayersController {
             layer = assignAndIncreaseLayerIfNeeded(mReplacingWindows.remove(), layer);
         }
 
+        // Adjust the assistant stack windows to be above the docked and fullscreen stack windows,
+        // but under the pinned stack windows
+        while (!mAssistantWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mAssistantWindows.remove(), layer);
+        }
+
         while (!mPinnedWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mPinnedWindows.remove(), layer);
         }
+
+        // Make sure IME is the highest window in the base layer of it's target.
+        if (mImeTarget != null) {
+            if (mImeTarget.mAppToken == null) {
+                // For non-app ime targets adjust the layer we start from to match what we found
+                // when assigning layers. Otherwise, just use the highest app layer we have some far.
+                layer = mHighestLayerInImeTargetBaseLayer + WINDOW_LAYER_MULTIPLIER;
+            }
+
+            while (!mInputMethodWindows.isEmpty()) {
+                layer = assignAndIncreaseLayerIfNeeded(mInputMethodWindows.remove(), layer);
+            }
+
+            // Adjust app windows the should be displayed above the IME since they are above the IME
+            // target.
+            while (!mAboveImeTargetAppWindows.isEmpty()) {
+                layer = assignAndIncreaseLayerIfNeeded(mAboveImeTargetAppWindows.remove(), layer);
+            }
+        }
+
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
         if (win != null) {
             assignAnimLayer(win, layer);
-            // Make sure we leave space inbetween normal windows for dims and such.
+            // Make sure we leave space in-between normal windows for dims and such.
             layer += WINDOW_LAYER_MULTIPLIER;
         }
         return layer;
@@ -240,21 +255,22 @@ public class WindowLayersController {
 
     private void assignAnimLayer(WindowState w, int layer) {
         w.mLayer = layer;
-        w.mWinAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
-                    getSpecialWindowAnimLayerAdjustment(w);
-        if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0
-                && w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
-            w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
-        }
-    }
-
-    void dump(PrintWriter pw, String s) {
-        if (mInputMethodAnimLayerAdjustment != 0 ||
-                mService.mWallpaperControllerLocked.getAnimLayerAdjustment() != 0) {
-            pw.print("  mInputMethodAnimLayerAdjustment=");
-            pw.print(mInputMethodAnimLayerAdjustment);
-            pw.print("  mWallpaperAnimLayerAdjustment=");
-            pw.println(mService.mWallpaperControllerLocked.getAnimLayerAdjustment());
+        w.mWinAnimator.mAnimLayer = w.getAnimLayerAdjustment()
+                + w.getSpecialWindowAnimLayerAdjustment();
+        if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0) {
+            if (w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
+                w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
+            }
+            // TODO(b/62029108): the entire contents of the if statement should call the refactored
+            // function to set the thumbnail layer for w.AppToken
+            int highestLayer = w.mAppToken.getHighestAnimLayer();
+            if (highestLayer > 0) {
+                if (w.mAppToken.mAppAnimator.thumbnail != null
+                        && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer != highestLayer) {
+                    w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = highestLayer;
+                    w.mAppToken.mAppAnimator.thumbnail.setLayer(highestLayer + 1);
+                }
+            }
         }
     }
 }

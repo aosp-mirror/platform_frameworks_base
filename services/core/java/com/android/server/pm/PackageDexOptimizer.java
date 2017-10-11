@@ -22,11 +22,15 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.PowerManager;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -51,6 +55,8 @@ import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
+import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
+
 import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
 import static dalvik.system.DexFile.getSafeModeCompilerFilter;
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
@@ -65,13 +71,17 @@ public class PackageDexOptimizer {
     public static final int DEX_OPT_SKIPPED = 0;
     public static final int DEX_OPT_PERFORMED = 1;
     public static final int DEX_OPT_FAILED = -1;
+    // One minute over PM WATCHDOG_TIMEOUT
+    private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
     /** Special library name that skips shared libraries check during compilation. */
     public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
 
+    @GuardedBy("mInstallLock")
     private final Installer mInstaller;
     private final Object mInstallLock;
 
+    @GuardedBy("mInstallLock")
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
 
@@ -92,7 +102,17 @@ public class PackageDexOptimizer {
     }
 
     static boolean canOptimizePackage(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        // We do not dexopt a package with no code.
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+            return false;
+        }
+
+        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
+        if (pkg.isPrivilegedApp()) {
+            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
+        }
+
+        return true;
     }
 
     /**
@@ -110,21 +130,12 @@ public class PackageDexOptimizer {
             return DEX_OPT_SKIPPED;
         }
         synchronized (mInstallLock) {
-            // During boot the system doesn't need to instantiate and obtain a wake lock.
-            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
-            // dexopt.
-            final boolean useLock = mSystemReady;
-            if (useLock) {
-                mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
-                mDexoptWakeLock.acquire();
-            }
+            final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
                         targetCompilationFilter, packageStats, isUsedByOtherApps, bootComplete);
             } finally {
-                if (useLock) {
-                    mDexoptWakeLock.release();
-                }
+                releaseWakeLockLI(acquireTime);
             }
         }
     }
@@ -141,7 +152,7 @@ public class PackageDexOptimizer {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+        final List<String> paths = pkg.getAllCodePaths();
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
 
         final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
@@ -149,42 +160,38 @@ public class PackageDexOptimizer {
         final boolean profileUpdated = checkForProfileUpdates &&
                 isProfileUpdated(pkg, sharedGid, compilerFilter);
 
-        // TODO(calin,jeffhao): shared library paths should be adjusted to include previous code
-        // paths (b/34169257).
-        String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
+        final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         final int dexoptFlags = getDexFlags(pkg, compilerFilter, bootComplete);
+        // Get the dependencies of each split in the package. For each code path in the package,
+        // this array contains the relative paths of each split it depends on, separated by colons.
+        String[] splitDependencies = getSplitDependencies(pkg);
 
         int result = DEX_OPT_SKIPPED;
-        // TODO: Iterate based on dependency hierarchy (currently alphabetically by name)
-        // (b/37480811).
-        String basePathCheck = null;
-        for (String path : paths) {
+        for (int i = 0; i < paths.size(); i++) {
+            // Skip paths that have no code.
+            if ((i == 0 && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) ||
+                    (i != 0 && (pkg.splitFlags[i - 1] & ApplicationInfo.FLAG_HAS_CODE) == 0)) {
+                continue;
+            }
+            // Append shared libraries with split dependencies for this split.
+            String path = paths.get(i);
+            String sharedLibrariesPathWithSplits;
+            if (sharedLibrariesPath != null && splitDependencies[i] != null) {
+                sharedLibrariesPathWithSplits = sharedLibrariesPath + ":" + splitDependencies[i];
+            } else {
+                sharedLibrariesPathWithSplits =
+                        splitDependencies[i] != null ? splitDependencies[i] : sharedLibrariesPath;
+            }
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter, profileUpdated,
-                        sharedLibrariesPath, dexoptFlags, sharedGid, packageStats);
+                        sharedLibrariesPathWithSplits, dexoptFlags, sharedGid, packageStats);
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
                 //  - SKIPPED when all paths are up to date
                 if ((result != DEX_OPT_FAILED) && (newResult != DEX_OPT_SKIPPED)) {
                     result = newResult;
-                }
-                // Add the relative path of code we just compiled to the shared libraries.
-                int slashIndex = path.lastIndexOf('/') + 1;
-                String relativePath = path.substring(slashIndex);
-                if (sharedLibrariesPath == null) {
-                    sharedLibrariesPath = relativePath;
-                } else {
-                    sharedLibrariesPath += ":" + relativePath;
-                }
-                // Sanity check that the base paths are all the same.
-                String basePath = path.substring(0, slashIndex);
-                if (basePathCheck == null) {
-                    basePathCheck = basePath;
-                } else if (!basePath.equals(basePathCheck)) {
-                    Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
-                        basePathCheck);
                 }
             }
         }
@@ -223,7 +230,7 @@ public class PackageDexOptimizer {
             long startTime = System.currentTimeMillis();
 
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
-                    compilerFilter, pkg.volumeUuid, sharedLibrariesPath);
+                    compilerFilter, pkg.volumeUuid, sharedLibrariesPath, pkg.applicationInfo.seInfo);
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -253,41 +260,68 @@ public class PackageDexOptimizer {
     public int dexOptSecondaryDexPath(ApplicationInfo info, String path, Set<String> isas,
             String compilerFilter, boolean isUsedByOtherApps) {
         synchronized (mInstallLock) {
-            // During boot the system doesn't need to instantiate and obtain a wake lock.
-            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
-            // dexopt.
-            final boolean useLock = mSystemReady;
-            if (useLock) {
-                mDexoptWakeLock.setWorkSource(new WorkSource(info.uid));
-                mDexoptWakeLock.acquire();
-            }
+            final long acquireTime = acquireWakeLockLI(info.uid);
             try {
                 return dexOptSecondaryDexPathLI(info, path, isas, compilerFilter,
                         isUsedByOtherApps);
             } finally {
-                if (useLock) {
-                    mDexoptWakeLock.release();
-                }
+                releaseWakeLockLI(acquireTime);
             }
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private long acquireWakeLockLI(final int uid) {
+        // During boot the system doesn't need to instantiate and obtain a wake lock.
+        // PowerManager might not be ready, but that doesn't mean that we can't proceed with
+        // dexopt.
+        if (!mSystemReady) {
+            return -1;
+        }
+        mDexoptWakeLock.setWorkSource(new WorkSource(uid));
+        mDexoptWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+        return SystemClock.elapsedRealtime();
+    }
+
+    @GuardedBy("mInstallLock")
+    private void releaseWakeLockLI(final long acquireTime) {
+        if (acquireTime < 0) {
+            return;
+        }
+        try {
+            if (mDexoptWakeLock.isHeld()) {
+                mDexoptWakeLock.release();
+            }
+            final long duration = SystemClock.elapsedRealtime() - acquireTime;
+            if (duration >= WAKELOCK_TIMEOUT_MS) {
+                Slog.wtf(TAG, "WakeLock " + mDexoptWakeLock.getTag()
+                        + " time out. Operation took " + duration + " ms. Thread: "
+                        + Thread.currentThread().getName());
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Error while releasing " + mDexoptWakeLock.getTag() + " lock", e);
         }
     }
 
     @GuardedBy("mInstallLock")
     private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path, Set<String> isas,
             String compilerFilter, boolean isUsedByOtherApps) {
+        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
+        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         // Secondary dex files are currently not compiled at boot.
         int dexoptFlags = getDexFlags(info, compilerFilter, /* bootComplete */ true)
                 | DEXOPT_SECONDARY_DEX;
         // Check the app storage and add the appropriate flags.
-        if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+        if (info.deviceProtectedDataDir != null &&
+                FileUtils.contains(info.deviceProtectedDataDir, path)) {
             dexoptFlags |= DEXOPT_STORAGE_DE;
-        } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+        } else if (info.credentialProtectedDataDir != null &&
+                FileUtils.contains(info.credentialProtectedDataDir, path)) {
             dexoptFlags |= DEXOPT_STORAGE_CE;
         } else {
             Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
             return DEX_OPT_FAILED;
         }
-        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
         Log.d(TAG, "Running dexopt on: " + path
                 + " pkg=" + info.packageName + " isa=" + isas
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
@@ -301,7 +335,7 @@ public class PackageDexOptimizer {
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK);
+                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK, info.seInfoUser);
             }
 
             return DEX_OPT_PERFORMED;
@@ -405,7 +439,8 @@ public class PackageDexOptimizer {
             boolean newProfile) {
         int dexoptNeeded;
         try {
-            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, newProfile);
+          dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, newProfile,
+              false /* downgrade */);
         } catch (IOException ioe) {
             Slog.w(TAG, "IOException reading apk: " + path, ioe);
             return DEX_OPT_FAILED;
@@ -428,6 +463,69 @@ public class PackageDexOptimizer {
             sb.append(lib);
         }
         return sb.toString();
+    }
+
+    /**
+     * Walks dependency tree and gathers the dependencies for each split in a split apk.
+     * The split paths are stored as relative paths, separated by colons.
+     */
+    private String[] getSplitDependencies(PackageParser.Package pkg) {
+        // Convert all the code paths to relative paths.
+        String baseCodePath = new File(pkg.baseCodePath).getParent();
+        List<String> paths = pkg.getAllCodePaths();
+        String[] splitDependencies = new String[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            File pathFile = new File(paths.get(i));
+            String fileName = pathFile.getName();
+            paths.set(i, fileName);
+
+            // Sanity check that the base paths of the splits are all the same.
+            String basePath = pathFile.getParent();
+            if (!basePath.equals(baseCodePath)) {
+                Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
+                        baseCodePath);
+            }
+        }
+
+        // If there are no other dependencies, fill in the implicit dependency on the base apk.
+        SparseArray<int[]> dependencies = pkg.applicationInfo.splitDependencies;
+        if (dependencies == null) {
+            for (int i = 1; i < paths.size(); i++) {
+                splitDependencies[i] = paths.get(0);
+            }
+            return splitDependencies;
+        }
+
+        // Fill in the dependencies, skipping the base apk which has no dependencies.
+        for (int i = 1; i < dependencies.size(); i++) {
+            getParentDependencies(dependencies.keyAt(i), paths, dependencies, splitDependencies);
+        }
+
+        return splitDependencies;
+    }
+
+    /**
+     * Recursive method to generate dependencies for a particular split.
+     * The index is a key from the package's splitDependencies.
+     */
+    private String getParentDependencies(int index, List<String> paths,
+            SparseArray<int[]> dependencies, String[] splitDependencies) {
+        // The base apk is always first, and has no dependencies.
+        if (index == 0) {
+            return null;
+        }
+        // Return the result if we've computed the dependencies for this index already.
+        if (splitDependencies[index] != null) {
+            return splitDependencies[index];
+        }
+        // Get the dependencies for the parent of this index and append its path to it.
+        int parent = dependencies.get(index)[0];
+        String parentDependencies =
+                getParentDependencies(parent, paths, dependencies, splitDependencies);
+        String path = parentDependencies == null ? paths.get(parent) :
+                parentDependencies + ":" + paths.get(parent);
+        splitDependencies[index] = path;
+        return path;
     }
 
     /**

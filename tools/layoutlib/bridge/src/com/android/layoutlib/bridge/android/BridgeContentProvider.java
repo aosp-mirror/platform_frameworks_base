@@ -97,8 +97,8 @@ public final class BridgeContentProvider implements IContentProvider {
     }
 
     @Override
-    public Cursor query(String callingPackage, Uri arg0, String[] arg1, String arg2, String[] arg3,
-            String arg4, ICancellationSignal arg5) throws RemoteException {
+    public Cursor query(String callingPackage, Uri arg0, String[] arg1,
+            Bundle arg3, ICancellationSignal arg4) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -144,5 +144,11 @@ public final class BridgeContentProvider implements IContentProvider {
     @Override
     public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
         return null;
+    }
+
+    @Override
+    public boolean refresh(String callingPkg, Uri url, Bundle args,
+                    ICancellationSignal cancellationSignal) throws RemoteException {
+        return false;
     }
 }

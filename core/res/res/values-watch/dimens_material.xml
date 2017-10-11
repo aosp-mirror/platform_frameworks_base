@@ -44,4 +44,10 @@
     <dimen name="progress_bar_size_small">16dip</dimen>
     <dimen name="progress_bar_size_medium">32dip</dimen>
     <dimen name="progress_bar_size_large">64dip</dimen>
-</resources>
+
+    <!-- fallback for screen percentage widths -->
+    <dimen name="screen_percentage_05">0dp</dimen>
+    <dimen name="screen_percentage_10">0dp</dimen>
+    <dimen name="screen_percentage_12">0dp</dimen>
+    <dimen name="screen_percentage_15">0dp</dimen>
+  </resources>

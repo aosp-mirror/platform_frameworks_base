@@ -16,13 +16,18 @@
 
 package android.view;
 
-import dalvik.system.CloseGuard;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
+
+import dalvik.system.CloseGuard;
 
 /**
  * SurfaceControl
@@ -32,13 +37,16 @@ public class SurfaceControl {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags)
+            int w, int h, int format, int flags, long parentObject, int windowType, int ownerUid)
             throws OutOfResourcesException;
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
+            Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
+            boolean allLayers, boolean useIdentityTransform, int rotation);
+    private static native GraphicBuffer nativeScreenshotToBuffer(IBinder displayToken,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform, int rotation);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
@@ -50,6 +58,8 @@ public class SurfaceControl {
     private static native void nativeSetAnimationTransaction();
 
     private static native void nativeSetLayer(long nativeObject, int zorder);
+    private static native void nativeSetRelativeLayer(long nativeObject, IBinder relativeTo,
+            int zorder);
     private static native void nativeSetPosition(long nativeObject, float x, float y);
     private static native void nativeSetGeometryAppliesWithResize(long nativeObject);
     private static native void nativeSetSize(long nativeObject, int w, int h);
@@ -90,6 +100,11 @@ public class SurfaceControl {
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long nativeObject,
             IBinder handle, long frame);
+    private static native void nativeDeferTransactionUntilSurface(long nativeObject,
+            long surfaceObject, long frame);
+    private static native void nativeReparentChildren(long nativeObject,
+            IBinder handle);
+    private static native void nativeSeverChildren(long nativeObject);
     private static native void nativeSetOverrideScalingMode(long nativeObject,
             int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
@@ -276,11 +291,25 @@ public class SurfaceControl {
      * @param h The surface initial height.
      * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
      * in the creation flags.
+     * @param windowType The type of the window as specified in WindowManager.java.
+     * @param ownerUid A unique per-app ID.
      *
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     public SurfaceControl(SurfaceSession session,
+            String name, int w, int h, int format, int flags, int windowType, int ownerUid)
+                    throws OutOfResourcesException {
+        this(session, name, w, h, format, flags, null, windowType, ownerUid);
+    }
+
+    public SurfaceControl(SurfaceSession session,
             String name, int w, int h, int format, int flags)
+                    throws OutOfResourcesException {
+        this(session, name, w, h, format, flags, null, INVALID_WINDOW_TYPE, Binder.getCallingUid());
+    }
+
+    public SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
+            SurfaceControl parent, int windowType, int ownerUid)
                     throws OutOfResourcesException {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
@@ -299,12 +328,24 @@ public class SurfaceControl {
         }
 
         mName = name;
-        mNativeObject = nativeCreate(session, name, w, h, format, flags);
+        mNativeObject = nativeCreate(session, name, w, h, format, flags,
+            parent != null ? parent.mNativeObject : 0, windowType, ownerUid);
         if (mNativeObject == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
         }
 
+        mCloseGuard.open("release");
+    }
+
+    // This is a transfer constructor, useful for transferring a live SurfaceControl native
+    // object to another Java wrapper which could have some different behavior, e.g.
+    // event logging.
+    public SurfaceControl(SurfaceControl other) {
+        mName = other.mName;
+        mNativeObject = other.mNativeObject;
+        other.mCloseGuard.close();
+        other.mNativeObject = 0;
         mCloseGuard.open("release");
     }
 
@@ -387,7 +428,23 @@ public class SurfaceControl {
     }
 
     public void deferTransactionUntil(IBinder handle, long frame) {
-        nativeDeferTransactionUntil(mNativeObject, handle, frame);
+        if (frame > 0) {
+            nativeDeferTransactionUntil(mNativeObject, handle, frame);
+        }
+    }
+
+    public void deferTransactionUntil(Surface barrier, long frame) {
+        if (frame > 0) {
+            nativeDeferTransactionUntilSurface(mNativeObject, barrier.mNativeObject, frame);
+        }
+    }
+
+    public void reparentChildren(IBinder newParentHandle) {
+        nativeReparentChildren(mNativeObject, newParentHandle);
+    }
+
+    public void detachChildren() {
+        nativeSeverChildren(mNativeObject);
     }
 
     public void setOverrideScalingMode(int scalingMode) {
@@ -399,10 +456,6 @@ public class SurfaceControl {
         return nativeGetHandle(mNativeObject);
     }
 
-    public boolean getTransformToDisplayInverse() {
-        return nativeGetTransformToDisplayInverse(mNativeObject);
-    }
-
     /** flag the transaction as an animation */
     public static void setAnimationTransaction() {
         nativeSetAnimationTransaction();
@@ -411,6 +464,11 @@ public class SurfaceControl {
     public void setLayer(int zorder) {
         checkNotReleased();
         nativeSetLayer(mNativeObject, zorder);
+    }
+
+    public void setRelativeLayer(IBinder relativeTo, int zorder) {
+        checkNotReleased();
+        nativeSetRelativeLayer(mNativeObject, relativeTo, zorder);
     }
 
     public void setPosition(float x, float y) {
@@ -477,9 +535,9 @@ public class SurfaceControl {
         nativeSetAlpha(mNativeObject, alpha);
     }
 
-    public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+    public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
         checkNotReleased();
-        nativeSetMatrix(mNativeObject, dsdx, dtdx, dsdy, dtdy);
+        nativeSetMatrix(mNativeObject, dsdx, dtdx, dtdy, dsdy);
     }
 
     public void setWindowCrop(Rect crop) {
@@ -812,6 +870,19 @@ public class SurfaceControl {
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, sourceCrop, width, height,
+                minLayer, maxLayer, false, useIdentityTransform, rotation);
+    }
+
+    /**
+     * Like {@link SurfaceControl#screenshot(Rect, int, int, int, int, boolean, int)}
+     * but returns a GraphicBuffer.
+     */
+    public static GraphicBuffer screenshotToBuffer(Rect sourceCrop, int width, int height,
+            int minLayer, int maxLayer, boolean useIdentityTransform,
+            int rotation) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        return nativeScreenshotToBuffer(displayToken, sourceCrop, width, height,
                 minLayer, maxLayer, false, useIdentityTransform, rotation);
     }
 

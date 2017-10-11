@@ -52,9 +52,9 @@ public class LowStorageTest extends Activity {
         StatFs stat = new StatFs(path.getPath());
         int totalBlocks = stat.getBlockCount();
         mBlockSize = (int) (stat.getBlockSize());
-        TextView startSizeTextView = (TextView) findViewById(R.id.totalsize);
+        TextView startSizeTextView = findViewById(R.id.totalsize);
         startSizeTextView.setText(Long.toString((totalBlocks * mBlockSize) / BYTE_SIZE));
-        Button button = (Button) findViewById(R.id.button_run);
+        Button button = findViewById(R.id.button_run);
         button.setOnClickListener(mStartListener);
     }
 
@@ -121,9 +121,9 @@ public class LowStorageTest extends Activity {
             File path = Environment.getDataDirectory();
             StatFs stat = new StatFs(path.getPath());
             long availableBlocks = stat.getAvailableBlocks();
-            TextView freeSizeTextView = (TextView) findViewById(R.id.freesize);
+            TextView freeSizeTextView = findViewById(R.id.freesize);
             freeSizeTextView.setText(Long.toString((availableBlocks * mBlockSize) / BYTE_SIZE));
-            TextView statusTextView = (TextView) findViewById(R.id.status);
+            TextView statusTextView = findViewById(R.id.status);
             statusTextView.setText("Finished. You can start the test now.");
         } catch (Exception e) {
             Log.v(TAG, e.toString());

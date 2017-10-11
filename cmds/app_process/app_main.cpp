@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
+#include <hwbinder/IPCThreadState.h>
 #include <utils/Log.h>
 #include <cutils/memory.h>
 #include <cutils/properties.h>
@@ -85,6 +85,7 @@ public:
         ar->callMain(mClassName, mClass, mArgs);
 
         IPCThreadState::self()->stopProcess();
+        hardware::IPCThreadState::self()->stopProcess();
     }
 
     virtual void onZygoteInit()
@@ -99,6 +100,7 @@ public:
         if (mClassName.isEmpty()) {
             // if zygote
             IPCThreadState::self()->stopProcess();
+            hardware::IPCThreadState::self()->stopProcess();
         }
 
         AndroidRuntime::onExit(code);
@@ -233,6 +235,9 @@ int main(int argc, char* const argv[])
     for (i = 0; i < argc; i++) {
         if (known_command == true) {
           runtime.addOption(strdup(argv[i]));
+          // The static analyzer gets upset that we don't ever free the above
+          // string. Since the allocation is from main, leaking it doesn't seem
+          // problematic. NOLINTNEXTLINE
           ALOGV("app_process main add known option '%s'", argv[i]);
           known_command = false;
           continue;
@@ -256,6 +261,9 @@ int main(int argc, char* const argv[])
         }
 
         runtime.addOption(strdup(argv[i]));
+        // The static analyzer gets upset that we don't ever free the above
+        // string. Since the allocation is from main, leaking it doesn't seem
+        // problematic. NOLINTNEXTLINE
         ALOGV("app_process main add option '%s'", argv[i]);
     }
 

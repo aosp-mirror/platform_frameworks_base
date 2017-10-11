@@ -18,11 +18,11 @@ package android.service.wallpaper;
 
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.util.MergedConfiguration;
 import android.view.WindowInsets;
 
 import com.android.internal.R;
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.BaseIWindow;
 import com.android.internal.view.BaseSurfaceHolder;
 
@@ -32,7 +32,6 @@ import android.app.Service;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -55,7 +54,6 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import java.io.FileDescriptor;
@@ -169,7 +167,7 @@ public abstract class WallpaperService extends Service {
         final Rect mFinalSystemInsets = new Rect();
         final Rect mFinalStableInsets = new Rect();
         final Rect mBackdropFrame = new Rect();
-        final Configuration mConfiguration = new Configuration();
+        final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
 
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
@@ -232,8 +230,7 @@ public abstract class WallpaperService extends Service {
                         "Wallpapers do not support keep screen on");
             }
 
-            @Override
-            public Canvas lockCanvas() {
+            private void prepareToDraw() {
                 if (mDisplayState == Display.STATE_DOZE
                         || mDisplayState == Display.STATE_DOZE_SUSPEND) {
                     try {
@@ -242,7 +239,24 @@ public abstract class WallpaperService extends Service {
                         // System server died, can be ignored.
                     }
                 }
+            }
+
+            @Override
+            public Canvas lockCanvas() {
+                prepareToDraw();
                 return super.lockCanvas();
+            }
+
+            @Override
+            public Canvas lockCanvas(Rect dirty) {
+                prepareToDraw();
+                return super.lockCanvas(dirty);
+            }
+
+            @Override
+            public Canvas lockHardwareCanvas() {
+                prepareToDraw();
+                return super.lockHardwareCanvas();
             }
         };
 
@@ -272,8 +286,8 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                    Configuration newConfig, Rect backDropRect, boolean forceLayout,
-                    boolean alwaysConsumeNavBar) {
+                    MergedConfiguration mergedConfiguration, Rect backDropRect, boolean forceLayout,
+                    boolean alwaysConsumeNavBar, int displayId) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
@@ -552,7 +566,8 @@ public abstract class WallpaperService extends Service {
                     out.print(mVisibleInsets.toShortString());
                     out.print(" mWinFrame="); out.print(mWinFrame.toShortString());
                     out.print(" mContentInsets="); out.println(mContentInsets.toShortString());
-            out.print(prefix); out.print("mConfiguration="); out.println(mConfiguration);
+            out.print(prefix); out.print("mConfiguration=");
+                    out.println(mMergedConfiguration.getMergedConfiguration());
             out.print(prefix); out.print("mLayout="); out.println(mLayout);
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
@@ -679,7 +694,7 @@ public abstract class WallpaperService extends Service {
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
                             mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
-                            mConfiguration, mSurfaceHolder.mSurface);
+                            mMergedConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);

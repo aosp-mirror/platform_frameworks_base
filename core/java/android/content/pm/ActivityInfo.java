@@ -17,14 +17,18 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
 /**
  * Information you can retrieve about a particular application
@@ -157,32 +161,62 @@ public class ActivityInfo extends ComponentInfo
     public String targetActivity;
 
     /**
+     * Token used to string together multiple events within a single launch action.
+     * @hide
+     */
+    public String launchToken;
+
+    /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
      * visible.
      * @hide
      */
     public static final int RESIZE_MODE_UNRESIZEABLE = 0;
     /**
-     * Activity can not be resized and always occupies the fullscreen area with all windows cropped
-     * to either the task or stack bounds.
+     * Activity didn't explicitly request to be resizeable, but we are making it resizeable because
+     * of the SDK version it targets. Only affects apps with target SDK >= N where the app is
+     * implied to be resizeable if it doesn't explicitly set the attribute to any value.
      * @hide
      */
-    public static final int RESIZE_MODE_CROP_WINDOWS = 1;
+    public static final int RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION = 1;
     /**
-     * Activity is resizeable.
+     * Activity explicitly requested to be resizeable.
      * @hide
      */
     public static final int RESIZE_MODE_RESIZEABLE = 2;
     /**
-     * Activity is resizeable and supported picture-in-picture mode.
+     * Activity is resizeable and supported picture-in-picture mode.  This flag is now deprecated
+     * since activities do not need to be resizeable to support picture-in-picture.
+     * See {@link #FLAG_SUPPORTS_PICTURE_IN_PICTURE}.
+     *
      * @hide
+     * @deprecated
      */
-    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
+    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED = 3;
     /**
-     * Activity is does not support resizing, but we are forcing it to be resizeable.
+     * Activity does not support resizing, but we are forcing it to be resizeable. Only affects
+     * certain pre-N apps where we force them to be resizeable.
      * @hide
      */
     public static final int RESIZE_MODE_FORCE_RESIZEABLE = 4;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the size remains landscape.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY = 5;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the size remains portrait.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY = 6;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the bounds remain in the same orientation as they are.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION = 7;
     /**
      * Value indicating if the resizing mode the activity supports.
      * See {@link android.R.attr#resizeableActivity}.
@@ -191,11 +225,58 @@ public class ActivityInfo extends ComponentInfo
     public int resizeMode = RESIZE_MODE_RESIZEABLE;
 
     /**
+     * Value indicating the maximum aspect ratio the activity supports.
+     * <p>
+     * 0 means unset.
+     * @See {@link android.R.attr#maxAspectRatio}.
+     * @hide
+     */
+    public float maxAspectRatio;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
      */
     public String requestedVrComponent;
+
+    /**
+     * Value for {@link #colorMode} indicating that the activity should use the
+     * default color mode (sRGB, low dynamic range).
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_DEFAULT = 0;
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use a
+     * wide color gamut if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT = 1;
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use a
+     * high dynamic range if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_HDR = 2;
+
+    /** @hide */
+    @IntDef({
+        COLOR_MODE_DEFAULT,
+        COLOR_MODE_WIDE_COLOR_GAMUT,
+        COLOR_MODE_HDR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorMode {}
+
+    /**
+     * The color mode requested by this activity. The target display may not be
+     * able to honor the request.
+     */
+    @ColorMode
+    public int colorMode = COLOR_MODE_DEFAULT;
 
     /**
      * Bit in {@link #flags} indicating whether this activity is able to
@@ -333,6 +414,34 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_ALWAYS_FOCUSABLE = 0x40000;
 
     /**
+     * Bit in {@link #flags} indicating if the activity is visible to instant
+     * applications. The activity is visible if it's either implicitly or
+     * explicitly exposed.
+     * @hide
+     */
+    public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is implicitly visible
+     * to instant applications. Implicitly visible activities are those that
+     * implement certain intent-filters:
+     * <ul>
+     * <li>action {@link Intent#CATEGORY_BROWSABLE}</li>
+     * <li>action {@link Intent#ACTION_SEND}</li>
+     * <li>action {@link Intent#ACTION_SENDTO}</li>
+     * <li>action {@link Intent#ACTION_SEND_MULTIPLE}</li>
+     * </ul>
+     * @hide
+     */
+    public static final int FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP = 0x200000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity supports picture-in-picture mode.
+     * See {@link android.R.attr#supportsPictureInPicture}.
+     * @hide
+     */
+    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000;
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.
@@ -369,6 +478,7 @@ public class ActivityInfo extends ComponentInfo
 
     /** @hide */
     @IntDef({
+            SCREEN_ORIENTATION_UNSET,
             SCREEN_ORIENTATION_UNSPECIFIED,
             SCREEN_ORIENTATION_LANDSCAPE,
             SCREEN_ORIENTATION_PORTRAIT,
@@ -389,6 +499,15 @@ public class ActivityInfo extends ComponentInfo
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScreenOrientation {}
 
+    /**
+     * Internal constant used to indicate that the app didn't set a specific orientation value.
+     * Different from {@link #SCREEN_ORIENTATION_UNSPECIFIED} below as the app can set its
+     * orientation to {@link #SCREEN_ORIENTATION_UNSPECIFIED} while this means that the app didn't
+     * set anything. The system will mostly treat this similar to
+     * {@link #SCREEN_ORIENTATION_UNSPECIFIED}.
+     * @hide
+     */
+    public static final int SCREEN_ORIENTATION_UNSET = -2;
     /**
      * Constant corresponding to <code>unspecified</code> in
      * the {@link android.R.attr#screenOrientation} attribute.
@@ -520,6 +639,7 @@ public class ActivityInfo extends ComponentInfo
                     CONFIG_SMALLEST_SCREEN_SIZE,
                     CONFIG_DENSITY,
                     CONFIG_LAYOUT_DIRECTION,
+                    CONFIG_COLOR_MODE,
                     CONFIG_FONT_SCALE,
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -625,6 +745,20 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_LAYOUT_DIRECTION = 0x2000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the change to the display color gamut or dynamic
+     * range. Set from the {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_COLOR_MODE = 0x4000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
+     * attribute. This is not a core resource configuration, but a higher-level value, so its
+     * constant starts at the high bits.
+     * @hide We do not want apps handling this yet, but we do need some kind of bit for diffs.
+     */
+    public static final int CONFIG_ASSETS_PATHS = 0x80000000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configuration, but a higher-level value, so its
@@ -652,6 +786,7 @@ public class ActivityInfo extends ComponentInfo
         Configuration.NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,   // SMALLEST SCREEN SIZE
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
+        Configuration.NATIVE_CONFIG_COLOR_MODE,             // COLOR_MODE
     };
 
     /**
@@ -707,7 +842,8 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
-     * {@link #CONFIG_DENSITY}, and {@link #CONFIG_LAYOUT_DIRECTION}.
+     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION} and
+     * {@link #CONFIG_COLOR_MODE}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
@@ -720,6 +856,7 @@ public class ActivityInfo extends ComponentInfo
      * WindowManager.LayoutParams.softInputMode}.  If 0 (unspecified),
      * the mode from the theme will be used.
      */
+    @android.view.WindowManager.LayoutParams.SoftInputModeFlags
     public int softInputMode;
 
     /**
@@ -742,6 +879,16 @@ public class ActivityInfo extends ComponentInfo
      * If defined, the activity named here is the logical parent of this activity.
      */
     public String parentActivityName;
+
+    /**
+     * Screen rotation animation desired by the activity, with values as defined
+     * for {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
+     *
+     * -1 means to use the system default.
+     *
+     * @hide
+     */
+    public int rotationAnimation = -1;
 
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
@@ -802,6 +949,9 @@ public class ActivityInfo extends ComponentInfo
         windowLayout = orig.windowLayout;
         resizeMode = orig.resizeMode;
         requestedVrComponent = orig.requestedVrComponent;
+        rotationAnimation = orig.rotationAnimation;
+        colorMode = orig.colorMode;
+        maxAspectRatio = orig.maxAspectRatio;
     }
 
     /**
@@ -828,23 +978,80 @@ public class ActivityInfo extends ComponentInfo
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    boolean isFixedOrientation() {
-        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT
+    public boolean isFixedOrientation() {
+        return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
+    /**
+     * Returns true if the specified orientation is considered fixed.
+     * @hide
+     */
+    static public boolean isFixedOrientation(int orientation) {
+        return isFixedOrientationLandscape(orientation) || isFixedOrientationPortrait(orientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to landscape.
+     * @hide
+     */
+    boolean isFixedOrientationLandscape() {
+        return isFixedOrientationLandscape(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to landscape.
+     * @hide
+     */
+    public static boolean isFixedOrientationLandscape(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to portrait.
+     * @hide
+     */
+    boolean isFixedOrientationPortrait() {
+        return isFixedOrientationPortrait(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to portrait.
+     * @hide
+     */
+    public static boolean isFixedOrientationPortrait(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_USER_PORTRAIT;
+    }
+
+    /**
+     * Returns true if the activity supports picture-in-picture.
+     * @hide
+     */
+    public boolean supportsPictureInPicture() {
+        return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
     }
 
     /** @hide */
     public static boolean isResizeableMode(int mode) {
         return mode == RESIZE_MODE_RESIZEABLE
-                || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
-                || mode == RESIZE_MODE_FORCE_RESIZEABLE;
+                || mode == RESIZE_MODE_FORCE_RESIZEABLE
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION
+                || mode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+    }
+
+    /** @hide */
+    public static boolean isPreserveOrientationMode(int mode) {
+        return mode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
     }
 
     /** @hide */
@@ -852,14 +1059,18 @@ public class ActivityInfo extends ComponentInfo
         switch (mode) {
             case RESIZE_MODE_UNRESIZEABLE:
                 return "RESIZE_MODE_UNRESIZEABLE";
-            case RESIZE_MODE_CROP_WINDOWS:
-                return "RESIZE_MODE_CROP_WINDOWS";
+            case RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION:
+                return "RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION";
             case RESIZE_MODE_RESIZEABLE:
                 return "RESIZE_MODE_RESIZEABLE";
-            case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
-                return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
             case RESIZE_MODE_FORCE_RESIZEABLE:
                 return "RESIZE_MODE_FORCE_RESIZEABLE";
+            case RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY:
+                return "RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY";
+            case RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY:
+                return "RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY";
+            case RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION:
+                return "RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION";
             default:
                 return "unknown=" + mode;
         }
@@ -907,6 +1118,9 @@ public class ActivityInfo extends ComponentInfo
         if (requestedVrComponent != null) {
             pw.println(prefix + "requestedVrComponent=" + requestedVrComponent);
         }
+        if (maxAspectRatio != 0) {
+            pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
+        }
         super.dumpBack(pw, prefix, flags);
     }
 
@@ -951,6 +1165,28 @@ public class ActivityInfo extends ComponentInfo
         }
         dest.writeInt(resizeMode);
         dest.writeString(requestedVrComponent);
+        dest.writeInt(rotationAnimation);
+        dest.writeInt(colorMode);
+        dest.writeFloat(maxAspectRatio);
+    }
+
+    /**
+     * Determines whether the {@link Activity} is considered translucent or floating.
+     * @hide
+     */
+    public static boolean isTranslucentOrFloating(TypedArray attributes) {
+        final boolean isTranslucent =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
+                        false);
+        final boolean isSwipeToDismiss = !attributes.hasValue(
+                com.android.internal.R.styleable.Window_windowIsTranslucent)
+                && attributes.getBoolean(
+                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
+        final boolean isFloating =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsFloating,
+                        false);
+
+        return isFloating || isTranslucent || isSwipeToDismiss;
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -985,6 +1221,9 @@ public class ActivityInfo extends ComponentInfo
         }
         resizeMode = source.readInt();
         requestedVrComponent = source.readString();
+        rotationAnimation = source.readInt();
+        colorMode = source.readInt();
+        maxAspectRatio = source.readFloat();
     }
 
     /**

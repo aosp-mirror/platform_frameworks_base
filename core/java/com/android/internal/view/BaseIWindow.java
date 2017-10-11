@@ -16,14 +16,16 @@
 
 package com.android.internal.view;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.MergedConfiguration;
 import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.PointerIcon;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -37,8 +39,9 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
-            Rect stableInsets, Rect outsets, boolean reportDraw, Configuration newConfig,
-            Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeNavBar) {
+            Rect stableInsets, Rect outsets, boolean reportDraw,
+            MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
+            boolean alwaysConsumeNavBar, int displayId) {
         if (reportDraw) {
             try {
                 mSession.finishDrawing(this);
@@ -83,10 +86,17 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void dispatchDragEvent(DragEvent event) {
+        if (event.getAction() == DragEvent.ACTION_DROP) {
+            try {
+                mSession.reportDropResult(this, false);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     @Override
     public void updatePointerIcon(float x, float y) {
+        InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
     }
 
     @Override
@@ -112,5 +122,9 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+    }
+
+    @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
     }
 }

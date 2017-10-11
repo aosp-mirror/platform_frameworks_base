@@ -17,13 +17,12 @@ Copyright (C) 2016 The Android Open Source Project
 <!-- Placeholder icon for network logging until the real icon is finalized-->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="12.0dp"
-        android:height="12.0dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0"
-        android:tint="#4DFFFFFF" >
+  android:width="12.0dp"
+  android:height="12.0dp"
+  android:viewportWidth="24.0"
+  android:viewportHeight="24.0">
     <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M2,24v-4h12v4H2z M2,16v-4h20v4H2z M5,7 12,0 19,7 14,7 14,15 10,15 10,7z"/>
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M2,24v-4h12v4H2z M2,16v-4h20v4H2z M5,7 12,0 19,7 14,7 14,15 10,15 10,7z"/>
 
 </vector>

@@ -25,8 +25,10 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo.CodecCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -73,12 +75,12 @@ import java.util.Map;
  <h4>Compressed Buffers</h4>
  <p>
  Input buffers (for decoders) and output buffers (for encoders) contain compressed data according
- to the {@linkplain MediaFormat#KEY_MIME format's type}. For video types this is a single
+ to the {@linkplain MediaFormat#KEY_MIME format's type}. For video types this is normally a single
  compressed video frame. For audio data this is normally a single access unit (an encoded audio
  segment typically containing a few milliseconds of audio as dictated by the format type), but
  this requirement is slightly relaxed in that a buffer may contain multiple encoded access units
  of audio. In either case, buffers do not start or end on arbitrary byte boundaries, but rather on
- frame/access unit boundaries.
+ frame/access unit boundaries unless they are flagged with {@link #BUFFER_FLAG_PARTIAL_FRAME}.
 
  <h4>Raw Audio Buffers</h4>
  <p>
@@ -1567,6 +1569,13 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_END_OF_STREAM = 4;
 
+    /**
+     * This indicates that the buffer only contains part of a frame,
+     * and the decoder should batch the data until a buffer without
+     * this flag appears before decoding the frame.
+     */
+    public static final int BUFFER_FLAG_PARTIAL_FRAME = 8;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -1575,6 +1584,7 @@ final public class MediaCodec {
             BUFFER_FLAG_KEY_FRAME,
             BUFFER_FLAG_CODEC_CONFIG,
             BUFFER_FLAG_END_OF_STREAM,
+            BUFFER_FLAG_PARTIAL_FRAME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}
@@ -1851,6 +1861,47 @@ final public class MediaCodec {
             @Nullable MediaFormat format,
             @Nullable Surface surface, @Nullable MediaCrypto crypto,
             @ConfigureFlag int flags) {
+        configure(format, surface, crypto, null, flags);
+    }
+
+    /**
+     * Configure a component to be used with a descrambler.
+     * @param format The format of the input data (decoder) or the desired
+     *               format of the output data (encoder). Passing {@code null}
+     *               as {@code format} is equivalent to passing an
+     *               {@link MediaFormat#MediaFormat an empty mediaformat}.
+     * @param surface Specify a surface on which to render the output of this
+     *                decoder. Pass {@code null} as {@code surface} if the
+     *                codec does not generate raw video output (e.g. not a video
+     *                decoder) and/or if you want to configure the codec for
+     *                {@link ByteBuffer} output.
+     * @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
+     *                component as an encoder.
+     * @param descrambler Specify a descrambler object to facilitate secure
+     *                descrambling of the media data, or null for non-secure codecs.
+     * @throws IllegalArgumentException if the surface has been released (or is invalid),
+     * or the format is unacceptable (e.g. missing a mandatory key),
+     * or the flags are not set properly
+     * (e.g. missing {@link #CONFIGURE_FLAG_ENCODE} for an encoder).
+     * @throws IllegalStateException if not in the Uninitialized state.
+     * @throws CryptoException upon DRM error.
+     * @throws CodecException upon codec error.
+     */
+    public void configure(
+            @Nullable MediaFormat format, @Nullable Surface surface,
+            @ConfigureFlag int flags, @Nullable MediaDescrambler descrambler) {
+        configure(format, surface, null,
+                descrambler != null ? descrambler.getBinder() : null, flags);
+    }
+
+    private void configure(
+            @Nullable MediaFormat format, @Nullable Surface surface,
+            @Nullable MediaCrypto crypto, @Nullable IBinder descramblerBinder,
+            @ConfigureFlag int flags) {
+        if (crypto != null && descramblerBinder != null) {
+            throw new IllegalArgumentException("Can't use crypto and descrambler together!");
+        }
+
         String[] keys = null;
         Object[] values = null;
 
@@ -1881,7 +1932,7 @@ final public class MediaCodec {
 
         mHasSurface = surface != null;
 
-        native_configure(keys, values, surface, crypto, flags);
+        native_configure(keys, values, surface, crypto, descramblerBinder, flags);
     }
 
     /**
@@ -1959,7 +2010,8 @@ final public class MediaCodec {
 
     private native final void native_configure(
             @Nullable String[] keys, @Nullable Object[] values,
-            @Nullable Surface surface, @Nullable MediaCrypto crypto, @ConfigureFlag int flags);
+            @Nullable Surface surface, @Nullable MediaCrypto crypto,
+            @Nullable IBinder descramblerBinder, @ConfigureFlag int flags);
 
     /**
      * Requests a Surface to use as the input to an encoder, in place of input buffers.  This
@@ -3134,6 +3186,23 @@ final public class MediaCodec {
     public native final String getName();
 
     /**
+     *  Return Metrics data about the current codec instance.
+     *
+     * @return a {@link PersistableBundle} containing the set of attributes and values
+     * available for the media being handled by this instance of MediaCodec
+     * The attributes are descibed in {@link MetricsConstants}.
+     *
+     * Additional vendor-specific fields may also be present in
+     * the return value.
+     */
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
+    }
+
+    private native PersistableBundle native_getMetrics();
+
+    /**
      * Change a video encoder's target bitrate on the fly. The value is an
      * Integer object containing the new bitrate in bps.
      */
@@ -3589,5 +3658,81 @@ final public class MediaCodec {
             private final int mColInc;
             private final ByteBuffer mData;
         }
+    }
+
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * Key to extract the codec being used
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String CODEC = "android.media.mediacodec.codec";
+
+        /**
+         * Key to extract the MIME type
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String MIME_TYPE = "android.media.mediacodec.mime";
+
+        /**
+         * Key to extract what the codec mode
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is a String. Values will be one of the constants
+         * {@link #MODE_AUDIO} or {@link #MODE_VIDEO}.
+         */
+        public static final String MODE = "android.media.mediacodec.mode";
+
+        /**
+         * The value returned for the key {@link #MODE} when the
+         * codec is a audio codec.
+         */
+        public static final String MODE_AUDIO = "audio";
+
+        /**
+         * The value returned for the key {@link #MODE} when the
+         * codec is a video codec.
+         */
+        public static final String MODE_VIDEO = "video";
+
+        /**
+         * Key to extract the flag indicating whether the codec is running
+         * as an encoder or decoder from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         * A 0 indicates decoder; 1 indicates encoder.
+         */
+        public static final String ENCODER = "android.media.mediacodec.encoder";
+
+        /**
+         * Key to extract the flag indicating whether the codec is running
+         * in secure (DRM) mode from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String SECURE = "android.media.mediacodec.secure";
+
+        /**
+         * Key to extract the width (in pixels) of the video track
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String WIDTH = "android.media.mediacodec.width";
+
+        /**
+         * Key to extract the height (in pixels) of the video track
+         * from the {@link MediaCodec#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String HEIGHT = "android.media.mediacodec.height";
+
+        /**
+         * Key to extract the rotation (in degrees) to properly orient the video
+         * from the {@link MediaCodec#getMetrics} return.
+         * The value is a integer.
+         */
+        public static final String ROTATION = "android.media.mediacodec.rotation";
+
     }
 }

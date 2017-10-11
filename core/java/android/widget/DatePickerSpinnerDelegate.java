@@ -24,7 +24,6 @@ import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,13 +33,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker.AbstractDatePickerDelegate;
 import android.widget.NumberPicker.OnValueChangeListener;
 
+import libcore.icu.ICU;
+
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
-
-import libcore.icu.ICU;
 
 /**
  * A delegate implementing the basic DatePicker
@@ -87,8 +86,6 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
 
     private Calendar mMaxDate;
 
-    private Calendar mCurrentDate;
-
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
     DatePickerSpinnerDelegate(DatePicker delegator, Context context, AttributeSet attrs,
@@ -118,7 +115,8 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(layoutResourceId, mDelegator, true);
+        final View view = inflater.inflate(layoutResourceId, mDelegator, true);
+        view.setSaveFromParentEnabled(false);
 
         OnValueChangeListener onChangeListener = new OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -398,14 +396,6 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         return true;
     }
 
-    @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
-        String selectedDateUtterance = DateUtils.formatDateTime(mContext,
-                mCurrentDate.getTimeInMillis(), flags);
-        event.getText().add(selectedDateUtterance);
-    }
-
     /**
      * Sets the current locale.
      *
@@ -585,6 +575,10 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnDateChangedListener != null) {
             mOnDateChangedListener.onDateChanged(mDelegator, getYear(), getMonth(),
+                    getDayOfMonth());
+        }
+        if (mAutoFillChangeListener != null) {
+            mAutoFillChangeListener.onDateChanged(mDelegator, getYear(), getMonth(),
                     getDayOfMonth());
         }
     }

@@ -20,18 +20,20 @@ import android.app.ActivityManager;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
 /** Quick settings tile: Control flashlight **/
-public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
+public class FlashlightTile extends QSTileImpl<BooleanState> implements
         FlashlightController.FlashlightListener {
 
     private final AnimationIcon mEnable
@@ -42,16 +44,14 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
             R.drawable.ic_signal_flashlight_enable);
     private final FlashlightController mFlashlightController;
 
-    public FlashlightTile(Host host) {
+    public FlashlightTile(QSHost host) {
         super(host);
-        mFlashlightController = host.getFlashlightController();
-        mFlashlightController.addListener(this);
+        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mFlashlightController.removeListener(this);
     }
 
     @Override
@@ -61,6 +61,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public void setListening(boolean listening) {
+        if (listening) {
+            mFlashlightController.addCallback(this);
+        } else {
+            mFlashlightController.removeCallback(this);
+        }
     }
 
     @Override
@@ -82,7 +87,6 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         boolean newState = !mState.value;
         refreshState(newState);
         mFlashlightController.setFlashlight(newState);
@@ -102,16 +106,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (!mFlashlightController.isAvailable()) {
-            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable)
+            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_enable)
                     .mutate();
-            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
-            icon.setTint(disabledColor);
             state.icon = new DrawableIcon(icon);
-            state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(disabledColor),
-                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_flashlight_unavailable);
+            state.state = Tile.STATE_UNAVAILABLE;
             return;
         }
         if (arg instanceof Boolean) {
@@ -126,8 +126,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         final AnimationIcon icon = state.value ? mEnable : mDisable;
         state.icon = icon;
         state.contentDescription = mContext.getString(R.string.quick_settings_flashlight_label);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

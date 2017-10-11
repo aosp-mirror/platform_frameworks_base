@@ -31,7 +31,8 @@ import android.util.SparseIntArray;
 import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -39,11 +40,12 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 public class NetworkNotificationManager {
 
+
     public static enum NotificationType {
-        LOST_INTERNET(MetricsEvent.NOTIFICATION_NETWORK_LOST_INTERNET),
-        NETWORK_SWITCH(MetricsEvent.NOTIFICATION_NETWORK_SWITCH),
-        NO_INTERNET(MetricsEvent.NOTIFICATION_NETWORK_NO_INTERNET),
-        SIGN_IN(MetricsEvent.NOTIFICATION_NETWORK_SIGN_IN);
+        LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
+        NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
+        NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
+        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN);
 
         public final int eventId;
 
@@ -140,6 +142,18 @@ public class NetworkNotificationManager {
             extraInfo = null;
         }
 
+        // Clear any previous notification with lower priority, otherwise return. http://b/63676954.
+        // A new SIGN_IN notification with a new intent should override any existing one.
+        final int previousEventId = mNotificationTypeMap.get(id);
+        final NotificationType previousNotifyType = NotificationType.getFromId(previousEventId);
+        if (priority(previousNotifyType) > priority(notifyType)) {
+            Slog.d(TAG, String.format(
+                    "ignoring notification %s for network %s with existing notification %s",
+                    notifyType, id, previousNotifyType));
+            return;
+        }
+        clearNotification(id);
+
         if (DBG) {
             Slog.d(TAG, String.format(
                     "showNotification tag=%s event=%s transport=%s extraInfo=%s highPrioriy=%s",
@@ -187,7 +201,9 @@ public class NetworkNotificationManager {
             return;
         }
 
-        Notification.Builder builder = new Notification.Builder(mContext)
+        final String channelId = highPriority ? SystemNotificationChannels.NETWORK_ALERTS :
+                SystemNotificationChannels.NETWORK_STATUS;
+        Notification.Builder builder = new Notification.Builder(mContext, channelId)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)
                 .setSmallIcon(icon)
@@ -198,16 +214,16 @@ public class NetworkNotificationManager {
                 .setContentTitle(title)
                 .setContentIntent(intent)
                 .setLocalOnly(true)
-                .setPriority(highPriority ?
-                        Notification.PRIORITY_HIGH :
-                        Notification.PRIORITY_DEFAULT)
-                .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
                 .setOnlyAlertOnce(true);
 
         if (notifyType == NotificationType.NETWORK_SWITCH) {
             builder.setStyle(new Notification.BigTextStyle().bigText(details));
         } else {
             builder.setContentText(details);
+        }
+
+        if (notifyType == NotificationType.SIGN_IN) {
+            builder.extend(new Notification.TvExtender().setChannelId(channelId));
         }
 
         Notification notification = builder.build();
@@ -269,5 +285,23 @@ public class NetworkNotificationManager {
     static String nameOf(int eventId) {
         NotificationType t = NotificationType.getFromId(eventId);
         return (t != null) ? t.name() : "UNKNOWN";
+    }
+
+    private static int priority(NotificationType t) {
+        if (t == null) {
+            return 0;
+        }
+        switch (t) {
+            case SIGN_IN:
+                return 4;
+            case NO_INTERNET:
+                return 3;
+            case NETWORK_SWITCH:
+                return 2;
+            case LOST_INTERNET:
+                return 1;
+            default:
+                return 0;
+        }
     }
 }

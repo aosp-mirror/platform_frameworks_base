@@ -68,6 +68,22 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".InvalidateTreeActivity"
+            android:label="General/Invalidate Tree" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ResizeHWLayerActivity"
+            android:label="General/Resize HW Layer" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialAnimationActivity"
             android:label="General/Trivial Animation" >
             <intent-filter>
@@ -84,6 +100,31 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".FadingEdgeListActivity"
+            android:label="General/Fading Edge ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SaveLayerInterleaveActivity"
+            android:label="General/SaveLayer Animation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ClippedListActivity"
+            android:label="General/Clipped ListView"
+            android:theme="@style/NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialRecyclerViewActivity"
             android:label="General/Trivial RecyclerView" >
             <intent-filter>
@@ -94,10 +135,18 @@
         <activity
             android:name=".SlowBindRecyclerViewActivity"
             android:label="General/Slow Bind RecyclerView" >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="com.android.test.uibench.TEST" />
-        </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SlowNestedRecyclerViewActivity"
+            android:label="General/Slow Nested RecyclerView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ActivityTransition"
@@ -128,6 +177,14 @@
         <activity
             android:name=".ShadowGridActivity"
             android:label="Rendering/Shadow Grid" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".RenderingJitter"
+            android:label="Rendering/Jitter" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
@@ -180,5 +237,25 @@
             </intent-filter>
         </activity>
 
+        <!-- Navigation Drawer -->
+        <activity
+            android:name=".NavigationDrawerActivity"
+            android:label="Navigation Drawer Activity"
+            android:theme="@style/NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Notification Shade -->
+        <activity
+            android:name=".NotificationShadeActivity"
+            android:label="Notification Shade">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

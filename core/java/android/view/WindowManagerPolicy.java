@@ -16,7 +16,53 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
+import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
+import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
+
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
@@ -25,12 +71,14 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.view.animation.Animation;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 
 import java.io.PrintWriter;
@@ -136,10 +184,10 @@ public interface WindowManagerPolicy {
             throws RemoteException;
 
     /**
-     * @return true if windows with FLAG_DISMISS_KEYGUARD should be allowed to show even if
-     *         the keyguard is locked.
+     * Called when the Keyguard occluded state changed.
+     * @param occluded Whether Keyguard is currently occluded or not.
      */
-    boolean canShowDismissingWindowWhileLockedLw();
+    void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -339,13 +387,6 @@ public interface WindowManagerPolicy {
         boolean isVisibleLw();
 
         /**
-         * Like {@link #isVisibleLw}, but also counts a window that is currently
-         * "hidden" behind the keyguard as visible.  This allows us to apply
-         * things like window flags that impact the keyguard.
-         */
-        boolean isVisibleOrBehindKeyguardLw();
-
-        /**
          * Is this window currently visible to the user on-screen?  It is
          * displayed either if it is visible or it is currently running an
          * animation before no longer being visible.  Must be called with the
@@ -358,6 +399,13 @@ public interface WindowManagerPolicy {
          * considering its app token) is currently animating.
          */
         boolean isAnimatingLw();
+
+        /**
+         * @return Whether the window can affect SystemUI flags, meaning that SystemUI (system bars,
+         *         for example) will be  affected by the flags specified in this window. This is the
+         *         case when the surface is on screen but not exiting.
+         */
+        boolean canAffectSystemUiFlags();
 
         /**
          * Is this window considered to be gone for purposes of layout?
@@ -424,6 +472,18 @@ public interface WindowManagerPolicy {
         public boolean isInMultiWindowMode();
 
         public int getRotationAnimationHint();
+
+        public boolean isInputMethodWindow();
+
+        public int getDisplayId();
+
+        /**
+         * Returns true if the window owner can add internal system windows.
+         * That is, they have {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}.
+         */
+        default boolean canAddInternalSystemWindow() {
+            return false;
+        }
     }
 
     /**
@@ -435,6 +495,20 @@ public interface WindowManagerPolicy {
          * Remove the input consumer from the window manager.
          */
         void dismiss();
+    }
+
+    /**
+     * Holds the contents of a starting window. {@link #addSplashScreen} needs to wrap the
+     * contents of the starting window into an class implementing this interface, which then will be
+     * held by WM and released with {@link #remove} when no longer needed.
+     */
+    interface StartingSurface {
+
+        /**
+         * Removes the starting window surface. Do not hold the window manager lock when calling
+         * this method!
+         */
+        void remove();
     }
 
     /**
@@ -458,7 +532,7 @@ public interface WindowManagerPolicy {
         /**
          * Add a input consumer which will consume all input events going to any window below it.
          */
-        public InputConsumer addInputConsumer(Looper looper,
+        public InputConsumer createInputConsumer(Looper looper, String name,
                 InputEventReceiver.Factory inputEventReceiverFactory);
 
         /**
@@ -509,9 +583,26 @@ public interface WindowManagerPolicy {
         void getStackBounds(int stackId, Rect outBounds);
 
         /**
-         * Overrides all currently playing app animations with {@param a}.
+         * Notifies window manager that {@link #isShowingDreamLw} has changed.
          */
-        void overridePlayingAppAnimationsLw(Animation a);
+        void notifyShowingDreamChanged();
+
+        /**
+         * @return The currently active input method window.
+         */
+        WindowState getInputMethodWindowLw();
+
+        /**
+         * Notifies window manager that {@link #isKeyguardTrustedLw} has changed.
+         */
+        void notifyKeyguardTrustedChanged();
+
+        /**
+         * Notifies the window manager that screen is being turned off.
+         *
+         * @param listener callback to call when display can be turned off
+         */
+        void screenTurningOff(ScreenOffListener listener);
     }
 
     public interface PointerEventListener {
@@ -636,27 +727,181 @@ public interface WindowManagerPolicy {
             int navigationPresence);
 
     /**
-     * Assign a window type to a layer.  Allows you to control how different
+     * Returns the layer assignment for the window state. Allows you to control how different
+     * kinds of windows are ordered on-screen.
+     *
+     * @param win The window state
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
+     */
+    default int getWindowLayerLw(WindowState win) {
+        return getWindowLayerFromTypeLw(win.getBaseType(), win.canAddInternalSystemWindow());
+    }
+
+    /**
+     * Returns the layer assignment for the window type. Allows you to control how different
      * kinds of windows are ordered on-screen.
      *
      * @param type The type of window being assigned.
-     *
-     * @return int An arbitrary integer used to order windows, with lower
-     *         numbers below higher ones.
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
      */
-    public int windowTypeToLayerLw(int type);
+    default int getWindowLayerFromTypeLw(int type) {
+        if (isSystemAlertWindowType(type)) {
+            throw new IllegalArgumentException("Use getWindowLayerFromTypeLw() or"
+                    + " getWindowLayerLw() for alert window types");
+        }
+        return getWindowLayerFromTypeLw(type, false /* canAddInternalSystemWindow */);
+    }
 
     /**
-     * Return how to Z-order sub-windows in relation to the window they are
-     * attached to.  Return positive to have them ordered in front, negative for
-     * behind.
+     * Returns the layer assignment for the window type. Allows you to control how different
+     * kinds of windows are ordered on-screen.
+     *
+     * @param type The type of window being assigned.
+     * @param canAddInternalSystemWindow If the owner window associated with the type we are
+     *        evaluating can add internal system windows. I.e they have
+     *        {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
+     *        types {@link android.view.WindowManager.LayoutParams#isSystemAlertWindowType(int)}
+     *        can be assigned layers greater than the layer for
+     *        {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} Else, their
+     *        layers would be lesser.
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
+     */
+    default int getWindowLayerFromTypeLw(int type, boolean canAddInternalSystemWindow) {
+        if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
+            return APPLICATION_LAYER;
+        }
+
+        switch (type) {
+            case TYPE_WALLPAPER:
+                // wallpaper is at the bottom, though the window manager may move it.
+                return  1;
+            case TYPE_PRESENTATION:
+            case TYPE_PRIVATE_PRESENTATION:
+                return  APPLICATION_LAYER;
+            case TYPE_DOCK_DIVIDER:
+                return  APPLICATION_LAYER;
+            case TYPE_QS_DIALOG:
+                return  APPLICATION_LAYER;
+            case TYPE_PHONE:
+                return  3;
+            case TYPE_SEARCH_BAR:
+            case TYPE_VOICE_INTERACTION_STARTING:
+                return  4;
+            case TYPE_VOICE_INTERACTION:
+                // voice interaction layer is almost immediately above apps.
+                return  5;
+            case TYPE_INPUT_CONSUMER:
+                return  6;
+            case TYPE_SYSTEM_DIALOG:
+                return  7;
+            case TYPE_TOAST:
+                // toasts and the plugged-in battery thing
+                return  8;
+            case TYPE_PRIORITY_PHONE:
+                // SIM errors and unlock.  Not sure if this really should be in a high layer.
+                return  9;
+            case TYPE_SYSTEM_ALERT:
+                // like the ANR / app crashed dialogs
+                return  canAddInternalSystemWindow ? 11 : 10;
+            case TYPE_APPLICATION_OVERLAY:
+                return  12;
+            case TYPE_DREAM:
+                // used for Dreams (screensavers with TYPE_DREAM windows)
+                return  13;
+            case TYPE_INPUT_METHOD:
+                // on-screen keyboards and other such input method user interfaces go here.
+                return  14;
+            case TYPE_INPUT_METHOD_DIALOG:
+                // on-screen keyboards and other such input method user interfaces go here.
+                return  15;
+            case TYPE_STATUS_BAR_SUB_PANEL:
+                return  17;
+            case TYPE_STATUS_BAR:
+                return  18;
+            case TYPE_STATUS_BAR_PANEL:
+                return  19;
+            case TYPE_KEYGUARD_DIALOG:
+                return  20;
+            case TYPE_VOLUME_OVERLAY:
+                // the on-screen volume indicator and controller shown when the user
+                // changes the device volume
+                return  21;
+            case TYPE_SYSTEM_OVERLAY:
+                // the on-screen volume indicator and controller shown when the user
+                // changes the device volume
+                return  canAddInternalSystemWindow ? 22 : 11;
+            case TYPE_NAVIGATION_BAR:
+                // the navigation bar, if available, shows atop most things
+                return  23;
+            case TYPE_NAVIGATION_BAR_PANEL:
+                // some panels (e.g. search) need to show on top of the navigation bar
+                return  24;
+            case TYPE_SCREENSHOT:
+                // screenshot selection layer shouldn't go above system error, but it should cover
+                // navigation bars at the very least.
+                return  25;
+            case TYPE_SYSTEM_ERROR:
+                // system-level error dialogs
+                return  canAddInternalSystemWindow ? 26 : 10;
+            case TYPE_MAGNIFICATION_OVERLAY:
+                // used to highlight the magnified portion of a display
+                return  27;
+            case TYPE_DISPLAY_OVERLAY:
+                // used to simulate secondary display devices
+                return  28;
+            case TYPE_DRAG:
+                // the drag layer: input for drag-and-drop is associated with this window,
+                // which sits above all other focusable windows
+                return  29;
+            case TYPE_ACCESSIBILITY_OVERLAY:
+                // overlay put by accessibility services to intercept user interaction
+                return  30;
+            case TYPE_SECURE_SYSTEM_OVERLAY:
+                return  31;
+            case TYPE_BOOT_PROGRESS:
+                return  32;
+            case TYPE_POINTER:
+                // the (mouse) pointer layer
+                return  33;
+            default:
+                Slog.e("WindowManager", "Unknown window type: " + type);
+                return APPLICATION_LAYER;
+        }
+    }
+
+    int APPLICATION_LAYER = 2;
+    int APPLICATION_MEDIA_SUBLAYER = -2;
+    int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
+    int APPLICATION_PANEL_SUBLAYER = 1;
+    int APPLICATION_SUB_PANEL_SUBLAYER = 2;
+    int APPLICATION_ABOVE_SUB_PANEL_SUBLAYER = 3;
+
+    /**
+     * Return how to Z-order sub-windows in relation to the window they are attached to.
+     * Return positive to have them ordered in front, negative for behind.
      *
      * @param type The sub-window type code.
      *
      * @return int Layer in relation to the attached window, where positive is
      *         above and negative is below.
      */
-    public int subWindowTypeToLayerLw(int type);
+    default int getSubWindowLayerFromTypeLw(int type) {
+        switch (type) {
+            case TYPE_APPLICATION_PANEL:
+            case TYPE_APPLICATION_ATTACHED_DIALOG:
+                return APPLICATION_PANEL_SUBLAYER;
+            case TYPE_APPLICATION_MEDIA:
+                return APPLICATION_MEDIA_SUBLAYER;
+            case TYPE_APPLICATION_MEDIA_OVERLAY:
+                return APPLICATION_MEDIA_OVERLAY_SUBLAYER;
+            case TYPE_APPLICATION_SUB_PANEL:
+                return APPLICATION_SUB_PANEL_SUBLAYER;
+            case TYPE_APPLICATION_ABOVE_SUB_PANEL:
+                return APPLICATION_ABOVE_SUB_PANEL_SUBLAYER;
+        }
+        Slog.e("WindowManager", "Unknown sub-window type: " + type);
+        return 0;
+    }
 
     /**
      * Get the highest layer (actually one more than) that the wallpaper is
@@ -670,7 +915,7 @@ public interface WindowManagerPolicy {
      * button bar.
      */
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the display height available after excluding any screen
@@ -678,7 +923,7 @@ public interface WindowManagerPolicy {
      * button bar.
      */
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the available screen width that we should report for the
@@ -687,7 +932,7 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
      * Return the available screen height that we should report for the
@@ -696,34 +941,18 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode);
+            int uiMode, int displayId);
 
     /**
-     * Return whether the given window is forcibly hiding all windows except windows with
-     * FLAG_SHOW_WHEN_LOCKED set.  Typically returns true for the keyguard.
-     */
-    public boolean isForceHiding(WindowManager.LayoutParams attrs);
-
-
-    /**
-     * Return whether the given window can become one that passes isForceHiding() test.
-     * Typically returns true for the StatusBar.
+     * Return whether the given window can become the Keyguard window. Typically returns true for
+     * the StatusBar.
      */
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs);
 
     /**
-     * Determine if a window that is behind one that is force hiding
-     * (as determined by {@link #isForceHiding}) should actually be hidden.
-     * For example, typically returns false for the status bar.  Be careful
-     * to return false for any window that you may hide yourself, since this
-     * will conflict with what you set.
+     * @return whether {@param win} can be hidden by Keyguard
      */
-    public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs);
-
-    /**
-     * Return the window that is hiding the keyguard, if such a thing exists.
-     */
-    public WindowState getWinShowWhenLockedLw();
+    public boolean canBeHiddenByKeyguardLw(WindowState win);
 
     /**
      * Called when the system would like to show a UI to indicate that an
@@ -743,34 +972,14 @@ public interface WindowManagerPolicy {
      * @param windowFlags Window layout flags.
      * @param overrideConfig override configuration to consider when generating
      *        context to for resources.
+     * @param displayId Id of the display to show the splash screen at.
      *
-     * @return Optionally you can return the View that was used to create the
-     *         window, for easy removal in removeStartingWindow.
+     * @return The starting surface.
      *
-     * @see #removeStartingWindow
      */
-    public View addStartingWindow(IBinder appToken, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel,
-            int labelRes, int icon, int logo, int windowFlags, Configuration overrideConfig);
-
-    /**
-     * Called when the first window of an application has been displayed, while
-     * {@link #addStartingWindow} has created a temporary initial window for
-     * that application.  You should at this point remove the window from the
-     * window manager.  This is called without the window manager locked so
-     * that you can call back into it.
-     *
-     * <p>Note: due to the nature of these functions not being called with the
-     * window manager locked, you must be prepared for this function to be
-     * called multiple times and/or an initial time with a null View window
-     * even if you previously returned one.
-     *
-     * @param appToken Token of the application that has started.
-     * @param window Window View that was returned by createStartingWindow.
-     *
-     * @see #addStartingWindow
-     */
-    public void removeStartingWindow(IBinder appToken, View window);
+    public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
+            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
+            int logo, int windowFlags, Configuration overrideConfig, int displayId);
 
     /**
      * Prepare for a window being added to the window manager.  You can throw an
@@ -834,16 +1043,16 @@ public interface WindowManagerPolicy {
             boolean forceDefault);
 
     /**
-     * Create and return an animation to re-display a force hidden window.
+     * Create and return an animation to re-display a window that was force hidden by Keyguard.
      */
-    public Animation createForceHideEnterAnimation(boolean onWallpaper,
+    public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade);
 
     /**
-     * Create and return an animation to let the wallpaper disappear after being shown on a force
-     * hiding window.
+     * Create and return an animation to let the wallpaper disappear after being shown behind
+     * Keyguard.
      */
-    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade);
+    public Animation createKeyguardWallpaperExit(boolean goingToNotificationShade);
 
     /**
      * Called from the input reader thread before a key is enqueued.
@@ -1000,7 +1209,7 @@ public interface WindowManagerPolicy {
      * @param attached For sub-windows, the window it is attached to. Otherwise null.
      */
     public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached);
+            WindowManager.LayoutParams attrs, WindowState attached, WindowState imeTarget);
 
     /**
      * Called following layout of all windows and after policy has been applied
@@ -1072,12 +1281,28 @@ public interface WindowManagerPolicy {
     public void screenTurnedOn();
 
     /**
+     * Called when the display would like to be turned off. This gives policy a chance to do some
+     * things before the display power state is actually changed to off.
+     *
+     * @param screenOffListener Must be called to tell that the display power state can actually be
+     *                          changed now after policy has done its work.
+     */
+    public void screenTurningOff(ScreenOffListener screenOffListener);
+
+    /**
      * Called when the device has turned the screen off.
      */
     public void screenTurnedOff();
 
     public interface ScreenOnListener {
         void onScreenOn();
+    }
+
+    /**
+     * See {@link #screenTurnedOff}
+     */
+    public interface ScreenOffListener {
+        void onScreenOff();
     }
 
     /**
@@ -1147,11 +1372,21 @@ public interface WindowManagerPolicy {
     public boolean isKeyguardSecure(int userId);
 
     /**
-     * Return whether the keyguard is on.
+     * Return whether the keyguard is currently occluded.
      *
-     * @return true if in keyguard is on.
+     * @return true if in keyguard is occluded, false otherwise
      */
-    public boolean isKeyguardShowingOrOccluded();
+    public boolean isKeyguardOccluded();
+
+    /**
+     * @return true if in keyguard is on and not occluded.
+     */
+    public boolean isKeyguardShowingAndNotOccluded();
+
+    /**
+     * @return whether Keyguard is in trusted state and can be dismissed without credentials
+     */
+    public boolean isKeyguardTrustedLw();
 
     /**
      * inKeyguardRestrictedKeyInputMode
@@ -1166,13 +1401,10 @@ public interface WindowManagerPolicy {
 
     /**
      * Ask the policy to dismiss the keyguard, if it is currently shown.
+     *
+     * @param callback Callback to be informed about the result.
      */
-    public void dismissKeyguardLw();
-
-    /**
-     * Notifies the keyguard that the activity has drawn it was waiting for.
-     */
-    public void notifyActivityDrawnForKeyguardLw();
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback);
 
     /**
      * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method
@@ -1181,6 +1413,8 @@ public interface WindowManagerPolicy {
      * @return true if the keyguard has drawn.
      */
     public boolean isKeyguardDrawnLw();
+
+    public boolean isShowingDreamLw();
 
     /**
      * Given an orientation constant, returns the appropriate surface rotation,
@@ -1313,7 +1547,7 @@ public interface WindowManagerPolicy {
     /**
      * Called by System UI to notify of changes to the visibility of PIP.
      */
-    public void setTvPipVisibilityLw(boolean visible);
+    void setPipVisibilityLw(boolean visible);
 
     /**
      * Specifies whether there is an on-screen navigation bar separate from the status bar.
@@ -1331,6 +1565,18 @@ public interface WindowManagerPolicy {
      * @hide
      */
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
+
+    /**
+     * An internal callback (from InputMethodManagerService) to notify a state change regarding
+     * whether the back key should dismiss the software keyboard (IME) or not.
+     *
+     * @param newValue {@code true} if the software keyboard is shown and the back key is expected
+     *                 to dismiss the software keyboard.
+     * @hide
+     */
+    default void setDismissImeOnBackKeyPressed(boolean newValue) {
+        // Default implementation does nothing.
+    }
 
     /**
      * Show the recents task list app.
@@ -1356,6 +1602,15 @@ public interface WindowManagerPolicy {
      * @param newUserId The id of the incoming user.
      */
     public void setCurrentUserLw(int newUserId);
+
+    /**
+     * For a given user-switch operation, this will be called once with switching=true before the
+     * user-switch and once with switching=false afterwards (or if the user-switch was cancelled).
+     * This gives the policy a chance to alter its behavior for the duration of a user-switch.
+     *
+     * @param switching true if a user-switch is in progress
+     */
+    void setSwitchingUser(boolean switching);
 
     /**
      * Print the WindowManagerPolicy's state into the given stream.
@@ -1436,4 +1691,16 @@ public interface WindowManagerPolicy {
     public void onConfigurationChanged();
 
     public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
+
+    /**
+     * Called when System UI has been started.
+     */
+    void onSystemUiStarted();
+
+    /**
+     * Checks whether the policy is ready for dismissing the boot animation and completing the boot.
+     *
+     * @return true if ready; false otherwise.
+     */
+    boolean canDismissBootAnimation();
 }

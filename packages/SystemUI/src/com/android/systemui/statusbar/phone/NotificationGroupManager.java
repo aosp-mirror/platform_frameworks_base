@@ -416,6 +416,10 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 child = getIsolatedChild(sbn.getGroupKey());
             }
             if (child != null) {
+                if (child.row.keepInParent() || child.row.isRemoved() || child.row.isDismissed()) {
+                    // the notification is actually already removed, no need to do heads-up on it.
+                    return;
+                }
                 if (mHeadsUpManager.isHeadsUp(child.key)) {
                     mHeadsUpManager.updateNotification(child, true);
                 } else {

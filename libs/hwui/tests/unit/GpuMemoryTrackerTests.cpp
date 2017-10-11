@@ -51,7 +51,7 @@ static void destroyEglContext() {
 TEST(GpuMemoryTracker, sizeCheck) {
     destroyEglContext();
 
-    GpuMemoryTracker::onGLContextCreated();
+    GpuMemoryTracker::onGpuContextCreated();
     ASSERT_EQ(0, GpuMemoryTracker::getTotalSize(GpuObjectType::Texture));
     ASSERT_EQ(0, GpuMemoryTracker::getInstanceCount(GpuObjectType::Texture));
     {
@@ -66,5 +66,5 @@ TEST(GpuMemoryTracker, sizeCheck) {
     }
     ASSERT_EQ(0, GpuMemoryTracker::getTotalSize(GpuObjectType::Texture));
     ASSERT_EQ(0, GpuMemoryTracker::getInstanceCount(GpuObjectType::Texture));
-    GpuMemoryTracker::onGLContextDestroyed();
+    GpuMemoryTracker::onGpuContextDestroyed();
 }

@@ -16,10 +16,10 @@
 
 package android.view.textservice;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * This class contains a metadata of suggestions from the text service

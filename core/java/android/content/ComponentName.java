@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -52,7 +54,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      *            the component
      * @return the new ComponentName
      */
-    public static ComponentName createRelative(String pkg, String cls) {
+    public static @NonNull ComponentName createRelative(@NonNull String pkg, @NonNull String cls) {
         if (TextUtils.isEmpty(cls)) {
             throw new IllegalArgumentException("class name cannot be empty");
         }
@@ -83,7 +85,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      *            the component
      * @return the new ComponentName
      */
-    public static ComponentName createRelative(Context pkg, String cls) {
+    public static @NonNull ComponentName createRelative(@NonNull Context pkg, @NonNull String cls) {
         return createRelative(pkg.getPackageName(), cls);
     }
 
@@ -95,7 +97,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * @param cls The name of the class inside of <var>pkg</var> that
      * implements the component.  Can not be null.
      */
-    public ComponentName(String pkg, String cls) {
+    public ComponentName(@NonNull String pkg, @NonNull String cls) {
         if (pkg == null) throw new NullPointerException("package name is null");
         if (cls == null) throw new NullPointerException("class name is null");
         mPackage = pkg;
@@ -110,7 +112,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * @param cls The name of the class inside of <var>pkg</var> that
      * implements the component.
      */
-    public ComponentName(Context pkg, String cls) {
+    public ComponentName(@NonNull Context pkg, @NonNull String cls) {
         if (cls == null) throw new NullPointerException("class name is null");
         mPackage = pkg.getPackageName();
         mClass = cls;
@@ -124,7 +126,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * @param cls The Class object of the desired component, from which the
      * actual class name will be retrieved.
      */
-    public ComponentName(Context pkg, Class<?> cls) {
+    public ComponentName(@NonNull Context pkg, @NonNull Class<?> cls) {
         mPackage = pkg.getPackageName();
         mClass = cls.getName();
     }
@@ -136,14 +138,14 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
     /**
      * Return the package name of this component.
      */
-    public String getPackageName() {
+    public @NonNull String getPackageName() {
         return mPackage;
     }
     
     /**
      * Return the class name of this component.
      */
-    public String getClassName() {
+    public @NonNull String getClassName() {
         return mClass;
     }
     
@@ -200,7 +202,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * 
      * @see #unflattenFromString(String)
      */
-    public String flattenToString() {
+    public @NonNull String flattenToString() {
         return mPackage + "/" + mClass;
     }
     
@@ -215,7 +217,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * 
      * @see #unflattenFromString(String)
      */
-    public String flattenToShortString() {
+    public @NonNull String flattenToShortString() {
         StringBuilder sb = new StringBuilder(mPackage.length() + mClass.length());
         appendShortString(sb, mPackage, mClass);
         return sb.toString();
@@ -255,7 +257,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * 
      * @see #flattenToString()
      */
-    public static ComponentName unflattenFromString(String str) {
+    public static @Nullable ComponentName unflattenFromString(@NonNull String str) {
         int sep = str.indexOf('/');
         if (sep < 0 || (sep+1) >= str.length()) {
             return null;

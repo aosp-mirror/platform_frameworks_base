@@ -17,6 +17,7 @@
         <!-- theme ref in android NS. value = @string/candidates_style = <u>candidates</u> -->
         <item>?android:attr/candidatesTextStyleSpans</item>
         <item>@android:string/unknownName</item>  <!-- value = Unknown -->
+        <item>?EC</item>
     </string-array>
 
     <!-- resources that the above array can refer to -->

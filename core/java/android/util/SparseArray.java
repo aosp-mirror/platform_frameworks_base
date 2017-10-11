@@ -346,10 +346,41 @@ public class SparseArray<E> implements Cloneable {
             gc();
         }
 
-        for (int i = 0; i < mSize; i++)
-            if (mValues[i] == value)
+        for (int i = 0; i < mSize; i++) {
+            if (mValues[i] == value) {
                 return i;
+            }
+        }
 
+        return -1;
+    }
+
+    /**
+     * Returns an index for which {@link #valueAt} would return the
+     * specified key, or a negative number if no keys map to the
+     * specified value.
+     * <p>Beware that this is a linear search, unlike lookups by key,
+     * and that multiple keys can map to the same value and this will
+     * find only one of them.
+     * <p>Note also that this method uses {@code equals} unlike {@code indexOfValue}.
+     * @hide
+     */
+    public int indexOfValueByValue(E value) {
+        if (mGarbage) {
+            gc();
+        }
+
+        for (int i = 0; i < mSize; i++) {
+            if (value == null) {
+                if (mValues[i] == null) {
+                    return i;
+                }
+            } else {
+                if (value.equals(mValues[i])) {
+                    return i;
+                }
+            }
+        }
         return -1;
     }
 

@@ -3,8 +3,11 @@
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src) \
+    $(call all-proto-files-under, proto)
 LOCAL_MODULE := am
+LOCAL_PROTOC_OPTIMIZE_TYPE := stream
 include $(BUILD_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)

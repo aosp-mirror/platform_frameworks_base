@@ -52,16 +52,6 @@
             >
             <include layout="@layout/system_icons" />
         </FrameLayout>
-        <TextView android:id="@+id/battery_level"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/header_battery_margin_keyguard"
-            android:paddingEnd="@dimen/battery_level_padding_end"
-            android:textColor="#ffffff"
-            android:visibility="gone"
-            android:textSize="@dimen/battery_level_text_size"
-            android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
 
     <com.android.keyguard.CarrierText

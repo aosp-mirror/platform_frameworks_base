@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="test.amslam">
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".PongReceiver"
+            android:exported="false" />
+
+        <service android:name=".subreceivers.PingReceiver000" android:exported="false" android:process=":ping000" />
+        <service android:name=".subreceivers.PingReceiver001" android:exported="false" android:process=":ping001" />
+        <service android:name=".subreceivers.PingReceiver002" android:exported="false" android:process=":ping002" />
+        <service android:name=".subreceivers.PingReceiver003" android:exported="false" android:process=":ping003" />
+        <service android:name=".subreceivers.PingReceiver004" android:exported="false" android:process=":ping004" />
+        <service android:name=".subreceivers.PingReceiver005" android:exported="false" android:process=":ping005" />
+        <service android:name=".subreceivers.PingReceiver006" android:exported="false" android:process=":ping006" />
+        <service android:name=".subreceivers.PingReceiver007" android:exported="false" android:process=":ping007" />
+        <service android:name=".subreceivers.PingReceiver008" android:exported="false" android:process=":ping008" />
+        <service android:name=".subreceivers.PingReceiver009" android:exported="false" android:process=":ping009" />
+        <service android:name=".subreceivers.PingReceiver010" android:exported="false" android:process=":ping010" />
+        <service android:name=".subreceivers.PingReceiver011" android:exported="false" android:process=":ping011" />
+        <service android:name=".subreceivers.PingReceiver012" android:exported="false" android:process=":ping012" />
+        <service android:name=".subreceivers.PingReceiver013" android:exported="false" android:process=":ping013" />
+        <service android:name=".subreceivers.PingReceiver014" android:exported="false" android:process=":ping014" />
+        <service android:name=".subreceivers.PingReceiver015" android:exported="false" android:process=":ping015" />
+        <service android:name=".subreceivers.PingReceiver016" android:exported="false" android:process=":ping016" />
+        <service android:name=".subreceivers.PingReceiver017" android:exported="false" android:process=":ping017" />
+        <service android:name=".subreceivers.PingReceiver018" android:exported="false" android:process=":ping018" />
+        <service android:name=".subreceivers.PingReceiver019" android:exported="false" android:process=":ping019" />
+        <service android:name=".subreceivers.PingReceiver020" android:exported="false" android:process=":ping020" />
+        <service android:name=".subreceivers.PingReceiver021" android:exported="false" android:process=":ping021" />
+        <service android:name=".subreceivers.PingReceiver022" android:exported="false" android:process=":ping022" />
+        <service android:name=".subreceivers.PingReceiver023" android:exported="false" android:process=":ping023" />
+        <service android:name=".subreceivers.PingReceiver024" android:exported="false" android:process=":ping024" />
+        <service android:name=".subreceivers.PingReceiver025" android:exported="false" android:process=":ping025" />
+        <service android:name=".subreceivers.PingReceiver026" android:exported="false" android:process=":ping026" />
+        <service android:name=".subreceivers.PingReceiver027" android:exported="false" android:process=":ping027" />
+        <service android:name=".subreceivers.PingReceiver028" android:exported="false" android:process=":ping028" />
+        <service android:name=".subreceivers.PingReceiver029" android:exported="false" android:process=":ping029" />
+        <service android:name=".subreceivers.PingReceiver030" android:exported="false" android:process=":ping030" />
+        <service android:name=".subreceivers.PingReceiver031" android:exported="false" android:process=":ping031" />
+        <service android:name=".subreceivers.PingReceiver032" android:exported="false" android:process=":ping032" />
+        <service android:name=".subreceivers.PingReceiver033" android:exported="false" android:process=":ping033" />
+        <service android:name=".subreceivers.PingReceiver034" android:exported="false" android:process=":ping034" />
+        <service android:name=".subreceivers.PingReceiver035" android:exported="false" android:process=":ping035" />
+        <service android:name=".subreceivers.PingReceiver036" android:exported="false" android:process=":ping036" />
+        <service android:name=".subreceivers.PingReceiver037" android:exported="false" android:process=":ping037" />
+        <service android:name=".subreceivers.PingReceiver038" android:exported="false" android:process=":ping038" />
+        <service android:name=".subreceivers.PingReceiver039" android:exported="false" android:process=":ping039" />
+        <service android:name=".subreceivers.PingReceiver040" android:exported="false" android:process=":ping040" />
+        <service android:name=".subreceivers.PingReceiver041" android:exported="false" android:process=":ping041" />
+        <service android:name=".subreceivers.PingReceiver042" android:exported="false" android:process=":ping042" />
+        <service android:name=".subreceivers.PingReceiver043" android:exported="false" android:process=":ping043" />
+        <service android:name=".subreceivers.PingReceiver044" android:exported="false" android:process=":ping044" />
+        <service android:name=".subreceivers.PingReceiver045" android:exported="false" android:process=":ping045" />
+        <service android:name=".subreceivers.PingReceiver046" android:exported="false" android:process=":ping046" />
+        <service android:name=".subreceivers.PingReceiver047" android:exported="false" android:process=":ping047" />
+        <service android:name=".subreceivers.PingReceiver048" android:exported="false" android:process=":ping048" />
+        <service android:name=".subreceivers.PingReceiver049" android:exported="false" android:process=":ping049" />
+        <service android:name=".subreceivers.PingReceiver050" android:exported="false" android:process=":ping050" />
+        <service android:name=".subreceivers.PingReceiver051" android:exported="false" android:process=":ping051" />
+        <service android:name=".subreceivers.PingReceiver052" android:exported="false" android:process=":ping052" />
+        <service android:name=".subreceivers.PingReceiver053" android:exported="false" android:process=":ping053" />
+        <service android:name=".subreceivers.PingReceiver054" android:exported="false" android:process=":ping054" />
+        <service android:name=".subreceivers.PingReceiver055" android:exported="false" android:process=":ping055" />
+        <service android:name=".subreceivers.PingReceiver056" android:exported="false" android:process=":ping056" />
+        <service android:name=".subreceivers.PingReceiver057" android:exported="false" android:process=":ping057" />
+        <service android:name=".subreceivers.PingReceiver058" android:exported="false" android:process=":ping058" />
+        <service android:name=".subreceivers.PingReceiver059" android:exported="false" android:process=":ping059" />
+        <service android:name=".subreceivers.PingReceiver060" android:exported="false" android:process=":ping060" />
+        <service android:name=".subreceivers.PingReceiver061" android:exported="false" android:process=":ping061" />
+        <service android:name=".subreceivers.PingReceiver062" android:exported="false" android:process=":ping062" />
+        <service android:name=".subreceivers.PingReceiver063" android:exported="false" android:process=":ping063" />
+        <service android:name=".subreceivers.PingReceiver064" android:exported="false" android:process=":ping064" />
+        <service android:name=".subreceivers.PingReceiver065" android:exported="false" android:process=":ping065" />
+        <service android:name=".subreceivers.PingReceiver066" android:exported="false" android:process=":ping066" />
+        <service android:name=".subreceivers.PingReceiver067" android:exported="false" android:process=":ping067" />
+        <service android:name=".subreceivers.PingReceiver068" android:exported="false" android:process=":ping068" />
+        <service android:name=".subreceivers.PingReceiver069" android:exported="false" android:process=":ping069" />
+        <service android:name=".subreceivers.PingReceiver070" android:exported="false" android:process=":ping070" />
+        <service android:name=".subreceivers.PingReceiver071" android:exported="false" android:process=":ping071" />
+        <service android:name=".subreceivers.PingReceiver072" android:exported="false" android:process=":ping072" />
+        <service android:name=".subreceivers.PingReceiver073" android:exported="false" android:process=":ping073" />
+        <service android:name=".subreceivers.PingReceiver074" android:exported="false" android:process=":ping074" />
+        <service android:name=".subreceivers.PingReceiver075" android:exported="false" android:process=":ping075" />
+        <service android:name=".subreceivers.PingReceiver076" android:exported="false" android:process=":ping076" />
+        <service android:name=".subreceivers.PingReceiver077" android:exported="false" android:process=":ping077" />
+        <service android:name=".subreceivers.PingReceiver078" android:exported="false" android:process=":ping078" />
+        <service android:name=".subreceivers.PingReceiver079" android:exported="false" android:process=":ping079" />
+        <service android:name=".subreceivers.PingReceiver080" android:exported="false" android:process=":ping080" />
+        <service android:name=".subreceivers.PingReceiver081" android:exported="false" android:process=":ping081" />
+        <service android:name=".subreceivers.PingReceiver082" android:exported="false" android:process=":ping082" />
+        <service android:name=".subreceivers.PingReceiver083" android:exported="false" android:process=":ping083" />
+        <service android:name=".subreceivers.PingReceiver084" android:exported="false" android:process=":ping084" />
+        <service android:name=".subreceivers.PingReceiver085" android:exported="false" android:process=":ping085" />
+        <service android:name=".subreceivers.PingReceiver086" android:exported="false" android:process=":ping086" />
+        <service android:name=".subreceivers.PingReceiver087" android:exported="false" android:process=":ping087" />
+        <service android:name=".subreceivers.PingReceiver088" android:exported="false" android:process=":ping088" />
+        <service android:name=".subreceivers.PingReceiver089" android:exported="false" android:process=":ping089" />
+        <service android:name=".subreceivers.PingReceiver090" android:exported="false" android:process=":ping090" />
+        <service android:name=".subreceivers.PingReceiver091" android:exported="false" android:process=":ping091" />
+        <service android:name=".subreceivers.PingReceiver092" android:exported="false" android:process=":ping092" />
+        <service android:name=".subreceivers.PingReceiver093" android:exported="false" android:process=":ping093" />
+        <service android:name=".subreceivers.PingReceiver094" android:exported="false" android:process=":ping094" />
+        <service android:name=".subreceivers.PingReceiver095" android:exported="false" android:process=":ping095" />
+        <service android:name=".subreceivers.PingReceiver096" android:exported="false" android:process=":ping096" />
+        <service android:name=".subreceivers.PingReceiver097" android:exported="false" android:process=":ping097" />
+        <service android:name=".subreceivers.PingReceiver098" android:exported="false" android:process=":ping098" />
+        <service android:name=".subreceivers.PingReceiver099" android:exported="false" android:process=":ping099" />
+    </application>
+
+</manifest>

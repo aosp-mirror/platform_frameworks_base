@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +46,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
     public ComponentName admin1;
     public ComponentName admin2;
     public ComponentName admin3;
+    public ComponentName adminAnotherPackage;
     public ComponentName adminNoPerm;
 
     @Override
@@ -59,12 +61,42 @@ public abstract class DpmTestBase extends AndroidTestCase {
         admin1 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin1.class);
         admin2 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin2.class);
         admin3 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin3.class);
+        adminAnotherPackage = new ComponentName(DpmMockContext.ANOTHER_PACKAGE_NAME,
+                "whatever.random.class");
         adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
     }
 
     @Override
     public DpmMockContext getContext() {
         return mMockContext;
+    }
+
+    protected interface DpmRunnable {
+        public void run(DevicePolicyManager dpm) throws Exception;
+    }
+
+    /**
+     * Simulate an RPC from {@param caller} to the service context ({@link #mContext}).
+     *
+     * The caller sees its own context. The server also sees its own separate context, with the
+     * appropriate calling UID and calling permissions fields already set up.
+     */
+    protected void runAsCaller(DpmMockContext caller, DevicePolicyManagerServiceTestable dpms,
+            DpmRunnable action) {
+        final DpmMockContext serviceContext = mMockContext;
+
+        final long origId = serviceContext.binder.clearCallingIdentity();
+        try {
+            serviceContext.binder.callingUid = caller.binder.callingUid;
+            serviceContext.binder.callingPid = caller.binder.callingPid;
+            serviceContext.binder.callingPermissions.put(caller.binder.callingUid,
+                    caller.permissions);
+            action.run(new DevicePolicyManagerTestable(caller, dpms));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        } finally {
+            serviceContext.binder.restoreCallingIdentity(origId);
+        }
     }
 
     protected void markPackageAsInstalled(String packageName, ApplicationInfo ai, int userId)
@@ -81,6 +113,10 @@ public abstract class DpmTestBase extends AndroidTestCase {
         doReturn(pi).when(mMockContext.ipackageManager).getPackageInfo(
                 eq(packageName),
                 eq(0),
+                eq(userId));
+
+        doReturn(ai.uid).when(mMockContext.packageManager).getPackageUidAsUser(
+                eq(packageName),
                 eq(userId));
     }
 
@@ -101,6 +137,13 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 admin);
     }
 
+    protected void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
+            ComponentName copyFromAdmin)
+            throws Exception {
+        setUpPackageManagerForFakeAdmin(admin, packageUid,
+                /* enabledSetting =*/ null, /* appTargetSdk = */ null, copyFromAdmin);
+    }
+
     /**
      * Set up a component in the mock package manager to be an active admin.
      *
@@ -118,7 +161,6 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 mRealTestContext.getPackageManager().getApplicationInfo(
                         copyFromAdmin.getPackageName(),
                         PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
-
         ai.enabledSetting = enabledSetting == null
                 ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                 : enabledSetting;
@@ -161,6 +203,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 
+        doReturn(new String[] {admin.getPackageName()}).when(mMockContext.ipackageManager)
+            .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
     }

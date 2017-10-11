@@ -503,11 +503,7 @@ interface ITelephony {
       */
     boolean isConcurrentVoiceAndDataAllowed(int subId);
 
-    oneway void setVisualVoicemailEnabled(String callingPackage,
-            in PhoneAccountHandle accountHandle, boolean enabled);
-
-    boolean isVisualVoicemailEnabled(String callingPackage,
-            in PhoneAccountHandle accountHandle);
+    Bundle getVisualVoicemailSettings(String callingPackage, int subId);
 
     String getVisualVoicemailPackageName(String callingPackage, int subId);
 
@@ -531,8 +527,11 @@ interface ITelephony {
      * Send a visual voicemail SMS. Internal use only.
      * Requires caller to be the default dialer and have SEND_SMS permission
      */
-    oneway void sendVisualVoicemailSmsForSubscriber(in String callingPackage, in int subId,
+    void sendVisualVoicemailSmsForSubscriber(in String callingPackage, in int subId,
             in String number, in int port, in String text, in PendingIntent sentIntent);
+
+    // Send the special dialer code. The IPC caller must be the current default dialer.
+    void sendDialerSpecialCode(String callingPackageName, String inputCode);
 
     /**
      * Returns the network type for data transmission
@@ -1081,6 +1080,15 @@ interface ITelephony {
     boolean isImsRegistered();
 
     /**
+     * Get IMS Registration Status on a particular subid.
+     *
+     * @param subId user preferred subId.
+     *
+     * @return {@code true} if the IMS status is registered.
+     */
+    boolean isImsRegisteredForSubscriber(int subId);
+
+    /**
      * Returns the Status of Wi-Fi Calling
      */
     boolean isWifiCallingAvailable();
@@ -1178,6 +1186,20 @@ interface ITelephony {
     Uri getVoicemailRingtoneUri(in PhoneAccountHandle accountHandle);
 
     /**
+     * Sets the per-account voicemail ringtone.
+     *
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or
+     * has permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param phoneAccountHandle The handle for the {@link PhoneAccount} for which to set the
+     * voicemail ringtone.
+     * @param uri The URI for the ringtone to play when receiving a voicemail from a specific
+     * PhoneAccount.
+     */
+    void setVoicemailRingtoneUri(String callingPackage,
+            in PhoneAccountHandle phoneAccountHandle, in Uri uri);
+
+    /**
      * Returns whether vibration is set for voicemail notification in Phone settings.
      *
      * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
@@ -1185,6 +1207,20 @@ interface ITelephony {
      * @return {@code true} if the vibration is set for this PhoneAccount, {@code false} otherwise.
      */
     boolean isVoicemailVibrationEnabled(in PhoneAccountHandle accountHandle);
+
+    /**
+     * Sets the per-account preference whether vibration is enabled for voicemail notifications.
+     *
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or
+     * has permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param phoneAccountHandle The handle for the {@link PhoneAccount} for which to set the
+     * voicemail vibration setting.
+     * @param enabled Whether to enable or disable vibration for voicemail notifications from a
+     * specific PhoneAccount.
+     */
+    void setVoicemailVibrationEnabled(String callingPackage,
+            in PhoneAccountHandle phoneAccountHandle, boolean enabled);
 
     /**
      * Returns a list of packages that have carrier privileges.

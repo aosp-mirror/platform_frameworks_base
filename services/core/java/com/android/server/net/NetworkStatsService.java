@@ -31,6 +31,8 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.STATS_PER_IFACE;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
@@ -102,6 +104,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.NetworkInterfaceProto;
+import android.service.NetworkStatsServiceDumpProto;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -113,10 +117,12 @@ import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
@@ -552,15 +558,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getSummaryForAllUid(
                     NetworkTemplate template, long start, long end, boolean includeTags) {
-                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
-                final NetworkStats stats =
-                        getUidComplete().getSummary(template, start, end, accessLevel);
-                if (includeTags) {
-                    final NetworkStats tagStats = getUidTagComplete()
-                            .getSummary(template, start, end, accessLevel);
-                    stats.combineAllValues(tagStats);
+                try {
+                    @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                    final NetworkStats stats =
+                            getUidComplete().getSummary(template, start, end, accessLevel);
+                    if (includeTags) {
+                        final NetworkStats tagStats = getUidTagComplete()
+                                .getSummary(template, start, end, accessLevel);
+                        stats.combineAllValues(tagStats);
+                    }
+                    return stats;
+                } catch (NullPointerException e) {
+                    // TODO: Track down and fix the cause of this crash and remove this catch block.
+                    Slog.wtf(TAG, "NullPointerException in getSummaryForAllUid", e);
+                    throw e;
                 }
-                return stats;
             }
 
             @Override
@@ -1032,6 +1044,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats xtSnapshot = getNetworkStatsXt();
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
+        // Tethering snapshot for dev and xt stats. Counts per-interface data from tethering stats
+        // providers that isn't already counted by dev and XT stats.
+        final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
+        xtSnapshot.combineAllValues(tetherSnapshot);
+        devSnapshot.combineAllValues(tetherSnapshot);
 
         // For xt/dev, we pass a null VPN array because usage is aggregated by UID, so VPN traffic
         // can't be reattributed to responsible apps.
@@ -1211,7 +1228,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // Build list of UIDs that we should clean up
         int[] uids = new int[0];
         final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
-                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
+                PackageManager.MATCH_ANY_USER
+                | PackageManager.MATCH_DISABLED_COMPONENTS);
         for (ApplicationInfo app : apps) {
             final int uid = UserHandle.getUid(userId, app.uid);
             uids = ArrayUtils.appendInt(uids, uid);
@@ -1222,7 +1240,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter rawWriter, String[] args) {
-        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, rawWriter)) return;
 
         long duration = DateUtils.DAY_IN_MILLIS;
         final HashSet<String> argSet = new HashSet<String>();
@@ -1247,6 +1265,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final IndentingPrintWriter pw = new IndentingPrintWriter(rawWriter, "  ");
 
         synchronized (mStatsLock) {
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                // In this case ignore all other arguments.
+                dumpProto(fd);
+                return;
+            }
+
             if (poll) {
                 performPollLocked(FLAG_PERSIST_ALL | FLAG_PERSIST_FORCE);
                 pw.println("Forced poll");
@@ -1319,6 +1343,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
+
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES, mActiveIfaces);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES, mActiveUidIfaces);
+        mDevRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
+        mXtRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
+        mUidRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
+        mUidTagRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
+
+        proto.flush();
+    }
+
+    private static void dumpInterfaces(ProtoOutputStream proto, long tag,
+            ArrayMap<String, NetworkIdentitySet> ifaces) {
+        for (int i = 0; i < ifaces.size(); i++) {
+            final long start = proto.start(tag);
+
+            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
+            ifaces.valueAt(i).writeToProto(proto, NetworkInterfaceProto.IDENTITIES);
+
+            proto.end(start);
+        }
+    }
+
     /**
      * Return snapshot of current UID statistics, including any
      * {@link TrafficStats#UID_TETHERING}, video calling data usage, and {@link #mUidOperations}
@@ -1328,14 +1379,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
 
         // fold tethering stats and operations into uid snapshot
-        final NetworkStats tetherSnapshot = getNetworkStatsTethering();
+        final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
 
         // fold video calling data usage stats into uid snapshot
-        final NetworkStats vtStats = telephonyManager.getVtDataUsage(true);
+        final NetworkStats vtStats = telephonyManager.getVtDataUsage(STATS_PER_UID);
         if (vtStats != null) {
             uidSnapshot.combineAllValues(vtStats);
         }
@@ -1354,7 +1405,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 Context.TELEPHONY_SERVICE);
 
         // Merge video calling data usage into XT
-        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(false);
+        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(STATS_PER_IFACE);
         if (vtSnapshot != null) {
             xtSnapshot.combineAllValues(vtSnapshot);
         }
@@ -1366,9 +1417,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return snapshot of current tethering statistics. Will return empty
      * {@link NetworkStats} if any problems are encountered.
      */
-    private NetworkStats getNetworkStatsTethering() throws RemoteException {
+    private NetworkStats getNetworkStatsTethering(int how) throws RemoteException {
         try {
-            return mNetworkManager.getNetworkStatsTethering();
+            return mNetworkManager.getNetworkStatsTethering(how);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);

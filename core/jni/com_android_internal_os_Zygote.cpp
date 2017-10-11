@@ -54,10 +54,10 @@
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
-#include "ScopedLocalRef.h"
-#include "ScopedPrimitiveArray.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "fd_utils.h"
 
 #include "nativebridge/native_bridge.h"
@@ -108,13 +108,9 @@ static void SigChldHandler(int /*signal_number*/) {
      // changes its locking strategy or its use of syscalls within the
      // lazy-init critical section, its use here may become unsafe.
     if (WIFEXITED(status)) {
-      if (WEXITSTATUS(status)) {
-        ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
-      }
+      ALOGI("Process %d exited cleanly (%d)", pid, WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
-      if (WTERMSIG(status) != SIGKILL) {
-        ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
-      }
+      ALOGI("Process %d exited due to signal (%d)", pid, WTERMSIG(status));
       if (WCOREDUMP(status)) {
         ALOGI("Process %d dumped core.", pid);
       }
@@ -220,6 +216,14 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 
 // The debug malloc library needs to know whether it's the zygote or a child.
 extern "C" int gMallocLeakZygoteChild;
+
+static void PreApplicationInit() {
+  // The child process sets this to indicate it's not the zygote.
+  gMallocLeakZygoteChild = 1;
+
+  // Set the jemalloc decay time to 1.
+  mallopt(M_DECAY_TIME, 1);
+}
 
 static void EnableKeepCapabilities(JNIEnv* env) {
   int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
@@ -473,7 +477,7 @@ static void FillFileDescriptorVector(JNIEnv* env,
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
-                                     jint debug_flags, jobjectArray javaRlimits,
+                                     jint runtime_flags, jobjectArray javaRlimits,
                                      jlong permittedCapabilities, jlong effectiveCapabilities,
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
@@ -517,11 +521,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   pid_t pid = fork();
 
   if (pid == 0) {
-    // The child process.
-    gMallocLeakZygoteChild = 1;
-
-    // Set the jemalloc decay time to 1.
-    mallopt(M_DECAY_TIME, 1);
+    PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
@@ -658,7 +658,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     UnsetSigChldHandler();
 
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                               is_system_server, instructionSet);
     if (env->ExceptionCheck()) {
       RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
@@ -674,13 +674,33 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   }
   return pid;
 }
+
+static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
+    __user_cap_header_struct capheader;
+    memset(&capheader, 0, sizeof(capheader));
+    capheader.version = _LINUX_CAPABILITY_VERSION_3;
+    capheader.pid = 0;
+
+    __user_cap_data_struct capdata[2];
+    if (capget(&capheader, &capdata[0]) == -1) {
+        ALOGE("capget failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "capget failed");
+    }
+
+    return capdata[0].effective |
+           (static_cast<uint64_t>(capdata[1].effective) << 32);
+}
 }  // anonymous namespace
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
+  PreApplicationInit();
+}
+
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits,
+        jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose,
         jintArray fdsToIgnore,
@@ -720,17 +740,21 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
-    return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
+    // Containers run without some capabilities, so drop any caps that are not
+    // available.
+    capabilities &= GetEffectiveCapabilityMask(env);
+
+    return ForkAndSpecializeCommon(env, uid, gid, gids, runtime_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
             se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
-        jint debug_flags, jobjectArray rlimits, jlong permittedCapabilities,
+        jint runtime_flags, jobjectArray rlimits, jlong permittedCapabilities,
         jlong effectiveCapabilities) {
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
-                                      debug_flags, rlimits,
+                                      runtime_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
                                       NULL, NULL, NULL);
@@ -807,7 +831,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
+    { "nativePreApplicationInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

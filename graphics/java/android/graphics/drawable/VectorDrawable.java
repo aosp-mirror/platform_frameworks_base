@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
 /**
@@ -332,7 +333,7 @@ public class VectorDrawable extends Drawable {
         // Color filters always override tint filters.
         final ColorFilter colorFilter = (mColorFilter == null ? mTintFilter : mColorFilter);
         final long colorFilterNativeInstance = colorFilter == null ? 0 :
-                colorFilter.native_instance;
+                colorFilter.getNativeInstance();
         boolean canReuseCache = mVectorState.canReuseCache();
         int pixelCount = nDraw(mVectorState.getNativeRenderer(), canvas.getNativeCanvasWrapper(),
                 colorFilterNativeInstance, mTmpBounds, needMirroring(),
@@ -412,6 +413,12 @@ public class VectorDrawable extends Drawable {
         return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mVectorState != null && mVectorState.hasFocusStateSpecified();
+    }
+
     @Override
     protected boolean onStateChange(int[] stateSet) {
         boolean changed = false;
@@ -476,10 +483,10 @@ public class VectorDrawable extends Drawable {
         final int sourceDensity = mVectorState.mDensity;
         final int targetDensity = mTargetDensity;
         if (targetDensity != sourceDensity) {
-            mDpiScaledWidth = Drawable.scaleFromDensity(
-                    (int) mVectorState.mBaseWidth, sourceDensity, targetDensity, true);
-            mDpiScaledHeight = Drawable.scaleFromDensity(
-                    (int) mVectorState.mBaseHeight,sourceDensity, targetDensity, true);
+            mDpiScaledWidth = Drawable.scaleFromDensity(mVectorState.mBaseWidth, sourceDensity,
+                    targetDensity, true);
+            mDpiScaledHeight = Drawable.scaleFromDensity(mVectorState.mBaseHeight,sourceDensity,
+                    targetDensity, true);
             final int left = Drawable.scaleFromDensity(
                     opticalInsets.left, sourceDensity, targetDensity, false);
             final int right = Drawable.scaleFromDensity(
@@ -490,8 +497,8 @@ public class VectorDrawable extends Drawable {
                     opticalInsets.bottom, sourceDensity, targetDensity, false);
             mDpiScaledInsets = Insets.of(left, top, right, bottom);
         } else {
-            mDpiScaledWidth = (int) mVectorState.mBaseWidth;
-            mDpiScaledHeight = (int) mVectorState.mBaseHeight;
+            mDpiScaledWidth = mVectorState.mBaseWidth;
+            mDpiScaledHeight = mVectorState.mBaseHeight;
             mDpiScaledInsets = opticalInsets;
         }
 
@@ -668,9 +675,9 @@ public class VectorDrawable extends Drawable {
                     "<vector> tag requires viewportHeight > 0");
         }
 
-        state.mBaseWidth = a.getDimension(
+        state.mBaseWidth = a.getDimensionPixelSize(
                 R.styleable.VectorDrawable_width, state.mBaseWidth);
-        state.mBaseHeight = a.getDimension(
+        state.mBaseHeight = a.getDimensionPixelSize(
                 R.styleable.VectorDrawable_height, state.mBaseHeight);
 
         if (state.mBaseWidth <= 0) {
@@ -812,8 +819,8 @@ public class VectorDrawable extends Drawable {
         Mode mTintMode = DEFAULT_TINT_MODE;
         boolean mAutoMirrored;
 
-        float mBaseWidth = 0;
-        float mBaseHeight = 0;
+        int mBaseWidth = 0;
+        int mBaseHeight = 0;
         float mViewportWidth = 0;
         float mViewportHeight = 0;
         Insets mOpticalInsets = Insets.NONE;
@@ -975,6 +982,11 @@ public class VectorDrawable extends Drawable {
                     || (mRootGroup != null && mRootGroup.isStateful());
         }
 
+        public boolean hasFocusStateSpecified() {
+            return mTint != null && mTint.hasFocusStateSpecified()
+                    || (mRootGroup != null && mRootGroup.hasFocusStateSpecified());
+        }
+
         void setViewportSize(float viewportWidth, float viewportHeight) {
             mViewportWidth = viewportWidth;
             mViewportHeight = viewportHeight;
@@ -992,8 +1004,9 @@ public class VectorDrawable extends Drawable {
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
-            mBaseWidth = Drawable.scaleFromDensity(mBaseWidth, sourceDensity, targetDensity);
-            mBaseHeight = Drawable.scaleFromDensity(mBaseHeight, sourceDensity, targetDensity);
+            mBaseWidth = Drawable.scaleFromDensity(mBaseWidth, sourceDensity, targetDensity, true);
+            mBaseHeight = Drawable.scaleFromDensity(mBaseHeight, sourceDensity, targetDensity,
+                    true);
 
             final int insetLeft = Drawable.scaleFromDensity(
                     mOpticalInsets.left, sourceDensity, targetDensity, false);
@@ -1325,6 +1338,21 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
+        public boolean hasFocusStateSpecified() {
+            boolean result = false;
+
+            final ArrayList<VObject> children = mChildren;
+            for (int i = 0, count = children.size(); i < count; i++) {
+                final VObject child = children.get(i);
+                if (child.isStateful()) {
+                    result |= child.hasFocusStateSpecified();
+                }
+            }
+
+            return result;
+        }
+
+        @Override
         int getNativeSize() {
             // Return the native allocation needed for the subtree.
             int size = NATIVE_ALLOCATION_SIZE;
@@ -1564,6 +1592,11 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean isStateful() {
+            return false;
+        }
+
+        @Override
+        public boolean hasFocusStateSpecified() {
             return false;
         }
 
@@ -1815,6 +1848,14 @@ public class VectorDrawable extends Drawable {
         @Override
         public boolean isStateful() {
             return mStrokeColors != null || mFillColors != null;
+        }
+
+        @Override
+        public boolean hasFocusStateSpecified() {
+            return (mStrokeColors != null && mStrokeColors instanceof ColorStateList &&
+                    ((ColorStateList) mStrokeColors).hasFocusStateSpecified()) &&
+                    (mFillColors != null && mFillColors instanceof ColorStateList &&
+                    ((ColorStateList) mFillColors).hasFocusStateSpecified());
         }
 
         @Override
@@ -2115,45 +2156,66 @@ public class VectorDrawable extends Drawable {
         abstract void applyTheme(Theme t);
         abstract boolean onStateChange(int[] state);
         abstract boolean isStateful();
+        abstract boolean hasFocusStateSpecified();
         abstract int getNativeSize();
         abstract Property getProperty(String propertyName);
     }
 
-    private static native long nCreateTree(long rootGroupPtr);
-    private static native long nCreateTreeFromCopy(long treeToCopy, long rootGroupPtr);
-    private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
-            float viewportHeight);
-    private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
-    private static native float nGetRootAlpha(long rendererPtr);
-    private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
-
     private static native int nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache);
-    private static native long nCreateFullPath();
-    private static native long nCreateFullPath(long nativeFullPathPtr);
     private static native boolean nGetFullPathProperties(long pathPtr, byte[] properties,
             int length);
+    private static native void nSetName(long nodePtr, String name);
+    private static native boolean nGetGroupProperties(long groupPtr, float[] properties,
+            int length);
+    private static native void nSetPathString(long pathPtr, String pathString, int length);
 
+    // ------------- @FastNative ------------------
+
+    @FastNative
+    private static native long nCreateTree(long rootGroupPtr);
+    @FastNative
+    private static native long nCreateTreeFromCopy(long treeToCopy, long rootGroupPtr);
+    @FastNative
+    private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
+            float viewportHeight);
+    @FastNative
+    private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
+    @FastNative
+    private static native float nGetRootAlpha(long rendererPtr);
+    @FastNative
+    private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
+
+    @FastNative
+    private static native long nCreateFullPath();
+    @FastNative
+    private static native long nCreateFullPath(long nativeFullPathPtr);
+
+    @FastNative
     private static native void nUpdateFullPathProperties(long pathPtr, float strokeWidth,
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
             int strokeLineJoin, int fillType);
+    @FastNative
     private static native void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr);
+    @FastNative
     private static native void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr);
 
+    @FastNative
     private static native long nCreateClipPath();
+    @FastNative
     private static native long nCreateClipPath(long clipPathPtr);
 
+    @FastNative
     private static native long nCreateGroup();
+    @FastNative
     private static native long nCreateGroup(long groupPtr);
-    private static native void nSetName(long nodePtr, String name);
-    private static native boolean nGetGroupProperties(long groupPtr, float[] properties,
-            int length);
+    @FastNative
     private static native void nUpdateGroupProperties(long groupPtr, float rotate, float pivotX,
             float pivotY, float scaleX, float scaleY, float translateX, float translateY);
 
+    @FastNative
     private static native void nAddChild(long groupPtr, long nodePtr);
-    private static native void nSetPathString(long pathPtr, String pathString, int length);
 
     /**
      * The setters and getters below for paths and groups are here temporarily, and will be
@@ -2162,37 +2224,68 @@ public class VectorDrawable extends Drawable {
      * for VD during animation, and these setters and getters will be obsolete.
      */
     // Setters and getters during animation.
+    @FastNative
     private static native float nGetRotation(long groupPtr);
+    @FastNative
     private static native void nSetRotation(long groupPtr, float rotation);
+    @FastNative
     private static native float nGetPivotX(long groupPtr);
+    @FastNative
     private static native void nSetPivotX(long groupPtr, float pivotX);
+    @FastNative
     private static native float nGetPivotY(long groupPtr);
+    @FastNative
     private static native void nSetPivotY(long groupPtr, float pivotY);
+    @FastNative
     private static native float nGetScaleX(long groupPtr);
+    @FastNative
     private static native void nSetScaleX(long groupPtr, float scaleX);
+    @FastNative
     private static native float nGetScaleY(long groupPtr);
+    @FastNative
     private static native void nSetScaleY(long groupPtr, float scaleY);
+    @FastNative
     private static native float nGetTranslateX(long groupPtr);
+    @FastNative
     private static native void nSetTranslateX(long groupPtr, float translateX);
+    @FastNative
     private static native float nGetTranslateY(long groupPtr);
+    @FastNative
     private static native void nSetTranslateY(long groupPtr, float translateY);
 
     // Setters and getters for VPath during animation.
+    @FastNative
     private static native void nSetPathData(long pathPtr, long pathDataPtr);
+    @FastNative
     private static native float nGetStrokeWidth(long pathPtr);
+    @FastNative
     private static native void nSetStrokeWidth(long pathPtr, float width);
+    @FastNative
     private static native int nGetStrokeColor(long pathPtr);
+    @FastNative
     private static native void nSetStrokeColor(long pathPtr, int strokeColor);
+    @FastNative
     private static native float nGetStrokeAlpha(long pathPtr);
+    @FastNative
     private static native void nSetStrokeAlpha(long pathPtr, float alpha);
+    @FastNative
     private static native int nGetFillColor(long pathPtr);
+    @FastNative
     private static native void nSetFillColor(long pathPtr, int fillColor);
+    @FastNative
     private static native float nGetFillAlpha(long pathPtr);
+    @FastNative
     private static native void nSetFillAlpha(long pathPtr, float fillAlpha);
+    @FastNative
     private static native float nGetTrimPathStart(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathStart(long pathPtr, float trimPathStart);
+    @FastNative
     private static native float nGetTrimPathEnd(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathEnd(long pathPtr, float trimPathEnd);
+    @FastNative
     private static native float nGetTrimPathOffset(long pathPtr);
+    @FastNative
     private static native void nSetTrimPathOffset(long pathPtr, float trimPathOffset);
 }

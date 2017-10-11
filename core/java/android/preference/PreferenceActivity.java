@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
@@ -39,6 +40,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -74,12 +76,11 @@ import java.util.List;
  * however vary; currently there are two major approaches it may take:
  *
  * <ul>
- * <li>On a small screen it may display only the headers as a single list
- * when first launched.  Selecting one of the header items will re-launch
- * the activity with it only showing the PreferenceFragment of that header.
- * <li>On a large screen in may display both the headers and current
- * PreferenceFragment together as panes.  Selecting a header item switches
- * to showing the correct PreferenceFragment for that item.
+ * <li>On a small screen it may display only the headers as a single list when first launched.
+ * Selecting one of the header items will only show the PreferenceFragment of that header (on
+ * Android N and lower a new Activity is launched).
+ * <li>On a large screen in may display both the headers and current PreferenceFragment together as
+ * panes. Selecting a header item switches to showing the correct PreferenceFragment for that item.
  * </ul>
  *
  * <p>Subclasses of PreferenceActivity should implement
@@ -87,7 +88,7 @@ import java.util.List;
  * items.  Doing this implicitly switches the class into its new "headers
  * + fragments" mode rather than the old style of just showing a single
  * preferences list.
- * 
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For information about using {@code PreferenceActivity},
@@ -199,6 +200,13 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private ViewGroup mPrefsContainer;
 
+    // Backup of the original activity title. This is used when navigating back to the headers list
+    // in onBackPress to restore the title.
+    private CharSequence mActivityTitle;
+
+    // Null if in legacy mode.
+    private ViewGroup mHeadersContainer;
+
     private FragmentBreadCrumbs mFragmentBreadCrumbs;
 
     private boolean mSinglePane;
@@ -292,7 +300,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                 holder = (HeaderViewHolder) view.getTag();
             }
 
-            // All view fields must be updated every time, because the view may be recycled 
+            // All view fields must be updated every time, because the view may be recycled
             Header header = getItem(position);
             if (mRemoveIconIfEmpty) {
                 if (header.iconRes == 0) {
@@ -469,7 +477,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
             return breadCrumbShortTitle;
         }
-        
+
         @Override
         public int describeContents() {
             return 0;
@@ -532,6 +540,16 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Override home navigation button to call onBackPressed (b/35152749).
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -558,12 +576,14 @@ public abstract class PreferenceActivity extends ListActivity implements
 
         mListFooter = (FrameLayout)findViewById(com.android.internal.R.id.list_footer);
         mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs_frame);
+        mHeadersContainer = (ViewGroup) findViewById(com.android.internal.R.id.headers);
         boolean hidingHeaders = onIsHidingHeaders();
         mSinglePane = hidingHeaders || !onIsMultiPane();
         String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
         Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
         int initialTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_TITLE, 0);
         int initialShortTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, 0);
+        mActivityTitle = getTitle();
 
         if (savedInstanceState != null) {
             // We are restarting from a previous saved state; used that to
@@ -575,66 +595,41 @@ public abstract class PreferenceActivity extends ListActivity implements
                         (int) HEADER_ID_UNDEFINED);
                 if (curHeader >= 0 && curHeader < mHeaders.size()) {
                     setSelectedHeader(mHeaders.get(curHeader));
+                } else if (!mSinglePane && initialFragment == null) {
+                    switchToHeader(onGetInitialHeader());
                 }
+            } else {
+                // This will for instance hide breadcrumbs for single pane.
+                showBreadCrumbs(getTitle(), null);
+            }
+        } else {
+            if (!onIsHidingHeaders()) {
+                onBuildHeaders(mHeaders);
             }
 
-        } else {
-            if (initialFragment != null && mSinglePane) {
-                // If we are just showing a fragment, we want to run in
-                // new fragment mode, but don't need to compute and show
-                // the headers.
+            if (initialFragment != null) {
                 switchToHeader(initialFragment, initialArguments);
-                if (initialTitle != 0) {
-                    CharSequence initialTitleStr = getText(initialTitle);
-                    CharSequence initialShortTitleStr = initialShortTitle != 0
-                            ? getText(initialShortTitle) : null;
-                    showBreadCrumbs(initialTitleStr, initialShortTitleStr);
-                }
-
-            } else {
-                // We need to try to build the headers.
-                onBuildHeaders(mHeaders);
-
-                // If there are headers, then at this point we need to show
-                // them and, depending on the screen, we may also show in-line
-                // the currently selected preference fragment.
-                if (mHeaders.size() > 0) {
-                    if (!mSinglePane) {
-                        if (initialFragment == null) {
-                            Header h = onGetInitialHeader();
-                            switchToHeader(h);
-                        } else {
-                            switchToHeader(initialFragment, initialArguments);
-                        }
-                    }
-                }
+            } else if (!mSinglePane && mHeaders.size() > 0) {
+                switchToHeader(onGetInitialHeader());
             }
         }
 
-        // The default configuration is to only show the list view.  Adjust
-        // visibility for other configurations.
-        if (initialFragment != null && mSinglePane) {
-            // Single pane, showing just a prefs fragment.
-            findViewById(com.android.internal.R.id.headers).setVisibility(View.GONE);
-            mPrefsContainer.setVisibility(View.VISIBLE);
-            if (initialTitle != 0) {
-                CharSequence initialTitleStr = getText(initialTitle);
-                CharSequence initialShortTitleStr = initialShortTitle != 0
-                        ? getText(initialShortTitle) : null;
-                showBreadCrumbs(initialTitleStr, initialShortTitleStr);
-            }
-        } else if (mHeaders.size() > 0) {
+        if (mHeaders.size() > 0) {
             setListAdapter(new HeaderAdapter(this, mHeaders, mPreferenceHeaderItemResId,
                     mPreferenceHeaderRemoveEmptyIcon));
             if (!mSinglePane) {
-                // Multi-pane.
                 getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-                if (mCurHeader != null) {
-                    setSelectedHeader(mCurHeader);
-                }
-                mPrefsContainer.setVisibility(View.VISIBLE);
             }
-        } else {
+        }
+
+        if (mSinglePane && initialFragment != null && initialTitle != 0) {
+            CharSequence initialTitleStr = getText(initialTitle);
+            CharSequence initialShortTitleStr = initialShortTitle != 0
+                    ? getText(initialShortTitle) : null;
+            showBreadCrumbs(initialTitleStr, initialShortTitleStr);
+        }
+
+        if (mHeaders.size() == 0 && initialFragment == null) {
             // If there are no headers, we are in the old "just show a screen
             // of preferences" mode.
             setContentView(com.android.internal.R.layout.preference_list_content_single);
@@ -642,6 +637,25 @@ public abstract class PreferenceActivity extends ListActivity implements
             mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs);
             mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
             mPreferenceManager.setOnPreferenceTreeClickListener(this);
+            mHeadersContainer = null;
+        } else if (mSinglePane) {
+            // Single-pane so one of the header or prefs containers must be hidden.
+            if (initialFragment != null || mCurHeader != null) {
+                mHeadersContainer.setVisibility(View.GONE);
+            } else {
+                mPrefsContainer.setVisibility(View.GONE);
+            }
+
+            // This animates our manual transitions between headers and prefs panel in single-pane.
+            // It also comes last so we don't animate any initial layout changes done above.
+            ViewGroup container = (ViewGroup) findViewById(
+                    com.android.internal.R.id.prefs_container);
+            container.setLayoutTransition(new LayoutTransition());
+        } else {
+            // Multi-pane
+            if (mHeaders.size() > 0 && mCurHeader != null) {
+                setSelectedHeader(mCurHeader);
+            }
         }
 
         // see if we should show Back/Next buttons
@@ -697,12 +711,28 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
+                && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
+            mCurHeader = null;
+
+            mPrefsContainer.setVisibility(View.GONE);
+            mHeadersContainer.setVisibility(View.VISIBLE);
+            if (mActivityTitle != null) {
+                showBreadCrumbs(mActivityTitle, null);
+            }
+            getListView().clearChoices();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     /**
      * Returns true if this activity is currently showing the header list.
      */
     public boolean hasHeaders() {
-        return getListView().getVisibility() == View.VISIBLE
-                && mPreferenceManager == null;
+        return mHeadersContainer != null && mHeadersContainer.getVisibility() == View.VISIBLE;
     }
 
     /**
@@ -718,7 +748,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * and a preference fragment.
      */
     public boolean isMultiPane() {
-        return hasHeaders() && mPrefsContainer.getVisibility() == View.VISIBLE;
+        return !mSinglePane;
     }
 
     /**
@@ -820,14 +850,14 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (!"preference-headers".equals(nodeName)) {
                 throw new RuntimeException(
                         "XML document must start with <preference-headers> tag; found"
-                        + nodeName + " at " + parser.getPositionDescription());
+                                + nodeName + " at " + parser.getPositionDescription());
             }
 
             Bundle curBundle = null;
 
             final int outerDepth = parser.getDepth();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                     continue;
                 }
@@ -889,7 +919,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
                     final int innerDepth = parser.getDepth();
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                           && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                            && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
                         if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                             continue;
                         }
@@ -939,8 +969,9 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (getApplicationInfo().targetSdkVersion  >= android.os.Build.VERSION_CODES.KITKAT) {
             throw new RuntimeException(
                     "Subclasses of PreferenceActivity must override isValidFragment(String)"
-                    + " to verify that the Fragment class is valid! " + this.getClass().getName()
-                    + " has not checked if fragment " + fragmentName + " is valid.");
+                            + " to verify that the Fragment class is valid! "
+                            + this.getClass().getName()
+                            + " has not checked if fragment " + fragmentName + " is valid.");
         } else {
             return true;
         }
@@ -1017,6 +1048,13 @@ public abstract class PreferenceActivity extends ListActivity implements
         // Only call this if we didn't save the instance state for later.
         // If we did save it, it will be restored when we bind the adapter.
         super.onRestoreInstanceState(state);
+
+        if (!mSinglePane) {
+            // Multi-pane.
+            if (mCurHeader != null) {
+                setSelectedHeader(mCurHeader);
+            }
+        }
     }
 
     @Override
@@ -1061,18 +1099,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void onHeaderClick(Header header, int position) {
         if (header.fragment != null) {
-            if (mSinglePane) {
-                int titleRes = header.breadCrumbTitleRes;
-                int shortTitleRes = header.breadCrumbShortTitleRes;
-                if (titleRes == 0) {
-                    titleRes = header.titleRes;
-                    shortTitleRes = 0;
-                }
-                startWithFragment(header.fragment, header.fragmentArguments, null, 0,
-                        titleRes, shortTitleRes);
-            } else {
-                switchToHeader(header);
-            }
+            switchToHeader(header);
         } else if (header.intent != null) {
             startActivity(header.intent);
         }
@@ -1084,7 +1111,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * the selected fragment.  The default implementation constructs an Intent
      * that re-launches the current activity with the appropriate arguments to
      * display the fragment.
-     * 
+     *
      * @param fragmentName The name of the fragment to display.
      * @param args Optional arguments to supply to the fragment.
      * @param titleRes Optional resource ID of title to show for this item.
@@ -1103,7 +1130,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         intent.putExtra(EXTRA_NO_HEADERS, true);
         return intent;
     }
-    
+
     /**
      * Like {@link #startWithFragment(String, Bundle, Fragment, int, int, int)}
      * but uses a 0 titleRes.
@@ -1223,11 +1250,21 @@ public abstract class PreferenceActivity extends ListActivity implements
             throw new IllegalArgumentException("Invalid fragment for this activity: "
                     + fragmentName);
         }
+
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        transaction.setTransition(mSinglePane
+                ? FragmentTransaction.TRANSIT_NONE
+                : FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(com.android.internal.R.id.prefs, f);
         transaction.commitAllowingStateLoss();
+
+        if (mSinglePane && mPrefsContainer.getVisibility() == View.GONE) {
+            // We are transitioning from headers to preferences panel in single-pane so we need
+            // to hide headers and show the prefs container.
+            mPrefsContainer.setVisibility(View.VISIBLE);
+            mHeadersContainer.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -1340,7 +1377,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * be instantiated and placed in the appropriate pane.  If running in
      * single-pane mode, a new activity will be launched in which to show the
      * fragment.
-     * 
+     *
      * @param fragmentClass Full name of the class implementing the fragment.
      * @param args Any desired arguments to supply to the fragment.
      * @param titleRes Optional resource identifier of the title of this
@@ -1355,29 +1392,25 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void startPreferencePanel(String fragmentClass, Bundle args, @StringRes int titleRes,
             CharSequence titleText, Fragment resultTo, int resultRequestCode) {
-        if (mSinglePane) {
-            startWithFragment(fragmentClass, args, resultTo, resultRequestCode, titleRes, 0);
-        } else {
-            Fragment f = Fragment.instantiate(this, fragmentClass, args);
-            if (resultTo != null) {
-                f.setTargetFragment(resultTo, resultRequestCode);
-            }
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(com.android.internal.R.id.prefs, f);
-            if (titleRes != 0) {
-                transaction.setBreadCrumbTitle(titleRes);
-            } else if (titleText != null) {
-                transaction.setBreadCrumbTitle(titleText);
-            }
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.addToBackStack(BACK_STACK_PREFS);
-            transaction.commitAllowingStateLoss();
+        Fragment f = Fragment.instantiate(this, fragmentClass, args);
+        if (resultTo != null) {
+            f.setTargetFragment(resultTo, resultRequestCode);
         }
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(com.android.internal.R.id.prefs, f);
+        if (titleRes != 0) {
+            transaction.setBreadCrumbTitle(titleRes);
+        } else if (titleText != null) {
+            transaction.setBreadCrumbTitle(titleText);
+        }
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        transaction.addToBackStack(BACK_STACK_PREFS);
+        transaction.commitAllowingStateLoss();
     }
 
     /**
      * Called by a preference panel fragment to finish itself.
-     * 
+     *
      * @param caller The fragment that is asking to be finished.
      * @param resultCode Optional result code to send back to the original
      * launching fragment.
@@ -1385,21 +1418,16 @@ public abstract class PreferenceActivity extends ListActivity implements
      * launching fragment.
      */
     public void finishPreferencePanel(Fragment caller, int resultCode, Intent resultData) {
-        if (mSinglePane) {
-            setResult(resultCode, resultData);
-            finish();
-        } else {
-            // XXX be smarter about popping the stack.
-            onBackPressed();
-            if (caller != null) {
-                if (caller.getTargetFragment() != null) {
-                    caller.getTargetFragment().onActivityResult(caller.getTargetRequestCode(),
-                            resultCode, resultData);
-                }
+        // TODO: be smarter about popping the stack.
+        onBackPressed();
+        if (caller != null) {
+            if (caller.getTargetFragment() != null) {
+                caller.getTargetFragment().onActivityResult(caller.getTargetRequestCode(),
+                        resultCode, resultData);
             }
         }
     }
-    
+
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
         startPreferencePanel(pref.getFragment(), pref.getExtras(), pref.getTitleRes(),

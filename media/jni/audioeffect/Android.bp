@@ -16,10 +16,6 @@ cc_library_shared {
         "libaudioclient",
     ],
 
-    header_libs: [
-        "libaudioeffects",
-    ],
-
     cflags: [
         "-Wall",
         "-Werror",

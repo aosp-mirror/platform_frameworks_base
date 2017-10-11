@@ -17,6 +17,9 @@
 package android.content;
 
 import android.annotation.SystemApi;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
+import android.app.Notification;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -278,6 +281,13 @@ public class ContextWrapper extends Context {
         return mBase.getDir(name, mode);
     }
 
+
+    /** @hide **/
+    @Override
+    public File getPreloadsFileCache() {
+        return mBase.getPreloadsFileCache();
+    }
+
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
         return mBase.openOrCreateDatabase(name, mode, factory);
@@ -498,6 +508,13 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, Bundle options) {
+        mBase.sendBroadcastAsUser(intent, user, receiverPermission, options);
+    }
+
+    /** @hide */
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp) {
         mBase.sendBroadcastAsUser(intent, user, receiverPermission, appOp);
     }
@@ -588,10 +605,24 @@ public class ContextWrapper extends Context {
 
     @Override
     public Intent registerReceiver(
+        BroadcastReceiver receiver, IntentFilter filter, int flags) {
+        return mBase.registerReceiver(receiver, filter, flags);
+    }
+
+    @Override
+    public Intent registerReceiver(
         BroadcastReceiver receiver, IntentFilter filter,
         String broadcastPermission, Handler scheduler) {
         return mBase.registerReceiver(receiver, filter, broadcastPermission,
                 scheduler);
+    }
+
+    @Override
+    public Intent registerReceiver(
+        BroadcastReceiver receiver, IntentFilter filter,
+        String broadcastPermission, Handler scheduler, int flags) {
+        return mBase.registerReceiver(receiver, filter, broadcastPermission,
+                scheduler, flags);
     }
 
     /** @hide */
@@ -614,6 +645,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public ComponentName startForegroundService(Intent service) {
+        return mBase.startForegroundService(service);
+    }
+
+    @Override
     public boolean stopService(Intent name) {
         return mBase.stopService(name);
     }
@@ -622,6 +658,12 @@ public class ContextWrapper extends Context {
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         return mBase.startServiceAsUser(service, user);
+    }
+
+    /** @hide */
+    @Override
+    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+        return mBase.startForegroundServiceAsUser(service, user);
     }
 
     /** @hide */
@@ -641,6 +683,13 @@ public class ContextWrapper extends Context {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
         return mBase.bindServiceAsUser(service, conn, flags, user);
+    }
+
+    /** @hide */
+    @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            Handler handler, UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
     @Override
@@ -715,6 +764,11 @@ public class ContextWrapper extends Context {
     @Override
     public void revokeUriPermission(Uri uri, int modeFlags) {
         mBase.revokeUriPermission(uri, modeFlags);
+    }
+
+    @Override
+    public void revokeUriPermission(String targetPackage, Uri uri, int modeFlags) {
+        mBase.revokeUriPermission(targetPackage, uri, modeFlags);
     }
 
     @Override
@@ -794,6 +848,13 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public Context createContextForSplit(String splitName)
+            throws PackageManager.NameNotFoundException {
+        return mBase.createContextForSplit(splitName);
+    }
+
+    /** @hide */
+    @Override
     public int getUserId() {
         return mBase.getUserId();
     }
@@ -827,6 +888,14 @@ public class ContextWrapper extends Context {
         return mBase.getDisplay();
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void updateDisplay(int displayId) {
+        mBase.updateDisplay(displayId);
+    }
+
     @Override
     public Context createDeviceProtectedStorageContext() {
         return mBase.createDeviceProtectedStorageContext();
@@ -849,5 +918,51 @@ public class ContextWrapper extends Context {
     @Override
     public boolean isCredentialProtectedStorage() {
         return mBase.isCredentialProtectedStorage();
+    }
+
+    /** {@hide} */
+    @Override
+    public boolean canLoadUnsafeResources() {
+        return mBase.canLoadUnsafeResources();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IBinder getActivityToken() {
+        return mBase.getActivityToken();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
+            int flags) {
+        return mBase.getServiceDispatcher(conn, handler, flags);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IApplicationThread getIApplicationThread() {
+        return mBase.getIApplicationThread();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public Handler getMainThreadHandler() {
+        return mBase.getMainThreadHandler();
+    }
+
+    /**
+     * @hide
+     */
+    public int getNextAutofillId() {
+        return mBase.getNextAutofillId();
     }
 }

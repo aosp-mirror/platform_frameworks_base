@@ -118,7 +118,7 @@ public class DefaultDialerManager {
         String defaultPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
                 Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
 
-        final List<String> packageNames = getInstalledDialerApplications(context);
+        final List<String> packageNames = getInstalledDialerApplications(context, user);
 
         // Verify that the default dialer has not been disabled or uninstalled.
         if (packageNames.contains(defaultPackageName)) {

@@ -14,41 +14,32 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:paddingBottom="@dimen/qs_tile_padding_top"
-    android:paddingTop="@dimen/qs_tile_padding_top" >
+    android:paddingTop="@dimen/qs_tile_padding_top"
+    android:paddingStart="@dimen/qs_footer_padding_start"
+    android:paddingEnd="@dimen/qs_footer_padding_end"
+    android:gravity="center_vertical"
+    android:background="?android:attr/colorPrimary" >
 
     <TextView
         android:id="@+id/footer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:textSize="@dimen/qs_tile_text_size" />
+        android:gravity="start"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.QS.TileLabel"
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageView
         android:id="@+id/footer_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="8dp"
-        android:layout_toStartOf="@id/footer_text"
+        android:layout_width="@dimen/qs_footer_icon_size"
+        android:layout_height="@dimen/qs_footer_icon_size"
         android:contentDescription="@null"
-        android:src="@drawable/ic_qs_vpn"
-        android:visibility="invisible" />
+        android:src="@drawable/ic_info_outline"
+        android:tint="?android:attr/textColorSecondary"/>
 
-    <!-- Only shown if both images are visible -->
-    <ImageView
-        android:id="@+id/footer_icon2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="8dp"
-        android:layout_toStartOf="@id/footer_icon"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_qs_network_logging"
-        android:visibility="invisible" />
-
-</RelativeLayout>
+</LinearLayout>

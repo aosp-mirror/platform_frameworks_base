@@ -17,14 +17,9 @@
 #ifndef AAPT_XML_PULL_PARSER_H
 #define AAPT_XML_PULL_PARSER_H
 
-#include "Resource.h"
-#include "process/IResourceTableConsumer.h"
-#include "util/Maybe.h"
-#include "util/StringPiece.h"
-#include "xml/XmlUtil.h"
+#include <expat.h>
 
 #include <algorithm>
-#include <expat.h>
 #include <istream>
 #include <ostream>
 #include <queue>
@@ -32,267 +27,301 @@
 #include <string>
 #include <vector>
 
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
+
+#include "Resource.h"
+#include "process/IResourceTableConsumer.h"
+#include "util/Maybe.h"
+#include "xml/XmlUtil.h"
+
 namespace aapt {
 namespace xml {
 
 class XmlPullParser : public IPackageDeclStack {
-public:
-    enum class Event {
-        kBadDocument,
-        kStartDocument,
-        kEndDocument,
+ public:
+  enum class Event {
+    kBadDocument,
+    kStartDocument,
+    kEndDocument,
 
-        kStartNamespace,
-        kEndNamespace,
-        kStartElement,
-        kEndElement,
-        kText,
-        kComment,
-    };
+    kStartNamespace,
+    kEndNamespace,
+    kStartElement,
+    kEndElement,
+    kText,
+    kComment,
+  };
 
-    /**
-     * Skips to the next direct descendant node of the given startDepth,
-     * skipping namespace nodes.
-     *
-     * When nextChildNode returns true, you can expect Comments, Text, and StartElement events.
-     */
-    static bool nextChildNode(XmlPullParser* parser, size_t startDepth);
-    static bool skipCurrentElement(XmlPullParser* parser);
-    static bool isGoodEvent(Event event);
+  /**
+   * Skips to the next direct descendant node of the given start_depth,
+   * skipping namespace nodes.
+   *
+   * When NextChildNode() returns true, you can expect Comments, Text, and
+   * StartElement events.
+   */
+  static bool NextChildNode(XmlPullParser* parser, size_t start_depth);
+  static bool SkipCurrentElement(XmlPullParser* parser);
+  static bool IsGoodEvent(Event event);
 
-    XmlPullParser(std::istream& in);
-    ~XmlPullParser();
+  explicit XmlPullParser(std::istream& in);
+  ~XmlPullParser();
 
-    /**
-     * Returns the current event that is being processed.
-     */
-    Event getEvent() const;
+  /**
+   * Returns the current event that is being processed.
+   */
+  Event event() const;
 
-    const std::string& getLastError() const;
+  const std::string& error() const;
 
-    /**
-     * Note, unlike XmlPullParser, the first call to next() will return
-     * StartElement of the first element.
-     */
-    Event next();
+  /**
+   * Note, unlike XmlPullParser, the first call to next() will return
+   * StartElement of the first element.
+   */
+  Event Next();
 
-    //
-    // These are available for all nodes.
-    //
+  //
+  // These are available for all nodes.
+  //
 
-    const std::u16string& getComment() const;
-    size_t getLineNumber() const;
-    size_t getDepth() const;
+  const std::string& comment() const;
+  size_t line_number() const;
+  size_t depth() const;
 
-    /**
-     * Returns the character data for a Text event.
-     */
-    const std::u16string& getText() const;
+  /**
+   * Returns the character data for a Text event.
+   */
+  const std::string& text() const;
 
-    //
-    // Namespace prefix and URI are available for StartNamespace and EndNamespace.
-    //
+  //
+  // Namespace prefix and URI are available for StartNamespace and EndNamespace.
+  //
 
-    const std::u16string& getNamespacePrefix() const;
-    const std::u16string& getNamespaceUri() const;
+  const std::string& namespace_prefix() const;
+  const std::string& namespace_uri() const;
 
-    //
-    // These are available for StartElement and EndElement.
-    //
+  //
+  // These are available for StartElement and EndElement.
+  //
 
-    const std::u16string& getElementNamespace() const;
-    const std::u16string& getElementName() const;
+  const std::string& element_namespace() const;
+  const std::string& element_name() const;
 
-    /*
-     * Uses the current stack of namespaces to resolve the package. Eg:
-     * xmlns:app = "http://schemas.android.com/apk/res/com.android.app"
-     * ...
-     * android:text="@app:string/message"
-     *
-     * In this case, 'app' will be converted to 'com.android.app'.
-     *
-     * If xmlns:app="http://schemas.android.com/apk/res-auto", then
-     * 'package' will be set to 'defaultPackage'.
-     */
-    Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece16& alias, const StringPiece16& localPackage) const override;
+  /*
+   * Uses the current stack of namespaces to resolve the package. Eg:
+   * xmlns:app = "http://schemas.android.com/apk/res/com.android.app"
+   * ...
+   * android:text="@app:string/message"
+   *
+   * In this case, 'app' will be converted to 'com.android.app'.
+   *
+   * If xmlns:app="http://schemas.android.com/apk/res-auto", then
+   * 'package' will be set to 'defaultPackage'.
+   */
+  Maybe<ExtractedPackage> TransformPackageAlias(
+      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
 
-    //
-    // Remaining methods are for retrieving information about attributes
-    // associated with a StartElement.
-    //
-    // Attributes must be in sorted order (according to the less than operator
-    // of struct Attribute).
-    //
+  //
+  // Remaining methods are for retrieving information about attributes
+  // associated with a StartElement.
+  //
+  // Attributes must be in sorted order (according to the less than operator
+  // of struct Attribute).
+  //
 
-    struct Attribute {
-        std::u16string namespaceUri;
-        std::u16string name;
-        std::u16string value;
+  struct Attribute {
+    std::string namespace_uri;
+    std::string name;
+    std::string value;
 
-        int compare(const Attribute& rhs) const;
-        bool operator<(const Attribute& rhs) const;
-        bool operator==(const Attribute& rhs) const;
-        bool operator!=(const Attribute& rhs) const;
-    };
+    int compare(const Attribute& rhs) const;
+    bool operator<(const Attribute& rhs) const;
+    bool operator==(const Attribute& rhs) const;
+    bool operator!=(const Attribute& rhs) const;
+  };
 
-    using const_iterator = std::vector<Attribute>::const_iterator;
+  using const_iterator = std::vector<Attribute>::const_iterator;
 
-    const_iterator beginAttributes() const;
-    const_iterator endAttributes() const;
-    size_t getAttributeCount() const;
-    const_iterator findAttribute(StringPiece16 namespaceUri, StringPiece16 name) const;
+  const_iterator begin_attributes() const;
+  const_iterator end_attributes() const;
+  size_t attribute_count() const;
+  const_iterator FindAttribute(android::StringPiece namespace_uri, android::StringPiece name) const;
 
-private:
-    static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, const char* uri);
-    static void XMLCALL startElementHandler(void* userData, const char* name, const char** attrs);
-    static void XMLCALL characterDataHandler(void* userData, const char* s, int len);
-    static void XMLCALL endElementHandler(void* userData, const char* name);
-    static void XMLCALL endNamespaceHandler(void* userData, const char* prefix);
-    static void XMLCALL commentDataHandler(void* userData, const char* comment);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(XmlPullParser);
 
-    struct EventData {
-        Event event;
-        size_t lineNumber;
-        size_t depth;
-        std::u16string data1;
-        std::u16string data2;
-        std::vector<Attribute> attributes;
-    };
+  static void XMLCALL StartNamespaceHandler(void* user_data, const char* prefix,
+                                            const char* uri);
+  static void XMLCALL StartElementHandler(void* user_data, const char* name,
+                                          const char** attrs);
+  static void XMLCALL CharacterDataHandler(void* user_data, const char* s,
+                                           int len);
+  static void XMLCALL EndElementHandler(void* user_data, const char* name);
+  static void XMLCALL EndNamespaceHandler(void* user_data, const char* prefix);
+  static void XMLCALL CommentDataHandler(void* user_data, const char* comment);
 
-    std::istream& mIn;
-    XML_Parser mParser;
-    char mBuffer[16384];
-    std::queue<EventData> mEventQueue;
-    std::string mLastError;
-    const std::u16string mEmpty;
-    size_t mDepth;
-    std::stack<std::u16string> mNamespaceUris;
+  struct EventData {
+    Event event;
+    size_t line_number;
+    size_t depth;
+    std::string data1;
+    std::string data2;
+    std::vector<Attribute> attributes;
+  };
 
-    struct PackageDecl {
-        std::u16string prefix;
-        ExtractedPackage package;
-    };
-    std::vector<PackageDecl> mPackageAliases;
+  std::istream& in_;
+  XML_Parser parser_;
+  char buffer_[16384];
+  std::queue<EventData> event_queue_;
+  std::string error_;
+  const std::string empty_;
+  size_t depth_;
+  std::stack<std::string> namespace_uris_;
+
+  struct PackageDecl {
+    std::string prefix;
+    ExtractedPackage package;
+  };
+  std::vector<PackageDecl> package_aliases_;
 };
 
 /**
  * Finds the attribute in the current element within the global namespace.
  */
-Maybe<StringPiece16> findAttribute(const XmlPullParser* parser, const StringPiece16& name);
+Maybe<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                          const android::StringPiece& name);
 
 /**
- * Finds the attribute in the current element within the global namespace. The attribute's value
+ * Finds the attribute in the current element within the global namespace. The
+ * attribute's value
  * must not be the empty string.
  */
-Maybe<StringPiece16> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece16& name);
+Maybe<android::StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
+                                                  const android::StringPiece& name);
 
 //
 // Implementation
 //
 
-inline ::std::ostream& operator<<(::std::ostream& out, XmlPullParser::Event event) {
+inline ::std::ostream& operator<<(::std::ostream& out,
+                                  XmlPullParser::Event event) {
+  switch (event) {
+    case XmlPullParser::Event::kBadDocument:
+      return out << "BadDocument";
+    case XmlPullParser::Event::kStartDocument:
+      return out << "StartDocument";
+    case XmlPullParser::Event::kEndDocument:
+      return out << "EndDocument";
+    case XmlPullParser::Event::kStartNamespace:
+      return out << "StartNamespace";
+    case XmlPullParser::Event::kEndNamespace:
+      return out << "EndNamespace";
+    case XmlPullParser::Event::kStartElement:
+      return out << "StartElement";
+    case XmlPullParser::Event::kEndElement:
+      return out << "EndElement";
+    case XmlPullParser::Event::kText:
+      return out << "Text";
+    case XmlPullParser::Event::kComment:
+      return out << "Comment";
+  }
+  return out;
+}
+
+inline bool XmlPullParser::NextChildNode(XmlPullParser* parser,
+                                         size_t start_depth) {
+  Event event;
+
+  // First get back to the start depth.
+  while (IsGoodEvent(event = parser->Next()) &&
+         parser->depth() > start_depth + 1) {
+  }
+
+  // Now look for the first good node.
+  while ((event != Event::kEndElement || parser->depth() > start_depth) &&
+         IsGoodEvent(event)) {
     switch (event) {
-        case XmlPullParser::Event::kBadDocument: return out << "BadDocument";
-        case XmlPullParser::Event::kStartDocument: return out << "StartDocument";
-        case XmlPullParser::Event::kEndDocument: return out << "EndDocument";
-        case XmlPullParser::Event::kStartNamespace: return out << "StartNamespace";
-        case XmlPullParser::Event::kEndNamespace: return out << "EndNamespace";
-        case XmlPullParser::Event::kStartElement: return out << "StartElement";
-        case XmlPullParser::Event::kEndElement: return out << "EndElement";
-        case XmlPullParser::Event::kText: return out << "Text";
-        case XmlPullParser::Event::kComment: return out << "Comment";
+      case Event::kText:
+      case Event::kComment:
+      case Event::kStartElement:
+        return true;
+      default:
+        break;
     }
-    return out;
+    event = parser->Next();
+  }
+  return false;
 }
 
-inline bool XmlPullParser::nextChildNode(XmlPullParser* parser, size_t startDepth) {
-    Event event;
-
-    // First get back to the start depth.
-    while (isGoodEvent(event = parser->next()) && parser->getDepth() > startDepth + 1) {}
-
-    // Now look for the first good node.
-    while ((event != Event::kEndElement || parser->getDepth() > startDepth) && isGoodEvent(event)) {
-        switch (event) {
-        case Event::kText:
-        case Event::kComment:
-        case Event::kStartElement:
-            return true;
-        default:
-            break;
-        }
-        event = parser->next();
+inline bool XmlPullParser::SkipCurrentElement(XmlPullParser* parser) {
+  int depth = 1;
+  while (depth > 0) {
+    switch (parser->Next()) {
+      case Event::kEndDocument:
+        return true;
+      case Event::kBadDocument:
+        return false;
+      case Event::kStartElement:
+        depth++;
+        break;
+      case Event::kEndElement:
+        depth--;
+        break;
+      default:
+        break;
     }
-    return false;
+  }
+  return true;
 }
 
-inline bool XmlPullParser::skipCurrentElement(XmlPullParser* parser) {
-    int depth = 1;
-    while (depth > 0) {
-        switch (parser->next()) {
-            case Event::kEndDocument:
-                return true;
-            case Event::kBadDocument:
-                return false;
-            case Event::kStartElement:
-                depth++;
-                break;
-            case Event::kEndElement:
-                depth--;
-                break;
-            default:
-                break;
-        }
-    }
-    return true;
-}
-
-inline bool XmlPullParser::isGoodEvent(XmlPullParser::Event event) {
-    return event != Event::kBadDocument && event != Event::kEndDocument;
+inline bool XmlPullParser::IsGoodEvent(XmlPullParser::Event event) {
+  return event != Event::kBadDocument && event != Event::kEndDocument;
 }
 
 inline int XmlPullParser::Attribute::compare(const Attribute& rhs) const {
-    int cmp = namespaceUri.compare(rhs.namespaceUri);
-    if (cmp != 0) return cmp;
-    return name.compare(rhs.name);
+  int cmp = namespace_uri.compare(rhs.namespace_uri);
+  if (cmp != 0) return cmp;
+  return name.compare(rhs.name);
 }
 
 inline bool XmlPullParser::Attribute::operator<(const Attribute& rhs) const {
-    return compare(rhs) < 0;
+  return compare(rhs) < 0;
 }
 
 inline bool XmlPullParser::Attribute::operator==(const Attribute& rhs) const {
-    return compare(rhs) == 0;
+  return compare(rhs) == 0;
 }
 
 inline bool XmlPullParser::Attribute::operator!=(const Attribute& rhs) const {
-    return compare(rhs) != 0;
+  return compare(rhs) != 0;
 }
 
-inline XmlPullParser::const_iterator XmlPullParser::findAttribute(StringPiece16 namespaceUri,
-                                                                  StringPiece16 name) const {
-    const auto endIter = endAttributes();
-    const auto iter = std::lower_bound(beginAttributes(), endIter,
-            std::pair<StringPiece16, StringPiece16>(namespaceUri, name),
-            [](const Attribute& attr, const std::pair<StringPiece16, StringPiece16>& rhs) -> bool {
-                int cmp = attr.namespaceUri.compare(0, attr.namespaceUri.size(),
-                        rhs.first.data(), rhs.first.size());
-                if (cmp < 0) return true;
-                if (cmp > 0) return false;
-                cmp = attr.name.compare(0, attr.name.size(), rhs.second.data(), rhs.second.size());
-                if (cmp < 0) return true;
-                return false;
-            }
-    );
+inline XmlPullParser::const_iterator XmlPullParser::FindAttribute(
+    android::StringPiece namespace_uri, android::StringPiece name) const {
+  const auto end_iter = end_attributes();
+  const auto iter = std::lower_bound(
+      begin_attributes(), end_iter,
+      std::pair<android::StringPiece, android::StringPiece>(namespace_uri, name),
+      [](const Attribute& attr,
+         const std::pair<android::StringPiece, android::StringPiece>& rhs) -> bool {
+        int cmp = attr.namespace_uri.compare(
+            0, attr.namespace_uri.size(), rhs.first.data(), rhs.first.size());
+        if (cmp < 0) return true;
+        if (cmp > 0) return false;
+        cmp = attr.name.compare(0, attr.name.size(), rhs.second.data(),
+                                rhs.second.size());
+        if (cmp < 0) return true;
+        return false;
+      });
 
-    if (iter != endIter && namespaceUri == iter->namespaceUri && name == iter->name) {
-        return iter;
-    }
-    return endIter;
+  if (iter != end_iter && namespace_uri == iter->namespace_uri &&
+      name == iter->name) {
+    return iter;
+  }
+  return end_iter;
 }
 
-} // namespace xml
-} // namespace aapt
+}  // namespace xml
+}  // namespace aapt
 
-#endif // AAPT_XML_PULL_PARSER_H
+#endif  // AAPT_XML_PULL_PARSER_H

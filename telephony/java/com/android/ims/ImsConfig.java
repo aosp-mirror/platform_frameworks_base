@@ -524,6 +524,7 @@ public class ImsConfig {
     * Defines IMS feature value.
     */
     public static class FeatureValueConstants {
+        public static final int ERROR = -1;
         public static final int OFF = 0;
         public static final int ON = 1;
     }
@@ -696,5 +697,12 @@ public class ImsConfig {
             throw new ImsException("setFeatureValue()", e,
                     ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
         }
+    }
+
+    /**
+     * @return true if the binder connection is alive, false otherwise.
+     */
+    public boolean isBinderAlive() {
+        return miConfig.asBinder().isBinderAlive();
     }
 }

@@ -16,6 +16,11 @@
 
 package com.android.providers.settings;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.fail;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.ContentObserver;
@@ -27,6 +32,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,57 +52,70 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
 
     private final Object mLock = new Object();
 
+    @Test
     public void testSetAndGetGlobalViaFrontEndApiForSystemUser() throws Exception {
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
     }
 
+    @Test
     public void testSetAndGetGlobalViaFrontEndApiForNonSystemUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
+        final int secondaryUserId = getSecondaryUserId();
+        if (secondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
                     + "testSetAndGetGlobalViaFrontEndApiForNonSystemUser");
             return;
         }
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, mSecondaryUserId);
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_GLOBAL, secondaryUserId);
     }
 
+    @Test
     public void testSetAndGetSecureViaFrontEndApiForSystemUser() throws Exception {
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, UserHandle.USER_SYSTEM);
     }
 
+    @Test
     public void testSetAndGetSecureViaFrontEndApiForNonSystemUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
+        final int secondaryUserId = getSecondaryUserId();
+        if (secondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
                     + "testSetAndGetSecureViaFrontEndApiForNonSystemUser");
             return;
         }
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, mSecondaryUserId);
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SECURE, secondaryUserId);
     }
 
+    @Test
     public void testSetAndGetSystemViaFrontEndApiForSystemUser() throws Exception {
         performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, UserHandle.USER_SYSTEM);
     }
 
+    @Test
     public void testSetAndGetSystemViaFrontEndApiForNonSystemUser() throws Exception {
-        if (mSecondaryUserId == UserHandle.USER_SYSTEM) {
+        final int secondaryUserId = getSecondaryUserId();
+        if (secondaryUserId == UserHandle.USER_SYSTEM) {
             Log.w(LOG_TAG, "No secondary user. Skipping "
                     + "testSetAndGetSystemViaFrontEndApiForNonSystemUser");
             return;
         }
-        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, mSecondaryUserId);
+        performSetAndGetSettingTestViaFrontEndApi(SETTING_TYPE_SYSTEM, secondaryUserId);
     }
 
+    @Test
     public void testSetAndGetGlobalViaProviderApi() throws Exception {
         performSetAndGetSettingTestViaProviderApi(SETTING_TYPE_GLOBAL);
     }
 
+    @Test
     public void testSetAndGetSecureViaProviderApi() throws Exception {
         performSetAndGetSettingTestViaProviderApi(SETTING_TYPE_SECURE);
     }
 
+    @Test
     public void testSetAndGetSystemViaProviderApi() throws Exception {
         performSetAndGetSettingTestViaProviderApi(SETTING_TYPE_SYSTEM);
     }
 
+    @Test
     public void testSelectAllGlobalViaProviderApi() throws Exception {
         setSettingViaProviderApiAndAssertSuccessfulChange(SETTING_TYPE_GLOBAL,
                 FAKE_SETTING_NAME, FAKE_SETTING_VALUE, false);
@@ -108,6 +127,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
+    @Test
     public void testSelectAllSecureViaProviderApi() throws Exception {
         setSettingViaProviderApiAndAssertSuccessfulChange(SETTING_TYPE_SECURE,
                 FAKE_SETTING_NAME, FAKE_SETTING_VALUE, false);
@@ -119,6 +139,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
+    @Test
     public void testSelectAllSystemViaProviderApi() throws Exception {
         setSettingViaProviderApiAndAssertSuccessfulChange(SETTING_TYPE_SYSTEM,
                 FAKE_SETTING_NAME, FAKE_SETTING_VALUE, true);
@@ -130,30 +151,37 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
+    @Test
     public void testQueryUpdateDeleteGlobalViaProviderApi() throws Exception {
         doTestQueryUpdateDeleteGlobalViaProviderApiForType(SETTING_TYPE_GLOBAL);
     }
 
+    @Test
     public void testQueryUpdateDeleteSecureViaProviderApi() throws Exception {
         doTestQueryUpdateDeleteGlobalViaProviderApiForType(SETTING_TYPE_SECURE);
     }
 
+    @Test
     public void testQueryUpdateDeleteSystemViaProviderApi() throws Exception {
         doTestQueryUpdateDeleteGlobalViaProviderApiForType(SETTING_TYPE_SYSTEM);
     }
 
+    @Test
     public void testBulkInsertGlobalViaProviderApi() throws Exception {
         toTestBulkInsertViaProviderApiForType(SETTING_TYPE_GLOBAL);
     }
 
+    @Test
     public void testBulkInsertSystemViaProviderApi() throws Exception {
         toTestBulkInsertViaProviderApiForType(SETTING_TYPE_SYSTEM);
     }
 
+    @Test
     public void testBulkInsertSecureViaProviderApi() throws Exception {
         toTestBulkInsertViaProviderApiForType(SETTING_TYPE_SECURE);
     }
 
+    @Test
     public void testAppCannotRunsSystemOutOfMemoryWritingSystemSettings() throws Exception {
         int insertedCount = 0;
         try {
@@ -164,6 +192,8 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             }
             fail("Adding app specific settings must be bound.");
         } catch (Exception e) {
+            // expected
+        } finally {
             for (; insertedCount >= 0; insertedCount--) {
                 Log.w(LOG_TAG, "Removing app specific setting: " + insertedCount);
                 deleteStringViaProviderApi(SETTING_TYPE_SYSTEM,
@@ -172,18 +202,22 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
+    @Test
     public void testQueryStringInBracketsGlobalViaProviderApiForType() throws Exception {
         doTestQueryStringInBracketsViaProviderApiForType(SETTING_TYPE_GLOBAL);
     }
 
+    @Test
     public void testQueryStringInBracketsSecureViaProviderApiForType() throws Exception {
         doTestQueryStringInBracketsViaProviderApiForType(SETTING_TYPE_SECURE);
     }
 
+    @Test
     public void testQueryStringInBracketsSystemViaProviderApiForType() throws Exception {
         doTestQueryStringInBracketsViaProviderApiForType(SETTING_TYPE_SYSTEM);
     }
 
+    @Test
     public void testQueryStringWithAppendedNameToUriViaProviderApi() throws Exception {
         // Make sure we have a clean slate.
         deleteStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME);
@@ -203,6 +237,228 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         } finally {
             // Clean up.
             deleteStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME);
+        }
+    }
+
+    @Test
+    public void testResetModePackageDefaultsGlobal() throws Exception {
+        testResetModePackageDefaultsCommon(SETTING_TYPE_GLOBAL);
+    }
+
+    @Test
+    public void testResetModePackageDefaultsSecure() throws Exception {
+        testResetModePackageDefaultsCommon(SETTING_TYPE_SECURE);
+    }
+
+    private void testResetModePackageDefaultsCommon(int type) throws Exception {
+        // Make sure we have a clean slate.
+        setSettingViaShell(type, FAKE_SETTING_NAME, null, true);
+        try {
+            // Set a value but don't make it the default
+            setSettingViaShell(type, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE, false);
+
+            // Reset the changes made by the "shell/root" package
+            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "root");
+
+            // Make sure the old APIs don't set defaults
+            assertNull(getSetting(type, FAKE_SETTING_NAME));
+
+            // Set a value and make it the default
+            setSettingViaShell(type, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE, true);
+            // Change the setting from the default
+            setSettingViaShell(type, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE_2, false);
+
+            // Reset the changes made by this package
+            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "root");
+
+            // Make sure the old APIs don't set defaults
+            assertEquals(FAKE_SETTING_VALUE, getSetting(type, FAKE_SETTING_NAME));
+        } finally {
+            // Make sure we have a clean slate.
+            setSettingViaShell(type, FAKE_SETTING_NAME, null, true);
+        }
+    }
+
+    @Test
+    public void testResetModePackageDefaultsWithTokensGlobal() throws Exception {
+        testResetModePackageDefaultsWithTokensCommon(SETTING_TYPE_GLOBAL);
+    }
+
+    @Test
+    public void testResetModePackageDefaultsWithTokensSecure() throws Exception {
+        testResetModePackageDefaultsWithTokensCommon(SETTING_TYPE_SECURE);
+    }
+
+    private void testResetModePackageDefaultsWithTokensCommon(int type) throws Exception {
+        // Make sure we have a clean slate.
+        setSettingViaShell(type, FAKE_SETTING_NAME, null, true);
+        setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        try {
+            // Set a default value
+            setSettingViaShell(type, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE, true);
+            // Change the default and associate a token
+            setSettingViaShell(type, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE_2, "TOKEN1", false);
+
+            // Set a default value
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE, "TOKEN2", true);
+            // Change the default and associate a token
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE_2, "TOKEN2", false);
+
+            // Reset settings associated with TOKEN1
+            resetToDefaultsViaShell(type, "shell", "TOKEN1");
+            resetToDefaultsViaShell(type, "root", "TOKEN1");
+
+            // Make sure TOKEN1 settings are reset
+            assertEquals(FAKE_SETTING_VALUE, getSetting(type,
+                    FAKE_SETTING_NAME));
+
+            // Make sure TOKEN2 settings are not reset
+            assertEquals(FAKE_SETTING_VALUE_2, getSetting(type,
+                    FAKE_SETTING_NAME_1));
+
+            // Reset settings associated with TOKEN2
+            resetToDefaultsViaShell(type, "shell", "TOKEN2");
+            resetToDefaultsViaShell(type, "root", "TOKEN2");
+
+            // Make sure TOKEN2 settings are reset
+            assertEquals(FAKE_SETTING_VALUE, getSetting(type,
+                    FAKE_SETTING_NAME_1));
+        } finally {
+            // Make sure we have a clean slate.
+            setSettingViaShell(type, FAKE_SETTING_NAME, null, true);
+            setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        }
+    }
+
+    @Test
+    public void testResetModeUntrustedDefaultsGlobal() throws Exception {
+        testResetModeUntrustedDefaultsCommon(SETTING_TYPE_GLOBAL);
+    }
+
+    @Test
+    public void testResetModeUntrustedDefaultsSecure() throws Exception {
+        testResetModeUntrustedDefaultsCommon(SETTING_TYPE_SECURE);
+    }
+
+    private void testResetModeUntrustedDefaultsCommon(int type) throws Exception {
+        // Make sure we have a clean slate.
+        putSetting(type, FAKE_SETTING_NAME, null);
+        setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        try {
+            // Set a default setting as a trusted component
+            putSetting(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE);
+            // Change the setting as a trusted component
+            putSetting(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE_2);
+
+            // Set a default setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE, true);
+            // Change the setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE_2, false);
+
+            // Reset the untrusted changes to defaults
+            resetSettingsViaShell(type,
+                    Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+
+            // Check whether only the untrusted changes set to defaults
+            assertEquals(FAKE_SETTING_VALUE_2, getSetting(type, FAKE_SETTING_NAME));
+            assertEquals(FAKE_SETTING_VALUE, getSetting(type, FAKE_SETTING_NAME_1));
+        } finally {
+            // Make sure we have a clean slate.
+            putSetting(type, FAKE_SETTING_NAME, null);
+            setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        }
+    }
+
+    @Test
+    public void testResetModeUntrustedClearGlobal() throws Exception {
+        testResetModeUntrustedClearCommon(SETTING_TYPE_GLOBAL);
+    }
+
+    @Test
+    public void testResetModeUntrustedClearSecure() throws Exception {
+        testResetModeUntrustedClearCommon(SETTING_TYPE_SECURE);
+    }
+
+    private void testResetModeUntrustedClearCommon(int type) throws Exception {
+        // Make sure we have a clean slate.
+        putSetting(type, FAKE_SETTING_NAME, null);
+        setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        try {
+            // Set a default setting as a trusted component
+            putSetting(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE);
+            // Change the setting as a trusted component
+            putSetting(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE_2);
+
+            // Set a default setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE, true);
+            // Change the setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE_2, false);
+
+            // Clear the untrusted changes
+            resetSettingsViaShell(type,
+                    Settings.RESET_MODE_UNTRUSTED_CHANGES);
+
+            // Check whether only the untrusted changes set to defaults
+            assertEquals(FAKE_SETTING_VALUE_2, getSetting(type, FAKE_SETTING_NAME));
+            assertNull(getSetting(type, FAKE_SETTING_NAME_1));
+        } finally {
+            // Make sure we have a clean slate.
+            putSetting(type, FAKE_SETTING_NAME, null);
+            setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        }
+    }
+
+    @Test
+    public void testResetModeTrustedDefaultsGlobal() throws Exception {
+        testResetModeTrustedDefaultsCommon(SETTING_TYPE_GLOBAL);
+    }
+
+    @Test
+    public void testResetModeTrustedDefaultsSecure() throws Exception {
+        testResetModeTrustedDefaultsCommon(SETTING_TYPE_SECURE);
+    }
+
+    private void testResetModeTrustedDefaultsCommon(int type) throws Exception {
+        // Make sure we have a clean slate.
+        putSetting(type, FAKE_SETTING_NAME, null);
+        setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
+        try {
+            // Set a default setting as a trusted component
+            putSetting(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE);
+            // Change the setting as a trusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME, FAKE_SETTING_VALUE_2, false);
+
+            // Set a default setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE, true);
+            // Change the setting as an untrusted component
+            setSettingViaShell(type, FAKE_SETTING_NAME_1,
+                    FAKE_SETTING_VALUE_2, false);
+
+            // Reset to trusted defaults
+            resetSettingsViaShell(type,
+                    Settings.RESET_MODE_TRUSTED_DEFAULTS);
+
+            // Check whether snapped to trusted defaults
+            assertEquals(FAKE_SETTING_VALUE, getSetting(type, FAKE_SETTING_NAME));
+            assertNull(getSetting(type, FAKE_SETTING_NAME_1));
+        } finally {
+            // Make sure we have a clean slate.
+            putSetting(type, FAKE_SETTING_NAME, null);
+            setSettingViaShell(type, FAKE_SETTING_NAME_1, null, true);
         }
     }
 
@@ -341,22 +597,16 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
 
     private void setSettingViaFrontEndApiAndAssertSuccessfulChange(final int type,
             final String name, final String value, final int userId) throws Exception {
-        setSettingAndAssertSuccessfulChange(new Runnable() {
-            @Override
-            public void run() {
-                setStringViaFrontEndApiSetting(type, name, value, userId);
-            }
+        setSettingAndAssertSuccessfulChange(() -> {
+            setStringViaFrontEndApiSetting(type, name, value, userId);
         }, type, name, value, userId);
     }
 
     private void setSettingViaProviderApiAndAssertSuccessfulChange(final int type,
             final String name, final String value, final boolean withTableRowUri)
             throws Exception {
-        setSettingAndAssertSuccessfulChange(new Runnable() {
-            @Override
-            public void run() {
-                insertStringViaProviderApi(type, name, value, withTableRowUri);
-            }
+        setSettingAndAssertSuccessfulChange(() -> {
+            insertStringViaProviderApi(type, name, value, withTableRowUri);
         }, type, name, value, UserHandle.USER_SYSTEM);
     }
 

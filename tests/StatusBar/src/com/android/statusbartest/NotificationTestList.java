@@ -16,7 +16,13 @@
 
 package com.android.statusbartest;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -24,7 +30,9 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -72,6 +80,13 @@ public class NotificationTestList extends TestActivity
         super.onCreate(icicle);
         mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
         mActivityCreateTime = System.currentTimeMillis();
+        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        mNM.createNotificationChannel(new NotificationChannel("min", "Min", IMPORTANCE_MIN));
+        mNM.createNotificationChannel(new NotificationChannel("low", "Low", IMPORTANCE_LOW));
+        mNM.createNotificationChannel(
+                new NotificationChannel("default", "Default", IMPORTANCE_DEFAULT));
+        mNM.createNotificationChannel(new NotificationChannel("high", "High", IMPORTANCE_HIGH));
     }
 
     @Override
@@ -81,29 +96,34 @@ public class NotificationTestList extends TestActivity
 
     @Override
     protected Test[] tests() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        
         return mTests;
     }
 
     private Test[] mTests = new Test[] {
+            new Test("cancel all") {
+                public void run() {
+                    mNM.cancelAll();
+                }
+            },
             new Test("Phone call") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
-                            .setSmallIcon(R.drawable.icon2)
-                            .setContentTitle("phone call")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    NotificationChannel phoneCall =
+                            new NotificationChannel("phone call", "Phone Call", IMPORTANCE_HIGH);
+                    phoneCall.setVibrationPattern(new long[] {
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 });
+                    phoneCall.enableVibration(true);
+                    phoneCall.setLightColor(0xff0000ff);
+                    phoneCall.enableLights(true);
+                    phoneCall.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
                                     getPackageName() + "/raw/ringer"),
-                                    new AudioAttributes.Builder().setUsage(
-                                            AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build())
-                            .setPriority(Notification.PRIORITY_MAX)
-                            .setVibrate(new long[] {
-                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 })
+                            new AudioAttributes.Builder().setUsage(
+                                    AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build());
+                    Notification n = new Notification.Builder(NotificationTestList.this,
+                            "phone call")
+                            .setSmallIcon(R.drawable.icon2)
                             .setFullScreenIntent(makeIntent2(), true)
                             .build();
                     mNM.notify(7001, n);
@@ -112,35 +132,29 @@ public class NotificationTestList extends TestActivity
             new Test("Post a group") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "min")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Min priority group 1")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .setGroup("group1")
                             .build();
                     mNM.notify(6000, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("low priority group 1")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_LOW)
                             .setGroup("group1")
                             .build();
                     mNM.notify(6001, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("default priority group 1")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setGroup("group1")
+                            .setOngoing(true)
+                            .setColorized(true)
                             .build();
                     mNM.notify(6002, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("summary group 1")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .setGroup("group1")
                             .setGroupSummary(true)
                             .build();
@@ -150,27 +164,21 @@ public class NotificationTestList extends TestActivity
             new Test("Post a group (2) w/o summary") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "min")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Min priority group 2")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .setGroup("group2")
                             .build();
                     mNM.notify(6100, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("low priority group 2")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_LOW)
                             .setGroup("group2")
                             .build();
                     mNM.notify(6101, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("default priority group 2")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setGroup("group2")
                             .build();
                     mNM.notify(6102, n);
@@ -179,11 +187,9 @@ public class NotificationTestList extends TestActivity
             new Test("Summary for group 2") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "min")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("summary group 2")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .setGroup("group2")
                             .setGroupSummary(true)
                             .build();
@@ -193,54 +199,44 @@ public class NotificationTestList extends TestActivity
             new Test("Group up public-secret") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("public notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setGroup("public-secret")
                             .build();
                     mNM.notify("public", 7009, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("private only notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PRIVATE)
                             .setGroup("public-secret")
                             .build();
                     mNM.notify("no public", 7010, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("private version of notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PRIVATE)
                             .setGroup("public-secret")
-                            .setPublicVersion(new Notification.Builder(NotificationTestList.this)
+                            .setPublicVersion(new Notification.Builder(
+                                    NotificationTestList.this, "default")
                                     .setSmallIcon(R.drawable.icon2)
                                     .setContentTitle("public notification of private notification")
-                                    .setPriority(Notification.PRIORITY_DEFAULT)
                                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                                     .build())
                             .build();
                     mNM.notify("priv with pub", 7011, n);
-                    n = new Notification.Builder(NotificationTestList.this)
+                    n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("secret notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_SECRET)
                             .setGroup("public-secret")
                             .build();
                     mNM.notify("secret", 7012, n);
 
-                    Notification s = new Notification.Builder(NotificationTestList.this)
+                    Notification s = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("summary group public-secret")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .setGroup("public-secret")
                             .setGroupSummary(true)
                             .build();
@@ -261,39 +257,19 @@ public class NotificationTestList extends TestActivity
             new Test("Min priority") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "min")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Min priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_MIN)
                             .build();
                     mNM.notify("min", 7000, n);
-                }
-            },
-            new Test("Min priority, high pri flag") {
-                public void run()
-                {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
-                            .setSmallIcon(R.drawable.icon2)
-                            .setContentTitle("Min priority, high pri flag")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
-                            .setPriority(Notification.PRIORITY_MIN)
-                            .setFullScreenIntent(makeIntent2(), true)
-                            .build();
-                    mNM.notify(7001, n);
                 }
             },
             new Test("Low priority") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Low priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_LOW)
                             .build();
                     mNM.notify("low", 7002, n);
                 }
@@ -301,11 +277,9 @@ public class NotificationTestList extends TestActivity
             new Test("Default priority") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Default priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .build();
                     mNM.notify("default", 7004, n);
                 }
@@ -313,49 +287,23 @@ public class NotificationTestList extends TestActivity
             new Test("High priority") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "high")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("High priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
-                            .setPriority(Notification.PRIORITY_HIGH)
                             .build();
                     mNM.notify("high", 7006, n);
                 }
             },
-            new Test("Max priority") {
-                public void run()
-                {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
-                            .setSmallIcon(R.drawable.icon2)
-                            .setContentTitle("Max priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
-                            .setPriority(Notification.PRIORITY_MAX)
-                            .setFullScreenIntent(makeIntent2(), false)
-                            .build();
-                    mNM.notify("max", 7007, n);
-                }
-            },
-            new Test("Max priority with delay") {
+            new Test("high priority with delay") {
                 public void run()
                 {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
                     }
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "high")
                             .setSmallIcon(R.drawable.icon2)
-                            .setContentTitle("Max priority")
-                            .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
-                            .setPriority(Notification.PRIORITY_MAX)
+                            .setContentTitle("High priority")
                             .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7008, n);
@@ -364,11 +312,9 @@ public class NotificationTestList extends TestActivity
             new Test("public notification") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("public notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .build();
                     mNM.notify("public", 7009, n);
@@ -377,11 +323,9 @@ public class NotificationTestList extends TestActivity
             new Test("private notification, no public") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("private only notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PRIVATE)
                             .build();
                     mNM.notify("no public", 7010, n);
@@ -390,16 +334,14 @@ public class NotificationTestList extends TestActivity
             new Test("private notification, has public") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("private version of notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_PRIVATE)
-                            .setPublicVersion(new Notification.Builder(NotificationTestList.this)
+                            .setPublicVersion(new Notification.Builder(
+                                    NotificationTestList.this, "low")
                                     .setSmallIcon(R.drawable.icon2)
                                     .setContentTitle("public notification of private notification")
-                                    .setPriority(Notification.PRIORITY_DEFAULT)
                                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                                     .build())
                             .build();
@@ -409,30 +351,70 @@ public class NotificationTestList extends TestActivity
             new Test("secret notification") {
                 public void run()
                 {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("secret notification")
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setVisibility(Notification.VISIBILITY_SECRET)
                             .build();
                     mNM.notify("secret", 7012, n);
                 }
             },
+            new Test("1 minute timeout") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("timeout in a minute")
+                            .setTimeoutAfter(System.currentTimeMillis() + (1000 * 60))
+                            .build();
+                    mNM.notify("timeout_min", 7013, n);
+                }
+            },
+            new Test("Colorized") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("RED IS BEST")
+                            .setContentText("or is blue?")
+                            .setTimeoutAfter(System.currentTimeMillis() + (1000 * 60))
+                            .setColor(Color.RED)
+                            .setFlag(Notification.FLAG_ONGOING_EVENT, true)
+                            .setColorized(true)
+                            .build();
+                    mNM.notify("timeout_min", 7013, n);
+                }
+            },
+            new Test("Too many cancels") {
+                public void run()
+                {
+                    mNM.cancelAll();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Cancel then post")
+                            .setContentText("instead of just updating the existing notification")
+                            .build();
+                    mNM.notify("cancel_madness", 7014, n);
+                }
+            },
         new Test("Off") {
             public void run() {
-                PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE);
+                PowerManager pm = (PowerManager) NotificationTestList.this.getSystemService(
+                        Context.POWER_SERVICE);
                 PowerManager.WakeLock wl = 
                             pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sound");
                 wl.acquire();
 
                 pm.goToSleep(SystemClock.uptimeMillis());
 
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.stat_sys_phone)
                         .setContentTitle(name)
-                        .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                        getPackageName() + "/raw/ringer"))
                         .build();
                 Log.d(TAG, "n.sound=" + n.sound);
 
@@ -453,14 +435,15 @@ public class NotificationTestList extends TestActivity
 
         new Test("Custom Button") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                RemoteViews view = new RemoteViews(getPackageName(), R.layout.button_notification);
+                view.setOnClickPendingIntent(R.id.button, makeIntent2());
+                Notification n = new Notification.Builder(NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
                         .setOngoing(true)
+                        .setCustomContentView(view)
                         .build();
-                n.contentView = new RemoteViews(getPackageName(), R.layout.button_notification);
-                n.contentView.setOnClickPendingIntent(R.id.button, makeIntent2());
 
                 mNM.notify(1, n);
             }
@@ -468,12 +451,16 @@ public class NotificationTestList extends TestActivity
 
         new Test("Action Button") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
                         .setOngoing(true)
-                        .addAction(R.drawable.ic_statusbar_chat, "Button", makeIntent2())
+                        .addAction(new Notification.Action.Builder(
+                                Icon.createWithResource(NotificationTestList.this,
+                                        R.drawable.ic_statusbar_chat),
+                                "Button", makeIntent2())
+                                .build())
                         .build();
 
                 mNM.notify(1, n);
@@ -482,7 +469,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("with intent") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle("Persistent #1")
@@ -514,7 +501,8 @@ public class NotificationTestList extends TestActivity
         new Test("Whens") {
             public void run()
             {
-                Notification.Builder n = new Notification.Builder(NotificationTestList.this)
+                Notification.Builder n = new Notification.Builder(
+                        NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.icon1)
                         .setContentTitle(name)
                         .setOngoing(true);
@@ -535,7 +523,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Bad Icon #1 (when=create)") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.layout.chrono_notification /* not an icon */)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle("Persistent #1")
@@ -548,7 +536,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Bad Icon #1 (when=now)") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.layout.chrono_notification /* not an icon */)
                         .setWhen(System.currentTimeMillis())
                         .setContentTitle("Persistent #1")
@@ -561,7 +549,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Null Icon #1 (when=now)") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(0)
                         .setWhen(System.currentTimeMillis())
                         .setContentTitle("Persistent #1")
@@ -574,7 +562,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Bad resource #1 (when=create)") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon2)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle("Persistent #1")
@@ -588,7 +576,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Bad resource #1 (when=now)") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon2)
                         .setWhen(System.currentTimeMillis())
                         .setContentTitle("Persistent #1")
@@ -618,7 +606,7 @@ public class NotificationTestList extends TestActivity
                 new Runnable() {
                     public void run() {
                         Log.d(TAG, "Stress - Ongoing/Latest 0");
-                        Notification n = new Notification.Builder(NotificationTestList.this)
+                        Notification n = new Notification.Builder(NotificationTestList.this, "low")
                                 .setSmallIcon(R.drawable.icon3)
                                 .setWhen(System.currentTimeMillis())
                                 .setContentTitle("Stress - Ongoing")
@@ -631,7 +619,7 @@ public class NotificationTestList extends TestActivity
                 new Runnable() {
                     public void run() {
                         Log.d(TAG, "Stress - Ongoing/Latest 1");
-                        Notification n = new Notification.Builder(NotificationTestList.this)
+                        Notification n = new Notification.Builder(NotificationTestList.this, "low")
                                 .setSmallIcon(R.drawable.icon4)
                                 .setWhen(System.currentTimeMillis())
                                 .setContentTitle("Stress - Latest")
@@ -645,14 +633,18 @@ public class NotificationTestList extends TestActivity
         new Test("Long") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                NotificationChannel channel = new NotificationChannel("v. noisy",
+                        "channel for sound and a custom vibration", IMPORTANCE_DEFAULT);
+                channel.enableVibration(true);
+                channel.setVibrationPattern(new long[] {
+                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 });
+                mNM.createNotificationChannel(channel);
+
+                Notification n = new Notification.Builder(NotificationTestList.this, "v. noisy")
                         .setSmallIcon(R.drawable.icon1)
                         .setContentTitle(name)
-                        .setDefaults(Notification.DEFAULT_SOUND)
-                        .setVibrate(new long[] {
-                                300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                                300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                                300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 })
                         .build();
                 mNM.notify(1, n);
             }
@@ -666,7 +658,8 @@ public class NotificationTestList extends TestActivity
                 Thread t = new Thread() {
                     public void run() {
                         int x = 0;
-                        final Notification.Builder n = new Notification.Builder(NotificationTestList.this)
+                        final Notification.Builder n = new Notification.Builder(
+                                NotificationTestList.this, "low")
                                 .setSmallIcon(R.drawable.icon1)
                                 .setContentTitle(name)
                                 .setOngoing(true);
@@ -703,11 +696,15 @@ public class NotificationTestList extends TestActivity
         new Test("Blue Lights") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                NotificationChannel channel = new NotificationChannel("blue",
+                        "blue", IMPORTANCE_DEFAULT);
+                channel.enableLights(true);
+                channel.setLightColor(0xff0000ff);
+                mNM.createNotificationChannel(channel);
+
+                Notification n = new Notification.Builder(NotificationTestList.this, "blue")
                         .setSmallIcon(R.drawable.icon2)
                         .setContentTitle(name)
-                        .setLights(0xff0000ff, 1, 0)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .build();
                 mNM.notify(1, n);
             }
@@ -716,24 +713,15 @@ public class NotificationTestList extends TestActivity
         new Test("Red Lights") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .setLights(0xffff0000, 1, 0)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+                NotificationChannel channel = new NotificationChannel("red",
+                        "red", IMPORTANCE_DEFAULT);
+                channel.enableLights(true);
+                channel.setLightColor(0xffff0000);
+                mNM.createNotificationChannel(channel);
 
-        new Test("Yellow Lights") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "red")
                         .setSmallIcon(R.drawable.icon2)
                         .setContentTitle(name)
-                        .setLights(0xffffff00, 1, 0)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .build();
                 mNM.notify(1, n);
             }
@@ -742,62 +730,21 @@ public class NotificationTestList extends TestActivity
         new Test("Lights off") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "default")
                         .setSmallIcon(R.drawable.icon2)
                         .setContentTitle(name)
-                        .setLights(0x00000000, 0, 0)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
                         .build();
                 mNM.notify(1, n);
             }
         },
 
-        new Test("Blue Blinking Slow") {
+        new Test("Alert once") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .setLights(0xff0000ff, 1300, 1300)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Blue Blinking Fast") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .setLights(0xff0000ff, 300, 300)
-                        .setDefaults(Notification.DEFAULT_LIGHTS)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Default All") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .setDefaults(Notification.DEFAULT_ALL)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Default All, once") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "high")
                         .setSmallIcon(R.drawable.icon2)
                         .setContentTitle(name)
                         .setOnlyAlertOnce(true)
-                        .setDefaults(Notification.DEFAULT_ALL)
                         .build();
                 mNM.notify(1, n);
             }
@@ -806,11 +753,15 @@ public class NotificationTestList extends TestActivity
         new Test("Resource Sound") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                NotificationChannel channel = new NotificationChannel("res_sound",
+                        "resource sound", IMPORTANCE_DEFAULT);
+                channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                        getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                mNM.createNotificationChannel(channel);
+
+                Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
                         .setSmallIcon(R.drawable.stat_sys_phone)
                         .setContentTitle(name)
-                        .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                getPackageName() + "/raw/ringer"))
                         .build();
                 Log.d(TAG, "n.sound=" + n.sound);
 
@@ -821,40 +772,37 @@ public class NotificationTestList extends TestActivity
         new Test("Sound and Cancel") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                NotificationChannel channel = new NotificationChannel("res_sound",
+                        "resource sound", IMPORTANCE_DEFAULT);
+                channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                        getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                mNM.createNotificationChannel(channel);
+
+                Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
                         .setSmallIcon(R.drawable.stat_sys_phone)
                         .setContentTitle(name)
-                        .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                getPackageName() + "/raw/ringer"))
                         .build();
-                Log.d(TAG, "n.sound=" + n.sound);
 
                 mNM.notify(1, n);
-                SystemClock.sleep(200);
+                SystemClock.sleep(600);
                 mNM.cancel(1);
-            }
-        },
-
-        new Test("Vibrate") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.stat_sys_phone)
-                        .setContentTitle(name)
-                        .setVibrate(new long[]{0, 700, 500, 1000})
-                        .build();
-
-                mNM.notify(1, n);
             }
         },
 
         new Test("Vibrate and cancel") {
             public void run()
             {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                NotificationChannel channel = new NotificationChannel("vibrate",
+                        "vibrate", IMPORTANCE_DEFAULT);
+                channel.enableVibration(true);
+                channel.setVibrationPattern(new long[] {0, 700, 500, 1000, 0, 700, 500, 1000,
+                        0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000,
+                        0, 700, 500, 1000, 0, 700, 500, 1000});
+                mNM.createNotificationChannel(channel);
+
+                Notification n = new Notification.Builder(NotificationTestList.this, "vibrate")
                         .setSmallIcon(R.drawable.stat_sys_phone)
                         .setContentTitle(name)
-                        .setVibrate(new long[]{0, 700, 500, 1000})
                         .build();
 
                 mNM.notify(1, n);
@@ -944,7 +892,8 @@ public class NotificationTestList extends TestActivity
                                         + "Sometimes."
                                         + "Ohandwhathappensifwehaveonereallylongstringarewesure"
                                         + "thatwesegmentitcorrectly?\n";
-                                Notification n = new Notification.Builder(NotificationTestList.this)
+                                Notification n = new Notification.Builder(
+                                        NotificationTestList.this, "low")
                                         .setSmallIcon(R.drawable.icon1)
                                         .setContentTitle(name)
                                         .setContentText("This is still a notification!!!")
@@ -959,7 +908,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Persistent #2") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
@@ -972,7 +921,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Persistent #3") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
@@ -985,7 +934,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Persistent #2 Vibrate") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
@@ -999,7 +948,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Persistent #1 - different icon") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon2)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle(name)
@@ -1012,7 +961,7 @@ public class NotificationTestList extends TestActivity
 
         new Test("Chronometer Start") {
             public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
+                Notification n = new Notification.Builder(NotificationTestList.this, "low")
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(System.currentTimeMillis())
                         .setContentTitle(name)
@@ -1029,7 +978,8 @@ public class NotificationTestList extends TestActivity
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
                             Log.d(TAG, "Chronometer Stop");
-                            Notification n = new Notification.Builder(NotificationTestList.this)
+                            Notification n = new Notification.Builder(
+                                    NotificationTestList.this, "low")
                                     .setSmallIcon(R.drawable.icon1)
                                     .setWhen(System.currentTimeMillis())
                                     .setContentTitle(name)
@@ -1087,7 +1037,7 @@ public class NotificationTestList extends TestActivity
         new Test("Ten Notifications") {
             public void run() {
                 for (int i = 0; i < 10; i++) {
-                    Notification n = new Notification.Builder(NotificationTestList.this)
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(kNumberedIconResIDs[i])
                             .setContentTitle("Persistent #" + i)
                             .setContentText("Notify me!!!" + i)
@@ -1138,90 +1088,12 @@ public class NotificationTestList extends TestActivity
             }
         },
 
-        new Test("PRIORITY_HIGH") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                    .setSmallIcon(R.drawable.notification5)
-                    .setContentTitle("High priority")
-                    .setContentText("This should appear before all others")
-                    .setPriority(Notification.PRIORITY_HIGH)
-                    .build();
-
-                int[] idOut = new int[1];
-                try {
-                    INotificationManager directLine = mNM.getService();
-                    directLine.enqueueNotificationWithTag(
-                            getPackageName(),
-                            getPackageName(),
-                            null, 
-                            100, 
-                            n,
-                            idOut,
-                            UserHandle.myUserId());
-                } catch (android.os.RemoteException ex) {
-                    // oh well
-                }
-            }
-        },
-
-        new Test("PRIORITY_MAX") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                    .setSmallIcon(R.drawable.notification9)
-                    .setContentTitle("MAX priority")
-                    .setContentText("This might appear as an intruder alert")
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .build();
-
-                int[] idOut = new int[1];
-                try {
-                    INotificationManager directLine = mNM.getService();
-                    directLine.enqueueNotificationWithTag(
-                            getPackageName(),
-                            getPackageName(),
-                            null,
-                            200, 
-                            n,
-                            idOut,
-                            UserHandle.myUserId());
-                } catch (android.os.RemoteException ex) {
-                    // oh well
-                }
-            }
-        },
-
-        new Test("PRIORITY_MIN") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                    .setSmallIcon(R.drawable.notification0)
-                    .setContentTitle("MIN priority")
-                    .setContentText("You should not see this")
-                    .setPriority(Notification.PRIORITY_MIN)
-                    .build();
-
-                int[] idOut = new int[1];
-                try {
-                    INotificationManager directLine = mNM.getService();
-                    directLine.enqueueNotificationWithTag(
-                            getPackageName(),
-                            getPackageName(),
-                            null,
-                            1, 
-                            n,
-                            idOut,
-                            UserHandle.myUserId());
-                } catch (android.os.RemoteException ex) {
-                    // oh well
-                }
-            }
-        },
-
         new Test("Crash") {
             public void run()
             {
-                PowerManager.WakeLock wl
-                        = ((PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE))
-                            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "crasher");
+                PowerManager.WakeLock wl =
+                        ((PowerManager) NotificationTestList.this.getSystemService(Context.POWER_SERVICE))
+                                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "crasher");
                 wl.acquire();
                 mHandler.postDelayed(new Runnable() {
                             public void run() {
@@ -1235,7 +1107,7 @@ public class NotificationTestList extends TestActivity
     };
 
     private Notification notificationWithNumbers(String name, int num) {
-        Notification n = new Notification.Builder(NotificationTestList.this)
+        Notification n = new Notification.Builder(NotificationTestList.this, "low")
                 .setSmallIcon((num >= 0 && num < kNumberedIconResIDs.length)
                         ? kNumberedIconResIDs[num]
                         : kUnnumberedIconResID)
@@ -1290,7 +1162,7 @@ public class NotificationTestList extends TestActivity
     }
 
     void timeNotification(int n, String label, long time) {
-        mNM.notify(n, new Notification.Builder(NotificationTestList.this)
+        mNM.notify(n, new Notification.Builder(NotificationTestList.this, "low")
                 .setSmallIcon(R.drawable.ic_statusbar_missedcall)
                 .setWhen(time)
                 .setContentTitle(label)

@@ -38,13 +38,15 @@ cc_library_shared {
         "asset_manager.cpp",
         "choreographer.cpp",
         "configuration.cpp",
+        "hardware_buffer_jni.cpp",
         "input.cpp",
         "looper.cpp",
         "native_activity.cpp",
-        "native_window.cpp",
+        "native_window_jni.cpp",
         "net.c",
         "obb.cpp",
         "sensor.cpp",
+        "sharedmem.cpp",
         "storage_manager.cpp",
         "trace.cpp",
     ],
@@ -58,11 +60,19 @@ cc_library_shared {
         "libbinder",
         "libui",
         "libgui",
+        "libsensor",
         "libandroid_runtime",
         "libnetd_client",
     ],
 
-    static_libs: ["libstorage"],
+    static_libs: [
+        "libstorage",
+        "libarect",
+    ],
+
+    whole_static_libs: ["libnativewindow"],
+
+    export_static_lib_headers: ["libarect"],
 
     include_dirs: ["bionic/libc/dns/include"],
 }
@@ -76,4 +86,11 @@ cc_library_shared {
     shared_libs: ["libnetd_client"],
 
     include_dirs: ["bionic/libc/dns/include"],
+}
+
+llndk_library {
+    name: "libandroid_net",
+    export_include_dirs: ["include"],
+    symbol_file: "libandroid_net.map.txt",
+    unversioned: true,
 }

@@ -21,17 +21,22 @@
 #include "android_media_MediaCodec.h"
 
 #include "android_media_MediaCrypto.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
+#include "android_util_Binder.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
+
+#include <android/media/IDescrambler.h>
 
 #include <cutils/compiler.h>
 
 #include <gui/Surface.h>
 
 #include <media/ICrypto.h>
+#include <media/MediaCodecBuffer.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -267,6 +272,7 @@ status_t JMediaCodec::configure(
         const sp<AMessage> &format,
         const sp<IGraphicBufferProducer> &bufferProducer,
         const sp<ICrypto> &crypto,
+        const sp<IDescrambler> &descrambler,
         int flags) {
     sp<Surface> client;
     if (bufferProducer != NULL) {
@@ -276,7 +282,8 @@ status_t JMediaCodec::configure(
         mSurfaceTextureClient.clear();
     }
 
-    return mCodec->configure(format, mSurfaceTextureClient, crypto, flags);
+    return mCodec->configure(
+            format, mSurfaceTextureClient, crypto, descrambler, flags);
 }
 
 status_t JMediaCodec::setSurface(
@@ -407,7 +414,7 @@ status_t JMediaCodec::getOutputFormat(JNIEnv *env, size_t index, jobject *format
 
 status_t JMediaCodec::getBuffers(
         JNIEnv *env, bool input, jobjectArray *bufArray) const {
-    Vector<sp<ABuffer> > buffers;
+    Vector<sp<MediaCodecBuffer> > buffers;
 
     status_t err =
         input
@@ -425,7 +432,7 @@ status_t JMediaCodec::getBuffers(
     }
 
     for (size_t i = 0; i < buffers.size(); ++i) {
-        const sp<ABuffer> &buffer = buffers.itemAt(i);
+        const sp<MediaCodecBuffer> &buffer = buffers.itemAt(i);
 
         jobject byteBuffer = NULL;
         err = createByteBufferFromABuffer(
@@ -446,8 +453,9 @@ status_t JMediaCodec::getBuffers(
 }
 
 // static
+template <typename T>
 status_t JMediaCodec::createByteBufferFromABuffer(
-        JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+        JNIEnv *env, bool readOnly, bool clearBuffer, const sp<T> &buffer,
         jobject *buf) const {
     // if this is an ABuffer that doesn't actually hold any accessible memory,
     // use a null ByteBuffer
@@ -492,7 +500,7 @@ status_t JMediaCodec::createByteBufferFromABuffer(
 
 status_t JMediaCodec::getBuffer(
         JNIEnv *env, bool input, size_t index, jobject *buf) const {
-    sp<ABuffer> buffer;
+    sp<MediaCodecBuffer> buffer;
 
     status_t err =
         input
@@ -509,7 +517,7 @@ status_t JMediaCodec::getBuffer(
 
 status_t JMediaCodec::getImage(
         JNIEnv *env, bool input, size_t index, jobject *buf) const {
-    sp<ABuffer> buffer;
+    sp<MediaCodecBuffer> buffer;
 
     status_t err =
         input
@@ -614,6 +622,12 @@ status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     *nameStr = env->NewStringUTF(name.c_str());
 
     return OK;
+}
+
+status_t JMediaCodec::getMetrics(JNIEnv *, MediaAnalyticsItem * &reply) const {
+
+    status_t status = mCodec->getMetrics(reply);
+    return status;
 }
 
 status_t JMediaCodec::setParameters(const sp<AMessage> &msg) {
@@ -958,6 +972,7 @@ static void android_media_MediaCodec_native_configure(
         jobjectArray keys, jobjectArray values,
         jobject jsurface,
         jobject jcrypto,
+        jobject descramblerBinderObj,
         jint flags) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -993,7 +1008,13 @@ static void android_media_MediaCodec_native_configure(
         crypto = JCrypto::GetCrypto(env, jcrypto);
     }
 
-    err = codec->configure(format, bufferProducer, crypto, flags);
+    sp<IDescrambler> descrambler;
+    if (descramblerBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, descramblerBinderObj);
+        descrambler = interface_cast<IDescrambler>(binder);
+    }
+
+    err = codec->configure(format, bufferProducer, crypto, descrambler, flags);
 
     throwExceptionAsNecessary(env, err);
 }
@@ -1644,6 +1665,35 @@ static jobject android_media_MediaCodec_getName(
     return NULL;
 }
 
+static jobject
+android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_MediaCodec_native_getMetrics");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    // get what we have for the metrics from the codec
+    MediaAnalyticsItem *item = NULL;
+
+    status_t err = codec->getMetrics(env, item);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        return (jobject) NULL;
+    }
+
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
 static void android_media_MediaCodec_setParameters(
         JNIEnv *env, jobject thiz, jobjectArray keys, jobjectArray vals) {
     ALOGV("android_media_MediaCodec_setParameters");
@@ -1902,7 +1952,7 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_configure",
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
-      "Landroid/media/MediaCrypto;I)V",
+      "Landroid/media/MediaCrypto;Landroid/os/IBinder;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
     { "native_setSurface",
@@ -1951,6 +2001,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
+
+    { "native_getMetrics", "()Landroid/os/PersistableBundle;",
+      (void *)android_media_MediaCodec_native_getMetrics},
 
     { "setParameters", "([Ljava/lang/String;[Ljava/lang/Object;)V",
       (void *)android_media_MediaCodec_setParameters },

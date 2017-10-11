@@ -19,8 +19,8 @@ package android.text.style;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Paint;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.text.TextPaint;
 
 public abstract class ReplacementSpan extends MetricAffectingSpan {

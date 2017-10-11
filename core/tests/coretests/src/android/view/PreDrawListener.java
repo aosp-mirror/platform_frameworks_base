@@ -75,9 +75,9 @@ public class PreDrawListener extends Activity implements OnClickListener {
         super.onCreate(icicle);
         setContentView(R.layout.pre_draw_listener);
 
-        mFrame = (MyLinearLayout) findViewById(R.id.frame);
+        mFrame = findViewById(R.id.frame);
 
-        Button mGoButton = (Button) findViewById(R.id.go);
+        Button mGoButton = findViewById(R.id.go);
         mGoButton.setOnClickListener(this);
     }
 

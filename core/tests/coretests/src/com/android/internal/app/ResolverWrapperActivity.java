@@ -1,0 +1,91 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.app;
+
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.RemoteException;
+
+import java.util.function.Function;
+
+import static org.mockito.Mockito.mock;
+
+
+/*
+ * Simple wrapper around chooser activity to be able to initiate it under test
+ */
+public class ResolverWrapperActivity extends ResolverActivity {
+    static final OverrideData sOverrides = new OverrideData();
+    private UsageStatsManager mUsm;
+
+    ResolveListAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    @Override
+    public boolean isVoiceInteraction() {
+        if (sOverrides.isVoiceInteraction != null) {
+            return sOverrides.isVoiceInteraction;
+        }
+        return super.isVoiceInteraction();
+    }
+
+    @Override
+    public void safelyStartActivity(TargetInfo cti) {
+        if (sOverrides.onSafelyStartCallback != null &&
+                sOverrides.onSafelyStartCallback.apply(cti)) {
+            return;
+        }
+        super.safelyStartActivity(cti);
+    }
+
+    @Override
+    protected ResolverListController createListController() {
+        return sOverrides.resolverListController;
+    }
+
+    @Override
+    public PackageManager getPackageManager() {
+        if (sOverrides.createPackageManager != null) {
+            return sOverrides.createPackageManager.apply(super.getPackageManager());
+        }
+        return super.getPackageManager();
+    }
+
+    /**
+     * We cannot directly mock the activity created since instrumentation creates it.
+     * <p>
+     * Instead, we use static instances of this object to modify behavior.
+     */
+    static class OverrideData {
+        @SuppressWarnings("Since15")
+        public Function<PackageManager, PackageManager> createPackageManager;
+        public Function<TargetInfo, Boolean> onSafelyStartCallback;
+        public ResolverListController resolverListController;
+        public Boolean isVoiceInteraction;
+
+        public void reset() {
+            onSafelyStartCallback = null;
+            isVoiceInteraction = null;
+            createPackageManager = null;
+            resolverListController = mock(ResolverListController.class);
+        }
+    }
+}

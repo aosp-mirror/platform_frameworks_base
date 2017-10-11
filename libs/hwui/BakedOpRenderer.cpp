@@ -181,12 +181,8 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
-Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
-    if (!texture) {
-        return mCaches.textureCache.get(bitmap);
-    }
-    return texture;
+Texture* BakedOpRenderer::getTexture(Bitmap* bitmap) {
+    return mCaches.textureCache.get(bitmap);
 }
 
 void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
@@ -367,6 +363,7 @@ void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& sta
     state.computedState.transform.copyTo(&info.transform[0]);
 
     mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
+    if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {

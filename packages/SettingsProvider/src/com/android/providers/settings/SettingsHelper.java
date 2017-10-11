@@ -16,7 +16,7 @@
 
 package com.android.providers.settings;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
@@ -239,7 +239,6 @@ public class SettingsHelper {
         // these features working after the restore.
         switch (name) {
             case Settings.Secure.ACCESSIBILITY_ENABLED:
-            case Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION:
             case Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD:
             case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
@@ -344,7 +343,7 @@ public class SettingsHelper {
         if (loc == null) return; // Couldn't find the saved locale in this version of the software
 
         try {
-            IActivityManager am = ActivityManagerNative.getDefault();
+            IActivityManager am = ActivityManager.getService();
             Configuration config = am.getConfiguration();
             config.locale = loc;
             // indicate this isn't some passing default - the user wants this remembered

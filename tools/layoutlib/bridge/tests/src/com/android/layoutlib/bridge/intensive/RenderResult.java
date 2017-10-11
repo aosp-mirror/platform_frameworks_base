@@ -23,6 +23,7 @@ import com.android.ide.common.rendering.api.ViewInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,19 +32,22 @@ class RenderResult {
     private final List<ViewInfo> mRootViews;
     private final List<ViewInfo> mSystemViews;
     private final Result mRenderResult;
+    private BufferedImage mImage;
 
     private RenderResult(@Nullable Result result, @Nullable List<ViewInfo> systemViewInfoList,
-            @Nullable List<ViewInfo> rootViewInfoList) {
+            @Nullable List<ViewInfo> rootViewInfoList, @Nullable BufferedImage image) {
         mSystemViews = systemViewInfoList == null ? Collections.emptyList() : systemViewInfoList;
         mRootViews = rootViewInfoList == null ? Collections.emptyList() : rootViewInfoList;
         mRenderResult = result;
+        mImage = image;
     }
 
     @NonNull
     static RenderResult getFromSession(@NonNull RenderSession session) {
         return new RenderResult(session.getResult(),
                 new ArrayList<>(session.getSystemRootViews()),
-                new ArrayList<>(session.getRootViews()));
+                new ArrayList<>(session.getRootViews()),
+                session.getImage());
     }
 
     @Nullable
@@ -59,5 +63,10 @@ class RenderResult {
     @NonNull
     public List<ViewInfo> getSystemViews() {
         return mSystemViews;
+    }
+
+    @Nullable
+    public BufferedImage getImage() {
+        return mImage;
     }
 }

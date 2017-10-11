@@ -45,9 +45,9 @@ public class VisibilityCallback extends Activity {
         mVictim = (MonitoredTextView)findViewById(R.id.victim);
 
         // Find our buttons
-        Button visibleButton = (Button) findViewById(R.id.vis);
-        Button invisibleButton = (Button) findViewById(R.id.invis);
-        Button goneButton = (Button) findViewById(R.id.gone);
+        Button visibleButton = findViewById(R.id.vis);
+        Button invisibleButton = findViewById(R.id.invis);
+        Button goneButton = findViewById(R.id.gone);
 
         // Wire each button to a click listener
         visibleButton.setOnClickListener(mVisibleListener);

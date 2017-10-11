@@ -29,10 +29,9 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 
 #include <DeferredLayerUpdater.h>
-#include <LayerRenderer.h>
 #include <SkiaShader.h>
 #include <Rect.h>
 #include <RenderNode.h>
@@ -67,10 +66,10 @@ static void android_view_HardwareLayer_setTransform(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_HardwareLayer_setSurfaceTexture(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr, jobject surface, jboolean isAlreadyAttached) {
+        jlong layerUpdaterPtr, jobject surface) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
-    layer->setSurfaceTexture(surfaceTexture, !isAlreadyAttached);
+    layer->setSurfaceTexture(surfaceTexture);
 }
 
 static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
@@ -89,7 +88,7 @@ static const JNINativeMethod gMethods[] = {
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
     { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },
     { "nSetTransform",           "(JJ)V",      (void*) android_view_HardwareLayer_setTransform },
-    { "nSetSurfaceTexture",      "(JLandroid/graphics/SurfaceTexture;Z)V",
+    { "nSetSurfaceTexture",      "(JLandroid/graphics/SurfaceTexture;)V",
             (void*) android_view_HardwareLayer_setSurfaceTexture },
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
 };

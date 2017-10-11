@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+#include "debug/GlesDriver.h"
+#include "debug/NullGlesDriver.h"
+
+#include "hwui/Typeface.h"
+
 #include <benchmark/benchmark.h>
 
-BENCHMARK_MAIN();
+#include <memory>
+
+using namespace android;
+using namespace android::uirenderer;
+
+int main(int argc, char** argv) {
+    debug::GlesDriver::replace(std::make_unique<debug::NullGlesDriver>());
+    benchmark::Initialize(&argc, argv);
+    Typeface::setRobotoTypefaceForTest();
+    benchmark::RunSpecifiedBenchmarks();
+    return 0;
+}

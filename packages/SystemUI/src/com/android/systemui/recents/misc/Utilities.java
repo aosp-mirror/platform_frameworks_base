@@ -79,8 +79,7 @@ public class Utilities {
     public static final Rect EMPTY_RECT = new Rect();
 
     /**
-     * @return the first parent walking up the view hierarchy that has the given class type (or
-     * a subclass).
+     * @return the first parent walking up the view hierarchy that has the given class type.
      *
      * @param parentClass must be a class derived from {@link View}
      */

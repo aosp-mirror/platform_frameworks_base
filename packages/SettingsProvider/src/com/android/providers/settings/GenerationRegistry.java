@@ -32,7 +32,7 @@ import java.io.IOException;
  * processes can read to determine if their local caches are stale,
  */
 final class GenerationRegistry {
-    private static final String LOG_TAG = "GenerationTracker";
+    private static final String LOG_TAG = "GenerationRegistry";
 
     private static final boolean DEBUG = false;
 
@@ -120,6 +120,9 @@ final class GenerationRegistry {
             final int size = 1 + 2 + 10 + 2 * UserManager.getMaxSupportedUsers();
             try {
                 mBackingStore = new MemoryIntArray(size);
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Created backing store " + mBackingStore);
+                }
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Error creating generation tracker", e);
             }
@@ -131,6 +134,9 @@ final class GenerationRegistry {
         if (mBackingStore != null) {
             try {
                 mBackingStore.close();
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Destroyed backing store " + mBackingStore);
+                }
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Cannot close generation memory array", e);
             }

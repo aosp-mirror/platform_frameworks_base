@@ -19,20 +19,22 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
 
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
+
 /**
- * An implementation of a GL canvas that records drawing operations.
+ * A Canvas implementation that records view system drawing operations for deferred rendering.
  * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
  *
  * @hide
  */
-public class DisplayListCanvas extends Canvas {
+public final class DisplayListCanvas extends RecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
@@ -40,7 +42,7 @@ public class DisplayListCanvas extends Canvas {
     private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
 
     private static final SynchronizedPool<DisplayListCanvas> sPool =
-            new SynchronizedPool<DisplayListCanvas>(POOL_LIMIT);
+            new SynchronizedPool<>(POOL_LIMIT);
 
     RenderNode mNode;
     private int mWidth;
@@ -50,9 +52,10 @@ public class DisplayListCanvas extends Canvas {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
         DisplayListCanvas canvas = sPool.acquire();
         if (canvas == null) {
-            canvas = new DisplayListCanvas(width, height);
+            canvas = new DisplayListCanvas(node, width, height);
         } else {
-            nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, width, height);
+            nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, node.mNativeRenderNode,
+                    width, height);
         }
         canvas.mNode = node;
         canvas.mWidth = width;
@@ -75,27 +78,13 @@ public class DisplayListCanvas extends Canvas {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // JNI
-    ///////////////////////////////////////////////////////////////////////////
-
-    private static native boolean nIsAvailable();
-    private static boolean sIsAvailable = nIsAvailable();
-
-    static boolean isAvailable() {
-        return sIsAvailable;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    private DisplayListCanvas(int width, int height) {
-        super(nCreateDisplayListCanvas(width, height));
+    private DisplayListCanvas(@NonNull RenderNode node, int width, int height) {
+        super(nCreateDisplayListCanvas(node.mNativeRenderNode, width, height));
         mDensity = 0; // disable bitmap density scaling
     }
-
-    private static native long nCreateDisplayListCanvas(int width, int height);
-    private static native void nResetDisplayListCanvas(long canvas, int width, int height);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
@@ -142,9 +131,6 @@ public class DisplayListCanvas extends Canvas {
         return nGetMaximumTextureHeight();
     }
 
-    private static native int nGetMaximumTextureWidth();
-    private static native int nGetMaximumTextureHeight();
-
     ///////////////////////////////////////////////////////////////////////////
     // Setup
     ///////////////////////////////////////////////////////////////////////////
@@ -158,8 +144,6 @@ public class DisplayListCanvas extends Canvas {
     public void insertInorderBarrier() {
         nInsertReorderBarrier(mNativeCanvasWrapper, false);
     }
-
-    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
 
     ///////////////////////////////////////////////////////////////////////////
     // Functor
@@ -191,14 +175,9 @@ public class DisplayListCanvas extends Canvas {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
 
-    private static native void nCallDrawGLFunction(long renderer,
-            long drawGLFunction, Runnable releasedCallback);
-
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
-
-    protected static native long nFinishRecording(long renderer);
 
     /**
      * Draws the specified display list onto this canvas. The display list can only
@@ -209,8 +188,6 @@ public class DisplayListCanvas extends Canvas {
     public void drawRenderNode(RenderNode renderNode) {
         nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList());
     }
-
-    private static native void nDrawRenderNode(long renderer, long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
@@ -225,8 +202,6 @@ public class DisplayListCanvas extends Canvas {
         nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 
-    private static native void nDrawLayer(long renderer, long layer);
-
     ///////////////////////////////////////////////////////////////////////////
     // Drawing
     ///////////////////////////////////////////////////////////////////////////
@@ -237,9 +212,6 @@ public class DisplayListCanvas extends Canvas {
                 radius.getNativeContainer(), paint.getNativeContainer());
     }
 
-    private static native void nDrawCircle(long renderer, long propCx,
-            long propCy, long propRadius, long propPaint);
-
     public void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint) {
@@ -248,9 +220,6 @@ public class DisplayListCanvas extends Canvas {
                 rx.getNativeContainer(), ry.getNativeContainer(),
                 paint.getNativeContainer());
     }
-
-    private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
-            long propRight, long propBottom, long propRx, long propRy, long propPaint);
 
     @Override
     protected void throwIfCannotDraw(Bitmap bitmap) {
@@ -261,4 +230,38 @@ public class DisplayListCanvas extends Canvas {
                     "Canvas: trying to draw too large(" + bitmapSize + "bytes) bitmap.");
         }
     }
+
+
+    // ------------------ Fast JNI ------------------------
+
+    @FastNative
+    private static native void nCallDrawGLFunction(long renderer,
+            long drawGLFunction, Runnable releasedCallback);
+
+
+    // ------------------ Critical JNI ------------------------
+
+    @CriticalNative
+    private static native long nCreateDisplayListCanvas(long node, int width, int height);
+    @CriticalNative
+    private static native void nResetDisplayListCanvas(long canvas, long node,
+            int width, int height);
+    @CriticalNative
+    private static native int nGetMaximumTextureWidth();
+    @CriticalNative
+    private static native int nGetMaximumTextureHeight();
+    @CriticalNative
+    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+    @CriticalNative
+    private static native long nFinishRecording(long renderer);
+    @CriticalNative
+    private static native void nDrawRenderNode(long renderer, long renderNode);
+    @CriticalNative
+    private static native void nDrawLayer(long renderer, long layer);
+    @CriticalNative
+    private static native void nDrawCircle(long renderer, long propCx,
+            long propCy, long propRadius, long propPaint);
+    @CriticalNative
+    private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
+            long propRight, long propBottom, long propRx, long propRy, long propPaint);
 }

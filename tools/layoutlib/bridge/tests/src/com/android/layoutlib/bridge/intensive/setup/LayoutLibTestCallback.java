@@ -42,6 +42,9 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Map;
 
 import com.google.android.collect.Maps;
@@ -59,10 +62,11 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
     private final Map<ResourceType, Map<String, Integer>> mResources = Maps.newHashMap();
     private final ILogger mLog;
     private final ActionBarCallback mActionBarCallback = new ActionBarCallback();
-    private final ClassLoader mModuleClassLoader = new ModuleClassLoader(PROJECT_CLASSES_LOCATION);
+    private final ClassLoader mModuleClassLoader;
 
-    public LayoutLibTestCallback(ILogger logger) {
+    public LayoutLibTestCallback(ILogger logger, ClassLoader classLoader) {
         mLog = logger;
+        mModuleClassLoader = classLoader;
     }
 
     public void initResources() throws ClassNotFoundException {
@@ -128,7 +132,11 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @Override
     public Integer getResourceId(ResourceType type, String name) {
-        return mResources.get(type).get(name);
+        Map<String, Integer> resName2Id = mResources.get(type);
+        if (resName2Id == null) {
+            return null;
+        }
+        return resName2Id.get(name);
     }
 
     @Override

@@ -15,17 +15,33 @@
  */
 package com.android.server.notification;
 
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.content.pm.ParceledListSlice;
+import android.os.UserHandle;
+
+import java.util.Collection;
+
 public interface RankingConfig {
 
-    int getPriority(String packageName, int uid);
-
-    void setPriority(String packageName, int uid, int priority);
-
-    int getVisibilityOverride(String packageName, int uid);
-
-    void setVisibilityOverride(String packageName, int uid, int visibility);
-
     void setImportance(String packageName, int uid, int importance);
-
     int getImportance(String packageName, int uid);
+    void setShowBadge(String packageName, int uid, boolean showBadge);
+    boolean canShowBadge(String packageName, int uid);
+    boolean badgingEnabled(UserHandle userHandle);
+
+    Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+            int uid);
+    void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
+            boolean fromTargetApp);
+    ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+            int uid, boolean includeDeleted);
+    void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
+            boolean fromTargetApp);
+    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
+    void deleteNotificationChannel(String pkg, int uid, String channelId);
+    void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
+    void permanentlyDeleteNotificationChannels(String pkg, int uid);
+    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid, boolean includeDeleted);
 }

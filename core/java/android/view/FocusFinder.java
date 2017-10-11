@@ -16,14 +16,20 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.util.ArrayMap;
-import android.util.SparseArray;
-import android.util.SparseBooleanArray;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * The algorithm used for finding the next focusable view in a given direction
@@ -49,7 +55,13 @@ public class FocusFinder {
     final Rect mFocusedRect = new Rect();
     final Rect mOtherRect = new Rect();
     final Rect mBestCandidateRect = new Rect();
-    final SequentialFocusComparator mSequentialFocusComparator = new SequentialFocusComparator();
+    private final UserSpecifiedFocusComparator mUserSpecifiedFocusComparator =
+            new UserSpecifiedFocusComparator((r, v) -> isValidId(v.getNextFocusForwardId())
+                            ? v.findUserSetNextFocus(r, View.FOCUS_FORWARD) : null);
+    private final UserSpecifiedFocusComparator mUserSpecifiedClusterComparator =
+            new UserSpecifiedFocusComparator((r, v) -> isValidId(v.getNextClusterForwardId())
+                    ? v.findUserSetNextKeyboardNavigationCluster(r, View.FOCUS_FORWARD) : null);
+    private final FocusSorter mFocusSorter = new FocusSorter();
 
     private final ArrayList<View> mTempList = new ArrayList<View>();
 
@@ -83,8 +95,9 @@ public class FocusFinder {
 
     private View findNextFocus(ViewGroup root, View focused, Rect focusedRect, int direction) {
         View next = null;
+        ViewGroup effectiveRoot = getEffectiveRoot(root, focused);
         if (focused != null) {
-            next = findNextUserSpecifiedFocus(root, focused, direction);
+            next = findNextUserSpecifiedFocus(effectiveRoot, focused, direction);
         }
         if (next != null) {
             return next;
@@ -92,9 +105,9 @@ public class FocusFinder {
         ArrayList<View> focusables = mTempList;
         try {
             focusables.clear();
-            root.addFocusables(focusables, direction);
+            effectiveRoot.addFocusables(focusables, direction);
             if (!focusables.isEmpty()) {
-                next = findNextFocus(root, focused, focusedRect, direction, focusables);
+                next = findNextFocus(effectiveRoot, focused, focusedRect, direction, focusables);
             }
         } finally {
             focusables.clear();
@@ -102,13 +115,92 @@ public class FocusFinder {
         return next;
     }
 
+    /**
+     * Returns the "effective" root of a view. The "effective" root is the closest ancestor
+     * within-which focus should cycle.
+     * <p>
+     * For example: normal focus navigation would stay within a ViewGroup marked as
+     * touchscreenBlocksFocus and keyboardNavigationCluster until a cluster-jump out.
+     * @return the "effective" root of {@param focused}
+     */
+    private ViewGroup getEffectiveRoot(ViewGroup root, View focused) {
+        if (focused == null || focused == root) {
+            return root;
+        }
+        ViewGroup effective = null;
+        ViewParent nextParent = focused.getParent();
+        do {
+            if (nextParent == root) {
+                return effective != null ? effective : root;
+            }
+            ViewGroup vg = (ViewGroup) nextParent;
+            if (vg.getTouchscreenBlocksFocus()
+                    && focused.getContext().getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_TOUCHSCREEN)
+                    && vg.isKeyboardNavigationCluster()) {
+                // Don't stop and return here because the cluster could be nested and we only
+                // care about the top-most one.
+                effective = vg;
+            }
+            nextParent = nextParent.getParent();
+        } while (nextParent instanceof ViewGroup);
+        return root;
+    }
+
+    /**
+     * Find the root of the next keyboard navigation cluster after the current one.
+     * @param root The view tree to look inside. Cannot be null
+     * @param currentCluster The starting point of the search. Null means the default cluster
+     * @param direction Direction to look
+     * @return The next cluster, or null if none exists
+     */
+    public View findNextKeyboardNavigationCluster(
+            @NonNull View root,
+            @Nullable View currentCluster,
+            @View.FocusDirection int direction) {
+        View next = null;
+        if (currentCluster != null) {
+            next = findNextUserSpecifiedKeyboardNavigationCluster(root, currentCluster, direction);
+            if (next != null) {
+                return next;
+            }
+        }
+
+        final ArrayList<View> clusters = mTempList;
+        try {
+            clusters.clear();
+            root.addKeyboardNavigationClusters(clusters, direction);
+            if (!clusters.isEmpty()) {
+                next = findNextKeyboardNavigationCluster(
+                        root, currentCluster, clusters, direction);
+            }
+        } finally {
+            clusters.clear();
+        }
+        return next;
+    }
+
+    private View findNextUserSpecifiedKeyboardNavigationCluster(View root, View currentCluster,
+            int direction) {
+        View userSetNextCluster =
+                currentCluster.findUserSetNextKeyboardNavigationCluster(root, direction);
+        if (userSetNextCluster != null && userSetNextCluster.hasFocusable()) {
+            return userSetNextCluster;
+        }
+        return null;
+    }
+
     private View findNextUserSpecifiedFocus(ViewGroup root, View focused, int direction) {
         // check for user specified next focus
         View userSetNextFocus = focused.findUserSetNextFocus(root, direction);
-        if (userSetNextFocus != null && userSetNextFocus.isFocusable()
-                && (!userSetNextFocus.isInTouchMode()
-                        || userSetNextFocus.isFocusableInTouchMode())) {
-            return userSetNextFocus;
+        while (userSetNextFocus != null) {
+            if (userSetNextFocus.isFocusable()
+                    && userSetNextFocus.getVisibility() == View.VISIBLE
+                    && (!userSetNextFocus.isInTouchMode()
+                            || userSetNextFocus.isFocusableInTouchMode())) {
+                return userSetNextFocus;
+            }
+            userSetNextFocus = userSetNextFocus.findUserSetNextFocus(root, direction);
         }
         return null;
     }
@@ -170,16 +262,42 @@ public class FocusFinder {
         }
     }
 
+    private View findNextKeyboardNavigationCluster(
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            @View.FocusDirection int direction) {
+        try {
+            // Note: This sort is stable.
+            mUserSpecifiedClusterComparator.setFocusables(clusters, root);
+            Collections.sort(clusters, mUserSpecifiedClusterComparator);
+        } finally {
+            mUserSpecifiedClusterComparator.recycle();
+        }
+        final int count = clusters.size();
+
+        switch (direction) {
+            case View.FOCUS_FORWARD:
+            case View.FOCUS_DOWN:
+            case View.FOCUS_RIGHT:
+                return getNextKeyboardNavigationCluster(root, currentCluster, clusters, count);
+            case View.FOCUS_BACKWARD:
+            case View.FOCUS_UP:
+            case View.FOCUS_LEFT:
+                return getPreviousKeyboardNavigationCluster(root, currentCluster, clusters, count);
+            default:
+                throw new IllegalArgumentException("Unknown direction: " + direction);
+        }
+    }
+
     private View findNextFocusInRelativeDirection(ArrayList<View> focusables, ViewGroup root,
             View focused, Rect focusedRect, int direction) {
         try {
             // Note: This sort is stable.
-            mSequentialFocusComparator.setRoot(root);
-            mSequentialFocusComparator.setIsLayoutRtl(root.isLayoutRtl());
-            mSequentialFocusComparator.setFocusables(focusables);
-            Collections.sort(focusables, mSequentialFocusComparator);
+            mUserSpecifiedFocusComparator.setFocusables(focusables, root);
+            Collections.sort(focusables, mUserSpecifiedFocusComparator);
         } finally {
-            mSequentialFocusComparator.recycle();
+            mUserSpecifiedFocusComparator.recycle();
         }
 
         final int count = focusables.size();
@@ -268,6 +386,52 @@ public class FocusFinder {
             return focusables.get(count - 1);
         }
         return null;
+    }
+
+    private static View getNextKeyboardNavigationCluster(
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            int count) {
+        if (currentCluster == null) {
+            // The current cluster is the default one.
+            // The next cluster after the default one is the first one.
+            // Note that the caller guarantees that 'clusters' is not empty.
+            return clusters.get(0);
+        }
+
+        final int position = clusters.lastIndexOf(currentCluster);
+        if (position >= 0 && position + 1 < count) {
+            // Return the next non-default cluster if we can find it.
+            return clusters.get(position + 1);
+        }
+
+        // The current cluster is the last one. The next one is the default one, i.e. the
+        // root.
+        return root;
+    }
+
+    private static View getPreviousKeyboardNavigationCluster(
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            int count) {
+        if (currentCluster == null) {
+            // The current cluster is the default one.
+            // The previous cluster before the default one is the last one.
+            // Note that the caller guarantees that 'clusters' is not empty.
+            return clusters.get(count - 1);
+        }
+
+        final int position = clusters.indexOf(currentCluster);
+        if (position > 0) {
+            // Return the previous non-default cluster if we can find it.
+            return clusters.get(position - 1);
+        }
+
+        // The current cluster is the first one. The previous one is the default one, i.e.
+        // the root.
+        return root;
     }
 
     /**
@@ -606,63 +770,155 @@ public class FocusFinder {
         return id != 0 && id != View.NO_ID;
     }
 
+    static final class FocusSorter {
+        private ArrayList<Rect> mRectPool = new ArrayList<>();
+        private int mLastPoolRect;
+        private int mRtlMult;
+        private HashMap<View, Rect> mRectByView = null;
+
+        private Comparator<View> mTopsComparator = (first, second) -> {
+            if (first == second) {
+                return 0;
+            }
+
+            Rect firstRect = mRectByView.get(first);
+            Rect secondRect = mRectByView.get(second);
+
+            int result = firstRect.top - secondRect.top;
+            if (result == 0) {
+                return firstRect.bottom - secondRect.bottom;
+            }
+            return result;
+        };
+
+        private Comparator<View> mSidesComparator = (first, second) -> {
+            if (first == second) {
+                return 0;
+            }
+
+            Rect firstRect = mRectByView.get(first);
+            Rect secondRect = mRectByView.get(second);
+
+            int result = firstRect.left - secondRect.left;
+            if (result == 0) {
+                return firstRect.right - secondRect.right;
+            }
+            return mRtlMult * result;
+        };
+
+        public void sort(View[] views, int start, int end, ViewGroup root, boolean isRtl) {
+            int count = end - start;
+            if (count < 2) {
+                return;
+            }
+            if (mRectByView == null) {
+                mRectByView = new HashMap<>();
+            }
+            mRtlMult = isRtl ? -1 : 1;
+            for (int i = mRectPool.size(); i < count; ++i) {
+                mRectPool.add(new Rect());
+            }
+            for (int i = start; i < end; ++i) {
+                Rect next = mRectPool.get(mLastPoolRect++);
+                views[i].getDrawingRect(next);
+                root.offsetDescendantRectToMyCoords(views[i], next);
+                mRectByView.put(views[i], next);
+            }
+
+            // Sort top-to-bottom
+            Arrays.sort(views, start, count, mTopsComparator);
+            // Sweep top-to-bottom to identify rows
+            int sweepBottom = mRectByView.get(views[start]).bottom;
+            int rowStart = start;
+            int sweepIdx = start + 1;
+            for (; sweepIdx < end; ++sweepIdx) {
+                Rect currRect = mRectByView.get(views[sweepIdx]);
+                if (currRect.top >= sweepBottom) {
+                    // Next view is on a new row, sort the row we've just finished left-to-right.
+                    if ((sweepIdx - rowStart) > 1) {
+                        Arrays.sort(views, rowStart, sweepIdx, mSidesComparator);
+                    }
+                    sweepBottom = currRect.bottom;
+                    rowStart = sweepIdx;
+                } else {
+                    // Next view vertically overlaps, we need to extend our "row height"
+                    sweepBottom = Math.max(sweepBottom, currRect.bottom);
+                }
+            }
+            // Sort whatever's left (final row) left-to-right
+            if ((sweepIdx - rowStart) > 1) {
+                Arrays.sort(views, rowStart, sweepIdx, mSidesComparator);
+            }
+
+            mLastPoolRect = 0;
+            mRectByView.clear();
+        }
+    }
+
     /**
-     * Sorts views according to their visual layout and geometry for default tab order.
-     * If views are part of a focus chain (nextFocusForwardId), then they are all grouped
-     * together. The head of the chain is used to determine the order of the chain and is
-     * first in the order and the tail of the chain is the last in the order. The views
-     * in the middle of the chain can be arbitrary order.
-     * This is used for sequential focus traversal.
+     * Public for testing.
+     *
+     * @hide
      */
-    private static final class SequentialFocusComparator implements Comparator<View> {
-        private final Rect mFirstRect = new Rect();
-        private final Rect mSecondRect = new Rect();
-        private ViewGroup mRoot;
-        private boolean mIsLayoutRtl;
-        private final SparseArray<View> mFocusables = new SparseArray<View>();
-        private final SparseBooleanArray mIsConnectedTo = new SparseBooleanArray();
+    @TestApi
+    public static void sort(View[] views, int start, int end, ViewGroup root, boolean isRtl) {
+        getInstance().mFocusSorter.sort(views, start, end, root, isRtl);
+    }
+
+    /**
+     * Sorts views according to any explicitly-specified focus-chains. If there are no explicitly
+     * specified focus chains (eg. no nextFocusForward attributes defined), this should be a no-op.
+     */
+    private static final class UserSpecifiedFocusComparator implements Comparator<View> {
+        private final ArrayMap<View, View> mNextFoci = new ArrayMap<>();
+        private final ArraySet<View> mIsConnectedTo = new ArraySet<>();
         private final ArrayMap<View, View> mHeadsOfChains = new ArrayMap<View, View>();
+        private final ArrayMap<View, Integer> mOriginalOrdinal = new ArrayMap<>();
+        private final NextFocusGetter mNextFocusGetter;
+        private View mRoot;
+
+        public interface NextFocusGetter {
+            View get(View root, View view);
+        }
+
+        UserSpecifiedFocusComparator(NextFocusGetter nextFocusGetter) {
+            mNextFocusGetter = nextFocusGetter;
+        }
 
         public void recycle() {
             mRoot = null;
-            mFocusables.clear();
             mHeadsOfChains.clear();
             mIsConnectedTo.clear();
+            mOriginalOrdinal.clear();
+            mNextFoci.clear();
         }
 
-        public void setRoot(ViewGroup root) {
+        public void setFocusables(List<View> focusables, View root) {
             mRoot = root;
-        }
+            for (int i = 0; i < focusables.size(); ++i) {
+                mOriginalOrdinal.put(focusables.get(i), i);
+            }
 
-        public void setIsLayoutRtl(boolean b) {
-            mIsLayoutRtl = b;
-        }
-
-        public void setFocusables(ArrayList<View> focusables) {
             for (int i = focusables.size() - 1; i >= 0; i--) {
                 final View view = focusables.get(i);
-                final int id = view.getId();
-                if (isValidId(id)) {
-                    mFocusables.put(id, view);
-                }
-                final int nextId = view.getNextFocusForwardId();
-                if (isValidId(nextId)) {
-                    mIsConnectedTo.put(nextId, true);
+                final View next = mNextFocusGetter.get(mRoot, view);
+                if (next != null && mOriginalOrdinal.containsKey(next)) {
+                    mNextFoci.put(view, next);
+                    mIsConnectedTo.add(next);
                 }
             }
 
             for (int i = focusables.size() - 1; i >= 0; i--) {
                 final View view = focusables.get(i);
-                final int nextId = view.getNextFocusForwardId();
-                if (isValidId(nextId) && !mIsConnectedTo.get(view.getId())) {
+                final View next = mNextFoci.get(view);
+                if (next != null && !mIsConnectedTo.contains(view)) {
                     setHeadOfChain(view);
                 }
             }
         }
 
         private void setHeadOfChain(View head) {
-            for (View view = head; view != null;
-                    view = mFocusables.get(view.getNextFocusForwardId())) {
+            for (View view = head; view != null; view = mNextFoci.get(view)) {
                 final View otherHead = mHeadsOfChains.get(view);
                 if (otherHead != null) {
                     if (otherHead == head) {
@@ -690,50 +946,28 @@ public class FocusFinder {
                     return -1; // first is the head, it should be first
                 } else if (second == firstHead) {
                     return 1; // second is the head, it should be first
-                } else if (isValidId(first.getNextFocusForwardId())) {
+                } else if (mNextFoci.get(first) != null) {
                     return -1; // first is not the end of the chain
                 } else {
                     return 1; // first is end of chain
                 }
             }
+            boolean involvesChain = false;
             if (firstHead != null) {
                 first = firstHead;
+                involvesChain = true;
             }
             if (secondHead != null) {
                 second = secondHead;
+                involvesChain = true;
             }
 
-            // First see if they belong to the same focus chain.
-            getRect(first, mFirstRect);
-            getRect(second, mSecondRect);
-
-            if (mFirstRect.top < mSecondRect.top) {
-                return -1;
-            } else if (mFirstRect.top > mSecondRect.top) {
-                return 1;
-            } else if (mFirstRect.left < mSecondRect.left) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.left > mSecondRect.left) {
-                return mIsLayoutRtl ? -1 : 1;
-            } else if (mFirstRect.bottom < mSecondRect.bottom) {
-                return -1;
-            } else if (mFirstRect.bottom > mSecondRect.bottom) {
-                return 1;
-            } else if (mFirstRect.right < mSecondRect.right) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.right > mSecondRect.right) {
-                return mIsLayoutRtl ? -1 : 1;
+            if (involvesChain) {
+                // keep original order between chains
+                return mOriginalOrdinal.get(first) < mOriginalOrdinal.get(second) ? -1 : 1;
             } else {
-                // The view are distinct but completely coincident so we consider
-                // them equal for our purposes.  Since the sort is stable, this
-                // means that the views will retain their layout order relative to one another.
                 return 0;
             }
-        }
-
-        private void getRect(View view, Rect rect) {
-            view.getDrawingRect(rect);
-            mRoot.offsetDescendantRectToMyCoords(view, rect);
         }
     }
 }

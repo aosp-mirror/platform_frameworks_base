@@ -38,14 +38,14 @@ public class ListRecyclerProfiling extends Activity {
             values[i] = ((Integer) i).toString();
         }
 
-        ListView listView = (ListView) findViewById(R.id.list);
+        ListView listView = findViewById(R.id.list);
 
         ViewDebug.startRecyclerTracing("SimpleList", listView);
 
         listView.setAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values));
 
-        ImageButton stopProfiling = (ImageButton) findViewById(R.id.pause);
+        ImageButton stopProfiling = findViewById(R.id.pause);
         stopProfiling.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 ViewDebug.stopRecyclerTracing();

@@ -7,6 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"您的流動數據已停用"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"輕按即可瀏覽 %s 網站"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"請與您的服務供應商 (%s) 聯絡"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"流動數據狀態"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"登入流動網絡"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"您正在嘗試加入的網絡有安全性問題。"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"例如，登入頁面可能並不屬於所顯示的機構。"</string>

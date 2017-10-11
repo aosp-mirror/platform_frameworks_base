@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/tools/streaming_proto/test/imported.proto";
+
+package com.android.streaming_proto_test;
+
+/**
+ * Enum that outside the scope of any classes.
+ */
+enum Outside {
+    OUTSIDE_0 = 0;
+    OUTSIDE_1 = 1;
+};
+
+message Sibling {
+    optional int32 int32_field = 1;
+}
+
+/**
+ * Message with all of the field types.
+ */
+message All {
+    /**
+     * Enum that is inside the scope of a class.
+     */
+    enum Inside {
+        option allow_alias = true;
+        INSIDE_0 = 0;
+        INSIDE_1 = 1;
+        INSIDE_1A = 1;
+    };
+
+    /**
+     * Message that is recursive.
+     */
+    message Nested {
+        optional int32 data = 10001;
+        optional Nested nested = 10002;
+    };
+
+    optional double double_field = 10;
+    repeated double double_field_repeated = 11;
+    repeated double double_field_packed = 12 [packed=true];
+
+    optional float float_field = 20;
+    repeated float float_field_repeated = 21;
+    repeated float float_field_packed = 22 [packed=true];
+
+    optional int32 int32_field = 30;
+    repeated int32 int32_field_repeated = 31;
+    repeated int32 int32_field_packed = 32 [packed=true];
+
+    optional int64 int64_field = 40;
+    repeated int64 int64_field_repeated = 41;
+    repeated int64 int64_field_packed = 42 [packed=true];
+
+    optional uint32 uint32_field = 50;
+    repeated uint32 uint32_field_repeated = 51;
+    repeated uint32 uint32_field_packed = 52 [packed=true];
+
+    optional uint64 uint64_field = 60;
+    repeated uint64 uint64_field_repeated = 61;
+    repeated uint64 uint64_field_packed = 62 [packed=true];
+
+    optional sint32 sint32_field = 70;
+    repeated sint32 sint32_field_repeated = 71;
+    repeated sint32 sint32_field_packed = 72 [packed=true];
+
+    optional sint64 sint64_field = 80;
+    repeated sint64 sint64_field_repeated = 81;
+    repeated sint64 sint64_field_packed = 82 [packed=true];
+
+    optional fixed32 fixed32_field = 90;
+    repeated fixed32 fixed32_field_repeated = 91;
+    repeated fixed32 fixed32_field_packed = 92 [packed=true];
+
+    optional fixed64 fixed64_field = 100;
+    repeated fixed64 fixed64_field_repeated = 101;
+    repeated fixed64 fixed64_field_packed = 102 [packed=true];
+
+    optional sfixed32 sfixed32_field = 110;
+    repeated sfixed32 sfixed32_field_repeated = 111;
+    repeated sfixed32 sfixed32_field_packed = 112 [packed=true];
+
+    optional sfixed64 sfixed64_field = 120;
+    repeated sfixed64 sfixed64_field_repeated = 121;
+    repeated sfixed64 sfixed64_field_packed = 122 [packed=true];
+
+    optional bool bool_field = 130;
+    repeated bool bool_field_repeated = 131;
+    repeated bool bool_field_packed = 132 [packed=true];
+
+    optional string string_field = 140;
+    repeated string string_field_repeated = 141;
+
+    optional bytes bytes_field = 150;
+    repeated bytes bytes_field_repeated = 151;
+
+    optional Outside outside_field = 160;
+    repeated Outside outside_field_repeated = 161;
+    repeated Outside outside_field_packed = 162 [packed=true];
+
+    optional Nested nested_field = 170;
+    repeated Nested nested_field_repeated = 171;
+
+    optional ImportedMessage imported_field = 180;
+    repeated ImportedMessage imported_field_repeated = 181;
+};

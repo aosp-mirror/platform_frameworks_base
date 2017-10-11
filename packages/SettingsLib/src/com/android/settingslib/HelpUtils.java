@@ -35,7 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -76,12 +76,14 @@ public class HelpUtils {
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, String helpUri,
             String backupContext) {
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
+        helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, helpUri, backupContext);
     }
 
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, int helpUriResource,
             String backupContext) {
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
+        helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, activity.getString(helpUriResource),
                 backupContext);
     }
@@ -125,7 +127,7 @@ public class HelpUtils {
                         return true;
                     }
                 });
-                helpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                helpMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 helpMenuItem.setVisible(true);
             } else {
                 helpMenuItem.setVisible(false);
@@ -178,27 +180,30 @@ public class HelpUtils {
         }
 
         Resources resources = context.getResources();
-        boolean includePackageName = resources.getBoolean(R.bool.config_sendPackageName);
+        boolean includePackageName =
+                resources.getBoolean(com.android.internal.R.bool.config_sendPackageName);
 
         if (sendPackageName && includePackageName) {
             String[] packageNameKey =
-                    {resources.getString(R.string.config_helpPackageNameKey)};
+                    {resources.getString(com.android.internal.R.string.config_helpPackageNameKey)};
             String[] packageNameValue =
-                    {resources.getString(R.string.config_helpPackageNameValue)};
+                    {resources.getString(
+                            com.android.internal.R.string.config_helpPackageNameValue)};
             String helpIntentExtraKey =
-                    resources.getString(R.string.config_helpIntentExtraKey);
+                    resources.getString(com.android.internal.R.string.config_helpIntentExtraKey);
             String helpIntentNameKey =
-                    resources.getString(R.string.config_helpIntentNameKey);
+                    resources.getString(com.android.internal.R.string.config_helpIntentNameKey);
             String feedbackIntentExtraKey =
-                    resources.getString(R.string.config_feedbackIntentExtraKey);
+                    resources.getString(
+                            com.android.internal.R.string.config_feedbackIntentExtraKey);
             String feedbackIntentNameKey =
-                    resources.getString(R.string.config_feedbackIntentNameKey);
+                    resources.getString(com.android.internal.R.string.config_feedbackIntentNameKey);
             intent.putExtra(helpIntentExtraKey, packageNameKey);
             intent.putExtra(helpIntentNameKey, packageNameValue);
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);
             intent.putExtra(feedbackIntentNameKey, packageNameValue);
         }
-        intent.putExtra(EXTRA_THEME, 1 /* Light, dark action bar */);
+        intent.putExtra(EXTRA_THEME, 0 /* Light theme */);
         TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
         intent.putExtra(EXTRA_PRIMARY_COLOR, array.getColor(0, 0));
         array.recycle();
@@ -209,7 +214,7 @@ public class HelpUtils {
      * of the app's package as gotten via the context.
      * @return the uri with added query parameters
      */
-    public static Uri uriWithAddedParameters(Context context, Uri baseUri) {
+    private static Uri uriWithAddedParameters(Context context, Uri baseUri) {
         Uri.Builder builder = baseUri.buildUpon();
 
         // Add in the preferred language

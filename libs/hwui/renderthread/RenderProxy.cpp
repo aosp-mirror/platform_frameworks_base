@@ -18,15 +18,18 @@
 
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
-#include "LayerRenderer.h"
+#include "Properties.h"
 #include "Readback.h"
 #include "Rect.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "renderstate/RenderState.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
+
+#include <ui/GraphicBuffer.h>
 
 namespace android {
 namespace uirenderer {
@@ -59,7 +62,7 @@ namespace renderthread {
 
 CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory) {
-    return new CanvasContext(*args->thread, args->translucent,
+    return CanvasContext::create(*args->thread, args->translucent,
             args->rootRenderNode, args->contextFactory);
 }
 
@@ -184,19 +187,17 @@ void RenderProxy::setStopped(bool stopped) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE6(setup, CanvasContext* context, int width, int height,
+CREATE_BRIDGE4(setup, CanvasContext* context,
         float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-    args->context->setup(args->width, args->height, args->lightRadius,
+    args->context->setup(args->lightRadius,
             args->ambientShadowAlpha, args->spotShadowAlpha);
     return nullptr;
 }
 
-void RenderProxy::setup(int width, int height, float lightRadius,
+void RenderProxy::setup(float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     SETUP_TASK(setup);
     args->context = mContext;
-    args->width = width;
-    args->height = height;
     args->lightRadius = lightRadius;
     args->ambientShadowAlpha = ambientShadowAlpha;
     args->spotShadowAlpha = spotShadowAlpha;
@@ -231,19 +232,18 @@ int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
 }
 
-int RenderProxy::syncAndDrawFrame(TreeObserver* observer) {
-    return mDrawFrameTask.drawFrame(observer);
+int RenderProxy::syncAndDrawFrame() {
+    return mDrawFrameTask.drawFrame();
 }
 
-CREATE_BRIDGE2(destroy, CanvasContext* context, TreeObserver* observer) {
-    args->context->destroy(args->observer);
+CREATE_BRIDGE1(destroy, CanvasContext* context) {
+    args->context->destroy();
     return nullptr;
 }
 
-void RenderProxy::destroy(TreeObserver* observer) {
+void RenderProxy::destroy() {
     SETUP_TASK(destroy);
     args->context = mContext;
-    args->observer = observer;
     // destroyCanvasAndSurface() needs a fence as when it returns the
     // underlying BufferQueue is going to be released from under
     // the render thread.
@@ -271,22 +271,8 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
     }
 }
 
-CREATE_BRIDGE2(runWithGlContext, CanvasContext* context, RenderTask* task) {
-    args->context->runWithGlContext(args->task);
-    return nullptr;
-}
-
-void RenderProxy::runWithGlContext(RenderTask* gltask) {
-    SETUP_TASK(runWithGlContext);
-    args->context = mContext;
-    args->task = gltask;
-    postAndWait(task);
-}
-
 CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
-    Layer* layer = args->context->createTextureLayer();
-    if (!layer) return nullptr;
-    return new DeferredLayerUpdater(layer);
+    return args->context->createTextureLayer();
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
@@ -297,16 +283,15 @@ DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     return layer;
 }
 
-CREATE_BRIDGE3(buildLayer, CanvasContext* context, RenderNode* node, TreeObserver* observer) {
-    args->context->buildLayer(args->node, args->observer);
+CREATE_BRIDGE2(buildLayer, CanvasContext* context, RenderNode* node) {
+    args->context->buildLayer(args->node);
     return nullptr;
 }
 
-void RenderProxy::buildLayer(RenderNode* node, TreeObserver* observer) {
+void RenderProxy::buildLayer(RenderNode* node) {
     SETUP_TASK(buildLayer);
     args->context = mContext;
     args->node = node;
-    args->observer = observer;
     postAndWait(task);
 }
 
@@ -343,15 +328,14 @@ void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(destroyHardwareResources, CanvasContext* context, TreeObserver* observer) {
-    args->context->destroyHardwareResources(args->observer);
+CREATE_BRIDGE1(destroyHardwareResources, CanvasContext* context) {
+    args->context->destroyHardwareResources();
     return nullptr;
 }
 
-void RenderProxy::destroyHardwareResources(TreeObserver* observer) {
+void RenderProxy::destroyHardwareResources() {
     SETUP_TASK(destroyHardwareResources);
     args->context = mContext;
-    args->observer = observer;
     postAndWait(task);
 }
 
@@ -460,6 +444,19 @@ void RenderProxy::resetProfileInfo() {
     postAndWait(task);
 }
 
+CREATE_BRIDGE2(frameTimePercentile, RenderThread* thread, int percentile) {
+    return reinterpret_cast<void*>(static_cast<uintptr_t>(
+        args->thread->jankTracker().findPercentile(args->percentile)));
+}
+
+uint32_t RenderProxy::frameTimePercentile(int p) {
+    SETUP_TASK(frameTimePercentile);
+    args->thread = &mRenderThread;
+    args->percentile = p;
+    return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(
+        postAndWait(task)));
+}
+
 CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
     args->thread->jankTracker().dump(args->fd);
 
@@ -471,11 +468,7 @@ CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
     } else {
         fprintf(file, "\nNo caches instance.\n");
     }
-#if HWUI_NEW_OPS
     fprintf(file, "\nPipeline=FrameBuilder\n");
-#else
-    fprintf(file, "\nPipeline=OpenGLRenderer\n");
-#endif
     fflush(file);
     return nullptr;
 }
@@ -488,23 +481,6 @@ void RenderProxy::dumpGraphicsMemory(int fd) {
     staticPostAndWait(task);
 }
 
-CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map,
-               size_t size) {
-    CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
-    args->buffer->decStrong(nullptr);
-    return nullptr;
-}
-
-void RenderProxy::setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size) {
-    SETUP_TASK(setTextureAtlas);
-    args->thread = &mRenderThread;
-    args->buffer = buffer.get();
-    args->buffer->incStrong(nullptr);
-    args->map = map;
-    args->size = size;
-    post(task);
-}
-
 CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
     args->thread->jankTracker().switchStorageToAshmem(args->fd);
     close(args->fd);
@@ -513,9 +489,22 @@ CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
 
 void RenderProxy::setProcessStatsBuffer(int fd) {
     SETUP_TASK(setProcessStatsBuffer);
-    args->thread = &mRenderThread;
+    auto& rt = RenderThread::getInstance();
+    args->thread = &rt;
     args->fd = dup(fd);
-    post(task);
+    rt.queue(task);
+}
+
+CREATE_BRIDGE1(rotateProcessStatsBuffer, RenderThread* thread) {
+    args->thread->jankTracker().rotateStorage();
+    return nullptr;
+}
+
+void RenderProxy::rotateProcessStatsBuffer() {
+    SETUP_TASK(rotateProcessStatsBuffer);
+    auto& rt = RenderThread::getInstance();
+    args->thread = &rt;
+    rt.queue(task);
 }
 
 int RenderProxy::getRenderThreadTid() {
@@ -625,32 +614,31 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
     post(task);
 }
 
-CREATE_BRIDGE3(copySurfaceInto, RenderThread* thread,
-        Surface* surface, SkBitmap* bitmap) {
-    return (void*) Readback::copySurfaceInto(*args->thread,
-            *args->surface, args->bitmap);
+CREATE_BRIDGE4(copySurfaceInto, RenderThread* thread,
+        Surface* surface, Rect srcRect, SkBitmap* bitmap) {
+    return (void*)args->thread->readback().copySurfaceInto(*args->surface,
+            args->srcRect, args->bitmap);
 }
 
-int RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
+int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top,
+        int right, int bottom,  SkBitmap* bitmap) {
     SETUP_TASK(copySurfaceInto);
     args->bitmap = bitmap;
     args->surface = surface.get();
     args->thread = &RenderThread::getInstance();
+    args->srcRect.set(left, top, right, bottom);
     return static_cast<int>(
             reinterpret_cast<intptr_t>( staticPostAndWait(task) ));
 }
 
-CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, SkBitmap* bitmap) {
-    if (Caches::hasInstance() && args->thread->eglManager().hasEglContext()) {
-        ATRACE_NAME("Bitmap#prepareToDraw task");
-        Caches::getInstance().textureCache.prefetch(args->bitmap);
-    }
-    delete args->bitmap;
+CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, Bitmap* bitmap) {
+    CanvasContext::prepareToDraw(*args->thread, args->bitmap);
+    args->bitmap->unref();
     args->bitmap = nullptr;
     return nullptr;
 }
 
-void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
+void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     // If we haven't spun up a hardware accelerated window yet, there's no
     // point in precaching these bitmaps as it can't impact jank.
     // We also don't know if we even will spin up a hardware-accelerated
@@ -659,7 +647,8 @@ void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
     RenderThread* renderThread = &RenderThread::getInstance();
     SETUP_TASK(prepareToDraw);
     args->thread = renderThread;
-    args->bitmap = new SkBitmap(bitmap);
+    bitmap.ref();
+    args->bitmap = &bitmap;
     nsecs_t lastVsync = renderThread->timeLord().latestVsync();
     nsecs_t estimatedNextVsync = lastVsync + renderThread->timeLord().frameIntervalNanos();
     nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(CLOCK_MONOTONIC);
@@ -673,6 +662,55 @@ void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
     } else {
         renderThread->queue(task);
     }
+}
+
+CREATE_BRIDGE2(allocateHardwareBitmap, RenderThread* thread, SkBitmap* bitmap) {
+    sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(*args->thread, *args->bitmap);
+    return hardwareBitmap.release();
+}
+
+sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
+    SETUP_TASK(allocateHardwareBitmap);
+    args->bitmap = &bitmap;
+    args->thread = &RenderThread::getInstance();
+    sk_sp<Bitmap> hardwareBitmap(reinterpret_cast<Bitmap*>(staticPostAndWait(task)));
+    return hardwareBitmap;
+}
+
+CREATE_BRIDGE3(copyGraphicBufferInto, RenderThread* thread, GraphicBuffer* buffer, SkBitmap* bitmap) {
+    return (void*) args->thread->readback().copyGraphicBufferInto(args->buffer, args->bitmap);
+}
+
+int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
+    RenderThread& thread = RenderThread::getInstance();
+    if (Properties::isSkiaEnabled() && gettid() == thread.getTid()) {
+        //TODO: fix everything that hits this. We should never be triggering a readback ourselves.
+        return (int) thread.readback().copyGraphicBufferInto(buffer, bitmap);
+    } else {
+        SETUP_TASK(copyGraphicBufferInto);
+        args->thread = &thread;
+        args->bitmap = bitmap;
+        args->buffer = buffer;
+        return static_cast<int>(reinterpret_cast<intptr_t>(staticPostAndWait(task)));
+    }
+}
+
+CREATE_BRIDGE2(onBitmapDestroyed, RenderThread* thread, uint32_t pixelRefId) {
+    args->thread->renderState().onBitmapDestroyed(args->pixelRefId);
+    return nullptr;
+}
+
+void RenderProxy::onBitmapDestroyed(uint32_t pixelRefId) {
+    if (!RenderThread::hasInstance()) return;
+    SETUP_TASK(onBitmapDestroyed);
+    RenderThread& thread = RenderThread::getInstance();
+    args->thread = &thread;
+    args->pixelRefId = pixelRefId;
+    thread.queue(task);
+}
+
+void RenderProxy::disableVsync() {
+    Properties::disableVsync = true;
 }
 
 void RenderProxy::post(RenderTask* task) {
@@ -693,6 +731,7 @@ void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {
 
 void* RenderProxy::staticPostAndWait(MethodInvokeRenderTask* task) {
     RenderThread& thread = RenderThread::getInstance();
+    LOG_ALWAYS_FATAL_IF(gettid() == thread.getTid());
     void* retval;
     task->setReturnPtr(&retval);
     thread.queueAndWait(task);

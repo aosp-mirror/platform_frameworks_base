@@ -22,7 +22,7 @@
 #include <utils/TypeHelpers.h>
 #include <utils/Vector.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 /*
  * Declare a concrete type for the NDK's AInputQueue forward declaration

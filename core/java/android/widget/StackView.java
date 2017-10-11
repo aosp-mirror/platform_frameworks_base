@@ -15,8 +15,6 @@
 
 package android.widget;
 
-import java.lang.ref.WeakReference;
-
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
@@ -44,6 +42,8 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.LinearInterpolator;
 import android.widget.RemoteViews.RemoteView;
+
+import java.lang.ref.WeakReference;
 
 @RemoteView
 /**
@@ -670,12 +670,12 @@ public class StackView extends AdapterViewAnimator {
                 activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ? 1 : 0;
             }
 
-            boolean endOfStack = mLoopViews && adapterCount == 1 && 
-                ((mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_UP) ||
-                 (mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_DOWN));
-            boolean beginningOfStack = mLoopViews && adapterCount == 1 && 
-                ((mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_UP) ||
-                 (mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_DOWN));
+            boolean endOfStack = mLoopViews && adapterCount == 1
+                    && ((mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_UP)
+                    || (mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_DOWN));
+            boolean beginningOfStack = mLoopViews && adapterCount == 1
+                    && ((mStackMode == ITEMS_SLIDE_DOWN && swipeGestureType == GESTURE_SLIDE_UP)
+                    || (mStackMode == ITEMS_SLIDE_UP && swipeGestureType == GESTURE_SLIDE_DOWN));
 
             int stackMode;
             if (mLoopViews && !beginningOfStack && !endOfStack) {
@@ -1051,6 +1051,11 @@ public class StackView extends AdapterViewAnimator {
 
                 float d = (float) Math.hypot(viewLp.horizontalOffset, viewLp.verticalOffset);
                 float maxd = (float) Math.hypot(mSlideAmount, 0.4f * mSlideAmount);
+                if (d > maxd) {
+                    // Because mSlideAmount is updated in onLayout(), it is possible that d > maxd
+                    // if we get onLayout() right before this method is called.
+                    d = maxd;
+                }
 
                 if (velocity == 0) {
                     return (invert ? (1 - d / maxd) : d / maxd) * DEFAULT_ANIMATION_DURATION;

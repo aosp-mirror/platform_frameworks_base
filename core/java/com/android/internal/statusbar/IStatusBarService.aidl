@@ -63,6 +63,15 @@ interface IStatusBarService
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask, String cause);
 
+    void onGlobalActionsShown();
+    void onGlobalActionsHidden();
+
+    /**
+     * These methods are needed for global actions control which the UI is shown in sysui.
+     */
+    void shutdown();
+    void reboot(boolean safeMode);
+
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);

@@ -85,6 +85,8 @@
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
 
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
     <!-- location test permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
@@ -112,6 +114,9 @@
 
     <!-- accessibility test permissions -->
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
+
+    <!-- vr test permissions -->
+    <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
 
     <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
@@ -475,6 +480,13 @@
         </activity>
 
         <activity android:name="android.view.Merge" android:label="MergeTag">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.view.ScaleGesture" android:label="ScaleGesture">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
@@ -1102,6 +1114,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.app.Activity" android:label="Empty Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <!-- Activity-level metadata -->
         <meta-data android:name="com.android.frameworks.coretests.isApp" android:value="true" />
         <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />
@@ -1151,6 +1170,8 @@
         </activity>
         <activity android:name="android.app.EmptyActivity">
         </activity>
+        <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
+        <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">
@@ -1245,6 +1266,11 @@
             <meta-data android:name="com.android.frameworks.coretests.reference" android:resource="@xml/metadata" />
         </provider>
 
+        <provider android:name="android.provider.MockFontProvider"
+                  android:authorities="android.provider.fonts.font"
+                  android:exported="false"
+                  android:multiprocess="true" />
+
         <!-- Application components used for content tests -->
         <provider android:name="android.content.MemoryFileProvider"
                 android:authorities="android.content.MemoryFileProvider"
@@ -1338,6 +1364,9 @@
               <action android:name="android.service.vr.VrListenerService" />
             </intent-filter>
         </service>
+
+        <service android:name="android.content.CrossUserContentService"
+                android:exported="true" />
 
     </application>
 

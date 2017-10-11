@@ -124,8 +124,18 @@
     <item msgid="8900559293912978337">"ሞኖ"</item>
     <item msgid="8883739882299884241">"ስቲሪዮ"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"ለኦዲዮ ጥራት ተብቷል (990 ኪቢ/ሴ / 909 ኪቢ/ሴ)"</item>
+    <item msgid="2921767058740704969">"ለኦዲዮ ጥራት አትባ (660 ኪቢ/ሴ / 606 ኪቢ/ሴ)"</item>
+    <item msgid="8860982705384396512">"ለግንኙነት ጥራት ተብቷል (330 ኪቢ/ሴ / 303 ኪቢ/ሴ)"</item>
+    <item msgid="4414060457677684127">"የተሻለው ጥረት (ተለማማጅ የቢት ፍጥነት)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"ለኦዲዮ ጥራት ተብቷል"</item>
+    <item msgid="4327143584633311908">"የተመጣጠነ የኦዲዮ እና ግንኙነት ጥራት"</item>
+    <item msgid="4681409244565426925">"ለግንኙነት ጥራት ተብቷል"</item>
+    <item msgid="364670732877872677">"የተሻለው ጥረት (ተለማማጅ የቢት ፍጥነት)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ጠፍቷል"</item>
     <item msgid="1593289376502312923">"64 ኪባ"</item>
@@ -215,12 +225,16 @@
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"ጠፍቷል"</item>
     <item msgid="2751513398307949636">"ማያ ገጽ ላይ እንደ አሞሌዎች"</item>
-    <item msgid="1851438178120770973">"በ adb shell dumpsys gfxinfo ውስጥ"</item>
+    <item msgid="2355151170975410323">"በ<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> ውስጥ"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ጠፍቷል"</item>
     <item msgid="7688197031296835369">"ስዕሉ አልፎ የፈሰሰባቸው አካባቢዎችን አሳይ"</item>
     <item msgid="2290859360633824369">"ቀይ እና አረንጓዴ የማይለይባቸው ቦታዎች አሳይ"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (ነባሪ)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"መደበኛ ወሰኖች"</item>

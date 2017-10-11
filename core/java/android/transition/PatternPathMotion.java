@@ -15,8 +15,6 @@
  */
 package android.transition;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Matrix;
@@ -24,6 +22,8 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.util.AttributeSet;
 import android.util.PathParser;
+
+import com.android.internal.R;
 
 /**
  * A PathMotion that takes a Path pattern and applies it to the separation between two points.

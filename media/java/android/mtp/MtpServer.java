@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * Java wrapper for MTP/PTP support as USB responder.
  * {@hide}
@@ -24,6 +26,7 @@ public class MtpServer implements Runnable {
 
     private long mNativeContext; // accessed by native methods
     private final MtpDatabase mDatabase;
+    private final Runnable mOnTerminate;
 
     static {
         System.loadLibrary("media_jni");
@@ -32,11 +35,13 @@ public class MtpServer implements Runnable {
     public MtpServer(
             MtpDatabase database,
             boolean usePtp,
+            Runnable onTerminate,
             String deviceInfoManufacturer,
             String deviceInfoModel,
             String deviceInfoDeviceVersion,
             String deviceInfoSerialNumber) {
-        mDatabase = database;
+        mDatabase = Preconditions.checkNotNull(database);
+        mOnTerminate = Preconditions.checkNotNull(onTerminate);
         native_setup(
                 database,
                 usePtp,
@@ -57,6 +62,7 @@ public class MtpServer implements Runnable {
         native_run();
         native_cleanup();
         mDatabase.close();
+        mOnTerminate.run();
     }
 
     public void sendObjectAdded(int handle) {

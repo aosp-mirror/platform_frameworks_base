@@ -23,6 +23,8 @@
 #include <media/AudioResamplerPublic.h>
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
+#include <media/MediaAnalyticsItem.h>
+#include <media/stagefright/Utils.h>            // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -30,16 +32,19 @@
 #include <fcntl.h>
 #include <utils/threads.h>
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/Log.h"
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
+#include "android_media_BufferingParams.h"
 #include "android_media_MediaDataSource.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_SyncParams.h"
+#include "android_media_VolumeShaper.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -51,6 +56,24 @@
 #include <binder/IServiceManager.h>
 
 #include "android_util_Binder.h"
+
+// Modular DRM begin
+#define FIND_CLASS(var, className) \
+var = env->FindClass(className); \
+LOG_FATAL_IF(! (var), "Unable to find class " className);
+
+#define GET_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
+var = env->GetMethodID(clazz, fieldName, fieldDescriptor); \
+LOG_FATAL_IF(! (var), "Unable to find method " fieldName);
+
+struct StateExceptionFields {
+    jmethodID init;
+    jclass classId;
+};
+
+static StateExceptionFields gStateExceptionFields;
+// Modular DRM end
+
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -69,8 +92,10 @@ struct fields_t {
 };
 static fields_t fields;
 
+static BufferingParams::fields_t gBufferingParamsFields;
 static PlaybackParams::fields_t gPlaybackParamsFields;
 static SyncParams::fields_t gSyncParamsFields;
+static VolumeShaperHelper::fields_t gVolumeShaperFields;
 
 static Mutex sLock;
 
@@ -343,6 +368,66 @@ android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsu
     setVideoSurface(env, thiz, jsurface, true /* mediaPlayerMustBeAlive */);
 }
 
+static jobject
+android_media_MediaPlayer_getDefaultBufferingParams(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    BufferingParams bp;
+    BufferingSettings &settings = bp.settings;
+    process_media_player_call(
+            env, thiz, mp->getDefaultBufferingSettings(&settings),
+            "java/lang/IllegalStateException", "unexpected error");
+    ALOGV("getDefaultBufferingSettings:{%s}", settings.toString().string());
+
+    return bp.asJobject(env, gBufferingParamsFields);
+}
+
+static jobject
+android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    BufferingParams bp;
+    BufferingSettings &settings = bp.settings;
+    process_media_player_call(
+            env, thiz, mp->getBufferingSettings(&settings),
+            "java/lang/IllegalStateException", "unexpected error");
+    ALOGV("getBufferingSettings:{%s}", settings.toString().string());
+
+    return bp.asJobject(env, gBufferingParamsFields);
+}
+
+static void
+android_media_MediaPlayer_setBufferingParams(JNIEnv *env, jobject thiz, jobject params)
+{
+    if (params == NULL) {
+        return;
+    }
+
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    BufferingParams bp;
+    bp.fillFromJobject(env, gBufferingParamsFields, params);
+    ALOGV("setBufferingParams:{%s}", bp.settings.toString().string());
+
+    process_media_player_call(
+            env, thiz, mp->setBufferingSettings(bp.settings),
+            "java/lang/IllegalStateException", "unexpected error");
+}
+
 static void
 android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
 {
@@ -577,15 +662,15 @@ android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jint msec)
+android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jlong msec, jint mode)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    ALOGV("seekTo: %d(msec)", msec);
-    process_media_player_call( env, thiz, mp->seekTo(msec), NULL, NULL );
+    ALOGV("seekTo: %lld(msec), mode=%d", (long long)msec, mode);
+    process_media_player_call( env, thiz, mp->seekTo((int)msec, (MediaPlayerSeekMode)mode), NULL, NULL );
 }
 
 static jint
@@ -622,6 +707,33 @@ android_media_MediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz)
     return (jint) h;
 }
 
+static jobject
+android_media_MediaPlayer_native_getMetrics(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    Parcel p;
+    int key = FOURCC('m','t','r','X');
+    status_t status = mp->getParameter(key, &p);
+    if (status != OK) {
+        ALOGD("getMetrics() failed: %d", status);
+        return (jobject) NULL;
+    }
+
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(p);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
 
 static jint
 android_media_MediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
@@ -860,8 +972,23 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
     env->DeleteLocalRef(clazz);
 
+    gBufferingParamsFields.init(env);
+
+    // Modular DRM
+    FIND_CLASS(clazz, "android/media/MediaDrm$MediaDrmStateException");
+    if (clazz) {
+        GET_METHOD_ID(gStateExceptionFields.init, clazz, "<init>", "(ILjava/lang/String;)V");
+        gStateExceptionFields.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+        env->DeleteLocalRef(clazz);
+    } else {
+        ALOGE("JNI android_media_MediaPlayer_native_init couldn't "
+              "get clazz android/media/MediaDrm$MediaDrmStateException");
+    }
+
     gPlaybackParamsFields.init(env);
     gSyncParamsFields.init(env);
+    gVolumeShaperFields.init(env);
 }
 
 static void
@@ -1033,6 +1160,217 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
     ;
 }
 
+// Pass through the arguments to the MediaServer player implementation.
+static jint android_media_MediaPlayer_applyVolumeShaper(JNIEnv *env, jobject thiz,
+        jobject jconfig, jobject joperation) {
+    // NOTE: hard code here to prevent platform issues. Must match VolumeShaper.java
+    const int VOLUME_SHAPER_INVALID_OPERATION = -38;
+
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == nullptr) {
+        return (jint)VOLUME_SHAPER_INVALID_OPERATION;
+    }
+
+    sp<VolumeShaper::Configuration> configuration;
+    sp<VolumeShaper::Operation> operation;
+    if (jconfig != nullptr) {
+        configuration = VolumeShaperHelper::convertJobjectToConfiguration(
+                env, gVolumeShaperFields, jconfig);
+        ALOGV("applyVolumeShaper configuration: %s", configuration->toString().c_str());
+    }
+    if (joperation != nullptr) {
+        operation = VolumeShaperHelper::convertJobjectToOperation(
+                env, gVolumeShaperFields, joperation);
+        ALOGV("applyVolumeShaper operation: %s", operation->toString().c_str());
+    }
+    VolumeShaper::Status status = mp->applyVolumeShaper(configuration, operation);
+    if (status == INVALID_OPERATION) {
+        status = VOLUME_SHAPER_INVALID_OPERATION;
+    }
+    return (jint)status; // if status < 0 an error, else a VolumeShaper id
+}
+
+// Pass through the arguments to the MediaServer player implementation.
+static jobject android_media_MediaPlayer_getVolumeShaperState(JNIEnv *env, jobject thiz,
+        jint id) {
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == nullptr) {
+        return (jobject)nullptr;
+    }
+
+    sp<VolumeShaper::State> state = mp->getVolumeShaperState((int)id);
+    if (state.get() == nullptr) {
+        return (jobject)nullptr;
+    }
+    return VolumeShaperHelper::convertStateToJobject(env, gVolumeShaperFields, state);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Modular DRM begin
+
+// TODO: investigate if these can be shared with their MediaDrm counterparts
+static void throwDrmStateException(JNIEnv *env, const char *msg, status_t err)
+{
+    ALOGE("Illegal DRM state exception: %s (%d)", msg, err);
+
+    jobject exception = env->NewObject(gStateExceptionFields.classId,
+            gStateExceptionFields.init, static_cast<int>(err),
+            env->NewStringUTF(msg));
+    env->Throw(static_cast<jthrowable>(exception));
+}
+
+// TODO: investigate if these can be shared with their MediaDrm counterparts
+static bool throwDrmExceptionAsNecessary(JNIEnv *env, status_t err, const char *msg = NULL)
+{
+    const char *drmMessage = "Unknown DRM Msg";
+
+    switch (err) {
+    case ERROR_DRM_UNKNOWN:
+        drmMessage = "General DRM error";
+        break;
+    case ERROR_DRM_NO_LICENSE:
+        drmMessage = "No license";
+        break;
+    case ERROR_DRM_LICENSE_EXPIRED:
+        drmMessage = "License expired";
+        break;
+    case ERROR_DRM_SESSION_NOT_OPENED:
+        drmMessage = "Session not opened";
+        break;
+    case ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED:
+        drmMessage = "Not initialized";
+        break;
+    case ERROR_DRM_DECRYPT:
+        drmMessage = "Decrypt error";
+        break;
+    case ERROR_DRM_CANNOT_HANDLE:
+        drmMessage = "Unsupported scheme or data format";
+        break;
+    case ERROR_DRM_TAMPER_DETECTED:
+        drmMessage = "Invalid state";
+        break;
+    default:
+        break;
+    }
+
+    String8 vendorMessage;
+    if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
+        vendorMessage = String8::format("DRM vendor-defined error: %d", err);
+        drmMessage = vendorMessage.string();
+    }
+
+    if (err == BAD_VALUE) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+        return true;
+    } else if (err == ERROR_DRM_NOT_PROVISIONED) {
+        jniThrowException(env, "android/media/NotProvisionedException", msg);
+        return true;
+    } else if (err == ERROR_DRM_RESOURCE_BUSY) {
+        jniThrowException(env, "android/media/ResourceBusyException", msg);
+        return true;
+    } else if (err == ERROR_DRM_DEVICE_REVOKED) {
+        jniThrowException(env, "android/media/DeniedByServerException", msg);
+        return true;
+    } else if (err == DEAD_OBJECT) {
+        jniThrowException(env, "android/media/MediaDrmResetException",
+                          "mediaserver died");
+        return true;
+    } else if (err != OK) {
+        String8 errbuf;
+        if (drmMessage != NULL) {
+            if (msg == NULL) {
+                msg = drmMessage;
+            } else {
+                errbuf = String8::format("%s: %s", msg, drmMessage);
+                msg = errbuf.string();
+            }
+        }
+        throwDrmStateException(env, msg, err);
+        return true;
+    }
+    return false;
+}
+
+static Vector<uint8_t> JByteArrayToVector(JNIEnv *env, jbyteArray const &byteArray)
+{
+    Vector<uint8_t> vector;
+    size_t length = env->GetArrayLength(byteArray);
+    vector.insertAt((size_t)0, length);
+    env->GetByteArrayRegion(byteArray, 0, length, (jbyte *)vector.editArray());
+    return vector;
+}
+
+static void android_media_MediaPlayer_prepareDrm(JNIEnv *env, jobject thiz,
+                    jbyteArray uuidObj, jbyteArray drmSessionIdObj)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (uuidObj == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    Vector<uint8_t> uuid = JByteArrayToVector(env, uuidObj);
+
+    if (uuid.size() != 16) {
+        jniThrowException(
+                          env,
+                          "java/lang/IllegalArgumentException",
+                          "invalid UUID size, expected 16 bytes");
+        return;
+    }
+
+    Vector<uint8_t> drmSessionId = JByteArrayToVector(env, drmSessionIdObj);
+
+    if (drmSessionId.size() == 0) {
+        jniThrowException(
+                          env,
+                          "java/lang/IllegalArgumentException",
+                          "empty drmSessionId");
+        return;
+    }
+
+    status_t err = mp->prepareDrm(uuid.array(), drmSessionId);
+    if (err != OK) {
+        if (err == INVALID_OPERATION) {
+            jniThrowException(
+                              env,
+                              "java/lang/IllegalStateException",
+                              "The player must be in prepared state.");
+        } else if (err == ERROR_DRM_CANNOT_HANDLE) {
+            jniThrowException(
+                              env,
+                              "android/media/UnsupportedSchemeException",
+                              "Failed to instantiate drm object.");
+        } else {
+            throwDrmExceptionAsNecessary(env, err, "Failed to prepare DRM scheme");
+        }
+    }
+}
+
+static void android_media_MediaPlayer_releaseDrm(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    status_t err = mp->releaseDrm();
+    if (err != OK) {
+        if (err == INVALID_OPERATION) {
+            jniThrowException(
+                              env,
+                              "java/lang/IllegalStateException",
+                              "Can not release DRM in an active player state.");
+        }
+    }
+}
+// Modular DRM end
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -1046,17 +1384,21 @@ static const JNINativeMethod gMethods[] = {
     {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
+    {"getDefaultBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getDefaultBufferingParams},
+    {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer_getBufferingParams},
+    {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
+    {"native_getMetrics",   "()Landroid/os/PersistableBundle;", (void *)android_media_MediaPlayer_native_getMetrics},
     {"setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer_setPlaybackParams},
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
     {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
     {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer_getSyncParams},
-    {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
+    {"_seekTo",             "(JI)V",                            (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},
     {"getCurrentPosition",  "()I",                              (void *)android_media_MediaPlayer_getCurrentPosition},
@@ -1082,6 +1424,15 @@ static const JNINativeMethod gMethods[] = {
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
+    {"native_applyVolumeShaper",
+                            "(Landroid/media/VolumeShaper$Configuration;Landroid/media/VolumeShaper$Operation;)I",
+                                                                (void *)android_media_MediaPlayer_applyVolumeShaper},
+    {"native_getVolumeShaperState",
+                            "(I)Landroid/media/VolumeShaper$State;",
+                                                                (void *)android_media_MediaPlayer_getVolumeShaperState},
+    // Modular DRM
+    { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer_prepareDrm },
+    { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer_releaseDrm },
 };
 
 // This function only registers the native methods
@@ -1090,11 +1441,11 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
-extern int register_android_media_ExifInterface(JNIEnv *env);
 extern int register_android_media_ImageReader(JNIEnv *env);
 extern int register_android_media_ImageWriter(JNIEnv *env);
 extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_Drm(JNIEnv *env);
+extern int register_android_media_Descrambler(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
 extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaCodecList(JNIEnv *env);
@@ -1211,13 +1562,13 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
         goto bail;
     }
 
-    if (register_android_media_MediaHTTPConnection(env) < 0) {
-        ALOGE("ERROR: MediaHTTPConnection native registration failed");
+    if (register_android_media_Descrambler(env) < 0) {
+        ALOGE("ERROR: MediaDescrambler native registration failed");
         goto bail;
     }
 
-    if (register_android_media_ExifInterface(env) < 0) {
-        ALOGE("ERROR: ExifInterface native registration failed");
+    if (register_android_media_MediaHTTPConnection(env) < 0) {
+        ALOGE("ERROR: MediaHTTPConnection native registration failed");
         goto bail;
     }
 

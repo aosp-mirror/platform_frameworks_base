@@ -5,6 +5,7 @@ app_process_common_shared_libs := \
     libbinder \
     libcutils \
     libdl \
+    libhwbinder \
     liblog \
     libnativeloader \
     libutils \

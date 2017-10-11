@@ -17,18 +17,16 @@
 package android.widget;
 
 import android.annotation.NonNull;
-import android.content.res.Configuration;
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
-import android.os.Parcel;
-import android.os.Parcelable;
-import com.android.internal.R;
-
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -47,28 +45,32 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.R;
+
 import java.util.List;
 
 /**
- * Layout container for a view hierarchy that can be scrolled by the user,
- * allowing it to be larger than the physical display.  A ScrollView
- * is a {@link FrameLayout}, meaning you should place one child in it
- * containing the entire contents to scroll; this child may itself be a layout
- * manager with a complex hierarchy of objects.  A child that is often used
- * is a {@link LinearLayout} in a vertical orientation, presenting a vertical
- * array of top-level items that the user can scroll through.
- * <p>You should never use a ScrollView with a {@link ListView}, because
- * ListView takes care of its own vertical scrolling.  Most importantly, doing this
- * defeats all of the important optimizations in ListView for dealing with
- * large lists, since it effectively forces the ListView to display its entire
- * list of items to fill up the infinite container supplied by ScrollView.
- * <p>The {@link TextView} class also
- * takes care of its own scrolling, so does not require a ScrollView, but
- * using the two together is possible to achieve the effect of a text view
- * within a larger container.
+ * A view group that allows the view hierarchy placed within it to be scrolled.
+ * Scroll view may have only one direct child placed within it.
+ * To add multiple views within the scroll view, make
+ * the direct child you add a view group, for example {@link LinearLayout}, and
+ * place additional views within that LinearLayout.
  *
- * <p>ScrollView only supports vertical scrolling. For horizontal scrolling,
- * use {@link HorizontalScrollView}.
+ * <p>Scroll view supports vertical scrolling only. For horizontal scrolling,
+ * use {@link HorizontalScrollView} instead.</p>
+ *
+ * <p>Never add a {@link android.support.v7.widget.RecyclerView} or {@link ListView} to
+ * a scroll view. Doing so results in poor user interface performance and a poor user
+ * experience.</p>
+ *
+ * <p class="note">
+ * For vertical scrolling, consider {@link android.support.v4.widget.NestedScrollView}
+ * instead of scroll view which offers greater user interface flexibility and
+ * support for the material design scrolling patterns.</p>
+ *
+ * <p>To learn more about material design patterns for handling scrolling, see
+ * <a href="https://material.io/guidelines/patterns/scrolling-techniques.html#">
+ * Scrolling techniques</a>.</p>
  *
  * @attr ref android.R.styleable#ScrollView_fillViewport
  */
@@ -135,7 +137,7 @@ public class ScrollView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
-    private int mScrollFactor;
+    private float mVerticalScrollFactor;
 
     /**
      * ID of the active pointer. This is used to retain consistency during
@@ -250,7 +252,7 @@ public class ScrollView extends FrameLayout {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-        mScrollFactor = configuration.getScaledScrollFactor();
+        mVerticalScrollFactor = configuration.getScaledVerticalScrollFactor();
     }
 
     @Override
@@ -796,7 +798,7 @@ public class ScrollView extends FrameLayout {
                     axisValue = 0;
                 }
 
-                final int delta = Math.round(axisValue * mScrollFactor);
+                final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
@@ -1468,7 +1470,7 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (focused.getRevealOnFocusHint()) {
+        if (focused != null && focused.getRevealOnFocusHint()) {
             if (!mIsLayoutDirty) {
                 scrollToChild(focused);
             } else {
@@ -1875,7 +1877,7 @@ public class ScrollView extends FrameLayout {
 
         @Override
         public String toString() {
-            return "HorizontalScrollView.SavedState{"
+            return "ScrollView.SavedState{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " scrollPosition=" + scrollPosition + "}";
         }

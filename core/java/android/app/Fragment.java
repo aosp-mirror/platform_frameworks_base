@@ -31,8 +31,10 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionSet;
@@ -56,6 +58,7 @@ import android.widget.AdapterView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 
 final class FragmentState implements Parcelable {
     final String mClassName;
@@ -100,15 +103,19 @@ final class FragmentState implements Parcelable {
         mSavedFragmentState = in.readBundle();
     }
 
-    public Fragment instantiate(FragmentHostCallback host, Fragment parent,
-            FragmentManagerNonConfig childNonConfig) {
+    public Fragment instantiate(FragmentHostCallback host, FragmentContainer container,
+            Fragment parent, FragmentManagerNonConfig childNonConfig) {
         if (mInstance == null) {
             final Context context = host.getContext();
             if (mArguments != null) {
                 mArguments.setClassLoader(context.getClassLoader());
             }
 
-            mInstance = Fragment.instantiate(context, mClassName, mArguments);
+            if (container != null) {
+                mInstance = container.instantiate(context, mClassName, mArguments);
+            } else {
+                mInstance = Fragment.instantiate(context, mClassName, mArguments);
+            }
 
             if (mSavedFragmentState != null) {
                 mSavedFragmentState.setClassLoader(context.getClassLoader());
@@ -375,15 +382,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     int mState = INITIALIZING;
 
-    // Non-null if the fragment's view hierarchy is currently animating away,
-    // meaning we need to wait a bit on completely destroying it.  This is the
-    // animation that is running.
-    Animator mAnimatingAway;
-
-    // If mAnimatingAway != null, this is the state we should move to once the
-    // animation is done.
-    int mStateAfterAnimating;
-
     // When instantiated from saved state, this is the saved state.
     Bundle mSavedFragmentState;
     SparseArray<Parcelable> mSavedViewState;
@@ -420,6 +418,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     // True if this fragment has been restored from previously saved state.
     boolean mRestored;
+
+    // True if performCreateView has been called and a matching call to performDestroyView
+    // has not yet happened.
+    boolean mPerformedCreateView;
 
     // Number of active back stack entries this fragment is in.
     int mBackStackNesting;
@@ -478,9 +480,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // Used to verify that subclasses call through to super class.
     boolean mCalled;
 
-    // If app has requested a specific animation, this is the one to use.
-    int mNextAnim;
-
     // The parent container of the fragment after dynamically added to UI.
     ViewGroup mContainer;
 
@@ -498,17 +497,22 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     boolean mLoadersStarted;
     boolean mCheckedForLoaderManager;
 
-    private Transition mEnterTransition = null;
-    private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
-    private Transition mExitTransition = null;
-    private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
-    private Transition mSharedElementEnterTransition = null;
-    private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
-    private Boolean mAllowReturnTransitionOverlap;
-    private Boolean mAllowEnterTransitionOverlap;
+    // The animation and transition information for the fragment. This will be null
+    // unless the elements are explicitly accessed and should remain null for Fragments
+    // without Views.
+    AnimationInfo mAnimationInfo;
 
-    SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
-    SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+    // True if the View was added, and its animation has yet to be run. This could
+    // also indicate that the fragment view hasn't been made visible, even if there is no
+    // animation for this fragment.
+    boolean mIsNewlyAdded;
+
+    // True if mHidden has been changed and the animation should be scheduled.
+    boolean mHiddenChanged;
+
+    // The cached value from onGetLayoutInflater(Bundle) that will be returned from
+    // getLayoutInflater()
+    LayoutInflater mLayoutInflater;
 
     /**
      * State information that has been retrieved from a fragment instance
@@ -574,13 +578,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * arguments can be supplied by the caller with {@link #setArguments}
      * and later retrieved by the Fragment with {@link #getArguments}.
      *
-     * <p>Applications should generally not implement a constructor.  The
-     * first place application code can run where the fragment is ready to
-     * be used is in {@link #onAttach(Activity)}, the point where the fragment
-     * is actually associated with its activity.  Some applications may also
-     * want to implement {@link #onInflate} to retrieve attributes from a
-     * layout resource, though should take care here because this happens for
-     * the fragment is attached to its activity.
+     * <p>Applications should generally not implement a constructor. Prefer
+     * {@link #onAttach(Context)} instead. It is the first place application code can run where
+     * the fragment is ready to be used - the point where the fragment is actually associated with
+     * its context. Some applications may also want to implement {@link #onInflate} to retrieve
+     * attributes from a layout resource, although note this happens when the fragment is attached.
      */
     public Fragment() {
     }
@@ -619,10 +621,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                 }
                 sClassMap.put(fname, clazz);
             }
-            Fragment f = (Fragment)clazz.newInstance();
+            Fragment f = (Fragment) clazz.getConstructor().newInstance();
             if (args != null) {
                 args.setClassLoader(f.getClass().getClassLoader());
-                f.mArguments = args;
+                f.setArguments(args);
             }
             return f;
         } catch (ClassNotFoundException e) {
@@ -637,6 +639,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new InstantiationException("Unable to instantiate fragment " + fname
                     + ": make sure class name exists, is public, and has an"
                     + " empty constructor that is public", e);
+        } catch (NoSuchMethodException e) {
+            throw new InstantiationException("Unable to instantiate fragment " + fname
+                    + ": could not find Fragment constructor", e);
+        } catch (InvocationTargetException e) {
+            throw new InstantiationException("Unable to instantiate fragment " + fname
+                    + ": calling Fragment constructor caused an exception", e);
         }
     }
 
@@ -717,14 +725,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Supply the construction arguments for this fragment.  This can only
-     * be called before the fragment has been attached to its activity; that
-     * is, you should call it immediately after constructing the fragment.  The
-     * arguments supplied here will be retained across fragment destroy and
+     * Supply the construction arguments for this fragment.
+     * The arguments supplied here will be retained across fragment destroy and
      * creation.
+     *
+     * <p>This method cannot be called if the fragment is added to a FragmentManager and
+     * if {@link #isStateSaved()} would return true. Prior to {@link Build.VERSION_CODES#O},
+     * this method may only be called if the fragment has not yet been added to a FragmentManager.
+     * </p>
      */
     public void setArguments(Bundle args) {
-        if (mIndex >= 0) {
+        // The isStateSaved requirement below was only added in Android O and is compatible
+        // because it loosens previous requirements rather than making them more strict.
+        // See method javadoc.
+        if (mIndex >= 0 && isStateSaved()) {
             throw new IllegalStateException("Fragment already active");
         }
         mArguments = args;
@@ -735,6 +749,21 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     final public Bundle getArguments() {
         return mArguments;
+    }
+
+    /**
+     * Returns true if this fragment is added and its state has already been saved
+     * by its host. Any operations that would change saved state should not be performed
+     * if this method returns true, and some operations such as {@link #setArguments(Bundle)}
+     * will fail.
+     *
+     * @return true if this fragment's state has already been saved by its host
+     */
+    public final boolean isStateSaved() {
+        if (mFragmentManager == null) {
+            return false;
+        }
+        return mFragmentManager.isStateSaved();
     }
 
     /**
@@ -765,6 +794,24 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * are going to call back with {@link #onActivityResult(int, int, Intent)}.
      */
     public void setTargetFragment(Fragment fragment, int requestCode) {
+        // Don't allow a caller to set a target fragment in another FragmentManager,
+        // but there's a snag: people do set target fragments before fragments get added.
+        // We'll have the FragmentManager check that for validity when we move
+        // the fragments to a valid state.
+        final FragmentManager mine = getFragmentManager();
+        final FragmentManager theirs = fragment != null ? fragment.getFragmentManager() : null;
+        if (mine != null && theirs != null && mine != theirs) {
+            throw new IllegalArgumentException("Fragment " + fragment
+                    + " must share the same FragmentManager to be set as a target fragment");
+        }
+
+        // Don't let someone create a cycle.
+        for (Fragment check = fragment; check != null; check = check.getTargetFragment()) {
+            if (check == this) {
+                throw new IllegalArgumentException("Setting " + fragment + " as the target of "
+                        + this + " would create a target cycle");
+            }
+        }
         mTarget = fragment;
         mTargetRequestCode = requestCode;
     }
@@ -960,8 +1007,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * Called when the hidden state (as returned by {@link #isHidden()} of
      * the fragment has changed.  Fragments start out not hidden; this will
      * be called whenever the fragment changes state from that.
-     * @param hidden True if the fragment is now hidden, false if it is not
-     * visible.
+     * @param hidden True if the fragment is now hidden, false otherwise.
      */
     public void onHiddenChanged(boolean hidden) {
     }
@@ -1031,6 +1077,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * scrolled out of visibility or is otherwise not directly visible to the user.
      * This may be used by the system to prioritize operations such as fragment lifecycle updates
      * or loader ordering behavior.</p>
+     *
+     * <p><strong>Note:</strong> This method may be called outside of the fragment lifecycle
+     * and thus has no ordering guarantees with regard to fragment lifecycle method calls.</p>
      *
      * <p><strong>Note:</strong> Prior to Android N there was a platform bug that could cause
      * <code>setUserVisibleHint</code> to bring a fragment up to the started state before its
@@ -1148,6 +1197,19 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         mHost.onStartActivityFromFragment(this, intent, requestCode, options);
+    }
+
+    /**
+     * @hide
+     * Call {@link Activity#startActivityForResultAsUser(Intent, int, UserHandle)} from the
+     * fragment's containing Activity.
+     */
+    public void startActivityForResultAsUser(
+            Intent intent, int requestCode, Bundle options, UserHandle user) {
+        if (mHost == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
+        mHost.onStartActivityAsUserFromFragment(this, intent, requestCode, options, user);
     }
 
     /**
@@ -1319,17 +1381,54 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * @hide Hack so that DialogFragment can make its Dialog before creating
-     * its views, and the view construction can use the dialog's context for
-     * inflation.  Maybe this should become a public API. Note sure.
+     * Returns the LayoutInflater used to inflate Views of this Fragment. The default
+     * implementation will throw an exception if the Fragment is not attached.
+     *
+     * @return The LayoutInflater used to inflate Views of this Fragment.
      */
-    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
+    public LayoutInflater onGetLayoutInflater(Bundle savedInstanceState) {
+        if (mHost == null) {
+            throw new IllegalStateException("onGetLayoutInflater() cannot be executed until the "
+                    + "Fragment is attached to the FragmentManager.");
+        }
         final LayoutInflater result = mHost.onGetLayoutInflater();
         if (mHost.onUseFragmentManagerInflaterFactory()) {
             getChildFragmentManager(); // Init if needed; use raw implementation below.
             result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());
         }
         return result;
+    }
+
+    /**
+     * Returns the cached LayoutInflater used to inflate Views of this Fragment. If
+     * {@link #onGetLayoutInflater(Bundle)} has not been called {@link #onGetLayoutInflater(Bundle)}
+     * will be called with a {@code null} argument and that value will be cached.
+     * <p>
+     * The cached LayoutInflater will be replaced immediately prior to
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} and cleared immediately after
+     * {@link #onDetach()}.
+     *
+     * @return The LayoutInflater used to inflate Views of this Fragment.
+     */
+    public final LayoutInflater getLayoutInflater() {
+        if (mLayoutInflater == null) {
+            return performGetLayoutInflater(null);
+        }
+        return mLayoutInflater;
+    }
+
+    /**
+     * Calls {@link #onGetLayoutInflater(Bundle)} and caches the result for use by
+     * {@link #getLayoutInflater()}.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     * @return The LayoutInflater used to inflate Views of this Fragment.
+     */
+    LayoutInflater performGetLayoutInflater(Bundle savedInstanceState) {
+        LayoutInflater layoutInflater = onGetLayoutInflater(savedInstanceState);
+        mLayoutInflater = layoutInflater;
+        return mLayoutInflater;
     }
 
     /**
@@ -1390,26 +1489,41 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Fragment);
-        mEnterTransition = loadTransition(context, a, mEnterTransition, null,
-                com.android.internal.R.styleable.Fragment_fragmentEnterTransition);
-        mReturnTransition = loadTransition(context, a, mReturnTransition, USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentReturnTransition);
-        mExitTransition = loadTransition(context, a, mExitTransition, null,
-                com.android.internal.R.styleable.Fragment_fragmentExitTransition);
-        mReenterTransition = loadTransition(context, a, mReenterTransition, USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentReenterTransition);
-        mSharedElementEnterTransition = loadTransition(context, a, mSharedElementEnterTransition,
-                null, com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition);
-        mSharedElementReturnTransition = loadTransition(context, a, mSharedElementReturnTransition,
+        setEnterTransition(loadTransition(context, a, getEnterTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentEnterTransition));
+        setReturnTransition(loadTransition(context, a, getReturnTransition(),
                 USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition);
-        if (mAllowEnterTransitionOverlap == null) {
-            mAllowEnterTransitionOverlap = a.getBoolean(
-                    com.android.internal.R.styleable.Fragment_fragmentAllowEnterTransitionOverlap, true);
+                com.android.internal.R.styleable.Fragment_fragmentReturnTransition));
+        setExitTransition(loadTransition(context, a, getExitTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentExitTransition));
+
+        setReenterTransition(loadTransition(context, a, getReenterTransition(),
+                USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentReenterTransition));
+        setSharedElementEnterTransition(loadTransition(context, a,
+                getSharedElementEnterTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition));
+        setSharedElementReturnTransition(loadTransition(context, a,
+                getSharedElementReturnTransition(), USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition));
+        boolean isEnterSet;
+        boolean isReturnSet;
+        if (mAnimationInfo == null) {
+            isEnterSet = false;
+            isReturnSet = false;
+        } else {
+            isEnterSet = mAnimationInfo.mAllowEnterTransitionOverlap != null;
+            isReturnSet = mAnimationInfo.mAllowReturnTransitionOverlap != null;
         }
-        if (mAllowReturnTransitionOverlap == null) {
-            mAllowReturnTransitionOverlap = a.getBoolean(
-                    com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap, true);
+        if (!isEnterSet) {
+            setAllowEnterTransitionOverlap(a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowEnterTransitionOverlap,
+                    true));
+        }
+        if (!isReturnSet) {
+            setAllowReturnTransitionOverlap(a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap,
+                    true));
         }
         a.recycle();
 
@@ -1617,8 +1731,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
                 mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, false);
-            }
-            if (mLoaderManager != null) {
+            } else if (mLoaderManager != null) {
                 mLoaderManager.doStart();
             }
         }
@@ -1660,11 +1773,44 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
      * visa-versa. This is generally tied to {@link Activity#onMultiWindowModeChanged} of the
+     * containing Activity. This method provides the same configuration that will be sent in the
+     * following {@link #onConfigurationChanged(Configuration)} call after the activity enters this
+     * mode.
+     *
+     * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInMultiWindowMode}.
+     */
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+        onMultiWindowModeChanged(isInMultiWindowMode);
+    }
+
+    /**
+     * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
+     * visa-versa. This is generally tied to {@link Activity#onMultiWindowModeChanged} of the
      * containing Activity.
      *
      * @param isInMultiWindowMode True if the activity is in multi-window mode.
+     *
+     * @deprecated Use {@link #onMultiWindowModeChanged(boolean, Configuration)} instead.
      */
+    @Deprecated
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+    }
+
+    /**
+     * Called by the system when the activity changes to and from picture-in-picture mode. This is
+     * generally tied to {@link Activity#onPictureInPictureModeChanged} of the containing Activity.
+     * This method provides the same configuration that will be sent in the following
+     * {@link #onConfigurationChanged(Configuration)} call after the activity enters this mode.
+     *
+     * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     * @param newConfig The new configuration of the activity with the state
+     *                  {@param isInPictureInPictureMode}.
+     */
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     /**
@@ -1672,7 +1818,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * generally tied to {@link Activity#onPictureInPictureModeChanged} of the containing Activity.
      *
      * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
+     *
+     * @deprecated Use {@link #onPictureInPictureModeChanged(boolean, Configuration)} instead.
      */
+    @Deprecated
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
     }
 
@@ -1934,16 +2083,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void setEnterSharedElementCallback(SharedElementCallback callback) {
         if (callback == null) {
+            if (mAnimationInfo == null) {
+                return; // already a null callback
+            }
             callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mEnterTransitionCallback = callback;
-    }
-
-    /**
-     * @hide
-     */
-    public void setEnterSharedElementTransitionCallback(SharedElementCallback callback) {
-        setEnterSharedElementCallback(callback);
+        ensureAnimationInfo().mEnterTransitionCallback = callback;
     }
 
     /**
@@ -1955,16 +2100,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void setExitSharedElementCallback(SharedElementCallback callback) {
         if (callback == null) {
+            if (mAnimationInfo == null) {
+                return; // already a null callback
+            }
             callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mExitTransitionCallback = callback;
-    }
-
-    /**
-     * @hide
-     */
-    public void setExitSharedElementTransitionCallback(SharedElementCallback callback) {
-        setExitSharedElementCallback(callback);
+        ensureAnimationInfo().mExitTransitionCallback = callback;
     }
 
     /**
@@ -1979,7 +2120,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
      */
     public void setEnterTransition(Transition transition) {
-        mEnterTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mEnterTransition = transition;
+        }
     }
 
     /**
@@ -1993,7 +2136,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
      */
     public Transition getEnterTransition() {
-        return mEnterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mEnterTransition;
     }
 
     /**
@@ -2011,7 +2157,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public void setReturnTransition(Transition transition) {
-        mReturnTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mReturnTransition = transition;
+        }
     }
 
     /**
@@ -2028,8 +2176,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public Transition getReturnTransition() {
-        return mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
-                : mReturnTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
+                : mAnimationInfo.mReturnTransition;
     }
 
     /**
@@ -2046,7 +2197,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public void setExitTransition(Transition transition) {
-        mExitTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mExitTransition = transition;
+        }
     }
 
     /**
@@ -2063,7 +2216,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public Transition getExitTransition() {
-        return mExitTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mExitTransition;
     }
 
     /**
@@ -2080,7 +2236,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
      */
     public void setReenterTransition(Transition transition) {
-        mReenterTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mReenterTransition = transition;
+        }
     }
 
     /**
@@ -2097,8 +2255,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
      */
     public Transition getReenterTransition() {
-        return mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
-                : mReenterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
+                : mAnimationInfo.mReenterTransition;
     }
 
     /**
@@ -2112,7 +2273,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
      */
     public void setSharedElementEnterTransition(Transition transition) {
-        mSharedElementEnterTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mSharedElementEnterTransition = transition;
+        }
     }
 
     /**
@@ -2126,7 +2289,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
      */
     public Transition getSharedElementEnterTransition() {
-        return mSharedElementEnterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mSharedElementEnterTransition;
     }
 
     /**
@@ -2143,7 +2309,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
      */
     public void setSharedElementReturnTransition(Transition transition) {
-        mSharedElementReturnTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mSharedElementReturnTransition = transition;
+        }
     }
 
     /**
@@ -2160,8 +2328,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
      */
     public Transition getSharedElementReturnTransition() {
-        return mSharedElementReturnTransition == USE_DEFAULT_TRANSITION ?
-                getSharedElementEnterTransition() : mSharedElementReturnTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mSharedElementReturnTransition == USE_DEFAULT_TRANSITION
+                ? getSharedElementEnterTransition()
+                : mAnimationInfo.mSharedElementReturnTransition;
     }
 
     /**
@@ -2174,7 +2346,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
      */
     public void setAllowEnterTransitionOverlap(boolean allow) {
-        mAllowEnterTransitionOverlap = allow;
+        ensureAnimationInfo().mAllowEnterTransitionOverlap = allow;
     }
 
     /**
@@ -2187,7 +2359,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
      */
     public boolean getAllowEnterTransitionOverlap() {
-        return (mAllowEnterTransitionOverlap == null) ? true : mAllowEnterTransitionOverlap;
+        return (mAnimationInfo == null || mAnimationInfo.mAllowEnterTransitionOverlap == null)
+                ? true : mAnimationInfo.mAllowEnterTransitionOverlap;
     }
 
     /**
@@ -2200,7 +2373,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
      */
     public void setAllowReturnTransitionOverlap(boolean allow) {
-        mAllowReturnTransitionOverlap = allow;
+        ensureAnimationInfo().mAllowReturnTransitionOverlap = allow;
     }
 
     /**
@@ -2213,7 +2386,90 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
      */
     public boolean getAllowReturnTransitionOverlap() {
-        return (mAllowReturnTransitionOverlap == null) ? true : mAllowReturnTransitionOverlap;
+        return (mAnimationInfo == null || mAnimationInfo.mAllowReturnTransitionOverlap == null)
+                ? true : mAnimationInfo.mAllowReturnTransitionOverlap;
+    }
+
+    /**
+     * Postpone the entering Fragment transition until {@link #startPostponedEnterTransition()}
+     * or {@link FragmentManager#executePendingTransactions()} has been called.
+     * <p>
+     * This method gives the Fragment the ability to delay Fragment animations
+     * until all data is loaded. Until then, the added, shown, and
+     * attached Fragments will be INVISIBLE and removed, hidden, and detached Fragments won't
+     * be have their Views removed. The transaction runs when all postponed added Fragments in the
+     * transaction have called {@link #startPostponedEnterTransition()}.
+     * <p>
+     * This method should be called before being added to the FragmentTransaction or
+     * in {@link #onCreate(Bundle), {@link #onAttach(Context)}, or
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}}.
+     * {@link #startPostponedEnterTransition()} must be called to allow the Fragment to
+     * start the transitions.
+     * <p>
+     * When a FragmentTransaction is started that may affect a postponed FragmentTransaction,
+     * based on which containers are in their operations, the postponed FragmentTransaction
+     * will have its start triggered. The early triggering may result in faulty or nonexistent
+     * animations in the postponed transaction. FragmentTransactions that operate only on
+     * independent containers will not interfere with each other's postponement.
+     * <p>
+     * Calling postponeEnterTransition on Fragments with a null View will not postpone the
+     * transition. Likewise, postponement only works if FragmentTransaction optimizations are
+     * enabled.
+     *
+     * @see Activity#postponeEnterTransition()
+     * @see FragmentTransaction#setReorderingAllowed(boolean)
+     */
+    public void postponeEnterTransition() {
+        ensureAnimationInfo().mEnterTransitionPostponed = true;
+    }
+
+    /**
+     * Begin postponed transitions after {@link #postponeEnterTransition()} was called.
+     * If postponeEnterTransition() was called, you must call startPostponedEnterTransition()
+     * or {@link FragmentManager#executePendingTransactions()} to complete the FragmentTransaction.
+     * If postponement was interrupted with {@link FragmentManager#executePendingTransactions()},
+     * before {@code startPostponedEnterTransition()}, animations may not run or may execute
+     * improperly.
+     *
+     * @see Activity#startPostponedEnterTransition()
+     */
+    public void startPostponedEnterTransition() {
+        if (mFragmentManager == null || mFragmentManager.mHost == null) {
+                ensureAnimationInfo().mEnterTransitionPostponed = false;
+        } else if (Looper.myLooper() != mFragmentManager.mHost.getHandler().getLooper()) {
+            mFragmentManager.mHost.getHandler().
+                    postAtFrontOfQueue(this::callStartTransitionListener);
+        } else {
+            callStartTransitionListener();
+        }
+    }
+
+    /**
+     * Calls the start transition listener. This must be called on the UI thread.
+     */
+    private void callStartTransitionListener() {
+        final OnStartEnterTransitionListener listener;
+        if (mAnimationInfo == null) {
+            listener = null;
+        } else {
+            mAnimationInfo.mEnterTransitionPostponed = false;
+            listener = mAnimationInfo.mStartEnterTransitionListener;
+            mAnimationInfo.mStartEnterTransitionListener = null;
+        }
+        if (listener != null) {
+            listener.onStartEnterTransition();
+        }
+    }
+
+    /**
+     * Returns true if mAnimationInfo is not null or the transition differs from the default value.
+     * This is broken out to ensure mAnimationInfo is properly locked when checking.
+     */
+    private boolean shouldChangeTransition(Transition transition, Transition defaultValue) {
+        if (transition == defaultValue) {
+            return mAnimationInfo != null;
+        }
+        return true;
     }
 
     /**
@@ -2274,8 +2530,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(" mTargetRequestCode=");
             writer.println(mTargetRequestCode);
         }
-        if (mNextAnim != 0) {
-            writer.print(prefix); writer.print("mNextAnim="); writer.println(mNextAnim);
+        if (getNextAnim() != 0) {
+            writer.print(prefix); writer.print("mNextAnim="); writer.println(getNextAnim());
         }
         if (mContainer != null) {
             writer.print(prefix); writer.print("mContainer="); writer.println(mContainer);
@@ -2283,10 +2539,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mView != null) {
             writer.print(prefix); writer.print("mView="); writer.println(mView);
         }
-        if (mAnimatingAway != null) {
-            writer.print(prefix); writer.print("mAnimatingAway="); writer.println(mAnimatingAway);
+        if (getAnimatingAway() != null) {
+            writer.print(prefix); writer.print("mAnimatingAway=");
+            writer.println(getAnimatingAway());
             writer.print(prefix); writer.print("mStateAfterAnimating=");
-            writer.println(mStateAfterAnimating);
+            writer.println(getStateAfterAnimating());
         }
         if (mLoaderManager != null) {
             writer.print(prefix); writer.println("Loader Manager:");
@@ -2313,7 +2570,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mChildFragmentManager.attachController(mHost, new FragmentContainer() {
             @Override
             @Nullable
-            public View onFindViewById(int id) {
+            public <T extends View> T onFindViewById(int id) {
                 if (mView == null) {
                     throw new IllegalStateException("Fragment does not have a view");
                 }
@@ -2350,6 +2607,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mChildFragmentManager != null) {
             mChildFragmentManager.noteStateNotSaved();
         }
+        mPerformedCreateView = true;
         return onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -2407,6 +2665,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    void noteStateNotSaved() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
+        }
+    }
+
+    @Deprecated
     void performMultiWindowModeChanged(boolean isInMultiWindowMode) {
         onMultiWindowModeChanged(isInMultiWindowMode);
         if (mChildFragmentManager != null) {
@@ -2414,10 +2679,27 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    void performMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+        onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+        }
+    }
+
+    @Deprecated
     void performPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         onPictureInPictureModeChanged(isInPictureInPictureMode);
         if (mChildFragmentManager != null) {
             mChildFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
+        }
+    }
+
+    void performPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode,
+                    newConfig);
         }
     }
 
@@ -2576,6 +2858,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mLoaderManager != null) {
             mLoaderManager.doReportNextStart();
         }
+        mPerformedCreateView = false;
     }
 
     void performDestroy() {
@@ -2595,6 +2878,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     void performDetach() {
         mCalled = false;
         onDetach();
+        mLayoutInflater = null;
         if (!mCalled) {
             throw new SuperNotCalledException("Fragment " + this
                     + " did not call through to super.onDetach()");
@@ -2610,6 +2894,23 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             }
             mChildFragmentManager.dispatchDestroy();
             mChildFragmentManager = null;
+        }
+    }
+
+    void setOnStartEnterTransitionListener(OnStartEnterTransitionListener listener) {
+        ensureAnimationInfo();
+        if (listener == mAnimationInfo.mStartEnterTransitionListener) {
+            return;
+        }
+        if (listener != null && mAnimationInfo.mStartEnterTransitionListener != null) {
+            throw new IllegalStateException("Trying to set a replacement " +
+                    "startPostponedEnterTransition on " + this);
+        }
+        if (mAnimationInfo.mEnterTransitionPostponed) {
+            mAnimationInfo.mStartEnterTransitionListener = listener;
+        }
+        if (listener != null) {
+            listener.startListening();
         }
     }
 
@@ -2631,4 +2932,158 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         return transition;
     }
 
+    private AnimationInfo ensureAnimationInfo() {
+        if (mAnimationInfo == null) {
+            mAnimationInfo = new AnimationInfo();
+        }
+        return mAnimationInfo;
+    }
+
+    int getNextAnim() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextAnim;
+    }
+
+    void setNextAnim(int animResourceId) {
+        if (mAnimationInfo == null && animResourceId == 0) {
+            return; // no change!
+        }
+        ensureAnimationInfo().mNextAnim = animResourceId;
+    }
+
+    int getNextTransition() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextTransition;
+    }
+
+    void setNextTransition(int nextTransition, int nextTransitionStyle) {
+        if (mAnimationInfo == null && nextTransition == 0 && nextTransitionStyle == 0) {
+            return; // no change!
+        }
+        ensureAnimationInfo();
+        mAnimationInfo.mNextTransition = nextTransition;
+        mAnimationInfo.mNextTransitionStyle = nextTransitionStyle;
+    }
+
+    int getNextTransitionStyle() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextTransitionStyle;
+    }
+
+    SharedElementCallback getEnterTransitionCallback() {
+        if (mAnimationInfo == null) {
+            return SharedElementCallback.NULL_CALLBACK;
+        }
+        return mAnimationInfo.mEnterTransitionCallback;
+    }
+
+    SharedElementCallback getExitTransitionCallback() {
+        if (mAnimationInfo == null) {
+            return SharedElementCallback.NULL_CALLBACK;
+        }
+        return mAnimationInfo.mExitTransitionCallback;
+    }
+
+    Animator getAnimatingAway() {
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mAnimatingAway;
+    }
+
+    void setAnimatingAway(Animator animator) {
+        ensureAnimationInfo().mAnimatingAway = animator;
+    }
+
+    int getStateAfterAnimating() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mStateAfterAnimating;
+    }
+
+    void setStateAfterAnimating(int state) {
+        ensureAnimationInfo().mStateAfterAnimating = state;
+    }
+
+    boolean isPostponed() {
+        if (mAnimationInfo == null) {
+            return false;
+        }
+        return mAnimationInfo.mEnterTransitionPostponed;
+    }
+
+    boolean isHideReplaced() {
+        if (mAnimationInfo == null) {
+            return false;
+        }
+        return mAnimationInfo.mIsHideReplaced;
+    }
+
+    void setHideReplaced(boolean replaced) {
+        ensureAnimationInfo().mIsHideReplaced = replaced;
+    }
+
+    /**
+     * Used internally to be notified when {@link #startPostponedEnterTransition()} has
+     * been called. This listener will only be called once and then be removed from the
+     * listeners.
+     */
+    interface OnStartEnterTransitionListener {
+        void onStartEnterTransition();
+        void startListening();
+    }
+
+    /**
+     * Contains all the animation and transition information for a fragment. This will only
+     * be instantiated for Fragments that have Views.
+     */
+    static class AnimationInfo {
+        // Non-null if the fragment's view hierarchy is currently animating away,
+        // meaning we need to wait a bit on completely destroying it.  This is the
+        // animation that is running.
+        Animator mAnimatingAway;
+
+        // If mAnimatingAway != null, this is the state we should move to once the
+        // animation is done.
+        int mStateAfterAnimating;
+
+        // If app has requested a specific animation, this is the one to use.
+        int mNextAnim;
+
+        // If app has requested a specific transition, this is the one to use.
+        int mNextTransition;
+
+        // If app has requested a specific transition style, this is the one to use.
+        int mNextTransitionStyle;
+
+        private Transition mEnterTransition = null;
+        private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
+        private Transition mExitTransition = null;
+        private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
+        private Transition mSharedElementEnterTransition = null;
+        private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
+        private Boolean mAllowReturnTransitionOverlap;
+        private Boolean mAllowEnterTransitionOverlap;
+
+        SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+        SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+
+        // True when postponeEnterTransition has been called and startPostponeEnterTransition
+        // hasn't been called yet.
+        boolean mEnterTransitionPostponed;
+
+        // Listener to wait for startPostponeEnterTransition. After being called, it will
+        // be set to null
+        OnStartEnterTransitionListener mStartEnterTransitionListener;
+
+        // True if the View was hidden, but the transition is handling the hide
+        boolean mIsHideReplaced;
+    }
 }

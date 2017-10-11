@@ -45,12 +45,12 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         final int userId = 0;
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 0);
 
-        aih.updateDisplayLocked(true, /* elapsedRealtime= */ 1000);
-        aih.updateDisplayLocked(false, /* elapsedRealtime= */ 2000);
+        aih.updateDisplay(true, /* elapsedRealtime= */ 1000);
+        aih.updateDisplay(false, /* elapsedRealtime= */ 2000);
         // Screen On time file should be written right away
         assertTrue(aih.getScreenOnTimeFile().exists());
 
-        aih.writeAppIdleTimesLocked(userId);
+        aih.writeAppIdleTimes(userId);
         // stats file should be written now
         assertTrue(new File(new File(mStorageDir, "users/" + userId),
                 AppIdleHistory.APP_IDLE_FILENAME).exists());
@@ -58,43 +58,43 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
     public void testScreenOnTime() {
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
-        aih.updateDisplayLocked(false, 2000);
-        assertEquals(aih.getScreenOnTimeLocked(2000), 0);
-        aih.updateDisplayLocked(true, 3000);
-        assertEquals(aih.getScreenOnTimeLocked(4000), 1000);
-        assertEquals(aih.getScreenOnTimeLocked(5000), 2000);
-        aih.updateDisplayLocked(false, 6000);
+        aih.updateDisplay(false, 2000);
+        assertEquals(aih.getScreenOnTime(2000), 0);
+        aih.updateDisplay(true, 3000);
+        assertEquals(aih.getScreenOnTime(4000), 1000);
+        assertEquals(aih.getScreenOnTime(5000), 2000);
+        aih.updateDisplay(false, 6000);
         // Screen on time should not keep progressing with screen is off
-        assertEquals(aih.getScreenOnTimeLocked(7000), 3000);
-        assertEquals(aih.getScreenOnTimeLocked(8000), 3000);
-        aih.writeAppIdleDurationsLocked();
+        assertEquals(aih.getScreenOnTime(7000), 3000);
+        assertEquals(aih.getScreenOnTime(8000), 3000);
+        aih.writeAppIdleDurations();
 
         // Check if the screen on time is persisted across instantiations
         AppIdleHistory aih2 = new AppIdleHistory(mStorageDir, 0);
-        assertEquals(aih2.getScreenOnTimeLocked(11000), 3000);
-        aih2.updateDisplayLocked(true, 4000);
-        aih2.updateDisplayLocked(false, 5000);
-        assertEquals(aih2.getScreenOnTimeLocked(13000), 4000);
+        assertEquals(aih2.getScreenOnTime(11000), 3000);
+        aih2.updateDisplay(true, 4000);
+        aih2.updateDisplay(false, 5000);
+        assertEquals(aih2.getScreenOnTime(13000), 4000);
     }
 
     public void testPackageEvents() {
         AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
         aih.setThresholds(4000, 1000);
-        aih.updateDisplayLocked(true, 1000);
+        aih.updateDisplay(true, 1000);
         // App is not-idle by default
-        assertFalse(aih.isIdleLocked(PACKAGE_1, 0, 1500));
+        assertFalse(aih.isIdle(PACKAGE_1, 0, 1500));
         // Still not idle
-        assertFalse(aih.isIdleLocked(PACKAGE_1, 0, 3000));
+        assertFalse(aih.isIdle(PACKAGE_1, 0, 3000));
         // Idle now
-        assertTrue(aih.isIdleLocked(PACKAGE_1, 0, 8000));
+        assertTrue(aih.isIdle(PACKAGE_1, 0, 8000));
         // Not idle
-        assertFalse(aih.isIdleLocked(PACKAGE_2, 0, 9000));
+        assertFalse(aih.isIdle(PACKAGE_2, 0, 9000));
 
         // Screen off
-        aih.updateDisplayLocked(false, 9100);
+        aih.updateDisplay(false, 9100);
         // Still idle after 10 seconds because screen hasn't been on long enough
-        assertFalse(aih.isIdleLocked(PACKAGE_2, 0, 20000));
-        aih.updateDisplayLocked(true, 21000);
-        assertTrue(aih.isIdleLocked(PACKAGE_2, 0, 23000));
+        assertFalse(aih.isIdle(PACKAGE_2, 0, 20000));
+        aih.updateDisplay(true, 21000);
+        assertTrue(aih.isIdle(PACKAGE_2, 0, 23000));
     }
 }

@@ -16,6 +16,11 @@
 
 package com.android.server.timezone;
 
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,12 +31,15 @@ import android.app.timezone.RulesManager;
 import android.app.timezone.RulesState;
 import android.os.ParcelFileDescriptor;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
-import libcore.tzdata.shared2.DistroVersion;
-import libcore.tzdata.shared2.StagedDistroOperation;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
+
+import libcore.io.IoUtils;
 
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
 import static org.junit.Assert.assertEquals;
@@ -40,7 +48,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -48,6 +56,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,7 +68,6 @@ public class RulesManagerServiceTest {
 
     private FakeExecutor mFakeExecutor;
     private PermissionHelper mMockPermissionHelper;
-    private FileDescriptorHelper mMockFileDescriptorHelper;
     private PackageTracker mMockPackageTracker;
     private TimeZoneDistroInstaller mMockTimeZoneDistroInstaller;
 
@@ -67,7 +75,6 @@ public class RulesManagerServiceTest {
     public void setUp() {
         mFakeExecutor = new FakeExecutor();
 
-        mMockFileDescriptorHelper = mock(FileDescriptorHelper.class);
         mMockPackageTracker = mock(PackageTracker.class);
         mMockPermissionHelper = mock(PermissionHelper.class);
         mMockTimeZoneDistroInstaller = mock(TimeZoneDistroInstaller.class);
@@ -75,7 +82,6 @@ public class RulesManagerServiceTest {
         mRulesManagerService = new RulesManagerService(
                 mMockPermissionHelper,
                 mFakeExecutor,
-                mMockFileDescriptorHelper,
                 mMockPackageTracker,
                 mMockTimeZoneDistroInstaller);
     }
@@ -271,9 +277,8 @@ public class RulesManagerServiceTest {
                 revision);
         configureInstalledDistroVersion(installedDistroVersion);
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         // Start an async operation so there is one in progress. The mFakeExecutor won't actually
         // execute it.
@@ -282,36 +287,41 @@ public class RulesManagerServiceTest {
 
         mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback);
 
+        // Request the rules state while the async operation is "happening".
+        RulesState actualRulesState = mRulesManagerService.getRulesState();
         RulesState expectedRuleState = new RulesState(
                 systemRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
                 true /* operationInProgress */,
                 RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_UNKNOWN, null /* installedDistroRulesVersion */);
-        assertEquals(expectedRuleState, mRulesManagerService.getRulesState());
+        assertEquals(expectedRuleState, actualRulesState);
     }
 
     @Test
     public void requestInstall_operationInProgress() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor1 =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         byte[] tokenBytes = createArbitraryTokenBytes();
         ICallback callback = new StubbedCallback();
 
         // First request should succeed.
         assertEquals(RulesManager.SUCCESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
+                mRulesManagerService.requestInstall(parcelFileDescriptor1, tokenBytes, callback));
 
         // Something async should be enqueued. Clear it but do not execute it so we can detect the
         // second request does nothing.
         mFakeExecutor.getAndResetLastCommand();
 
         // Second request should fail.
+        ParcelFileDescriptor parcelFileDescriptor2 =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
         assertEquals(RulesManager.ERROR_OPERATION_IN_PROGRESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
+                mRulesManagerService.requestInstall(parcelFileDescriptor2, tokenBytes, callback));
+
+        assertClosed(parcelFileDescriptor2);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -323,9 +333,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_badToken() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         byte[] badTokenBytes = new byte[2];
         ICallback callback = new StubbedCallback();
@@ -335,6 +344,8 @@ public class RulesManagerServiceTest {
             fail();
         } catch (IllegalArgumentException expected) {
         }
+
+        assertClosed(parcelFileDescriptor);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -365,7 +376,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_nullCallback() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
         byte[] tokenBytes = createArbitraryTokenBytes();
         ICallback callback = null;
 
@@ -373,6 +385,8 @@ public class RulesManagerServiceTest {
             mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback);
             fail();
         } catch (NullPointerException expected) {}
+
+        assertClosed(parcelFileDescriptor);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -384,9 +398,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_asyncSuccess() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        byte[] expectedContent = createArbitraryBytes(1000);
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         CheckToken token = createArbitraryToken();
         byte[] tokenBytes = token.toByteArray();
@@ -403,13 +416,15 @@ public class RulesManagerServiceTest {
         verifyNoPackageTrackerCallsMade();
 
         // Set up the installer.
-        configureStageInstallExpectation(expectedContent, TimeZoneDistroInstaller.INSTALL_SUCCESS);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
+        assertClosed(parcelFileDescriptor);
+
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedContent);
+        verifyStageInstallCalled();
         verifyPackageTrackerCalled(token, true /* success */);
 
         // Check the callback was called.
@@ -420,9 +435,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_nullTokenBytes() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        byte[] expectedContent = createArbitraryBytes(1000);
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         TestCallback callback = new TestCallback();
 
@@ -436,13 +450,15 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageInstallExpectation(expectedContent, TimeZoneDistroInstaller.INSTALL_SUCCESS);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
+        assertClosed(parcelFileDescriptor);
+
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedContent);
+        verifyStageInstallCalled();
         verifyPackageTrackerCalled(null /* expectedToken */, true /* success */);
 
         // Check the callback was received.
@@ -453,9 +469,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_asyncInstallFail() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         CheckToken token = createArbitraryToken();
         byte[] tokenBytes = token.toByteArray();
@@ -471,14 +486,15 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageInstallExpectation(
-                expectedContent, TimeZoneDistroInstaller.INSTALL_FAIL_VALIDATION_ERROR);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_FAIL_VALIDATION_ERROR);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
+        assertClosed(parcelFileDescriptor);
+
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedContent);
+        verifyStageInstallCalled();
 
         // Validation failure is treated like a successful check: repeating it won't improve things.
         boolean expectedSuccess = true;
@@ -486,38 +502,6 @@ public class RulesManagerServiceTest {
 
         // Check the callback was received.
         callback.assertResultReceived(Callback.ERROR_INSTALL_VALIDATION_ERROR);
-    }
-
-    @Test
-    public void requestInstall_asyncParcelFileDescriptorReadFail() throws Exception {
-        configureCallerHasPermission();
-
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadFailure(parcelFileDescriptor);
-
-        CheckToken token = createArbitraryToken();
-        byte[] tokenBytes = token.toByteArray();
-
-        TestCallback callback = new TestCallback();
-
-        // Request the install.
-        assertEquals(RulesManager.SUCCESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
-
-        // Simulate the async execution.
-        mFakeExecutor.simulateAsyncExecutionOfLastCommand();
-
-        // Verify nothing else happened.
-        verifyNoInstallerCallsMade();
-
-        // A failure to read the ParcelFileDescriptor is treated as a failure. It might be the
-        // result of a file system error. This is a fairly arbitrary choice.
-        verifyPackageTrackerCalled(token, false /* success */);
-
-        verifyNoPackageTrackerCallsMade();
-
-        // Check the callback was received.
-        callback.assertResultReceived(Callback.ERROR_UNKNOWN_FAILURE);
     }
 
     @Test
@@ -601,7 +585,39 @@ public class RulesManagerServiceTest {
         verifyNoPackageTrackerCallsMade();
 
         // Set up the installer.
-        configureStageUninstallExpectation(true /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_SUCCESS);
+
+        // Simulate the async execution.
+        mFakeExecutor.simulateAsyncExecutionOfLastCommand();
+
+        // Verify the expected calls were made to other components.
+        verifyStageUninstallCalled();
+        verifyPackageTrackerCalled(token, true /* success */);
+
+        // Check the callback was called.
+        callback.assertResultReceived(Callback.SUCCESS);
+    }
+
+    @Test
+    public void requestUninstall_asyncNothingInstalled() throws Exception {
+        configureCallerHasPermission();
+
+        CheckToken token = createArbitraryToken();
+        byte[] tokenBytes = token.toByteArray();
+
+        TestCallback callback = new TestCallback();
+
+        // Request the uninstall.
+        assertEquals(RulesManager.SUCCESS,
+                mRulesManagerService.requestUninstall(tokenBytes, callback));
+
+        // Assert nothing has happened yet.
+        callback.assertNoResultReceived();
+        verifyNoInstallerCallsMade();
+        verifyNoPackageTrackerCallsMade();
+
+        // Set up the installer.
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_NOTHING_INSTALLED);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -629,7 +645,7 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageUninstallExpectation(true /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -660,7 +676,7 @@ public class RulesManagerServiceTest {
         callback.assertNoResultReceived();
 
         // Set up the installer.
-        configureStageUninstallExpectation(false /* success */);
+        configureStageUninstallExpectation(TimeZoneDistroInstaller.UNINSTALL_FAIL);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
@@ -745,6 +761,97 @@ public class RulesManagerServiceTest {
         verifyPackageTrackerCalled(null /* token */, true /* success */);
     }
 
+    @Test
+    public void dump_noPermission() throws Exception {
+        when(mMockPermissionHelper.checkDumpPermission(any(String.class), any(PrintWriter.class)))
+                .thenReturn(false);
+
+        doDumpCallAndCapture(mRulesManagerService, null);
+        verifyZeroInteractions(mMockPackageTracker, mMockTimeZoneDistroInstaller);
+    }
+
+    @Test
+    public void dump_emptyArgs() throws Exception {
+        doSuccessfulDumpCall(mRulesManagerService, new String[0]);
+
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+    }
+
+    @Test
+    public void dump_nullArgs() throws Exception {
+        doSuccessfulDumpCall(mRulesManagerService, null);
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+    }
+
+    @Test
+    public void dump_unknownArgs() throws Exception {
+        String dumpedTextUnknownArgs = doSuccessfulDumpCall(
+                mRulesManagerService, new String[] { "foo", "bar"});
+
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+
+        String dumpedTextZeroArgs = doSuccessfulDumpCall(mRulesManagerService, null);
+        assertEquals(dumpedTextZeroArgs, dumpedTextUnknownArgs);
+    }
+
+    @Test
+    public void dump_formatState() throws Exception {
+        // Just expect these to not throw exceptions, not return nothing, and not interact with the
+        // package tracker.
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("p"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("s"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("c"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("i"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("o"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("t"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("a"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("z" /* Unknown */));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("piscotz"));
+
+        verifyZeroInteractions(mMockPackageTracker);
+    }
+
+    private static String[] dumpFormatArgs(String argsString) {
+        return new String[] { "-format_state", argsString};
+    }
+
+    private String doSuccessfulDumpCall(RulesManagerService rulesManagerService, String[] args)
+            throws Exception {
+        when(mMockPermissionHelper.checkDumpPermission(any(String.class), any(PrintWriter.class)))
+                .thenReturn(true);
+
+        // Set up the mocks to return (arbitrary) information about the current device state.
+        when(mMockTimeZoneDistroInstaller.getSystemRulesVersion()).thenReturn("2017a");
+        when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion()).thenReturn(
+                new DistroVersion(2, 3, "2017b", 4));
+        when(mMockTimeZoneDistroInstaller.getStagedDistroOperation()).thenReturn(
+                StagedDistroOperation.install(new DistroVersion(5, 6, "2017c", 7)));
+
+        // Do the dump call.
+        String dumpedOutput = doDumpCallAndCapture(rulesManagerService, args);
+
+        assertFalse(dumpedOutput.isEmpty());
+
+        return dumpedOutput;
+    }
+
+    private static String doDumpCallAndCapture(
+            RulesManagerService rulesManagerService, String[] args) throws IOException {
+        File file = File.createTempFile("dump", null);
+        try {
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                FileDescriptor fd = fos.getFD();
+                rulesManagerService.dump(fd, args);
+            }
+            return IoUtils.readFileAsString(file.getAbsolutePath());
+        } finally {
+            file.delete();
+        }
+    }
+
     private void verifyNoPackageTrackerCallsMade() {
         verifyNoMoreInteractions(mMockPackageTracker);
         reset(mMockPackageTracker);
@@ -768,29 +875,18 @@ public class RulesManagerServiceTest {
                 .enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
     }
 
-    private void configureParcelFileDescriptorReadSuccess(ParcelFileDescriptor parcelFileDescriptor,
-            byte[] content) throws Exception {
-        when(mMockFileDescriptorHelper.readFully(parcelFileDescriptor)).thenReturn(content);
-    }
-
-    private void configureParcelFileDescriptorReadFailure(ParcelFileDescriptor parcelFileDescriptor)
+    private void configureStageInstallExpectation(int resultCode)
             throws Exception {
-        when(mMockFileDescriptorHelper.readFully(parcelFileDescriptor))
-                .thenThrow(new IOException("Simulated failure"));
-    }
-
-    private void configureStageInstallExpectation(byte[] expectedContent, int resultCode)
-            throws Exception {
-        when(mMockTimeZoneDistroInstaller.stageInstallWithErrorCode(eq(expectedContent)))
+        when(mMockTimeZoneDistroInstaller.stageInstallWithErrorCode(any(TimeZoneDistro.class)))
                 .thenReturn(resultCode);
     }
 
-    private void configureStageUninstallExpectation(boolean success) throws Exception {
-        doReturn(success).when(mMockTimeZoneDistroInstaller).stageUninstall();
+    private void configureStageUninstallExpectation(int resultCode) throws Exception {
+        doReturn(resultCode).when(mMockTimeZoneDistroInstaller).stageUninstall();
     }
 
-    private void verifyStageInstallCalled(byte[] expectedContent) throws Exception {
-        verify(mMockTimeZoneDistroInstaller).stageInstallWithErrorCode(eq(expectedContent));
+    private void verifyStageInstallCalled() throws Exception {
+        verify(mMockTimeZoneDistroInstaller).stageInstallWithErrorCode(any(TimeZoneDistro.class));
         verifyNoMoreInteractions(mMockTimeZoneDistroInstaller);
         reset(mMockTimeZoneDistroInstaller);
     }
@@ -820,10 +916,6 @@ public class RulesManagerServiceTest {
 
     private CheckToken createArbitraryToken() {
         return new CheckToken(1, new PackageVersions(1, 1));
-    }
-
-    private ParcelFileDescriptor createFakeParcelFileDescriptor() {
-        return new ParcelFileDescriptor((ParcelFileDescriptor) null);
     }
 
     private void configureDeviceSystemRulesVersion(String systemRulesVersion) throws Exception {
@@ -863,6 +955,10 @@ public class RulesManagerServiceTest {
     private void configureDeviceCannotReadInstalledDistroVersion() throws Exception {
         when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion())
                 .thenThrow(new IOException("Simulated failure"));
+    }
+
+    private static void assertClosed(ParcelFileDescriptor parcelFileDescriptor) {
+        assertFalse(parcelFileDescriptor.getFileDescriptor().valid());
     }
 
     private static class FakeExecutor implements Executor {
@@ -920,5 +1016,18 @@ public class RulesManagerServiceTest {
         public void onFinished(int error) {
             fail("Unexpected call");
         }
+    }
+
+    private static ParcelFileDescriptor createParcelFileDescriptor(byte[] bytes)
+            throws IOException {
+        File file = File.createTempFile("pfd", null);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(bytes);
+        }
+        ParcelFileDescriptor pfd =
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        // This should now be safe to delete. The ParcelFileDescriptor has an open fd.
+        file.delete();
+        return pfd;
     }
 }

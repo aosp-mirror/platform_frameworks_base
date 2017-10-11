@@ -47,7 +47,7 @@ public class SenderPackageFilter implements Filter {
         try {
             // USER_SYSTEM here is not important. Only app id is used and getPackageUid() will
             // return a uid whether the app is installed for a user or not.
-            packageUid = pm.getPackageUid(mPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+            packageUid = pm.getPackageUid(mPackageName, PackageManager.MATCH_ANY_USER,
                     UserHandle.USER_SYSTEM);
         } catch (RemoteException ex) {
             // handled below

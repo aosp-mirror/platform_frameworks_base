@@ -25,7 +25,7 @@ option java_package com.android.server
 # This is logged when the screen on broadcast has completed
 2727 power_screen_broadcast_stop (which|1|5),(wakelockCount|1|1)
 # This is logged when the screen is turned on or off.
-2728 power_screen_state (offOrOn|1|5),(becauseOfUser|1|5),(totalTouchDownTime|2|3),(touchCycles|1|1)
+2728 power_screen_state (offOrOn|1|5),(becauseOfUser|1|5),(totalTouchDownTime|2|3),(touchCycles|1|1),(latency|1|3)
 # This is logged when the partial wake lock (keeping the device awake
 # regardless of whether the screen is off) is acquired or released.
 2729 power_partial_wake_state (releasedorAcquired|1|5),(tag|3)
@@ -41,14 +41,10 @@ option java_package com.android.server
 # ---------------------------
 # DeviceStorageMonitorService.java
 # ---------------------------
-# The disk space free on the /data partition, in bytes
-2744 free_storage_changed (data|2|2)
-# Device low memory notification and disk space free on the /data partition, in bytes at that time
-2745 low_storage (data|2|2)
-# disk space free on the /data, /system, and /cache partitions in bytes
-2746 free_storage_left (data|2|2),(system|2|2),(cache|2|2)
-# file on cache partition was deleted
+# File on cache partition was deleted
 2748 cache_file_deleted (path|3)
+# Storage volume state and usable space in bytes
+2749 storage_state (uuid|3),(old_state|1),(new_state|1),(usable|2),(total|2)
 
 
 # ---------------------------
@@ -99,6 +95,13 @@ option java_package com.android.server
 2810 watchdog_vmstat (runtime|2|3),(pgfree|1|1),(pgactivate|1|1),(pgdeactivate|1|1),(pgfault|1|1),(pgmajfault|1|1)
 2811 watchdog_requested_reboot (NoWait|1|1),(ScheduleInterval|1|3),(RecheckInterval|1|3),(StartTime|1|3),(Window|1|3),(MinScreenOff|1|3),(MinNextAlarm|1|3)
 
+# ---------------------------
+# RescueParty.java
+# ---------------------------
+2900 rescue_note (uid|1),(count|1),(window|2)
+2901 rescue_level (level|1),(trigger_uid|1)
+2902 rescue_success (level|1)
+2903 rescue_failure (level|1),(msg|3)
 
 # ---------------------------
 # BackupManagerService.java
@@ -125,6 +128,7 @@ option java_package com.android.server
 2843 full_backup_success (Package|3)
 2844 full_restore_package (Package|3)
 2845 full_backup_quota_exceeded (Package|3)
+2846 full_backup_cancelled (Package|3),(Message|3)
 
 2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
 
@@ -249,7 +253,7 @@ option java_package com.android.server
 51501 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
 
 # ---------------------------
-# MountService.java
+# StorageManagerService.java
 # ---------------------------
 2755 fstrim_start (time|2|3)
 2756 fstrim_finish (time|2|3)
@@ -264,3 +268,16 @@ option java_package com.android.server
 # GestureLauncherService.java
 # ---------------------------
 40100 camera_gesture_triggered (gesture_on_time|2|3), (sensor1_on_time|2|3), (sensor2_on_time|2|3), (event_extra|1|1)
+
+# ---------------------------
+# timezone/RulesManagerService.java
+# ---------------------------
+51600 timezone_trigger_check (token|3)
+51610 timezone_request_install (token|3)
+51611 timezone_install_started (token|3)
+51612 timezone_install_complete (token|3), (result|1)
+51620 timezone_request_uninstall (token|3)
+51621 timezone_uninstall_started (token|3)
+51622 timezone_uninstall_complete (token|3), (result|1)
+51630 timezone_request_nothing (token|3)
+51631 timezone_nothing_complete (token|3)

@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Команден ред"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Отчети за програмни грешки"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Сигналът за програмна грешка „<xliff:g id="ID">#%d</xliff:g>“ се генерира"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Сигналът за програмна грешка „<xliff:g id="ID">#%d</xliff:g>“ е заснет"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Подробностите се добавят към сигнала за пр. грешка"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Моля, изчакайте…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Сигналът за програмна грешка скоро ще се покаже на телефона"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Изберете, за да споделите сигнала си за програмна грешка"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Докоснете, за да споделите сигнала си за програмна грешка"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Изберете, за да споделите сигнала за прогр. грешка без екранна снимка, или изчакайте завършването й"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Докоснете, за да споделите сигнала за прогр. грешка без екранна снимка, или изчакайте завършването й"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Докоснете, за да споделите сигнала за прогр. грешка без екранна снимка, или изчакайте завършването й"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Отчетите за програмни грешки съдържат данни от различни регистрационни файлове на системата, които може да включват информация, която смятате за поверителна (като например използване на приложенията и данни за местоположението). Споделяйте ги само с хора и приложения, на които имате доверие."</string>
@@ -40,4 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Заглавие на сигнала за програмна грешка"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Обобщена информация за сигнала за програмна грешка"</string>
     <string name="save" msgid="4781509040564835759">"Запазване"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Сигнал за прог. грешка: Споделяне"</string>
 </resources>

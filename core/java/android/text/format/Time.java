@@ -18,12 +18,12 @@ package android.text.format;
 
 import android.util.TimeFormatException;
 
+import libcore.util.ZoneInfo;
+import libcore.util.ZoneInfoDB;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import libcore.util.ZoneInfo;
-import libcore.util.ZoneInfoDB;
 
 /**
  * An alternative to the {@link java.util.Calendar} and

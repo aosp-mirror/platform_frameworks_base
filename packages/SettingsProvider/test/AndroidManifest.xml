@@ -29,7 +29,8 @@
     </application>
 
     <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
+        android:name="android.support.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.providers.setting.test"
         android:label="Settings Provider Tests" />
+
 </manifest>

@@ -17,12 +17,12 @@
 package com.android.layoutlib.bridge.android;
 
 import android.content.ClipData;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.MergedConfiguration;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowSession;
@@ -89,22 +89,10 @@ public final class BridgeWindowSession implements IWindowSession {
     @Override
     public int relayout(IWindow iWindow, int i, LayoutParams layoutParams, int i2,
             int i3, int i4, int i5, Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5,
-            Rect rect6, Rect rect7, Configuration configuration, Surface surface)
+            Rect rect6, Rect rect7, MergedConfiguration mergedConfig, Surface surface)
             throws RemoteException {
         // pass for now.
         return 0;
-    }
-
-    @Override
-    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
-        // pass for now.
-        return;
-    }
-
-    @Override
-    public void performDeferredDestroy(IWindow window) {
-        // pass for now.
     }
 
     @Override

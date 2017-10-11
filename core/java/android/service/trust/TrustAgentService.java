@@ -23,16 +23,20 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -118,12 +122,44 @@ public class TrustAgentService extends Service {
     public @interface GrantTrustFlags {}
 
 
+    /**
+     * Int enum indicating that escrow token is active.
+     * See {@link #onEscrowTokenStateReceived(long, int)}
+     *
+     */
+    public static final int TOKEN_STATE_ACTIVE = 1;
+
+    /**
+     * Int enum indicating that escow token is inactive.
+     * See {@link #onEscrowTokenStateReceived(long, int)}
+     *
+     */
+    public static final int TOKEN_STATE_INACTIVE = 0;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {
+                TOKEN_STATE_ACTIVE,
+                TOKEN_STATE_INACTIVE,
+            })
+    public @interface TokenState {}
+
     private static final int MSG_UNLOCK_ATTEMPT = 1;
     private static final int MSG_CONFIGURE = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
     private static final int MSG_DEVICE_LOCKED = 4;
     private static final int MSG_DEVICE_UNLOCKED = 5;
+    private static final int MSG_UNLOCK_LOCKOUT = 6;
+    private static final int MSG_ESCROW_TOKEN_ADDED = 7;
+    private static final int MSG_ESCROW_TOKEN_STATE_RECEIVED = 8;
+    private static final int MSG_ESCROW_TOKEN_REMOVED = 9;
 
+    private static final String EXTRA_TOKEN = "token";
+    private static final String EXTRA_TOKEN_HANDLE = "token_handle";
+    private static final String EXTRA_USER_HANDLE = "user_handle";
+    private static final String EXTRA_TOKEN_STATE = "token_state";
+    private static final String EXTRA_TOKEN_REMOVED_RESULT = "token_removed_result";
     /**
      * Class containing raw data for a given configuration request.
      */
@@ -151,7 +187,10 @@ public class TrustAgentService extends Service {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
                     break;
-                case MSG_CONFIGURE:
+                case MSG_UNLOCK_LOCKOUT:
+                    onDeviceUnlockLockout(msg.arg1);
+                    break;
+                case MSG_CONFIGURE: {
                     ConfigurationData data = (ConfigurationData) msg.obj;
                     boolean result = onConfigure(data.options);
                     if (data.token != null) {
@@ -164,6 +203,7 @@ public class TrustAgentService extends Service {
                         }
                     }
                     break;
+                }
                 case MSG_TRUST_TIMEOUT:
                     onTrustTimeout();
                     break;
@@ -173,6 +213,28 @@ public class TrustAgentService extends Service {
                 case MSG_DEVICE_UNLOCKED:
                     onDeviceUnlocked();
                     break;
+                case MSG_ESCROW_TOKEN_ADDED: {
+                    Bundle data = msg.getData();
+                    byte[] token = data.getByteArray(EXTRA_TOKEN);
+                    long handle = data.getLong(EXTRA_TOKEN_HANDLE);
+                    UserHandle user = (UserHandle) data.getParcelable(EXTRA_USER_HANDLE);
+                    onEscrowTokenAdded(token, handle, user);
+                    break;
+                }
+                case MSG_ESCROW_TOKEN_STATE_RECEIVED: {
+                    Bundle data = msg.getData();
+                    long handle = data.getLong(EXTRA_TOKEN_HANDLE);
+                    int tokenState = data.getInt(EXTRA_TOKEN_STATE, TOKEN_STATE_INACTIVE);
+                    onEscrowTokenStateReceived(handle, tokenState);
+                    break;
+                }
+                case MSG_ESCROW_TOKEN_REMOVED: {
+                    Bundle data = msg.getData();
+                    long handle = data.getLong(EXTRA_TOKEN_HANDLE);
+                    boolean success = data.getBoolean(EXTRA_TOKEN_REMOVED_RESULT);
+                    onEscrowTokenRemoved(handle, success);
+                    break;
+                }
             }
         }
     };
@@ -226,6 +288,53 @@ public class TrustAgentService extends Service {
     public void onDeviceUnlocked() {
     }
 
+    /**
+     * Called when the device enters a temporary unlock lockout.
+     *
+     * <p>This occurs when the user has consecutively failed to unlock the device too many times,
+     * and must wait until a timeout has passed to perform another attempt. The user may then only
+     * use strong authentication mechanisms (PIN, pattern or password) to unlock the device.
+     * Calls to {@link #grantTrust(CharSequence, long, int)} will be ignored until the user has
+     * unlocked the device and {@link #onDeviceUnlocked()} is called.
+     *
+     * @param timeoutMs The amount of time, in milliseconds, that needs to elapse before the user
+     *    can attempt to unlock the device again.
+     */
+    public void onDeviceUnlockLockout(long timeoutMs) {
+    }
+
+  /**
+     * Called when an escrow token is added for user userId.
+     *
+     * @param token the added token
+     * @param handle the handle to the corresponding internal synthetic password. A user is unlocked
+     * by presenting both handle and escrow token.
+     * @param user the user to which the escrow token is added.
+     *
+     */
+    public void onEscrowTokenAdded(byte[] token, long handle, UserHandle user) {
+    }
+
+    /**
+     * Called when an escrow token state is received upon request.
+     *
+     * @param handle the handle to the internal synthetic password.
+     * @param state the state of the requested escrow token, see {@link TokenState}.
+     *
+     */
+    public void onEscrowTokenStateReceived(long handle, @TokenState int tokenState) {
+    }
+
+    /**
+     * Called when an escrow token is removed.
+     *
+     * @param handle the handle to the removed the synthetic password.
+     * @param successful whether the removing operaiton is achieved.
+     *
+     */
+    public void onEscrowTokenRemoved(long handle, boolean successful) {
+    }
+
     private void onError(String msg) {
         Slog.v(TAG, "Remote exception while " + msg);
     }
@@ -238,7 +347,7 @@ public class TrustAgentService extends Service {
      * <p>Agents that support configuration options should overload this method and return 'true'.
      *
      * @param options The aggregated list of options or an empty list if no restrictions apply.
-     * @return true if the {@link TrustAgentService} supports configuration options.
+     * @return true if it supports configuration options.
      */
     public boolean onConfigure(List<PersistableBundle> options) {
         return false;
@@ -354,6 +463,106 @@ public class TrustAgentService extends Service {
         }
     }
 
+    /**
+     * Call to add an escrow token to derive a synthetic password. A synthetic password is an
+     * alternaive to the user-set password/pin/pattern in order to unlock encrypted disk. An escrow
+     * token can be taken and internally derive the synthetic password. The new added token will not
+     * be acivated until the user input the correct PIN/Passcode/Password once.
+     *
+     * Result will be return by callback {@link #onEscrowTokenAdded(long, int)}
+     *
+     * @param token an escrow token of high entropy.
+     * @param user the user which the escrow token will be added to.
+     *
+     */
+    public final void addEscrowToken(byte[] token, UserHandle user) {
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot add escrow token if the agent is not connecting to framework");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.addEscrowToken(token, user.getIdentifier());
+            } catch (RemoteException e) {
+                onError("calling addEscrowToken");
+            }
+        }
+    }
+
+    /**
+     * Call to check the active state of an escrow token.
+     *
+     * Result will be return in callback {@link #onEscrowTokenStateReceived(long, boolean)}
+     *
+     * @param handle the handle of escrow token to the internal synthetic password.
+     * @param user the user which the escrow token is added to.
+     *
+     */
+    public final void isEscrowTokenActive(long handle, UserHandle user) {
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot add escrow token if the agent is not connecting to framework");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.isEscrowTokenActive(handle, user.getIdentifier());
+            } catch (RemoteException e) {
+                onError("calling isEscrowTokenActive");
+            }
+        }
+    }
+
+    /**
+     * Call to remove the escrow token.
+     *
+     * Result will be return in callback {@link #onEscrowTokenRemoved(long, boolean)}
+     *
+     * @param handle the handle of escrow tokent to the internal synthetic password.
+     * @param user the user id which the escrow token is added to.
+     *
+     */
+    public final void removeEscrowToken(long handle, UserHandle user) {
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot add escrow token if the agent is not connecting to framework");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.removeEscrowToken(handle, user.getIdentifier());
+            } catch (RemoteException e) {
+                onError("callling removeEscrowToken");
+            }
+        }
+    }
+
+    /**
+     * Call to unlock user's FBE.
+     *
+     * @param handle the handle of escrow tokent to the internal synthetic password.
+     * @param token the escrow token
+     * @param user the user about to be unlocked.
+     *
+     */
+    public final void unlockUserWithToken(long handle, byte[] token, UserHandle user) {
+        UserManager um = (UserManager) getSystemService(Context.USER_SERVICE);
+        if (um.isUserUnlocked()) {
+            Slog.i(TAG, "User already unlocked");
+            return;
+        }
+
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot add escrow token if the agent is not connecting to framework");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.unlockUserWithToken(handle, token, user.getIdentifier());
+            } catch (RemoteException e) {
+                onError("calling unlockUserWithToken");
+            }
+        }
+    }
+
     @Override
     public final IBinder onBind(Intent intent) {
         if (DEBUG) Slog.v(TAG, "onBind() intent = " + intent);
@@ -364,6 +573,11 @@ public class TrustAgentService extends Service {
         @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
             mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUnlockLockout(int timeoutMs) {
+            mHandler.obtainMessage(MSG_UNLOCK_LOCKOUT, timeoutMs, 0).sendToTarget();
         }
 
         @Override /* Binder API */
@@ -406,6 +620,28 @@ public class TrustAgentService extends Service {
                 }
             }
         }
-    }
 
+        @Override
+        public void onEscrowTokenAdded(byte[] token, long handle, UserHandle user) {
+            Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_ADDED);
+            msg.getData().putByteArray(EXTRA_TOKEN, token);
+            msg.getData().putLong(EXTRA_TOKEN_HANDLE, handle);
+            msg.getData().putParcelable(EXTRA_USER_HANDLE, user);
+            msg.sendToTarget();
+        }
+
+        public void onTokenStateReceived(long handle, int tokenState) {
+            Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_STATE_RECEIVED);
+            msg.getData().putLong(EXTRA_TOKEN_HANDLE, handle);
+            msg.getData().putInt(EXTRA_TOKEN_STATE, tokenState);
+            msg.sendToTarget();
+        }
+
+        public void onEscrowTokenRemoved(long handle, boolean successful) {
+            Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_REMOVED);
+            msg.getData().putLong(EXTRA_TOKEN_HANDLE, handle);
+            msg.getData().putBoolean(EXTRA_TOKEN_REMOVED_RESULT, successful);
+            msg.sendToTarget();
+        }
+    }
 }

@@ -16,13 +16,13 @@
 
 #define LOG_TAG "KeyEvent-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "android_view_KeyEvent.h"
 
 #include "core_jni_helpers.h"

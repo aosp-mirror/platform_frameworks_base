@@ -44,12 +44,9 @@ public class SSLSessionCacheTest extends TestCase {
 
         try {
             SSLSessionCache.install(new SSLSessionCache(mock), ctx);
-            clientCtx.getSession("www.foogle.com", 443);
-            Mockito.verify(mock).getSessionData(Mockito.anyString(), Mockito.anyInt());
         } finally {
             // Restore cacheless behaviour.
             SSLSessionCache.install(null, ctx);
-            clientCtx.getSession("www.foogle.com", 443);
             Mockito.verifyNoMoreInteractions(mock);
         }
     }

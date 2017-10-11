@@ -98,11 +98,11 @@
             <path
                 android:name="path_2"
                 android:pathData="M 1.35900878906,6.76104736328 c 0.0,0.0 -2.69998168945,0.0 -2.69998168945,0.0 c 0.0,0.0 0.0,-2.69995117188 0.0,-2.69995117188 c 0.0,0.0 2.69998168945,0.0 2.69998168945,0.0 c 0.0,0.0 0.0,2.69995117188 0.0,2.69995117188 Z"
-                android:fillColor="@*android:color/system_error" />
+                android:fillColor="?android:attr/colorError" />
             <path
                 android:name="path_1"
                 android:pathData="M 1.35363769531,1.36633300781 c 0.0,0.0 -2.69998168945,0.0 -2.69998168945,0.0 c 0.0,0.0 0.0,-8.09997558594 0.0,-8.09997558594 c 0.0,0.0 2.69998168945,0.0 2.69998168945,0.0 c 0.0,0.0 0.0,8.09997558594 0.0,8.09997558594 Z"
-                android:fillColor="@*android:color/system_error" />
+                android:fillColor="?android:attr/colorError" />
         </group>
     </group>
     <group
@@ -117,7 +117,7 @@
             <path
                 android:name="path_3"
                 android:pathData="M 0.0101470947266,10.8087768555 c -5.96701049805,0.0 -10.8000183105,-4.8330078125 -10.8000183105,-10.8000488281 c 0.0,-5.96691894531 4.8330078125,-10.7999267578 10.8000183105,-10.7999267578 c 5.96697998047,0.0 10.799987793,4.8330078125 10.799987793,10.7999267578 c 0.0,5.96704101562 -4.8330078125,10.8000488281 -10.799987793,10.8000488281 Z"
-                android:strokeColor="@*android:color/system_error"
+                android:strokeColor="?android:attr/colorError"
                 android:strokeWidth="2"
                 android:trimPathStart="0"
                 android:trimPathEnd="1" />

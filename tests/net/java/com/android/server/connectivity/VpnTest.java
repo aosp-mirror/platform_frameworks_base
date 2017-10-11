@@ -27,13 +27,17 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.net.NetworkInfo.DetailedState;
 import android.net.UidRange;
-import android.os.Build;
+import android.net.VpnService;
+import android.os.Build.VERSION_CODES;
+import android.os.Bundle;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -43,24 +47,25 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-
 import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Tests for {@link Vpn}.
  *
  * Build, install and run with:
- *  runtest --path src/com/android/server/connectivity/VpnTest.java
+ *  runtest --path java/com/android/server/connectivity/VpnTest.java
  */
 public class VpnTest extends AndroidTestCase {
     private static final String TAG = "VpnTest";
@@ -113,10 +118,13 @@ public class VpnTest extends AndroidTestCase {
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
+        when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
+                .thenReturn(Resources.getSystem().getString(
+                        R.string.config_customVpnAlwaysOnDisconnectedDialogComponent));
 
         // Used by {@link Notification.Builder}
         ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+        applicationInfo.targetSdkVersion = VERSION_CODES.CUR_DEVELOPMENT;
         when(mContext.getApplicationInfo()).thenReturn(applicationInfo);
 
         doNothing().when(mNetService).registerObserver(any());
@@ -312,6 +320,40 @@ public class VpnTest extends AndroidTestCase {
         vpn.prepare(null, VpnConfig.LEGACY_VPN);
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(exceptPkg0));
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
+    }
+
+    @SmallTest
+    public void testIsAlwaysOnPackageSupported() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+
+        ApplicationInfo appInfo = new ApplicationInfo();
+        when(mPackageManager.getApplicationInfoAsUser(eq(PKGS[0]), anyInt(), eq(primaryUser.id)))
+                .thenReturn(appInfo);
+
+        ServiceInfo svcInfo = new ServiceInfo();
+        ResolveInfo resInfo = new ResolveInfo();
+        resInfo.serviceInfo = svcInfo;
+        when(mPackageManager.queryIntentServicesAsUser(any(), eq(PackageManager.GET_META_DATA),
+                eq(primaryUser.id)))
+                .thenReturn(Collections.singletonList(resInfo));
+
+        // null package name should return false
+        assertFalse(vpn.isAlwaysOnPackageSupported(null));
+
+        // Pre-N apps are not supported
+        appInfo.targetSdkVersion = VERSION_CODES.M;
+        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
+
+        // N+ apps are supported by default
+        appInfo.targetSdkVersion = VERSION_CODES.N;
+        assertTrue(vpn.isAlwaysOnPackageSupported(PKGS[0]));
+
+        // Apps that opt out explicitly are not supported
+        appInfo.targetSdkVersion = VERSION_CODES.CUR_DEVELOPMENT;
+        Bundle metaData = new Bundle();
+        metaData.putBoolean(VpnService.SERVICE_META_DATA_SUPPORTS_ALWAYS_ON, false);
+        svcInfo.metaData = metaData;
+        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
     }
 
     @SmallTest

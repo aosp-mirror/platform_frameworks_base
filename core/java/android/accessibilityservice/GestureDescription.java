@@ -23,10 +23,8 @@ import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.InputDevice;
-import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,9 +126,14 @@ public final class GestureDescription {
         for (int i = 0; i < mStrokes.size(); i++) {
             StrokeDescription strokeDescription = mStrokes.get(i);
             if (strokeDescription.hasPointForTime(time)) {
-                touchPoints[numPointsFound].mPathIndex = i;
-                touchPoints[numPointsFound].mIsStartOfPath = (time == strokeDescription.mStartTime);
-                touchPoints[numPointsFound].mIsEndOfPath = (time == strokeDescription.mEndTime);
+                touchPoints[numPointsFound].mStrokeId = strokeDescription.getId();
+                touchPoints[numPointsFound].mContinuedStrokeId =
+                        strokeDescription.getContinuedStrokeId();
+                touchPoints[numPointsFound].mIsStartOfPath =
+                        (strokeDescription.getContinuedStrokeId() < 0)
+                                && (time == strokeDescription.mStartTime);
+                touchPoints[numPointsFound].mIsEndOfPath = !strokeDescription.willContinue()
+                        && (time == strokeDescription.mEndTime);
                 strokeDescription.getPosForTime(time, mTempPos);
                 touchPoints[numPointsFound].mX = Math.round(mTempPos[0]);
                 touchPoints[numPointsFound].mY = Math.round(mTempPos[1]);
@@ -196,6 +199,10 @@ public final class GestureDescription {
      * Immutable description of stroke that can be part of a gesture.
      */
     public static class StrokeDescription {
+        private static final int INVALID_STROKE_ID = -1;
+
+        static int sIdCounter;
+
         Path mPath;
         long mStartTime;
         long mEndTime;
@@ -203,6 +210,9 @@ public final class GestureDescription {
         private PathMeasure mPathMeasure;
         // The tap location is only set for zero-length paths
         float[] mTapLocation;
+        int mId;
+        boolean mContinued;
+        int mContinuedStrokeId = INVALID_STROKE_ID;
 
         /**
          * @param path The path to follow. Must have exactly one contour. The bounds of the path
@@ -211,26 +221,39 @@ public final class GestureDescription {
          * @param startTime The time, in milliseconds, from the time the gesture starts to the
          * time the stroke should start. Must not be negative.
          * @param duration The duration, in milliseconds, the stroke takes to traverse the path.
-         * Must not be negative.
+         * Must be positive.
          */
         public StrokeDescription(@NonNull Path path,
                 @IntRange(from = 0) long startTime,
                 @IntRange(from = 0) long duration) {
-            if (duration <= 0) {
-                throw new IllegalArgumentException("Duration must be positive");
-            }
-            if (startTime < 0) {
-                throw new IllegalArgumentException("Start time must not be negative");
-            }
+            this(path, startTime, duration, false);
+        }
+
+        /**
+         * @param path The path to follow. Must have exactly one contour. The bounds of the path
+         * must not be negative. The path must not be empty. If the path has zero length
+         * (for example, a single {@code moveTo()}), the stroke is a touch that doesn't move.
+         * @param startTime The time, in milliseconds, from the time the gesture starts to the
+         * time the stroke should start. Must not be negative.
+         * @param duration The duration, in milliseconds, the stroke takes to traverse the path.
+         * Must be positive.
+         * @param willContinue {@code true} if this stroke will be continued by one in the
+         * next gesture {@code false} otherwise. Continued strokes keep their pointers down when
+         * the gesture completes.
+         */
+        public StrokeDescription(@NonNull Path path,
+                @IntRange(from = 0) long startTime,
+                @IntRange(from = 0) long duration,
+                boolean willContinue) {
+            mContinued = willContinue;
+            Preconditions.checkArgument(duration > 0, "Duration must be positive");
+            Preconditions.checkArgument(startTime >= 0, "Start time must not be negative");
+            Preconditions.checkArgument(!path.isEmpty(), "Path is empty");
             RectF bounds = new RectF();
             path.computeBounds(bounds, false /* unused */);
-            if ((bounds.bottom < 0) || (bounds.top < 0) || (bounds.right < 0)
-                    || (bounds.left < 0)) {
-                throw new IllegalArgumentException("Path bounds must not be negative");
-            }
-            if (path.isEmpty()) {
-                throw new IllegalArgumentException("Path is empty");
-            }
+            Preconditions.checkArgument((bounds.bottom >= 0) && (bounds.top >= 0)
+                    && (bounds.right >= 0) && (bounds.left >= 0),
+                    "Path bounds must not be negative");
             mPath = new Path(path);
             mPathMeasure = new PathMeasure(path, false);
             if (mPathMeasure.getLength() == 0) {
@@ -252,6 +275,7 @@ public final class GestureDescription {
             mStartTime = startTime;
             mEndTime = startTime + duration;
             mTimeToLengthConversion = getLength() / duration;
+            mId = sIdCounter++;
         }
 
         /**
@@ -279,6 +303,62 @@ public final class GestureDescription {
          */
         public long getDuration() {
             return mEndTime - mStartTime;
+        }
+
+        /**
+         * Get the stroke's ID. The ID is used when a stroke is to be continued by another
+         * stroke in a future gesture.
+         *
+         * @return the ID of this stroke
+         * @hide
+         */
+        public int getId() {
+            return mId;
+        }
+
+        /**
+         * Create a new stroke that will continue this one. This is only possible if this stroke
+         * will continue.
+         *
+         * @param path The path for the stroke that continues this one. The starting point of
+         *             this path must match the ending point of the stroke it continues.
+         * @param startTime The time, in milliseconds, from the time the gesture starts to the
+         *                  time this stroke should start. Must not be negative. This time is from
+         *                  the start of the new gesture, not the one being continued.
+         * @param duration The duration for the new stroke. Must not be negative.
+         * @param willContinue {@code true} if this stroke will be continued by one in the
+         *             next gesture {@code false} otherwise.
+         * @return
+         */
+        public StrokeDescription continueStroke(Path path, long startTime, long duration,
+                boolean willContinue) {
+            if (!mContinued) {
+                throw new IllegalStateException(
+                        "Only strokes marked willContinue can be continued");
+            }
+            StrokeDescription strokeDescription =
+                    new StrokeDescription(path, startTime, duration, willContinue);
+            strokeDescription.mContinuedStrokeId = mId;
+            return strokeDescription;
+        }
+
+        /**
+         * Check if this stroke is marked to continue in the next gesture.
+         *
+         * @return {@code true} if the stroke is to be continued.
+         */
+        public boolean willContinue() {
+            return mContinued;
+        }
+
+        /**
+         * Get the ID of the stroke that this one will continue.
+         *
+         * @return The ID of the stroke that this stroke continues, or 0 if no such stroke exists.
+         * @hide
+         */
+        public int getContinuedStrokeId() {
+            return mContinuedStrokeId;
         }
 
         float getLength() {
@@ -314,11 +394,12 @@ public final class GestureDescription {
         private static final int FLAG_IS_START_OF_PATH = 0x01;
         private static final int FLAG_IS_END_OF_PATH = 0x02;
 
-        int mPathIndex;
-        boolean mIsStartOfPath;
-        boolean mIsEndOfPath;
-        float mX;
-        float mY;
+        public int mStrokeId;
+        public int mContinuedStrokeId;
+        public boolean mIsStartOfPath;
+        public boolean mIsEndOfPath;
+        public float mX;
+        public float mY;
 
         public TouchPoint() {
         }
@@ -328,7 +409,8 @@ public final class GestureDescription {
         }
 
         public TouchPoint(Parcel parcel) {
-            mPathIndex = parcel.readInt();
+            mStrokeId = parcel.readInt();
+            mContinuedStrokeId = parcel.readInt();
             int startEnd = parcel.readInt();
             mIsStartOfPath = (startEnd & FLAG_IS_START_OF_PATH) != 0;
             mIsEndOfPath = (startEnd & FLAG_IS_END_OF_PATH) != 0;
@@ -336,8 +418,9 @@ public final class GestureDescription {
             mY = parcel.readFloat();
         }
 
-        void copyFrom(TouchPoint other) {
-            mPathIndex = other.mPathIndex;
+        public void copyFrom(TouchPoint other) {
+            mStrokeId = other.mStrokeId;
+            mContinuedStrokeId = other.mContinuedStrokeId;
             mIsStartOfPath = other.mIsStartOfPath;
             mIsEndOfPath = other.mIsEndOfPath;
             mX = other.mX;
@@ -351,7 +434,8 @@ public final class GestureDescription {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mPathIndex);
+            dest.writeInt(mStrokeId);
+            dest.writeInt(mContinuedStrokeId);
             int startEnd = mIsStartOfPath ? FLAG_IS_START_OF_PATH : 0;
             startEnd |= mIsEndOfPath ? FLAG_IS_END_OF_PATH : 0;
             dest.writeInt(startEnd);
@@ -426,30 +510,15 @@ public final class GestureDescription {
     }
 
     /**
-     * Class to convert a GestureDescription to a series of MotionEvents.
+     * Class to convert a GestureDescription to a series of GestureSteps.
      *
      * @hide
      */
     public static class MotionEventGenerator {
-        /**
-         * Constants used to initialize all MotionEvents
-         */
-        private static final int EVENT_META_STATE = 0;
-        private static final int EVENT_BUTTON_STATE = 0;
-        private static final int EVENT_DEVICE_ID = 0;
-        private static final int EVENT_EDGE_FLAGS = 0;
-        private static final int EVENT_SOURCE = InputDevice.SOURCE_TOUCHSCREEN;
-        private static final int EVENT_FLAGS = 0;
-        private static final float EVENT_X_PRECISION = 1;
-        private static final float EVENT_Y_PRECISION = 1;
-
         /* Lazily-created scratch memory for processing touches */
         private static TouchPoint[] sCurrentTouchPoints;
-        private static TouchPoint[] sLastTouchPoints;
-        private static PointerCoords[] sPointerCoords;
-        private static PointerProperties[] sPointerProps;
 
-        static List<GestureStep> getGestureStepsFromGestureDescription(
+        public static List<GestureStep> getGestureStepsFromGestureDescription(
                 GestureDescription description, int sampleTimeMs) {
             final List<GestureStep> gestureSteps = new ArrayList<>();
 
@@ -474,31 +543,6 @@ public final class GestureDescription {
             return gestureSteps;
         }
 
-        public static List<MotionEvent> getMotionEventsFromGestureSteps(List<GestureStep> steps) {
-            final List<MotionEvent> motionEvents = new ArrayList<>();
-
-            // Number of points in last touch event
-            int lastTouchPointSize = 0;
-            TouchPoint[] lastTouchPoints;
-
-            for (int i = 0; i < steps.size(); i++) {
-                GestureStep step = steps.get(i);
-                int currentTouchPointSize = step.numTouchPoints;
-                lastTouchPoints = getLastTouchPoints(
-                        Math.max(lastTouchPointSize, currentTouchPointSize));
-
-                appendMoveEventIfNeeded(motionEvents, lastTouchPoints, lastTouchPointSize,
-                        step.touchPoints, currentTouchPointSize, step.timeSinceGestureStart);
-                lastTouchPointSize = appendUpEvents(motionEvents, lastTouchPoints,
-                        lastTouchPointSize, step.touchPoints, currentTouchPointSize,
-                        step.timeSinceGestureStart);
-                lastTouchPointSize = appendDownEvents(motionEvents, lastTouchPoints,
-                        lastTouchPointSize, step.touchPoints, currentTouchPointSize,
-                        step.timeSinceGestureStart);
-            }
-            return motionEvents;
-        }
-
         private static TouchPoint[] getCurrentTouchPoints(int requiredCapacity) {
             if ((sCurrentTouchPoints == null) || (sCurrentTouchPoints.length < requiredCapacity)) {
                 sCurrentTouchPoints = new TouchPoint[requiredCapacity];
@@ -507,134 +551,6 @@ public final class GestureDescription {
                 }
             }
             return sCurrentTouchPoints;
-        }
-
-        private static TouchPoint[] getLastTouchPoints(int requiredCapacity) {
-            if ((sLastTouchPoints == null) || (sLastTouchPoints.length < requiredCapacity)) {
-                sLastTouchPoints = new TouchPoint[requiredCapacity];
-                for (int i = 0; i < requiredCapacity; i++) {
-                    sLastTouchPoints[i] = new TouchPoint();
-                }
-            }
-            return sLastTouchPoints;
-        }
-
-        private static PointerCoords[] getPointerCoords(int requiredCapacity) {
-            if ((sPointerCoords == null) || (sPointerCoords.length < requiredCapacity)) {
-                sPointerCoords = new PointerCoords[requiredCapacity];
-                for (int i = 0; i < requiredCapacity; i++) {
-                    sPointerCoords[i] = new PointerCoords();
-                }
-            }
-            return sPointerCoords;
-        }
-
-        private static PointerProperties[] getPointerProps(int requiredCapacity) {
-            if ((sPointerProps == null) || (sPointerProps.length < requiredCapacity)) {
-                sPointerProps = new PointerProperties[requiredCapacity];
-                for (int i = 0; i < requiredCapacity; i++) {
-                    sPointerProps[i] = new PointerProperties();
-                }
-            }
-            return sPointerProps;
-        }
-
-        private static void appendMoveEventIfNeeded(List<MotionEvent> motionEvents,
-                TouchPoint[] lastTouchPoints, int lastTouchPointsSize,
-                TouchPoint[] currentTouchPoints, int currentTouchPointsSize, long currentTime) {
-            /* Look for pointers that have moved */
-            boolean moveFound = false;
-            for (int i = 0; i < currentTouchPointsSize; i++) {
-                int lastPointsIndex = findPointByPathIndex(lastTouchPoints, lastTouchPointsSize,
-                        currentTouchPoints[i].mPathIndex);
-                if (lastPointsIndex >= 0) {
-                    moveFound |= (lastTouchPoints[lastPointsIndex].mX != currentTouchPoints[i].mX)
-                            || (lastTouchPoints[lastPointsIndex].mY != currentTouchPoints[i].mY);
-                    lastTouchPoints[lastPointsIndex].copyFrom(currentTouchPoints[i]);
-                }
-            }
-
-            if (moveFound) {
-                long downTime = motionEvents.get(motionEvents.size() - 1).getDownTime();
-                motionEvents.add(obtainMotionEvent(downTime, currentTime, MotionEvent.ACTION_MOVE,
-                        lastTouchPoints, lastTouchPointsSize));
-            }
-        }
-
-        private static int appendUpEvents(List<MotionEvent> motionEvents,
-                TouchPoint[] lastTouchPoints, int lastTouchPointsSize,
-                TouchPoint[] currentTouchPoints, int currentTouchPointsSize, long currentTime) {
-            /* Look for a pointer at the end of its path */
-            for (int i = 0; i < currentTouchPointsSize; i++) {
-                if (currentTouchPoints[i].mIsEndOfPath) {
-                    int indexOfUpEvent = findPointByPathIndex(lastTouchPoints, lastTouchPointsSize,
-                            currentTouchPoints[i].mPathIndex);
-                    if (indexOfUpEvent < 0) {
-                        continue; // Should not happen
-                    }
-                    long downTime = motionEvents.get(motionEvents.size() - 1).getDownTime();
-                    int action = (lastTouchPointsSize == 1) ? MotionEvent.ACTION_UP
-                            : MotionEvent.ACTION_POINTER_UP;
-                    action |= indexOfUpEvent << MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-                    motionEvents.add(obtainMotionEvent(downTime, currentTime, action,
-                            lastTouchPoints, lastTouchPointsSize));
-                    /* Remove this point from lastTouchPoints */
-                    for (int j = indexOfUpEvent; j < lastTouchPointsSize - 1; j++) {
-                        lastTouchPoints[j].copyFrom(lastTouchPoints[j+1]);
-                    }
-                    lastTouchPointsSize--;
-                }
-            }
-            return lastTouchPointsSize;
-        }
-
-        private static int appendDownEvents(List<MotionEvent> motionEvents,
-                TouchPoint[] lastTouchPoints, int lastTouchPointsSize,
-                TouchPoint[] currentTouchPoints, int currentTouchPointsSize, long currentTime) {
-            /* Look for a pointer that is just starting */
-            for (int i = 0; i < currentTouchPointsSize; i++) {
-                if (currentTouchPoints[i].mIsStartOfPath) {
-                    /* Add the point to last coords and use the new array to generate the event */
-                    lastTouchPoints[lastTouchPointsSize++].copyFrom(currentTouchPoints[i]);
-                    int action = (lastTouchPointsSize == 1) ? MotionEvent.ACTION_DOWN
-                            : MotionEvent.ACTION_POINTER_DOWN;
-                    long downTime = (action == MotionEvent.ACTION_DOWN) ? currentTime :
-                            motionEvents.get(motionEvents.size() - 1).getDownTime();
-                    action |= i << MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-                    motionEvents.add(obtainMotionEvent(downTime, currentTime, action,
-                            lastTouchPoints, lastTouchPointsSize));
-                }
-            }
-            return lastTouchPointsSize;
-        }
-
-        private static MotionEvent obtainMotionEvent(long downTime, long eventTime, int action,
-                TouchPoint[] touchPoints, int touchPointsSize) {
-            PointerCoords[] pointerCoords = getPointerCoords(touchPointsSize);
-            PointerProperties[] pointerProperties = getPointerProps(touchPointsSize);
-            for (int i = 0; i < touchPointsSize; i++) {
-                pointerProperties[i].id = touchPoints[i].mPathIndex;
-                pointerProperties[i].toolType = MotionEvent.TOOL_TYPE_UNKNOWN;
-                pointerCoords[i].clear();
-                pointerCoords[i].pressure = 1.0f;
-                pointerCoords[i].size = 1.0f;
-                pointerCoords[i].x = touchPoints[i].mX;
-                pointerCoords[i].y = touchPoints[i].mY;
-            }
-            return MotionEvent.obtain(downTime, eventTime, action, touchPointsSize,
-                    pointerProperties, pointerCoords, EVENT_META_STATE, EVENT_BUTTON_STATE,
-                    EVENT_X_PRECISION, EVENT_Y_PRECISION, EVENT_DEVICE_ID, EVENT_EDGE_FLAGS,
-                    EVENT_SOURCE, EVENT_FLAGS);
-        }
-
-        private static int findPointByPathIndex(TouchPoint[] touchPoints, int touchPointsSize,
-                int pathIndex) {
-            for (int i = 0; i < touchPointsSize; i++) {
-                if (touchPoints[i].mPathIndex == pathIndex) {
-                    return i;
-                }
-            }
-            return -1;
         }
     }
 }

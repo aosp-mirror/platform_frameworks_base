@@ -21,7 +21,6 @@
     android:layout_width="@dimen/navigation_key_width"
     android:layout_height="match_parent"
     android:layout_weight="0"
-    android:src="@drawable/ic_sysbar_recent"
     android:scaleType="center"
     android:contentDescription="@string/accessibility_recent"
     android:paddingStart="@dimen/navigation_key_padding"

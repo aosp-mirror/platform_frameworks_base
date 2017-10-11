@@ -21,9 +21,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -40,15 +43,16 @@ public class PackageStatusStorageTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getContext();
+        File dataDir = context.getFilesDir();
 
         // Using the instrumentation context means the database is created in a test app-specific
         // directory.
-        mPackageStatusStorage = new PackageStatusStorage(context);
+        mPackageStatusStorage = new PackageStatusStorage(dataDir);
     }
 
     @After
     public void tearDown() throws Exception {
-        mPackageStatusStorage.deleteDatabaseForTests();
+        mPackageStatusStorage.deleteFileForTests();
     }
 
     @Test
@@ -90,7 +94,7 @@ public class PackageStatusStorageTest {
     }
 
     @Test
-    public void generateCheckToken_missingRowBehavior() {
+    public void generateCheckToken_missingFileBehavior() {
         // Assert initial state.
         assertNull(mPackageStatusStorage.getPackageStatus());
 
@@ -100,15 +104,15 @@ public class PackageStatusStorageTest {
         // There should now be state.
         assertNotNull(mPackageStatusStorage.getPackageStatus());
 
-        // Corrupt the table by removing the one row.
-        mPackageStatusStorage.deleteRowForTests();
+        // Corrupt the data by removing the file.
+        mPackageStatusStorage.deleteFileForTests();
 
         // Check that generateCheckToken recovers.
         assertNotNull(mPackageStatusStorage.generateCheckToken(VALID_PACKAGE_VERSIONS));
     }
 
     @Test
-    public void getPackageStatus_missingRowBehavior() {
+    public void getPackageStatus_missingFileBehavior() {
         // Assert initial state.
         assertNull(mPackageStatusStorage.getPackageStatus());
 
@@ -118,14 +122,14 @@ public class PackageStatusStorageTest {
         // There should now be a state.
         assertNotNull(mPackageStatusStorage.getPackageStatus());
 
-        // Corrupt the table by removing the one row.
-        mPackageStatusStorage.deleteRowForTests();
+        // Corrupt the data by removing the file.
+        mPackageStatusStorage.deleteFileForTests();
 
         assertNull(mPackageStatusStorage.getPackageStatus());
     }
 
     @Test
-    public void markChecked_missingRowBehavior() {
+    public void markChecked_missingFileBehavior() {
         // Assert initial state.
         CheckToken token1 = mPackageStatusStorage.generateCheckToken(VALID_PACKAGE_VERSIONS);
         assertNotNull(token1);
@@ -133,10 +137,10 @@ public class PackageStatusStorageTest {
         // There should now be a state.
         assertNotNull(mPackageStatusStorage.getPackageStatus());
 
-        // Corrupt the table by removing the one row.
-        mPackageStatusStorage.deleteRowForTests();
+        // Corrupt the data by removing the file.
+        mPackageStatusStorage.deleteFileForTests();
 
-        // The missing row should mean token1 is now considered invalid, so we should get a false.
+        // The missing file should mean token1 is now considered invalid, so we should get a false.
         assertFalse(mPackageStatusStorage.markChecked(token1, true /* succeeded */));
 
         // The storage should have recovered and we should be able to carry on like before.
@@ -225,5 +229,28 @@ public class PackageStatusStorageTest {
         boolean writeOk2 = mPackageStatusStorage.markChecked(token, true /* succeeded */);
         assertFalse(writeOk2);
         assertEquals(expectedPackageStatus, mPackageStatusStorage.getPackageStatus());
+    }
+
+    @Test
+    public void dump() {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        // Dump initial state.
+        mPackageStatusStorage.dump(printWriter);
+
+        // No crash and it does something.
+        assertFalse(stringWriter.toString().isEmpty());
+
+        // Reset
+        stringWriter.getBuffer().setLength(0);
+        assertTrue(stringWriter.toString().isEmpty());
+
+        // Store something.
+        mPackageStatusStorage.generateCheckToken(VALID_PACKAGE_VERSIONS);
+
+        mPackageStatusStorage.dump(printWriter);
+
+        assertFalse(stringWriter.toString().isEmpty());
     }
 }

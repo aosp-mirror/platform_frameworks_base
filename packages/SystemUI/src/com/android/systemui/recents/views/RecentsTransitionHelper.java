@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -29,6 +30,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,7 +38,11 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.AppTransitionAnimationSpec;
+import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
+import android.view.View;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Recents;
@@ -51,7 +57,7 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,56 +106,49 @@ public class RecentsTransitionHelper {
      */
     public void launchTaskFromRecents(final TaskStack stack, @Nullable final Task task,
             final TaskStackView stackView, final TaskView taskView,
-            final boolean screenPinningRequested, final Rect bounds, final int destinationStack) {
-        final ActivityOptions opts = ActivityOptions.makeBasic();
-        if (bounds != null) {
-            opts.setLaunchBounds(bounds.isEmpty() ? null : bounds);
-        }
+            final boolean screenPinningRequested, final int destinationStack) {
 
         final ActivityOptions.OnAnimationStartedListener animStartedListener;
-        final IAppTransitionAnimationSpecsFuture transitionFuture;
+        final AppTransitionAnimationSpecsFuture transitionFuture;
         if (taskView != null) {
-            transitionFuture = getAppTransitionFuture(new AnimationSpecComposer() {
-                @Override
-                public List<AppTransitionAnimationSpec> composeSpecs() {
-                    return composeAnimationSpecs(task, stackView, destinationStack);
-                }
-            });
-            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                    stackView.cancelAllTaskViewAnimations();
 
-                    if (screenPinningRequested) {
-                        // Request screen pinning after the animation runs
-                        mStartScreenPinningRunnable.taskId = task.key.id;
-                        mHandler.postDelayed(mStartScreenPinningRunnable, 350);
-                    }
+            // Fetch window rect here already in order not to be blocked on lock contention in WM
+            // when the future calls it.
+            final Rect windowRect = Recents.getSystemServices().getWindowRect();
+            transitionFuture = getAppTransitionFuture(
+                    () -> composeAnimationSpecs(task, stackView, destinationStack, windowRect));
+            animStartedListener = () -> {
+                // If we are launching into another task, cancel the previous task's
+                // window transition
+                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                stackView.cancelAllTaskViewAnimations();
+
+                if (screenPinningRequested) {
+                    // Request screen pinning after the animation runs
+                    mStartScreenPinningRunnable.taskId = task.key.id;
+                    mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                 }
             };
         } else {
             // This is only the case if the task is not on screen (scrolled offscreen for example)
             transitionFuture = null;
-            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
-                    stackView.cancelAllTaskViewAnimations();
-                }
+            animStartedListener = () -> {
+                // If we are launching into another task, cancel the previous task's
+                // window transition
+                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                stackView.cancelAllTaskViewAnimations();
             };
         }
 
+        final ActivityOptions opts = ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
+                mHandler, transitionFuture != null ? transitionFuture.future : null,
+                animStartedListener, true /* scaleUp */);
         if (taskView == null) {
             // If there is no task view, then we do not need to worry about animating out occluding
             // task views, and we can launch immediately
-            startTaskActivity(stack, task, taskView, opts, transitionFuture, animStartedListener);
+            startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
         } else {
             LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
                     screenPinningRequested);
@@ -158,18 +157,17 @@ public class RecentsTransitionHelper {
                     @Override
                     public void run() {
                         startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                                animStartedListener);
+                                destinationStack);
                     }
                 });
                 EventBus.getDefault().send(launchStartedEvent);
             } else {
                 EventBus.getDefault().send(launchStartedEvent);
-                startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                        animStartedListener);
+                startTaskActivity(stack, task, taskView, opts, transitionFuture, destinationStack);
             }
         }
         Recents.getSystemServices().sendCloseSystemWindows(
-                BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+                StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
     }
 
     public IRemoteCallback wrapStartedListener(final OnAnimationStartedListener listener) {
@@ -194,32 +192,34 @@ public class RecentsTransitionHelper {
      *
      * @param taskView this is the {@link TaskView} that we are launching from. This can be null if
      *                 we are toggling recents and the launch-to task is now offscreen.
+     * @param destinationStack id of the stack to put the task into.
      */
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskView taskView,
-            ActivityOptions opts, IAppTransitionAnimationSpecsFuture transitionFuture,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
+            ActivityOptions opts, AppTransitionAnimationSpecsFuture transitionFuture,
+            int destinationStack) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts)) {
-            // Keep track of the index of the task launch
-            int taskIndexFromFront = 0;
-            int taskIndex = stack.indexOfStackTask(task);
-            if (taskIndex > -1) {
-                taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
-            }
-            EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
-        } else {
-            // Dismiss the task if we fail to launch it
-            if (taskView != null) {
-                taskView.dismissTask();
-            }
+        ssp.startActivityFromRecents(mContext, task.key, task.title, opts, destinationStack,
+                succeeded -> {
+            if (succeeded) {
+                // Keep track of the index of the task launch
+                int taskIndexFromFront = 0;
+                int taskIndex = stack.indexOfStackTask(task);
+                if (taskIndex > -1) {
+                    taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
+                }
+                EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
+            } else {
+                // Dismiss the task if we fail to launch it
+                if (taskView != null) {
+                    taskView.dismissTask();
+                }
 
-            // Keep track of failed launches
-            EventBus.getDefault().send(new LaunchTaskFailedEvent());
-        }
-
+                // Keep track of failed launches
+                EventBus.getDefault().send(new LaunchTaskFailedEvent());
+            }
+        });
         if (transitionFuture != null) {
-            ssp.overridePendingAppTransitionMultiThumbFuture(transitionFuture,
-                    wrapStartedListener(animStartedListener), true /* scaleUp */);
+            mHandler.post(transitionFuture::precacheSpecs);
         }
     }
 
@@ -228,21 +228,18 @@ public class RecentsTransitionHelper {
      *
      * @param composer The implementation that composes the specs on the UI thread.
      */
-    public IAppTransitionAnimationSpecsFuture getAppTransitionFuture(
+    public AppTransitionAnimationSpecsFuture getAppTransitionFuture(
             final AnimationSpecComposer composer) {
         synchronized (this) {
             mAppTransitionAnimationSpecs = SPECS_WAITING;
         }
-        return new IAppTransitionAnimationSpecsFuture.Stub() {
+        IAppTransitionAnimationSpecsFuture future = new IAppTransitionAnimationSpecsFuture.Stub() {
             @Override
             public AppTransitionAnimationSpec[] get() throws RemoteException {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (RecentsTransitionHelper.this) {
-                            mAppTransitionAnimationSpecs = composer.composeSpecs();
-                            RecentsTransitionHelper.this.notifyAll();
-                        }
+                mHandler.post(() -> {
+                    synchronized (RecentsTransitionHelper.this) {
+                        mAppTransitionAnimationSpecs = composer.composeSpecs();
+                        RecentsTransitionHelper.this.notifyAll();
                     }
                 });
                 synchronized (RecentsTransitionHelper.this) {
@@ -262,6 +259,7 @@ public class RecentsTransitionHelper {
                 }
             }
         };
+        return new AppTransitionAnimationSpecsFuture(composer, future);
     }
 
     /**
@@ -271,8 +269,8 @@ public class RecentsTransitionHelper {
             Rect bounds) {
         mTmpTransform.fillIn(taskView);
         Task task = taskView.getTask();
-        Bitmap thumbnail = RecentsTransitionHelper.composeTaskBitmap(taskView, mTmpTransform);
-        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, thumbnail,
+        GraphicBuffer buffer = RecentsTransitionHelper.composeTaskBitmap(taskView, mTmpTransform);
+        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, buffer,
                 bounds));
     }
 
@@ -280,7 +278,7 @@ public class RecentsTransitionHelper {
      * Composes the animation specs for all the tasks in the target stack.
      */
     private List<AppTransitionAnimationSpec> composeAnimationSpecs(final Task task,
-            final TaskStackView stackView, final int destinationStack) {
+            final TaskStackView stackView, final int destinationStack, Rect windowRect) {
         // Ensure we have a valid target stack id
         final int targetStackId = destinationStack != INVALID_STACK_ID ?
                 destinationStack : task.key.stackId;
@@ -301,13 +299,12 @@ public class RecentsTransitionHelper {
         // TODO: Sometimes targetStackId is not initialized after reboot, so we also have to
         // check for INVALID_STACK_ID
         if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID || targetStackId == DOCKED_STACK_ID
-                || targetStackId == INVALID_STACK_ID) {
+                || targetStackId == ASSISTANT_STACK_ID || targetStackId == INVALID_STACK_ID) {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
                 mTmpTransform.fillIn(taskView);
-                stackLayout.transformToScreenCoordinates(mTmpTransform,
-                        null /* windowOverrideRect */);
+                stackLayout.transformToScreenCoordinates(mTmpTransform, windowRect);
                 AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, taskView,
                         mTmpTransform, true /* addHeaderBitmap */);
                 if (spec != null) {
@@ -354,7 +351,7 @@ public class RecentsTransitionHelper {
         return new AppTransitionAnimationSpec(task.key.id, null, taskRect);
     }
 
-    public static Bitmap composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
+    public static GraphicBuffer composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
         float scale = transform.scale;
         int fromWidth = (int) (transform.rect.width() * scale);
         int fromHeight = (int) (transform.rect.height() * scale);
@@ -362,26 +359,17 @@ public class RecentsTransitionHelper {
             Log.e(TAG, "Could not compose thumbnail for task: " + taskView.getTask() +
                     " at transform: " + transform);
 
-            Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            b.eraseColor(Color.TRANSPARENT);
-            return b;
+            return drawViewIntoGraphicBuffer(1, 1, null, 1f, 0x00ffffff);
         } else {
-            Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight,
-                    Bitmap.Config.ARGB_8888);
-
             if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-                b.eraseColor(0xFFff0000);
+                return drawViewIntoGraphicBuffer(fromWidth, fromHeight, null, 1f, 0xFFff0000);
             } else {
-                Canvas c = new Canvas(b);
-                c.scale(scale, scale);
-                taskView.draw(c);
-                c.setBitmap(null);
+                return drawViewIntoGraphicBuffer(fromWidth, fromHeight, taskView, scale, 0);
             }
-            return b.createAshmemBitmap();
         }
     }
 
-    private static Bitmap composeHeaderBitmap(TaskView taskView,
+    private static GraphicBuffer composeHeaderBitmap(TaskView taskView,
             TaskViewTransform transform) {
         float scale = transform.scale;
         int headerWidth = (int) (transform.rect.width());
@@ -390,16 +378,30 @@ public class RecentsTransitionHelper {
             return null;
         }
 
-        Bitmap b = Bitmap.createBitmap(headerWidth, headerHeight, Bitmap.Config.ARGB_8888);
         if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-            b.eraseColor(0xFFff0000);
+            return drawViewIntoGraphicBuffer(headerWidth, headerHeight, null, 1f, 0xFFff0000);
         } else {
-            Canvas c = new Canvas(b);
-            c.scale(scale, scale);
-            taskView.mHeaderView.draw(c);
-            c.setBitmap(null);
+            return drawViewIntoGraphicBuffer(headerWidth, headerHeight, taskView.mHeaderView,
+                    scale, 0);
         }
-        return b.createAshmemBitmap();
+    }
+
+    public static GraphicBuffer drawViewIntoGraphicBuffer(int bufferWidth, int bufferHeight,
+            View view, float scale, int eraseColor) {
+        RenderNode node = RenderNode.create("RecentsTransition", null);
+        node.setLeftTopRightBottom(0, 0, bufferWidth, bufferHeight);
+        node.setClipToBounds(false);
+        DisplayListCanvas c = node.start(bufferWidth, bufferHeight);
+        c.scale(scale, scale);
+        if (eraseColor != 0) {
+            c.drawColor(eraseColor);
+        }
+        if (view != null) {
+            view.draw(c);
+        }
+        node.end(c);
+        return ThreadedRenderer.createHardwareBitmap(node, bufferWidth, bufferHeight)
+                .createGraphicBufferHandle();
     }
 
     /**
@@ -407,7 +409,7 @@ public class RecentsTransitionHelper {
      */
     private static AppTransitionAnimationSpec composeAnimationSpec(TaskStackView stackView,
             TaskView taskView, TaskViewTransform transform, boolean addHeaderBitmap) {
-        Bitmap b = null;
+        GraphicBuffer b = null;
         if (addHeaderBitmap) {
             b = composeHeaderBitmap(taskView, transform);
             if (b == null) {
@@ -426,5 +428,35 @@ public class RecentsTransitionHelper {
 
     public interface AnimationSpecComposer {
         List<AppTransitionAnimationSpec> composeSpecs();
+    }
+
+    /**
+     * Class to be returned from {@link #composeAnimationSpec} that gives access to both the future
+     * and the anonymous class used for composing.
+     */
+    public class AppTransitionAnimationSpecsFuture {
+
+        private final AnimationSpecComposer composer;
+        private final IAppTransitionAnimationSpecsFuture future;
+
+        private AppTransitionAnimationSpecsFuture(AnimationSpecComposer composer,
+                IAppTransitionAnimationSpecsFuture future) {
+            this.composer = composer;
+            this.future = future;
+        }
+
+        public IAppTransitionAnimationSpecsFuture getFuture() {
+            return future;
+        }
+
+        /**
+         * Manually generates and caches the spec such that they are already available when the
+         * future needs.
+         */
+        public void precacheSpecs() {
+            synchronized (RecentsTransitionHelper.this) {
+                mAppTransitionAnimationSpecs = composer.composeSpecs();
+            }
+        }
     }
 }

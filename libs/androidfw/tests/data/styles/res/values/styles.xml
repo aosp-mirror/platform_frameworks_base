@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <public type="attr" name="attr_one" id="0x7f010000" />
+    <attr name="attr_one" />
+
+    <public type="attr" name="attr_two" id="0x7f010001" />
+    <attr name="attr_two" />
+
+    <public type="attr" name="attr_three" id="0x7f010002" />
+    <attr name="attr_three" />
+
+    <public type="attr" name="attr_four" id="0x7f010003" />
+    <attr name="attr_four" />
+
+    <public type="attr" name="attr_five" id="0x7f010004" />
+    <attr name="attr_five" />
+
+    <public type="attr" name="attr_indirect" id="0x7f010005" />
+    <attr name="attr_indirect" />
+
+    <public type="attr" name="attr_six" id="0x7f010006" />
+    <attr name="attr_six" />
+
+    <public type="attr" name="attr_empty" id="0x7f010007" />
+    <attr name="attr_empty" />
+
+    <public type="string" name="string_one" id="0x7f030000" />
+    <string name="string_one">Hi</string>
+
+    <public type="style" name="StyleOne" id="0x7f020000" />
+    <style name="StyleOne">
+        <item name="attr_one">1</item>
+        <item name="attr_two">2</item>
+    </style>
+
+    <public type="style" name="StyleTwo" id="0x7f020001" />
+    <style name="StyleTwo" parent="@style/StyleOne">
+        <item name="attr_indirect">3</item>
+        <item name="attr_two">"string"</item>
+        <item name="attr_three">?attr/attr_indirect</item>
+        <item name="attr_five">@string/string_one</item>
+        <item name="attr_empty">@empty</item>
+    </style>
+
+    <public type="style" name="StyleThree" id="0x7f020002" />
+    <style name="StyleThree">
+        <item name="attr_six">6</item>
+        <item name="attr_five">5</item>
+    </style>
+
+</resources>

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -102,6 +103,7 @@ public class Ringtone {
      */
     @Deprecated
     public void setStreamType(int streamType) {
+        PlayerBase.deprecateStreamTypeForPlayback(streamType, "Ringtone", "setStreamType()");
         setAudioAttributes(new AudioAttributes.Builder()
                 .setInternalLegacyStreamType(streamType)
                 .build());
@@ -206,11 +208,11 @@ public class Ringtone {
     public static String getTitle(
             Context context, Uri uri, boolean followSettingsUri, boolean allowRemote) {
         ContentResolver res = context.getContentResolver();
-        
+
         String title = null;
 
         if (uri != null) {
-            String authority = uri.getAuthority();
+            String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
 
             if (Settings.AUTHORITY.equals(authority)) {
                 if (followSettingsUri) {
@@ -257,6 +259,8 @@ public class Ringtone {
                     title = uri.getLastPathSegment();
                 }
             }
+        } else {
+            title = context.getString(com.android.internal.R.string.ringtone_silent);
         }
 
         if (title == null) {

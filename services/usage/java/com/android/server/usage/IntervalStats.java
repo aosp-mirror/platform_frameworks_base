@@ -121,6 +121,23 @@ class IntervalStats {
         endTime = timeStamp;
     }
 
+    void updateChooserCounts(String packageName, String category, String action) {
+        UsageStats usageStats = getOrCreateUsageStats(packageName);
+        if (usageStats.mChooserCounts == null) {
+            usageStats.mChooserCounts = new ArrayMap<>();
+        }
+        ArrayMap<String, Integer> chooserCounts;
+        final int idx = usageStats.mChooserCounts.indexOfKey(action);
+        if (idx < 0) {
+            chooserCounts = new ArrayMap<>();
+            usageStats.mChooserCounts.put(action, chooserCounts);
+        } else {
+            chooserCounts = usageStats.mChooserCounts.valueAt(idx);
+        }
+        int currentCount = chooserCounts.getOrDefault(category, 0);
+        chooserCounts.put(category, currentCount + 1);
+    }
+
     void updateConfigurationStats(Configuration config, long timeStamp) {
         if (activeConfiguration != null) {
             ConfigurationStats activeStats = configurations.get(activeConfiguration);

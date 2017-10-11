@@ -98,6 +98,7 @@ public interface EGL10 extends EGL {
     boolean     eglCopyBuffers(EGLDisplay display, EGLSurface surface, Object native_pixmap);
     EGLContext  eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list);
     EGLSurface  eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
+    @Deprecated
     EGLSurface  eglCreatePixmapSurface(EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list);
     EGLSurface  eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
     boolean     eglDestroyContext(EGLDisplay display, EGLContext context);

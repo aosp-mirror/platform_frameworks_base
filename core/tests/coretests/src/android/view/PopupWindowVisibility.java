@@ -45,13 +45,13 @@ public class PopupWindowVisibility extends Activity implements OnClickListener {
 
         mFrame = findViewById(R.id.frame);
         
-        mHide = (Button) findViewById(R.id.hide);
+        mHide = findViewById(R.id.hide);
         mHide.setOnClickListener(this);
         
-        mShow = (Button) findViewById(R.id.show);
+        mShow = findViewById(R.id.show);
         mShow.setOnClickListener(this);
         
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        Spinner spinner = findViewById(R.id.spinner);
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, mStrings);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -59,7 +59,7 @@ public class PopupWindowVisibility extends Activity implements OnClickListener {
         
         ArrayAdapter<String> autoAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line, COUNTRIES);
-        AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.auto);
+        AutoCompleteTextView textView = findViewById(R.id.auto);
         textView.setAdapter(autoAdapter);
     }
 

@@ -29,6 +29,10 @@ public class RecentsActivityLaunchState {
 
     public boolean launchedWithAltTab;
     public boolean launchedFromApp;
+    // Set if the activity that we launched from entered PiP during the transition into Recents
+    public boolean launchedFromPipApp;
+    // Set if the next activity that quick-switch will launch is the PiP activity
+    public boolean launchedWithNextPipApp;
     public boolean launchedFromBlacklistedApp;
     public boolean launchedFromHome;
     public boolean launchedViaDragGesture;
@@ -41,6 +45,8 @@ public class RecentsActivityLaunchState {
         launchedFromHome = false;
         launchedFromApp = false;
         launchedFromBlacklistedApp = false;
+        launchedFromPipApp = false;
+        launchedWithNextPipApp = false;
         launchedToTaskId = -1;
         launchedWithAltTab = false;
         launchedViaDragGesture = false;

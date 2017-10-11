@@ -24,13 +24,15 @@
 
 namespace android {
 
+struct JHwBinderHolder;
+
 struct JHwBinder : public hardware::BHwBinder {
     static void InitClass(JNIEnv *env);
 
-    static sp<JHwBinder> SetNativeContext(
-            JNIEnv *env, jobject thiz, const sp<JHwBinder> &context);
+    static sp<JHwBinderHolder> SetNativeContext(
+            JNIEnv *env, jobject thiz, const sp<JHwBinderHolder> &context);
 
-    static sp<JHwBinder> GetNativeContext(JNIEnv *env, jobject thiz);
+    static sp<JHwBinder> GetNativeBinder(JNIEnv *env, jobject thiz);
 
     JHwBinder(JNIEnv *env, jobject thiz);
 
@@ -45,7 +47,6 @@ protected:
             TransactCallback callback);
 
 private:
-    jclass mClass;
     jobject mObject;
 
     DISALLOW_COPY_AND_ASSIGN(JHwBinder);

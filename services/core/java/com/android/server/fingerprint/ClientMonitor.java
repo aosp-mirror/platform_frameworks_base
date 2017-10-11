@@ -18,8 +18,8 @@ package com.android.server.fingerprint;
 
 import android.Manifest;
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -28,13 +28,13 @@ import android.util.Slog;
 import java.util.NoSuchElementException;
 
 /**
- * Abstract base class for keeping track and dispatching events from fingerprintd to the
+ * Abstract base class for keeping track and dispatching events from fingerprint HAL to the
  * the current client.  Subclasses are responsible for coordinating the interaction with
- * fingerprintd for the specific action (e.g. authenticate, enroll, enumerate, etc.).
+ * fingerprint HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
 public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final String TAG = FingerprintService.TAG; // TODO: get specific name
-    protected static final int ERROR_ESRCH = 3; // Likely fingerprintd is dead. See errno.h.
+    protected static final int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. See errno.h.
     protected static final boolean DEBUG = FingerprintService.DEBUG;
     private IBinder mToken;
     private IFingerprintServiceReceiver mReceiver;
@@ -44,6 +44,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     private String mOwner;
     private Context mContext;
     private long mHalDeviceId;
+    protected boolean mAlreadyCancelled;
 
     /**
      * @param context context of FingerprintService
@@ -68,20 +69,22 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         mIsRestricted = restricted;
         mOwner = owner;
         try {
-            token.linkToDeath(this, 0);
+            if (token != null) {
+                token.linkToDeath(this, 0);
+            }
         } catch (RemoteException e) {
             Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
         }
     }
 
     /**
-     * Contacts fingerprintd to start the client.
+     * Contacts fingerprint HAL to start the client.
      * @return 0 on succes, errno from driver on failure
      */
     public abstract int start();
 
     /**
-     * Contacts fingerprintd to stop the client.
+     * Contacts fingerprint HAL to stop the client.
      * @param initiatedByClient whether the operation is at the request of a client
      */
     public abstract int stop(boolean initiatedByClient);
@@ -94,7 +97,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     /**
      * Gets the fingerprint daemon from the cached state in the container class.
      */
-    public abstract IFingerprintDaemon getFingerprintDaemon();
+    public abstract IBiometricsFingerprint getFingerprintDaemon();
 
     // Event callbacks from driver. Inappropriate calls is flagged/logged by the
     // respective client (e.g. enrolling shouldn't get authenticate events).
@@ -102,20 +105,20 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     // to the next client (e.g. authentication accepts or rejects a fingerprint).
     public abstract boolean onEnrollResult(int fingerId, int groupId, int rem);
     public abstract boolean onAuthenticated(int fingerId, int groupId);
-    public abstract boolean onRemoved(int fingerId, int groupId);
-    public abstract boolean onEnumerationResult(int fingerId, int groupId);
+    public abstract boolean onRemoved(int fingerId, int groupId, int remaining);
+    public abstract boolean onEnumerationResult(int fingerId, int groupId, int remaining);
 
     /**
-     * Called when we get notification from fingerprintd that an image has been acquired.
+     * Called when we get notification from fingerprint HAL that an image has been acquired.
      * Common to authenticate and enroll.
      * @param acquiredInfo info about the current image acquisition
      * @return true if client should be removed
      */
-    public boolean onAcquired(int acquiredInfo) {
+    public boolean onAcquired(int acquiredInfo, int vendorCode) {
         if (mReceiver == null)
             return true; // client not connected
         try {
-            mReceiver.onAcquired(getHalDeviceId(), acquiredInfo);
+            mReceiver.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
             return false; // acquisition continues...
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired:", e);
@@ -129,15 +132,15 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Called when we get notification from fingerprintd that an error has occurred with the
+     * Called when we get notification from fingerprint HAL that an error has occurred with the
      * current operation. Common to authenticate, enroll, enumerate and remove.
      * @param error
      * @return true if client should be removed
      */
-    public boolean onError(int error) {
+    public boolean onError(int error, int vendorCode) {
         if (mReceiver != null) {
             try {
-                mReceiver.onError(getHalDeviceId(), error);
+                mReceiver.onError(getHalDeviceId(), error, vendorCode);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendError:", e);
             }
@@ -162,7 +165,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public void binderDied() {
         mToken = null;
         mReceiver = null;
-        onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+        onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
     }
 
     @Override
@@ -170,7 +173,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         try {
             if (mToken != null) {
                 if (DEBUG) Slog.w(TAG, "removing leaked reference: " + mToken);
-                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
             }
         } finally {
             super.finalize();

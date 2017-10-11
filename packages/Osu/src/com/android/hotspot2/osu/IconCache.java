@@ -5,56 +5,67 @@ import android.util.Log;
 import com.android.anqp.HSIconFileElement;
 import com.android.anqp.IconInfo;
 import com.android.hotspot2.Utils;
+import com.android.hotspot2.flow.OSUInfo;
 
 import java.net.ProtocolException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static com.android.anqp.Constants.ANQPElementType.HSIconFile;
 
 public class IconCache extends Thread {
-    private static final int CacheSize = 64;
-    private static final int RetryCount = 3;
+    // Preferred icon parameters
+    private static final Set<String> ICON_TYPES =
+            new HashSet<>(Arrays.asList("image/png", "image/jpeg"));
+    private static final int ICON_WIDTH = 64;
+    private static final int ICON_HEIGHT = 64;
+    public static final Locale LOCALE = java.util.Locale.getDefault();
 
-    private final OSUManager mOSUManager;
-    private final Map<Long, LinkedList<QuerySet>> mBssQueues = new HashMap<>();
+    private static final int MAX_RETRY = 3;
+    private static final long REQUERY_TIME = 5000L;
+    private static final long REQUERY_TIMEOUT = 120000L;
 
-    private final Map<IconKey, HSIconFileElement> mCache =
-            new LinkedHashMap<IconKey, HSIconFileElement>() {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry eldest) {
-                    return size() > CacheSize;
-                }
-            };
+    private final OSUManager mOsuManager;
+    private final Map<EssKey, Map<String, FileEntry>> mPending;
+    private final Map<EssKey, Map<String, HSIconFileElement>> mCache;
 
-    private static class IconKey {
-        private final long mBSSID;
-        private final long mHESSID;
-        private final String mSSID;
-        private final int mAnqpDomID;
-        private final String mFileName;
+    private static class EssKey {
+        private final int mAnqpDomainId;
+        private final long mBssid;
+        private final long mHessid;
+        private final String mSsid;
 
-        private IconKey(OSUInfo osuInfo, String fileName) {
-            mBSSID = osuInfo.getBSSID();
-            mHESSID = osuInfo.getHESSID();
-            mSSID = osuInfo.getAdvertisingSSID();
-            mAnqpDomID = osuInfo.getAnqpDomID();
-            mFileName = fileName;
+        private EssKey(OSUInfo osuInfo) {
+            mAnqpDomainId = osuInfo.getAnqpDomID();
+            mBssid = osuInfo.getBSSID();
+            mHessid = osuInfo.getHESSID();
+            mSsid = osuInfo.getAdvertisingSsid();
         }
 
-        public String getFileName() {
-            return mFileName;
-        }
+        /*
+         *  ANQP ID 1   ANQP ID 2
+         *  0           0           BSSID equality
+         *  0           X           BSSID equality
+         *  Y           X           BSSID equality
+         *  X           X           Then:
+         *
+         *  HESSID1     HESSID2
+         *  0           0           compare SSIDs
+         *  0           X           not equal
+         *  Y           X           not equal
+         *  X           X           equal
+         */
 
         @Override
         public boolean equals(Object thatObject) {
@@ -65,328 +76,262 @@ public class IconCache extends Thread {
                 return false;
             }
 
-            IconKey that = (IconKey) thatObject;
-
-            return mFileName.equals(that.mFileName) && ((mBSSID == that.mBSSID) ||
-                    ((mAnqpDomID == that.mAnqpDomID) && (mAnqpDomID != 0) &&
-                            (mHESSID == that.mHESSID) && ((mHESSID != 0)
-                            || mSSID.equals(that.mSSID))));
+            EssKey that = (EssKey) thatObject;
+            if (mAnqpDomainId != 0 && mAnqpDomainId == that.mAnqpDomainId) {
+                return mHessid == that.mHessid
+                        && (mHessid != 0 || mSsid.equals(that.mSsid));
+            } else {
+                return mBssid == that.mBssid;
+            }
         }
 
         @Override
         public int hashCode() {
-            int result = (int) (mBSSID ^ (mBSSID >>> 32));
-            result = 31 * result + (int) (mHESSID ^ (mHESSID >>> 32));
-            result = 31 * result + mSSID.hashCode();
-            result = 31 * result + mAnqpDomID;
-            result = 31 * result + mFileName.hashCode();
-            return result;
+            if (mAnqpDomainId == 0) {
+                return (int) (mBssid ^ (mBssid >>> 32));
+            } else if (mHessid != 0) {
+                return mAnqpDomainId * 31 + (int) (mHessid ^ (mHessid >>> 32));
+            } else {
+                return mAnqpDomainId * 31 + mSsid.hashCode();
+            }
         }
 
         @Override
         public String toString() {
-            return String.format("%012x:%012x '%s' [%d] + '%s'",
-                    mBSSID, mHESSID, mSSID, mAnqpDomID, mFileName);
+            if (mAnqpDomainId == 0) {
+                return String.format("BSS %012x", mBssid);
+            } else if (mHessid != 0) {
+                return String.format("ESS %012x [%d]", mBssid, mAnqpDomainId);
+            } else {
+                return String.format("ESS '%s' [%d]", mSsid, mAnqpDomainId);
+            }
         }
     }
 
-    private static class QueryEntry {
-        private final IconKey mKey;
-        private int mRetry;
-        private long mLastSent;
+    private static class FileEntry {
+        private final String mFileName;
+        private int mRetry = 0;
+        private final long mTimestamp;
+        private final LinkedList<OSUInfo> mQueued;
+        private final Set<Long> mBssids;
 
-        private QueryEntry(IconKey key) {
-            mKey = key;
-            mLastSent = System.currentTimeMillis();
+        private FileEntry(OSUInfo osuInfo, String fileName) {
+            mFileName = fileName;
+            mQueued = new LinkedList<>();
+            mBssids = new HashSet<>();
+            mQueued.addLast(osuInfo);
+            mBssids.add(osuInfo.getBSSID());
+            mTimestamp = System.currentTimeMillis();
         }
 
-        private IconKey getKey() {
-            return mKey;
+        private void enqueu(OSUInfo osuInfo) {
+            mQueued.addLast(osuInfo);
+            mBssids.add(osuInfo.getBSSID());
         }
 
-        private int bumpRetry() {
-            mLastSent = System.currentTimeMillis();
+        private int update(long bssid, HSIconFileElement iconFileElement) {
+            if (!mBssids.contains(bssid)) {
+                return 0;
+            }
+            Log.d(OSUManager.TAG, "Updating icon on " + mQueued.size() + " osus");
+            for (OSUInfo osuInfo : mQueued) {
+                osuInfo.setIconFileElement(iconFileElement, mFileName);
+            }
+            return mQueued.size();
+        }
+
+        private int getAndIncrementRetry() {
             return mRetry++;
         }
 
-        private long age(long now) {
-            return now - mLastSent;
+        private long getTimestamp() {
+            return mTimestamp;
+        }
+
+        public String getFileName() {
+            return mFileName;
+        }
+
+        private long getLastBssid() {
+            return mQueued.getLast().getBSSID();
         }
 
         @Override
         public String toString() {
-            return String.format("Entry %s, retry %d", mKey, mRetry);
-        }
-    }
-
-    private static class QuerySet {
-        private final OSUInfo mOsuInfo;
-        private final LinkedList<QueryEntry> mEntries;
-
-        private QuerySet(OSUInfo osuInfo, List<IconInfo> icons) {
-            mOsuInfo = osuInfo;
-            mEntries = new LinkedList<>();
-            for (IconInfo iconInfo : icons) {
-                mEntries.addLast(new QueryEntry(new IconKey(osuInfo, iconInfo.getFileName())));
-            }
-        }
-
-        private QueryEntry peek() {
-            return mEntries.getFirst();
-        }
-
-        private QueryEntry pop() {
-            mEntries.removeFirst();
-            return mEntries.isEmpty() ? null : mEntries.getFirst();
-        }
-
-        private boolean isEmpty() {
-            return mEntries.isEmpty();
-        }
-
-        private List<QueryEntry> getAllEntries() {
-            return Collections.unmodifiableList(mEntries);
-        }
-
-        private long getBssid() {
-            return mOsuInfo.getBSSID();
-        }
-
-        private OSUInfo getOsuInfo() {
-            return mOsuInfo;
-        }
-
-        private IconKey updateIcon(String fileName, HSIconFileElement iconFileElement) {
-            IconKey key = null;
-            for (QueryEntry queryEntry : mEntries) {
-                if (queryEntry.getKey().getFileName().equals(fileName)) {
-                    key = queryEntry.getKey();
-                }
-            }
-            if (key == null) {
-                return null;
-            }
-
-            if (iconFileElement != null) {
-                mOsuInfo.setIconFileElement(iconFileElement, fileName);
-            } else {
-                mOsuInfo.setIconStatus(OSUInfo.IconStatus.NotAvailable);
-            }
-            return key;
-        }
-
-        private boolean updateIcon(IconKey key, HSIconFileElement iconFileElement) {
-            boolean match = false;
-            for (QueryEntry queryEntry : mEntries) {
-                if (queryEntry.getKey().equals(key)) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) {
-                return false;
-            }
-
-            if (iconFileElement != null) {
-                mOsuInfo.setIconFileElement(iconFileElement, key.getFileName());
-            } else {
-                mOsuInfo.setIconStatus(OSUInfo.IconStatus.NotAvailable);
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "OSU " + mOsuInfo + ": " + mEntries;
+            return String.format("'%s', retry %d, age %d, BSSIDs: %s",
+                    mFileName, mRetry,
+                    System.currentTimeMillis() - mTimestamp, Utils.bssidsToString(mBssids));
         }
     }
 
     public IconCache(OSUManager osuManager) {
-        mOSUManager = osuManager;
+        mOsuManager = osuManager;
+        mPending = new HashMap<>();
+        mCache = new HashMap<>();
     }
 
-    public void clear() {
-        mBssQueues.clear();
-        mCache.clear();
-    }
+    public int resolveIcons(Collection<OSUInfo> osuInfos) {
+        Set<EssKey> current = new HashSet<>();
+        int modCount = 0;
+        for (OSUInfo osuInfo : osuInfos) {
+            EssKey key = new EssKey(osuInfo);
+            current.add(key);
 
-    private boolean enqueue(QuerySet querySet) {
-        boolean newEntry = false;
-        LinkedList<QuerySet> queries = mBssQueues.get(querySet.getBssid());
-        if (queries == null) {
-            queries = new LinkedList<>();
-            mBssQueues.put(querySet.getBssid(), queries);
-            newEntry = true;
-        }
-        queries.addLast(querySet);
-        return newEntry;
-    }
+            if (osuInfo.getIconStatus() == OSUInfo.IconStatus.NotQueried) {
+                List<IconInfo> iconInfo =
+                        osuInfo.getIconInfo(LOCALE, ICON_TYPES, ICON_WIDTH, ICON_HEIGHT);
+                if (iconInfo.isEmpty()) {
+                    osuInfo.setIconStatus(OSUInfo.IconStatus.NotAvailable);
+                    continue;
+                }
 
-    public void startIconQuery(OSUInfo osuInfo, List<IconInfo> icons) {
-        Log.d("ZXZ", String.format("Icon query on %012x for %s", osuInfo.getBSSID(), icons));
-        if (icons == null || icons.isEmpty()) {
-            return;
-        }
-
-        QuerySet querySet = new QuerySet(osuInfo, icons);
-        for (QueryEntry entry : querySet.getAllEntries()) {
-            HSIconFileElement iconElement = mCache.get(entry.getKey());
-            if (iconElement != null) {
-                osuInfo.setIconFileElement(iconElement, entry.getKey().getFileName());
-                mOSUManager.iconResults(Arrays.asList(osuInfo));
-                return;
-            }
-        }
-        if (enqueue(querySet)) {
-            initiateQuery(querySet.getBssid());
-        }
-    }
-
-    private void initiateQuery(long bssid) {
-        LinkedList<QuerySet> queryEntries = mBssQueues.get(bssid);
-        if (queryEntries == null) {
-            return;
-        } else if (queryEntries.isEmpty()) {
-            mBssQueues.remove(bssid);
-            return;
-        }
-
-        QuerySet querySet = queryEntries.getFirst();
-        QueryEntry queryEntry = querySet.peek();
-        if (queryEntry.bumpRetry() >= RetryCount) {
-            QueryEntry newEntry = querySet.pop();
-            if (newEntry == null) {
-                // No more entries in this QuerySet, advance to the next set.
-                querySet.getOsuInfo().setIconStatus(OSUInfo.IconStatus.NotAvailable);
-                queryEntries.removeFirst();
-                if (queryEntries.isEmpty()) {
-                    // No further QuerySet on this BSSID, drop the bucket and bail.
-                    mBssQueues.remove(bssid);
-                    return;
+                String fileName = iconInfo.get(0).getFileName();
+                HSIconFileElement iconFileElement = get(key, fileName);
+                if (iconFileElement != null) {
+                    osuInfo.setIconFileElement(iconFileElement, fileName);
+                    Log.d(OSUManager.TAG, "Icon cache hit for " + osuInfo + "/" + fileName);
+                    modCount++;
                 } else {
-                    querySet = queryEntries.getFirst();
-                    queryEntry = querySet.peek();
-                    queryEntry.bumpRetry();
+                    FileEntry fileEntry = enqueue(key, fileName, osuInfo);
+                    if (fileEntry != null) {
+                        Log.d(OSUManager.TAG, "Initiating icon query for "
+                                + osuInfo + "/" + fileName);
+                        mOsuManager.doIconQuery(osuInfo.getBSSID(), fileName);
+                    } else {
+                        Log.d(OSUManager.TAG, "Piggybacking icon query for "
+                                + osuInfo + "/" + fileName);
+                    }
                 }
             }
         }
-        mOSUManager.doIconQuery(bssid, queryEntry.getKey().getFileName());
+
+        // Drop all non-current ESS's
+        Iterator<EssKey> pendingKeys = mPending.keySet().iterator();
+        while (pendingKeys.hasNext()) {
+            EssKey key = pendingKeys.next();
+            if (!current.contains(key)) {
+                pendingKeys.remove();
+            }
+        }
+        Iterator<EssKey> cacheKeys = mCache.keySet().iterator();
+        while (cacheKeys.hasNext()) {
+            EssKey key = cacheKeys.next();
+            if (!current.contains(key)) {
+                cacheKeys.remove();
+            }
+        }
+        return modCount;
     }
 
-    public void notifyIconReceived(long bssid, String fileName, byte[] iconData) {
-        Log.d("ZXZ", String.format("Icon '%s':%d received from %012x",
+    public HSIconFileElement getIcon(OSUInfo osuInfo) {
+        List<IconInfo> iconInfos = osuInfo.getIconInfo(LOCALE, ICON_TYPES, ICON_WIDTH, ICON_HEIGHT);
+        if (iconInfos == null || iconInfos.isEmpty()) {
+            return null;
+        }
+        EssKey key = new EssKey(osuInfo);
+        Map<String, HSIconFileElement> fileMap = mCache.get(key);
+        return fileMap != null ? fileMap.get(iconInfos.get(0).getFileName()) : null;
+    }
+
+    public int notifyIconReceived(long bssid, String fileName, byte[] iconData) {
+        Log.d(OSUManager.TAG, String.format("Icon '%s':%d received from %012x",
                 fileName, iconData != null ? iconData.length : -1, bssid));
-        IconKey key;
-        HSIconFileElement iconFileElement = null;
-        List<OSUInfo> updates = new ArrayList<>();
-
-        LinkedList<QuerySet> querySets = mBssQueues.get(bssid);
-        if (querySets == null || querySets.isEmpty()) {
-            Log.d(OSUManager.TAG,
-                    String.format("Spurious icon response from %012x for '%s' (%d) bytes",
-                            bssid, fileName, iconData != null ? iconData.length : -1));
-            Log.d("ZXZ", "query set: " + querySets
-                    + ", BSS queues: " + Utils.bssidsToString(mBssQueues.keySet()));
-            return;
-        } else {
-            QuerySet querySet = querySets.removeFirst();
-            if (iconData != null) {
-                try {
-                    iconFileElement = new HSIconFileElement(HSIconFile,
-                            ByteBuffer.wrap(iconData).order(ByteOrder.LITTLE_ENDIAN));
-                } catch (ProtocolException | BufferUnderflowException e) {
-                    Log.e(OSUManager.TAG, "Failed to parse ANQP icon file: " + e);
-                }
-            }
-            key = querySet.updateIcon(fileName, iconFileElement);
-            if (key == null) {
-                Log.d(OSUManager.TAG,
-                        String.format("Spurious icon response from %012x for '%s' (%d) bytes",
-                                bssid, fileName, iconData != null ? iconData.length : -1));
-                Log.d("ZXZ", "query set: " + querySets + ", BSS queues: "
-                        + Utils.bssidsToString(mBssQueues.keySet()));
-                querySets.addFirst(querySet);
-                return;
-            }
-
-            if (iconFileElement != null) {
-                mCache.put(key, iconFileElement);
-            }
-
-            if (querySet.isEmpty()) {
-                mBssQueues.remove(bssid);
-            }
-            updates.add(querySet.getOsuInfo());
+        if (fileName == null || iconData == null) {
+            return 0;
         }
 
-        // Update any other pending entries that matches the ESS of the currently resolved icon
-        Iterator<Map.Entry<Long, LinkedList<QuerySet>>> bssIterator =
-                mBssQueues.entrySet().iterator();
-        while (bssIterator.hasNext()) {
-            Map.Entry<Long, LinkedList<QuerySet>> bssEntries = bssIterator.next();
-            Iterator<QuerySet> querySetIterator = bssEntries.getValue().iterator();
-            while (querySetIterator.hasNext()) {
-                QuerySet querySet = querySetIterator.next();
-                if (querySet.updateIcon(key, iconFileElement)) {
-                    querySetIterator.remove();
-                    updates.add(querySet.getOsuInfo());
-                }
-            }
-            if (bssEntries.getValue().isEmpty()) {
-                bssIterator.remove();
-            }
+        HSIconFileElement iconFileElement;
+        try {
+            iconFileElement = new HSIconFileElement(HSIconFile,
+                    ByteBuffer.wrap(iconData).order(ByteOrder.LITTLE_ENDIAN));
+        } catch (ProtocolException | BufferUnderflowException e) {
+            Log.e(OSUManager.TAG, "Failed to parse ANQP icon file: " + e);
+            return 0;
         }
 
-        initiateQuery(bssid);
+        int updates = 0;
+        Iterator<Map.Entry<EssKey, Map<String, FileEntry>>> entries =
+                mPending.entrySet().iterator();
 
-        mOSUManager.iconResults(updates);
+        while (entries.hasNext()) {
+            Map.Entry<EssKey, Map<String, FileEntry>> entry = entries.next();
+
+            Map<String, FileEntry> fileMap = entry.getValue();
+            FileEntry fileEntry = fileMap.get(fileName);
+            updates = fileEntry.update(bssid, iconFileElement);
+            if (updates > 0) {
+                put(entry.getKey(), fileName, iconFileElement);
+                fileMap.remove(fileName);
+                if (fileMap.isEmpty()) {
+                    entries.remove();
+                }
+                break;
+            }
+        }
+        return updates;
     }
 
-    private static final long RequeryTimeLow = 6000L;
-    private static final long RequeryTimeHigh = 15000L;
+    public void tick(boolean wifiOff) {
+        if (wifiOff) {
+            mPending.clear();
+            mCache.clear();
+            return;
+        }
 
-    public void tickle(boolean wifiOff) {
-        synchronized (mCache) {
-            if (wifiOff) {
-                mBssQueues.clear();
-            } else {
-                long now = System.currentTimeMillis();
+        Iterator<Map.Entry<EssKey, Map<String, FileEntry>>> entries =
+                mPending.entrySet().iterator();
 
-                Iterator<Map.Entry<Long, LinkedList<QuerySet>>> bssIterator =
-                        mBssQueues.entrySet().iterator();
-                while (bssIterator.hasNext()) {
-                    // Get the list of entries for this BSSID
-                    Map.Entry<Long, LinkedList<QuerySet>> bssEntries = bssIterator.next();
-                    Iterator<QuerySet> querySetIterator = bssEntries.getValue().iterator();
-                    while (querySetIterator.hasNext()) {
-                        QuerySet querySet = querySetIterator.next();
-                        QueryEntry queryEntry = querySet.peek();
-                        long age = queryEntry.age(now);
-                        if (age > RequeryTimeHigh) {
-                            // Timed out entry, move on to the next.
-                            queryEntry = querySet.pop();
-                            if (queryEntry == null) {
-                                // Empty query set, update status and remove it.
-                                querySet.getOsuInfo()
-                                        .setIconStatus(OSUInfo.IconStatus.NotAvailable);
-                                querySetIterator.remove();
-                            } else {
-                                // Start a query on the next entry and bail out of the set iteration
-                                initiateQuery(querySet.getBssid());
-                                break;
-                            }
-                        } else if (age > RequeryTimeLow) {
-                            // Re-issue queries for qualified entries and bail out of set iteration
-                            initiateQuery(querySet.getBssid());
-                            break;
-                        }
-                    }
-                    if (bssEntries.getValue().isEmpty()) {
-                        // Kill the whole bucket if the set list is empty
-                        bssIterator.remove();
-                    }
+        long now = System.currentTimeMillis();
+        while (entries.hasNext()) {
+            Map<String, FileEntry> fileMap = entries.next().getValue();
+            Iterator<Map.Entry<String, FileEntry>> fileEntries = fileMap.entrySet().iterator();
+            while (fileEntries.hasNext()) {
+                FileEntry fileEntry = fileEntries.next().getValue();
+                long age = now - fileEntry.getTimestamp();
+                if (age > REQUERY_TIMEOUT || fileEntry.getAndIncrementRetry() > MAX_RETRY) {
+                    fileEntries.remove();
+                } else if (age > REQUERY_TIME) {
+                    mOsuManager.doIconQuery(fileEntry.getLastBssid(), fileEntry.getFileName());
                 }
             }
+            if (fileMap.isEmpty()) {
+                entries.remove();
+            }
         }
+    }
+
+    private HSIconFileElement get(EssKey key, String fileName) {
+        Map<String, HSIconFileElement> fileMap = mCache.get(key);
+        if (fileMap == null) {
+            return null;
+        }
+        return fileMap.get(fileName);
+    }
+
+    private void put(EssKey key, String fileName, HSIconFileElement icon) {
+        Map<String, HSIconFileElement> fileMap = mCache.get(key);
+        if (fileMap == null) {
+            fileMap = new HashMap<>();
+            mCache.put(key, fileMap);
+        }
+        fileMap.put(fileName, icon);
+    }
+
+    private FileEntry enqueue(EssKey key, String fileName, OSUInfo osuInfo) {
+        Map<String, FileEntry> entryMap = mPending.get(key);
+        if (entryMap == null) {
+            entryMap = new HashMap<>();
+            mPending.put(key, entryMap);
+        }
+
+        FileEntry fileEntry = entryMap.get(fileName);
+        osuInfo.setIconStatus(OSUInfo.IconStatus.InProgress);
+        if (fileEntry == null) {
+            fileEntry = new FileEntry(osuInfo, fileName);
+            entryMap.put(fileName, fileEntry);
+            return fileEntry;
+        }
+        fileEntry.enqueu(osuInfo);
+        return null;
     }
 }

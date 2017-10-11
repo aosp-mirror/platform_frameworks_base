@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 
 /**
@@ -34,8 +33,7 @@ import android.widget.RemoteViews;
 @RemoteViews.RemoteView
 public class MediaNotificationView extends FrameLayout {
 
-    private final int mMaxImageSize;
-    private final int mImageMinTopMargin;
+    private final int mSmallImageSize;
     private final int mNotificationContentMarginEnd;
     private final int mNotificationContentImageMarginEnd;
     private ImageView mRightIcon;
@@ -57,72 +55,68 @@ public class MediaNotificationView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int mode = MeasureSpec.getMode(widthMeasureSpec);
         boolean hasIcon = mRightIcon.getVisibility() != GONE;
+        if (!hasIcon) {
+            resetHeaderIndention();
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        boolean reMeasure = false;
         if (hasIcon && mode != MeasureSpec.UNSPECIFIED) {
-            measureChild(mActions, widthMeasureSpec, heightMeasureSpec);
             int size = MeasureSpec.getSize(widthMeasureSpec);
             size = size - mActions.getMeasuredWidth();
             ViewGroup.MarginLayoutParams layoutParams =
                     (MarginLayoutParams) mRightIcon.getLayoutParams();
             int imageEndMargin = layoutParams.getMarginEnd();
             size -= imageEndMargin;
-            size = Math.min(size, mMaxImageSize);
-            size = Math.max(size, mRightIcon.getMinimumWidth());
-            layoutParams.width = size;
-            layoutParams.height = size;
-            mRightIcon.setLayoutParams(layoutParams);
-
-            // lets ensure that the main column doesn't run into the image
-            ViewGroup.MarginLayoutParams mainParams
-                    = (MarginLayoutParams) mMainColumn.getLayoutParams();
-            int marginEnd = size + imageEndMargin + mNotificationContentMarginEnd;
-            if (marginEnd != mainParams.getMarginEnd()) {
-                mainParams.setMarginEnd(marginEnd);
-                mMainColumn.setLayoutParams(mainParams);
+            int fullHeight = getMeasuredHeight();
+            if (size < fullHeight) {
+                size = mSmallImageSize;
+            } else {
+                size = fullHeight;
             }
-
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        ViewGroup.MarginLayoutParams iconParams =
-                (MarginLayoutParams) mRightIcon.getLayoutParams();
-        int topMargin = getMeasuredHeight() - mRightIcon.getMeasuredHeight()
-                - iconParams.bottomMargin;
-        // If the topMargin is high enough we can also remove the header constraint!
-        boolean reMeasure = false;
-        if (!hasIcon || topMargin >= mImageMinTopMargin) {
-            reMeasure = resetHeaderIndention();
-        } else {
-            int paddingEnd = mNotificationContentImageMarginEnd;
-            ViewGroup.MarginLayoutParams headerParams =
-                    (MarginLayoutParams) mHeader.getLayoutParams();
-            int newMarginEnd = mRightIcon.getMeasuredWidth() + iconParams.getMarginEnd();
-            if (headerParams.getMarginEnd() != newMarginEnd) {
-                headerParams.setMarginEnd(newMarginEnd);
-                mHeader.setLayoutParams(headerParams);
+            if (layoutParams.width != size || layoutParams.height != size) {
+                layoutParams.width = size;
+                layoutParams.height = size;
+                mRightIcon.setLayoutParams(layoutParams);
                 reMeasure = true;
             }
-            if (mHeader.getPaddingEnd() != paddingEnd) {
+
+            // lets ensure that the main column doesn't run into the image
+            ViewGroup.MarginLayoutParams params
+                    = (MarginLayoutParams) mMainColumn.getLayoutParams();
+            int marginEnd = size + imageEndMargin + mNotificationContentMarginEnd;
+            if (marginEnd != params.getMarginEnd()) {
+                params.setMarginEnd(marginEnd);
+                mMainColumn.setLayoutParams(params);
+                reMeasure = true;
+            }
+            int headerMarginEnd = size + imageEndMargin;
+            params = (MarginLayoutParams) mHeader.getLayoutParams();
+            if (params.getMarginEnd() != headerMarginEnd) {
+                params.setMarginEnd(headerMarginEnd);
+                mHeader.setLayoutParams(params);
+                reMeasure = true;
+            }
+            if (mHeader.getPaddingEnd() != mNotificationContentImageMarginEnd) {
                 mHeader.setPaddingRelative(mHeader.getPaddingStart(),
                         mHeader.getPaddingTop(),
-                        paddingEnd,
+                        mNotificationContentImageMarginEnd,
                         mHeader.getPaddingBottom());
                 reMeasure = true;
             }
         }
         if (reMeasure) {
-            measureChildWithMargins(mHeader, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
-    private boolean resetHeaderIndention() {
-        boolean remeasure = false;
+    private void resetHeaderIndention() {
         if (mHeader.getPaddingEnd() != mNotificationContentMarginEnd) {
             mHeader.setPaddingRelative(mHeader.getPaddingStart(),
                     mHeader.getPaddingTop(),
                     mNotificationContentMarginEnd,
                     mHeader.getPaddingBottom());
-            remeasure = true;
         }
         ViewGroup.MarginLayoutParams headerParams =
                 (MarginLayoutParams) mHeader.getLayoutParams();
@@ -130,19 +124,14 @@ public class MediaNotificationView extends FrameLayout {
         if (headerParams.getMarginEnd() != 0) {
             headerParams.setMarginEnd(0);
             mHeader.setLayoutParams(headerParams);
-            remeasure = true;
         }
-        return remeasure;
     }
 
     public MediaNotificationView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mMaxImageSize = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.media_notification_expanded_image_max_size);
-        mImageMinTopMargin = (int) (context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_top)
-                + getResources().getDisplayMetrics().density * 2);
+        mSmallImageSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.media_notification_expanded_image_small_size);
         mNotificationContentMarginEnd = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
         mNotificationContentImageMarginEnd = context.getResources().getDimensionPixelSize(
@@ -152,7 +141,7 @@ public class MediaNotificationView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mRightIcon = (ImageView) findViewById(com.android.internal.R.id.right_icon);
+        mRightIcon = findViewById(com.android.internal.R.id.right_icon);
         mActions = findViewById(com.android.internal.R.id.media_actions);
         mHeader = findViewById(com.android.internal.R.id.notification_header);
         mMainColumn = findViewById(com.android.internal.R.id.notification_main_column);

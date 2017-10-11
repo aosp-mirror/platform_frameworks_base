@@ -34,7 +34,7 @@ public final class WebViewUpdateService {
         try {
             return getUpdateService().getAllWebViewPackages();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -45,7 +45,7 @@ public final class WebViewUpdateService {
         try {
             return getUpdateService().getValidWebViewPackages();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -56,7 +56,7 @@ public final class WebViewUpdateService {
         try {
             return getUpdateService().getCurrentWebViewPackageName();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

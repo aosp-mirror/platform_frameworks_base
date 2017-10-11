@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.annotation.SdkConstant;
+import android.annotation.SystemService;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.util.Log;
 
@@ -34,13 +37,10 @@ import java.util.zip.GZIPInputStream;
  * enqueued data exceeds the maximum size.  You can think of this as a
  * persistent, system-wide, blob-oriented "logcat".
  *
- * <p>You can obtain an instance of this class by calling
- * {@link android.content.Context#getSystemService}
- * with {@link android.content.Context#DROPBOX_SERVICE}.
- *
  * <p>DropBoxManager entries are not sent anywhere directly, but other system
  * services and debugging tools may scan and upload entries for processing.
  */
+@SystemService(Context.DROPBOX_SERVICE)
 public class DropBoxManager {
     private static final String TAG = "DropBoxManager";
 
@@ -67,6 +67,7 @@ public class DropBoxManager {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DROPBOX_ENTRY_ADDED =
         "android.intent.action.DROPBOX_ENTRY_ADDED";
 

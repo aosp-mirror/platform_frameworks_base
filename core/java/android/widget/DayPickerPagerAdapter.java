@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.widget.PagerAdapter;
-
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -25,12 +23,15 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.icu.util.Calendar;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleMonthView.OnDayClickListener;
+
+import com.android.internal.widget.PagerAdapter;
 
 /**
  * An adapter for a list of {@link android.widget.SimpleMonthView} items.
@@ -105,6 +106,17 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     public int getFirstDayOfWeek() {
         return mFirstDayOfWeek;
+    }
+
+    public boolean getBoundsForDate(Calendar day, Rect outBounds) {
+        final int position = getPositionForDay(day);
+        final ViewHolder monthView = mItems.get(position, null);
+        if (monthView == null) {
+            return false;
+        } else {
+            final int dayOfMonth = day.get(Calendar.DAY_OF_MONTH);
+            return monthView.calendar.getBoundsForDay(dayOfMonth, outBounds);
+        }
     }
 
     /**
@@ -213,7 +225,7 @@ class DayPickerPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         final View itemView = mInflater.inflate(mLayoutResId, container, false);
 
-        final SimpleMonthView v = (SimpleMonthView) itemView.findViewById(mCalendarViewId);
+        final SimpleMonthView v = itemView.findViewById(mCalendarViewId);
         v.setOnDayClickListener(mOnDayClickListener);
         v.setMonthTextAppearance(mMonthTextAppearance);
         v.setDayOfWeekTextAppearance(mDayOfWeekTextAppearance);

@@ -31,9 +31,9 @@
 #include <android_os_MessageQueue.h>
 #include <core_jni_helpers.h>
 #include <jni.h>
-#include <JNIHelp.h>
-#include <ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>

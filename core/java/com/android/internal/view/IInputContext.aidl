@@ -62,9 +62,7 @@ import com.android.internal.view.IInputContextCallback;
     void beginBatchEdit();
     
     void endBatchEdit();
-    
-    void reportFullscreenMode(boolean enabled);
-    
+
     void sendKeyEvent(in KeyEvent event);
     
     void clearMetaKeyStates(int states);

@@ -28,7 +28,7 @@ static bool isZero(uint8_t* data, int size) {
     return true;
 }
 
-RENDERTHREAD_TEST(FontRenderer, renderDropShadow) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FontRenderer, DISABLED_renderDropShadow) {
     SkPaint paint;
     paint.setTextSize(10);
     paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);

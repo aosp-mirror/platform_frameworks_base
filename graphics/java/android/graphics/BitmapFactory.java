@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static android.graphics.BitmapFactory.Options.validate;
+
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Trace;
@@ -41,7 +43,6 @@ public class BitmapFactory {
          * the same result from the decoder as if null were passed.
          */
         public Options() {
-            inDither = false;
             inScaled = true;
             inPremultiplied = true;
         }
@@ -103,14 +104,17 @@ public class BitmapFactory {
          * If set, decode methods will always return a mutable Bitmap instead of
          * an immutable one. This can be used for instance to programmatically apply
          * effects to a Bitmap loaded through BitmapFactory.
+         * <p>Can not be set simultaneously with inPreferredConfig =
+         * {@link android.graphics.Bitmap.Config#HARDWARE},
+         * because hardware bitmaps are always immutable.
          */
         @SuppressWarnings({"UnusedDeclaration"}) // used in native code
         public boolean inMutable;
 
         /**
          * If set to true, the decoder will return null (no bitmap), but
-         * the out... fields will still be set, allowing the caller to query
-         * the bitmap without having to allocate the memory for its pixels.
+         * the <code>out...</code> fields will still be set, allowing the caller to
+         * query the bitmap without having to allocate the memory for its pixels.
          */
         public boolean inJustDecodeBounds;
 
@@ -137,6 +141,35 @@ public class BitmapFactory {
          * default.
          */
         public Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        /**
+         * <p>If this is non-null, the decoder will try to decode into this
+         * color space. If it is null, or the request cannot be met,
+         * the decoder will pick either the color space embedded in the image
+         * or the color space best suited for the requested image configuration
+         * (for instance {@link ColorSpace.Named#SRGB sRGB} for
+         * the {@link Bitmap.Config#ARGB_8888} configuration).</p>
+         *
+         * <p>{@link Bitmap.Config#RGBA_F16} always uses the
+         * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB scRGB} color space).
+         * Bitmaps in other configurations without an embedded color space are
+         * assumed to be in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
+         *
+         * <p class="note">Only {@link ColorSpace.Model#RGB} color spaces are
+         * currently supported. An <code>IllegalArgumentException</code> will
+         * be thrown by the decode methods when setting a non-RGB color space
+         * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
+         *
+         * <p class="note">The specified color space's transfer function must be
+         * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
+         * <code>IllegalArgumentException</code> will be thrown by the decode methods
+         * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
+         * specified color space returns null.</p>
+         *
+         * <p>After decode, the bitmap's color space is stored in
+         * {@link #outColorSpace}.</p>
+         */
+        public ColorSpace inPreferredColorSpace = null;
 
         /**
          * If true (which is the default), the resulting bitmap will have its
@@ -345,9 +378,24 @@ public class BitmapFactory {
 
         /**
          * If known, this string is set to the mimetype of the decoded image.
-         * If not know, or there is an error, it is set to null.
+         * If not known, or there is an error, it is set to null.
          */
         public String outMimeType;
+
+        /**
+         * If known, the config the decoded bitmap will have.
+         * If not known, or there is an error, it is set to null.
+         */
+        public Bitmap.Config outConfig;
+
+        /**
+         * If known, the color space the decoded bitmap will have. Note that the
+         * output color space is not guaranteed to be the color space the bitmap
+         * is encoded with. If not known (when the config is
+         * {@link Bitmap.Config#ALPHA_8} for instance), or there is an error,
+         * it is set to null.
+         */
+        public ColorSpace outColorSpace;
 
         /**
          * Temp storage to use for decoding.  Suggest 16K or so.
@@ -381,6 +429,25 @@ public class BitmapFactory {
         public void requestCancelDecode() {
             mCancel = true;
         }
+
+        static void validate(Options opts) {
+            if (opts == null) return;
+
+            if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
+                throw new IllegalArgumentException("Bitmaps with Config.HARWARE are always immutable");
+            }
+
+            if (opts.inPreferredColorSpace != null) {
+                if (!(opts.inPreferredColorSpace instanceof ColorSpace.Rgb)) {
+                    throw new IllegalArgumentException("The destination color space must use the " +
+                            "RGB color model");
+                }
+                if (((ColorSpace.Rgb) opts.inPreferredColorSpace).getTransferParameters() == null) {
+                    throw new IllegalArgumentException("The destination color space must use an " +
+                            "ICC parametric transfer function");
+                }
+            }
+        }
     }
 
     /**
@@ -393,8 +460,14 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeFile(String pathName, Options opts) {
+        validate(opts);
         Bitmap bm = null;
         InputStream stream = null;
         try {
@@ -431,10 +504,15 @@ public class BitmapFactory {
     /**
      * Decode a new Bitmap from an InputStream. This InputStream was obtained from
      * resources, which we pass to be able to scale the bitmap accordingly.
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeResourceStream(Resources res, TypedValue value,
             InputStream is, Rect pad, Options opts) {
-
+        validate(opts);
         if (opts == null) {
             opts = new Options();
         }
@@ -466,8 +544,14 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
+        validate(opts);
         Bitmap bm = null;
         InputStream is = null; 
         
@@ -520,11 +604,17 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length, Options opts) {
         if ((offset | length) < 0 || data.length < offset + length) {
             throw new ArrayIndexOutOfBoundsException();
         }
+        validate(opts);
 
         Bitmap bm;
 
@@ -598,6 +688,11 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      *
      * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT},
      * if {@link InputStream#markSupported is.markSupported()} returns true,
@@ -610,6 +705,7 @@ public class BitmapFactory {
         if (is == null) {
             return null;
         }
+        validate(opts);
 
         Bitmap bm = null;
 
@@ -673,8 +769,14 @@ public class BitmapFactory {
      * @param opts null-ok; Options that control downsampling and whether the
      *             image should be completely decoded, or just its size returned.
      * @return the decoded bitmap, or null
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set, if the specified color space
+     *         is not {@link ColorSpace.Model#RGB RGB}, or if the specified color space's transfer
+     *         function is not an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
+        validate(opts);
         Bitmap bm;
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeFileDescriptor");

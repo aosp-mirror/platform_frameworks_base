@@ -17,7 +17,6 @@
 package com.android.imftest.samples;
 
 import android.app.Activity;
-import android.app.ActivityManagerNative;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.MediaStore;
@@ -51,7 +50,7 @@ public class AutoCompleteTextViewActivityLandscape extends Activity
 
        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
                android.R.layout.simple_dropdown_item_1line, COUNTRIES);
-       AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.edit);
+       AutoCompleteTextView textView = findViewById(R.id.edit);
        textView.setAdapter(adapter);
    }
 

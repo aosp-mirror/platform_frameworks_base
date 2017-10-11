@@ -16,15 +16,18 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -37,8 +40,13 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -49,10 +57,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
-public class SignalClusterView
-        extends LinearLayout
-        implements NetworkControllerImpl.SignalCallback,
-        SecurityController.SecurityControllerCallback, Tunable {
+public class SignalClusterView extends LinearLayout implements NetworkControllerImpl.SignalCallback,
+        SecurityController.SecurityControllerCallback, Tunable,
+        DarkReceiver {
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -62,8 +69,8 @@ public class SignalClusterView
     private static final String SLOT_WIFI = "wifi";
     private static final String SLOT_ETHERNET = "ethernet";
 
-    NetworkControllerImpl mNC;
-    SecurityController mSC;
+    private final NetworkController mNetworkController;
+    private final SecurityController mSecurityController;
 
     private boolean mNoSimsVisible = false;
     private boolean mVpnVisible = false;
@@ -72,10 +79,13 @@ public class SignalClusterView
     private boolean mEthernetVisible = false;
     private int mEthernetIconId = 0;
     private int mLastEthernetIconId = -1;
+    private int mWifiBadgeId = -1;
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
+    private int mLastWifiBadgeId = -1;
     private int mLastWifiStrengthId = -1;
-    private int mWifiActivityId = 0;
+    private boolean mWifiIn;
+    private boolean mWifiOut;
     private int mLastWifiActivityId = -1;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
@@ -91,7 +101,8 @@ public class SignalClusterView
     ViewGroup mEthernetGroup, mWifiGroup;
     View mNoSimsCombo;
     ImageView mVpn, mEthernet, mWifi, mAirplane, mNoSims, mEthernetDark, mWifiDark, mNoSimsDark;
-    ImageView mWifiActivity;
+    ImageView mWifiActivityIn;
+    ImageView mWifiActivityOut;
     View mWifiAirplaneSpacer;
     View mWifiSignalSpacer;
     LinearLayout mMobileSignalGroup;
@@ -108,6 +119,8 @@ public class SignalClusterView
     private boolean mBlockMobile;
     private boolean mBlockWifi;
     private boolean mBlockEthernet;
+    private boolean mActivityEnabled;
+    private boolean mForceBlockWifi;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -134,6 +147,19 @@ public class SignalClusterView
         TypedValue typedValue = new TypedValue();
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         mIconScaleFactor = typedValue.getFloat();
+        mNetworkController = Dependency.get(NetworkController.class);
+        mSecurityController = Dependency.get(SecurityController.class);
+        updateActivityEnabled();
+    }
+
+    public void setForceBlockWifi() {
+        mForceBlockWifi = true;
+        mBlockWifi = true;
+        if (isAttachedToWindow()) {
+            // Re-register to get new callbacks.
+            mNetworkController.removeCallback(this);
+            mNetworkController.addCallback(this);
+        }
     }
 
     @Override
@@ -152,45 +178,33 @@ public class SignalClusterView
             mBlockAirplane = blockAirplane;
             mBlockMobile = blockMobile;
             mBlockEthernet = blockEthernet;
-            mBlockWifi = blockWifi;
+            mBlockWifi = blockWifi || mForceBlockWifi;
             // Re-register to get new callbacks.
-            mNC.removeSignalCallback(this);
-            mNC.addSignalCallback(this);
+            mNetworkController.removeCallback(this);
+            mNetworkController.addCallback(this);
         }
-    }
-
-    public void setNetworkController(NetworkControllerImpl nc) {
-        if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
-        mNC = nc;
-    }
-
-    public void setSecurityController(SecurityController sc) {
-        if (DEBUG) Log.d(TAG, "SecurityController=" + sc);
-        mSC = sc;
-        mSC.addCallback(this);
-        mVpnVisible = mSC.isVpnEnabled();
-        mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mVpn            = (ImageView) findViewById(R.id.vpn);
-        mEthernetGroup  = (ViewGroup) findViewById(R.id.ethernet_combo);
-        mEthernet       = (ImageView) findViewById(R.id.ethernet);
-        mEthernetDark   = (ImageView) findViewById(R.id.ethernet_dark);
-        mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
-        mWifi           = (ImageView) findViewById(R.id.wifi_signal);
-        mWifiDark       = (ImageView) findViewById(R.id.wifi_signal_dark);
-        mWifiActivity   = (ImageView) findViewById(R.id.wifi_inout);
-        mAirplane       = (ImageView) findViewById(R.id.airplane);
-        mNoSims         = (ImageView) findViewById(R.id.no_sims);
-        mNoSimsDark     = (ImageView) findViewById(R.id.no_sims_dark);
+        mVpn            = findViewById(R.id.vpn);
+        mEthernetGroup  = findViewById(R.id.ethernet_combo);
+        mEthernet       = findViewById(R.id.ethernet);
+        mEthernetDark   = findViewById(R.id.ethernet_dark);
+        mWifiGroup      = findViewById(R.id.wifi_combo);
+        mWifi           = findViewById(R.id.wifi_signal);
+        mWifiDark       = findViewById(R.id.wifi_signal_dark);
+        mWifiActivityIn = findViewById(R.id.wifi_in);
+        mWifiActivityOut= findViewById(R.id.wifi_out);
+        mAirplane       = findViewById(R.id.airplane);
+        mNoSims         = findViewById(R.id.no_sims);
+        mNoSimsDark     = findViewById(R.id.no_sims_dark);
         mNoSimsCombo    =             findViewById(R.id.no_sims_combo);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
-        mMobileSignalGroup = (LinearLayout) findViewById(R.id.mobile_signal_group);
+        mMobileSignalGroup =          findViewById(R.id.mobile_signal_group);
 
         maybeScaleVpnAndNoSimsIcons();
     }
@@ -216,27 +230,32 @@ public class SignalClusterView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mVpnVisible = mSecurityController.isVpnEnabled();
+        mVpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
 
         for (PhoneState state : mPhoneStates) {
-            mMobileSignalGroup.addView(state.mMobileGroup);
+            if (state.mMobileGroup.getParent() == null) {
+                mMobileSignalGroup.addView(state.mMobileGroup);
+            }
         }
 
         int endPadding = mMobileSignalGroup.getChildCount() > 0 ? mMobileSignalGroupEndPadding : 0;
         mMobileSignalGroup.setPaddingRelative(0, 0, endPadding, 0);
 
-        TunerService.get(mContext).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
 
         apply();
         applyIconTint();
-        mNC.addSignalCallback(this);
+        mNetworkController.addCallback(this);
+        mSecurityController.addCallback(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         mMobileSignalGroup.removeAllViews();
-        TunerService.get(mContext).removeTunable(this);
-        mSC.removeCallback(this);
-        mNC.removeSignalCallback(this);
+        Dependency.get(TunerService.class).removeTunable(this);
+        mSecurityController.removeCallback(this);
+        mNetworkController.removeCallback(this);
 
         super.onDetachedFromWindow();
     }
@@ -255,23 +274,26 @@ public class SignalClusterView
         post(new Runnable() {
             @Override
             public void run() {
-                mVpnVisible = mSC.isVpnEnabled();
-                mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
+                mVpnVisible = mSecurityController.isVpnEnabled();
+                mVpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
                 apply();
             }
         });
     }
 
+    private void updateActivityEnabled() {
+        mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
+    }
+
     @Override
     public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-            boolean activityIn, boolean activityOut, String description) {
+            boolean activityIn, boolean activityOut, String description, boolean isTransient) {
         mWifiVisible = statusIcon.visible && !mBlockWifi;
         mWifiStrengthId = statusIcon.icon;
+        mWifiBadgeId = statusIcon.iconOverlay;
         mWifiDescription = statusIcon.contentDescription;
-        mWifiActivityId = activityIn && activityOut ? R.drawable.stat_sys_wifi_inout
-                : activityIn ? R.drawable.stat_sys_wifi_in
-                : activityOut ? R.drawable.stat_sys_wifi_out
-                : 0;
+        mWifiIn = activityIn && mActivityEnabled && mWifiVisible;
+        mWifiOut = activityOut && mActivityEnabled && mWifiVisible;
 
         apply();
     }
@@ -291,10 +313,8 @@ public class SignalClusterView
         state.mMobileTypeDescription = typeContentDescription;
         state.mIsMobileTypeIconWide = statusType != 0 && isWide;
         state.mRoaming = roaming;
-        state.mMobileActivityId = activityIn && activityOut ? R.drawable.stat_sys_signal_inout
-                : activityIn ? R.drawable.stat_sys_signal_in
-                : activityOut ? R.drawable.stat_sys_signal_out
-                : 0;
+        state.mActivityIn = activityIn && mActivityEnabled;
+        state.mActivityOut = activityOut && mActivityEnabled;
 
         apply();
     }
@@ -318,15 +338,6 @@ public class SignalClusterView
     public void setSubs(List<SubscriptionInfo> subs) {
         if (hasCorrectSubs(subs)) {
             return;
-        }
-        // Clear out all old subIds.
-        for (PhoneState state : mPhoneStates) {
-            if (state.mMobile != null) {
-                state.maybeStopAnimatableDrawable(state.mMobile);
-            }
-            if (state.mMobileDark != null) {
-                state.maybeStopAnimatableDrawable(state.mMobileDark);
-            }
         }
         mPhoneStates.clear();
         if (mMobileSignalGroup != null) {
@@ -416,30 +427,13 @@ public class SignalClusterView
             mWifi.setImageDrawable(null);
             mWifiDark.setImageDrawable(null);
             mLastWifiStrengthId = -1;
-        }
-        if (mWifiActivity !=  null) {
-            mWifiActivity.setImageDrawable(null);
-            mLastWifiActivityId = -1;
+            mLastWifiBadgeId = -1;
         }
 
         for (PhoneState state : mPhoneStates) {
-            if (state.mMobile != null) {
-                state.maybeStopAnimatableDrawable(state.mMobile);
-                state.mMobile.setImageDrawable(null);
-                state.mLastMobileStrengthId = -1;
-            }
-            if (state.mMobileDark != null) {
-                state.maybeStopAnimatableDrawable(state.mMobileDark);
-                state.mMobileDark.setImageDrawable(null);
-                state.mLastMobileStrengthId = -1;
-            }
             if (state.mMobileType != null) {
                 state.mMobileType.setImageDrawable(null);
                 state.mLastMobileTypeId = -1;
-            }
-            if (state.mMobileActivity != null) {
-                state.mMobileActivity.setImageDrawable(null);
-                state.mLastMobileActivityId = -1;
             }
         }
 
@@ -489,16 +483,16 @@ public class SignalClusterView
                     (mEthernetVisible ? "VISIBLE" : "GONE")));
 
         if (mWifiVisible) {
-            if (mWifiStrengthId != mLastWifiStrengthId) {
-                setIconForView(mWifi, mWifiStrengthId);
-                setIconForView(mWifiDark, mWifiStrengthId);
-                mLastWifiStrengthId = mWifiStrengthId;
-            }
-            if (mWifiActivityId != mLastWifiActivityId) {
-                if (mWifiActivityId != 0) {
-                    setIconForView(mWifiActivity, mWifiActivityId);
+            if (mWifiStrengthId != mLastWifiStrengthId || mWifiBadgeId != mLastWifiBadgeId) {
+                if (mWifiBadgeId == -1) {
+                    setIconForView(mWifi, mWifiStrengthId);
+                    setIconForView(mWifiDark, mWifiStrengthId);
+                } else {
+                    setBadgedWifiIconForView(mWifi, mWifiStrengthId, mWifiBadgeId);
+                    setBadgedWifiIconForView(mWifiDark, mWifiStrengthId, mWifiBadgeId);
                 }
-                mLastWifiActivityId = mWifiActivityId;
+                mLastWifiStrengthId = mWifiStrengthId;
+                mLastWifiBadgeId = mWifiBadgeId;
             }
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
@@ -511,7 +505,8 @@ public class SignalClusterView
                     (mWifiVisible ? "VISIBLE" : "GONE"),
                     mWifiStrengthId));
 
-        mWifiActivity.setVisibility(mWifiActivityId != 0 ? View.VISIBLE : View.GONE);
+        mWifiActivityIn.setVisibility(mWifiIn ? View.VISIBLE : View.GONE);
+        mWifiActivityOut.setVisibility(mWifiOut ? View.VISIBLE : View.GONE);
 
         boolean anyMobileVisible = false;
         int firstMobileTypeId = 0;
@@ -562,6 +557,10 @@ public class SignalClusterView
         // Using the imageView's context to retrieve the Drawable so that theme is preserved.
         Drawable icon = imageView.getContext().getDrawable(iconId);
 
+        setScaledIcon(imageView, icon);
+    }
+
+    private void setScaledIcon(ImageView imageView, Drawable icon) {
         if (mIconScaleFactor == 1.f) {
             imageView.setImageDrawable(icon);
         } else {
@@ -569,7 +568,35 @@ public class SignalClusterView
         }
     }
 
-    public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
+    /**
+     * Creates and sets a LayerDrawable from the given ids on the given view.
+     *
+     * <p>This method will also scale the icon by {@link #mIconScaleFactor} if appropriate.
+     */
+    private void setBadgedWifiIconForView(ImageView imageView, @DrawableRes int wifiPieId,
+            @DrawableRes int badgeId) {
+        // Using the imageView's context to retrieve the Drawable so that theme is preserved.;
+        LayerDrawable icon = new LayerDrawable(new Drawable[] {
+                imageView.getContext().getDrawable(wifiPieId),
+                imageView.getContext().getDrawable(badgeId)});
+
+        // The LayerDrawable shares an underlying state so we must mutate the object to change the
+        // color between the light and dark themes.
+        icon.mutate().setTint(getColorAttr(imageView.getContext(), R.attr.singleToneColor));
+
+        setScaledIcon(imageView, icon);
+    }
+
+    /** Returns the given color attribute value, or white if not defined. */
+    @ColorInt private static int getColorAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[] {attr});
+        @ColorInt int colorAccent = ta.getColor(0, Color.WHITE);
+        ta.recycle();
+        return colorAccent;
+    }
+
+    @Override
+    public void onDarkChanged(Rect tintArea, float darkIntensity, int tint) {
         boolean changed = tint != mIconTint || darkIntensity != mDarkIntensity
                 || !mTintArea.equals(tintArea);
         mIconTint = tint;
@@ -581,18 +608,20 @@ public class SignalClusterView
     }
 
     private void applyIconTint() {
-        setTint(mVpn, StatusBarIconController.getTint(mTintArea, mVpn, mIconTint));
-        setTint(mAirplane, StatusBarIconController.getTint(mTintArea, mAirplane, mIconTint));
+        setTint(mVpn, DarkIconDispatcher.getTint(mTintArea, mVpn, mIconTint));
+        setTint(mAirplane, DarkIconDispatcher.getTint(mTintArea, mAirplane, mIconTint));
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mNoSims, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mNoSims, mDarkIntensity),
                 mNoSims, mNoSimsDark);
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
                 mWifi, mWifiDark);
-        setTint(mWifiActivity,
-                StatusBarIconController.getTint(mTintArea, mWifiActivity, mIconTint));
+        setTint(mWifiActivityIn,
+                DarkIconDispatcher.getTint(mTintArea, mWifiActivityIn, mIconTint));
+        setTint(mWifiActivityOut,
+                DarkIconDispatcher.getTint(mTintArea, mWifiActivityOut, mIconTint));
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
                 mEthernet, mEthernetDark);
         for (int i = 0; i < mPhoneStates.size(); i++) {
             mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity, mTintArea);
@@ -615,17 +644,19 @@ public class SignalClusterView
     private class PhoneState {
         private final int mSubId;
         private boolean mMobileVisible = false;
-        private int mMobileStrengthId = 0, mMobileTypeId = 0, mMobileActivityId = 0;
+        private int mMobileStrengthId = 0, mMobileTypeId = 0;
         private int mLastMobileStrengthId = -1;
         private int mLastMobileTypeId = -1;
-        private int mLastMobileActivityId = -1;
         private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
         private ViewGroup mMobileGroup;
         private ImageView mMobile, mMobileDark, mMobileType, mMobileRoaming;
         public boolean mRoaming;
-        private ImageView mMobileActivity;
+        private ImageView mMobileActivityIn;
+        private ImageView mMobileActivityOut;
+        public boolean mActivityIn;
+        public boolean mActivityOut;
 
         public PhoneState(int subId, Context context) {
             ViewGroup root = (ViewGroup) LayoutInflater.from(context)
@@ -636,18 +667,24 @@ public class SignalClusterView
 
         public void setViews(ViewGroup root) {
             mMobileGroup    = root;
-            mMobile         = (ImageView) root.findViewById(R.id.mobile_signal);
-            mMobileDark     = (ImageView) root.findViewById(R.id.mobile_signal_dark);
-            mMobileType     = (ImageView) root.findViewById(R.id.mobile_type);
-            mMobileRoaming  = (ImageView) root.findViewById(R.id.mobile_roaming);
-            mMobileActivity = (ImageView) root.findViewById(R.id.mobile_inout);
+            mMobile         = root.findViewById(R.id.mobile_signal);
+            mMobileDark     = root.findViewById(R.id.mobile_signal_dark);
+            mMobileType     = root.findViewById(R.id.mobile_type);
+            mMobileRoaming  = root.findViewById(R.id.mobile_roaming);
+            mMobileActivityIn = root.findViewById(R.id.mobile_in);
+            mMobileActivityOut = root.findViewById(R.id.mobile_out);
+            // TODO: Remove the 2 instances because now the drawable can handle darkness.
+            mMobile.setImageDrawable(new SignalDrawable(mMobile.getContext()));
+            SignalDrawable drawable = new SignalDrawable(mMobileDark.getContext());
+            drawable.setDarkIntensity(1);
+            mMobileDark.setImageDrawable(drawable);
         }
 
         public boolean apply(boolean isSecondaryIcon) {
             if (mMobileVisible && !mIsAirplaneMode) {
                 if (mLastMobileStrengthId != mMobileStrengthId) {
-                    updateAnimatableIcon(mMobile, mMobileStrengthId);
-                    updateAnimatableIcon(mMobileDark, mMobileStrengthId);
+                    mMobile.getDrawable().setLevel(mMobileStrengthId);
+                    mMobileDark.getDrawable().setLevel(mMobileStrengthId);
                     mLastMobileStrengthId = mMobileStrengthId;
                 }
 
@@ -656,10 +693,6 @@ public class SignalClusterView
                     mLastMobileTypeId = mMobileTypeId;
                 }
 
-                if (mLastMobileActivityId != mMobileActivityId) {
-                    mMobileActivity.setImageResource(mMobileActivityId);
-                    mLastMobileActivityId = mMobileActivityId;
-                }
                 mMobileGroup.setContentDescription(mMobileTypeDescription
                         + " " + mMobileDescription);
                 mMobileGroup.setVisibility(View.VISIBLE);
@@ -682,52 +715,10 @@ public class SignalClusterView
 
             mMobileType.setVisibility(mMobileTypeId != 0 ? View.VISIBLE : View.GONE);
             mMobileRoaming.setVisibility(mRoaming ? View.VISIBLE : View.GONE);
-            mMobileActivity.setVisibility(mMobileActivityId != 0 ? View.VISIBLE : View.GONE);
+            mMobileActivityIn.setVisibility(mActivityIn ? View.VISIBLE : View.GONE);
+            mMobileActivityOut.setVisibility(mActivityOut ? View.VISIBLE : View.GONE);
 
             return mMobileVisible;
-        }
-
-        private void updateAnimatableIcon(ImageView view, int resId) {
-            maybeStopAnimatableDrawable(view);
-            setIconForView(view, resId);
-            maybeStartAnimatableDrawable(view);
-        }
-
-        private void maybeStopAnimatableDrawable(ImageView view) {
-            Drawable drawable = view.getDrawable();
-
-            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
-            // wrapper.
-            if (drawable instanceof ScalingDrawableWrapper) {
-                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
-            }
-
-            if (drawable instanceof Animatable) {
-                Animatable ad = (Animatable) drawable;
-                if (ad.isRunning()) {
-                    ad.stop();
-                }
-            }
-        }
-
-        private void maybeStartAnimatableDrawable(ImageView view) {
-            Drawable drawable = view.getDrawable();
-
-            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
-            // wrapper.
-            if (drawable instanceof ScalingDrawableWrapper) {
-                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
-            }
-
-            if (drawable instanceof Animatable) {
-                Animatable ad = (Animatable) drawable;
-                if (ad instanceof AnimatedVectorDrawable) {
-                    ((AnimatedVectorDrawable) ad).forceAnimationOnUI();
-                }
-                if (!ad.isRunning()) {
-                    ad.start();
-                }
-            }
         }
 
         public void populateAccessibilityEvent(AccessibilityEvent event) {
@@ -739,13 +730,15 @@ public class SignalClusterView
 
         public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
             applyDarkIntensity(
-                    StatusBarIconController.getDarkIntensity(tintArea, mMobile, darkIntensity),
+                    DarkIconDispatcher.getDarkIntensity(tintArea, mMobile, darkIntensity),
                     mMobile, mMobileDark);
-            setTint(mMobileType, StatusBarIconController.getTint(tintArea, mMobileType, tint));
-            setTint(mMobileRoaming, StatusBarIconController.getTint(tintArea, mMobileRoaming,
+            setTint(mMobileType, DarkIconDispatcher.getTint(tintArea, mMobileType, tint));
+            setTint(mMobileRoaming, DarkIconDispatcher.getTint(tintArea, mMobileRoaming,
                     tint));
-            setTint(mMobileActivity,
-                    StatusBarIconController.getTint(tintArea, mMobileActivity, tint));
+            setTint(mMobileActivityIn,
+                    DarkIconDispatcher.getTint(tintArea, mMobileActivityIn, tint));
+            setTint(mMobileActivityOut,
+                    DarkIconDispatcher.getTint(tintArea, mMobileActivityOut, tint));
         }
     }
 }

@@ -18,9 +18,12 @@ package android.app;
 
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.app.InstantAppResolverService.InstantAppResolutionCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.InstantAppResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -28,19 +31,22 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Base class for implementing the resolver service.
  * @hide
+ * @deprecated use InstantAppResolverService instead
  */
+@Deprecated
 @SystemApi
-public abstract class EphemeralResolverService extends Service {
-    public static final String EXTRA_RESOLVE_INFO = "android.app.extra.RESOLVE_INFO";
-    public static final String EXTRA_SEQUENCE = "android.app.extra.SEQUENCE";
-    private static final String EXTRA_PREFIX = "android.app.PREFIX";
-    private Handler mHandler;
+public abstract class EphemeralResolverService extends InstantAppResolverService {
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final String TAG = "PackageManager";
 
     /**
      * Called to retrieve resolve info for ephemeral applications.
@@ -49,62 +55,61 @@ public abstract class EphemeralResolverService extends Service {
      * @param prefixMask A mask that was applied to each digest prefix. This should
      *      be used when comparing against the digest prefixes as all bits might
      *      not be set.
+     * @deprecated use {@link #onGetEphemeralResolveInfo(int[])} instead
      */
+    @Deprecated
     public abstract List<EphemeralResolveInfo> onEphemeralResolveInfoList(
-            int digestPrefix[], int prefixMask);
+            int digestPrefix[], int prefix);
 
-    @Override
-    public final void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        mHandler = new ServiceHandler(base.getMainLooper());
+    /**
+     * Called to retrieve resolve info for ephemeral applications.
+     *
+     * @param digestPrefix The hash prefix of the ephemeral's domain.
+     */
+    public List<EphemeralResolveInfo> onGetEphemeralResolveInfo(int digestPrefix[]) {
+        return onEphemeralResolveInfoList(digestPrefix, 0xFFFFF000);
+    }
+
+    /**
+     * Called to retrieve intent filters for ephemeral applications.
+     *
+     * @param hostName The name of the host to get intent filters for.
+     */
+    public EphemeralResolveInfo onGetEphemeralIntentFilter(String hostName) {
+        throw new IllegalStateException("Must define");
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
-        return new IEphemeralResolver.Stub() {
-            @Override
-            public void getEphemeralResolveInfoList(
-                    IRemoteCallback callback, int digestPrefix[], int prefixMask, int sequence) {
-                final Message msg = mHandler.obtainMessage(
-                        ServiceHandler.MSG_GET_EPHEMERAL_RESOLVE_INFO, prefixMask, sequence, callback);
-                final Bundle data = new Bundle();
-                data.putIntArray(EXTRA_PREFIX, digestPrefix);
-                msg.setData(data);
-                msg.sendToTarget();
-            }
-        };
+    public Looper getLooper() {
+        return super.getLooper();
     }
 
-    private final class ServiceHandler extends Handler {
-        public static final int MSG_GET_EPHEMERAL_RESOLVE_INFO = 1;
-
-        public ServiceHandler(Looper looper) {
-            super(looper, null /*callback*/, true /*async*/);
+    @Override
+    void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
+            InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Log.d(TAG, "Legacy resolver; getInstantAppResolveInfo;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
         }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(Message message) {
-            final int action = message.what;
-            switch (action) {
-                case MSG_GET_EPHEMERAL_RESOLVE_INFO: {
-                    final IRemoteCallback callback = (IRemoteCallback) message.obj;
-                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
-                    final List<EphemeralResolveInfo> resolveInfo =
-                            onEphemeralResolveInfoList(digestPrefix, message.arg1);
-                    final Bundle data = new Bundle();
-                    data.putInt(EXTRA_SEQUENCE, message.arg2);
-                    data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
-                    try {
-                        callback.sendResult(data);
-                    } catch (RemoteException e) {
-                    }
-                } break;
-
-                default: {
-                    throw new IllegalArgumentException("Unknown message: " + action);
-                }
-            }
+        final List<EphemeralResolveInfo> response = onGetEphemeralResolveInfo(digestPrefix);
+        final int responseSize = response == null ? 0 : response.size();
+        final List<InstantAppResolveInfo> resultList = new ArrayList<>(responseSize);
+        for (int i = 0; i < responseSize; i++) {
+            resultList.add(response.get(i).getInstantAppResolveInfo());
         }
+        callback.onInstantAppResolveInfo(resultList);
+    }
+
+    @Override
+    void _onGetInstantAppIntentFilter(int[] digestPrefix, String token,
+            String hostName, InstantAppResolutionCallback callback) {
+        if (DEBUG_EPHEMERAL) {
+            Log.d(TAG, "Legacy resolver; getInstantAppIntentFilter;"
+                    + " prefix: " + Arrays.toString(digestPrefix));
+        }
+        final EphemeralResolveInfo response = onGetEphemeralIntentFilter(hostName);
+        final List<InstantAppResolveInfo> resultList = new ArrayList<>(1);
+        resultList.add(response.getInstantAppResolveInfo());
+        callback.onInstantAppResolveInfo(resultList);
     }
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Командалык кабык"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Мүчүлүштүк тууралуу кабар берүүлөр"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Мүчүлүштүк тууралуу билдирүү <xliff:g id="ID">#%d</xliff:g> түзүлүүдө"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Мүчүлүштүк тууралуу билдирүү <xliff:g id="ID">#%d</xliff:g> жаздырылды"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Мүчүлүштүк жөнүндө кабардын чоо-жайы кошулууда"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Күтө туруңуз…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Мүчүлүштүктөр жөнүндө кабар жакында телефонго чыгат"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Мүчүлүштүк тууралуу кабарды жөнөтүү үчүн таптап коюңуз"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Мүчүлүштүк тууралуу билдирүүңүздү бөлүшүү үчүн таптап коюңуз"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Мүчүлүштүк тууралуу кабарды скриншотсуз жөнөтүү үчүн солго серпиңиз же скриншот даяр болгуча күтүңүз"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Мүчүлүштүктөр тууралуу билдирүүлөрдө тутумдун ар кандай таржымалдарынан алынган дайындар, ошондой эле купуя маалымат камтылышы мүмкүн (мисалы, жайгашкан жер сыяктуу). Мындай билдирүүлөрдү бир гана ишеничтүү адамдар жана колдонмолор менен бөлүшүңүз."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Экинчи көрсөтүлбөсүн"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Мүчүлүштүктөрдү кабарлоолор"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Мүчүлүштүк тууралуу кабарлаган файл окулбай койду"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Мүчүлүштүктөр жөнүндө кабардын чоо-жайы zip файлына кошулбай койду"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"аталышы жок"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Чоо-жайы"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Скриншот"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Скриншот ийгиликтүү тартылды."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Скриншот тартылбай койду."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Мүчүлүштүк тууралуу билдирүүнүн <xliff:g id="ID">#%d</xliff:g> чоо-жайы"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Файлдын аталышы"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Мүчүлүштүктүн аталышы"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Мүчүлүштүк корутундусу"</string>
+    <string name="save" msgid="4781509040564835759">"Сактоо"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Мүчүлүштүк тууралуу кабарлоо"</string>
+</resources>

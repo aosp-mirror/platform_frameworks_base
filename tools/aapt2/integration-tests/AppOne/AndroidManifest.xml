@@ -14,4 +14,9 @@
      limitations under the License.
 -->
 
-<manifest package="com.android.aapt.app.one" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.aapt.app.one" coreApp="true">
+    <uses-sdk android:minSdkVersion="21" />
+
+    <uses-permission-sdk-23 android:name="android.permission.TEST" android:maxSdkVersion="22" />
+</manifest>

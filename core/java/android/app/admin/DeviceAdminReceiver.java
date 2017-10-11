@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.accounts.AccountManager;
+import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -28,6 +29,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
+import android.os.UserHandle;
 import android.security.KeyChain;
 
 import java.lang.annotation.Retention;
@@ -79,6 +82,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * that other applications can not abuse it.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_ENABLED
             = "android.app.action.DEVICE_ADMIN_ENABLED";
 
@@ -92,6 +96,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * to the user before they disable your admin.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED
             = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
 
@@ -113,6 +118,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * its intent filter.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_DEVICE_ADMIN_DISABLED
             = "android.app.action.DEVICE_ADMIN_DISABLED";
 
@@ -122,13 +128,14 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * of the new password with {@link DevicePolicyManager#isActivePasswordSufficient()
      * DevicePolicyManager.isActivePasswordSufficient()}.
      * You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordChanged}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordChanged(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to receive
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_CHANGED
             = "android.app.action.ACTION_PASSWORD_CHANGED";
 
@@ -138,39 +145,42 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * number of failed password attempts there have been with
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordFailed}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordFailed(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_FAILED
             = "android.app.action.ACTION_PASSWORD_FAILED";
 
     /**
      * Action sent to a device administrator when the user has successfully entered their device
      * or profile challenge password, after failing one or more times.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordSucceeded}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordSucceeded(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_SUCCEEDED
             = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
 
     /**
      * Action periodically sent to a device administrator when the device or profile challenge
      * password is expiring.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordExpiring}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordExpiring(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to receive
      * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PASSWORD_EXPIRING
             = "android.app.action.ACTION_PASSWORD_EXPIRING";
 
@@ -185,6 +195,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_LOCK_TASK_ENTERING
             = "android.app.action.LOCK_TASK_ENTERING";
 
@@ -198,6 +209,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_LOCK_TASK_EXITING
             = "android.app.action.LOCK_TASK_EXITING";
 
@@ -230,6 +242,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p>Output: Nothing</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
 
@@ -242,6 +255,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_SHARING_DECLINED =
             "android.app.action.BUGREPORT_SHARING_DECLINED";
 
@@ -254,6 +268,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_FAILED = "android.app.action.BUGREPORT_FAILED";
 
     /**
@@ -264,6 +279,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_BUGREPORT_SHARE =
             "android.app.action.BUGREPORT_SHARE";
 
@@ -272,6 +288,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_SECURITY_LOGS_AVAILABLE
             = "android.app.action.SECURITY_LOGS_AVAILABLE";
 
@@ -281,6 +298,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_NETWORK_LOGS_AVAILABLE
             = "android.app.action.NETWORK_LOGS_AVAILABLE";
 
@@ -304,6 +322,26 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public static final String EXTRA_NETWORK_LOGS_COUNT =
             "android.app.extra.EXTRA_NETWORK_LOGS_COUNT";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been added.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the new user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_ADDED = "android.app.action.USER_ADDED";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been removed.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the new user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_REMOVED = "android.app.action.USER_REMOVED";
 
     /**
      * A string containing the SHA-256 hash of the bugreport file.
@@ -357,33 +395,41 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
     /** @hide */
-    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
+    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS =
+            "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID = "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI = "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE =
+            "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
 
     /**
      * Broadcast action: notify device owner that there is a pending system update.
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE = "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE =
+            "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
 
     /**
      * A long type extra for {@link #onSystemUpdatePending} recording the system time as given by
      * {@link System#currentTimeMillis()} when the current pending system update is first available.
      * @hide
      */
-    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME = "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
+    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME =
+            "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
 
     /**
      * Name under which a DevicePolicy component publishes information
@@ -471,8 +517,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * to retrieve the active password characteristics.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordChanged(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordChanged(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has changed their device or profile challenge password, as a result of
+     * receiving {@link #ACTION_PASSWORD_CHANGED}.  At this point you
+     * can use {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * to retrieve the active password characteristics.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password changed. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordChanged(Context context, Intent intent, UserHandle user) {
+        onPasswordChanged(context, intent);
     }
 
     /**
@@ -482,8 +547,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * failed password attempts.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordFailed(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordFailed(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has failed at entering their device or profile challenge password,
+     * as a result of receiving {@link #ACTION_PASSWORD_FAILED}.  At this point you can use
+     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()} to retrieve the number of
+     * failed password attempts.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password check failed. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordFailed(Context context, Intent intent, UserHandle user) {
+        onPasswordFailed(context, intent);
     }
 
     /**
@@ -493,8 +577,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * failed.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordSucceeded(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordSucceeded(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has succeeded at entering their device or profile challenge password,
+     * as a result of receiving {@link #ACTION_PASSWORD_SUCCEEDED}.  This will
+     * only be received the first time they succeed after having previously
+     * failed.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user of profile for whom the password check succeeded.  To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordSucceeded(Context context, Intent intent, UserHandle user) {
+        onPasswordSucceeded(context, intent);
     }
 
     /**
@@ -514,8 +617,37 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordExpiring(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordExpiring(Context context, Intent intent) {
+    }
+
+    /**
+     * Called periodically when the device or profile challenge password is about to expire
+     * or has expired.  It will typically be called at these times: on device boot, once per day
+     * before the password expires, and at the time when the password expires.
+     *
+     * <p>If the password is not updated by the user, this method will continue to be called
+     * once per day until the password is changed or the device admin disables password expiration.
+     *
+     * <p>The admin will typically post a notification requesting the user to change their password
+     * in response to this call. The actual password expiration time can be obtained by calling
+     * {@link DevicePolicyManager#getPasswordExpiration(ComponentName) }
+     *
+     * <p>The admin should be sure to take down any notifications it posted in response to this call
+     * when it receives {@link DeviceAdminReceiver#onPasswordChanged(Context, Intent, UserHandle) }.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password is expiring. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordExpiring(Context context, Intent intent, UserHandle user) {
+        onPasswordExpiring(context, intent);
     }
 
     /**
@@ -594,17 +726,24 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Allows the receiver to be notified when information about a pending system update is
+     * Called when the information about a pending system update is available.
+     *
+     * <p>Allows the receiver to be notified when information about a pending system update is
      * available from the system update service. The same pending system update can trigger multiple
      * calls to this method, so it is necessary to examine the incoming parameters for details about
      * the update.
-     * <p>
-     * This callback is only applicable to device owners.
+     *
+     * <p>This callback is only applicable to device owners and profile owners.
+     *
+     * <p>To get further information about a pending system update (for example, whether or not the
+     * update is a security patch), the device owner or profile owner can call
+     * {@link DevicePolicyManager#getPendingSystemUpdate}.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param receivedTime The time as given by {@link System#currentTimeMillis()} indicating when
      *        the current pending update was first available. -1 if no pending update is available.
+     * @see DevicePolicyManager#getPendingSystemUpdate
      */
     public void onSystemUpdatePending(Context context, Intent intent, long receivedTime) {
     }
@@ -655,6 +794,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called when a new batch of security logs can be retrieved.
      *
+     * <p>If a secondary user or profile is created, this callback won't be received until all users
+     * become affiliated again (even if security logging is enabled).
+     * See {@link DevicePolicyManager#setAffiliationIds}
+     *
+     * <p>This callback will be re-triggered if the logs are not retrieved.
+     *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
@@ -669,19 +814,46 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * ever be called when network logging is enabled. The logs can only be retrieved while network
      * logging is enabled.
      *
+     * <p>If a secondary user or profile is created, this callback won't be received until all users
+     * become affiliated again (even if network logging is enabled). It will also no longer be
+     * possible to retrieve the network logs batch with the most recent {@code batchToken} provided
+     * by this callback. See {@link DevicePolicyManager#setAffiliationIds}.
+     *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param batchToken The token representing the current batch of network logs.
      * @param networkLogsCount The total count of events in the current batch of network logs.
-     * @see DevicePolicyManager#retrieveNetworkLogs(ComponentName)
-     *
-     * @hide
+     * @see DevicePolicyManager#retrieveNetworkLogs
      */
     public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
             int networkLogsCount) {
     }
+
+     /**
+      * Called when a user or profile is created.
+      *
+      * <p>This callback is only applicable to device owners.
+      *
+      * @param context The running context as per {@link #onReceive}.
+      * @param intent The received intent as per {@link #onReceive}.
+      * @param newUser The {@link UserHandle} of the user that has just been added.
+      */
+     public void onUserAdded(Context context, Intent intent, UserHandle newUser) {
+     }
+
+     /**
+      * Called when a user or profile is removed.
+      *
+      * <p>This callback is only applicable to device owners.
+      *
+      * @param context The running context as per {@link #onReceive}.
+      * @param intent The received intent as per {@link #onReceive}.
+      * @param removedUser The {@link UserHandle} of the user that has just been removed.
+      */
+     public void onUserRemoved(Context context, Intent intent, UserHandle removedUser) {
+     }
 
     /**
      * Intercept standard device administrator broadcasts.  Implementations
@@ -693,11 +865,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {
-            onPasswordChanged(context, intent);
+            onPasswordChanged(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PASSWORD_FAILED.equals(action)) {
-            onPasswordFailed(context, intent);
+            onPasswordFailed(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PASSWORD_SUCCEEDED.equals(action)) {
-            onPasswordSucceeded(context, intent);
+            onPasswordSucceeded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_DEVICE_ADMIN_ENABLED.equals(action)) {
             onEnabled(context, intent);
         } else if (ACTION_DEVICE_ADMIN_DISABLE_REQUESTED.equals(action)) {
@@ -709,7 +881,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_DEVICE_ADMIN_DISABLED.equals(action)) {
             onDisabled(context, intent);
         } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
-            onPasswordExpiring(context, intent);
+            onPasswordExpiring(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
@@ -741,6 +913,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             long batchToken = intent.getLongExtra(EXTRA_NETWORK_LOGS_TOKEN, -1);
             int networkLogsCount = intent.getIntExtra(EXTRA_NETWORK_LOGS_COUNT, 0);
             onNetworkLogsAvailable(context, intent, batchToken, networkLogsCount);
+        } else if (ACTION_USER_ADDED.equals(action)) {
+            onUserAdded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_USER_REMOVED.equals(action)) {
+            onUserRemoved(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         }
     }
 }

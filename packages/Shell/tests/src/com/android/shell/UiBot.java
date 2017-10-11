@@ -16,14 +16,17 @@
 
 package com.android.shell;
 
+import android.app.Instrumentation;
+import android.app.StatusBarManager;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -34,11 +37,13 @@ final class UiBot {
     private static final String TAG = "UiBot";
     private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
 
+    private final Instrumentation mInstrumentation;
     private final UiDevice mDevice;
     private final int mTimeout;
 
-    public UiBot(UiDevice device, int timeout) {
-        mDevice = device;
+    public UiBot(Instrumentation instrumentation, int timeout) {
+        mInstrumentation = instrumentation;
+        mDevice = UiDevice.getInstance(instrumentation);
         mTimeout = timeout;
     }
 
@@ -55,6 +60,13 @@ final class UiBot {
         assertTrue("could not get system ui (" + SYSTEMUI_PACKAGE + ")", gotIt);
 
         return getObject(text);
+    }
+
+    public void collapseStatusBar() throws Exception {
+        // TODO: mDevice should provide such method..
+        StatusBarManager sbm =
+                (StatusBarManager) mInstrumentation.getContext().getSystemService("statusbar");
+        sbm.collapsePanels();
     }
 
     /**
@@ -111,6 +123,16 @@ final class UiBot {
         return uiObject;
     }
 
+    /**
+     * Asserts an object is not visible.
+     */
+    public void assertNotVisibleById(String id) {
+        // TODO: not working when the bugreport dialog is shown, it hangs until the dialog is
+        // dismissed and hence always work.
+        boolean hasIt = mDevice.hasObject(By.res(id));
+        assertFalse("should not have found object with id '" + id+ "'", hasIt);
+    }
+
 
     /**
      * Clicks on a UI element.
@@ -133,56 +155,24 @@ final class UiBot {
     }
 
     /**
-     * Chooses a given activity to handle an Intent, using the "Just Once" button.
+     * Chooses a given activity to handle an Intent.
      *
      * @param name name of the activity as displayed in the UI (typically the value set by
      *            {@code android:label} in the manifest).
      */
-    // TODO: UI Automator should provide such logic.
     public void chooseActivity(String name) {
-        // First check if the activity is the default option.
-        String shareText = "Share with " + name;
-        Log.v(TAG, "Waiting for ActivityChooser text: '" + shareText + "'");
-        boolean gotIt = mDevice.wait(Until.hasObject(By.text(shareText)), mTimeout);
-        boolean justOnceHack = false;
-
-        if (gotIt) {
-            Log.v(TAG, "Found activity " + name + ", it's the default action");
-            clickJustOnce();
-        } else {
-            // Since it's not, need to find it in the scrollable list...
-            Log.v(TAG, "Activity " + name + " is not default action");
-            UiScrollable activitiesList = new UiScrollable(new UiSelector().scrollable(true));
-            try {
-                activitiesList.scrollForward();
-            } catch (UiObjectNotFoundException e) {
-                // TODO: for some paranormal issue, the first time a test is run the scrollable
-                // activity list is displayed but calling scrollForwad() (or even isScrollable())
-                // throws a "UiObjectNotFoundException: UiSelector[SCROLLABLE=true]" exception
-                justOnceHack = true;
-                Log.d(TAG, "could not scroll forward", e);
-            }
-            UiObject activity = getVisibleObject(name);
-            // ... then select it.
-            click(activity, name);
-            if (justOnceHack) {
-                clickJustOnce();
-            }
-        }
-    }
-
-    private void clickJustOnce() {
-        boolean gotIt = mDevice.wait(Until.hasObject(By.res("android", "button_once")), mTimeout);
-        assertTrue("'Just Once' button not visible yet", gotIt);
-
-        UiObject justOnce = mDevice
-                .findObject(new UiSelector().resourceId("android:id/button_once"));
-        assertTrue("'Just Once' button not found", justOnce.exists());
-
-        click(justOnce, "Just Once");
+        // It uses an intent chooser now, so just getting the activity by text is enough...
+        UiObject activity = getObject(name);
+        click(activity, name);
     }
 
     public void pressBack() {
         mDevice.pressBack();
     }
+
+    public void turnScreenOn() throws Exception {
+        mDevice.executeShellCommand("input keyevent KEYCODE_WAKEUP");
+        mDevice.executeShellCommand("wm dismiss-keyguard");
+    }
+
 }

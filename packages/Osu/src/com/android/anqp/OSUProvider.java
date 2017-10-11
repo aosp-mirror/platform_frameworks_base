@@ -1,5 +1,10 @@
 package com.android.anqp;
 
+import android.os.Parcel;
+
+import com.android.hotspot2.Utils;
+
+import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -154,5 +159,55 @@ public class OSUProvider {
                 ", NAI='" + mOsuNai + '\'' +
                 ", serviceDescriptions=" + mServiceDescriptions +
                 '}';
+    }
+
+    public OSUProvider(Parcel in) throws IOException {
+        mSSID = in.readString();
+        int nameCount = in.readInt();
+        mNames = new ArrayList<>(nameCount);
+        for (int n = 0; n < nameCount; n++) {
+            mNames.add(new I18Name(in));
+        }
+        mOSUServer = in.readString();
+        int methodCount = in.readInt();
+        mOSUMethods = new ArrayList<>(methodCount);
+        for (int n = 0; n < methodCount; n++) {
+            mOSUMethods.add(Utils.mapEnum(in.readInt(), OSUMethod.class));
+        }
+        int iconCount = in.readInt();
+        mIcons = new ArrayList<>(iconCount);
+        for (int n = 0; n < iconCount; n++) {
+            mIcons.add(new IconInfo(in));
+        }
+        mOsuNai = in.readString();
+        int serviceCount = in.readInt();
+        mServiceDescriptions = new ArrayList<>(serviceCount);
+        for (int n = 0; n < serviceCount; n++) {
+            mServiceDescriptions.add(new I18Name(in));
+        }
+        mHashCode = in.readInt();
+    }
+
+    public void writeParcel(Parcel out) {
+        out.writeString(mSSID);
+        out.writeInt(mNames.size());
+        for (I18Name name : mNames) {
+            name.writeParcel(out);
+        }
+        out.writeString(mOSUServer);
+        out.writeInt(mOSUMethods.size());
+        for (OSUMethod method : mOSUMethods) {
+            out.writeInt(method.ordinal());
+        }
+        out.writeInt(mIcons.size());
+        for (IconInfo iconInfo : mIcons) {
+            iconInfo.writeParcel(out);
+        }
+        out.writeString(mOsuNai);
+        out.writeInt(mServiceDescriptions.size());
+        for (I18Name serviceDescription : mServiceDescriptions) {
+            serviceDescription.writeParcel(out);
+        }
+        out.writeInt(mHashCode);
     }
 }

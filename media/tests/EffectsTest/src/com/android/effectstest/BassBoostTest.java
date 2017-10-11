@@ -70,7 +70,7 @@ public class BassBoostTest extends Activity implements OnCheckedChangeListener {
 
         setContentView(R.layout.bassboosttest);
 
-        mSessionText = (EditText) findViewById(R.id.sessionEdit);
+        mSessionText = findViewById(R.id.sessionEdit);
         mSessionText.setOnKeyListener(mSessionKeyListener);
 
         mSessionText.setText(Integer.toString(sSession));

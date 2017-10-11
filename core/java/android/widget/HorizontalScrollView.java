@@ -129,7 +129,7 @@ public class HorizontalScrollView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
-    private float mScrollFactor;
+    private float mHorizontalScrollFactor;
 
     /**
      * ID of the active pointer. This is used to retain consistency during
@@ -224,7 +224,7 @@ public class HorizontalScrollView extends FrameLayout {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-        mScrollFactor = configuration.getScaledScrollFactor();
+        mHorizontalScrollFactor = configuration.getScaledHorizontalScrollFactor();
     }
 
     @Override
@@ -743,7 +743,7 @@ public class HorizontalScrollView extends FrameLayout {
                         axisValue = 0;
                     }
 
-                    final int delta = Math.round(axisValue * mScrollFactor);
+                    final int delta = Math.round(axisValue * mHorizontalScrollFactor);
                     if (delta != 0) {
                         final int range = getScrollRange();
                         int oldScrollX = mScrollX;
@@ -1443,7 +1443,7 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (focused.getRevealOnFocusHint()) {
+        if (focused != null && focused.getRevealOnFocusHint()) {
             if (!mIsLayoutDirty) {
                 scrollToChild(focused);
             } else {

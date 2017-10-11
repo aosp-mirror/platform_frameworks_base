@@ -61,11 +61,21 @@ public class ResolveInfo implements Parcelable {
     public ProviderInfo providerInfo;
 
     /**
-     * The ephemeral application that corresponds to this resolution match. This will
-     * only be set in specific circumstances.
+     * An auxiliary response that may modify the resolved information. This is
+     * only set under certain circumstances; such as when resolving instant apps
+     * or components defined in un-installed splits.
      * @hide
      */
-    public EphemeralResolveInfo ephemeralResolveInfo;
+    public AuxiliaryResolveInfo auxiliaryInfo;
+
+    /**
+     * Whether or not an instant app is available for the resolved intent.
+     */
+    public boolean isInstantAppAvailable;
+
+    /** @removed */
+    @Deprecated
+    public boolean instantAppAvailable;
 
     /**
      * The IntentFilter that was matched for this ResolveInfo.
@@ -324,6 +334,8 @@ public class ResolveInfo implements Parcelable {
         system = orig.system;
         targetUserId = orig.targetUserId;
         handleAllWebDataURI = orig.handleAllWebDataURI;
+        isInstantAppAvailable = orig.isInstantAppAvailable;
+        instantAppAvailable = isInstantAppAvailable;
     }
 
     public String toString() {
@@ -387,6 +399,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(noResourceId ? 1 : 0);
         dest.writeInt(iconResourceId);
         dest.writeInt(handleAllWebDataURI ? 1 : 0);
+        dest.writeInt(isInstantAppAvailable ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -434,6 +447,7 @@ public class ResolveInfo implements Parcelable {
         noResourceId = source.readInt() != 0;
         iconResourceId = source.readInt();
         handleAllWebDataURI = source.readInt() != 0;
+        instantAppAvailable = isInstantAppAvailable = source.readInt() != 0;
     }
 
     public static class DisplayNameComparator

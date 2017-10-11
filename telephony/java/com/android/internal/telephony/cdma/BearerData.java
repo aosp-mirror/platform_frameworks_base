@@ -1113,6 +1113,27 @@ public final class BearerData {
         return decodeCharset(data, offset, numFields, 1, "Shift_JIS");
     }
 
+    private static String decodeGsmDcs(byte[] data, int offset, int numFields, int msgType)
+            throws CodingException
+    {
+        if ((msgType & 0xC0) != 0) {
+            throw new CodingException("unsupported coding group ("
+                    + msgType + ")");
+        }
+
+        switch ((msgType >> 2) & 0x3) {
+        case UserData.ENCODING_GSM_DCS_7BIT:
+            return decode7bitGsm(data, offset, numFields);
+        case UserData.ENCODING_GSM_DCS_8BIT:
+            return decodeUtf8(data, offset, numFields);
+        case UserData.ENCODING_GSM_DCS_16BIT:
+            return decodeUtf16(data, offset, numFields);
+        default:
+            throw new CodingException("unsupported user msgType encoding ("
+                    + msgType + ")");
+        }
+    }
+
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
         throws CodingException
     {
@@ -1166,6 +1187,10 @@ public final class BearerData {
             break;
         case UserData.ENCODING_SHIFT_JIS:
             userData.payloadStr = decodeShiftJis(userData.payload, offset, userData.numFields);
+            break;
+        case UserData.ENCODING_GSM_DCS:
+            userData.payloadStr = decodeGsmDcs(userData.payload, offset,
+                    userData.numFields, userData.msgType);
             break;
         default:
             throw new CodingException("unsupported user data encoding ("

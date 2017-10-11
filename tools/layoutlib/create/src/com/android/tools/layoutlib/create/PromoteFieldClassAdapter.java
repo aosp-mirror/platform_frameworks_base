@@ -31,7 +31,7 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 public class PromoteFieldClassAdapter extends ClassVisitor {
 
     private final Set<String> mFieldNames;
-    private static final int ACC_NOT_PUBLIC = ~(ACC_PRIVATE | ACC_PROTECTED);
+    private static final int CLEAR_PRIVATE_MASK = ~(ACC_PRIVATE | ACC_PROTECTED);
 
     public PromoteFieldClassAdapter(ClassVisitor cv, Set<String> fieldNames) {
         super(Main.ASM_VERSION, cv);
@@ -43,7 +43,7 @@ public class PromoteFieldClassAdapter extends ClassVisitor {
             Object value) {
         if (mFieldNames.contains(name)) {
             if ((access & ACC_PUBLIC) == 0) {
-                access = (access & ACC_NOT_PUBLIC) | ACC_PUBLIC;
+                access = (access & CLEAR_PRIVATE_MASK) | ACC_PUBLIC;
             }
         }
         return super.visitField(access, name, desc, signature, value);

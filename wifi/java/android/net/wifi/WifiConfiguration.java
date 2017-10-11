@@ -67,6 +67,8 @@ public class WifiConfiguration implements Parcelable {
     public static final String updateIdentiferVarName = "update_identifier";
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
+    /** {@hide} */
+    public static final int LOCAL_ONLY_NETWORK_ID = -2;
 
     /** {@hide} */
     private String mPasspointManagementObjectTree;
@@ -228,9 +230,9 @@ public class WifiConfiguration implements Parcelable {
      */
     public int networkId;
 
+    // Fixme We need remove this field to use only Quality network selection status only
     /**
      * The current status of this network configuration entry.
-     * Fixme We need remove this field to use only Quality network selection status only
      * @see Status
      */
     public int status;
@@ -238,8 +240,8 @@ public class WifiConfiguration implements Parcelable {
     /**
      * The network's SSID. Can either be an ASCII string,
      * which must be enclosed in double quotation marks
-     * (e.g., {@code "MyNetwork"}, or a string of
-     * hex digits,which are not enclosed in quotes
+     * (e.g., {@code "MyNetwork"}), or a string of
+     * hex digits, which are not enclosed in quotes
      * (e.g., {@code 01a243f405}).
      */
     public String SSID;
@@ -290,9 +292,10 @@ public class WifiConfiguration implements Parcelable {
      * string otherwise.
      */
     public String preSharedKey;
+
     /**
      * Up to four WEP keys. Either an ASCII string enclosed in double
-     * quotation marks (e.g., {@code "abcdef"} or a string
+     * quotation marks (e.g., {@code "abcdef"}) or a string
      * of hex digits (e.g., {@code 0102030405}).
      * <p/>
      * When the value of one of these keys is read, the actual key is
@@ -367,12 +370,12 @@ public class WifiConfiguration implements Parcelable {
     public WifiEnterpriseConfig enterpriseConfig;
 
     /**
-     * Fully qualified domain name of a passpoint configuration
+     * Fully qualified domain name of a Passpoint configuration
      */
     public String FQDN;
 
     /**
-     * Name of passpoint credential provider
+     * Name of Passpoint credential provider
      */
     public String providerFriendlyName;
 
@@ -385,8 +388,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isHomeProviderNetwork;
 
     /**
-     * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
-     * passpoint credential will be considered valid
+     * Roaming Consortium Id list for Passpoint credential; identifies a set of networks where
+     * Passpoint credential will be considered valid
      */
     public long[] roamingConsortiumIds;
 
@@ -496,12 +499,6 @@ public class WifiConfiguration implements Parcelable {
      */
     /** @hide **/
     public static int INVALID_RSSI = -127;
-
-    /**
-     * @hide
-     * Set to true if this is a Carrier Network, else set to false.
-     */
-    public boolean isCarrierNetwork = false;
 
     /**
      * @hide
@@ -734,6 +731,16 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Indicate that a WifiConfiguration is temporary and should not be saved
+     * nor considered by AutoJoin.
+     */
+    @SystemApi
+    public boolean isEphemeral() {
+      return ephemeral;
+    }
+
+    /**
+     * @hide
      * A hint about whether or not the network represented by this WifiConfiguration
      * is metered. This is hinted at via the meteredHint bit on DHCP results set in
      * {@link com.android.server.wifi.WifiStateMachine}, or via a network score in
@@ -833,6 +840,10 @@ public class WifiConfiguration implements Parcelable {
          * Default value. Means not disabled
          */
         public static final int NETWORK_SELECTION_ENABLE = 0;
+        /**
+         * The starting index for network selection disabled reasons
+         */
+        public static final int NETWORK_SELECTION_DISABLED_STARTING_INDEX = 1;
         /**
          * @deprecated it is not used any more.
          * This network is disabled because higher layer (>2) network is bad
@@ -1421,7 +1432,7 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Identify if this configuration represents a passpoint network
+     * Identify if this configuration represents a Passpoint network
      */
     public boolean isPasspoint() {
         return !TextUtils.isEmpty(FQDN)
@@ -1611,7 +1622,6 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
-        sbuf.append(" isCarrierNetwork=" + isCarrierNetwork);
         sbuf.append(" ");
 
         if (this.lastConnected != 0) {
@@ -1997,7 +2007,6 @@ public class WifiConfiguration implements Parcelable {
             userApproved = source.userApproved;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
-            isCarrierNetwork = source.isCarrierNetwork;
             creationTime = source.creationTime;
             updateTime = source.updateTime;
             shared = source.shared;
@@ -2065,7 +2074,6 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
-        dest.writeInt(isCarrierNetwork ? 1 : 0);
         dest.writeInt(shared ? 1 : 0);
         dest.writeString(mPasspointManagementObjectTree);
     }
@@ -2133,7 +2141,6 @@ public class WifiConfiguration implements Parcelable {
                 config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
-                config.isCarrierNetwork = in.readInt() != 0;
                 config.shared = in.readInt() != 0;
                 config.mPasspointManagementObjectTree = in.readString();
                 return config;

@@ -51,6 +51,11 @@ public abstract class HwBinder implements IHwBinder {
             String serviceName)
         throws RemoteException, NoSuchElementException;
 
+    public static native final void configureRpcThreadpool(
+            long maxThreads, boolean callerWillJoin);
+
+    public static native final void joinRpcThreadpool();
+
     // Returns address of the "freeFunction".
     private static native final long native_init();
 
@@ -66,4 +71,13 @@ public abstract class HwBinder implements IHwBinder {
     }
 
     private long mNativeContext;
+
+    private static native void native_report_sysprop_change();
+
+    /**
+     * Notifies listeners that a system property has changed
+     */
+    public static void reportSyspropChanged() {
+        native_report_sysprop_change();
+    }
 }

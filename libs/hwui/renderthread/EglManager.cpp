@@ -24,10 +24,19 @@
 
 #include "Caches.h"
 #include "DeviceInfo.h"
+#include "Frame.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
+#include "Texture.h"
+
 #include <EGL/eglext.h>
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
 
 #define GLES_VERSION 2
 
@@ -60,7 +69,7 @@ static const char* egl_error_str(EGLint error) {
         return "Unknown error";
     }
 }
-static const char* egl_error_str() {
+const char* EglManager::eglErrorString() {
     return egl_error_str(eglGetError());
 }
 
@@ -69,33 +78,13 @@ static struct {
     bool setDamage = false;
 } EglExtensions;
 
-void Frame::map(const SkRect& in, EGLint* out) const {
-    /* The rectangles are specified relative to the bottom-left of the surface
-     * and the x and y components of each rectangle specify the bottom-left
-     * position of that rectangle.
-     *
-     * HWUI does everything with 0,0 being top-left, so need to map
-     * the rect
-     */
-    SkIRect idirty;
-    in.roundOut(&idirty);
-    EGLint y = mHeight - (idirty.y() + idirty.height());
-    // layout: {x, y, width, height}
-    out[0] = idirty.x();
-    out[1] = y;
-    out[2] = idirty.width();
-    out[3] = idirty.height();
-}
-
 EglManager::EglManager(RenderThread& thread)
         : mRenderThread(thread)
         , mEglDisplay(EGL_NO_DISPLAY)
         , mEglConfig(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mCurrentSurface(EGL_NO_SURFACE)
-        , mAtlasMap(nullptr)
-        , mAtlasMapSize(0) {
+        , mCurrentSurface(EGL_NO_SURFACE) {
 }
 
 void EglManager::initialize() {
@@ -105,11 +94,11 @@ void EglManager::initialize() {
 
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
-            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", egl_error_str());
+            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", eglErrorString());
 
     EGLint major, minor;
     LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE,
-            "Failed to initialize display %p! err=%s", mEglDisplay, egl_error_str());
+            "Failed to initialize display %p! err=%s", mEglDisplay, eglErrorString());
 
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
@@ -117,7 +106,10 @@ void EglManager::initialize() {
 
     // Now that extensions are loaded, pick a swap behavior
     if (Properties::enablePartialUpdates) {
-        if (Properties::useBufferAge && EglExtensions.bufferAge) {
+        // An Adreno driver bug is causing rendering problems for SkiaGL with
+        // buffer age swap behavior (b/31957043).  To temporarily workaround,
+        // we will use preserved swap behavior.
+        if (Properties::useBufferAge && EglExtensions.bufferAge && !Properties::isSkiaEnabled()) {
             mSwapBehavior = SwapBehavior::BufferAge;
         } else {
             mSwapBehavior = SwapBehavior::Preserved;
@@ -130,7 +122,22 @@ void EglManager::initialize() {
     makeCurrent(mPBufferSurface);
     DeviceInfo::initialize();
     mRenderThread.renderState().onGLContextCreated();
-    initAtlas();
+
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+#ifdef HWUI_GLES_WRAP_ENABLED
+        debug::GlesDriver* driver = debug::GlesDriver::get();
+        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
+        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
+        LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+        GrContextOptions options;
+        options.fGpuPathRenderers &= ~GrContextOptions::GpuPathRenderers::kDistanceField;
+        options.fAllowPathMaskCaching = true;
+        mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
+                (GrBackendContext)glInterface.get(), options));
+    }
 }
 
 void EglManager::initExtensions() {
@@ -178,7 +185,7 @@ void EglManager::loadConfig() {
             loadConfig();
         } else {
             // Failed to get a valid config
-            LOG_ALWAYS_FATAL("Failed to choose config, error = %s", egl_error_str());
+            LOG_ALWAYS_FATAL("Failed to choose config, error = %s", eglErrorString());
         }
     }
 }
@@ -190,33 +197,7 @@ void EglManager::createContext() {
     };
     mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attribs);
     LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT,
-        "Failed to create context, error = %s", egl_error_str());
-}
-
-void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
-        int64_t* map, size_t mapSize) {
-
-    // Already initialized
-    if (mAtlasBuffer.get()) {
-        ALOGW("Multiple calls to setTextureAtlas!");
-        delete map;
-        return;
-    }
-
-    mAtlasBuffer = buffer;
-    mAtlasMap = map;
-    mAtlasMapSize = mapSize;
-
-    if (hasEglContext()) {
-        initAtlas();
-    }
-}
-
-void EglManager::initAtlas() {
-    if (mAtlasBuffer.get()) {
-        mRenderThread.renderState().assetAtlas().init(mAtlasBuffer,
-                mAtlasMap, mAtlasMapSize);
-    }
+        "Failed to create context, error = %s", eglErrorString());
 }
 
 void EglManager::createPBufferSurface() {
@@ -231,15 +212,24 @@ void EglManager::createPBufferSurface() {
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
     initialize();
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, nullptr);
+
+    EGLint attribs[] = {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+            EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR,
+            EGL_COLORSPACE, EGL_COLORSPACE_sRGB,
+#endif
+            EGL_NONE
+    };
+
+    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, attribs);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
-            (void*) window, egl_error_str());
+            (void*) window, eglErrorString());
 
     if (mSwapBehavior != SwapBehavior::Preserved) {
         LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED) == EGL_FALSE,
                             "Failed to set swap behavior to destroyed for window %p, eglErr = %s",
-                            (void*) window, egl_error_str());
+                            (void*) window, eglErrorString());
     }
 
     return surface;
@@ -250,13 +240,14 @@ void EglManager::destroySurface(EGLSurface surface) {
         makeCurrent(EGL_NO_SURFACE);
     }
     if (!eglDestroySurface(mEglDisplay, surface)) {
-        ALOGW("Failed to destroy surface %p, error=%s", (void*)surface, egl_error_str());
+        ALOGW("Failed to destroy surface %p, error=%s", (void*)surface, eglErrorString());
     }
 }
 
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
+    mRenderThread.setGrContext(nullptr);
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);
@@ -284,10 +275,13 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
                     (void*)surface, egl_error_str(*errOut));
         } else {
             LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
-                    (void*)surface, egl_error_str());
+                    (void*)surface, eglErrorString());
         }
     }
     mCurrentSurface = surface;
+    if (Properties::disableVsync) {
+        eglSwapInterval(mEglDisplay, 0);
+    }
     return true;
 }
 
@@ -325,7 +319,7 @@ void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
         frame.map(dirty, rects);
         if (!eglSetDamageRegionKHR(mEglDisplay, frame.mSurface, rects, 1)) {
             LOG_ALWAYS_FATAL("Failed to set damage region on surface %p, error=%s",
-                    (void*)frame.mSurface, egl_error_str());
+                    (void*)frame.mSurface, eglErrorString());
         }
     }
 #endif
@@ -379,14 +373,14 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
             preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
     if (!preserved) {
         ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s",
-                (void*) surface, egl_error_str());
+                (void*) surface, eglErrorString());
         // Maybe it's already set?
         EGLint swapBehavior;
         if (eglQuerySurface(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, &swapBehavior)) {
             preserved = (swapBehavior == EGL_BUFFER_PRESERVED);
         } else {
             ALOGW("Failed to query EGL_SWAP_BEHAVIOR on surface %p, error=%p",
-                                (void*) surface, egl_error_str());
+                                (void*) surface, eglErrorString());
         }
     }
 

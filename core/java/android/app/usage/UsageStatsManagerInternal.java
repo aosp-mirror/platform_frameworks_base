@@ -19,7 +19,7 @@ package android.app.usage;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
  * UsageStatsManager local system service interface.
@@ -127,4 +127,12 @@ public abstract class UsageStatsManagerInternal {
 
     public abstract void applyRestoredPayload(int user, String key, byte[] payload);
 
+    /**
+     * Return usage stats.
+     *
+     * @param obfuscateInstantApps whether instant app package names need to be obfuscated in the
+     *     result.
+     */
+    public abstract List<UsageStats> queryUsageStatsForUser(
+            int userId, int interval, long beginTime, long endTime, boolean obfuscateInstantApps);
 }

@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
 import android.media.tv.DvbDeviceInfo;
@@ -105,4 +106,8 @@ interface ITvInputManager {
     // For DVB device binding
     List<DvbDeviceInfo> getDvbDeviceList();
     ParcelFileDescriptor openDvbDevice(in DvbDeviceInfo info, int device);
+
+    // For preview channels and programs
+    void sendTvInputNotifyIntent(in Intent intent, int userId);
+    void requestChannelBrowsable(in Uri channelUri, int userId);
 }

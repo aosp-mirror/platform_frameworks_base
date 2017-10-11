@@ -31,7 +31,7 @@ public final class TwilightState {
     private final long mSunriseTimeMillis;
     private final long mSunsetTimeMillis;
 
-    TwilightState(long sunriseTimeMillis, long sunsetTimeMillis) {
+    public TwilightState(long sunriseTimeMillis, long sunsetTimeMillis) {
         mSunriseTimeMillis = sunriseTimeMillis;
         mSunsetTimeMillis = sunsetTimeMillis;
     }

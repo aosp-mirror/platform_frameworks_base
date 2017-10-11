@@ -40,6 +40,14 @@ public class UserData {
     public static final int ENCODING_GSM_DCS                    = 0x0A;
 
     /**
+     * User data message type encoding types.
+     * (See 3GPP2 C.S0015-B, 4.5.2 and 3GPP 23.038, Section 4)
+     */
+    public static final int ENCODING_GSM_DCS_7BIT               = 0x00;
+    public static final int ENCODING_GSM_DCS_8BIT               = 0x01;
+    public static final int ENCODING_GSM_DCS_16BIT              = 0x02;
+
+    /**
      * IS-91 message types.
      * (See TIA/EIS/IS-91-A-ENGL 1999, table 3.7.1.1-3)
      */

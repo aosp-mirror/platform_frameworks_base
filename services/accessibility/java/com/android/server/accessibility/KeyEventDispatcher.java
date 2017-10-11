@@ -16,12 +16,10 @@
 
 package com.android.server.accessibility;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Pools;
 import android.util.Pools.Pool;
@@ -29,8 +27,6 @@ import android.util.Slog;
 import android.view.InputEventConsistencyVerifier;
 import android.view.KeyEvent;
 import android.view.WindowManagerPolicy;
-
-import com.android.server.accessibility.AccessibilityManagerService.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,32 +42,33 @@ import java.util.Map;
  * they process each call to {@code AccessibilityService.onKeyEvent} on a single thread, and so
  * don't see the N+1th event until they have processed the Nth event.
  */
-public class KeyEventDispatcher {
+public class KeyEventDispatcher implements Handler.Callback {
     // Debugging
     private static final String LOG_TAG = "KeyEventDispatcher";
     private static final boolean DEBUG = false;
     /* KeyEvents must be processed in this time interval */
     private static final long ON_KEY_EVENT_TIMEOUT_MILLIS = 500;
-    private static final int MSG_ON_KEY_EVENT_TIMEOUT = 1;
+    public static final int MSG_ON_KEY_EVENT_TIMEOUT = 1;
     private static final int MAX_POOL_SIZE = 10;
 
     private final Pool<PendingKeyEvent> mPendingEventPool = new Pools.SimplePool<>(MAX_POOL_SIZE);
     private final Object mLock;
 
     /*
-     * Track events sent to each service. If a KeyEvent is to be sent to at least one service,
+     * Track events sent to each filter. If a KeyEvent is to be sent to at least one service,
      * a corresponding PendingKeyEvent is created for it. This PendingKeyEvent is placed in
      * the list for each service its KeyEvent is sent to. It is removed from the list when
      * the service calls setOnKeyEventResult, or when we time out waiting for the service to
      * respond.
      */
-    private final Map<Service, ArrayList<PendingKeyEvent>> mPendingEventsMap = new ArrayMap<>();
+    private final Map<KeyEventFilter, ArrayList<PendingKeyEvent>> mPendingEventsMap =
+            new ArrayMap<>();
 
     private final InputEventConsistencyVerifier mSentEventsVerifier;
     private final Handler mHandlerToSendKeyEventsToInputFilter;
     private final int mMessageTypeForSendKeyEvent;
-    private final Handler mKeyEventTimeoutHandler;
     private final PowerManager mPowerManager;
+    private Handler mKeyEventTimeoutHandler;
 
     /**
      * @param handlerToSendKeyEventsToInputFilter The handler to which to post {@code KeyEvent}s
@@ -84,8 +81,7 @@ public class KeyEventDispatcher {
      * by a service
      */
     public KeyEventDispatcher(Handler handlerToSendKeyEventsToInputFilter,
-            int messageTypeForSendKeyEvent, Object lock,
-            PowerManager powerManager) {
+            int messageTypeForSendKeyEvent, Object lock, PowerManager powerManager) {
         if (InputEventConsistencyVerifier.isInstrumentationEnabled()) {
             mSentEventsVerifier = new InputEventConsistencyVerifier(
                     this, 0, KeyEventDispatcher.class.getSimpleName());
@@ -95,58 +91,55 @@ public class KeyEventDispatcher {
         mHandlerToSendKeyEventsToInputFilter = handlerToSendKeyEventsToInputFilter;
         mMessageTypeForSendKeyEvent = messageTypeForSendKeyEvent;
         mKeyEventTimeoutHandler =
-                new Handler(mHandlerToSendKeyEventsToInputFilter.getLooper(), new Callback());
+                new Handler(handlerToSendKeyEventsToInputFilter.getLooper(), this);
         mLock = lock;
         mPowerManager = powerManager;
     }
 
     /**
+     * See above for most params
+     * @param timeoutHandler Specify a handler to use for handling timeouts. This internal state is
+     * exposed for testing.
+     */
+    public KeyEventDispatcher(Handler handlerToSendKeyEventsToInputFilter,
+            int messageTypeForSendKeyEvent, Object lock, PowerManager powerManager,
+            Handler timeoutHandler) {
+        this(handlerToSendKeyEventsToInputFilter, messageTypeForSendKeyEvent, lock, powerManager);
+        mKeyEventTimeoutHandler = timeoutHandler;
+    }
+
+    /**
      * Notify that a new KeyEvent is available to accessibility services. Must be called with the
-     * lock used to construct this object held. The boundServices list must also be protected
-     * by a lock.
+     * lock used to construct this object held. The keyEventFilters list must also be protected
+     * by the lock.
      *
      * @param event The new key event
      * @param policyFlags Flags for the event
-     * @param boundServices A list of currently bound AccessibilityServices
+     * @param keyEventFilters A list of keyEventFilters that should be considered for processing
+     * this event
      *
      * @return {@code true} if the event was passed to at least one AccessibilityService,
      * {@code false} otherwise.
      */
-    // TODO: The locking policy for boundServices needs some thought.
+    // TODO: The locking policy for keyEventFilters needs some thought.
     public boolean notifyKeyEventLocked(
-            KeyEvent event, int policyFlags, List<Service> boundServices) {
+            KeyEvent event, int policyFlags, List<? extends KeyEventFilter> keyEventFilters) {
         PendingKeyEvent pendingKeyEvent = null;
         KeyEvent localClone = KeyEvent.obtain(event);
-        for (int i = 0; i < boundServices.size(); i++) {
-            Service service = boundServices.get(i);
-            // Key events are handled only by services that declared
-            // this capability and requested to filter key events.
-            if (!service.mRequestFilterKeyEvents || (service.mServiceInterface == null)) {
-                continue;
+        for (int i = 0; i < keyEventFilters.size(); i++) {
+            KeyEventFilter keyEventFilter = keyEventFilters.get(i);
+            if (keyEventFilter.onKeyEvent(localClone, localClone.getSequenceNumber())) {
+                if (pendingKeyEvent == null) {
+                    pendingKeyEvent = obtainPendingEventLocked(localClone, policyFlags);
+                }
+                ArrayList<PendingKeyEvent> pendingEventList = mPendingEventsMap.get(keyEventFilter);
+                if (pendingEventList == null) {
+                    pendingEventList = new ArrayList<>();
+                    mPendingEventsMap.put(keyEventFilter, pendingEventList);
+                }
+                pendingEventList.add(pendingKeyEvent);
+                pendingKeyEvent.referenceCount++;
             }
-            int filterKeyEventBit = service.mAccessibilityServiceInfo.getCapabilities()
-                    & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
-            if (filterKeyEventBit == 0) {
-                continue;
-            }
-
-            try {
-                // The event will be cloned in the IPC call, so it doesn't need to be here.
-                service.mServiceInterface.onKeyEvent(localClone, localClone.getSequenceNumber());
-            } catch (RemoteException re) {
-                continue;
-            }
-
-            if (pendingKeyEvent == null) {
-                pendingKeyEvent = obtainPendingEventLocked(localClone, policyFlags);
-            }
-            ArrayList<PendingKeyEvent> pendingEventList = mPendingEventsMap.get(service);
-            if (pendingEventList == null) {
-                pendingEventList = new ArrayList<>();
-                mPendingEventsMap.put(service, pendingEventList);
-            }
-            pendingEventList.add(pendingKeyEvent);
-            pendingKeyEvent.referenceCount++;
         }
 
         if (pendingKeyEvent == null) {
@@ -163,14 +156,14 @@ public class KeyEventDispatcher {
     /**
      * Set the result from onKeyEvent from one service.
      *
-     * @param service The service setting the result
+     * @param keyEventFilter The filter setting the result
      * @param handled {@code true} if the service handled the {@code KeyEvent}
      * @param sequence The sequence number of the {@code KeyEvent}
      */
-    public void setOnKeyEventResult(Service service, boolean handled, int sequence) {
+    public void setOnKeyEventResult(KeyEventFilter keyEventFilter, boolean handled, int sequence) {
         synchronized (mLock) {
             PendingKeyEvent pendingEvent =
-                    removeEventFromListLocked(mPendingEventsMap.get(service), sequence);
+                    removeEventFromListLocked(mPendingEventsMap.get(keyEventFilter), sequence);
             if (pendingEvent != null) {
                 if (handled && !pendingEvent.handled) {
                     pendingEvent.handled = handled;
@@ -190,19 +183,38 @@ public class KeyEventDispatcher {
     /**
      * Flush all pending key events for a service, treating all of them as unhandled
      *
-     * @param service The service for which to flush events
+     * @param keyEventFilter The filter for which to flush events
      */
-    public void flush(Service service) {
+    public void flush(KeyEventFilter keyEventFilter) {
         synchronized (mLock) {
-            List<PendingKeyEvent> pendingEvents = mPendingEventsMap.get(service);
+            List<PendingKeyEvent> pendingEvents = mPendingEventsMap.get(keyEventFilter);
             if (pendingEvents != null) {
                 for (int i = 0; i < pendingEvents.size(); i++) {
                     PendingKeyEvent pendingEvent = pendingEvents.get(i);
                     removeReferenceToPendingEventLocked(pendingEvent);
                 }
-                mPendingEventsMap.remove(service);
+                mPendingEventsMap.remove(keyEventFilter);
             }
         }
+    }
+
+    @Override
+    public boolean handleMessage(Message message) {
+        if (message.what != MSG_ON_KEY_EVENT_TIMEOUT) {
+            Slog.w(LOG_TAG, "Unknown message: " + message.what);
+            return false;
+        }
+        PendingKeyEvent pendingKeyEvent = (PendingKeyEvent) message.obj;
+        synchronized (mLock) {
+            for (ArrayList<PendingKeyEvent> listForService : mPendingEventsMap.values()) {
+                if (listForService.remove(pendingKeyEvent)) {
+                    if(removeReferenceToPendingEventLocked(pendingKeyEvent)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private PendingKeyEvent obtainPendingEventLocked(KeyEvent event, int policyFlags) {
@@ -279,23 +291,16 @@ public class KeyEventDispatcher {
         boolean handled;
     }
 
-    private class Callback implements Handler.Callback {
-        @Override
-        public boolean handleMessage(Message message) {
-            if (message.what != MSG_ON_KEY_EVENT_TIMEOUT) {
-                throw new IllegalArgumentException("Unknown message: " + message.what);
-            }
-            PendingKeyEvent pendingKeyEvent = (PendingKeyEvent) message.obj;
-            synchronized (mLock) {
-                for (ArrayList<PendingKeyEvent> listForService : mPendingEventsMap.values()) {
-                    if (listForService.remove(pendingKeyEvent)) {
-                        if(removeReferenceToPendingEventLocked(pendingKeyEvent)) {
-                            break;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
+    public interface KeyEventFilter {
+        /**
+         * Filter a key event if possible
+         *
+         * @param event The event to filter
+         * @param sequenceNumber The sequence number of the event
+         *
+         * @return {@code true} if the filter is active and will call back with status.
+         * {@code false} if the filter is not active and will ignore the event
+         */
+        boolean onKeyEvent(KeyEvent event, int sequenceNumber);
     }
 }

@@ -36,13 +36,9 @@ public class HTTPResponse implements HTTPMessage {
 
         while (offset < expected) {
             int amount = in.read(input, offset, input.length - offset);
-            Log.d(OSUManager.TAG, String.format("Reading into %d from %d, amount %d -> %d",
-                    input.length, offset, input.length - offset, amount));
             if (amount < 0) {
                 throw new EOFException();
             }
-            //Log.d("ZXZ", "HTTP response: '"
-            // + new String(input, 0, offset + amount, StandardCharsets.ISO_8859_1));
 
             if (body < 0) {
                 for (int n = offset; n < offset + amount; n++) {

@@ -68,15 +68,15 @@ public class StatFs {
      */
     @Deprecated
     public int getBlockSize() {
-        return (int) mStat.f_bsize;
+        return (int) mStat.f_frsize;
     }
 
     /**
      * The size, in bytes, of a block on the file system. This corresponds to
-     * the Unix {@code statvfs.f_bsize} field.
+     * the Unix {@code statvfs.f_frsize} field.
      */
     public long getBlockSizeLong() {
-        return mStat.f_bsize;
+        return mStat.f_frsize;
     }
 
     /**
@@ -119,7 +119,7 @@ public class StatFs {
      * will want to use {@link #getAvailableBytes()} instead.
      */
     public long getFreeBytes() {
-        return mStat.f_bfree * mStat.f_bsize;
+        return mStat.f_bfree * mStat.f_frsize;
     }
 
     /**
@@ -143,13 +143,13 @@ public class StatFs {
      * applications.
      */
     public long getAvailableBytes() {
-        return mStat.f_bavail * mStat.f_bsize;
+        return mStat.f_bavail * mStat.f_frsize;
     }
 
     /**
      * The total number of bytes supported by the file system.
      */
     public long getTotalBytes() {
-        return mStat.f_blocks * mStat.f_bsize;
+        return mStat.f_blocks * mStat.f_frsize;
     }
 }

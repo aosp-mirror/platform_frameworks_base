@@ -17,11 +17,6 @@
 package android.transition;
 
 import android.annotation.TransitionRes;
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -31,6 +26,11 @@ import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.InflateException;
 import android.view.ViewGroup;
+
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -276,9 +276,11 @@ public class TransitionInflater {
                             transition.addTarget(clazz);
                         }
                     } catch (ClassNotFoundException e) {
+                        a.recycle();
                         throw new RuntimeException("Could not create " + className, e);
                     }
                 }
+                a.recycle();
             } else {
                 throw new RuntimeException("Unknown scene name: " + parser.getName());
             }

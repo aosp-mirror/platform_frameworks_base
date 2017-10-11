@@ -668,7 +668,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final class HotplugDisplayEventReceiver extends DisplayEventReceiver {
         public HotplugDisplayEventReceiver(Looper looper) {
-            super(looper);
+            super(looper, VSYNC_SOURCE_APP);
         }
 
         @Override

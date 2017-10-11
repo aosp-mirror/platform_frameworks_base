@@ -16,7 +16,7 @@
 
 package com.android.framework.permission.tests;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -33,7 +33,7 @@ public class ActivityManagerPermissionTests extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mAm = ActivityManagerNative.getDefault();
+        mAm = ActivityManager.getService();
     }
 
     @SmallTest

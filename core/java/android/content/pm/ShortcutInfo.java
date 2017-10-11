@@ -92,6 +92,15 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_IMMUTABLE = 1 << 8;
 
     /** @hide */
+    public static final int FLAG_ADAPTIVE_BITMAP = 1 << 9;
+
+    /** @hide */
+    public static final int FLAG_RETURNED_BY_SERVICE = 1 << 10;
+
+    /** @hide When this is set, the bitmap icon is waiting to be saved. */
+    public static final int FLAG_ICON_FILE_PENDING_SAVE = 1 << 11;
+
+    /** @hide */
     @IntDef(flag = true,
             value = {
             FLAG_DYNAMIC,
@@ -103,6 +112,9 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_DISABLED,
             FLAG_STRINGS_RESOLVED,
             FLAG_IMMUTABLE,
+            FLAG_ADAPTIVE_BITMAP,
+            FLAG_RETURNED_BY_SERVICE,
+            FLAG_ICON_FILE_PENDING_SAVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -126,6 +138,10 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public static final int CLONE_REMOVE_FOR_LAUNCHER = CLONE_REMOVE_ICON | CLONE_REMOVE_INTENT
+            | CLONE_REMOVE_RES_NAMES;
+
+    /** @hide */
+    public static final int CLONE_REMOVE_FOR_LAUNCHER_APPROVAL = CLONE_REMOVE_INTENT
             | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
@@ -314,9 +330,11 @@ public final class ShortcutInfo implements Parcelable {
      *
      * @hide
      */
-    public void enforceMandatoryFields() {
+    public void enforceMandatoryFields(boolean forPinned) {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
-        Preconditions.checkNotNull(mActivity, "Activity must be provided");
+        if (!forPinned) {
+            Preconditions.checkNotNull(mActivity, "Activity must be provided");
+        }
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Short label must be provided");
         }
@@ -684,6 +702,7 @@ public final class ShortcutInfo implements Parcelable {
         switch (icon.getType()) {
             case Icon.TYPE_RESOURCE:
             case Icon.TYPE_BITMAP:
+            case Icon.TYPE_ADAPTIVE_BITMAP:
                 break; // OK
             default:
                 throw getInvalidIconException();
@@ -809,8 +828,9 @@ public final class ShortcutInfo implements Parcelable {
          * <p>Tints set with {@link Icon#setTint} or {@link Icon#setTintList} are not supported
          * and will be ignored.
          *
-         * <p>Only icons created with {@link Icon#createWithBitmap(Bitmap)} and
-         * {@link Icon#createWithResource} are supported.
+         * <p>Only icons created with {@link Icon#createWithBitmap(Bitmap)},
+         * {@link Icon#createWithAdaptiveBitmap(Bitmap)}
+         * and {@link Icon#createWithResource} are supported.
          * Other types, such as URI-based icons, are not supported.
          *
          * @see LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)
@@ -1330,6 +1350,16 @@ public final class ShortcutInfo implements Parcelable {
         return (mFlags & flags) == flags;
     }
 
+    /** @hide */
+    public boolean isReturnedByServer() {
+        return hasFlags(FLAG_RETURNED_BY_SERVICE);
+    }
+
+    /** @hide */
+    public void setReturnedByServer() {
+        addFlags(FLAG_RETURNED_BY_SERVICE);
+    }
+
     /** Return whether a shortcut is dynamic. */
     public boolean isDynamic() {
         return hasFlags(FLAG_DYNAMIC);
@@ -1436,6 +1466,31 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
+     * Return whether a shortcut's icon is adaptive bitmap following design guideline
+     * defined in {@link android.graphics.drawable.AdaptiveIconDrawable}.
+     *
+     * @hide internal/unit tests only
+     */
+    public boolean hasAdaptiveBitmap() {
+        return hasFlags(FLAG_ADAPTIVE_BITMAP);
+    }
+
+    /** @hide */
+    public boolean isIconPendingSave() {
+        return hasFlags(FLAG_ICON_FILE_PENDING_SAVE);
+    }
+
+    /** @hide */
+    public void setIconPendingSave() {
+        addFlags(FLAG_ICON_FILE_PENDING_SAVE);
+    }
+
+    /** @hide */
+    public void clearIconPendingSave() {
+        clearFlags(FLAG_ICON_FILE_PENDING_SAVE);
+    }
+
+    /**
      * Return whether a shortcut only contains "key" information only or not.  If true, only the
      * following fields are available.
      * <ul>
@@ -1498,7 +1553,12 @@ public final class ShortcutInfo implements Parcelable {
         return mIconResId;
     }
 
-    /** @hide */
+    /**
+     * Bitmap path.  Note this will be null even if {@link #hasIconFile()} is set when the save
+     * is pending.  Use {@link #isIconPendingSave()} to check it.
+     *
+     * @hide
+     */
     public String getBitmapPath() {
         return mBitmapPath;
     }
@@ -1744,6 +1804,9 @@ public final class ShortcutInfo implements Parcelable {
         if (hasIconFile()) {
             sb.append("If");
         }
+        if (isIconPendingSave()) {
+            sb.append("^");
+        }
         if (hasIconResource()) {
             sb.append("Ir");
         }
@@ -1752,6 +1815,9 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (hasStringResourcesResolved()) {
             sb.append("Sr");
+        }
+        if (isReturnedByServer()) {
+            sb.append("V");
         }
         sb.append("]");
 

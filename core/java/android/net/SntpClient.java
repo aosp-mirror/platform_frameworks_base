@@ -96,6 +96,7 @@ public class SntpClient {
 
     public boolean requestTime(InetAddress address, int port, int timeout) {
         DatagramSocket socket = null;
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_NTP);
         try {
             socket = new DatagramSocket();
             socket.setSoTimeout(timeout);
@@ -161,6 +162,7 @@ public class SntpClient {
             if (socket != null) {
                 socket.close();
             }
+            TrafficStats.setThreadStatsTag(oldTag);
         }
 
         return true;

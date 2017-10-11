@@ -17,18 +17,21 @@
 package com.android.server.timezone;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import libcore.io.Streams;
 
 /**
  * A single class that implements multiple helper interfaces for use by {@link RulesManagerService}.
  */
-final class RulesManagerServiceHelperImpl
-        implements PermissionHelper, Executor, FileDescriptorHelper {
+final class RulesManagerServiceHelperImpl implements PermissionHelper, Executor {
 
     private final Context mContext;
 
@@ -41,19 +44,21 @@ final class RulesManagerServiceHelperImpl
         mContext.enforceCallingPermission(requiredPermission, null /* message */);
     }
 
-    // TODO Wake lock required?
     @Override
-    public void execute(Runnable runnable) {
-        // TODO Is there a better way?
-        new Thread(runnable).start();
+    public boolean checkDumpPermission(String tag, PrintWriter pw) {
+        // TODO(nfuller): Switch to DumpUtils.checkDumpPermission() when it is available in AOSP.
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump LocationManagerService from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return false;
+        }
+        return true;
     }
 
     @Override
-    public byte[] readFully(ParcelFileDescriptor parcelFileDescriptor) throws IOException {
-        try (ParcelFileDescriptor pfd = parcelFileDescriptor) {
-            // Read bytes
-            FileInputStream in = new FileInputStream(pfd.getFileDescriptor(), false /* isOwner */);
-            return Streams.readFully(in);
-        }
+    public void execute(Runnable runnable) {
+        AsyncTask.execute(runnable);
     }
 }

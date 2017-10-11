@@ -14,6 +14,7 @@ import com.android.hotspot2.asn1.Asn1Object;
 import com.android.hotspot2.asn1.Asn1Oid;
 import com.android.hotspot2.asn1.OidMappings;
 import com.android.hotspot2.osu.HTTPHandler;
+import com.android.hotspot2.osu.OSUFlowManager;
 import com.android.hotspot2.osu.OSUSocketFactory;
 import com.android.hotspot2.osu.commands.GetCertData;
 import com.android.hotspot2.pps.HomeSP;
@@ -80,7 +81,7 @@ public class ESTHandler implements AutoCloseable {
     private PrivateKey mClientKey;
 
     public ESTHandler(GetCertData certData, Network network, OMADMAdapter omadmAdapter,
-                      KeyManager km, KeyStore ks, HomeSP homeSP, int flowType)
+                      KeyManager km, KeyStore ks, HomeSP homeSP, OSUFlowManager.FlowType flowType)
             throws IOException, GeneralSecurityException {
         mURL = new URL(certData.getServer());
         mUser = certData.getUserName();

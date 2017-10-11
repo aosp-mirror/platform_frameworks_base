@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
@@ -168,6 +169,24 @@ public class TrafficStats {
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. Only one active tag per thread is supported.
+     * <p>
+     * Changes only take effect during subsequent calls to
+     * {@link #tagSocket(Socket)}.
+     * <p>
+     * Tags between {@code 0xFFFFFF00} and {@code 0xFFFFFFFF} are reserved and
+     * used internally by system services like {@link DownloadManager} when
+     * performing traffic on behalf of an application.
+     *
+     * @return the current tag for the calling thread, which can be used to
+     *         restore any existing values after a nested operation is finished
+     */
+    public static int getAndSetThreadStatsTag(int tag) {
+        return NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
+    }
+
+    /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
      * from the current thread. The tag used internally is well-defined to
      * distinguish all backup-related traffic.
      *
@@ -225,6 +244,7 @@ public class TrafficStats {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
@@ -237,6 +257,7 @@ public class TrafficStats {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }

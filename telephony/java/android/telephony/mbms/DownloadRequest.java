@@ -16,82 +16,165 @@
 
 package android.telephony.mbms;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
+import android.util.Log;
 
-import java.lang.IllegalStateException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 /**
- * A Parcelable class describing a pending Cell-Broadcast download request
- * @hide
+ * Describes a request to download files over cell-broadcast. Instances of this class should be
+ * created by the app when requesting a download, and instances of this class will be passed back
+ * to the app when the middleware updates the status of the download.
  */
-public class DownloadRequest implements Parcelable {
+public final class DownloadRequest implements Parcelable {
+    // Version code used to keep token calculation consistent.
+    private static final int CURRENT_VERSION = 1;
+    private static final String LOG_TAG = "MbmsDownloadRequest";
+
     /** @hide */
+    public static final int MAX_APP_INTENT_SIZE = 50000;
+
+    /** @hide */
+    public static final int MAX_DESTINATION_URI_SIZE = 50000;
+
+    /** @hide */
+    private static class OpaqueDataContainer implements Serializable {
+        private final String appIntent;
+        private final int version;
+
+        public OpaqueDataContainer(String appIntent, int version) {
+            this.appIntent = appIntent;
+            this.version = version;
+        }
+    }
+
     public static class Builder {
-        private int id;
-        private FileServiceInfo serviceInfo;
+        private String fileServiceId;
         private Uri source;
-        private Uri dest;
-        private int sub;
+        private int subscriptionId;
         private String appIntent;
-        private String appName;  // not the Android app Name, the embms app Name
+        private int version = CURRENT_VERSION;
 
-        public Builder setId(int id) {
-            this.id = id;
-            return this;
+
+        /**
+         * Builds a new DownloadRequest.
+         * @param sourceUri the source URI for the DownloadRequest to be built. This URI should
+         *     never be null.
+         */
+        public Builder(@NonNull Uri sourceUri) {
+            if (sourceUri == null) {
+                throw new IllegalArgumentException("Source URI must be non-null.");
+            }
+            source = sourceUri;
         }
 
+        /**
+         * Sets the service from which the download request to be built will download from.
+         * @param serviceInfo
+         * @return
+         */
         public Builder setServiceInfo(FileServiceInfo serviceInfo) {
-            this.serviceInfo = serviceInfo;
+            fileServiceId = serviceInfo.getServiceId();
             return this;
         }
 
-        public Builder setSource(Uri source) {
-            this.source = source;
+        /**
+         * Set the service ID for the download request. For use by the middleware only.
+         * @hide
+         */
+        @SystemApi
+        public Builder setServiceId(String serviceId) {
+            fileServiceId = serviceId;
             return this;
         }
 
-        public Builder setDest(Uri dest) {
-            this.dest = dest;
+        /**
+         * Set the subscription ID on which the file(s) should be downloaded.
+         * @param subscriptionId
+         */
+        public Builder setSubscriptionId(int subscriptionId) {
+            this.subscriptionId = subscriptionId;
             return this;
         }
 
-        public Builder setSub(int sub) {
-            this.sub = sub;
-            return this;
-        }
-
+        /**
+         * Set the {@link Intent} that should be sent when the download completes or fails. This
+         * should be an intent with a explicit {@link android.content.ComponentName} targeted to a
+         * {@link android.content.BroadcastReceiver} in the app's package.
+         *
+         * The middleware should not use this method.
+         * @param intent
+         */
         public Builder setAppIntent(Intent intent) {
             this.appIntent = intent.toUri(0);
+            if (this.appIntent.length() > MAX_APP_INTENT_SIZE) {
+                throw new IllegalArgumentException("App intent must not exceed length " +
+                        MAX_APP_INTENT_SIZE);
+            }
+            return this;
+        }
+
+        /**
+         * For use by the middleware to set the byte array of opaque data. The opaque data
+         * includes information about the download request that is used by the client app and the
+         * manager code, but is irrelevant to the middleware.
+         * @param data A byte array, the contents of which should have been originally obtained
+         *             from {@link DownloadRequest#getOpaqueData()}.
+         * @hide
+         */
+        @SystemApi
+        public Builder setOpaqueData(byte[] data) {
+            try {
+                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(data));
+                OpaqueDataContainer dataContainer = (OpaqueDataContainer) stream.readObject();
+                version = dataContainer.version;
+                appIntent = dataContainer.appIntent;
+            } catch (IOException e) {
+                // Really should never happen
+                Log.e(LOG_TAG, "Got IOException trying to parse opaque data");
+                throw new IllegalArgumentException(e);
+            } catch (ClassNotFoundException e) {
+                Log.e(LOG_TAG, "Got ClassNotFoundException trying to parse opaque data");
+                throw new IllegalArgumentException(e);
+            }
             return this;
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(id, serviceInfo, source, dest, sub, appIntent, appName);
+            return new DownloadRequest(fileServiceId, source, subscriptionId, appIntent, version);
         }
     }
 
-    private final int downloadId;
-    private final FileServiceInfo fileServiceInfo;
+    private final String fileServiceId;
     private final Uri sourceUri;
-    private final Uri destinationUri;
-    private final int subId;
+    private final int subscriptionId;
     private final String serializedResultIntentForApp;
-    private String appName; // not the Android app Name, the embms app name
+    private final int version;
 
-    private DownloadRequest(int id, FileServiceInfo serviceInfo,
-            Uri source, Uri dest,
-            int sub, String appIntent, String name) {
-        downloadId = id;
-        fileServiceInfo = serviceInfo;
+    private DownloadRequest(String fileServiceId,
+            Uri source, int sub,
+            String appIntent, int version) {
+        this.fileServiceId = fileServiceId;
         sourceUri = source;
-        destinationUri = dest;
-        subId = sub;
+        subscriptionId = sub;
         serializedResultIntentForApp = appIntent;
-        appName = name;
+        this.version = version;
     }
 
     public static DownloadRequest copy(DownloadRequest other) {
@@ -99,23 +182,19 @@ public class DownloadRequest implements Parcelable {
     }
 
     private DownloadRequest(DownloadRequest dr) {
-        downloadId = dr.downloadId;
-        fileServiceInfo = dr.fileServiceInfo;
+        fileServiceId = dr.fileServiceId;
         sourceUri = dr.sourceUri;
-        destinationUri = dr.destinationUri;
-        subId = dr.subId;
+        subscriptionId = dr.subscriptionId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
-        appName = dr.appName;
+        version = dr.version;
     }
 
     private DownloadRequest(Parcel in) {
-        downloadId = in.readInt();
-        fileServiceInfo = in.readParcelable(getClass().getClassLoader());
+        fileServiceId = in.readString();
         sourceUri = in.readParcelable(getClass().getClassLoader());
-        destinationUri = in.readParcelable(getClass().getClassLoader());
-        subId = in.readInt();
+        subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
-        appName = in.readString();
+        version = in.readInt();
     }
 
     public int describeContents() {
@@ -123,35 +202,39 @@ public class DownloadRequest implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(downloadId);
-        out.writeParcelable(fileServiceInfo, flags);
+        out.writeString(fileServiceId);
         out.writeParcelable(sourceUri, flags);
-        out.writeParcelable(destinationUri, flags);
-        out.writeInt(subId);
+        out.writeInt(subscriptionId);
         out.writeString(serializedResultIntentForApp);
-        out.writeString(appName);
+        out.writeInt(version);
     }
 
-    public int getDownloadId() {
-        return downloadId;
+    /**
+     * @return The ID of the file service to download from.
+     */
+    public String getFileServiceId() {
+        return fileServiceId;
     }
 
-    public FileServiceInfo getFileServiceInfo() {
-        return fileServiceInfo;
-    }
-
+    /**
+     * @return The source URI to download from
+     */
     public Uri getSourceUri() {
         return sourceUri;
     }
 
-    public Uri getDestinationUri() {
-        return destinationUri;
+    /**
+     * @return The subscription ID on which to perform MBMS operations.
+     */
+    public int getSubscriptionId() {
+        return subscriptionId;
     }
 
-    public int getSubId() {
-        return subId;
-    }
-
+    /**
+     * For internal use -- returns the intent to send to the app after download completion or
+     * failure.
+     * @hide
+     */
     public Intent getIntentForApp() {
         try {
             return Intent.parseUri(serializedResultIntentForApp, 0);
@@ -160,16 +243,33 @@ public class DownloadRequest implements Parcelable {
         }
     }
 
-    /** @hide */
-    public synchronized void setAppName(String newAppName) {
-        if (appName != null) {
-            throw new IllegalStateException("Attempting to reset appName");
+    /**
+     * For use by the middleware only. The byte array returned from this method should be
+     * persisted and sent back to the app upon download completion or failure by passing it into
+     * {@link Builder#setOpaqueData(byte[])}.
+     * @return A byte array of opaque data to persist.
+     * @hide
+     */
+    @SystemApi
+    public byte[] getOpaqueData() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutputStream stream = new ObjectOutputStream(byteArrayOutputStream);
+            OpaqueDataContainer container = new OpaqueDataContainer(
+                    serializedResultIntentForApp, version);
+            stream.writeObject(container);
+            stream.flush();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            // Really should never happen
+            Log.e(LOG_TAG, "Got IOException trying to serialize opaque data");
+            return null;
         }
-        appName = newAppName;
     }
 
-    public String getAppName() {
-        return appName;
+    /** @hide */
+    public int getVersion() {
+        return version;
     }
 
     public static final Parcelable.Creator<DownloadRequest> CREATOR =
@@ -181,4 +281,75 @@ public class DownloadRequest implements Parcelable {
             return new DownloadRequest[size];
         }
     };
+
+    /**
+     * Maximum permissible length for the app's destination path, when serialized via
+     * {@link Uri#toString()}.
+     */
+    public static int getMaxAppIntentSize() {
+        return MAX_APP_INTENT_SIZE;
+    }
+
+    /**
+     * Maximum permissible length for the app's download-completion intent, when serialized via
+     * {@link Intent#toUri(int)}.
+     */
+    public static int getMaxDestinationUriSize() {
+        return MAX_DESTINATION_URI_SIZE;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isMultipartDownload() {
+        // TODO: figure out what qualifies a request as a multipart download request.
+        return getSourceUri().getLastPathSegment() != null &&
+                getSourceUri().getLastPathSegment().contains("*");
+    }
+
+    /**
+     * Retrieves the hash string that should be used as the filename when storing a token for
+     * this DownloadRequest.
+     * @hide
+     */
+    public String getHash() {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Could not get sha256 hash object");
+        }
+        if (version >= 1) {
+            // Hash the source URI and the app intent
+            digest.update(sourceUri.toString().getBytes(StandardCharsets.UTF_8));
+            if (serializedResultIntentForApp != null) {
+                digest.update(serializedResultIntentForApp.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        // Add updates for future versions here
+        return Base64.encodeToString(digest.digest(), Base64.URL_SAFE | Base64.NO_WRAP);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof DownloadRequest)) {
+            return false;
+        }
+        DownloadRequest request = (DownloadRequest) o;
+        return subscriptionId == request.subscriptionId &&
+                version == request.version &&
+                Objects.equals(fileServiceId, request.fileServiceId) &&
+                Objects.equals(sourceUri, request.sourceUri) &&
+                Objects.equals(serializedResultIntentForApp, request.serializedResultIntentForApp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileServiceId, sourceUri,
+                subscriptionId, serializedResultIntentForApp, version);
+    }
 }

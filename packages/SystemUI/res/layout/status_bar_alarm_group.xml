@@ -20,55 +20,40 @@
     android:id="@+id/date_time_alarm_group"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginStart="16dp"
-    android:gravity="start"
-    android:orientation="vertical">
-    <LinearLayout
-        android:id="@+id/date_time_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:focusable="true" >
-
-        <include layout="@layout/split_clock_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/clock" />
-
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/alarm_status_collapsed"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_access_alarms_small"
-            android:paddingStart="6dp"
-            android:gravity="center"
-            android:visibility="gone" />
-    </LinearLayout>
+    android:padding="4dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground">
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:layout_marginTop="-4dp"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
         android:textSize="@dimen/qs_time_collapsed_size"
-        android:gravity="top"
+        android:gravity="center_vertical"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:id="@+id/alarm_status_collapsed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_access_alarms_small"
+        android:tint="?android:attr/textColorPrimary"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <com.android.systemui.statusbar.AlphaOptimizedButton
         android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="20dp"
-        android:paddingTop="3dp"
-        android:drawablePadding="8dp"
-        android:drawableStart="@drawable/ic_access_alarms_small"
-        android:textColor="#64ffffff"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-        android:gravity="top"
-        android:background="?android:attr/selectableItemBackground"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+        android:gravity="center_vertical"
+        android:background="@null"
+        android:clickable="false"
         android:visibility="gone" />
 
 </LinearLayout>

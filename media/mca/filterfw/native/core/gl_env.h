@@ -27,8 +27,9 @@
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 
-#include <gui/IGraphicBufferProducer.h>
-#include <gui/Surface.h>
+#include <utils/StrongPointer.h>
+
+struct ANativeWindow;
 
 namespace android {
 
@@ -255,7 +256,8 @@ class GLEnv {
     std::map<int, ShaderProgram*> attached_shaders_;
     std::map<int, VertexFrame*> attached_vframes_;
 
-    DISALLOW_COPY_AND_ASSIGN(GLEnv);
+    GLEnv(const GLEnv&) = delete;
+    GLEnv& operator=(const GLEnv&) = delete;
 };
 
 } // namespace filterfw

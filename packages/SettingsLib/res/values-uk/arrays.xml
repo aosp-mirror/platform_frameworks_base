@@ -124,29 +124,39 @@
     <item msgid="8900559293912978337">"Моно"</item>
     <item msgid="8883739882299884241">"Стерео"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Оптимізовано для кращої якості аудіо (990/909 кбіт/с)"</item>
+    <item msgid="2921767058740704969">"Збалансована якість аудіо та з’єднання (660/606 кбіт/с)"</item>
+    <item msgid="8860982705384396512">"Оптимізовано для кращої якості з’єднання (330/303 кбіт/с)"</item>
+    <item msgid="4414060457677684127">"Найкраща якість (адаптивна швидкість передавання)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Оптимізовано для кращої якості аудіо"</item>
+    <item msgid="4327143584633311908">"Збалансована якість аудіо та з’єднання"</item>
+    <item msgid="4681409244565426925">"Оптимізовано для кращої якості з’єднання"</item>
+    <item msgid="364670732877872677">"Найкраща якість (адаптивна швидкість передавання)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Вимкнено"</item>
-    <item msgid="1593289376502312923">"64 Кб"</item>
-    <item msgid="487545340236145324">"256 Кб"</item>
-    <item msgid="2423528675294333831">"1 Мб"</item>
-    <item msgid="180883774509476541">"4 Мб"</item>
-    <item msgid="2803199102589126938">"16 Мб"</item>
+    <item msgid="1593289376502312923">"64 КБ"</item>
+    <item msgid="487545340236145324">"256 КБ"</item>
+    <item msgid="2423528675294333831">"1 МБ"</item>
+    <item msgid="180883774509476541">"4 МБ"</item>
+    <item msgid="2803199102589126938">"16 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="6089470720451068364">"Вимкнено"</item>
-    <item msgid="4622460333038586791">"64 Кб"</item>
-    <item msgid="2212125625169582330">"256 Кб"</item>
-    <item msgid="1704946766699242653">"1 Мб"</item>
+    <item msgid="4622460333038586791">"64 КБ"</item>
+    <item msgid="2212125625169582330">"256 КБ"</item>
+    <item msgid="1704946766699242653">"1 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Вимкнено"</item>
-    <item msgid="2969458029344750262">"Буфер журналу: 64 Кб"</item>
-    <item msgid="1342285115665698168">"Буфер журналу: 256 Кб"</item>
-    <item msgid="1314234299552254621">"Буфер журналу: 1 Мб"</item>
-    <item msgid="3606047780792894151">"Буфер журналу: 4 Мб"</item>
-    <item msgid="5431354956856655120">"Буфер журналу: 16 Мб"</item>
+    <item msgid="2969458029344750262">"Буфер журналу: 64 КБ"</item>
+    <item msgid="1342285115665698168">"Буфер журналу: 256 КБ"</item>
+    <item msgid="1314234299552254621">"Буфер журналу: 1 МБ"</item>
+    <item msgid="3606047780792894151">"Буфер журналу: 4 МБ"</item>
+    <item msgid="5431354956856655120">"Буфер журналу: 16 МБ"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Вимкнено"</item>
@@ -215,12 +225,16 @@
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"Вимк."</item>
     <item msgid="2751513398307949636">"На екрані у вигляді смужок"</item>
-    <item msgid="1851438178120770973">"У adb shell dumpsys gfxinfo"</item>
+    <item msgid="2355151170975410323">"У команді \"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>\""</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Вимк."</item>
     <item msgid="7688197031296835369">"Показувати області накладання"</item>
     <item msgid="2290859360633824369">"Показувати області дейтераномалії"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (за умовчанням)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Стандартне обмеження"</item>

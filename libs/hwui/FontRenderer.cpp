@@ -16,9 +16,13 @@
 
 #include "FontRenderer.h"
 
+#include "BakedOpDispatcher.h"
+#include "BakedOpRenderer.h"
+#include "BakedOpState.h"
 #include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
+#include "font/Font.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "PixelBuffer.h"
@@ -27,24 +31,12 @@
 #include "utils/Blur.h"
 #include "utils/Timing.h"
 
-
-#if HWUI_NEW_OPS
-#include "BakedOpDispatcher.h"
-#include "BakedOpRenderer.h"
-#include "BakedOpState.h"
-#else
-#include "OpenGLRenderer.h"
-#endif
-
 #include <algorithm>
 #include <cutils/properties.h>
+#include <RenderScript.h>
 #include <SkGlyph.h>
 #include <SkUtils.h>
 #include <utils/Log.h>
-
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
-#include <RenderScript.h>
-#endif
 
 namespace android {
 namespace uirenderer {
@@ -66,27 +58,22 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
     }
     int transformFlags = pureTranslate
             ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    bool gammaCorrection = true;
+#else
+    bool gammaCorrection = false;
+#endif
     Glop glop;
-#if HWUI_NEW_OPS
     GlopBuilder(renderer->renderState(), renderer->caches(), &glop)
             .setRoundRectClipState(bakedState->roundRectClipState)
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, bakedState->alpha)
+            .setGammaCorrection(gammaCorrection)
             .setTransform(bakedState->computedState.transform, transformFlags)
             .setModelViewIdentityEmptyBounds()
             .build();
     // Note: don't pass dirty bounds here, so user must manage passing dirty bounds to renderer
     renderer->renderGlop(nullptr, clip, glop);
-#else
-    GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
-            .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
-            .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
-            .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
-            .setTransform(*(renderer->currentSnapshot()), transformFlags)
-            .setModelViewOffsetRect(0, 0, Rect())
-            .build();
-    renderer->renderGlop(glop);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -304,24 +291,23 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     // Copy the glyph image, taking the mask format into account
     switch (format) {
         case SkMask::kA8_Format: {
-            uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
             uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX
                     - TEXTURE_BORDER_SIZE;
             // write leading border line
             memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
             // write glyph data
             if (mGammaTable) {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
+                for (uint32_t cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
-                    for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
+                    for (uint32_t cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
                         uint8_t tempCol = bitmapBuffer[bY + bX];
                         cacheBuffer[row + cacheX] = mGammaTable[tempCol];
                     }
                     cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             } else {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
+                for (uint32_t cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     memcpy(&cacheBuffer[row + startX], &bitmapBuffer[bY], glyph.fWidth);
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
@@ -602,17 +588,12 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
         return image;
     }
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // Align buffers for renderscript usage
     if (paddedWidth & (RS_CPU_ALLOCATION_ALIGNMENT - 1)) {
         paddedWidth += RS_CPU_ALLOCATION_ALIGNMENT - paddedWidth % RS_CPU_ALLOCATION_ALIGNMENT;
     }
     int size = paddedWidth * paddedHeight;
     uint8_t* dataBuffer = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, size);
-#else
-    int size = paddedWidth * paddedHeight;
-    uint8_t* dataBuffer = (uint8_t*) malloc(size);
-#endif
 
     memset(dataBuffer, 0, size);
 
@@ -702,7 +683,6 @@ bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, cons
 
 void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF && radius <= 25.0f) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
@@ -740,7 +720,6 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
             return;
         }
     }
-#endif
 
     std::unique_ptr<float[]> gaussian(new float[2 * intRadius + 1]);
     Blur::generateGaussianWeights(gaussian.get(), radius);

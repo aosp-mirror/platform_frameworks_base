@@ -18,6 +18,8 @@ package android.graphics.drawable;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
 import android.graphics.*;
 import android.graphics.PorterDuff.Mode;
@@ -205,6 +207,31 @@ public class ColorDrawable extends Drawable {
     @Override
     public boolean isStateful() {
         return mColorState.mTint != null && mColorState.mTint.isStateful();
+    }
+
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mColorState.mTint != null && mColorState.mTint.hasFocusStateSpecified();
+    }
+
+    /**
+     * @hide
+     * @param mode new transfer mode
+     */
+    @Override
+    public void setXfermode(@Nullable Xfermode mode) {
+        mPaint.setXfermode(mode);
+        invalidateSelf();
+    }
+
+    /**
+     * @hide
+     * @return current transfer mode
+     */
+    @TestApi
+    public Xfermode getXfermode() {
+        return mPaint.getXfermode();
     }
 
     @Override

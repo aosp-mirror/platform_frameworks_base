@@ -58,7 +58,7 @@ public abstract class AdvertiseCallback {
      * that the advertising has been started successfully.
      *
      * @param settingsInEffect The actual settings used for advertising, which may be different from
-     *            what has been requested.
+     * what has been requested.
      */
     public void onStartSuccess(AdvertiseSettings settingsInEffect) {
     }
@@ -67,7 +67,7 @@ public abstract class AdvertiseCallback {
      * Callback when advertising could not be started.
      *
      * @param errorCode Error code (see ADVERTISE_FAILED_* constants) for advertising start
-     *            failures.
+     * failures.
      */
     public void onStartFailure(int errorCode) {
     }

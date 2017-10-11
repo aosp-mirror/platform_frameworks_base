@@ -26,18 +26,25 @@ import android.os.Handler;
 import android.os.Looper;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.util.NetworkConstants;
+import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -70,6 +77,7 @@ public class UpstreamNetworkMonitor {
     public static final int EVENT_ON_CAPABILITIES   = 2;
     public static final int EVENT_ON_LINKPROPERTIES = 3;
     public static final int EVENT_ON_LOST           = 4;
+    public static final int NOTIFY_LOCAL_PREFIXES   = 10;
 
     private static final int CALLBACK_LISTEN_ALL = 1;
     private static final int CALLBACK_TRACK_DEFAULT = 2;
@@ -81,25 +89,30 @@ public class UpstreamNetworkMonitor {
     private final Handler mHandler;
     private final int mWhat;
     private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
+    private HashSet<IpPrefix> mLocalPrefixes;
     private ConnectivityManager mCM;
     private NetworkCallback mListenAllCallback;
     private NetworkCallback mDefaultNetworkCallback;
     private NetworkCallback mMobileNetworkCallback;
     private boolean mDunRequired;
-    private Network mCurrentDefault;
+    // The current system default network (not really used yet).
+    private Network mDefaultInternetNetwork;
+    // The current upstream network used for tethering.
+    private Network mTetheringUpstreamNetwork;
 
-    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what, SharedLog log) {
+    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, SharedLog log, int what) {
         mContext = ctx;
         mTarget = tgt;
         mHandler = mTarget.getHandler();
-        mWhat = what;
         mLog = log.forSubComponent(TAG);
+        mWhat = what;
+        mLocalPrefixes = new HashSet<>();
     }
 
     @VisibleForTesting
     public UpstreamNetworkMonitor(
-            StateMachine tgt, int what, ConnectivityManager cm, SharedLog log) {
-        this(null, tgt, what, log);
+            ConnectivityManager cm, StateMachine tgt, SharedLog log, int what) {
+        this((Context) null, tgt, log, what);
         mCM = cm;
     }
 
@@ -120,10 +133,12 @@ public class UpstreamNetworkMonitor {
 
         releaseCallback(mDefaultNetworkCallback);
         mDefaultNetworkCallback = null;
+        mDefaultInternetNetwork = null;
 
         releaseCallback(mListenAllCallback);
         mListenAllCallback = null;
 
+        mTetheringUpstreamNetwork = null;
         mNetworkMap.clear();
     }
 
@@ -174,10 +189,6 @@ public class UpstreamNetworkMonitor {
         mMobileNetworkCallback = null;
     }
 
-    public NetworkState lookup(Network network) {
-        return (network != null) ? mNetworkMap.get(network) : null;
-    }
-
     // So many TODOs here, but chief among them is: make this functionality an
     // integral part of this class such that whenever a higher priority network
     // becomes available and useful we (a) file a request to keep it up as
@@ -185,7 +196,7 @@ public class UpstreamNetworkMonitor {
     // passing LinkProperties up to Tethering).
     //
     // Next TODO: return NetworkState instead of just the type.
-    public int selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
+    public NetworkState selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
         final TypeStatePair typeStatePair = findFirstAvailableUpstreamByType(
                 mNetworkMap.values(), preferredTypes);
 
@@ -201,7 +212,7 @@ public class UpstreamNetworkMonitor {
                 break;
             default:
                 /* If we've found an active upstream connection that's not DUN/HIPRI
-                 * we should stop any outstanding DUN/HIPRI start requests.
+                 * we should stop any outstanding DUN/HIPRI requests.
                  *
                  * If we found NONE we don't want to do this as we want any previous
                  * requests to keep trying to bring up something we can use.
@@ -210,7 +221,15 @@ public class UpstreamNetworkMonitor {
                 break;
         }
 
-        return typeStatePair.type;
+        return typeStatePair.ns;
+    }
+
+    public void setCurrentUpstream(Network upstream) {
+        mTetheringUpstreamNetwork = upstream;
+    }
+
+    public Set<IpPrefix> getLocalPrefixes() {
+        return (Set<IpPrefix>) mLocalPrefixes.clone();
     }
 
     private void handleAvailable(int callbackType, Network network) {
@@ -240,7 +259,7 @@ public class UpstreamNetworkMonitor {
                     // These request*() calls can be deleted post oag/339444.
                     return;
                 }
-                mCurrentDefault = network;
+                mDefaultInternetNetwork = network;
                 break;
 
             case CALLBACK_MOBILE_REQUEST:
@@ -292,6 +311,13 @@ public class UpstreamNetworkMonitor {
                     network, newNc));
         }
 
+        // Log changes in upstream network signal strength, if available.
+        if (network.equals(mTetheringUpstreamNetwork) && newNc.hasSignalStrength()) {
+            final int newSignal = newNc.getSignalStrength();
+            final String prevSignal = getSignalStrength(prev.networkCapabilities);
+            mLog.logf("upstream network signal strength: %s -> %s", prevSignal, newSignal);
+        }
+
         mNetworkMap.put(network, new NetworkState(
                 null, prev.linkProperties, newNc, network, null, null));
         // TODO: If sufficient information is available to select a more
@@ -320,9 +346,21 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LINKPROPERTIES, network);
     }
 
+    private void handleSuspended(int callbackType, Network network) {
+        if (callbackType != CALLBACK_LISTEN_ALL) return;
+        if (!network.equals(mTetheringUpstreamNetwork)) return;
+        mLog.log("SUSPENDED current upstream: " + network);
+    }
+
+    private void handleResumed(int callbackType, Network network) {
+        if (callbackType != CALLBACK_LISTEN_ALL) return;
+        if (!network.equals(mTetheringUpstreamNetwork)) return;
+        mLog.log("RESUMED current upstream: " + network);
+    }
+
     private void handleLost(int callbackType, Network network) {
         if (callbackType == CALLBACK_TRACK_DEFAULT) {
-            mCurrentDefault = null;
+            mDefaultInternetNetwork = null;
             // Receiving onLost() for a default network does not necessarily
             // mean the network is gone.  We wait for a separate notification
             // on either the LISTEN_ALL or MOBILE_REQUEST callbacks before
@@ -344,6 +382,14 @@ public class UpstreamNetworkMonitor {
         // if the current upstream network is gone, notify the target of the
         // fact that we now have no upstream at all.
         notifyTarget(EVENT_ON_LOST, mNetworkMap.remove(network));
+    }
+
+    private void recomputeLocalPrefixes() {
+        final HashSet<IpPrefix> localPrefixes = allLocalPrefixes(mNetworkMap.values());
+        if (!mLocalPrefixes.equals(localPrefixes)) {
+            mLocalPrefixes = localPrefixes;
+            notifyTarget(NOTIFY_LOCAL_PREFIXES, localPrefixes.clone());
+        }
     }
 
     // Fetch (and cache) a ConnectivityManager only if and when we need one.
@@ -380,14 +426,23 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
             handleLinkProp(network, newLp);
+            recomputeLocalPrefixes();
         }
 
-        // TODO: Handle onNetworkSuspended();
-        // TODO: Handle onNetworkResumed();
+        @Override
+        public void onNetworkSuspended(Network network) {
+            handleSuspended(mCallbackType, network);
+        }
+
+        @Override
+        public void onNetworkResumed(Network network) {
+            handleResumed(mCallbackType, network);
+        }
 
         @Override
         public void onLost(Network network) {
             handleLost(mCallbackType, network);
+            recomputeLocalPrefixes();
         }
     }
 
@@ -399,16 +454,16 @@ public class UpstreamNetworkMonitor {
         notifyTarget(which, mNetworkMap.get(network));
     }
 
-    private void notifyTarget(int which, NetworkState netstate) {
-        mTarget.sendMessage(mWhat, which, 0, netstate);
+    private void notifyTarget(int which, Object obj) {
+        mTarget.sendMessage(mWhat, which, 0, obj);
     }
 
-    static private class TypeStatePair {
+    private static class TypeStatePair {
         public int type = TYPE_NONE;
         public NetworkState ns = null;
     }
 
-    static private TypeStatePair findFirstAvailableUpstreamByType(
+    private static TypeStatePair findFirstAvailableUpstreamByType(
             Iterable<NetworkState> netStates, Iterable<Integer> preferredTypes) {
         final TypeStatePair result = new TypeStatePair();
 
@@ -434,5 +489,22 @@ public class UpstreamNetworkMonitor {
         }
 
         return result;
+    }
+
+    private static HashSet<IpPrefix> allLocalPrefixes(Iterable<NetworkState> netStates) {
+        final HashSet<IpPrefix> prefixSet = new HashSet<>();
+
+        for (NetworkState ns : netStates) {
+            final LinkProperties lp = ns.linkProperties;
+            if (lp == null) continue;
+            prefixSet.addAll(PrefixUtils.localPrefixesFrom(lp));
+        }
+
+        return prefixSet;
+    }
+
+    private static String getSignalStrength(NetworkCapabilities nc) {
+        if (nc == null || !nc.hasSignalStrength()) return "unknown";
+        return Integer.toString(nc.getSignalStrength());
     }
 }

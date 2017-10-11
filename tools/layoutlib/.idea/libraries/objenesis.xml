@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="objenesis">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../out/host/common/obj/JAVA_LIBRARIES/objenesis-host_intermediates/javalib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

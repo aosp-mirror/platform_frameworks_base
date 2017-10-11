@@ -25,6 +25,8 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -44,6 +46,7 @@ public class Divider extends SystemUI {
     private boolean mVisible = false;
     private boolean mMinimized = false;
     private boolean mAdjustedForIme = false;
+    private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
 
     @Override
@@ -55,6 +58,7 @@ public class Divider extends SystemUI {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ssp.registerDockedStackListener(mDockDividerVisibilityListener);
         mForcedResizableController = new ForcedResizableInfoActivityController(mContext);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -67,10 +71,19 @@ public class Divider extends SystemUI {
         return mView;
     }
 
+    public boolean isMinimized() {
+        return mMinimized;
+    }
+
+    public boolean isHomeStackResizable() {
+        return mHomeStackResizable;
+    }
+
     private void addDivider(Configuration configuration) {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
+        mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
         final int size = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
@@ -81,6 +94,9 @@ public class Divider extends SystemUI {
     }
 
     private void removeDivider() {
+        if (mView != null) {
+            mView.onDividerRemoved();
+        }
         mWindowManager.remove();
     }
 
@@ -88,7 +104,7 @@ public class Divider extends SystemUI {
         removeDivider();
         addDivider(configuration);
         if (mMinimized) {
-            mView.setMinimizedDockStack(true);
+            mView.setMinimizedDockStack(true, mHomeStackResizable);
             updateTouchable();
         }
     }
@@ -102,23 +118,25 @@ public class Divider extends SystemUI {
                     mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
 
                     // Update state because animations won't finish.
-                    mView.setMinimizedDockStack(mMinimized);
+                    mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
                 }
             }
         });
     }
 
-    private void updateMinimizedDockedStack(final boolean minimized, final long animDuration) {
+    private void updateMinimizedDockedStack(final boolean minimized, final long animDuration,
+            final boolean isHomeStackResizable) {
         mView.post(new Runnable() {
             @Override
             public void run() {
+                mHomeStackResizable = isHomeStackResizable;
                 if (mMinimized != minimized) {
                     mMinimized = minimized;
                     updateTouchable();
                     if (animDuration > 0) {
-                        mView.setMinimizedDockStack(minimized, animDuration);
+                        mView.setMinimizedDockStack(minimized, animDuration, isHomeStackResizable);
                     } else {
-                        mView.setMinimizedDockStack(minimized);
+                        mView.setMinimizedDockStack(minimized, isHomeStackResizable);
                     }
                 }
             }
@@ -135,7 +153,19 @@ public class Divider extends SystemUI {
     }
 
     private void updateTouchable() {
-        mWindowManager.setTouchable(!mMinimized && !mAdjustedForIme);
+        mWindowManager.setTouchable((mHomeStackResizable || !mMinimized) && !mAdjustedForIme);
+    }
+
+    /**
+     * Workaround for b/62528361, at the time RecentsDrawnEvent is sent, it may happen before a
+     * configuration change to the Divider, and internally, the event will be posted to the
+     * subscriber, or DividerView, which has been removed and prevented from resizing. Instead,
+     * register the event handler here and proxy the event to the current DividerView.
+     */
+    public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
+        if (mView != null) {
+            mView.onRecentsDrawn();
+        }
     }
 
     @Override
@@ -158,9 +188,10 @@ public class Divider extends SystemUI {
         }
 
         @Override
-        public void onDockedStackMinimizedChanged(boolean minimized, long animDuration)
-                throws RemoteException {
-            updateMinimizedDockedStack(minimized, animDuration);
+        public void onDockedStackMinimizedChanged(boolean minimized, long animDuration,
+                boolean isHomeStackResizable) throws RemoteException {
+            mHomeStackResizable = isHomeStackResizable;
+            updateMinimizedDockedStack(minimized, animDuration, isHomeStackResizable);
         }
 
         @Override

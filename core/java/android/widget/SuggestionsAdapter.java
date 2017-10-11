@@ -21,8 +21,8 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.ContentResolver.OpenResourceIdResult;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -39,8 +39,8 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 
 import com.android.internal.R;
 
@@ -111,7 +111,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
-        
+
         // mStartSpinnerRunnable = new Runnable() {
         // public void run() {
         // // mSearchView.setWorking(true); // TODO:
@@ -286,7 +286,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         v.setTag(new ChildViewCache(v));
 
         // Set up icon.
-        final ImageView iconRefine = (ImageView) v.findViewById(R.id.edit_query);
+        final ImageView iconRefine = v.findViewById(R.id.edit_query);
         iconRefine.setImageResource(mCommitIconResId);
 
         return v;
@@ -304,11 +304,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         public final ImageView mIconRefine;
 
         public ChildViewCache(View v) {
-            mText1 = (TextView) v.findViewById(com.android.internal.R.id.text1);
-            mText2 = (TextView) v.findViewById(com.android.internal.R.id.text2);
-            mIcon1 = (ImageView) v.findViewById(com.android.internal.R.id.icon1);
-            mIcon2 = (ImageView) v.findViewById(com.android.internal.R.id.icon2);
-            mIconRefine = (ImageView) v.findViewById(com.android.internal.R.id.edit_query);
+            mText1 = v.findViewById(com.android.internal.R.id.text1);
+            mText2 = v.findViewById(com.android.internal.R.id.text2);
+            mIcon1 = v.findViewById(com.android.internal.R.id.icon1);
+            mIcon2 = v.findViewById(com.android.internal.R.id.icon2);
+            mIconRefine = v.findViewById(com.android.internal.R.id.edit_query);
         }
     }
 

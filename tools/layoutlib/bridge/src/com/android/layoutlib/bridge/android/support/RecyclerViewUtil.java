@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
+import com.android.layoutlib.bridge.util.ReflectionUtils;
 import com.android.layoutlib.bridge.util.ReflectionUtils.ReflectionException;
 
 import android.annotation.NonNull;
@@ -116,7 +117,7 @@ public class RecyclerViewUtil {
     private static void setProperty(@NonNull Object object, @NonNull String propertyClassName,
       @NonNull Object propertyValue, @NonNull String propertySetter)
             throws ReflectionException {
-        Class<?> propertyClass = getClassInstance(propertyValue, propertyClassName);
+        Class<?> propertyClass = ReflectionUtils.getClassInstance(propertyValue, propertyClassName);
         setProperty(object, propertyClass, propertyValue, propertySetter);
     }
 
@@ -126,22 +127,4 @@ public class RecyclerViewUtil {
         invoke(getMethod(object.getClass(), propertySetter, propertyClass), object, propertyValue);
     }
 
-    /**
-     * Looks through the class hierarchy of {@code object} at runtime and returns the class matching
-     * the name {@code className}.
-     * <p/>
-     * This is used when we cannot use Class.forName() since the class we want was loaded from a
-     * different ClassLoader.
-     */
-    @NonNull
-    private static Class<?> getClassInstance(@NonNull Object object, @NonNull String className) {
-        Class<?> superClass = object.getClass();
-        while (superClass != null) {
-            if (className.equals(superClass.getName())) {
-                return superClass;
-            }
-            superClass = superClass.getSuperclass();
-        }
-        throw new RuntimeException("invalid object/classname combination.");
-    }
 }

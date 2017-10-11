@@ -54,29 +54,50 @@ struct ProfileData {
     nsecs_t statStartTime;
 };
 
+enum class JankTrackerType {
+    // The default, means there's no description set
+    Generic,
+    // The profile data represents a package
+    Package,
+    // The profile data is for a specific window
+    Window,
+};
+
+// Metadata about the ProfileData being collected
+struct ProfileDataDescription {
+    JankTrackerType type;
+    std::string name;
+};
+
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
     explicit JankTracker(const DisplayInfo& displayInfo);
     ~JankTracker();
 
+    void setDescription(JankTrackerType type, const std::string&& name) {
+        mDescription.type = type;
+        mDescription.name = name;
+    }
+
     void addFrame(const FrameInfo& frame);
 
-    void dump(int fd) { dumpData(mData, fd); }
+    void dump(int fd) { dumpData(fd, &mDescription, mData); }
     void reset();
 
+    void rotateStorage();
     void switchStorageToAshmem(int ashmemfd);
 
     uint32_t findPercentile(int p) { return findPercentile(mData, p); }
-
-    ANDROID_API static void dumpBuffer(const void* buffer, size_t bufsize, int fd);
+    static int32_t frameTimeForFrameCountIndex(uint32_t index);
+    static int32_t frameTimeForSlowFrameCountIndex(uint32_t index);
 
 private:
     void freeData();
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
     static uint32_t findPercentile(const ProfileData* data, int p);
-    static void dumpData(const ProfileData* data, int fd);
+    static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
     int64_t mFrameInterval;
@@ -90,6 +111,7 @@ private:
     nsecs_t mDequeueTimeForgiveness = 0;
     ProfileData* mData;
     bool mIsMapped = false;
+    ProfileDataDescription mDescription;
 };
 
 } /* namespace uirenderer */

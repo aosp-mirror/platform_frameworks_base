@@ -17,7 +17,7 @@
 #include "Caches.h"
 
 #include "GammaFontRenderer.h"
-#include "LayerRenderer.h"
+#include "GlLayer.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
@@ -53,7 +53,6 @@ Caches::Caches(RenderState& renderState)
         : gradientCache(mExtensions)
         , patchCache(renderState)
         , programCache(mExtensions)
-        , dither(*this)
         , mRenderState(&renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
@@ -70,8 +69,6 @@ bool Caches::init() {
 
     mRegionMesh = nullptr;
     mProgram = nullptr;
-
-    patchCache.init();
 
     mInitialized = true;
 
@@ -168,17 +165,17 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
     log.appendFormat("  TextureCache         %8d / %8d\n",
             textureCache.getSize(), textureCache.getMaxSize());
-    log.appendFormat("  LayerCache           %8d / %8d (numLayers = %zu)\n",
-            layerCache.getSize(), layerCache.getMaxSize(), layerCache.getCount());
     if (mRenderState) {
         int memused = 0;
         for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
                 it != mRenderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
-            log.appendFormat("    Layer size %dx%d; isTextureLayer()=%d; texid=%u fbo=%u; refs=%d\n",
+            LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL);
+            const GlLayer* glLayer = static_cast<const GlLayer*>(layer);
+            log.appendFormat("    GlLayer size %dx%d; texid=%u refs=%d\n",
                     layer->getWidth(), layer->getHeight(),
-                    layer->isTextureLayer(), layer->getTextureId(),
-                    layer->getFbo(), layer->getStrongCount());
+                    glLayer->getTextureId(),
+                    layer->getStrongCount());
             memused += layer->getWidth() * layer->getHeight() * 4;
         }
         log.appendFormat("  Layers total   %8d (numLayers = %zu)\n",
@@ -226,7 +223,6 @@ void Caches::dumpMemoryUsage(String8 &log) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::clearGarbage() {
-    textureCache.clearGarbage();
     pathCache.clearGarbage();
     patchCache.clearGarbage();
 }
@@ -242,7 +238,6 @@ void Caches::flush(FlushMode mode) {
             gradientCache.clear();
             fontRenderer.clear();
             fboCache.clear();
-            dither.clear();
             // fall through
         case FlushMode::Moderate:
             fontRenderer.flush();
@@ -251,7 +246,6 @@ void Caches::flush(FlushMode mode) {
             tessellationCache.clear();
             // fall through
         case FlushMode::Layers:
-            layerCache.clear();
             renderBufferCache.clear();
             break;
     }

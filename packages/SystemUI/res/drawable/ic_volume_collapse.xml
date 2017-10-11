@@ -18,7 +18,8 @@
     android:height="24dp"
     android:viewportHeight="24"
     android:viewportWidth="24"
-    android:width="24dp" >
+    android:width="24dp"
+    android:tint="?android:attr/colorControlNormal" >
 
     <group
         android:name="chevron_02"

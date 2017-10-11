@@ -16,34 +16,33 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserManager;
 
-import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
-public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
+public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
              "com.android.settings", "com.android.settings.TetherSettings"));
 
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
                     R.drawable.ic_hotspot_disable);
+    private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot_disable);
     private final AnimationIcon mDisable =
             new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
                     R.drawable.ic_hotspot_enable);
@@ -55,9 +54,9 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
     private final GlobalSetting mAirplaneMode;
     private boolean mListening;
 
-    public HotspotTile(Host host) {
+    public HotspotTile(QSHost host) {
         super(host);
-        mController = host.getHotspotController();
+        mController = Dependency.get(HotspotController.class);
         mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
             protected void handleValueChanged(int value) {
@@ -107,7 +106,6 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         if (!isEnabled && mAirplaneMode.getValue() != 0) {
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setHotspotEnabled(!isEnabled);
     }
 
@@ -126,21 +124,23 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         } else {
             state.value = mController.isHotspotEnabled();
         }
-        state.icon = state.value ? mEnable : mDisable;
+        state.icon = !state.value ? mDisable
+                : state.isTransient ? mEnabledStatic
+                : mEnable;
         boolean wasAirplane = state.isAirplaneMode;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
-        if (state.isAirplaneMode) {
-            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
-            state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(disabledColor),
-                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+        state.isTransient = mController.isHotspotTransient();
+        if (state.isTransient) {
+            state.icon = ResourceIcon.get(R.drawable.ic_hotspot_transient_animation);
+        } else if (state.isAirplaneMode) {
             state.icon = mUnavailable;
         } else if (wasAirplane) {
             state.icon = mDisableNoAnimation;
         }
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
+        state.state = state.isAirplaneMode ? Tile.STATE_UNAVAILABLE
+                : state.value || state.isTransient ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

@@ -75,14 +75,14 @@ public class BitmapShader_Delegate extends Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nativeCreate(Bitmap androidBitmap, int shaderTileModeX,
-            int shaderTileModeY) {
+    /*package*/ static long nativeCreate(long nativeMatrix, Bitmap androidBitmap,
+            int shaderTileModeX, int shaderTileModeY) {
         Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(androidBitmap);
         if (bitmap == null) {
             return 0;
         }
 
-        BitmapShader_Delegate newDelegate = new BitmapShader_Delegate(
+        BitmapShader_Delegate newDelegate = new BitmapShader_Delegate(nativeMatrix,
                 bitmap.getImage(),
                 Shader_Delegate.getTileMode(shaderTileModeX),
                 Shader_Delegate.getTileMode(shaderTileModeY));
@@ -91,8 +91,9 @@ public class BitmapShader_Delegate extends Shader_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    private BitmapShader_Delegate(BufferedImage image,
+    private BitmapShader_Delegate(long matrix, BufferedImage image,
             TileMode tileModeX, TileMode tileModeY) {
+        super(matrix);
         mJavaPaint = new BitmapShaderPaint(image, tileModeX, tileModeY);
     }
 

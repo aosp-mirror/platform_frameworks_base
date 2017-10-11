@@ -156,25 +156,13 @@ public class BaseBundle {
      * @param b a Bundle to be copied.
      */
     BaseBundle(BaseBundle b) {
-        if (b.mParcelledData != null) {
-            if (b.isEmptyParcel()) {
-                mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
-            } else {
-                mParcelledData = Parcel.obtain();
-                mParcelledData.appendFrom(b.mParcelledData, 0, b.mParcelledData.dataSize());
-                mParcelledData.setDataPosition(0);
-            }
-        } else {
-            mParcelledData = null;
-        }
+        copyInternal(b, false);
+    }
 
-        if (b.mMap != null) {
-            mMap = new ArrayMap<>(b.mMap);
-        } else {
-            mMap = null;
-        }
-
-        mClassLoader = b.mClassLoader;
+    /**
+     * Special constructor that does not initialize the bundle.
+     */
+    BaseBundle(boolean doInit) {
     }
 
     /**
@@ -225,7 +213,7 @@ public class BaseBundle {
      * If the underlying data are stored as a Parcel, unparcel them
      * using the currently assigned class loader.
      */
-    /* package */ synchronized void unparcel() {
+    /* package */ void unparcel() {
         synchronized (this) {
             final Parcel parcelledData = mParcelledData;
             if (parcelledData == null) {
@@ -323,11 +311,117 @@ public class BaseBundle {
     }
 
     /**
+     * @hide this should probably be the implementation of isEmpty().  To do that we
+     * need to ensure we always use the special empty parcel form when the bundle is
+     * empty.  (This may already be the case, but to be safe we'll do this later when
+     * we aren't trying to stabilize.)
+     */
+    public boolean maybeIsEmpty() {
+        if (isParcelled()) {
+            return isEmptyParcel();
+        } else {
+            return isEmpty();
+        }
+    }
+
+    /**
+     * @hide This kind-of does an equality comparison.  Kind-of.
+     */
+    public boolean kindofEquals(BaseBundle other) {
+        if (other == null) {
+            return false;
+        }
+        if (isParcelled() != other.isParcelled()) {
+            // Big kind-of here!
+            return false;
+        } else if (isParcelled()) {
+            return mParcelledData.compareData(other.mParcelledData) == 0;
+        } else {
+            return mMap.equals(other.mMap);
+        }
+    }
+
+    /**
      * Removes all elements from the mapping of this Bundle.
      */
     public void clear() {
         unparcel();
         mMap.clear();
+    }
+
+    void copyInternal(BaseBundle from, boolean deep) {
+        synchronized (from) {
+            if (from.mParcelledData != null) {
+                if (from.isEmptyParcel()) {
+                    mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
+                } else {
+                    mParcelledData = Parcel.obtain();
+                    mParcelledData.appendFrom(from.mParcelledData, 0,
+                            from.mParcelledData.dataSize());
+                    mParcelledData.setDataPosition(0);
+                }
+            } else {
+                mParcelledData = null;
+            }
+
+            if (from.mMap != null) {
+                if (!deep) {
+                    mMap = new ArrayMap<>(from.mMap);
+                } else {
+                    final ArrayMap<String, Object> fromMap = from.mMap;
+                    final int N = fromMap.size();
+                    mMap = new ArrayMap<>(N);
+                    for (int i = 0; i < N; i++) {
+                        mMap.append(fromMap.keyAt(i), deepCopyValue(fromMap.valueAt(i)));
+                    }
+                }
+            } else {
+                mMap = null;
+            }
+
+            mClassLoader = from.mClassLoader;
+        }
+    }
+
+    Object deepCopyValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Bundle) {
+            return ((Bundle)value).deepCopy();
+        } else if (value instanceof PersistableBundle) {
+            return ((PersistableBundle)value).deepCopy();
+        } else if (value instanceof ArrayList) {
+            return deepcopyArrayList((ArrayList) value);
+        } else if (value.getClass().isArray()) {
+            if (value instanceof int[]) {
+                return ((int[])value).clone();
+            } else if (value instanceof long[]) {
+                return ((long[])value).clone();
+            } else if (value instanceof float[]) {
+                return ((float[])value).clone();
+            } else if (value instanceof double[]) {
+                return ((double[])value).clone();
+            } else if (value instanceof Object[]) {
+                return ((Object[])value).clone();
+            } else if (value instanceof byte[]) {
+                return ((byte[])value).clone();
+            } else if (value instanceof short[]) {
+                return ((short[])value).clone();
+            } else if (value instanceof char[]) {
+                return ((char[]) value).clone();
+            }
+        }
+        return value;
+    }
+
+    ArrayList deepcopyArrayList(ArrayList from) {
+        final int N = from.size();
+        ArrayList out = new ArrayList(N);
+        for (int i=0; i<N; i++) {
+            out.add(deepCopyValue(from.get(i)));
+        }
+        return out;
     }
 
     /**
@@ -1381,39 +1475,42 @@ public class BaseBundle {
     void writeToParcelInner(Parcel parcel, int flags) {
         // Keep implementation in sync with writeToParcel() in
         // frameworks/native/libs/binder/PersistableBundle.cpp.
-        final Parcel parcelledData;
+        final ArrayMap<String, Object> map;
         synchronized (this) {
-            parcelledData = mParcelledData;
-        }
-        if (parcelledData != null) {
-            if (isEmptyParcel()) {
-                parcel.writeInt(0);
-            } else {
-                int length = parcelledData.dataSize();
-                parcel.writeInt(length);
-                parcel.writeInt(BUNDLE_MAGIC);
-                parcel.appendFrom(parcelledData, 0, length);
-            }
-        } else {
-            // Special case for empty bundles.
-            if (mMap == null || mMap.size() <= 0) {
-                parcel.writeInt(0);
+            // unparcel() can race with this method and cause the parcel to recycle
+            // at the wrong time. So synchronize access the mParcelledData's content.
+            if (mParcelledData != null) {
+                if (mParcelledData == NoImagePreloadHolder.EMPTY_PARCEL) {
+                    parcel.writeInt(0);
+                } else {
+                    int length = mParcelledData.dataSize();
+                    parcel.writeInt(length);
+                    parcel.writeInt(BUNDLE_MAGIC);
+                    parcel.appendFrom(mParcelledData, 0, length);
+                }
                 return;
             }
-            int lengthPos = parcel.dataPosition();
-            parcel.writeInt(-1); // dummy, will hold length
-            parcel.writeInt(BUNDLE_MAGIC);
-
-            int startPos = parcel.dataPosition();
-            parcel.writeArrayMapInternal(mMap);
-            int endPos = parcel.dataPosition();
-
-            // Backpatch length
-            parcel.setDataPosition(lengthPos);
-            int length = endPos - startPos;
-            parcel.writeInt(length);
-            parcel.setDataPosition(endPos);
+            map = mMap;
         }
+
+        // Special case for empty bundles.
+        if (map == null || map.size() <= 0) {
+            parcel.writeInt(0);
+            return;
+        }
+        int lengthPos = parcel.dataPosition();
+        parcel.writeInt(-1); // dummy, will hold length
+        parcel.writeInt(BUNDLE_MAGIC);
+
+        int startPos = parcel.dataPosition();
+        parcel.writeArrayMapInternal(map);
+        int endPos = parcel.dataPosition();
+
+        // Backpatch length
+        parcel.setDataPosition(lengthPos);
+        int length = endPos - startPos;
+        parcel.writeInt(length);
+        parcel.setDataPosition(endPos);
     }
 
     /**
@@ -1451,6 +1548,7 @@ public class BaseBundle {
         Parcel p = Parcel.obtain();
         p.setDataPosition(0);
         p.appendFrom(parcel, offset, length);
+        p.adoptClassCookies(parcel);
         if (DEBUG) Log.d(TAG, "Retrieving "  + Integer.toHexString(System.identityHashCode(this))
                 + ": " + length + " bundle bytes starting at " + offset);
         p.setDataPosition(0);

@@ -26,6 +26,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -58,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -187,6 +187,21 @@ public abstract class Drawable {
     private boolean mVisible = true;
 
     private int mLayoutDirection;
+
+    /**
+     * The source density to use when looking up resources using
+     * {@link Resources#getDrawableForDensity(int, int, Theme)}. A value of 0 means there is no
+     * override and the system density will be used.
+     *
+     * NOTE(adamlesinski): This is transient state used to get around the public API that does not
+     * account for source density overrides. Custom drawables implemented by developers do not need
+     * to be aware of the source density override, as it is only used by Launcher to load higher
+     * resolution icons from external Resources packages, which do not execute custom code.
+     * This is all to support the {@link Resources#getDrawableForDensity(int, int, Theme)} API.
+     *
+     * @hide
+     */
+    protected int mSrcDensityOverride = 0;
 
     /**
      * Draw in its bounds (set via setBounds) respecting optional effects such
@@ -576,6 +591,12 @@ public abstract class Drawable {
      * </p>
      */
     public void setColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
+        if (getColorFilter() instanceof PorterDuffColorFilter) {
+            PorterDuffColorFilter existing = (PorterDuffColorFilter) getColorFilter();
+            if (existing.getColor() == color && existing.getMode() == mode) {
+                return;
+            }
+        }
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
@@ -704,6 +725,25 @@ public abstract class Drawable {
      * @see #setState(int[])
      */
     public boolean isStateful() {
+        return false;
+    }
+
+    /**
+     * Indicates whether this drawable has at least one state spec explicitly
+     * specifying {@link android.R.attr#state_focused}.
+     *
+     * <p>Note: A View uses a {@link Drawable} instance as its background and it
+     * changes its appearance based on a state. On keyboard devices, it should
+     * specify its {@link android.R.attr#state_focused} to make sure the user
+     * knows which view is holding the focus.</p>
+     *
+     * @return {@code true} if {@link android.R.attr#state_focused} is specified
+     * for this drawable.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean hasFocusStateSpecified() {
         return false;
     }
 
@@ -1172,7 +1212,8 @@ public abstract class Drawable {
      * create resources in XML, see
      * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
      */
-    public static Drawable createFromXml(Resources r, XmlPullParser parser)
+    @NonNull
+    public static Drawable createFromXml(@NonNull Resources r, @NonNull XmlPullParser parser)
             throws XmlPullParserException, IOException {
         return createFromXml(r, parser, null);
     }
@@ -1182,7 +1223,20 @@ public abstract class Drawable {
      * For more information on how to create resources in XML, see
      * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
      */
-    public static Drawable createFromXml(Resources r, XmlPullParser parser, Theme theme)
+    @NonNull
+    public static Drawable createFromXml(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @Nullable Theme theme) throws XmlPullParserException, IOException {
+        return createFromXmlForDensity(r, parser, 0, theme);
+    }
+
+    /**
+     * Version of {@link #createFromXml(Resources, XmlPullParser, Theme)} that accepts a density
+     * override.
+     * @hide
+     */
+    @NonNull
+    public static Drawable createFromXmlForDensity(@NonNull Resources r,
+            @NonNull XmlPullParser parser, int density, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
@@ -1197,7 +1251,7 @@ public abstract class Drawable {
             throw new XmlPullParserException("No start tag found");
         }
 
-        Drawable drawable = createFromXmlInner(r, parser, attrs, theme);
+        Drawable drawable = createFromXmlInnerForDensity(r, parser, attrs, density, theme);
 
         if (drawable == null) {
             throw new RuntimeException("Unknown initial tag: " + parser.getName());
@@ -1211,8 +1265,9 @@ public abstract class Drawable {
      * a tag in an XML document, tries to create a Drawable from that tag.
      * Returns null if the tag is not a valid drawable.
      */
-    public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs)
-            throws XmlPullParserException, IOException {
+    @NonNull
+    public static Drawable createFromXmlInner(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs) throws XmlPullParserException, IOException {
         return createFromXmlInner(r, parser, attrs, null);
     }
 
@@ -1222,14 +1277,29 @@ public abstract class Drawable {
      * document, tries to create a Drawable from that tag. Returns {@code null}
      * if the tag is not a valid drawable.
      */
-    public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs,
-            Theme theme) throws XmlPullParserException, IOException {
-        return r.getDrawableInflater().inflateFromXml(parser.getName(), parser, attrs, theme);
+    @NonNull
+    public static Drawable createFromXmlInner(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
+            throws XmlPullParserException, IOException {
+        return createFromXmlInnerForDensity(r, parser, attrs, 0, theme);
+    }
+
+    /**
+     * Version of {@link #createFromXmlInner(Resources, XmlPullParser, AttributeSet, Theme)} that
+     * accepts an override density.
+     */
+    @NonNull
+    static Drawable createFromXmlInnerForDensity(@NonNull Resources r,
+            @NonNull XmlPullParser parser, @NonNull AttributeSet attrs, int density,
+            @Nullable Theme theme) throws XmlPullParserException, IOException {
+        return r.getDrawableInflater().inflateFromXmlForDensity(parser.getName(), parser, attrs,
+                density, theme);
     }
 
     /**
      * Create a drawable from file path name.
      */
+    @Nullable
     public static Drawable createFromPath(String pathName) {
         if (pathName == null) {
             return null;
@@ -1288,6 +1358,16 @@ public abstract class Drawable {
             @NonNull @SuppressWarnings("unused") XmlPullParser parser, @NonNull TypedArray attrs,
             @AttrRes int visibleAttr) throws XmlPullParserException, IOException {
         mVisible = attrs.getBoolean(visibleAttr, mVisible);
+    }
+
+    /**
+     * Sets the source override density for this Drawable. If non-zero, this density is to be used
+     * for any calls to {@link Resources#getDrawableForDensity(int, int, Theme)} or
+     * {@link Resources#getValueForDensity(int, int, TypedValue, boolean)}.
+     * @hide
+     */
+    final void setSrcDensityOverride(int density) {
+        mSrcDensityOverride = density;
     }
 
     /**
@@ -1359,19 +1439,6 @@ public abstract class Drawable {
          * this drawable (and thus require completely reloading it).
          */
         public abstract @Config int getChangingConfigurations();
-
-        /**
-         * @return Total pixel count
-         * @hide
-         */
-        public int addAtlasableBitmaps(@NonNull Collection<Bitmap> atlasList) {
-            return 0;
-        }
-
-        /** @hide */
-        protected final boolean isAtlasable(@Nullable Bitmap bitmap) {
-            return bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888;
-        }
 
         /**
          * Return whether this constant state can have a theme applied.

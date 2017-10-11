@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3171996292755059205">"કીગાર્ડ"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"PIN કોડ લખો"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"SIM PUK અને નવો PIN કોડ લખો"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK કોડ"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"નવો SIM PIN કોડ"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"પાસવર્ડ લખવા માટે ટચ કરો"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"અનલૉક કરવા માટે પાસવર્ડ લખો"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"અનલૉક કરવા માટે PIN લખો"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ખોટો PIN કોડ."</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"ચાર્જ થઈ ગયું"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"ચાર્જ થઈ રહ્યું છે"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"ઝડપથી ચાર્જ થઈ રહ્યું છે"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"ધીમેથી ચાર્જ થઈ રહ્યું છે"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"તમારું ચાર્જર કનેક્ટ કરો."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"નેટવર્ક લૉક થયું"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"કોઈ SIM કાર્ડ નથી"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"ટૅબ્લેટમાં SIM કાર્ડ નથી."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ફોનમાં SIM કાર્ડ નથી."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"એક SIM કાર્ડ દાખલ કરો."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM કાર્ડ ખૂટે છે અથવા વાંચન યોગ્ય નથી. SIM કાર્ડ દાખલ કરો."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"બિનઉપયોગી SIM કાર્ડ."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"તમારું SIM કાર્ડ કાયમી રૂપે અક્ષમ કરવામાં આવ્યું છે.\n બીજા SIM કાર્ડ માટે તમારા વાયરલેસ સેવા પ્રદાતાનો સંપર્ક કરો."</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM કાર્ડ લૉક કરેલ છે."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM કાર્ડ, PUK-લૉક કરેલ છે."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM કાર્ડ અનલૉક કરી રહ્યા છીએ…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN ક્ષેત્ર"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN ક્ષેત્ર"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK ક્ષેત્ર"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g> માટે આગલું એલાર્મ સેટ કર્યું"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"કાઢી નાખો"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"દાખલ કરો"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"પેટર્ન ભૂલી ગયાં"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ખોટી પેટર્ન"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"ખોટો પાસવર્ડ"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"ખોટો PIN"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"તમારી પેટર્ન દોરો"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"SIM PIN દાખલ કરો"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" માટે SIM PIN દાખલ કરો"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN દાખલ કરો"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"પાસવર્ડ દાખલ કરો"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"જોઈતો PIN કોડ દાખલ કરો"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"જોઈતા PIN કોડની પુષ્ટિ કરો"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM કાર્ડ અનલૉક કરી રહ્યા છીએ…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 થી 8 સંખ્યાનો હોય તેવો એક PIN લખો."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK કોડ 8 કે તેનાથી વધુ સંખ્યાનો હોવો જોઈએ."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"સાચો PUK કોડ ફરીથી દાખલ કરો. પુનરાવર્તિત પ્રયાસો SIM ને કાયમી રીતે અક્ષમ કરશે."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN કોડ મેળ ખાતા નથી"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"ઘણા બધા પેટર્ન પ્રયાસો"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"તમારો PIN તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"તમારો પાસવર્ડ તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"તમારી અનલૉક પેટર્ન તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"તમે ટૅબ્લેટને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, આ ટૅબ્લેટ ફરીથી સેટ કરવામાં આવશે, જે તેનો તમામ ડેટા કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"તમે ફોનને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, આ ફોન ફરીથી સેટ કરવામાં આવશે, જે તેનો તમામ ડેટા કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"તમે ટૅબ્લેટને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ ટૅબ્લેટ ફરીથી સેટ થશે, જે તેનો તમામ ડેટા કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"તમે ફોનને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ ફોન ફરીથી સેટ કરાશે, જે તેનો તમામ ડેટા કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"તમે ટૅબ્લેટને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. <xliff:g id="NUMBER_1">%2$d</xliff:g> વધુ અસફળ પ્રયાસો પછી, આ વપરાશકર્તાને દૂર કરવામાં આવશે, જે તમામ વપરાશકર્તા ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"તમે ફોનને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, આ વપરાશકર્તાને દૂર કરવામાં આવશે, જે તમામ વપરાશકર્તા ડેટા કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"તમે ટૅબ્લેટને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ વપરાશકર્તાને દૂર કરવામાં આવશે, જે તમામ વપરાશકર્તા ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"તમે ફોનને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ વપરાશકર્તાને દૂર કરવામાં આવશે, જે તમામ વપરાશકર્તા ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"તમે ટૅબ્લેટને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, કાર્ય પ્રોફાઇલ દૂર કરવામાં આવશે, જે તમામ પ્રોફાઇલ ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"તમે ફોનને <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસ પછી, કાર્ય પ્રોફાઇલ દૂર કરવામાં આવશે, જે તમામ પ્રોફાઇલ ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"તમે ટૅબ્લેટને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ કાર્ય પ્રોફાઇલ દૂર કરવામાં આવશે, જે તમામ પ્રોફાઇલ ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"તમે ફોનને <xliff:g id="NUMBER">%d</xliff:g> વખત ખોટી રીતે અનલૉક કરવાનો પ્રયાસ કર્યો છે. આ કાર્ય પ્રોફાઇલ દૂર કરવામાં આવશે, જે તમામ પ્રોફાઇલ ડેટાને કાઢી નાખશે."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"તમે તમારી અનલૉક પેટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, તમને એક ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને તમારા ટૅબ્લેટને અનલૉક કરવાનું કહેવામાં આવશે.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> સેકંડમાં ફરી પ્રયાસ કરો."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"તમે તમારી અનલૉક પેટર્ન <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે દોરી છે. વધુ <xliff:g id="NUMBER_1">%2$d</xliff:g> અસફળ પ્રયાસો પછી, તમને ઇમેઇલ એકાઉન્ટનો ઉપયોગ કરીને ફોન અનલૉક કરવાનું કહેવામાં આવશે.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"ખોટો SIM PIN કોડ, તમારે હવે તમારું ઉપકરણ અનલૉક કરવા માટે તમારા કેરીઅરનો સંપર્ક કરવો આવશ્યક છે."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="one">ખોટો SIM PIN કોડ, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+      <item quantity="other">ખોટો SIM PIN કોડ, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM અનુપયોગી છે. તમારા કૅરિઅરનો સંપર્ક કરો."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="one">ખોટો SIM PUK કોડ, SIM કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+      <item quantity="other">ખોટો SIM PUK કોડ, SIM કાયમી રૂપે અનુપયોગી બની જાય તે પહેલા તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"SIM PIN ઑપરેશન નિષ્ફળ થયું!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK ઓપરેશન નિષ્ફળ થયું!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"કોડ સ્વીકાર્યો!"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"કોઈ સેવા નથી."</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ઇનપુટ પદ્ધતિ સ્વિચ કરો"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"એરપ્લેન મોડ"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"ઉપકરણનો પુનઃપ્રારંભ થાય તે પછી પેટર્ન જરૂરી છે"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"ઉપકરણનો પુનઃપ્રારંભ થાય તે પછી PIN જરૂરી છે"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"ઉપકરણનો પુનઃપ્રારંભ થાય તે પછી પાસવર્ડ જરૂરી છે"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"વધારાની સુરક્ષા માટે પેટર્ન જરૂરી છે"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"વધારાની સુરક્ષા માટે PIN જરૂરી છે"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"વધારાની સુરક્ષા માટે પાસવર્ડ જરૂરી છે"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"જ્યારે તમે પ્રોફાઇલો સ્વિચ કરો ત્યારે પેટર્ન જરૂરી છે"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"જ્યારે તમે પ્રોફાઇલો સ્વિચ કરો ત્યારે PIN જરૂરી છે"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"જ્યારે તમે પ્રોફાઇલો સ્વિચ કરો ત્યારે પાસવર્ડ જરૂરી છે"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"વ્યવસ્થાપકે ઉપકરણ લૉક કરેલું છે"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ઉપકરણ મેન્યુઅલી લૉક કર્યું હતું"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="one">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પેટર્નની પુષ્ટિ કરો.</item>
+      <item quantity="other">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પેટર્નની પુષ્ટિ કરો.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="one">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. PIN ની પુષ્ટિ કરો.</item>
+      <item quantity="other">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. PIN ની પુષ્ટિ કરો.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="one">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પાસવર્ડની પુષ્ટિ કરો.</item>
+      <item quantity="other">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પાસવર્ડની પુષ્ટિ કરો.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ઓળખાયેલ નથી"</string>
+</resources>

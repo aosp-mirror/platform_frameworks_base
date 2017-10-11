@@ -24,6 +24,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -266,7 +267,6 @@ public class InputMethodService extends AbstractInputMethodService {
     InputMethodManager mImm;
     
     int mTheme = 0;
-    boolean mHardwareAccelerated = false;
     
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
@@ -292,7 +292,20 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mCandidatesViewStarted;
     InputConnection mStartedInputConnection;
     EditorInfo mInputEditorInfo;
-    
+
+    /**
+     * A token to keep tracking the last IPC that triggered
+     * {@link #doStartInput(InputConnection, EditorInfo, boolean)}. If
+     * {@link #doStartInput(InputConnection, EditorInfo, boolean)} was not caused by IPCs from
+     * {@link com.android.server.InputMethodManagerService}, this needs to remain unchanged.
+     *
+     * <p>Some IPCs to {@link com.android.server.InputMethodManagerService} require this token to
+     * disentangle event flows for various purposes such as better window animation and providing
+     * fine-grained debugging information.</p>
+     */
+    @Nullable
+    private IBinder mStartInputToken;
+
     int mShowInputFlags;
     boolean mShowInputRequested;
     boolean mLastShowInputRequested;
@@ -388,8 +401,9 @@ public class InputMethodService extends AbstractInputMethodService {
             mInputConnection = binding.getConnection();
             if (DEBUG) Log.v(TAG, "bindInput(): binding=" + binding
                     + " ic=" + mInputConnection);
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) ic.reportFullscreenMode(mIsFullscreen);
+            if (mImm != null && mToken != null) {
+                mImm.reportFullscreenMode(mToken, mIsFullscreen);
+            }
             initialize();
             onBindInput();
         }
@@ -413,6 +427,23 @@ public class InputMethodService extends AbstractInputMethodService {
         public void restartInput(InputConnection ic, EditorInfo attribute) {
             if (DEBUG) Log.v(TAG, "restartInput(): editor=" + attribute);
             doStartInput(ic, attribute, true);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
+                @NonNull EditorInfo editorInfo, boolean restarting,
+                @NonNull IBinder startInputToken) {
+            mStartInputToken = startInputToken;
+
+            // This needs to be dispatched to interface methods rather than doStartInput().
+            // Otherwise IME developers who have overridden those interface methods will lose
+            // notifications.
+            super.dispatchStartInputWithToken(inputConnection, editorInfo, restarting,
+                    startInputToken);
         }
 
         /**
@@ -454,8 +485,8 @@ public class InputMethodService extends AbstractInputMethodService {
             clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = isInputViewShown();
-            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
-                    mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken,
+                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -752,26 +783,27 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * You can call this to try to enable hardware accelerated drawing for
-     * your IME. This must be set before {@link #onCreate}, so you
-     * will typically call it in your constructor.  It is not always possible
-     * to use hardware accelerated drawing in an IME (for example on low-end
-     * devices that do not have the resources to support this), so the call
-     * returns true if it succeeds otherwise false if you will need to draw
-     * in software.  You must be able to handle either case.
+     * You can call this to try to enable accelerated drawing for your IME. This must be set before
+     * {@link #onCreate()}, so you will typically call it in your constructor.  It is not always
+     * possible to use hardware accelerated drawing in an IME (for example on low-end devices that
+     * do not have the resources to support this), so the call {@code true} if it succeeds otherwise
+     * {@code false} if you will need to draw in software.  You must be able to handle either case.
      *
-     * @deprecated Starting in API 21, hardware acceleration is always enabled
-     *             on capable devices.
+     * <p>In API 21 and later, system may automatically enable hardware accelerated drawing for your
+     * IME on capable devices even if this method is not explicitly called. Make sure that your IME
+     * is able to handle either case.</p>
+     *
+     * @return {@code true} if accelerated drawing is successfully enabled otherwise {@code false}.
+     *         On API 21 and later devices the return value is basically just a hint and your IME
+     *         does not need to change the behavior based on the it
+     * @deprecated Starting in API 21, hardware acceleration is always enabled on capable devices
      */
+    @Deprecated
     public boolean enableHardwareAcceleration() {
         if (mWindow != null) {
             throw new IllegalStateException("Must be called before onCreate()");
         }
-        if (ActivityManager.isHighEndGfx()) {
-            mHardwareAccelerated = true;
-            return true;
-        }
-        return false;
+        return ActivityManager.isHighEndGfx();
     }
 
     @Override public void onCreate() {
@@ -792,9 +824,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
-        if (mHardwareAccelerated) {
-            mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-        }
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
     }
@@ -928,8 +957,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
-                    mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken,
+                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
         }
     }
 
@@ -1030,8 +1059,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
             mIsFullscreen = isFullscreen;
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) ic.reportFullscreenMode(isFullscreen);
+            if (mImm != null && mToken != null) {
+                mImm.reportFullscreenMode(mToken, mIsFullscreen);
+            }
             mFullscreenApplied = true;
             initialize();
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
@@ -1087,8 +1117,10 @@ public class InputMethodService extends AbstractInputMethodService {
         final int currentHeight = mWindow.getWindow().getAttributes().height;
         final int newHeight = isFullscreen ? MATCH_PARENT : WRAP_CONTENT;
         if (mIsInputViewShown && currentHeight != newHeight) {
-            Log.w(TAG, "Window size has been changed. This may cause jankiness of resizing window: "
-                    + currentHeight + " -> " + newHeight);
+            if (DEBUG) {
+                Log.w(TAG,"Window size has been changed. This may cause jankiness of resizing "
+                        + "window: " + currentHeight + " -> " + newHeight);
+            }
         }
         mWindow.getWindow().setLayout(MATCH_PARENT, newHeight);
     }
@@ -1652,7 +1684,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
         final int nextImeWindowStatus = IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
         if (previousImeWindowStatus != nextImeWindowStatus) {
-            mImm.setImeWindowStatus(mToken, nextImeWindowStatus, mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken, nextImeWindowStatus,
+                    mBackDisposition);
         }
         if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
@@ -1677,7 +1710,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void doHideWindow() {
-        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
+        mImm.setImeWindowStatus(mToken, mStartInputToken, 0, mBackDisposition);
         hideWindow();
     }
 
@@ -2642,7 +2675,8 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mInputStarted=" + mInputStarted
                 + " mInputViewStarted=" + mInputViewStarted
                 + " mCandidatesViewStarted=" + mCandidatesViewStarted);
-        
+        p.println("  mStartInputToken=" + mStartInputToken);
+
         if (mInputEditorInfo != null) {
             p.println("  mInputEditorInfo:");
             mInputEditorInfo.dump(p, "    ");

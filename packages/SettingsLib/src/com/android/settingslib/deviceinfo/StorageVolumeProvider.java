@@ -16,8 +16,10 @@
 
 package com.android.settingslib.deviceinfo;
 
+import android.app.usage.StorageStatsManager;
 import android.os.storage.VolumeInfo;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,4 +36,23 @@ public interface StorageVolumeProvider {
      * Returns a list of VolumeInfos for the device.
      */
     List<VolumeInfo> getVolumes();
+
+    /**
+     * Returns the emulated volume for a given private volume.
+     */
+    VolumeInfo findEmulatedForPrivate(VolumeInfo privateVolume);
+
+    /**
+     * Returns the total bytes for a given storage volume.
+     *
+     * @pre The volume is a private volume and is readable.
+     */
+    long getTotalBytes(StorageStatsManager stats, VolumeInfo volume) throws IOException;
+
+    /**
+     * Returns the free bytes for a given storage volume.
+     *
+     * @pre The volume is a private volume and is readable.
+     */
+    long getFreeBytes(StorageStatsManager stats, VolumeInfo volume) throws IOException;
 }

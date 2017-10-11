@@ -31,6 +31,8 @@ import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.STATS_PER_IFACE;
+import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
@@ -45,6 +47,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -154,7 +157,7 @@ public class NetworkStatsServiceTest {
     private @Mock IConnectivityManager mConnManager;
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
-    private IdleableHandlerThread mHandlerThread;
+    private HandlerThread mHandlerThread;
     private Handler mHandler;
 
     private NetworkStatsService mService;
@@ -181,7 +184,7 @@ public class NetworkStatsServiceTest {
                 mServiceContext, mNetManager, mAlarmManager, wakeLock, mTime,
                 TelephonyManager.getDefault(), mSettings, new NetworkStatsObservers(),
                 mStatsDir, getBaseDir(mStatsDir));
-        mHandlerThread = new IdleableHandlerThread("HandlerThread");
+        mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
         Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
         mHandler = new Handler(mHandlerThread.getLooper(), callback);
@@ -822,17 +825,24 @@ public class NetworkStatsServiceTest {
         incrementCurrentTime(HOUR_IN_MILLIS);
         expectCurrentTime();
         expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 2048L, 16L, 512L, 4L));
 
+        // Traffic seen by kernel counters (includes software tethering).
+        final NetworkStats ifaceStats = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 1536L, 12L, 384L, 3L);
+        // Hardware tethering traffic, not seen by kernel counters.
+        final NetworkStats tetherStatsHardware = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 512L, 4L, 128L, 1L);
+
+        // Traffic for UID_RED.
         final NetworkStats uidStats = new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L);
-        final String[] tetherIfacePairs = new String[] { TEST_IFACE, "wlan0" };
+        // All tethering traffic, both hardware and software.
         final NetworkStats tetherStats = new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L,
                         0L);
 
-        expectNetworkStatsUidDetail(uidStats, tetherIfacePairs, tetherStats);
+        expectNetworkStatsSummary(ifaceStats, tetherStatsHardware);
+        expectNetworkStatsUidDetail(uidStats, tetherStats);
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -886,7 +896,7 @@ public class NetworkStatsServiceTest {
 
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
 
 
 
@@ -908,7 +918,7 @@ public class NetworkStatsServiceTest {
         assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
 
         // make sure callback has not being called
-        assertEquals(INVALID_TYPE, latchedHandler.mLastMessageType);
+        assertEquals(INVALID_TYPE, latchedHandler.lastMessageType);
 
         // and bump forward again, with counters going higher. this is
         // important, since it will trigger the data usage callback
@@ -926,7 +936,7 @@ public class NetworkStatsServiceTest {
 
         // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
         assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.lastMessageType);
         cv.close();
 
         // Allow binder to disconnect
@@ -937,7 +947,7 @@ public class NetworkStatsServiceTest {
 
         // Wait for the caller to ack receipt of CALLBACK_RELEASED
         assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.lastMessageType);
 
         // Make sure that the caller binder gets disconnected
         verify(mBinder).unlinkToDeath(any(IBinder.DeathRecipient.class), anyInt());
@@ -1012,10 +1022,16 @@ public class NetworkStatsServiceTest {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
+        expectNetworkStatsSummary(summary, new NetworkStats(0L, 0));
+    }
+
+    private void expectNetworkStatsSummary(NetworkStats summary, NetworkStats tetherStats)
+            throws Exception {
         when(mConnManager.getAllVpnInfo()).thenReturn(new VpnInfo[0]);
 
-        expectNetworkStatsSummaryDev(summary);
-        expectNetworkStatsSummaryXt(summary);
+        expectNetworkStatsTethering(STATS_PER_IFACE, tetherStats);
+        expectNetworkStatsSummaryDev(summary.clone());
+        expectNetworkStatsSummaryXt(summary.clone());
     }
 
     private void expectNetworkStatsSummaryDev(NetworkStats summary) throws Exception {
@@ -1026,17 +1042,21 @@ public class NetworkStatsServiceTest {
         when(mNetManager.getNetworkStatsSummaryXt()).thenReturn(summary);
     }
 
-    private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
-        expectNetworkStatsUidDetail(detail, new String[0], new NetworkStats(0L, 0));
+    private void expectNetworkStatsTethering(int how, NetworkStats stats)
+            throws Exception {
+        when(mNetManager.getNetworkStatsTethering(how)).thenReturn(stats);
     }
 
-    private void expectNetworkStatsUidDetail(
-            NetworkStats detail, String[] tetherIfacePairs, NetworkStats tetherStats)
+    private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
+        expectNetworkStatsUidDetail(detail, new NetworkStats(0L, 0));
+    }
+
+    private void expectNetworkStatsUidDetail(NetworkStats detail, NetworkStats tetherStats)
             throws Exception {
         when(mNetManager.getNetworkStatsUidDetail(UID_ALL)).thenReturn(detail);
 
         // also include tethering details, since they are folded into UID
-        when(mNetManager.getNetworkStatsTethering()).thenReturn(tetherStats);
+        when(mNetManager.getNetworkStatsTethering(STATS_PER_UID)).thenReturn(tetherStats);
     }
 
     private void expectDefaultSettings() throws Exception {
@@ -1203,12 +1223,12 @@ public class NetworkStatsServiceTest {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {
         private final ConditionVariable mCv;
-        int mLastMessageType = INVALID_TYPE;
+        int lastMessageType = INVALID_TYPE;
 
         LatchedHandler(Looper looper, ConditionVariable cv) {
             super(looper);
@@ -1217,49 +1237,9 @@ public class NetworkStatsServiceTest {
 
         @Override
         public void handleMessage(Message msg) {
-            mLastMessageType = msg.what;
+            lastMessageType = msg.what;
             mCv.open();
             super.handleMessage(msg);
         }
     }
-
-    /**
-     * A subclass of HandlerThread that allows callers to wait for it to become idle. waitForIdle
-     * will return immediately if the handler is already idle.
-     */
-    static class IdleableHandlerThread extends HandlerThread {
-        private IdleHandler mIdleHandler;
-
-        public IdleableHandlerThread(String name) {
-            super(name);
-        }
-
-        public void waitForIdle(long timeoutMs) {
-            final ConditionVariable cv = new ConditionVariable();
-            final MessageQueue queue = getLooper().getQueue();
-
-            synchronized (queue) {
-                if (queue.isIdle()) {
-                    return;
-                }
-
-                assertNull("BUG: only one idle handler allowed", mIdleHandler);
-                mIdleHandler = new IdleHandler() {
-                    public boolean queueIdle() {
-                        cv.open();
-                        mIdleHandler = null;
-                        return false;  // Remove the handler.
-                    }
-                };
-                queue.addIdleHandler(mIdleHandler);
-            }
-
-            if (!cv.block(timeoutMs)) {
-                fail("HandlerThread " + getName() + " did not become idle after " + timeoutMs
-                        + " ms");
-                queue.removeIdleHandler(mIdleHandler);
-            }
-        }
-    }
-
 }

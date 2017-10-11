@@ -16,9 +16,7 @@
 
 package android.view.inputmethod;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -39,10 +37,12 @@ import android.util.Slog;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class is used to specify meta information of an input method.
@@ -104,6 +104,19 @@ public final class InputMethodInfo implements Parcelable {
     private final boolean mSupportsSwitchingToNextInputMethod;
 
     /**
+     * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
+     * @return a unique ID to be returned by {@link #getId()}. We have used
+     *         {@link ComponentName#flattenToShortString()} for this purpose (and it is already
+     *         unrealistic to switch to a different scheme as it is already implicitly assumed in
+     *         many places).
+     * @hide
+     */
+    public static String computeId(@NonNull ResolveInfo service) {
+        final ServiceInfo si = service.serviceInfo;
+        return new ComponentName(si.packageName, si.name).flattenToShortString();
+    }
+
+    /**
      * Constructor.
      *
      * @param context The Context in which we are parsing the input method.
@@ -121,15 +134,15 @@ public final class InputMethodInfo implements Parcelable {
      * @param context The Context in which we are parsing the input method.
      * @param service The ResolveInfo returned from the package manager about
      * this input method's component.
-     * @param additionalSubtypesMap additional subtypes being added to this InputMethodInfo
+     * @param additionalSubtypes additional subtypes being added to this InputMethodInfo
      * @hide
      */
     public InputMethodInfo(Context context, ResolveInfo service,
-            Map<String, List<InputMethodSubtype>> additionalSubtypesMap)
+            List<InputMethodSubtype> additionalSubtypes)
             throws XmlPullParserException, IOException {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        mId = new ComponentName(si.packageName, si.name).flattenToShortString();
+        mId = computeId(service);
         boolean isAuxIme = true;
         boolean supportsSwitchingToNextInputMethod = false; // false as default
         mForceDefault = false;
@@ -213,7 +226,7 @@ public final class InputMethodInfo implements Parcelable {
                     subtypes.add(subtype);
                 }
             }
-        } catch (NameNotFoundException e) {
+        } catch (NameNotFoundException | IndexOutOfBoundsException | NumberFormatException e) {
             throw new XmlPullParserException(
                     "Unable to create context for: " + si.packageName);
         } finally {
@@ -224,8 +237,7 @@ public final class InputMethodInfo implements Parcelable {
             isAuxIme = false;
         }
 
-        if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
-            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypesMap.get(mId);
+        if (additionalSubtypes != null) {
             final int N = additionalSubtypes.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodSubtype subtype = additionalSubtypes.get(i);
@@ -260,8 +272,9 @@ public final class InputMethodInfo implements Parcelable {
      */
     public InputMethodInfo(String packageName, String className,
             CharSequence label, String settingsActivity) {
-        this(buildDummyResolveInfo(packageName, className, label), false, settingsActivity, null,
-                0, false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */);
+        this(buildDummyResolveInfo(packageName, className, label), false /* isAuxIme */,
+                settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
+                false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */);
     }
 
     /**
@@ -271,17 +284,17 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
             String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
             boolean forceDefault) {
-        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId,
-                forceDefault, true /* supportsSwitchingToNextInputMethod */);
+        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
+                true /* supportsSwitchingToNextInputMethod */);
     }
 
     /**
      * Temporary API for creating a built-in input method for test.
      * @hide
      */
-    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
-            String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
-            boolean forceDefault, boolean supportsSwitchingToNextInputMethod) {
+    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
+            List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
+            boolean supportsSwitchingToNextInputMethod) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();

@@ -24,6 +24,7 @@ import android.annotation.NonNull;
  * color and a specific {@link PorterDuff Porter-Duff composite mode}.
  */
 public class PorterDuffColorFilter extends ColorFilter {
+    @ColorInt
     private int mColor;
     private PorterDuff.Mode mMode;
 
@@ -40,7 +41,6 @@ public class PorterDuffColorFilter extends ColorFilter {
     public PorterDuffColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         mColor = color;
         mMode = mode;
-        update();
     }
 
     /**
@@ -52,6 +52,7 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @hide
      */
+    @ColorInt
     public int getColor() {
         return mColor;
     }
@@ -68,9 +69,11 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @hide
      */
-    public void setColor(int color) {
-        mColor = color;
-        update();
+    public void setColor(@ColorInt int color) {
+        if (mColor != color) {
+            mColor = color;
+            discardNativeInstance();
+        }
     }
 
     /**
@@ -97,13 +100,16 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @hide
      */
     public void setMode(@NonNull PorterDuff.Mode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("mode must be non-null");
+        }
         mMode = mode;
-        update();
+        discardNativeInstance();
     }
 
-    private void update() {
-        destroyFilter(native_instance);
-        native_instance = native_CreatePorterDuffFilter(mColor, mMode.nativeInt);
+    @Override
+    long createNativeInstance() {
+        return native_CreatePorterDuffFilter(mColor, mMode.nativeInt);
     }
 
     @Override
@@ -115,10 +121,7 @@ public class PorterDuffColorFilter extends ColorFilter {
             return false;
         }
         final PorterDuffColorFilter other = (PorterDuffColorFilter) object;
-        if (mColor != other.mColor || mMode != other.mMode) {
-            return false;
-        }
-        return true;
+        return (mColor == other.mColor && mMode.nativeInt == other.mMode.nativeInt);
     }
 
     @Override

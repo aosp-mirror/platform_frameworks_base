@@ -14,49 +14,53 @@
  * limitations under the License.
  */
 
-#include "test/Test.h"
 #include "xml/XmlActionExecutor.h"
+
+#include "test/Test.h"
 
 namespace aapt {
 namespace xml {
 
 TEST(XmlActionExecutorTest, BuildsAccessibleNestedPattern) {
-    XmlActionExecutor executor;
-    XmlNodeAction& manifestAction = executor[u"manifest"];
-    XmlNodeAction& applicationAction = manifestAction[u"application"];
+  XmlActionExecutor executor;
+  XmlNodeAction& manifest_action = executor["manifest"];
+  XmlNodeAction& application_action = manifest_action["application"];
 
-    Element* manifestEl = nullptr;
-    manifestAction.action([&](Element* manifest) -> bool {
-        manifestEl = manifest;
-        return true;
-    });
+  Element* manifest_el = nullptr;
+  manifest_action.Action([&](Element* manifest) -> bool {
+    manifest_el = manifest;
+    return true;
+  });
 
-    Element* applicationEl = nullptr;
-    applicationAction.action([&](Element* application) -> bool {
-        applicationEl = application;
-        return true;
-    });
+  Element* application_el = nullptr;
+  application_action.Action([&](Element* application) -> bool {
+    application_el = application;
+    return true;
+  });
 
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom("<manifest><application /></manifest>");
+  std::unique_ptr<XmlResource> doc =
+      test::BuildXmlDom("<manifest><application /></manifest>");
 
-    StdErrDiagnostics diag;
-    ASSERT_TRUE(executor.execute(XmlActionExecutorPolicy::None, &diag, doc.get()));
-    ASSERT_NE(nullptr, manifestEl);
-    EXPECT_EQ(std::u16string(u"manifest"), manifestEl->name);
+  StdErrDiagnostics diag;
+  ASSERT_TRUE(
+      executor.Execute(XmlActionExecutorPolicy::kNone, &diag, doc.get()));
+  ASSERT_NE(nullptr, manifest_el);
+  EXPECT_EQ(std::string("manifest"), manifest_el->name);
 
-    ASSERT_NE(nullptr, applicationEl);
-    EXPECT_EQ(std::u16string(u"application"), applicationEl->name);
+  ASSERT_NE(nullptr, application_el);
+  EXPECT_EQ(std::string("application"), application_el->name);
 }
 
 TEST(XmlActionExecutorTest, FailsWhenUndefinedHierarchyExists) {
-    XmlActionExecutor executor;
-    executor[u"manifest"][u"application"];
+  XmlActionExecutor executor;
+  executor["manifest"]["application"];
 
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom(
-            "<manifest><application /><activity /></manifest>");
-    StdErrDiagnostics diag;
-    ASSERT_FALSE(executor.execute(XmlActionExecutorPolicy::Whitelist, &diag, doc.get()));
+  std::unique_ptr<XmlResource> doc =
+      test::BuildXmlDom("<manifest><application /><activity /></manifest>");
+  StdErrDiagnostics diag;
+  ASSERT_FALSE(
+      executor.Execute(XmlActionExecutorPolicy::kWhitelist, &diag, doc.get()));
 }
 
-} // namespace xml
-} // namespace aapt
+}  // namespace xml
+}  // namespace aapt

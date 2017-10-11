@@ -16,13 +16,18 @@
 
 package com.android.preload;
 
+import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.AndroidDebugBridge.IDeviceChangeListener;
 import com.android.preload.classdataretrieval.hprof.Hprof;
 import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.IShellOutputReceiver;
+import com.android.ddmlib.SyncException;
+import com.android.ddmlib.TimeoutException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +36,18 @@ import java.util.concurrent.TimeUnit;
  * Helper class for some device routines.
  */
 public class DeviceUtils {
+
+  // Locations
+  private static final String PRELOADED_CLASSES_FILE = "/etc/preloaded-classes";
+  // Shell commands
+  private static final String CREATE_EMPTY_PRELOADED_CMD = "touch " + PRELOADED_CLASSES_FILE;
+  private static final String DELETE_CACHE_CMD = "rm /data/dalvik-cache/*/*boot.art";
+  private static final String DELETE_PRELOADED_CMD = "rm " + PRELOADED_CLASSES_FILE;
+  private static final String READ_PRELOADED_CMD = "cat " + PRELOADED_CLASSES_FILE;
+  private static final String START_SHELL_CMD = "start";
+  private static final String STOP_SHELL_CMD = "stop";
+  private static final String REMOUNT_SYSTEM_CMD = "mount -o rw,remount /system";
+  private static final String UNSET_BOOTCOMPLETE_CMD = "setprop dev.bootcomplete \"0\"";
 
   public static void init(int debugPort) {
     DdmPreferences.setSelectedDebugPort(debugPort);
@@ -119,43 +136,56 @@ public class DeviceUtils {
     return !ret.contains("No such file or directory");
   }
 
-  /**
-   * Remove files involved in a standard build that interfere with collecting data. This will
-   * remove /etc/preloaded-classes, which determines which classes are allocated already in the
-   * boot image. It also deletes any compiled boot image on the device. Then it restarts the
-   * device.
-   *
-   * This is a potentially long-running operation, as the boot after the deletion may take a while.
-   * The method will abort after the given timeout.
-   */
-  public static boolean removePreloaded(IDevice device, long preloadedWaitTimeInSeconds) {
-    String oldContent =
-        DeviceUtils.doShellReturnString(device, "cat /etc/preloaded-classes", 1, TimeUnit.SECONDS);
-    if (oldContent.trim().equals("")) {
-      System.out.println("Preloaded-classes already empty.");
-      return true;
-    }
+    /**
+     * Write over the preloaded-classes file with an empty or existing file and regenerate the boot
+     * image as necessary.
+     *
+     * @param device
+     * @param pcFile
+     * @param bootTimeout
+     * @throws AdbCommandRejectedException
+     * @throws IOException
+     * @throws TimeoutException
+     * @throws SyncException
+     * @return true if successfully overwritten, false otherwise
+     */
+    public static boolean overwritePreloaded(IDevice device, File pcFile, long bootTimeout)
+            throws AdbCommandRejectedException, IOException, TimeoutException, SyncException {
+        boolean writeEmpty = (pcFile == null);
+        if (writeEmpty) {
+            // Check if the preloaded-classes file is already empty.
+            String oldContent =
+                    doShellReturnString(device, READ_PRELOADED_CMD, 1, TimeUnit.SECONDS);
+            if (oldContent.trim().equals("")) {
+                System.out.println("Preloaded-classes already empty.");
+                return true;
+            }
+        }
 
-    // Stop the system server etc.
-    doShell(device, "stop", 100, TimeUnit.MILLISECONDS);
+        // Stop the system server etc.
+        doShell(device, STOP_SHELL_CMD, 1, TimeUnit.SECONDS);
+        // Remount the read-only system partition
+        doShell(device, REMOUNT_SYSTEM_CMD, 1, TimeUnit.SECONDS);
+        // Delete the preloaded-classes file
+        doShell(device, DELETE_PRELOADED_CMD, 1, TimeUnit.SECONDS);
+        // Delete the dalvik cache files
+        doShell(device, DELETE_CACHE_CMD, 1, TimeUnit.SECONDS);
+        if (writeEmpty) {
+            // Write an empty preloaded-classes file
+            doShell(device, CREATE_EMPTY_PRELOADED_CMD, 500, TimeUnit.MILLISECONDS);
+        } else {
+            // Push the new preloaded-classes file
+            device.pushFile(pcFile.getAbsolutePath(), PRELOADED_CLASSES_FILE);
+        }
+        // Manually reset the boot complete flag
+        doShell(device, UNSET_BOOTCOMPLETE_CMD, 1, TimeUnit.SECONDS);
+        // Restart system server on the device
+        doShell(device, START_SHELL_CMD, 1, TimeUnit.SECONDS);
+        // Wait for the boot complete flag and return the outcome.
+        return waitForBootComplete(device, bootTimeout);
+  }
 
-    // Remount /system, delete /etc/preloaded-classes. It would be nice to use "adb remount,"
-    // but AndroidDebugBridge doesn't expose it.
-    doShell(device, "mount -o remount,rw /system", 500, TimeUnit.MILLISECONDS);
-    doShell(device, "rm /etc/preloaded-classes", 100, TimeUnit.MILLISECONDS);
-    // We do need an empty file.
-    doShell(device, "touch /etc/preloaded-classes", 100, TimeUnit.MILLISECONDS);
-
-    // Delete the files in the dalvik cache.
-    doShell(device, "rm /data/dalvik-cache/*/*boot.art", 500, TimeUnit.MILLISECONDS);
-
-    // We'll try to use dev.bootcomplete to know when the system server is back up. But stop
-    // doesn't reset it, so do it manually.
-    doShell(device, "setprop dev.bootcomplete \"0\"", 500, TimeUnit.MILLISECONDS);
-
-    // Start the system server.
-    doShell(device, "start", 100, TimeUnit.MILLISECONDS);
-
+  private static boolean waitForBootComplete(IDevice device, long timeout) {
     // Do a loop checking each second whether bootcomplete. Wait for at most the given
     // threshold.
     Date startDate = new Date();
@@ -178,7 +208,7 @@ public class DeviceUtils {
       Date endDate = new Date();
       long seconds =
           TimeUnit.SECONDS.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS);
-      if (seconds > preloadedWaitTimeInSeconds) {
+      if (seconds > timeout) {
         return false;
       }
     }

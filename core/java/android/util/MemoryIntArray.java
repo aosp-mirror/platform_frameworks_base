@@ -19,8 +19,9 @@ package android.util;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.Process;
+
 import libcore.io.IoUtils;
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -51,6 +52,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     private static final int MAX_SIZE = 1024;
 
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
     private final boolean mIsOwner;
     private final long mMemoryAddr;
     private int mFd = -1;
@@ -60,7 +63,6 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      *
      * @param size The size of the array in terms of integer slots. Cannot be
      *     more than {@link #getMaxSize()}.
-     * @param clientWritable Whether other processes can write to the array.
      * @throws IOException If an error occurs while accessing the shared memory.
      */
     public MemoryIntArray(int size) throws IOException {
@@ -71,6 +73,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         final String name = UUID.randomUUID().toString();
         mFd = nativeCreate(name, size);
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
+        mCloseGuard.open("close");
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
@@ -81,6 +84,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         }
         mFd = pfd.detachFd();
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
+        mCloseGuard.open("close");
     }
 
     /**
@@ -140,6 +144,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         if (!isClosed()) {
             nativeClose(mFd, mMemoryAddr, mIsOwner);
             mFd = -1;
+            mCloseGuard.close();
         }
     }
 
@@ -152,8 +157,12 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     protected void finalize() throws Throwable {
-        IoUtils.closeQuietly(this);
-        super.finalize();
+        try {
+            mCloseGuard.warnIfOpen();
+            IoUtils.closeQuietly(this);
+        } finally {
+            super.finalize();
+        }
     }
 
     @Override
@@ -165,6 +174,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     public void writeToParcel(Parcel parcel, int flags) {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(mFd);
         try {
+            // Don't let writing to a parcel to close our fd - plz
             parcel.writeParcelable(pfd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } finally {
             pfd.detachFd();

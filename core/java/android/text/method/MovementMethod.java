@@ -16,10 +16,10 @@
 
 package android.text.method;
 
-import android.widget.TextView;
+import android.text.Spannable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.text.*;
+import android.widget.TextView;
 
 /**
  * Provides cursor positioning, scrolling and text selection functionality in a {@link TextView}.

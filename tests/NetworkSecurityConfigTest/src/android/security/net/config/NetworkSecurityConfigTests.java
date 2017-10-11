@@ -227,7 +227,7 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
     public void testConfigBuilderUsesParents() throws Exception {
         // Check that a builder with a parent uses the parent's values when non is set.
         NetworkSecurityConfig config = new NetworkSecurityConfig.Builder()
-                .setParent(NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N))
+                .setParent(NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N, 1))
                 .build();
         assert(!config.getTrustAnchors().isEmpty());
     }
@@ -268,9 +268,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
             // Install the test CA.
             store.installCertificate(TEST_CA_CERT);
             NetworkSecurityConfig preNConfig =
-                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.M).build();
+                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.M, 1).build();
             NetworkSecurityConfig nConfig =
-                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N).build();
+                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N, 1).build();
             Set<TrustAnchor> preNAnchors = preNConfig.getTrustAnchors();
             Set<TrustAnchor> nAnchors = nConfig.getTrustAnchors();
             Set<X509Certificate> preNCerts = new HashSet<X509Certificate>();

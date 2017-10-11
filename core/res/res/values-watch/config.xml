@@ -63,6 +63,8 @@
          Set to true for watch devices. -->
     <bool name="config_focusScrollContainersInTouchMode">true</bool>
 
-    <!-- The small screens of watch devices makes multi-window support undesireable. -->
-    <bool name="config_supportsMultiWindow">false</bool>
+    <!-- Enable generic multi-window in order to support Activity in virtual display. -->
+    <bool name="config_supportsMultiWindow">true</bool>
+    <bool name="config_supportsMultiDisplay">true</bool>
+    <bool name="config_supportsSplitScreenMultiWindow">false</bool>
 </resources>

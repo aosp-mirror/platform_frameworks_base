@@ -35,6 +35,8 @@
 #include "DrawFrameTask.h"
 
 namespace android {
+class GraphicBuffer;
+
 namespace uirenderer {
 
 class DeferredLayerUpdater;
@@ -42,7 +44,6 @@ class RenderNode;
 class DisplayList;
 class Layer;
 class Rect;
-class TreeObserver;
 
 namespace renderthread {
 
@@ -80,26 +81,24 @@ public:
     ANDROID_API void updateSurface(const sp<Surface>& surface);
     ANDROID_API bool pauseSurface(const sp<Surface>& surface);
     ANDROID_API void setStopped(bool stopped);
-    ANDROID_API void setup(int width, int height, float lightRadius,
+    ANDROID_API void setup(float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setLightCenter(const Vector3& lightCenter);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API int64_t* frameInfo();
-    ANDROID_API int syncAndDrawFrame(TreeObserver* observer);
-    ANDROID_API void destroy(TreeObserver* observer);
+    ANDROID_API int syncAndDrawFrame();
+    ANDROID_API void destroy();
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
 
-    ANDROID_API void runWithGlContext(RenderTask* task);
-
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
-    ANDROID_API void buildLayer(RenderNode* node, TreeObserver* observer);
+    ANDROID_API void buildLayer(RenderNode* node);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);
     ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
-    ANDROID_API void destroyHardwareResources(TreeObserver* observer);
+    ANDROID_API void destroyHardwareResources();
     ANDROID_API static void trimMemory(int level);
     ANDROID_API static void overrideProperty(const char* name, const char* value);
 
@@ -111,10 +110,11 @@ public:
     ANDROID_API void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing
     void resetProfileInfo();
+    uint32_t frameTimePercentile(int p);
     ANDROID_API static void dumpGraphicsMemory(int fd);
 
-    ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
-    ANDROID_API void setProcessStatsBuffer(int fd);
+    ANDROID_API static void rotateProcessStatsBuffer();
+    ANDROID_API static void setProcessStatsBuffer(int fd);
     ANDROID_API int getRenderThreadTid();
 
     ANDROID_API void serializeDisplayListTree();
@@ -128,9 +128,17 @@ public:
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API long getDroppedFrameReportCount();
 
-    ANDROID_API static int copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap);
-    ANDROID_API static void prepareToDraw(const SkBitmap& bitmap);
+    ANDROID_API static int copySurfaceInto(sp<Surface>& surface,
+            int left, int top, int right, int bottom, SkBitmap* bitmap);
+    ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
+    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
+
+    static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
+
+    static void onBitmapDestroyed(uint32_t pixelRefId);
+
+    ANDROID_API static void disableVsync();
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

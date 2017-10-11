@@ -16,6 +16,7 @@
 
 package android.os;
 
+import static android.os.FileUtils.roundStorageSize;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
@@ -25,9 +26,9 @@ import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.google.android.collect.Sets;
-
 import libcore.io.IoUtils;
+
+import com.google.android.collect.Sets;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -309,6 +310,34 @@ public class FileUtilsTest extends AndroidTestCase {
         assertNameEquals("test.foo.bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
         new File(mTarget, "test.foo.bar").createNewFile();
         assertNameEquals("test.foo (1).bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
+    }
+
+    public void testRoundStorageSize() throws Exception {
+        final long M128 = 128000000L;
+        final long M256 = 256000000L;
+        final long M512 = 512000000L;
+        final long G1 = 1000000000L;
+        final long G2 = 2000000000L;
+        final long G16 = 16000000000L;
+        final long G32 = 32000000000L;
+        final long G64 = 64000000000L;
+
+        assertEquals(M128, roundStorageSize(M128));
+        assertEquals(M256, roundStorageSize(M128 + 1));
+        assertEquals(M256, roundStorageSize(M256 - 1));
+        assertEquals(M256, roundStorageSize(M256));
+        assertEquals(M512, roundStorageSize(M256 + 1));
+        assertEquals(M512, roundStorageSize(M512 - 1));
+        assertEquals(M512, roundStorageSize(M512));
+        assertEquals(G1, roundStorageSize(M512 + 1));
+        assertEquals(G1, roundStorageSize(G1));
+        assertEquals(G2, roundStorageSize(G1 + 1));
+
+        assertEquals(G16, roundStorageSize(G16));
+        assertEquals(G32, roundStorageSize(G16 + 1));
+        assertEquals(G32, roundStorageSize(G32 - 1));
+        assertEquals(G32, roundStorageSize(G32));
+        assertEquals(G64, roundStorageSize(G32 + 1));
     }
 
     private static void assertNameEquals(String expected, File actual) {

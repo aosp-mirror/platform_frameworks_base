@@ -22,10 +22,10 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session;
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.PhoneEvent;
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.SensorEvent;
-import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.TouchEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.SensorEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.TouchEvent;
 
 /**
  * Collects touch, sensor and phone events and converts the data to

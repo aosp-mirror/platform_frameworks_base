@@ -16,19 +16,17 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.ColorMatrix;
-import android.service.notification.StatusBarNotification;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.ColorUtils;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for
@@ -36,10 +34,13 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
  */
 public abstract class NotificationViewWrapper implements TransformableView {
 
-    protected final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
+    private final NotificationDozeHelper mDozer;
+
     protected boolean mDark;
+    private int mBackgroundColor = 0;
+    protected boolean mShouldInvertDark;
     protected boolean mDarkInitialized = false;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
@@ -57,13 +58,23 @@ public abstract class NotificationViewWrapper implements TransformableView {
         } else if (v instanceof NotificationHeaderView) {
             return new NotificationHeaderViewWrapper(ctx, v, row);
         } else {
-            return new NotificationCustomViewWrapper(v, row);
+            return new NotificationCustomViewWrapper(ctx, v, row);
         }
     }
 
-    protected NotificationViewWrapper(View view, ExpandableNotificationRow row) {
+    protected NotificationViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         mView = view;
         mRow = row;
+        mDozer = createDozer(ctx);
+        onReinflated();
+    }
+
+    protected NotificationDozeHelper createDozer(Context ctx) {
+        return new NotificationDozeHelper();
+    }
+
+    protected NotificationDozeHelper getDozer() {
+        return mDozer;
     }
 
     /**
@@ -80,30 +91,31 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     /**
      * Notifies this wrapper that the content of the view might have changed.
-     * @param notification
+     * @param row the row this wrapper is attached to
      */
-    public void notifyContentUpdated(StatusBarNotification notification) {
+    public void onContentUpdated(ExpandableNotificationRow row) {
         mDarkInitialized = false;
-    };
-
-
-    protected void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
-            boolean dark, long delay, Animator.AnimatorListener listener) {
-        float startIntensity = dark ? 0f : 1f;
-        float endIntensity = dark ? 1f : 0f;
-        ValueAnimator animator = ValueAnimator.ofFloat(startIntensity, endIntensity);
-        animator.addUpdateListener(updateListener);
-        animator.setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
-        animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        animator.setStartDelay(delay);
-        if (listener != null) {
-            animator.addListener(listener);
-        }
-        animator.start();
     }
 
-    protected void updateGrayscaleMatrix(float intensity) {
-        mGrayscaleColorMatrix.setSaturation(1 - intensity);
+    public void onReinflated() {
+        if (shouldClearBackgroundOnReapply()) {
+            mBackgroundColor = 0;
+        }
+        Drawable background = mView.getBackground();
+        if (background instanceof ColorDrawable) {
+            mBackgroundColor = ((ColorDrawable) background).getColor();
+            mView.setBackground(null);
+        }
+        mShouldInvertDark = mBackgroundColor == 0 || isColorLight(mBackgroundColor);
+    }
+
+    protected boolean shouldClearBackgroundOnReapply() {
+        return true;
+    }
+
+    private boolean isColorLight(int backgroundColor) {
+        return Color.alpha(backgroundColor) == 0
+                || ColorUtils.calculateLuminance(backgroundColor) > 0.5;
     }
 
     /**
@@ -155,12 +167,23 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     public int getCustomBackgroundColor() {
-        return 0;
+        // Parent notifications should always use the normal background color
+        return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
-    public void setShowingLegacyBackground(boolean showing) {
+    public void setLegacy(boolean legacy) {
     }
 
     public void setContentHeight(int contentHeight, int minHeightHint) {
+    }
+
+    public void setRemoteInputVisible(boolean visible) {
+    }
+
+    public void setIsChildInGroup(boolean isChildInGroup) {
+    }
+
+    public boolean isDimmable() {
+        return true;
     }
 }

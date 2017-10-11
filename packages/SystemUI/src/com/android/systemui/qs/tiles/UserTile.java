@@ -21,21 +21,26 @@ import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Pair;
 
-import com.android.internal.logging.MetricsProto.MetricsEvent;
-import com.android.systemui.qs.QSTile;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
+import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
-public class UserTile extends QSTile<QSTile.State> implements UserInfoController.OnUserInfoChangedListener {
+public class UserTile extends QSTileImpl<State> implements UserInfoController.OnUserInfoChangedListener {
 
     private final UserSwitcherController mUserSwitcherController;
     private final UserInfoController mUserInfoController;
     private Pair<String, Drawable> mLastUpdate;
 
-    public UserTile(Host host) {
+    public UserTile(QSHost host) {
         super(host);
-        mUserSwitcherController = host.getUserSwitcherController();
-        mUserInfoController = host.getUserInfoController();
+        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
+        mUserInfoController = Dependency.get(UserInfoController.class);
     }
 
     @Override
@@ -66,9 +71,9 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mUserInfoController.addListener(this);
+            mUserInfoController.addCallback(this);
         } else {
-            mUserInfoController.remListener(this);
+            mUserInfoController.removeCallback(this);
         }
     }
 
@@ -96,7 +101,7 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     }
 
     @Override
-    public void onUserInfoChanged(String name, Drawable picture) {
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
         mLastUpdate = new Pair<>(name, picture);
         refreshState(mLastUpdate);
     }

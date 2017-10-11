@@ -805,7 +805,7 @@ public class MenuBuilder implements Menu {
      */
     void findItemsWithShortcutForKey(List<MenuItemImpl> items, int keyCode, KeyEvent event) {
         final boolean qwerty = isQwertyMode();
-        final int metaState = event.getMetaState();
+        final int modifierState = event.getModifiers();
         final KeyCharacterMap.KeyData possibleChars = new KeyCharacterMap.KeyData();
         // Get the chars associated with the keyCode (i.e using any chording combo)
         final boolean isKeyCodeMapped = event.getKeyData(possibleChars);
@@ -821,9 +821,13 @@ public class MenuBuilder implements Menu {
             if (item.hasSubMenu()) {
                 ((MenuBuilder)item.getSubMenu()).findItemsWithShortcutForKey(items, keyCode, event);
             }
-            final char shortcutChar = qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
-            if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
-                  (shortcutChar != 0) &&
+            final char shortcutChar =
+                    qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
+            final int shortcutModifiers =
+                    qwerty ? item.getAlphabeticModifiers() : item.getNumericModifiers();
+            final boolean isModifiersExactMatch = (modifierState & SUPPORTED_MODIFIERS_MASK)
+                    == (shortcutModifiers & SUPPORTED_MODIFIERS_MASK);
+            if (isModifiersExactMatch && (shortcutChar != 0) &&
                   (shortcutChar == possibleChars.meta[0]
                       || shortcutChar == possibleChars.meta[2]
                       || (qwerty && shortcutChar == '\b' &&

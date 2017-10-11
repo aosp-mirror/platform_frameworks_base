@@ -54,12 +54,6 @@ public class ManageDialog extends AlertActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getCallingPackage() != null) {
-            Log.e(TAG, getCallingPackage() + " cannot start this activity");
-            finish();
-            return;
-        }
-
         try {
 
             mService = IConnectivityManager.Stub.asInterface(

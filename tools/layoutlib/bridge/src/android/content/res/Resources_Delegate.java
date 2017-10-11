@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.ArrayResourceValue;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.PluralsResourceValue;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
@@ -42,10 +43,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.icu.text.PluralRules;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.LruCache;
 import android.util.TypedValue;
+import android.view.DisplayAdjustments;
 import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
@@ -58,13 +63,17 @@ import java.util.Iterator;
 public class Resources_Delegate {
 
     private static boolean[] mPlatformResourceFlag = new boolean[1];
+    // TODO: This cache is cleared every time a render session is disposed. Look into making this
+    // more long lived.
+    private static LruCache<String, Drawable.ConstantState> sDrawableCache = new LruCache<>(50);
 
     public static Resources initSystem(BridgeContext context,
             AssetManager assets,
             DisplayMetrics metrics,
             Configuration config,
             LayoutlibCallback layoutlibCallback) {
-        Resources resources = new Resources(assets, metrics, config);
+        Resources resources = new Resources(Resources_Delegate.class.getClassLoader());
+        resources.setImpl(new ResourcesImpl(assets, metrics, config, new DisplayAdjustments()));
         resources.mContext = context;
         resources.mLayoutlibCallback = layoutlibCallback;
         return Resources.mSystem = resources;
@@ -75,6 +84,7 @@ public class Resources_Delegate {
      * would prevent us from unloading the library.
      */
     public static void disposeSystem() {
+        sDrawableCache.evictAll();
         Resources.mSystem.mContext = null;
         Resources.mSystem.mLayoutlibCallback = null;
         Resources.mSystem = null;
@@ -121,9 +131,16 @@ public class Resources_Delegate {
         if (resourceInfo != null) {
             String attributeName = resourceInfo.getSecond();
             RenderResources renderResources = resources.mContext.getRenderResources();
-            return Pair.of(attributeName, platformResFlag_out[0] ?
+            ResourceValue value = platformResFlag_out[0] ?
                     renderResources.getFrameworkResource(resourceInfo.getFirst(), attributeName) :
-                    renderResources.getProjectResource(resourceInfo.getFirst(), attributeName));
+                    renderResources.getProjectResource(resourceInfo.getFirst(), attributeName);
+
+            if (value == null) {
+                // Unable to resolve the attribute, just leave the unresolved value
+                value = new ResourceValue(resourceInfo.getFirst(), attributeName, attributeName,
+                        platformResFlag_out[0]);
+            }
+            return Pair.of(attributeName, value);
         }
 
         return null;
@@ -137,9 +154,23 @@ public class Resources_Delegate {
     @LayoutlibDelegate
     static Drawable getDrawable(Resources resources, int id, Theme theme) {
         Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
-
         if (value != null) {
-            return ResourceHelper.getDrawable(value.getSecond(), resources.mContext, theme);
+            String key = value.getSecond().getValue();
+
+            Drawable.ConstantState constantState = key != null ? sDrawableCache.get(key) : null;
+            Drawable drawable;
+            if (constantState != null) {
+                drawable = constantState.newDrawable(resources, theme);
+            } else {
+                drawable =
+                        ResourceHelper.getDrawable(value.getSecond(), resources.mContext, theme);
+
+                if (key != null) {
+                    sDrawableCache.put(key, drawable.getConstantState());
+                }
+            }
+
+            return drawable;
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -386,9 +417,6 @@ public class Resources_Delegate {
             rv = resources.mContext.getRenderResources().resolveResValue(rv);
             if (rv != null) {
                 return rv.getValue();
-            } else {
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
-                        "Unable to resolve resource " + ref, null);
             }
         }
         // Not a reference.
@@ -712,6 +740,77 @@ public class Resources_Delegate {
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static String getQuantityString(Resources resources, int id, int quantity) throws
+            NotFoundException {
+        Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
+
+        if (value != null) {
+            if (value.getSecond() instanceof PluralsResourceValue) {
+                PluralsResourceValue pluralsResourceValue = (PluralsResourceValue) value.getSecond();
+                PluralRules pluralRules = PluralRules.forLocale(resources.getConfiguration().getLocales()
+                        .get(0));
+                String strValue = pluralsResourceValue.getValue(pluralRules.select(quantity));
+                if (strValue == null) {
+                    strValue = pluralsResourceValue.getValue(PluralRules.KEYWORD_OTHER);
+                }
+
+                return strValue;
+            }
+            else {
+                return value.getSecond().getValue();
+            }
+        }
+
+        // id was not found or not resolved. Throw a NotFoundException.
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static String getQuantityString(Resources resources, int id, int quantity, Object... formatArgs)
+            throws NotFoundException {
+        String raw = getQuantityString(resources, id, quantity);
+        return String.format(resources.getConfiguration().getLocales().get(0), raw, formatArgs);
+    }
+
+    @LayoutlibDelegate
+    static CharSequence getQuantityText(Resources resources, int id, int quantity) throws
+            NotFoundException {
+        return getQuantityString(resources, id, quantity);
+    }
+
+    @LayoutlibDelegate
+    static Typeface getFont(Resources resources, int id) throws
+            NotFoundException {
+        Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
+        if (value != null) {
+            return ResourceHelper.getFont(value.getSecond(), resources.mContext, null);
+        }
+
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static Typeface getFont(Resources resources, TypedValue outValue, int id) throws
+            NotFoundException {
+        Resources_Delegate.getValue(resources, id, outValue, true);
+        if (outValue.string != null) {
+            return ResourceHelper.getFont(outValue.string.toString(), resources.mContext, null,
+                    mPlatformResourceFlag[0]);
+        }
+
         throwException(resources, id);
 
         // this is not used since the method above always throws

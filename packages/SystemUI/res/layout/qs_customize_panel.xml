@@ -15,12 +15,13 @@
      limitations under the License.
 -->
 
-<!-- Height is 0 because it will be managed by the QSContainer manually -->
+<!-- Height is 0 because it will be managed by the QS manually -->
 <com.android.systemui.qs.customize.QSCustomizer
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:orientation="vertical"
+    android:elevation="4dp"
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 

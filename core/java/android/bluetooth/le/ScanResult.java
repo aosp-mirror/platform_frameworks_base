@@ -98,8 +98,10 @@ public final class ScanResult implements Parcelable {
      * @param scanRecord Scan record including both advertising data and scan response data.
      * @param rssi Received signal strength.
      * @param timestampNanos Timestamp at which the scan result was observed.
-     * @deprecated use {@link #ScanResult(BluetoothDevice, int, int, int, int, int, int, int, ScanRecord, long)}
+     * @deprecated use {@link #ScanResult(BluetoothDevice, int, int, int, int, int, int, int,
+     * ScanRecord, long)}
      */
+    @Deprecated
     public ScanResult(BluetoothDevice device, ScanRecord scanRecord, int rssi,
             long timestampNanos) {
         mDevice = device;
@@ -129,8 +131,8 @@ public final class ScanResult implements Parcelable {
      * @param timestampNanos Timestamp at which the scan result was observed.
      */
     public ScanResult(BluetoothDevice device, int eventType, int primaryPhy, int secondaryPhy,
-                      int advertisingSid, int txPower, int rssi, int periodicAdvertisingInterval,
-                      ScanRecord scanRecord, long timestampNanos) {
+            int advertisingSid, int txPower, int rssi, int periodicAdvertisingInterval,
+            ScanRecord scanRecord, long timestampNanos) {
         mDevice = device;
         mEventType = eventType;
         mPrimaryPhy = primaryPhy;
@@ -254,7 +256,9 @@ public final class ScanResult implements Parcelable {
      * Can be one of {@link BluetoothDevice#PHY_LE_1M} or
      * {@link BluetoothDevice#PHY_LE_CODED}.
      */
-    public int getPrimaryPhy() { return mPrimaryPhy; }
+    public int getPrimaryPhy() {
+        return mPrimaryPhy;
+    }
 
     /**
      * Returns the secondary Physical Layer
@@ -264,21 +268,27 @@ public final class ScanResult implements Parcelable {
      * or {@link ScanResult#PHY_UNUSED} - if the advertisement
      * was not received on a secondary physical channel.
      */
-    public int getSecondaryPhy() { return mSecondaryPhy; }
+    public int getSecondaryPhy() {
+        return mSecondaryPhy;
+    }
 
     /**
      * Returns the advertising set id.
      * May return {@link ScanResult#SID_NOT_PRESENT} if
      * no set id was is present.
      */
-    public int getAdvertisingSid() { return mAdvertisingSid; }
+    public int getAdvertisingSid() {
+        return mAdvertisingSid;
+    }
 
     /**
      * Returns the transmit power in dBm.
      * Valid range is [-127, 126]. A value of {@link ScanResult#TX_POWER_NOT_PRESENT}
      * indicates that the TX power is not present.
      */
-    public int getTxPower() { return mTxPower; }
+    public int getTxPower() {
+        return mTxPower;
+    }
 
     /**
      * Returns the periodic advertising interval in units of 1.25ms.
@@ -293,9 +303,9 @@ public final class ScanResult implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mDevice, mRssi, mScanRecord, mTimestampNanos,
-                            mEventType, mPrimaryPhy, mSecondaryPhy,
-                            mAdvertisingSid, mTxPower,
-                            mPeriodicAdvertisingInterval);
+                mEventType, mPrimaryPhy, mSecondaryPhy,
+                mAdvertisingSid, mTxPower,
+                mPeriodicAdvertisingInterval);
     }
 
     @Override
@@ -307,34 +317,34 @@ public final class ScanResult implements Parcelable {
             return false;
         }
         ScanResult other = (ScanResult) obj;
-        return Objects.equals(mDevice, other.mDevice) && (mRssi == other.mRssi) &&
-            Objects.equals(mScanRecord, other.mScanRecord) &&
-            (mTimestampNanos == other.mTimestampNanos) &&
-            mEventType == other.mEventType &&
-            mPrimaryPhy == other.mPrimaryPhy &&
-            mSecondaryPhy == other.mSecondaryPhy &&
-            mAdvertisingSid == other.mAdvertisingSid &&
-            mTxPower == other.mTxPower &&
-            mPeriodicAdvertisingInterval == other.mPeriodicAdvertisingInterval;
+        return Objects.equals(mDevice, other.mDevice) && (mRssi == other.mRssi)
+                && Objects.equals(mScanRecord, other.mScanRecord)
+                && (mTimestampNanos == other.mTimestampNanos)
+                && mEventType == other.mEventType
+                && mPrimaryPhy == other.mPrimaryPhy
+                && mSecondaryPhy == other.mSecondaryPhy
+                && mAdvertisingSid == other.mAdvertisingSid
+                && mTxPower == other.mTxPower
+                && mPeriodicAdvertisingInterval == other.mPeriodicAdvertisingInterval;
     }
 
     @Override
     public String toString() {
-      return "ScanResult{" + "device=" + mDevice + ", scanRecord=" +
-          Objects.toString(mScanRecord) + ", rssi=" + mRssi +
-          ", timestampNanos=" + mTimestampNanos + ", eventType=" + mEventType +
-          ", primaryPhy=" + mPrimaryPhy + ", secondaryPhy=" + mSecondaryPhy +
-          ", advertisingSid=" + mAdvertisingSid + ", txPower=" + mTxPower +
-          ", periodicAdvertisingInterval=" + mPeriodicAdvertisingInterval + '}';
+        return "ScanResult{" + "device=" + mDevice + ", scanRecord="
+                + Objects.toString(mScanRecord) + ", rssi=" + mRssi
+                + ", timestampNanos=" + mTimestampNanos + ", eventType=" + mEventType
+                + ", primaryPhy=" + mPrimaryPhy + ", secondaryPhy=" + mSecondaryPhy
+                + ", advertisingSid=" + mAdvertisingSid + ", txPower=" + mTxPower
+                + ", periodicAdvertisingInterval=" + mPeriodicAdvertisingInterval + '}';
     }
 
     public static final Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
-            @Override
+        @Override
         public ScanResult createFromParcel(Parcel source) {
             return new ScanResult(source);
         }
 
-            @Override
+        @Override
         public ScanResult[] newArray(int size) {
             return new ScanResult[size];
         }

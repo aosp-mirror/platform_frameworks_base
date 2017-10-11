@@ -118,6 +118,11 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * the Surface provided to prepare must not be used as a target of a CaptureRequest submitted
      * to this session.</p>
      *
+     * <p>Note that if 2 surfaces share the same stream via {@link
+     * OutputConfiguration#enableSurfaceSharing} and {@link OutputConfiguration#addSurface},
+     * prepare() only needs to be called on one surface, and {link
+     * StateCallback#onSurfacePrepared} will be triggered for both surfaces.</p>
+     *
      * <p>{@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}
      * devices cannot pre-allocate output buffers; for those devices,
      * {@link StateCallback#onSurfacePrepared} will be immediately called, and no preallocation is
@@ -221,51 +226,61 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract void tearDown(@NonNull Surface surface) throws CameraAccessException;
 
     /**
-     * <p>
-     * Finish the deferred output configurations where the output Surface was not configured before.
-     * </p>
-     * <p>
-     * For camera use cases where a preview and other output configurations need to be configured,
-     * it can take some time for the preview Surface to be ready (e.g., if the preview Surface is
-     * obtained from {@link android.view.SurfaceView}, the SurfaceView is ready after the UI layout
-     * is done, then it takes some time to get the preview Surface).
-     * </p>
-     * <p>
-     * To speed up camera startup time, the application can configure the
-     * {@link CameraCaptureSession} with the desired preview size, and defer the preview output
-     * configuration until the Surface is ready. After the {@link CameraCaptureSession} is created
-     * successfully with this deferred configuration and other normal configurations, the
-     * application can submit requests that don't include deferred output Surfaces. Once the
-     * deferred Surface is ready, the application can set the Surface to the same deferred output
-     * configuration with the {@link OutputConfiguration#setDeferredSurface} method, and then finish
-     * the deferred output configuration via this method, before it can submit requests with this
-     * output target.
-     * </p>
-     * <p>
-     * The output Surfaces included by this list of deferred {@link OutputConfiguration
-     * OutputConfigurations} can be used as {@link CaptureRequest} targets as soon as this call
-     * returns;
-     * </p>
-     * <p>
-     * This method is not supported by Legacy devices.
-     * </p>
+     * <p>Finalize the output configurations that now have their deferred and/or extra Surfaces
+     * included.</p>
      *
-     * @param deferredOutputConfigs a list of {@link OutputConfiguration OutputConfigurations} that
-     *            have had {@link OutputConfiguration#setDeferredSurface setDeferredSurface} invoked
-     *            with a valid output Surface.
+     * <p>For camera use cases where a preview and other output configurations need to be
+     * configured, it can take some time for the preview Surface to be ready. For example, if the
+     * preview Surface is obtained from {@link android.view.SurfaceView}, the SurfaceView will only
+     * be ready after the UI layout is done, potentially delaying camera startup.</p>
+     *
+     * <p>To speed up camera startup time, the application can configure the
+     * {@link CameraCaptureSession} with the eventual preview size (via
+     * {@link OutputConfiguration#OutputConfiguration(Size,Class) a deferred OutputConfiguration}),
+     * and defer the preview output configuration until the Surface is ready. After the
+     * {@link CameraCaptureSession} is created successfully with this deferred output and other
+     * normal outputs, the application can start submitting requests as long as they do not include
+     * deferred output Surfaces. Once a deferred Surface is ready, the application can add the
+     * Surface to the deferred output configuration with the
+     * {@link OutputConfiguration#addSurface} method, and then update the deferred output
+     * configuration via this method, before it can submit capture requests with this output
+     * target.</p>
+     *
+     * <p>This function can also be called in case where multiple surfaces share the same
+     * OutputConfiguration, and one of the surfaces becomes available after the {@link
+     * CameraCaptureSession} is created. In that case, the application must first create the
+     * OutputConfiguration with the available Surface, then enable furture surface sharing via
+     * {@link OutputConfiguration#enableSurfaceSharing}, before creating the CameraCaptureSession.
+     * After the CameraCaptureSession is created, and once the extra Surface becomes available, the
+     * application must then call {@link OutputConfiguration#addSurface} before finalizing the
+     * configuration with this method.</p>
+     *
+     * <p>If the provided OutputConfigurations are unchanged from session creation, this function
+     * call has no effect. This function must only be called once for a particular output
+     * configuration. </p>
+     *
+     * <p>The output Surfaces included by this list of
+     * {@link OutputConfiguration OutputConfigurations} can be used as {@link CaptureRequest}
+     * targets as soon as this call returns.</p>
+     *
+     * <p>This method is not supported by
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}-level devices.</p>
+     *
+     * @param outputConfigs a list of {@link OutputConfiguration OutputConfigurations} that
+     *            have had {@link OutputConfiguration#addSurface addSurface} invoked with a valid
+     *            output Surface after {@link CameraDevice#createCaptureSessionByOutputConfigurations}.
      * @throws CameraAccessException if the camera device is no longer connected or has encountered
      *             a fatal error.
      * @throws IllegalStateException if this session is no longer active, either because the session
-     *             was explicitly closed, a new session has been created or the camera device has
-     *             been closed. Or if this output configuration was already finished with the
-     *             included surface before.
+     *             was explicitly closed, a new session has been created, or the camera device has
+     *             been closed.
      * @throws IllegalArgumentException for invalid output configurations, including ones where the
      *             source of the Surface is no longer valid or the Surface is from a unsupported
-     *             source.
-     * @hide
+     *             source. Or if one of the output configuration was already finished with an
+     *             included surface in a prior call.
      */
-    public abstract void finishDeferredConfiguration(
-            List<OutputConfiguration> deferredOutputConfigs) throws CameraAccessException;
+    public abstract void finalizeOutputConfigurations(
+            List<OutputConfiguration> outputConfigs) throws CameraAccessException;
 
     /**
      * <p>Submit a request for an image to be captured by the camera device.</p>
@@ -725,6 +740,36 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
+         * This method is called when camera device's input capture queue becomes empty,
+         * and is ready to accept the next request.
+         *
+         * <p>Pending capture requests exist in one of two queues: the in-flight queue where requests
+         * are already in different stages of processing pipeline, and an input queue where requests
+         * wait to enter the in-flight queue. The input queue is needed because more requests may be
+         * submitted than the current camera device pipeline depth.</p>
+         *
+         * <p>This callback is fired when the input queue becomes empty, and the camera device may
+         * have to fall back to the repeating request if set, or completely skip the next frame from
+         * the sensor. This can cause glitches to camera preview output, for example. This callback
+         * will only fire after requests queued by capture() or captureBurst(), not after a
+         * repeating request or burst enters the in-flight queue. For example, in the common case
+         * of a repeating request and a single-shot JPEG capture, this callback only fires when the
+         * JPEG request has entered the in-flight queue for capture.</p>
+         *
+         * <p>By only sending a new {@link #capture} or {@link #captureBurst} when the input
+         * queue is empty, pipeline latency can be minimized.</p>
+         *
+         * <p>This callback is not fired when the session is first created. It is different from
+         * {@link #onReady}, which is fired when all requests in both queues have been processed.</p>
+         *
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
+         */
+        public void onCaptureQueueEmpty(@NonNull CameraCaptureSession session) {
+            // default empty implementation
+        }
+
+        /**
          * This method is called when the session is closed.
          *
          * <p>A session is closed when a new session is created by the parent camera device,
@@ -761,13 +806,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
                 @NonNull Surface surface) {
             // default empty implementation
         }
-    }
-
-    /**
-     * Temporary for migrating to Callback naming
-     * @hide
-     */
-    public static abstract class StateListener extends StateCallback {
     }
 
     /**
@@ -835,16 +873,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          */
         public void onCaptureStarted(@NonNull CameraCaptureSession session,
                 @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-            // Temporary trampoline for API change transition
-            onCaptureStarted(session, request, timestamp);
-        }
-
-        /**
-         * Temporary for API change transition
-         * @hide
-         */
-        public void onCaptureStarted(CameraCaptureSession session,
-                CaptureRequest request, long timestamp) {
             // default empty implementation
         }
 
@@ -1062,13 +1090,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
                 @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
             // default empty implementation
         }
-    }
-
-    /**
-     * Temporary for migrating to Callback naming
-     * @hide
-     */
-    public static abstract class CaptureListener extends CaptureCallback {
     }
 
 }

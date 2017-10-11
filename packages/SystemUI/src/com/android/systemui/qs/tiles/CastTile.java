@@ -16,21 +16,40 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.MediaRouter;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 
+import com.android.internal.app.MediaRouteChooserDialog;
+import com.android.internal.app.MediaRouteControllerDialog;
+import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -39,7 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 /** Quick settings tile: Cast **/
-public class CastTile extends QSTile<QSTile.BooleanState> {
+public class CastTile extends QSTileImpl<BooleanState> {
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);
 
@@ -47,12 +66,16 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     private final CastDetailAdapter mDetailAdapter;
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
+    private final ActivityStarter mActivityStarter;
+    private Dialog mDialog;
+    private boolean mRegistered;
 
-    public CastTile(Host host) {
+    public CastTile(QSHost host) {
         super(host);
-        mController = host.getCastController();
+        mController = Dependency.get(CastController.class);
         mDetailAdapter = new CastDetailAdapter();
-        mKeyguard = host.getKeyguardMonitor();
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     @Override
@@ -92,20 +115,47 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    protected void handleSecondaryClick() {
+        handleClick();
+    }
+
+    @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
-            mHost.startRunnableDismissingKeyguard(new Runnable() {
-                @Override
-                public void run() {
-                    MetricsLogger.action(mContext, getMetricsCategory());
-                    showDetail(true);
-                    mHost.openPanels();
-                }
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                showDetail(true);
             });
             return;
         }
-        MetricsLogger.action(mContext, getMetricsCategory());
         showDetail(true);
+    }
+
+    @Override
+    public void showDetail(boolean show) {
+        mUiHandler.post(() -> {
+            mDialog = MediaRouteDialogPresenter.createDialog(mContext, ROUTE_TYPE_REMOTE_DISPLAY,
+                    v -> {
+                        mDialog.dismiss();
+                        Dependency.get(ActivityStarter.class)
+                                .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
+                    });
+            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+            mUiHandler.post(() -> mDialog.show());
+            registerReceiver();
+            mHost.collapsePanels();
+        });
+    }
+
+    private void registerReceiver() {
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.CURRENT,
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null, null);
+        mRegistered = true;
+        mDialog.setOnDismissListener(dialog -> {
+            if (mRegistered) {
+                mContext.unregisterReceiver(mReceiver);
+                mRegistered = false;
+            }
+        });
     }
 
     @Override
@@ -118,7 +168,6 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.contentDescription = state.label;
         state.value = false;
-        state.autoMirrorDrawable = false;
         final Set<CastDevice> devices = mController.getCastDevices();
         boolean connecting = false;
         for (CastDevice device : devices) {
@@ -134,11 +183,11 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         if (!state.value && connecting) {
             state.label = mContext.getString(R.string.quick_settings_connecting);
         }
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
         mDetailAdapter.updateItems(devices);
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName =
-                Button.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.contentDescription = state.contentDescription + ","
                 + mContext.getString(R.string.accessibility_quick_settings_open_details);
     }
@@ -169,8 +218,17 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         }
 
         @Override
-        public void onKeyguardChanged() {
+        public void onKeyguardShowingChanged() {
             refreshState();
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mDialog != null) {
+                mDialog.dismiss();
+            }
         }
     };
 

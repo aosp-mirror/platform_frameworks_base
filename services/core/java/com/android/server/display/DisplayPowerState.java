@@ -369,8 +369,8 @@ final class DisplayPowerState {
                     mPendingBacklight = backlight;
 
                     boolean changeInProgress = mStateChangeInProgress || mBacklightChangeInProgress;
-                    mStateChangeInProgress = stateChanged;
-                    mBacklightChangeInProgress = backlightChanged;
+                    mStateChangeInProgress = stateChanged || mStateChangeInProgress;
+                    mBacklightChangeInProgress = backlightChanged || mBacklightChangeInProgress;
 
                     if (!changeInProgress) {
                         mLock.notifyAll();

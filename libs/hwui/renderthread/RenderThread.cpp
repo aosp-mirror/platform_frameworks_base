@@ -17,9 +17,12 @@
 #include "RenderThread.h"
 
 #include "../renderstate/RenderState.h"
+#include "../pipeline/skia/SkiaOpenGLReadback.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
+#include "OpenGLReadback.h"
 #include "RenderProxy.h"
+#include "VulkanManager.h"
 #include "utils/FatVector.h"
 
 #include <gui/DisplayEventReceiver.h>
@@ -95,6 +98,7 @@ void TaskQueue::queue(RenderTask* task) {
 }
 
 void TaskQueue::queueAtFront(RenderTask* task) {
+    LOG_ALWAYS_FATAL_IF(task->mNext || mHead == task, "Task is already in the queue!");
     if (mTail) {
         task->mNext = mHead;
         mHead = task;
@@ -158,7 +162,8 @@ RenderThread::RenderThread() : Thread(true)
         , mFrameCallbackTaskPending(false)
         , mFrameCallbackTask(nullptr)
         , mRenderState(nullptr)
-        , mEglManager(nullptr) {
+        , mEglManager(nullptr)
+        , mVkManager(nullptr) {
     Properties::load();
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
@@ -192,6 +197,31 @@ void RenderThread::initThreadLocals() {
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
     mJankTracker = new JankTracker(mDisplayInfo);
+    mVkManager = new VulkanManager(*this);
+}
+
+Readback& RenderThread::readback() {
+
+    if (!mReadback) {
+        auto renderType = Properties::getRenderPipelineType();
+        switch (renderType) {
+            case RenderPipelineType::OpenGL:
+                mReadback = new OpenGLReadbackImpl(*this);
+                break;
+            case RenderPipelineType::SkiaGL:
+            case RenderPipelineType::SkiaVulkan:
+                // It works to use the OpenGL pipeline for Vulkan but this is not
+                // ideal as it causes us to create an OpenGL context in addition
+                // to the Vulkan one.
+                mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
+                break;
+            default:
+                LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+                break;
+        }
+    }
+
+    return *mReadback;
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

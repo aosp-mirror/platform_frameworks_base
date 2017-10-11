@@ -18,7 +18,7 @@
 #define LOG_TAG "StringBlock"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <utils/misc.h>
 #include <core_jni_helpers.h>
 #include <utils/Log.h>

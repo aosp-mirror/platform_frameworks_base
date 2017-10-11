@@ -20,11 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.NetworkUtils;
 import android.text.BidiFormatter;
 import android.text.TextUtils;
 import android.view.View;
-import android.net.NetworkUtils;
-import android.net.TrafficStats;
 
 import java.util.Locale;
 
@@ -65,10 +64,16 @@ public final class Formatter {
     /**
      * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
      *
-     * If the context has a right-to-left locale, the returned string is wrapped in bidi formatting
-     * characters to make sure it's displayed correctly if inserted inside a right-to-left string.
-     * (This is useful in cases where the unit strings, like "MB", are left-to-right, but the
-     * locale is right-to-left.)
+     * <p>As of O, the prefixes are used in their standard meanings in the SI system, so kB = 1000
+     * bytes, MB = 1,000,000 bytes, etc.</p>
+     *
+     * <p class="note">In {@link android.os.Build.VERSION_CODES#N} and earlier, powers of 1024 are
+     * used instead, with KB = 1024 bytes, MB = 1,048,576 bytes, etc.</p>
+     *
+     * <p>If the context has a right-to-left locale, the returned string is wrapped in bidi
+     * formatting characters to make sure it's displayed correctly if inserted inside a
+     * right-to-left string. (This is useful in cases where the unit strings, like "MB", are
+     * left-to-right, but the locale is right-to-left.)</p>
      *
      * @param context Context to use to load the localized units
      * @param sizeBytes size value to be formatted, in bytes
@@ -104,28 +109,28 @@ public final class Formatter {
         long mult = 1;
         if (result > 900) {
             suffix = com.android.internal.R.string.kilobyteShort;
-            mult = TrafficStats.KB_IN_BYTES;
-            result = result / 1024;
+            mult = 1000;
+            result = result / 1000;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.megabyteShort;
-            mult = TrafficStats.MB_IN_BYTES;
-            result = result / 1024;
+            mult *= 1000;
+            result = result / 1000;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.gigabyteShort;
-            mult = TrafficStats.GB_IN_BYTES;
-            result = result / 1024;
+            mult *= 1000;
+            result = result / 1000;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.terabyteShort;
-            mult = TrafficStats.TB_IN_BYTES;
-            result = result / 1024;
+            mult *= 1000;
+            result = result / 1000;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.petabyteShort;
-            mult = TrafficStats.PB_IN_BYTES;
-            result = result / 1024;
+            mult *= 1000;
+            result = result / 1000;
         }
         // Note we calculate the rounded long by ourselves, but still let String.format()
         // compute the rounded value. String.format("%f", 0.1) might not return "0.1" due to

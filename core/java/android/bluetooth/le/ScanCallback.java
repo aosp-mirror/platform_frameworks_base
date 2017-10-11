@@ -46,17 +46,25 @@ public abstract class ScanCallback {
 
     /**
      * Fails to start scan as it is out of hardware resources.
+     *
      * @hide
      */
     public static final int SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES = 5;
 
     /**
+     * Fails to start scan as application tries to scan too frequently.
+     * @hide
+     */
+    public static final int SCAN_FAILED_SCANNING_TOO_FREQUENTLY = 6;
+
+    static final int NO_ERROR = 0;
+
+    /**
      * Callback when a BLE advertisement has been found.
      *
-     * @param callbackType Determines how this callback was triggered. Could be one of
-     *            {@link ScanSettings#CALLBACK_TYPE_ALL_MATCHES},
-     *            {@link ScanSettings#CALLBACK_TYPE_FIRST_MATCH} or
-     *            {@link ScanSettings#CALLBACK_TYPE_MATCH_LOST}
+     * @param callbackType Determines how this callback was triggered. Could be one of {@link
+     * ScanSettings#CALLBACK_TYPE_ALL_MATCHES}, {@link ScanSettings#CALLBACK_TYPE_FIRST_MATCH} or
+     * {@link ScanSettings#CALLBACK_TYPE_MATCH_LOST}
      * @param result A Bluetooth LE scan result.
      */
     public void onScanResult(int callbackType, ScanResult result) {

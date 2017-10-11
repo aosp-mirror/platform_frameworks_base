@@ -57,7 +57,7 @@ abstract public class CompareActivity extends Activity {
         getWindow().setBackgroundDrawable(new ColorDrawable(0xffefefef));
         ResourceModifiers.init(getResources());
 
-        mHardwareView = (MainView) findViewById(R.id.hardware_view);
+        mHardwareView = findViewById(R.id.hardware_view);
         mHardwareView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         mHardwareView.setBackgroundColor(Color.WHITE);
         mHardwareView.addDrawCallback(mDrawCallback);

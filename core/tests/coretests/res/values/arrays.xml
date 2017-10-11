@@ -31,4 +31,19 @@
         <item>2 days</item>
         <item>1 week</item>
     </string-array>
+
+    <string-array name="certs1">
+        <item>123456789</item>
+        <item>987654321</item>
+    </string-array>
+
+    <string-array name="certs2">
+        <item>abcdefg</item>
+        <item>gfedcba</item>
+    </string-array>
+
+    <array name="certarray">
+        <item>@array/certs1</item>
+        <item>@array/certs2</item>
+    </array>
 </resources>

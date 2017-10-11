@@ -48,19 +48,6 @@ LOCAL_JAVA_LIBRARIES := core-oj core-libart framework junit
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
-# Build the legacy-android-tests library
-# ======================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := \
-    $(call all-java-files-under, tests)
-LOCAL_MODULE := legacy-android-tests
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework junit
-LOCAL_STATIC_JAVA_LIBRARIES := legacy-android-test
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 ifeq ($(HOST_OS),linux)
 # Build the legacy-performance-test-hostdex library
 # =================================================

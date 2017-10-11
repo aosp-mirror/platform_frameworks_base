@@ -43,10 +43,16 @@
 
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
      interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.PhoneStatusBar</string>
+    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
 
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
+
+    <!-- Vibrator pattern for camera gesture launch. -->
+    <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
+        <item>0</item>
+        <item>400</item>
+    </integer-array>
 
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
@@ -94,13 +100,14 @@
 
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_num_rows">1</integer>
+    <integer name="quick_settings_num_rows_portrait">2</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane
+        wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast
     </string>
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
@@ -280,7 +287,7 @@
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
     <!-- Nav bar button default ordering/layout -->
-    <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
+    <string name="config_navBarLayout" translatable="false">left,back;home;recent,right</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
@@ -290,5 +297,43 @@
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
          If < 0, uses the value from HardwarePropertiesManager#getDeviceTemperatures. -->
     <integer name="config_warningTemperature">-1</integer>
+
+    <!-- Accessibility actions -->
+    <item type="id" name="action_split_task_to_left" />
+    <item type="id" name="action_split_task_to_right" />
+    <item type="id" name="action_split_task_to_top" />
+
+    <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
+         the notification is not swiped enough to dismiss it. -->
+    <bool name="config_showNotificationGear">true</bool>
+
+    <!-- Whether or not a background should be drawn behind a notification. -->
+    <bool name="config_drawNotificationBackground">true</bool>
+
+    <!-- Whether or not the edit icon on the quick settings header is shown. -->
+    <bool name="config_showQuickSettingsEditingIcon">true</bool>
+
+    <!-- Whether or not the multi-user switcher should be visible even if the quick settings are
+         not expanded. If there are not multiple users on the system, the switcher will still
+         hide itself. -->
+    <bool name="config_alwaysShowMultiUserSwitcher">false</bool>
+
+    <!-- Whether or not the expand indicator is visible for manually expanding the quick settings
+         panel. -->
+    <bool name="config_showQuickSettingsExpandIndicator">true</bool>
+
+    <!-- Whether or not to display the row of quick settings icons separate from the full quick
+         settings panel. -->
+    <bool name="config_showQuickSettingsRow">true</bool>
+
+    <!-- Whether or not the quick settings should be revealed on an overscroll of the
+         notifications panel. -->
+    <bool name="config_enableQuickSettingsOverscrollExpansion">true</bool>
+
+    <!-- Whether or the notifications can be shown and dismissed with a drag. -->
+    <bool name="config_enableNotificationShadeDrag">true</bool>
+
+    <!-- Whether to show activity indicators in the status bar -->
+    <bool name="config_showActivity">false</bool>
 
 </resources>

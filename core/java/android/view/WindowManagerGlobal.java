@@ -167,8 +167,10 @@ public final class WindowManagerGlobal {
                 sWindowManagerService = IWindowManager.Stub.asInterface(
                         ServiceManager.getService("window"));
                 try {
-                    sWindowManagerService = getWindowManagerService();
-                    ValueAnimator.setDurationScale(sWindowManagerService.getCurrentAnimatorScale());
+                    if (sWindowManagerService != null) {
+                        ValueAnimator.setDurationScale(
+                                sWindowManagerService.getCurrentAnimatorScale());
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -247,6 +249,19 @@ public final class WindowManagerGlobal {
             }
         }
         return views;
+    }
+
+    public View getWindowView(IBinder windowToken) {
+        synchronized (mLock) {
+            final int numViews = mViews.size();
+            for (int i = 0; i < numViews; ++i) {
+                final View view = mViews.get(i);
+                if (view.getWindowToken() == windowToken) {
+                    return view;
+                }
+            }
+        }
+        return null;
     }
 
     public View getRootView(String name) {
@@ -520,7 +535,7 @@ public final class WindowManagerGlobal {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
                 final ViewRootImpl root = mRoots.get(i);
                 if (root.mView != null && root.getHostVisibility() == View.VISIBLE
-                        && root.mAttachInfo.mHardwareRenderer != null) {
+                        && root.mAttachInfo.mThreadedRenderer != null) {
                     hasVisibleWindows = true;
                 } else {
                     root.destroyHardwareResources();
@@ -548,7 +563,7 @@ public final class WindowManagerGlobal {
                     pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
                     ThreadedRenderer renderer =
-                            root.getView().mAttachInfo.mHardwareRenderer;
+                            root.getView().mAttachInfo.mThreadedRenderer;
                     if (renderer != null) {
                         renderer.dumpGfxInfo(pw, fd, args);
                     }

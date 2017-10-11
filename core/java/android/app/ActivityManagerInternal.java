@@ -17,16 +17,21 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,9 +49,9 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we drew
-     * the starting window.
+     * the splash screen.
      */
-    public static final int APP_TRANSITION_STARTING_WINDOW = 1;
+    public static final int APP_TRANSITION_SPLASH_SCREEN = 1;
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we all
@@ -59,6 +64,12 @@ public abstract class ActivityManagerInternal {
      * timeout.
      */
     public static final int APP_TRANSITION_TIMEOUT = 3;
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because of a
+     * we drew a task snapshot.
+     */
+    public static final int APP_TRANSITION_SNAPSHOT = 4;
 
     /**
      * Grant Uri permissions from one app to another. This method only extends
@@ -119,19 +130,15 @@ public abstract class ActivityManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Callback for window manager to let activity manager know that the starting window has been
-     * drawn
-     */
-    public abstract void notifyStartingWindowDrawn();
-
-    /**
      * Callback for window manager to let activity manager know that we are finally starting the
      * app transition;
      *
-     * @param reason The reason why the app transition started. Must be one of the APP_TRANSITION_*
-     *               values.
+     * @param reasons A map from stack id to a reason integer why the transition was started,, which
+     *                must be one of the APP_TRANSITION_* values.
+     * @param timestamp The time at which the app transition started in
+     *                  {@link SystemClock#uptimeMillis()} timebase.
      */
-    public abstract void notifyAppTransitionStarting(int reason);
+    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp);
 
     /**
      * Callback for window manager to let activity manager know that the app transition was
@@ -165,7 +172,19 @@ public abstract class ActivityManagerInternal {
      *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
      *  such as Power Save mode.
      */
-    public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
+    public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
+            IBinder whitelistToken, long duration);
+
+    /**
+     * Allow DeviceIdleController to tell us about what apps are whitelisted.
+     */
+    public abstract void setDeviceIdleWhitelist(int[] appids);
+
+    /**
+     * Update information about which app IDs are on the temp whitelist.
+     */
+    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId,
+            boolean adding);
 
     /**
      * Updates and persists the {@link Configuration} for a given user.
@@ -191,4 +210,57 @@ public abstract class ActivityManagerInternal {
      * (-1).
      */
     public abstract int getUidProcessState(int uid);
+
+    /**
+     * Called when Keyguard flags might have changed.
+     *
+     * @param callback Callback to run after activity visibilities have been reevaluated. This can
+     *                 be used from window manager so that when the callback is called, it's
+     *                 guaranteed that all apps have their visibility updated accordingly.
+     */
+    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback);
+
+    /**
+     * @return {@code true} if system is ready, {@code false} otherwise.
+     */
+    public abstract boolean isSystemReady();
+
+    /**
+     * Called when the trusted state of Keyguard has changed.
+     */
+    public abstract void notifyKeyguardTrustedChanged();
+
+    /**
+     * Sets if the given pid has an overlay UI or not.
+     *
+     * @param pid The pid we are setting overlay UI for.
+     * @param hasOverlayUi True if the process has overlay UI.
+     * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
+     */
+    public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
+
+    /**
+     * Called after the network policy rules are updated by
+     * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
+     * {@param procStateSeq}.
+     */
+    public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
+
+    /**
+     * Called after virtual display Id is updated by
+     * {@link com.android.server.vr.Vr2dDisplay} with a specific
+     * {@param vr2dDisplayId}.
+     */
+    public abstract void setVr2dDisplayId(int vr2dDisplayId);
+
+    /**
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
+     */
+    public abstract void saveANRState(String reason);
+
+    /**
+     * Clears the previously saved activity manager ANR state.
+     */
+    public abstract void clearSavedANRState();
 }

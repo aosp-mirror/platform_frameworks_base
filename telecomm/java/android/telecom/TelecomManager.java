@@ -16,7 +16,10 @@ package android.telecom;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +49,8 @@ import java.util.List;
  * permissions declared in its manifest file. Where permissions apply, they are noted in the method
  * descriptions.
  */
+@SuppressAutoDoc
+@SystemService(Context.TELECOM_SERVICE)
 public class TelecomManager {
 
     /**
@@ -732,6 +737,10 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
         try {
             if (isServiceConnected()) {
@@ -813,6 +822,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
         try {
             if (isServiceConnected()) {
@@ -940,6 +950,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void clearPhoneAccounts() {
         clearAccounts();
     }
@@ -949,6 +960,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void clearAccounts() {
         try {
             if (isServiceConnected()) {
@@ -980,6 +992,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public ComponentName getDefaultPhoneApp() {
         try {
             if (isServiceConnected()) {
@@ -1196,6 +1209,10 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isRinging() {
         try {
             if (isServiceConnected()) {
@@ -1214,6 +1231,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
@@ -1227,18 +1245,22 @@ public class TelecomManager {
 
     /**
      * If there is a ringing incoming call, this method accepts the call on behalf of the user.
-     * TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
-     * this method (clockwork & gearhead).
+     *
      * If the incoming call is a video call, the call will be answered with the same video state as
      * the incoming call requests.  This means, for example, that an incoming call requesting
      * {@link VideoProfile#STATE_BIDIRECTIONAL} will be answered, accepting that state.
-     * @hide
+     *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
+     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
      */
-    @SystemApi
+    //TODO: L-release - need to convert all invocation of ITelecmmService#answerRingingCall to use
+    // this method (clockwork & gearhead).
+    @RequiresPermission(anyOf =
+            {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
     public void acceptRingingCall() {
         try {
             if (isServiceConnected()) {
-                getTelecomService().acceptRingingCall();
+                getTelecomService().acceptRingingCall(mContext.getPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#acceptRingingCall", e);
@@ -1249,14 +1271,18 @@ public class TelecomManager {
      * If there is a ringing incoming call, this method accepts the call on behalf of the user,
      * with the specified video state.
      *
+     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
+     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
+     *
      * @param videoState The desired video state to answer the call with.
-     * @hide
      */
-    @SystemApi
+    @RequiresPermission(anyOf =
+            {Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.MODIFY_PHONE_STATE})
     public void acceptRingingCall(int videoState) {
         try {
             if (isServiceConnected()) {
-                getTelecomService().acceptRingingCallWithVideoState(videoState);
+                getTelecomService().acceptRingingCallWithVideoState(
+                        mContext.getPackageName(), videoState);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#acceptRingingCallWithVideoState", e);
@@ -1281,10 +1307,11 @@ public class TelecomManager {
 
     /**
      * Returns whether TTY is supported on this device.
-     *
-     * @hide
      */
-    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isTtySupported() {
         try {
             if (isServiceConnected()) {
@@ -1563,6 +1590,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void enablePhoneAccount(PhoneAccountHandle handle, boolean isEnabled) {
         ITelecomService service = getTelecomService();
         if (service != null) {

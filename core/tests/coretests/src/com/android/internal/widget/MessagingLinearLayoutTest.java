@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.os.Debug;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.core.deps.guava.base.Function;
 import android.support.test.filters.SmallTest;
@@ -46,8 +45,7 @@ public class MessagingLinearLayoutTest {
     @Before
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
-        // maxHeight: 300px
-        // spacing: 50px
+        // spacing: 5px
         mView = (MessagingLinearLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.messaging_linear_layout_test, null);
     }
@@ -81,8 +79,8 @@ public class MessagingLinearLayoutTest {
 
         assertEquals(3, child1.getNumIndentLines());
         assertEquals(0, child2.getNumIndentLines());
-        assertFalse(child1.isHidden());
-        assertFalse(child2.isHidden());
+        assertFalse("child1 should not be hidden", child1.isHidden());
+        assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(205, mView.getMeasuredHeight());
     }
 
@@ -100,8 +98,8 @@ public class MessagingLinearLayoutTest {
 
         assertEquals(2, child1.getNumIndentLines());
         assertEquals(1, child2.getNumIndentLines());
-        assertFalse(child1.isHidden());
-        assertFalse(child2.isHidden());
+        assertFalse("child1 should not be hidden", child1.isHidden());
+        assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(105, mView.getMeasuredHeight());
     }
 
@@ -118,14 +116,14 @@ public class MessagingLinearLayoutTest {
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
         assertEquals(3, child2.getNumIndentLines());
-        assertTrue(child1.isHidden());
-        assertFalse(child2.isHidden());
-        assertEquals(300, mView.getMeasuredHeight());
+        assertTrue("child1 should be hidden", child1.isHidden());
+        assertFalse("child2 should not be hidden", child2.isHidden());
+        assertEquals(350, mView.getMeasuredHeight());
     }
 
     @Test
-    public void testLargeSmall_largeWrapsWith3indentbutnot3_andHitsMax() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> i > 2 ? 5 : 4);
+    public void testLargeSmall_largeWrapsWith3indentbutNotFullHeight_andHitsMax() {
+        FakeImageFloatingTextView child1 = fakeChild((i) -> i > 2 ? 7 : 6);
         FakeImageFloatingTextView child2 = fakeChild((i) -> 1);
 
         mView.setNumIndentLines(2);
@@ -135,10 +133,11 @@ public class MessagingLinearLayoutTest {
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertTrue(child1.isHidden());
-        assertFalse(child2.isHidden());
-        assertEquals(50, mView.getMeasuredHeight());
-        assertEquals(2, child2.getNumIndentLines());
+        assertFalse("child1 should not be hidden", child1.isHidden());
+        assertFalse("child2 should not be hidden", child2.isHidden());
+        assertEquals(355, mView.getMeasuredHeight());
+        assertEquals(3, child1.getNumIndentLines());
+        assertEquals(0, child2.getNumIndentLines());
     }
 
     @Test
@@ -153,8 +152,8 @@ public class MessagingLinearLayoutTest {
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertFalse(child1.isHidden());
-        assertFalse(child2.isHidden());
+        assertFalse("child1 should not be hidden", child1.isHidden());
+        assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(255, mView.getMeasuredHeight());
         assertEquals(3, child1.getNumIndentLines());
         assertEquals(0, child2.getNumIndentLines());
@@ -184,10 +183,23 @@ public class MessagingLinearLayoutTest {
         }
 
         @Override
+        public int getLayoutHeight() {
+            return Math.max(LINE_HEIGHT, getMeasuredHeight());
+        }
+
+        @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             setMeasuredDimension(
                     getDefaultSize(500, widthMeasureSpec),
-                    resolveSize(getDesiredHeight(), heightMeasureSpec));
+                    clampToMultiplesOfLineHeight(resolveSize(getDesiredHeight(),
+                            heightMeasureSpec)));
+        }
+
+        private int clampToMultiplesOfLineHeight(int size) {
+            if (size <= LINE_HEIGHT) {
+                return size;
+            }
+            return (size / LINE_HEIGHT) * LINE_HEIGHT;
         }
 
         @Override

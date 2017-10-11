@@ -79,7 +79,7 @@ public class PathMeasure {
      * are unchanged.
      *
      * @param distance The distance along the current contour to sample
-     * @param pos If not null, eturns the sampled position (x==[0], y==[1])
+     * @param pos If not null, returns the sampled position (x==[0], y==[1])
      * @param tan If not null, returns the sampled tangent (x==[0], y==[1])
      * @return false if there was no path associated with this measure object
     */

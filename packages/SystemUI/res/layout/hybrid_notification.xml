@@ -19,23 +19,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="@*android:dimen/notification_content_margin_start"
-    android:paddingEnd="12dp"
-    android:gravity="bottom|start">
+    android:gravity="bottom|start"
+    style="?attr/hybridNotificationStyle">
     <TextView
         android:id="@+id/notification_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="4dp"
-        android:singleLine="true"
         android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
+        android:singleLine="true"
+        style="?attr/hybridNotificationTitleStyle"
     />
     <TextView
         android:id="@+id/notification_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="4dp"
-        android:textAppearance="@*android:style/TextAppearance.Material.Notification"
         android:singleLine="true"
-        />
+        android:textAppearance="@*android:style/TextAppearance.Material.Notification"
+        style="?attr/hybridNotificationTextStyle"
+    />
 </com.android.systemui.statusbar.notification.HybridNotificationView>

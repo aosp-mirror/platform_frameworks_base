@@ -39,7 +39,7 @@ public class ActivityTransitionDetails extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.DKGRAY));
         setContentView(R.layout.activity_transition_details);
-        ImageView titleImage = (ImageView) findViewById(R.id.titleImage);
+        ImageView titleImage = findViewById(R.id.titleImage);
         titleImage.setImageDrawable(getHeroDrawable());
     }
 

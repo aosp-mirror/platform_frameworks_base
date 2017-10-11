@@ -25,6 +25,7 @@ import android.view.IWindowManager;
 import junit.framework.TestCase;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
@@ -42,26 +43,6 @@ public class WindowManagerPermissionTests extends TestCase {
     @SmallTest
     public void testMANAGE_APP_TOKENS() {
         try {
-            mWm.pauseKeyDispatching(null);
-            fail("IWindowManager.pauseKeyDispatching did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.resumeKeyDispatching(null);
-            fail("IWindowManager.resumeKeyDispatching did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
             mWm.setEventDispatching(true);
             fail("IWindowManager.setEventDispatching did not throw SecurityException as"
                     + " expected");
@@ -72,7 +53,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.addWindowToken(null, 0);
+            mWm.addWindowToken(null, 0, DEFAULT_DISPLAY);
             fail("IWindowManager.addWindowToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -82,7 +63,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.removeWindowToken(null);
+            mWm.removeWindowToken(null, DEFAULT_DISPLAY);
             fail("IWindowManager.removeWindowToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -92,40 +73,9 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.addAppToken(0, null, 0, 0, 0, false, false, 0, 0, false, false, null,
-                    Configuration.EMPTY, 0, false, false, 0, -1);
-            fail("IWindowManager.addAppToken did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.setAppTask(null, 0, INVALID_STACK_ID, null, null, 0, false);
-            fail("IWindowManager.setAppGroupId did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.updateOrientationFromAppTokens(new Configuration(), null);
+            mWm.updateOrientationFromAppTokens(new Configuration(),
+                    null /* freezeThisOneIfNeeded */, DEFAULT_DISPLAY);
             fail("IWindowManager.updateOrientationFromAppTokens did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.setAppOrientation(null, 0);
-            mWm.addWindowToken(null, 0);
-            fail("IWindowManager.setAppOrientation did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
             // expected
@@ -156,56 +106,6 @@ public class WindowManagerPermissionTests extends TestCase {
         try {
             mWm.executeAppTransition();
             fail("IWindowManager.executeAppTransition did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.setAppStartingWindow(null, "foo", 0, null, null, 0, 0, 0, 0, null, false);
-            fail("IWindowManager.setAppStartingWindow did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.setAppVisibility(null, false);
-            fail("IWindowManager.setAppVisibility did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.startAppFreezingScreen(null, 0);
-            fail("IWindowManager.startAppFreezingScreen did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.stopAppFreezingScreen(null, false);
-            fail("IWindowManager.stopAppFreezingScreen did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
-            mWm.removeAppToken(null);
-            fail("IWindowManager.removeAppToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
             // expected

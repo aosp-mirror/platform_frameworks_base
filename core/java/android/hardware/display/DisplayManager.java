@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
@@ -29,13 +30,8 @@ import java.util.ArrayList;
 
 /**
  * Manages the properties of attached displays.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument
- * {@link android.content.Context#DISPLAY_SERVICE}.
- * </p>
  */
+@SystemService(Context.DISPLAY_SERVICE)
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
@@ -108,13 +104,14 @@ public final class DisplayManager {
      * </p>
      *
      * <p>
-     * A private virtual display belongs to the application that created it.
-     * Only the a owner of a private virtual display is allowed to place windows upon it.
-     * The private virtual display also does not participate in display mirroring: it will
-     * neither receive mirrored content from another display nor allow its own content to
-     * be mirrored elsewhere.  More precisely, the only processes that are allowed to
-     * enumerate or interact with the private display are those that have the same UID as the
-     * application that originally created the private virtual display.
+     * A private virtual display belongs to the application that created it.  Only the a owner of a
+     * private virtual display and the apps that are already on that display are allowed to place
+     * windows upon it.  The private virtual display also does not participate in display mirroring:
+     * it will neither receive mirrored content from another display nor allow its own content to be
+     * mirrored elsewhere.  More precisely, the only processes that are allowed to enumerate or
+     * interact with the private display are those that have the same UID as the application that
+     * originally created the private virtual display or as the activities that are already on that
+     * display.
      * </p>
      *
      * @see #createVirtualDisplay
@@ -234,6 +231,31 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR = 1 << 4;
 
+    /**
+     * Virtual display flag: Allows content to be displayed on private virtual displays when
+     * keyguard is shown but is insecure.
+     *
+     * <p>
+     * This flag can only be applied to private displays as defined by the
+     * {@link Display#FLAG_PRIVATE} display flag. It is mutually exclusive with
+     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}. If both flags are specified then this flag's behavior
+     * will not be applied.
+     * </p>
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
+
+    /**
+     * Virtual display flag: Specifies that the virtual display can be associated with a
+     * touchpad device that matches its uniqueId.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;
@@ -323,8 +345,12 @@ public final class DisplayManager {
     private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
         Display display = mDisplays.get(displayId);
         if (display == null) {
-            display = mGlobal.getCompatibleDisplay(displayId,
-                    mContext.getDisplayAdjustments(displayId));
+            // TODO: We cannot currently provide any override configurations for metrics on displays
+            // other than the display the context is associated with.
+            final Context context = mContext.getDisplay().getDisplayId() == displayId
+                    ? mContext : mContext.getApplicationContext();
+
+            display = mGlobal.getCompatibleDisplay(displayId, context.getResources());
             if (display != null) {
                 mDisplays.put(displayId, display);
             }
@@ -526,16 +552,17 @@ public final class DisplayManager {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        return createVirtualDisplay(null,
-                name, width, height, densityDpi, surface, flags, callback, handler);
+        return createVirtualDisplay(null /* projection */, name, width, height, densityDpi, surface,
+                flags, callback, handler, null /* uniqueId */);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+            @Nullable String uniqueId) {
         return mGlobal.createVirtualDisplay(mContext, projection,
-                name, width, height, densityDpi, surface, flags, callback, handler);
+                name, width, height, densityDpi, surface, flags, callback, handler, uniqueId);
     }
 
     /**

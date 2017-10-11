@@ -24,8 +24,8 @@ LOCAL_PACKAGE_NAME := SmartCamera-tests
 
 LOCAL_SRC_FILES += $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
-LOCAL_STATIC_JAVA_LIBRARIES := guava junit legacy-android-test
+LOCAL_JAVA_LIBRARIES := legacy-android-test
+LOCAL_STATIC_JAVA_LIBRARIES := guava junit
 
 LOCAL_PROGUARD_ENABLED := disabled
 

@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.hardware.location.ContextHubService;
+import com.android.server.location.ContextHubService;
 import android.content.Context;
 import android.util.Log;
 

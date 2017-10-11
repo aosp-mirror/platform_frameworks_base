@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_SNAPSHOT_H
-#define ANDROID_HWUI_SNAPSHOT_H
+#pragma once
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -24,6 +23,7 @@
 #include <utils/RefBase.h>
 #include <ui/Region.h>
 
+#include <SkClipOp.h>
 #include <SkRegion.h>
 
 #include "ClipArea.h"
@@ -61,18 +61,6 @@ public:
     Rect dangerRects[4];
     Rect innerRect;
     float radius;
-};
-
-// TODO: remove for HWUI_NEW_OPS
-class ProjectionPathMask {
-public:
-    static void* operator new(size_t size) = delete;
-    static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc<ProjectionPathMask>(size);
-    }
-
-    const SkPath* projectionMask;
-    Matrix4 projectionMaskTransform;
 };
 
 /**
@@ -113,11 +101,6 @@ public:
          * restored when this snapshot is restored.
          */
         kFlagIsFboLayer = 0x4,
-        /**
-         * Indicates that this snapshot or an ancestor snapshot is
-         * an FBO layer.
-         */
-        kFlagFboTarget = 0x8, // TODO: remove for HWUI_NEW_OPS
     };
 
     /**
@@ -125,25 +108,19 @@ public:
      * the specified operation. The specified rectangle is transformed
      * by this snapshot's trasnformation.
      */
-    void clip(const Rect& localClip, SkRegion::Op op);
+    void clip(const Rect& localClip, SkClipOp op);
 
     /**
      * Modifies the current clip with the new clip rectangle and
      * the specified operation. The specified rectangle is considered
      * already transformed.
      */
-    void clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
-
-    /**
-     * Modifies the current clip with the specified region and operation.
-     * The specified region is considered already transformed.
-     */
-    void clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
+    void clipTransformed(const Rect& r, SkClipOp op = SkClipOp::kIntersect);
 
     /**
      * Modifies the current clip with the specified path and operation.
      */
-    void clipPath(const SkPath& path, SkRegion::Op op);
+    void clipPath(const SkPath& path, SkClipOp op);
 
     /**
      * Sets the current clip.
@@ -179,11 +156,6 @@ public:
      */
     void resetClip(float left, float top, float right, float bottom);
 
-    /**
-     * Resets the current transform to a pure 3D translation.
-     */
-    void resetTransform(float x, float y, float z);
-
     void initializeViewport(int width, int height) {
         mViewportData.initialize(width, height);
         mClipAreaRoot.setViewportDimensions(width, height);
@@ -207,25 +179,12 @@ public:
     /**
      * Sets (and replaces) the current projection mask
      */
-    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
-
-    /**
-     * Indicates whether this snapshot should be ignored. A snapshot
-     * is typically ignored if its layer is invisible or empty.
-     */
-    bool isIgnored() const;
+    void setProjectionPathMask(const SkPath* path);
 
     /**
      * Indicates whether the current transform has perspective components.
      */
     bool hasPerspectiveTransform() const;
-
-    /**
-     * Fills outTransform with the current, total transform to screen space,
-     * across layer boundaries.
-     */
-    // TODO: remove for HWUI_NEW_OPS
-    void buildScreenSpaceTransform(Matrix4* outTransform) const;
 
     /**
      * Dirty flags.
@@ -251,19 +210,6 @@ public:
     GLuint fbo;
 
     /**
-     * Indicates that this snapshot is invisible and nothing should be drawn
-     * inside it. This flag is set only when the layer clips drawing to its
-     * bounds and is passed to subsequent snapshots.
-     */
-    bool invisible;
-
-    /**
-     * If set to true, the layer will not be composited. This is similar to
-     * invisible but this flag is not passed to subsequent snapshots.
-     */
-    bool empty;
-
-    /**
      * Local transformation. Holds the current translation, scale and
      * rotation values.
      *
@@ -271,14 +217,6 @@ public:
      *  snapshot. This pointer must not be freed. See ::mTransformRoot.
      */
     mat4* transform;
-
-    /**
-     * The ancestor layer's dirty region.
-     *
-     * This is a reference to a region owned by a layer. This pointer must
-     * not be freed.
-     */
-    Region* region;
 
     /**
      * Current alpha value. This value is 1 by default, but may be set by a DisplayList which
@@ -302,11 +240,7 @@ public:
     /**
      * Current projection masking path - used exclusively to mask projected, tessellated circles.
      */
-#if HWUI_NEW_OPS
     const SkPath* projectionPathMask;
-#else
-    const ProjectionPathMask* projectionPathMask;
-#endif
 
     void dump() const;
 
@@ -345,5 +279,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_SNAPSHOT_H

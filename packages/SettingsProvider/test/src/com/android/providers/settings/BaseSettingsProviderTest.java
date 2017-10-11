@@ -25,14 +25,21 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+import libcore.io.Streams;
+import org.junit.runner.RunWith;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
  * Base class for the SettingContentProvider tests.
  */
-abstract class BaseSettingsProviderTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+abstract class BaseSettingsProviderTest {
     protected static final int SETTING_TYPE_GLOBAL = 1;
     protected static final int SETTING_TYPE_SECURE = 2;
     protected static final int SETTING_TYPE_SYSTEM = 3;
@@ -48,23 +55,7 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
             Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE
     };
 
-    protected int mSecondaryUserId = UserHandle.USER_SYSTEM;
-
-    @Override
-    public void setContext(Context context) {
-        super.setContext(context);
-
-        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> users = userManager.getUsers();
-        final int userCount = users.size();
-        for (int i = 0; i < userCount; i++) {
-            UserInfo user = users.get(i);
-            if (!user.isPrimary() && !user.isManagedProfile()) {
-                mSecondaryUserId = user.id;
-                break;
-            }
-        }
-    }
+    private int mSecondaryUserId = Integer.MIN_VALUE;
 
     protected void setStringViaFrontEndApiSetting(int type, String name, String value, int userId) {
         ContentResolver contentResolver = getContext().getContentResolver();
@@ -176,6 +167,166 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
         return null;
     }
 
+    protected static void resetSettingsViaShell(int type, int resetMode) throws IOException {
+        final String modeString;
+        switch (resetMode) {
+            case Settings.RESET_MODE_UNTRUSTED_DEFAULTS: {
+                modeString = "untrusted_defaults";
+            } break;
+
+            case Settings.RESET_MODE_UNTRUSTED_CHANGES: {
+                modeString = "untrusted_clear";
+            } break;
+
+            case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
+                modeString = "trusted_defaults";
+            } break;
+
+            default: {
+                throw new IllegalArgumentException("Invalid reset mode: " + resetMode);
+            }
+        }
+
+        switch (type) {
+            case SETTING_TYPE_GLOBAL: {
+                executeShellCommand("settings reset global " + modeString);
+            } break;
+
+            case SETTING_TYPE_SECURE: {
+                executeShellCommand("settings reset secure " + modeString);
+            } break;
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+    }
+
+    protected static void resetToDefaultsViaShell(int type, String packageName) throws IOException {
+        resetToDefaultsViaShell(type, packageName, null);
+    }
+
+    protected static void resetToDefaultsViaShell(int type, String packageName, String tag)
+            throws IOException {
+        switch (type) {
+            case SETTING_TYPE_GLOBAL: {
+                executeShellCommand("settings reset global " + packageName + " "
+                        + (tag != null ? tag : ""));
+            } break;
+
+            case SETTING_TYPE_SECURE: {
+                executeShellCommand("settings reset secure " + packageName + " "
+                        + (tag != null ? tag : ""));
+            } break;
+
+            case SETTING_TYPE_SYSTEM: {
+                executeShellCommand("settings reset system " + packageName + " "
+                        + (tag != null ? tag : ""));
+            } break;
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+    }
+
+    protected String getSetting(int type, String name) {
+        switch (type) {
+            case SETTING_TYPE_GLOBAL: {
+                return Settings.Global.getString(getContext().getContentResolver(), name);
+            }
+
+            case SETTING_TYPE_SECURE: {
+                return Settings.Secure.getString(getContext().getContentResolver(), name);
+            }
+
+            case SETTING_TYPE_SYSTEM: {
+                return Settings.System.getString(getContext().getContentResolver(), name);
+            }
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+    }
+
+    protected void putSetting(int type, String name, String value) {
+        switch (type) {
+            case SETTING_TYPE_GLOBAL: {
+                Settings.Global.putString(getContext().getContentResolver(), name, value);
+            } break;
+
+            case SETTING_TYPE_SECURE: {
+                Settings.Secure.putString(getContext().getContentResolver(), name, value);
+            } break;
+
+            case SETTING_TYPE_SYSTEM: {
+                Settings.System.putString(getContext().getContentResolver(), name, value);
+            } break;
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+    }
+
+    protected static void setSettingViaShell(int type, String name, String value,
+            boolean makeDefault) throws IOException {
+        setSettingViaShell(type, name, value, null, makeDefault);
+    }
+
+    protected static void setSettingViaShell(int type, String name, String value,
+            String token, boolean makeDefault) throws IOException {
+        switch (type) {
+            case SETTING_TYPE_GLOBAL: {
+                executeShellCommand("settings put global " + name + " "
+                        + value + (token != null ? " " + token : "")
+                        + (makeDefault ? " default" : ""));
+
+            } break;
+
+            case SETTING_TYPE_SECURE: {
+                executeShellCommand("settings put secure " + name + " "
+                        + value + (token != null ? " " + token : "")
+                        + (makeDefault ? " default" : ""));
+            } break;
+
+            case SETTING_TYPE_SYSTEM: {
+                executeShellCommand("settings put system " + name + " "
+                        + value + (token != null ? " " + token : "")
+                        + (makeDefault ? " default" : ""));
+            } break;
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+    }
+
+    protected Context getContext() {
+        return InstrumentationRegistry.getContext();
+    }
+
+    protected int getSecondaryUserId() {
+        if (mSecondaryUserId == Integer.MIN_VALUE) {
+            UserManager userManager = (UserManager) getContext()
+                    .getSystemService(Context.USER_SERVICE);
+            List<UserInfo> users = userManager.getUsers();
+            final int userCount = users.size();
+            for (int i = 0; i < userCount; i++) {
+                UserInfo user = users.get(i);
+                if (!user.isPrimary() && !user.isManagedProfile()) {
+                    mSecondaryUserId = user.id;
+                    return mSecondaryUserId;
+                }
+            }
+        }
+        if (mSecondaryUserId == Integer.MIN_VALUE) {
+            mSecondaryUserId =  UserHandle.USER_SYSTEM;
+        }
+        return mSecondaryUserId;
+    }
+
     protected static Uri getBaseUriForType(int type) {
         switch (type) {
             case SETTING_TYPE_GLOBAL: {
@@ -194,5 +345,11 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
                 throw new IllegalArgumentException("Invalid type: " + type);
             }
         }
+    }
+
+    protected static void executeShellCommand(String command) throws IOException {
+        InputStream is = new FileInputStream(InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().executeShellCommand(command).getFileDescriptor());
+        Streams.readFully(is);
     }
 }

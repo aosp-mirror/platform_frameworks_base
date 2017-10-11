@@ -26,6 +26,7 @@ import android.os.Process;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -81,15 +82,6 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void keyguardDone(boolean authenticated, boolean wakeup) {
-            Trace.beginSection("KeyguardService.mBinder#keyguardDone");
-            checkPermission();
-            // TODO: Remove wakeup
-            mKeyguardViewMediator.keyguardDone(authenticated);
-            Trace.endSection();
-        }
-
-        @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
@@ -98,9 +90,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void dismiss(boolean allowWhileOccluded) {
+        public void dismiss(IKeyguardDismissCallback callback) {
             checkPermission();
-            mKeyguardViewMediator.dismiss(allowWhileOccluded);
+            mKeyguardViewMediator.dismiss(callback);
         }
 
         @Override // Binder interface
@@ -145,7 +137,7 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onScreenTurnedOn() {
-            Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
+            Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOn();
             Trace.endSection();
@@ -178,6 +170,12 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
+        public void setSwitchingUser(boolean switching) {
+            checkPermission();
+            mKeyguardViewMediator.setSwitchingUser(switching);
+        }
+
+        @Override // Binder interface
         public void setCurrentUser(int userId) {
             checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);
@@ -198,9 +196,9 @@ public class KeyguardService extends Service {
         }
 
         @Override
-        public void onActivityDrawn() {
+        public void onShortPowerPressedGoHome() {
             checkPermission();
-            mKeyguardViewMediator.onActivityDrawn();
+            mKeyguardViewMediator.onShortPowerPressedGoHome();
         }
     };
 }

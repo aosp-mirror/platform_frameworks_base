@@ -162,7 +162,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean verifyVersion(int current, int alternative) {
+    protected boolean verifyVersion(int current, int alternative) {
         return (current < alternative);
     }
 

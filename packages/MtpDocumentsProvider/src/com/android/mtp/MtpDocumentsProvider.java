@@ -17,11 +17,13 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriPermission;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDiskIOException;
 import android.graphics.Point;
@@ -33,28 +35,29 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.Settings;
 import android.system.ErrnoException;
-import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import libcore.io.IoUtils;
 
 /**
  * DocumentsProvider for MTP devices.
@@ -86,9 +89,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private RootScanner mRootScanner;
     private Resources mResources;
     private MtpDatabase mDatabase;
-    private AppFuse mAppFuse;
     private ServiceIntentSender mIntentSender;
     private Context mContext;
+    private StorageManager mStorageManager;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -107,8 +110,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
-        mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = new ServiceIntentSender(getContext());
+        mStorageManager = getContext().getSystemService(StorageManager.class);
 
         // Check boot count and cleans database if it's first time to launch MtpDocumentsProvider
         // after booting.
@@ -128,14 +131,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         } catch (SQLiteDiskIOException error) {
             // It can happen due to disk shortage.
             Log.e(TAG, "Failed to clean database.", error);
-            return false;
-        }
-
-        // TODO: Mount AppFuse on demands.
-        try {
-            mAppFuse.mount(getContext().getSystemService(StorageManager.class));
-        } catch (IOException error) {
-            Log.e(TAG, "Failed to start app fuse.", error);
             return false;
         }
 
@@ -159,16 +154,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = database;
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
-        mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = intentSender;
+        mStorageManager = storageManager;
 
-        // TODO: Mount AppFuse on demands.
-        try {
-            mAppFuse.mount(storageManager);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to start app fuse.", e);
-            return false;
-        }
         resume();
         return true;
     }
@@ -190,7 +178,57 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
-        return mDatabase.queryDocument(documentId, projection);
+        final Cursor cursor = mDatabase.queryDocument(documentId, projection);
+        final int cursorCount = cursor.getCount();
+        if (cursorCount == 0) {
+            cursor.close();
+            throw new FileNotFoundException();
+        } else if (cursorCount != 1) {
+            cursor.close();
+            Log.wtf(TAG, "Unexpected cursor size: " + cursorCount);
+            return null;
+        }
+
+        final Identifier identifier = mDatabase.createIdentifier(documentId);
+        if (identifier.mDocumentType != MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
+            return cursor;
+        }
+        final String[] storageDocIds = mDatabase.getStorageDocumentIds(documentId);
+        if (storageDocIds.length != 1) {
+            return mDatabase.queryDocument(documentId, projection);
+        }
+
+        // If the documentId specifies a device having exact one storage, we repalce some device
+        // attributes with the storage attributes.
+        try {
+            final String storageName;
+            final int storageFlags;
+            try (final Cursor storageCursor = mDatabase.queryDocument(
+                    storageDocIds[0],
+                    MtpDatabase.strings(Document.COLUMN_DISPLAY_NAME, Document.COLUMN_FLAGS))) {
+                if (!storageCursor.moveToNext()) {
+                    throw new FileNotFoundException();
+                }
+                storageName = storageCursor.getString(0);
+                storageFlags = storageCursor.getInt(1);
+            }
+
+            cursor.moveToNext();
+            final ContentValues values = new ContentValues();
+            DatabaseUtils.cursorRowToContentValues(cursor, values);
+            if (values.containsKey(Document.COLUMN_DISPLAY_NAME)) {
+                values.put(Document.COLUMN_DISPLAY_NAME, mResources.getString(
+                        R.string.root_name,
+                        values.getAsString(Document.COLUMN_DISPLAY_NAME),
+                        storageName));
+            }
+            values.put(Document.COLUMN_FLAGS, storageFlags);
+            final MatrixCursor output = new MatrixCursor(projection, 1);
+            MtpDatabase.putValuesToCursor(values, output);
+            return output;
+        } finally {
+            cursor.close();
+        }
     }
 
     @Override
@@ -254,7 +292,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 }
                 if (MtpDeviceRecord.isPartialReadSupported(
                         device.operationsSupported, fileSize)) {
-                    return mAppFuse.openFile(Integer.parseInt(documentId), modeFlag);
+
+                    return mStorageManager.openProxyFileDescriptor(
+                            modeFlag,
+                            new MtpProxyFileDescriptorCallback(Integer.parseInt(documentId)));
                 } else {
                     // If getPartialObject{|64} are not supported for the device, returns
                     // non-seekable pipe FD instead.
@@ -264,7 +305,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 // TODO: Clear the parent document loader task (if exists) and call notify
                 // when writing is completed.
                 if (MtpDeviceRecord.isWritingSupported(device.operationsSupported)) {
-                    return mAppFuse.openFile(Integer.parseInt(documentId), modeFlag);
+                    return mStorageManager.openProxyFileDescriptor(
+                            modeFlag,
+                            new MtpProxyFileDescriptorCallback(Integer.parseInt(documentId)));
                 } else {
                     throw new UnsupportedOperationException(
                             "The device does not support writing operation.");
@@ -443,6 +486,51 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
+    public Path findDocumentPath(String parentDocumentId, String childDocumentId)
+            throws FileNotFoundException {
+        final LinkedList<String> ids = new LinkedList<>();
+        final Identifier childIdentifier = mDatabase.createIdentifier(childDocumentId);
+
+        Identifier i = childIdentifier;
+        outer: while (true) {
+            if (i.mDocumentId.equals(parentDocumentId)) {
+                ids.addFirst(i.mDocumentId);
+                break;
+            }
+            switch (i.mDocumentType) {
+                case MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT:
+                    ids.addFirst(i.mDocumentId);
+                    i = mDatabase.getParentIdentifier(i.mDocumentId);
+                    break;
+                case MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE: {
+                    // Check if there is the multiple storage.
+                    final Identifier deviceIdentifier =
+                            mDatabase.getParentIdentifier(i.mDocumentId);
+                    final String[] storageIds =
+                            mDatabase.getStorageDocumentIds(deviceIdentifier.mDocumentId);
+                    // Add storage's document ID to the path only when the device has multiple
+                    // storages.
+                    if (storageIds.length > 1) {
+                        ids.addFirst(i.mDocumentId);
+                        break outer;
+                    }
+                    i = deviceIdentifier;
+                    break;
+                }
+                case MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE:
+                    ids.addFirst(i.mDocumentId);
+                    break outer;
+            }
+        }
+
+        if (parentDocumentId != null) {
+            return new Path(null, ids);
+        } else {
+            return new Path(/* Should be same with root ID */ i.mDocumentId, ids);
+        }
+    }
+
+    @Override
     public boolean isChildDocument(String parentDocumentId, String documentId) {
         try {
             Identifier identifier = mDatabase.createIdentifier(documentId);
@@ -472,7 +560,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final DeviceToolkit toolkit =
                     new DeviceToolkit(mMtpManager, mResolver, mDatabase, device);
             mDeviceToolkits.put(deviceId, toolkit);
-            mIntentSender.sendUpdateNotificationIntent();
+            mIntentSender.sendUpdateNotificationIntent(getOpenedDeviceRecordsCache());
             try {
                 mRootScanner.resume().await();
             } catch (InterruptedException error) {
@@ -487,9 +575,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     void closeDevice(int deviceId) throws IOException, InterruptedException {
         synchronized (mDeviceListLock) {
             closeDeviceInternal(deviceId);
+            mIntentSender.sendUpdateNotificationIntent(getOpenedDeviceRecordsCache());
         }
         mRootScanner.resume();
-        mIntentSender.sendUpdateNotificationIntent();
     }
 
     MtpDeviceRecord[] getOpenedDeviceRecordsCache() {
@@ -543,7 +631,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 throw new RuntimeException(e);
             } finally {
                 mDatabase.close();
-                mAppFuse.close();
                 super.shutdown();
             }
         }
@@ -650,72 +737,92 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
     }
 
-    private class AppFuseCallback implements AppFuse.Callback {
-        private final Map<Long, MtpFileWriter> mWriters = new HashMap<>();
+    private class MtpProxyFileDescriptorCallback extends ProxyFileDescriptorCallback {
+        private final int mInode;
+        private MtpFileWriter mWriter;
 
-        @Override
-        public long getFileSize(int inode) throws FileNotFoundException {
-            return MtpDocumentsProvider.this.getFileSize(String.valueOf(inode));
+        MtpProxyFileDescriptorCallback(int inode) {
+            mInode = inode;
         }
 
         @Override
-        public long readObjectBytes(
-                int inode, long offset, long size, byte[] buffer) throws IOException {
-            final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
-            final MtpDeviceRecord record = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
-
-            if (MtpDeviceRecord.isSupported(
-                    record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT_64)) {
-                return mMtpManager.getPartialObject64(
-                        identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
-            }
-
-            if (0 <= offset && offset <= 0xffffffffL && MtpDeviceRecord.isSupported(
-                    record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT)) {
-                return mMtpManager.getPartialObject(
-                        identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
-            }
-
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int writeObjectBytes(
-                long fileHandle, int inode, long offset, int size, byte[] bytes)
-                throws IOException, ErrnoException {
-            final MtpFileWriter writer;
-            if (mWriters.containsKey(fileHandle)) {
-                writer = mWriters.get(fileHandle);
-            } else {
-                writer = new MtpFileWriter(mContext, String.valueOf(inode));
-                mWriters.put(fileHandle, writer);
-            }
-            return writer.write(offset, size, bytes);
-        }
-
-        @Override
-        public void flushFileHandle(long fileHandle) throws IOException, ErrnoException {
-            final MtpFileWriter writer = mWriters.get(fileHandle);
-            if (writer == null) {
-                // File handle for reading.
-                return;
-            }
-            final MtpDeviceRecord device = getDeviceToolkit(
-                    mDatabase.createIdentifier(writer.getDocumentId()).mDeviceId).mDeviceRecord;
-            writer.flush(mMtpManager, mDatabase, device.operationsSupported);
-        }
-
-        @Override
-        public void closeFileHandle(long fileHandle) throws IOException, ErrnoException {
-            final MtpFileWriter writer = mWriters.get(fileHandle);
-            if (writer == null) {
-                // File handle for reading.
-                return;
-            }
+        public long onGetSize() throws ErrnoException {
             try {
-                writer.close();
+                return getFileSize(String.valueOf(mInode));
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, e.getMessage(), e);
+                throw new ErrnoException("onGetSize", OsConstants.ENOENT);
+            }
+        }
+
+        @Override
+        public int onRead(long offset, int size, byte[] data) throws ErrnoException {
+            try {
+                final Identifier identifier = mDatabase.createIdentifier(Integer.toString(mInode));
+                final MtpDeviceRecord record = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
+                if (MtpDeviceRecord.isSupported(
+                        record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT_64)) {
+
+                        return (int) mMtpManager.getPartialObject64(
+                                identifier.mDeviceId, identifier.mObjectHandle, offset, size, data);
+
+                }
+                if (0 <= offset && offset <= 0xffffffffL && MtpDeviceRecord.isSupported(
+                        record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT)) {
+                    return (int) mMtpManager.getPartialObject(
+                            identifier.mDeviceId, identifier.mObjectHandle, offset, size, data);
+                }
+                throw new ErrnoException("onRead", OsConstants.ENOTSUP);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+                throw new ErrnoException("onRead", OsConstants.EIO);
+            }
+        }
+
+        @Override
+        public int onWrite(long offset, int size, byte[] data) throws ErrnoException {
+            try {
+                if (mWriter == null) {
+                    mWriter = new MtpFileWriter(mContext, String.valueOf(mInode));
+                }
+                return mWriter.write(offset, size, data);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+                throw new ErrnoException("onWrite", OsConstants.EIO);
+            }
+        }
+
+        @Override
+        public void onFsync() throws ErrnoException {
+            tryFsync();
+        }
+
+        @Override
+        public void onRelease() {
+            try {
+                tryFsync();
+            } catch (ErrnoException error) {
+                // Cannot recover from the error at onRelease. Client app should use fsync to
+                // ensure the provider writes data correctly.
+                Log.e(TAG, "Cannot recover from the error at onRelease.", error);
             } finally {
-                mWriters.remove(fileHandle);
+                if (mWriter != null) {
+                    IoUtils.closeQuietly(mWriter);
+                }
+            }
+        }
+
+        private void tryFsync() throws ErrnoException {
+            try {
+                if (mWriter != null) {
+                    final MtpDeviceRecord device =
+                            getDeviceToolkit(mDatabase.createIdentifier(
+                                    mWriter.getDocumentId()).mDeviceId).mDeviceRecord;
+                    mWriter.flush(mMtpManager, mDatabase, device.operationsSupported);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+                throw new ErrnoException("onWrite", OsConstants.EIO);
             }
         }
     }

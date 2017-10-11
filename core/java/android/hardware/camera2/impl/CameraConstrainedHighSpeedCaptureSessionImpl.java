@@ -58,14 +58,14 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraConstrainedHighSpeedCaptureSessionImpl(int id, List<Surface> outputs,
+    CameraConstrainedHighSpeedCaptureSessionImpl(int id,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess,
             CameraCharacteristics characteristics) {
         mCharacteristics = characteristics;
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
-        mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, outputs, wrapperCallback,
+        mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
                 stateHandler, deviceImpl, deviceStateHandler, configureSuccess);
     }
 
@@ -258,9 +258,9 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
-    public void finishDeferredConfiguration(List<OutputConfiguration> deferredOutputConfigs)
+    public void finalizeOutputConfigurations(List<OutputConfiguration> deferredOutputConfigs)
             throws CameraAccessException {
-        mSessionImpl.finishDeferredConfiguration(deferredOutputConfigs);
+        mSessionImpl.finalizeOutputConfigurations(deferredOutputConfigs);
     }
 
     private class WrapperCallback extends StateCallback {
@@ -291,6 +291,11 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         }
 
         @Override
+        public void onCaptureQueueEmpty(CameraCaptureSession session) {
+            mCallback.onCaptureQueueEmpty(CameraConstrainedHighSpeedCaptureSessionImpl.this);
+        }
+
+        @Override
         public void onClosed(CameraCaptureSession session) {
             mCallback.onClosed(CameraConstrainedHighSpeedCaptureSessionImpl.this);
         }
@@ -300,7 +305,5 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
             mCallback.onSurfacePrepared(CameraConstrainedHighSpeedCaptureSessionImpl.this,
                     surface);
         }
-
-
     }
 }

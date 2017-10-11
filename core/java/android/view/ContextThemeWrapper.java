@@ -36,8 +36,8 @@ public class ContextThemeWrapper extends ContextWrapper {
 
     /**
      * Creates a new context wrapper with no theme and no base context.
-     * <p>
-     * <stong>Note:</strong> A base context <strong>must</strong> be attached
+     * <p class="note">
+     * <strong>Note:</strong> A base context <strong>must</strong> be attached
      * using {@link #attachBaseContext(Context)} before calling any other
      * method on the newly constructed context wrapper.
      */

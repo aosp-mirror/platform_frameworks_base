@@ -17,18 +17,23 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.Resources;
+import android.content.Intent;
 import android.content.res.TypedArray;
+import android.icu.text.MeasureFormat;
+import android.icu.text.MeasureFormat.FormatWidth;
+import android.icu.util.Measure;
+import android.icu.util.MeasureUnit;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -80,7 +85,7 @@ public class Chronometer extends TextView {
     private OnChronometerTickListener mOnChronometerTickListener;
     private StringBuilder mRecycle = new StringBuilder(8);
     private boolean mCountDown;
-    
+
     /**
      * Initialize this Chronometer object.
      * Sets the base to the current time.
@@ -145,6 +150,22 @@ public class Chronometer extends TextView {
     }
 
     /**
+     * @return whether this is the final countdown
+     */
+    public boolean isTheFinalCountDown() {
+        try {
+            getContext().startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/9jK-NcRmVcw"))
+                            .addCategory(Intent.CATEGORY_BROWSABLE)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                                    | Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Set the time that the count-up timer is in reference to.
      *
      * @param base Use the {@link SystemClock#elapsedRealtime} time base.
@@ -191,7 +212,7 @@ public class Chronometer extends TextView {
 
     /**
      * Sets the listener to be called when the chronometer changes.
-     * 
+     *
      * @param listener The listener.
      */
     public void setOnChronometerTickListener(OnChronometerTickListener listener) {
@@ -209,10 +230,10 @@ public class Chronometer extends TextView {
     /**
      * Start counting up.  This does not affect the base as set from {@link #setBase}, just
      * the view display.
-     * 
-     * Chronometer works by regularly scheduling messages to the handler, even when the 
-     * Widget is not visible.  To make sure resource leaks do not occur, the user should 
-     * make sure that each start() call has a reciprocal call to {@link #stop}. 
+     *
+     * Chronometer works by regularly scheduling messages to the handler, even when the
+     * Widget is not visible.  To make sure resource leaks do not occur, the user should
+     * make sure that each start() call has a reciprocal call to {@link #stop}.
      */
     public void start() {
         mStarted = true;
@@ -222,9 +243,9 @@ public class Chronometer extends TextView {
     /**
      * Stop counting up.  This does not affect the base as set from {@link #setBase}, just
      * the view display.
-     * 
+     *
      * This stops the messages to the handler, effectively releasing resources that would
-     * be held as the chronometer is running, via {@link #start}. 
+     * be held as the chronometer is running, via {@link #start}.
      */
     public void stop() {
         mStarted = false;
@@ -330,9 +351,6 @@ public class Chronometer extends TextView {
     private static final int MIN_IN_SEC = 60;
     private static final int HOUR_IN_SEC = MIN_IN_SEC*60;
     private static String formatDuration(long ms) {
-        final Resources res = Resources.getSystem();
-        final StringBuilder text = new StringBuilder();
-
         int duration = (int) (ms / DateUtils.SECOND_IN_MILLIS);
         if (duration < 0) {
             duration = -duration;
@@ -349,31 +367,19 @@ public class Chronometer extends TextView {
             m = duration / MIN_IN_SEC;
             duration -= m * MIN_IN_SEC;
         }
-        int s = duration;
+        final int s = duration;
 
-        try {
-            if (h > 0) {
-                text.append(res.getQuantityString(
-                        com.android.internal.R.plurals.duration_hours, h, h));
-            }
-            if (m > 0) {
-                if (text.length() > 0) {
-                    text.append(' ');
-                }
-                text.append(res.getQuantityString(
-                        com.android.internal.R.plurals.duration_minutes, m, m));
-            }
-
-            if (text.length() > 0) {
-                text.append(' ');
-            }
-            text.append(res.getQuantityString(
-                    com.android.internal.R.plurals.duration_seconds, s, s));
-        } catch (Resources.NotFoundException e) {
-            // Ignore; plurals throws an exception for an untranslated quantity for a given locale.
-            return null;
+        final ArrayList<Measure> measures = new ArrayList<Measure>();
+        if (h > 0) {
+            measures.add(new Measure(h, MeasureUnit.HOUR));
         }
-        return text.toString();
+        if (m > 0) {
+            measures.add(new Measure(m, MeasureUnit.MINUTE));
+        }
+        measures.add(new Measure(s, MeasureUnit.SECOND));
+
+        return MeasureFormat.getInstance(Locale.getDefault(), FormatWidth.WIDE)
+                    .formatMeasures(measures.toArray(new Measure[measures.size()]));
     }
 
     @Override

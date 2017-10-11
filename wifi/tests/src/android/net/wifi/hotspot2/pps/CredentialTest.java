@@ -56,8 +56,8 @@ public class CredentialTest {
                                                X509Certificate[] clientCertificateChain,
                                                PrivateKey clientPrivateKey) {
         Credential cred = new Credential();
-        cred.setCreationTimeInMs(123455L);
-        cred.setExpirationTimeInMs(2310093L);
+        cred.setCreationTimeInMillis(123455L);
+        cred.setExpirationTimeInMillis(2310093L);
         cred.setRealm("realm");
         cred.setCheckAaaServerCertStatus(true);
         cred.setUserCredential(userCred);

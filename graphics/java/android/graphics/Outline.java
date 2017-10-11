@@ -58,8 +58,12 @@ public final class Outline {
     @Mode
     public int mMode = MODE_EMPTY;
 
-    /** @hide */
-    public final Path mPath = new Path();
+    /**
+     * Only guaranteed to be non-null when mode == MODE_CONVEX_PATH
+     *
+     * @hide
+     */
+    public Path mPath;
 
     /** @hide */
     public final Rect mRect = new Rect();
@@ -87,8 +91,11 @@ public final class Outline {
      * @see #isEmpty()
      */
     public void setEmpty() {
+        if (mPath != null) {
+            // rewind here to avoid thrashing the allocations, but could alternately clear ref
+            mPath.rewind();
+        }
         mMode = MODE_EMPTY;
-        mPath.rewind();
         mRect.setEmpty();
         mRadius = RADIUS_UNDEFINED;
     }
@@ -148,7 +155,12 @@ public final class Outline {
      */
     public void set(@NonNull Outline src) {
         mMode = src.mMode;
-        mPath.set(src.mPath);
+        if (src.mMode == MODE_CONVEX_PATH) {
+            if (mPath == null) {
+                mPath = new Path();
+            }
+            mPath.set(src.mPath);
+        }
         mRect.set(src.mRect);
         mRadius = src.mRadius;
         mAlpha = src.mAlpha;
@@ -180,10 +192,13 @@ public final class Outline {
             return;
         }
 
+        if (mMode == MODE_CONVEX_PATH) {
+            // rewind here to avoid thrashing the allocations, but could alternately clear ref
+            mPath.rewind();
+        }
         mMode = MODE_ROUND_RECT;
         mRect.set(left, top, right, bottom);
         mRadius = radius;
-        mPath.rewind();
     }
 
     /**
@@ -236,8 +251,13 @@ public final class Outline {
             return;
         }
 
+        if (mPath == null) {
+            mPath = new Path();
+        } else {
+            mPath.rewind();
+        }
+
         mMode = MODE_CONVEX_PATH;
-        mPath.rewind();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
         mRect.setEmpty();
         mRadius = RADIUS_UNDEFINED;
@@ -262,6 +282,10 @@ public final class Outline {
 
         if (!convexPath.isConvex()) {
             throw new IllegalArgumentException("path must be convex");
+        }
+
+        if (mPath == null) {
+            mPath = new Path();
         }
 
         mMode = MODE_CONVEX_PATH;

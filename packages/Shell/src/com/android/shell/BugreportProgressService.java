@@ -17,6 +17,7 @@
 package com.android.shell;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 import static com.android.shell.BugreportPrefs.STATE_HIDE;
 import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
@@ -42,16 +43,21 @@ import java.util.zip.ZipOutputStream;
 import libcore.io.Streams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FastPrintWriter;
+
 import com.google.android.collect.Lists;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.MainThread;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Action;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -59,33 +65,40 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
+import android.os.IDumpstate;
+import android.os.IDumpstateListener;
+import android.os.IDumpstateToken;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Patterns;
 import android.util.SparseArray;
-import android.view.Display;
-import android.view.KeyEvent;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -114,6 +127,8 @@ import android.widget.Toast;
  * <li>Stops itself if it doesn't have any process left to monitor.
  * </ol>
  * </ol>
+ *
+ * TODO: There are multiple threads involved.  Add synchronization accordingly.
  */
 public class BugreportProgressService extends Service {
     private static final String TAG = "BugreportProgressService";
@@ -122,10 +137,12 @@ public class BugreportProgressService extends Service {
     private static final String AUTHORITY = "com.android.shell";
 
     // External intents sent by dumpstate.
-    static final String INTENT_BUGREPORT_STARTED = "android.intent.action.BUGREPORT_STARTED";
-    static final String INTENT_BUGREPORT_FINISHED = "android.intent.action.BUGREPORT_FINISHED";
+    static final String INTENT_BUGREPORT_STARTED =
+            "com.android.internal.intent.action.BUGREPORT_STARTED";
+    static final String INTENT_BUGREPORT_FINISHED =
+            "com.android.internal.intent.action.BUGREPORT_FINISHED";
     static final String INTENT_REMOTE_BUGREPORT_FINISHED =
-            "android.intent.action.REMOTE_BUGREPORT_FINISHED";
+            "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
 
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
@@ -147,10 +164,9 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_INFO = "android.intent.extra.INFO";
 
     private static final int MSG_SERVICE_COMMAND = 1;
-    private static final int MSG_POLL = 2;
-    private static final int MSG_DELAYED_SCREENSHOT = 3;
-    private static final int MSG_SCREENSHOT_REQUEST = 4;
-    private static final int MSG_SCREENSHOT_RESPONSE = 5;
+    private static final int MSG_DELAYED_SCREENSHOT = 2;
+    private static final int MSG_SCREENSHOT_REQUEST = 3;
+    private static final int MSG_SCREENSHOT_RESPONSE = 4;
 
     // Passed to Message.obtain() when msg.arg2 is not used.
     private static final int UNUSED_ARG2 = -2;
@@ -159,6 +175,9 @@ public class BugreportProgressService extends Service {
     private static final int CAPPED_PROGRESS = 9900;
     private static final int CAPPED_MAX = 10000;
 
+    /** Show the progress log every this percent. */
+    private static final int LOG_PROGRESS_STEP = 10;
+
     /**
      * Delay before a screenshot is taken.
      * <p>
@@ -166,22 +185,15 @@ public class BugreportProgressService extends Service {
      */
     static final int SCREENSHOT_DELAY_SECONDS = 3;
 
-    /** Polling frequency, in milliseconds. */
-    static final long POLLING_FREQUENCY = 2 * DateUtils.SECOND_IN_MILLIS;
-
-    /** How long (in ms) a dumpstate process will be monitored if it didn't show progress. */
-    private static final long INACTIVITY_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
-
-    /** System properties used for monitoring progress. */
+    // TODO: will be gone once fully migrated to Binder
+    /** System properties used to communicate with dumpstate progress. */
     private static final String DUMPSTATE_PREFIX = "dumpstate.";
-    private static final String PROGRESS_SUFFIX = ".progress";
-    private static final String MAX_SUFFIX = ".max";
     private static final String NAME_SUFFIX = ".name";
 
     /** System property (and value) used to stop dumpstate. */
     // TODO: should call ActiveManager API instead
     private static final String CTL_STOP = "ctl.stop";
-    private static final String BUGREPORT_SERVICE = "bugreportplus";
+    private static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
      * Directory on Shell's data storage where screenshots will be stored.
@@ -190,11 +202,17 @@ public class BugreportProgressService extends Service {
      */
     private static final String SCREENSHOT_DIR = "bugreports";
 
+    private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
+
+    private final Object mLock = new Object();
+
     /** Managed dumpstate processes (keyed by id) */
-    private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();
+    private final SparseArray<DumpstateListener> mProcesses = new SparseArray<>();
 
     private Context mContext;
-    private ServiceHandler mMainHandler;
+
+    private Handler mMainThreadHandler;
+    private ServiceHandler mServiceHandler;
     private ScreenshotHandler mScreenshotHandler;
 
     private final BugreportInfoDialog mInfoDialog = new BugreportInfoDialog();
@@ -218,10 +236,13 @@ public class BugreportProgressService extends Service {
 
     private boolean mIsWatch;
 
+    private int mLastProgressPercent;
+
     @Override
     public void onCreate() {
         mContext = getApplicationContext();
-        mMainHandler = new ServiceHandler("BugreportProgressServiceMainThread");
+        mMainThreadHandler = new Handler(Looper.getMainLooper());
+        mServiceHandler = new ServiceHandler("BugreportProgressServiceMainThread");
         mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
 
         mScreenshotsDir = new File(getFilesDir(), SCREENSHOT_DIR);
@@ -234,6 +255,12 @@ public class BugreportProgressService extends Service {
         final Configuration conf = mContext.getResources().getConfiguration();
         mIsWatch = (conf.uiMode & Configuration.UI_MODE_TYPE_MASK) ==
                 Configuration.UI_MODE_TYPE_WATCH;
+        NotificationManager nm = NotificationManager.from(mContext);
+        nm.createNotificationChannel(
+                new NotificationChannel(NOTIFICATION_CHANNEL_ID,
+                        mContext.getString(R.string.bugreport_notification_channel),
+                        isTv(this) ? NotificationManager.IMPORTANCE_DEFAULT
+                                : NotificationManager.IMPORTANCE_LOW));
     }
 
     @Override
@@ -241,10 +268,10 @@ public class BugreportProgressService extends Service {
         Log.v(TAG, "onStartCommand(): " + dumpIntent(intent));
         if (intent != null) {
             // Handle it in a separate thread.
-            final Message msg = mMainHandler.obtainMessage();
+            final Message msg = mServiceHandler.obtainMessage();
             msg.what = MSG_SERVICE_COMMAND;
             msg.obj = intent;
-            mMainHandler.sendMessage(msg);
+            mServiceHandler.sendMessage(msg);
         }
 
         // If service is killed it cannot be recreated because it would not know which
@@ -259,7 +286,7 @@ public class BugreportProgressService extends Service {
 
     @Override
     public void onDestroy() {
-        mMainHandler.getLooper().quit();
+        mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
         super.onDestroy();
     }
@@ -268,14 +295,16 @@ public class BugreportProgressService extends Service {
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final int size = mProcesses.size();
         if (size == 0) {
-            writer.printf("No monitored processes");
+            writer.println("No monitored processes");
             return;
         }
-        writer.printf("Foreground id: %d\n\n", mForegroundId);
-        writer.printf("Monitored dumpstate processes\n");
-        writer.printf("-----------------------------\n");
+        writer.print("Foreground id: "); writer.println(mForegroundId);
+        writer.println("\n");
+        writer.println("Monitored dumpstate processes");
+        writer.println("-----------------------------");
         for (int i = 0; i < size; i++) {
-            writer.printf("%s\n", mProcesses.valueAt(i));
+            writer.print("#"); writer.println(i + 1);
+            writer.println(mProcesses.valueAt(i).info);
         }
     }
 
@@ -289,11 +318,6 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == MSG_POLL) {
-                poll();
-                return;
-            }
-
             if (msg.what == MSG_DELAYED_SCREENSHOT) {
                 takeScreenshot(msg.arg1, msg.arg2);
                 return;
@@ -340,7 +364,6 @@ public class BugreportProgressService extends Service {
                         stopSelfWhenDone();
                         return;
                     }
-                    poll();
                     break;
                 case INTENT_BUGREPORT_FINISHED:
                     if (id == 0) {
@@ -368,15 +391,6 @@ public class BugreportProgressService extends Service {
             return;
 
         }
-
-        private void poll() {
-            if (pollProgress()) {
-                // Keep polling...
-                sendEmptyMessageDelayed(MSG_POLL, POLLING_FREQUENCY);
-            } else {
-                Log.i(TAG, "Stopped polling");
-            }
-        }
     }
 
     /**
@@ -398,11 +412,12 @@ public class BugreportProgressService extends Service {
     }
 
     private BugreportInfo getInfo(int id) {
-        final BugreportInfo info = mProcesses.get(id);
-        if (info == null) {
+        final DumpstateListener listener = mProcesses.get(id);
+        if (listener == null) {
             Log.w(TAG, "Not monitoring process with ID " + id);
+            return null;
         }
-        return info;
+        return listener.info;
     }
 
     /**
@@ -434,9 +449,15 @@ public class BugreportProgressService extends Service {
             Log.w(TAG, "ID " + id + " already watched");
             return true;
         }
-        mProcesses.put(info.id, info);
-        updateProgress(info);
-        return true;
+        final DumpstateListener listener = new DumpstateListener(info);
+        mProcesses.put(info.id, listener);
+        if (listener.connect()) {
+            updateProgress(info);
+            return true;
+        } else {
+            Log.w(TAG, "not updating progress because it could not connect to dumpstate");
+            return false;
+        }
     }
 
     /**
@@ -504,11 +525,15 @@ public class BugreportProgressService extends Service {
             builder.setContentIntent(infoPendingIntent)
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
+        // Show a debug log, every LOG_PROGRESS_STEP percent.
+        final int progress = (info.progress * 100) / info.max;
 
-        if (DEBUG) {
-            Log.d(TAG, "Sending 'Progress' notification for id " + info.id + " (pid " + info.pid
-                    + "): " + percentageText);
+        if ((info.progress == 0) || (info.progress >= 100) ||
+                ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
+            Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
+        mLastProgressPercent = progress;
+
         sendForegroundabledNotification(info.id, builder.build());
     }
 
@@ -557,6 +582,7 @@ public class BugreportProgressService extends Service {
     private void cancel(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL);
         Log.v(TAG, "cancel: ID=" + id);
+        mInfoDialog.cancel();
         final BugreportInfo info = getInfo(id);
         if (info != null && !info.finished) {
             Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
@@ -567,96 +593,11 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Poll {@link SystemProperties} to get the progress on each monitored process.
-     *
-     * @return whether it should keep polling.
-     */
-    private boolean pollProgress() {
-        final int total = mProcesses.size();
-        if (total == 0) {
-            Log.d(TAG, "No process to poll progress.");
-        }
-        int activeProcesses = 0;
-        for (int i = 0; i < total; i++) {
-            final BugreportInfo info = mProcesses.valueAt(i);
-            if (info == null) {
-                Log.wtf(TAG, "pollProgress(): null info at index " + i + "(ID = "
-                        + mProcesses.keyAt(i) + ")");
-                continue;
-            }
-
-            final int pid = info.pid;
-            final int id = info.id;
-            if (info.finished) {
-                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid + " (id: " + id + ")");
-                continue;
-            }
-            activeProcesses++;
-            final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
-            info.realProgress = SystemProperties.getInt(progressKey, 0);
-            if (info.realProgress == 0) {
-                Log.v(TAG, "System property " + progressKey + " is not set yet");
-            }
-            final String maxKey = DUMPSTATE_PREFIX + pid + MAX_SUFFIX;
-            info.realMax = SystemProperties.getInt(maxKey, info.max);
-            if (info.realMax <= 0 ) {
-                Log.w(TAG, "Property " + maxKey + " is not positive: " + info.max);
-                continue;
-            }
-            /*
-             * Checks whether the progress changed in a way that should be displayed to the user:
-             * - info.progress / info.max represents the displayed progress
-             * - info.realProgress / info.realMax represents the real progress
-             * - since the real progress can decrease, the displayed progress is only updated if it
-             *   increases
-             * - the displayed progress is capped at a maximum (like 99%)
-             */
-            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
-            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
-            int max = info.realMax;
-            int progress = info.realProgress;
-
-            if (newPercentage > CAPPED_PROGRESS) {
-                progress = newPercentage = CAPPED_PROGRESS;
-                max = CAPPED_MAX;
-            }
-
-            if (newPercentage > oldPercentage) {
-                if (DEBUG) {
-                    if (progress != info.progress) {
-                        Log.v(TAG, "Updating progress for PID " + pid + "(id: " + id + ") from "
-                                + info.progress + " to " + progress);
-                    }
-                    if (max != info.max) {
-                        Log.v(TAG, "Updating max progress for PID " + pid + "(id: " + id + ") from "
-                                + info.max + " to " + max);
-                    }
-                }
-                info.progress = progress;
-                info.max = max;
-                info.lastUpdate = System.currentTimeMillis();
-                updateProgress(info);
-            } else {
-                long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
-                if (inactiveTime >= INACTIVITY_TIMEOUT) {
-                    Log.w(TAG, "No progress update for PID " + pid + " since "
-                            + info.getFormattedLastUpdate());
-                    stopProgress(info.id);
-                }
-            }
-        }
-        if (DEBUG) Log.v(TAG, "pollProgress() total=" + total + ", actives=" + activeProcesses);
-        return activeProcesses > 0;
-    }
-
-    /**
      * Fetches a {@link BugreportInfo} for a given process and launches a dialog where the user can
      * change its values.
      */
     private void launchBugreportInfoDialog(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS);
-        // Copy values so it doesn't lock mProcesses while UI is being updated
-        final String name, title, description;
         final BugreportInfo info = getInfo(id);
         if (info == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
@@ -670,7 +611,17 @@ public class BugreportProgressService extends Service {
         }
 
         collapseNotificationBar();
-        mInfoDialog.initialize(mContext, info);
+
+        // Dissmiss keyguard first.
+        final IWindowManager wm = IWindowManager.Stub
+                .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
+        try {
+            wm.dismissKeyguard(null);
+        } catch (Exception e) {
+            // ignore it
+        }
+
+        mMainThreadHandler.post(() -> mInfoDialog.initialize(mContext, info));
     }
 
     /**
@@ -709,11 +660,11 @@ public class BugreportProgressService extends Service {
     private void takeScreenshot(int id, int delay) {
         if (delay > 0) {
             Log.d(TAG, "Taking screenshot for " + id + " in " + delay + " seconds");
-            final Message msg = mMainHandler.obtainMessage();
+            final Message msg = mServiceHandler.obtainMessage();
             msg.what = MSG_DELAYED_SCREENSHOT;
             msg.arg1 = id;
             msg.arg2 = delay - 1;
-            mMainHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
+            mServiceHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
             return;
         }
 
@@ -737,7 +688,7 @@ public class BugreportProgressService extends Service {
         synchronized (BugreportProgressService.this) {
             mTakingScreenshot = flag;
             for (int i = 0; i < mProcesses.size(); i++) {
-                final BugreportInfo info = mProcesses.valueAt(i);
+                final BugreportInfo info = mProcesses.valueAt(i).info;
                 if (info.finished) {
                     Log.d(TAG, "Not updating progress for " + info.id + " while taking screenshot"
                             + " because share notification was already sent");
@@ -753,7 +704,7 @@ public class BugreportProgressService extends Service {
         boolean taken = takeScreenshot(mContext, screenshotFile);
         setTakingScreenshot(false);
 
-        Message.obtain(mMainHandler, MSG_SCREENSHOT_RESPONSE, requestMsg.arg1, taken ? 1 : 0,
+        Message.obtain(mServiceHandler, MSG_SCREENSHOT_RESPONSE, requestMsg.arg1, taken ? 1 : 0,
                 screenshotFile).sendToTarget();
     }
 
@@ -809,7 +760,7 @@ public class BugreportProgressService extends Service {
         final int total = mProcesses.size();
         if (total > 0) {
             for (int i = 0; i < total; i++) {
-                final BugreportInfo info = mProcesses.valueAt(i);
+                final BugreportInfo info = mProcesses.valueAt(i).info;
                 if (!info.finished) {
                     updateProgress(info);
                     break;
@@ -848,13 +799,13 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
             return;
         }
-        mInfoDialog.onBugreportFinished(id);
+        mInfoDialog.onBugreportFinished();
         BugreportInfo info = getInfo(id);
         if (info == null) {
             // Happens when BUGREPORT_FINISHED was received without a BUGREPORT_STARTED first.
             Log.v(TAG, "Creating info for untracked ID " + id);
             info = new BugreportInfo(mContext, id);
-            mProcesses.put(id, info);
+            mProcesses.put(id, new DumpstateListener(info));
         }
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
@@ -868,6 +819,17 @@ public class BugreportProgressService extends Service {
         final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
         if (screenshot != null) {
             info.addScreenshot(screenshot);
+        }
+
+        final String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        if (!TextUtils.isEmpty(shareTitle)) {
+            info.title = shareTitle;
+            final String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
+            if (!TextUtils.isEmpty(shareDescription)) {
+                info.shareDescription= shareDescription;
+            }
+            Log.d(TAG, "Bugreport title is " + info.title + ","
+                    + " shareDescription is " + info.shareDescription);
         }
         info.finished = true;
 
@@ -940,25 +902,40 @@ public class BugreportProgressService extends Service {
             .append(SystemProperties.get("ro.build.description"))
             .append("\nSerial number: ")
             .append(SystemProperties.get("ro.serialno"));
+        int descriptionLength = 0;
         if (!TextUtils.isEmpty(info.description)) {
             messageBody.append("\nDescription: ").append(info.description);
+            descriptionLength = info.description.length();
         }
         intent.putExtra(Intent.EXTRA_TEXT, messageBody.toString());
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
+        Log.d(TAG, "share intent: bureportUri=" + bugreportUri);
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
         for (File screenshot : info.screenshotFiles) {
             final Uri screenshotUri = getUri(context, screenshot);
+            Log.d(TAG, "share intent: screenshotUri=" + screenshotUri);
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
-        final Account sendToAccount = findSendToAccount(context);
+        final Pair<UserHandle, Account> sendToAccount = findSendToAccount(context,
+                SystemProperties.get("sendbug.preferred.domain"));
         if (sendToAccount != null) {
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { sendToAccount.name });
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { sendToAccount.second.name });
+
+            // TODO Open the chooser activity on work profile by default.
+            // If we just use startActivityAsUser(), then the launched app couldn't read
+            // attachments.
+            // We probably need to change ChooserActivity to take an extra argument for the
+            // default profile.
         }
+
+        // Log what was sent to the intent
+        Log.d(TAG, "share intent: EXTRA_SUBJECT=" + subject + ", EXTRA_TEXT=" + messageBody.length()
+                + " chars, description=" + descriptionLength + " chars");
 
         return intent;
     }
@@ -989,20 +966,39 @@ public class BugreportProgressService extends Service {
         }
 
         final Intent notifIntent;
+        boolean useChooser = true;
 
         // Send through warning dialog by default
         if (getWarningState(mContext, STATE_UNKNOWN) != STATE_HIDE) {
             notifIntent = buildWarningIntent(mContext, sendIntent);
+            // No need to show a chooser in this case.
+            useChooser = false;
         } else {
             notifIntent = sendIntent;
         }
         notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Send the share intent...
-        mContext.startActivity(notifIntent);
+        if (useChooser) {
+            sendShareIntent(mContext, notifIntent);
+        } else {
+            mContext.startActivity(notifIntent);
+        }
 
         // ... and stop watching this process.
         stopProgress(id);
+    }
+
+    static void sendShareIntent(Context context, Intent intent) {
+        final Intent chooserIntent = Intent.createChooser(intent,
+                context.getResources().getText(R.string.bugreport_intent_chooser_title));
+
+        // Since we may be launched behind lockscreen, make sure that ChooserActivity doesn't finish
+        // itself in onStop.
+        chooserIntent.putExtra(ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP, true);
+        // Starting the activity from a service.
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(chooserIntent);
     }
 
     /**
@@ -1019,10 +1015,20 @@ public class BugreportProgressService extends Service {
         shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = mContext.getString(R.string.bugreport_finished_title, info.id);
-        final String content = takingScreenshot ?
+        String content;
+        content = takingScreenshot ?
                 mContext.getString(R.string.bugreport_finished_pending_screenshot_text)
                 : mContext.getString(R.string.bugreport_finished_text);
+        final String title;
+        if (TextUtils.isEmpty(info.title)) {
+            title = mContext.getString(R.string.bugreport_finished_title, info.id);
+        } else {
+            title = info.title;
+            if (!TextUtils.isEmpty(info.shareDescription)) {
+                if(!takingScreenshot) content = info.shareDescription;
+            }
+        }
+
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
@@ -1060,13 +1066,16 @@ public class BugreportProgressService extends Service {
             sNotificationBundle.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                     context.getString(com.android.internal.R.string.android_system_label));
         }
-        return new Notification.Builder(context)
+        return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
                 .setCategory(Notification.CATEGORY_SYSTEM)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setSmallIcon(
+                        isTv(context) ? R.drawable.ic_bug_report_black_24dp
+                                : com.android.internal.R.drawable.stat_sys_adb)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+                        com.android.internal.R.color.system_notification_accent_color))
+                .extend(new Notification.TvExtender());
     }
 
     /**
@@ -1117,6 +1126,12 @@ public class BugreportProgressService extends Service {
      * description will be saved on {@code description.txt}.
      */
     private void addDetailsToZipFile(BugreportInfo info) {
+        synchronized (mLock) {
+            addDetailsToZipFileLocked(info);
+        }
+    }
+
+    private void addDetailsToZipFileLocked(BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
@@ -1198,44 +1213,52 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Find the best matching {@link Account} based on build properties.
+     * Find the best matching {@link Account} based on build properties.  If none found, returns
+     * the first account that looks like an email address.
      */
-    private static Account findSendToAccount(Context context) {
-        final AccountManager am = (AccountManager) context.getSystemService(
-                Context.ACCOUNT_SERVICE);
+    @VisibleForTesting
+    static Pair<UserHandle, Account> findSendToAccount(Context context, String preferredDomain) {
+        final UserManager um = context.getSystemService(UserManager.class);
+        final AccountManager am = context.getSystemService(AccountManager.class);
 
-        String preferredDomain = SystemProperties.get("sendbug.preferred.domain");
-        if (!preferredDomain.startsWith("@")) {
+        if (preferredDomain != null && !preferredDomain.startsWith("@")) {
             preferredDomain = "@" + preferredDomain;
         }
 
-        final Account[] accounts;
-        try {
-            accounts = am.getAccounts();
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Could not get accounts for preferred domain " + preferredDomain, e);
-            return null;
-        }
-        if (DEBUG) Log.d(TAG, "Number of accounts: " + accounts.length);
-        Account foundAccount = null;
-        for (Account account : accounts) {
-            if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
-                if (!preferredDomain.isEmpty()) {
-                    // if we have a preferred domain and it matches, return; otherwise keep
-                    // looking
-                    if (account.name.endsWith(preferredDomain)) {
-                        return account;
+        Pair<UserHandle, Account> first = null;
+
+        for (UserHandle user : um.getUserProfiles()) {
+            final Account[] accounts;
+            try {
+                accounts = am.getAccountsAsUser(user.getIdentifier());
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Could not get accounts for preferred domain " + preferredDomain
+                        + " for user " + user, e);
+                continue;
+            }
+            if (DEBUG) Log.d(TAG, "User: " + user + "  Number of accounts: " + accounts.length);
+            for (Account account : accounts) {
+                if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
+                    final Pair<UserHandle, Account> candidate = Pair.create(user, account);
+
+                    if (!TextUtils.isEmpty(preferredDomain)) {
+                        // if we have a preferred domain and it matches, return; otherwise keep
+                        // looking
+                        if (account.name.endsWith(preferredDomain)) {
+                            return candidate;
+                        }
+                        // if we don't have a preferred domain, just return since it looks like
+                        // an email address
                     } else {
-                        foundAccount = account;
+                        return candidate;
                     }
-                    // if we don't have a preferred domain, just return since it looks like
-                    // an email address
-                } else {
-                    return account;
+                    if (first == null) {
+                        first = candidate;
+                    }
                 }
             }
         }
-        return foundAccount;
+        return first;
     }
 
     static Uri getUri(Context context, File file) {
@@ -1272,6 +1295,7 @@ public class BugreportProgressService extends Service {
         addExtra(buffer, intent, EXTRA_BUGREPORT);
         addExtra(buffer, intent, EXTRA_SCREENSHOT);
         addExtra(buffer, intent, EXTRA_INFO);
+        addExtra(buffer, intent, EXTRA_TITLE);
 
         if (intent.hasExtra(EXTRA_ORIGINAL_INTENT)) {
             buffer.append(SHORT_EXTRA_ORIGINAL_INTENT).append(": ");
@@ -1326,14 +1350,17 @@ public class BugreportProgressService extends Service {
             return;
         }
         if (title != null && !title.equals(info.title)) {
+            Log.d(TAG, "updating bugreport title: " + title);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_TITLE_CHANGED);
         }
         info.title = title;
         if (description != null && !description.equals(info.description)) {
+            Log.d(TAG, "updating bugreport description: " + description.length() + " chars");
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED);
         }
         info.description = description;
         if (name != null && !name.equals(info.name)) {
+            Log.d(TAG, "updating bugreport name: " + name);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_NAME_CHANGED);
             info.name = name;
             updateProgress(info);
@@ -1358,7 +1385,6 @@ public class BugreportProgressService extends Service {
         if (bitmap == null) {
             return false;
         }
-        boolean status;
         try (final FileOutputStream fos = new FileOutputStream(path)) {
             if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)) {
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(150);
@@ -1373,6 +1399,10 @@ public class BugreportProgressService extends Service {
             bitmap.recycle();
         }
         return false;
+    }
+
+    private static boolean isTv(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     /**
@@ -1423,7 +1453,8 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
-        private void initialize(final Context context, BugreportInfo info) {
+        @MainThread
+        void initialize(final Context context, BugreportInfo info) {
             final String dialogTitle =
                     context.getString(R.string.bugreport_info_dialog_title, info.id);
             // First initializes singleton.
@@ -1450,7 +1481,7 @@ public class BugreportProgressService extends Service {
                 mDialog = new AlertDialog.Builder(context)
                         .setView(view)
                         .setTitle(dialogTitle)
-                        .setCancelable(false)
+                        .setCancelable(true)
                         .setPositiveButton(context.getString(R.string.save),
                                 null)
                         .setNegativeButton(context.getString(com.android.internal.R.string.cancel),
@@ -1478,6 +1509,7 @@ public class BugreportProgressService extends Service {
                 // Re-use view, but reset fields first.
                 mDialog.setTitle(dialogTitle);
                 mInfoName.setText(null);
+                mInfoName.setEnabled(true);
                 mInfoTitle.setText(null);
                 mInfoDescription.setText(null);
             }
@@ -1564,13 +1596,18 @@ public class BugreportProgressService extends Service {
          * <p>Once the bugreport is finished dumpstate has already generated the final files, so
          * changing the name would have no effect.
          */
-        private void onBugreportFinished(int id) {
+        void onBugreportFinished() {
             if (mInfoName != null) {
                 mInfoName.setEnabled(false);
                 mInfoName.setText(mSavedName);
             }
         }
 
+        void cancel() {
+            if (mDialog != null) {
+                mDialog.cancel();
+            }
+        }
     }
 
     /**
@@ -1666,6 +1703,11 @@ public class BugreportProgressService extends Service {
         int screenshotCounter;
 
         /**
+         * Descriptive text that will be shown to the user in the notification message.
+         */
+        String shareDescription;
+
+        /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
         BugreportInfo(Context context, int id, int pid, String name, int max) {
@@ -1673,7 +1715,7 @@ public class BugreportProgressService extends Service {
             this.id = id;
             this.pid = pid;
             this.name = name;
-            this.max = max;
+            this.max = this.realMax = max;
         }
 
         /**
@@ -1739,14 +1781,35 @@ public class BugreportProgressService extends Service {
         public String toString() {
             final float percent = ((float) progress * 100 / max);
             final float realPercent = ((float) realProgress * 100 / realMax);
-            return "id: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
-                    + "\n\ttitle: " + title + "\n\tdescription: " + description
-                    + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
-                    + "\n\tprogress: " + progress + "/" + max + " (" + percent + ")"
-                    + "\n\treal progress: " + realProgress + "/" + realMax + " (" + realPercent + ")"
-                    + "\n\tlast_update: " + getFormattedLastUpdate()
-                    + "\naddingDetailsToZip: " + addingDetailsToZip
-                    + " addedDetailsToZip: " + addedDetailsToZip;
+
+            final StringBuilder builder = new StringBuilder()
+                    .append("\tid: ").append(id)
+                    .append(", pid: ").append(pid)
+                    .append(", name: ").append(name)
+                    .append(", finished: ").append(finished)
+                    .append("\n\ttitle: ").append(title)
+                    .append("\n\tdescription: ");
+            if (description == null) {
+                builder.append("null");
+            } else {
+                if (TextUtils.getTrimmedLength(description) == 0) {
+                    builder.append("empty ");
+                }
+                builder.append("(").append(description.length()).append(" chars)");
+            }
+
+            return builder
+                .append("\n\tfile: ").append(bugreportFile)
+                .append("\n\tscreenshots: ").append(screenshotFiles)
+                .append("\n\tprogress: ").append(progress).append("/").append(max)
+                .append(" (").append(percent).append(")")
+                .append("\n\treal progress: ").append(realProgress).append("/").append(realMax)
+                .append(" (").append(realPercent).append(")")
+                .append("\n\tlast_update: ").append(getFormattedLastUpdate())
+                .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
+                .append(" addedDetailsToZip: ").append(addedDetailsToZip)
+                .append("\n\tshareDescription: ").append(shareDescription)
+                .toString();
         }
 
         // Parcelable contract
@@ -1772,6 +1835,7 @@ public class BugreportProgressService extends Service {
 
             finished = in.readInt() == 1;
             screenshotCounter = in.readInt();
+            shareDescription = in.readString();
         }
 
         @Override
@@ -1796,6 +1860,7 @@ public class BugreportProgressService extends Service {
 
             dest.writeInt(finished ? 1 : 0);
             dest.writeInt(screenshotCounter);
+            dest.writeString(shareDescription);
         }
 
         @Override
@@ -1812,16 +1877,118 @@ public class BugreportProgressService extends Service {
             return path == null ? null : new File(path);
         }
 
+        @SuppressWarnings("unused")
         public static final Parcelable.Creator<BugreportInfo> CREATOR =
                 new Parcelable.Creator<BugreportInfo>() {
+            @Override
             public BugreportInfo createFromParcel(Parcel source) {
                 return new BugreportInfo(source);
             }
 
+            @Override
             public BugreportInfo[] newArray(int size) {
                 return new BugreportInfo[size];
             }
         };
 
+    }
+
+    private final class DumpstateListener extends IDumpstateListener.Stub
+        implements DeathRecipient {
+
+        private final BugreportInfo info;
+        private IDumpstateToken token;
+
+        DumpstateListener(BugreportInfo info) {
+            this.info = info;
+        }
+
+        /**
+         * Connects to the {@code dumpstate} binder to receive updates.
+         */
+        boolean connect() {
+            if (token != null) {
+                Log.d(TAG, "connect(): " + info.id + " already connected");
+                return true;
+            }
+            final IBinder service = ServiceManager.getService("dumpstate");
+            if (service == null) {
+                Log.d(TAG, "dumpstate service not bound yet");
+                return true;
+            }
+            final IDumpstate dumpstate = IDumpstate.Stub.asInterface(service);
+            try {
+                token = dumpstate.setListener("Shell", this);
+                if (token != null) {
+                    token.asBinder().linkToDeath(this, 0);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Could not set dumpstate listener: " + e);
+            }
+            return token != null;
+        }
+
+        @Override
+        public void binderDied() {
+            if (!info.finished) {
+                // TODO: linkToDeath() might be called BEFORE Shell received the
+                // BUGREPORT_FINISHED broadcast, in which case the statements below
+                // spam logcat (but are harmless).
+                // The right, long-term solution is to provide an onFinished() callback
+                // on IDumpstateListener and call it instead of using a broadcast.
+                Log.w(TAG, "Dumpstate process died:\n" + info);
+                stopProgress(info.id);
+            }
+            token.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void onProgressUpdated(int progress) throws RemoteException {
+            /*
+             * Checks whether the progress changed in a way that should be displayed to the user:
+             * - info.progress / info.max represents the displayed progress
+             * - info.realProgress / info.realMax represents the real progress
+             * - since the real progress can decrease, the displayed progress is only updated if it
+             *   increases
+             * - the displayed progress is capped at a maximum (like 99%)
+             */
+            info.realProgress = progress;
+            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
+            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
+            int max = info.realMax;
+
+            if (newPercentage > CAPPED_PROGRESS) {
+                progress = newPercentage = CAPPED_PROGRESS;
+                max = CAPPED_MAX;
+            }
+
+            if (newPercentage > oldPercentage) {
+                if (DEBUG) {
+                    if (progress != info.progress) {
+                        Log.v(TAG, "Updating progress for PID " + info.pid + "(id: " + info.id
+                                + ") from " + info.progress + " to " + progress);
+                    }
+                    if (max != info.max) {
+                        Log.v(TAG, "Updating max progress for PID " + info.pid + "(id: " + info.id
+                                + ") from " + info.max + " to " + max);
+                    }
+                }
+                info.progress = progress;
+                info.max = max;
+                info.lastUpdate = System.currentTimeMillis();
+
+                updateProgress(info);
+            }
+        }
+
+        @Override
+        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
+            Log.d(TAG, "onMaxProgressUpdated: " + maxProgress);
+            info.realMax = maxProgress;
+        }
+
+        public void dump(String prefix, PrintWriter pw) {
+            pw.print(prefix); pw.print("token: "); pw.println(token);
+        }
     }
 }

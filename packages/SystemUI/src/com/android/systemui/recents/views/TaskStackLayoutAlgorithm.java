@@ -39,7 +39,6 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -221,12 +220,11 @@ public class TaskStackLayoutAlgorithm {
     }
 
     // A report of the visibility state of the stack
-    public class VisibilityReport {
+    public static class VisibilityReport {
         public int numVisibleTasks;
         public int numVisibleThumbnails;
 
-        /** Package level ctor */
-        VisibilityReport(int tasks, int thumbnails) {
+        public VisibilityReport(int tasks, int thumbnails) {
             numVisibleTasks = tasks;
             numVisibleThumbnails = thumbnails;
         }
@@ -506,9 +504,9 @@ public class TaskStackLayoutAlgorithm {
      * Computes the minimum and maximum scroll progress values and the progress values for each task
      * in the stack.
      */
-    void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet) {
+    void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet,
+            RecentsActivityLaunchState launchState) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         // Clear the progress map
         mTaskIndexMap.clear();
@@ -564,7 +562,8 @@ public class TaskStackLayoutAlgorithm {
             mMinScrollP = 0;
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
                     Math.max(0, mFocusedRange.getAbsoluteX(maxBottomNormX)));
-            if (launchState.launchedFromHome) {
+            if (launchState.launchedFromHome || launchState.launchedFromPipApp
+                    || launchState.launchedWithNextPipApp) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
@@ -583,8 +582,8 @@ public class TaskStackLayoutAlgorithm {
             mMinScrollP = 0;
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
-            boolean scrollToFront = launchState.launchedFromHome ||
-                    launchState.launchedViaDockGesture;
+            boolean scrollToFront = launchState.launchedFromHome || launchState.launchedFromPipApp
+                    || launchState.launchedWithNextPipApp || launchState.launchedViaDockGesture;
             if (launchState.launchedFromBlacklistedApp) {
                 mInitialScrollP = mMaxScrollP;
             } else if (launchState.launchedWithAltTab) {
@@ -610,6 +609,8 @@ public class TaskStackLayoutAlgorithm {
         mTaskIndexOverrideMap.clear();
 
         boolean scrollToFront = launchState.launchedFromHome ||
+                launchState.launchedFromPipApp ||
+                launchState.launchedWithNextPipApp ||
                 launchState.launchedFromBlacklistedApp ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
@@ -789,6 +790,10 @@ public class TaskStackLayoutAlgorithm {
      * stack scroll.  Requires that update() is called first.
      */
     public VisibilityReport computeStackVisibilityReport(ArrayList<Task> tasks) {
+        if (useGridLayout()) {
+            return mTaskGridLayoutAlgorithm.computeStackVisibilityReport(tasks);
+        }
+
         // Ensure minimum visibility count
         if (tasks.size() <= 1) {
             return new VisibilityReport(1, 1);
@@ -796,8 +801,8 @@ public class TaskStackLayoutAlgorithm {
 
         // Quick return when there are no stack tasks
         if (mNumStackTasks == 0) {
-            return new VisibilityReport(Math.max(mNumFreeformTasks, 1),
-                    Math.max(mNumFreeformTasks, 1));
+            return new VisibilityReport(mNumFreeformTasks > 0 ? Math.max(mNumFreeformTasks, 1) : 0,
+                    mNumFreeformTasks > 0 ? Math.max(mNumFreeformTasks, 1) : 0);
         }
 
         // Otherwise, walk backwards in the stack and count the number of tasks and visible
@@ -807,8 +812,8 @@ public class TaskStackLayoutAlgorithm {
         currentRange.offset(mInitialScrollP);
         int taskBarHeight = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_header_height);
-        int numVisibleTasks = Math.max(mNumFreeformTasks, 1);
-        int numVisibleThumbnails = Math.max(mNumFreeformTasks, 1);
+        int numVisibleTasks = mNumFreeformTasks > 0 ? Math.max(mNumFreeformTasks, 1) : 0;
+        int numVisibleThumbnails = mNumFreeformTasks > 0 ? Math.max(mNumFreeformTasks, 0) : 0;
         float prevScreenY = Integer.MAX_VALUE;
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
@@ -839,15 +844,15 @@ public class TaskStackLayoutAlgorithm {
                     // Once we hit the next front most task that does not have a visible thumbnail,
                     // walk through remaining visible set
                     for (int j = i; j >= 0; j--) {
-                        numVisibleTasks++;
                         taskProgress = getStackScrollForTask(tasks.get(j));
                         if (!currentRange.isInRange(taskProgress)) {
-                            continue;
+                            break;
                         }
+                        numVisibleTasks++;
                     }
                     break;
                 }
-            } else if (!isFrontMostTaskInGroup) {
+            } else {
                 // Affiliated task, no thumbnail
                 numVisibleTasks++;
             }

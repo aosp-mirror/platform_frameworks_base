@@ -43,7 +43,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView lv = (ListView) findViewById(android.R.id.list);
+        ListView lv = findViewById(android.R.id.list);
         lv.setDrawSelectorOnTop(true);
         lv.setAdapter(new SimpleAdapter(this, SAMPLES,
                 R.layout.item_layout, new String[] { KEY_NAME },
@@ -55,7 +55,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        ListView lv = (ListView) findViewById(android.R.id.list);
+        ListView lv = findViewById(android.R.id.list);
         for (int i = 0; i < lv.getChildCount(); i++) {
             lv.getChildAt(i).animate().translationY(0).setDuration(DURATION);
         }

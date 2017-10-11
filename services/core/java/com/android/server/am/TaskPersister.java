@@ -54,6 +54,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+
 public class TaskPersister {
     static final String TAG = "TaskPersister";
     static final boolean DEBUG = false;
@@ -73,9 +78,8 @@ public class TaskPersister {
     /** Special value for mWriteTime to mean don't wait, just write */
     private static final long FLUSH_QUEUE = -1;
 
-    private static final String RECENTS_FILENAME = "_task";
     private static final String TASKS_DIRNAME = "recent_tasks";
-    private static final String TASK_EXTENSION = ".xml";
+    private static final String TASK_FILENAME_SUFFIX = "_task.xml";
     private static final String IMAGES_DIRNAME = "recent_images";
     private static final String PERSISTED_TASK_IDS_FILENAME = "persisted_taskIds.txt";
     static final String IMAGE_EXTENSION = ".png";
@@ -407,7 +411,7 @@ public class TaskPersister {
         return null;
     }
 
-    List<TaskRecord> restoreTasksForUserLocked(final int userId) {
+    List<TaskRecord> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
@@ -425,6 +429,24 @@ public class TaskPersister {
                 Slog.d(TAG, "restoreTasksForUserLocked: userId=" + userId
                         + ", taskFile=" + taskFile.getName());
             }
+
+            if (!taskFile.getName().endsWith(TASK_FILENAME_SUFFIX)) {
+                continue;
+            }
+            try {
+                final int taskId = Integer.parseInt(taskFile.getName().substring(
+                        0 /* beginIndex */,
+                        taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
+                if (preaddedTasks.get(taskId, false)) {
+                    Slog.w(TAG, "Task #" + taskId +
+                            " has already been created so we don't restore again");
+                    continue;
+                }
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Unexpected task file name", e);
+                continue;
+            }
+
             BufferedReader reader = null;
             boolean deleteFile = false;
             try {
@@ -450,7 +472,8 @@ public class TaskPersister {
 
                                 final int taskId = task.taskId;
                                 if (mStackSupervisor.anyTaskForIdLocked(taskId,
-                                        /* restoreFromRecents= */ false, 0) != null) {
+                                        MATCH_TASK_IN_STACKS_OR_RECENT_TASKS,
+                                        INVALID_STACK_ID) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
                                 } else if (userId != task.userId) {
@@ -639,8 +662,9 @@ public class TaskPersister {
                             final TaskRecord task = mRecentTasks.get(taskNdx);
                             if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task +
                                     " persistable=" + task.isPersistable);
+                            final ActivityStack stack = task.getStack();
                             if ((task.isPersistable || task.inRecents)
-                                    && (task.stack == null || !task.stack.isHomeStack())) {
+                                    && (stack == null || !stack.isHomeOrRecentsStack())) {
                                 if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                                 persistentTaskIds.add(task.taskId);
                             } else {
@@ -648,6 +672,8 @@ public class TaskPersister {
                                         "omitting from persistentTaskIds task=" + task);
                             }
                         }
+                        mService.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
+                                mRecentTasks.usersWithRecentsLoadedLocked());
                     }
                     removeObsoleteFiles(persistentTaskIds);
                 }
@@ -735,13 +761,11 @@ public class TaskPersister {
                         try {
                             atomicFile = new AtomicFile(new File(
                                     getUserTasksDir(task.userId),
-                                    String.valueOf(task.taskId) + RECENTS_FILENAME
-                                    + TASK_EXTENSION));
+                                    String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
                             file = atomicFile.startWrite();
                             file.write(stringWriter.toString().getBytes());
                             file.write('\n');
                             atomicFile.finishWrite(file);
-
                         } catch (IOException e) {
                             if (file != null) {
                                 atomicFile.failWrite(file);

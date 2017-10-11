@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.IntDef;
-import android.view.Window;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -133,6 +132,26 @@ public final class FrameMetrics {
      */
     public static final int FIRST_DRAW_FRAME = 9;
 
+    /**
+     * Metric identifier for the timestamp of the intended vsync for this frame.
+     * <p>
+     * The intended start point for the frame. If this value is different from
+     * {@link #VSYNC_TIMESTAMP}, there was work occurring on the UI thread that
+     * prevented it from responding to the vsync signal in a timely fashion.
+     * </p>
+     */
+    public static final int INTENDED_VSYNC_TIMESTAMP = 10;
+
+    /**
+     * Metric identifier for the timestamp of the actual vsync for this frame.
+     * <p>
+     * The time value that was used in all the vsync listeners and drawing for
+     * the frame (Choreographer frame callbacks, animations,
+     * {@link View#getDrawingTime()}, etc…)
+     * </p>
+     */
+    public static final int VSYNC_TIMESTAMP = 11;
+
     private static final int FRAME_INFO_FLAG_FIRST_DRAW = 1 << 0;
 
     /**
@@ -152,6 +171,8 @@ public final class FrameMetrics {
             SWAP_BUFFERS_DURATION,
             TOTAL_DURATION,
             FIRST_DRAW_FRAME,
+            INTENDED_VSYNC_TIMESTAMP,
+            VSYNC_TIMESTAMP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Metric {}
@@ -262,7 +283,7 @@ public final class FrameMetrics {
      * @return the value of the metric or -1 if it is not available.
      */
     public long getMetric(@Metric int id) {
-        if (id < UNKNOWN_DELAY_DURATION || id > FIRST_DRAW_FRAME) {
+        if (id < UNKNOWN_DELAY_DURATION || id > VSYNC_TIMESTAMP) {
             return -1;
         }
 
@@ -272,6 +293,10 @@ public final class FrameMetrics {
 
         if (id == FIRST_DRAW_FRAME) {
             return (mTimingData[Index.FLAGS] & FRAME_INFO_FLAG_FIRST_DRAW) != 0 ? 1 : 0;
+        } else if (id == INTENDED_VSYNC_TIMESTAMP) {
+            return mTimingData[Index.INTENDED_VSYNC];
+        } else if (id == VSYNC_TIMESTAMP) {
+            return mTimingData[Index.VSYNC];
         }
 
         int durationsIdx = 2 * id;

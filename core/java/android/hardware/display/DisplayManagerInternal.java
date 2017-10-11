@@ -19,6 +19,8 @@ package android.hardware.display;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.util.IntArray;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -100,6 +102,16 @@ public abstract class DisplayManagerInternal {
             int displayId, DisplayInfo info);
 
     /**
+     * Get current display info without override from WindowManager.
+     * Current implementation of LogicalDisplay#getDisplayInfoLocked() always returns display info
+     * with overrides from WM if set. This method can be used for getting real display size without
+     * overrides to determine if real changes to display metrics happened.
+     * @param displayId Id of the target display.
+     * @param outInfo {@link DisplayInfo} to fill.
+     */
+    public abstract void getNonOverrideDisplayInfo(int displayId, DisplayInfo outInfo);
+
+    /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
      */
@@ -145,6 +157,21 @@ public abstract class DisplayManagerInternal {
      * @param y The Y offset by which to shift the contents of the display.
      */
     public abstract void setDisplayOffsets(int displayId, int x, int y);
+
+    /**
+     * Provide a list of UIDs that are present on the display and are allowed to access it.
+     *
+     * @param displayAccessUIDs Mapping displayId -> int array of UIDs.
+     */
+    public abstract void setDisplayAccessUIDs(SparseArray<IntArray> displayAccessUIDs);
+
+    /**
+     * Check if specified UID's content is present on display and should be granted access to it.
+     *
+     * @param uid UID to be checked.
+     * @param displayId id of the display where presence of the content is checked.
+     * */
+    public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
 
     /**
      * Describes the requested power state of the display.
@@ -196,6 +223,10 @@ public abstract class DisplayManagerInternal {
         // If true, scales the brightness to half of desired.
         public boolean lowPowerMode;
 
+        // The factor to adjust the screen brightness in low power mode in the range
+        // 0 (screen off) to 1 (no change)
+        public float screenLowPowerBrightnessFactor;
+
         // If true, applies a brightness boost.
         public boolean boostScreenBrightness;
 
@@ -218,6 +249,7 @@ public abstract class DisplayManagerInternal {
             useProximitySensor = false;
             screenBrightness = PowerManager.BRIGHTNESS_ON;
             screenAutoBrightnessAdjustment = 0.0f;
+            screenLowPowerBrightnessFactor = 0.5f;
             useAutoBrightness = false;
             blockScreenOn = false;
             dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
@@ -241,6 +273,7 @@ public abstract class DisplayManagerInternal {
             useProximitySensor = other.useProximitySensor;
             screenBrightness = other.screenBrightness;
             screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
+            screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             brightnessSetByUser = other.brightnessSetByUser;
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
@@ -262,6 +295,8 @@ public abstract class DisplayManagerInternal {
                     && useProximitySensor == other.useProximitySensor
                     && screenBrightness == other.screenBrightness
                     && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
+                    && screenLowPowerBrightnessFactor
+                    == other.screenLowPowerBrightnessFactor
                     && brightnessSetByUser == other.brightnessSetByUser
                     && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
@@ -282,6 +317,7 @@ public abstract class DisplayManagerInternal {
                     + ", useProximitySensor=" + useProximitySensor
                     + ", screenBrightness=" + screenBrightness
                     + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
+                    + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor
                     + ", brightnessSetByUser=" + brightnessSetByUser
                     + ", useAutoBrightness=" + useAutoBrightness
                     + ", blockScreenOn=" + blockScreenOn

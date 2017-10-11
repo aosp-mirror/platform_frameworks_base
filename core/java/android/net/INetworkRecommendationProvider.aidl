@@ -17,28 +17,12 @@
 package android.net;
 
 import android.net.NetworkKey;
-import android.net.RecommendationRequest;
-import android.os.IRemoteCallback;
 
 /**
  * The service responsible for answering network recommendation requests.
  * @hide
  */
 oneway interface INetworkRecommendationProvider {
-
-    /**
-     * Request a recommendation for the best network to connect to
-     * taking into account the inputs from the {@link RecommendationRequest}.
-     *
-     * @param request a {@link RecommendationRequest} instance containing the details of the request
-     * @param callback a {@link IRemoteCallback} instance to invoke when the recommendation
-     *                 is available
-     * @param sequence an internal number used for tracking the request
-     * @hide
-     */
-    void requestRecommendation(in RecommendationRequest request,
-                               in IRemoteCallback callback,
-                               int sequence);
 
     /**
      * Request scoring for networks.

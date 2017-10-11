@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
@@ -37,15 +38,21 @@ import java.util.List;
 interface ILauncherApps {
     void addOnAppsChangedListener(String callingPackage, in IOnAppsChangedListener listener);
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
-    ParceledListSlice getLauncherActivities(String packageName, in UserHandle user);
-    ActivityInfo resolveActivity(in ComponentName component, in UserHandle user);
-    void startActivityAsUser(in ComponentName component, in Rect sourceBounds,
+    ParceledListSlice getLauncherActivities(
+            String callingPackage, String packageName, in UserHandle user);
+    ActivityInfo resolveActivity(
+            String callingPackage, in ComponentName component, in UserHandle user);
+    void startActivityAsUser(String callingPackage,
+            in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    void showAppDetailsAsUser(in ComponentName component, in Rect sourceBounds,
+    void showAppDetailsAsUser(
+            String callingPackage, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    boolean isPackageEnabled(String packageName, in UserHandle user);
-    boolean isActivityEnabled(in ComponentName component, in UserHandle user);
-    ApplicationInfo getApplicationInfo(String packageName, int flags, in UserHandle user);
+    boolean isPackageEnabled(String callingPackage, String packageName, in UserHandle user);
+    boolean isActivityEnabled(
+            String callingPackage, in ComponentName component, in UserHandle user);
+    ApplicationInfo getApplicationInfo(
+            String callingPackage, String packageName, int flags, in UserHandle user);
 
     ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
             in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);
@@ -60,4 +67,9 @@ interface ILauncherApps {
             int userId);
 
     boolean hasShortcutHostPermission(String callingPackage);
+
+    ParceledListSlice getShortcutConfigActivities(
+            String callingPackage, String packageName, in UserHandle user);
+    IntentSender getShortcutConfigActivityIntent(String callingPackage, in ComponentName component,
+            in UserHandle user);
 }

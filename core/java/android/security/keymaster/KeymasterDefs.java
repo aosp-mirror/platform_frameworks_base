@@ -83,6 +83,14 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ROOT_OF_TRUST = KM_BYTES | 704;
     public static final int KM_TAG_UNIQUE_ID = KM_BYTES | 707;
     public static final int KM_TAG_ATTESTATION_CHALLENGE = KM_BYTES | 708;
+    public static final int KM_TAG_ATTESTATION_ID_BRAND = KM_BYTES | 710;
+    public static final int KM_TAG_ATTESTATION_ID_DEVICE = KM_BYTES | 711;
+    public static final int KM_TAG_ATTESTATION_ID_PRODUCT = KM_BYTES | 712;
+    public static final int KM_TAG_ATTESTATION_ID_SERIAL = KM_BYTES | 713;
+    public static final int KM_TAG_ATTESTATION_ID_IMEI = KM_BYTES | 714;
+    public static final int KM_TAG_ATTESTATION_ID_MEID = KM_BYTES | 715;
+    public static final int KM_TAG_ATTESTATION_ID_MANUFACTURER = KM_BYTES | 716;
+    public static final int KM_TAG_ATTESTATION_ID_MODEL = KM_BYTES | 717;
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
@@ -202,6 +210,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_INVALID_MAC_LENGTH = -57;
     public static final int KM_ERROR_MISSING_MIN_MAC_LENGTH = -58;
     public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH = -59;
+    public static final int KM_ERROR_CANNOT_ATTEST_IDS = -66;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
@@ -247,6 +256,7 @@ public final class KeymasterDefs {
                 "Caller-provided IV not permitted");
         sErrorCodeToString.put(KM_ERROR_INVALID_MAC_LENGTH,
                 "Invalid MAC or authentication tag length");
+        sErrorCodeToString.put(KM_ERROR_CANNOT_ATTEST_IDS, "Unable to attest device ids");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }

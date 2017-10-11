@@ -58,8 +58,8 @@ interface IInputMethodManager {
     InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken, int controlFlags,
-            int softInputMode, int windowFlags, in EditorInfo attribute,
-            IInputContext inputContext,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
+            int windowFlags, in EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
@@ -70,7 +70,8 @@ interface IInputMethodManager {
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
-    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
+    void setImeWindowStatus(in IBinder token, in IBinder startInputToken, int vis,
+            int backDisposition);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
@@ -85,6 +86,8 @@ interface IInputMethodManager {
 
     IInputContentUriToken createInputContentUriToken(in IBinder token, in Uri contentUri,
             in String packageName);
+
+    void reportFullscreenMode(in IBinder token, boolean fullscreen);
 
     oneway void notifyUserAction(int sequenceNumber);
 }

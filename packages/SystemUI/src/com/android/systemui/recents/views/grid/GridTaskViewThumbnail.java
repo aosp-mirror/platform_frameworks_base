@@ -28,7 +28,6 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
 
     private Path mThumbnailOutline;
     private Path mRestBackgroundOutline;
-    private Path mFullBackgroundOutline;
     // True if either this view's size or thumbnail scale has changed and mThumbnailOutline should
     // be updated.
     private boolean mUpdateThumbnailOutline = true;
@@ -64,9 +63,9 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
     /**
      * Updates the scale of the bitmap relative to this view.
      */
-    public void updateThumbnailScale() {
+    public void updateThumbnailMatrix() {
         mUpdateThumbnailOutline = true;
-        super.updateThumbnailScale();
+        super.updateThumbnailMatrix();
     }
 
     private void updateThumbnailOutline() {
@@ -145,10 +144,7 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
                         90, 90, false); // F
                 mRestBackgroundOutline.lineTo(l, t); // A
                 mRestBackgroundOutline.close();
-
             }
-        } else {
-            mFullBackgroundOutline = mThumbnailOutline;
         }
     }
 
@@ -167,7 +163,10 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
             updateThumbnailOutline();
             mUpdateThumbnailOutline = false;
         }
-        if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+
+        if (mUserLocked) {
+            canvas.drawPath(mThumbnailOutline, mLockedPaint);
+        } else if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
             // Draw the background, there will be some small overdraw with the thumbnail
             if (thumbnailWidth < viewWidth) {
                 // Portrait thumbnail on a landscape task view
@@ -177,9 +176,9 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
                 // Landscape thumbnail on a portrait task view
                 canvas.drawPath(mRestBackgroundOutline, mBgFillPaint);
             }
-            canvas.drawPath(mThumbnailOutline, mDrawPaint);
+            canvas.drawPath(mThumbnailOutline, getDrawPaint());
         } else {
-            canvas.drawPath(mFullBackgroundOutline, mBgFillPaint);
+            canvas.drawPath(mThumbnailOutline, mBgFillPaint);
         }
     }
 }

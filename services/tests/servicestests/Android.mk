@@ -12,21 +12,29 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    easymocklib \
     frameworks-base-testutils \
+    services.accessibility \
+    services.appwidget \
     services.core \
     services.devicepolicy \
     services.net \
+    services.retaildemo \
     services.usage \
     guava \
     android-support-test \
-    mockito-target \
+    mockito-target-minus-junit4 \
+    platform-test-annotations \
     ShortcutManagerTestUtils \
     truth-prebuilt
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
+
+LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl
+
+LOCAL_JAVA_LIBRARIES := android.test.mock legacy-android-test
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
 
@@ -47,9 +55,9 @@ LOCAL_JNI_SHARED_LIBRARIES := \
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
-# Code coverage puts us over the dex limit, so enable multi-dex for coverage-enabled builds
-ifeq (true,$(EMMA_INSTRUMENT))
 LOCAL_JACK_FLAGS := --multi-dex native
-endif # EMMA_INSTRUMENT_STATIC
+LOCAL_DX_FLAGS := --multi-dex
+
+LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
 
 include $(BUILD_PACKAGE)

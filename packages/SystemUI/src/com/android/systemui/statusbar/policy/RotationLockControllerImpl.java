@@ -42,12 +42,12 @@ public final class RotationLockControllerImpl implements RotationLockController 
         setListening(true);
     }
 
-    public void addRotationLockControllerCallback(RotationLockControllerCallback callback) {
+    public void addCallback(RotationLockControllerCallback callback) {
         mCallbacks.add(callback);
         notifyChanged(callback);
     }
 
-    public void removeRotationLockControllerCallback(RotationLockControllerCallback callback) {
+    public void removeCallback(RotationLockControllerCallback callback) {
         mCallbacks.remove(callback);
     }
 

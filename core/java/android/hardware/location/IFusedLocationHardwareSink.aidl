@@ -24,7 +24,7 @@ import android.location.Location;
  *
  * @hide
  */
-interface IFusedLocationHardwareSink {
+oneway interface IFusedLocationHardwareSink {
     /**
      * Event generated when a batch of location information is available.
      *

@@ -17,16 +17,17 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+
+import com.android.internal.widget.CachingIconView;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
-    public static final int NO_COLOR = -1;
+    public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private View mAppName;
@@ -45,7 +46,7 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
-    private View mIcon;
+    private CachingIconView mIcon;
     private View mProfileBadge;
     private View mInfo;
     private int mIconColor;
@@ -64,33 +65,7 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
     };
-    final AccessibilityDelegate mExpandDelegate = new AccessibilityDelegate() {
-
-        @Override
-        public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            if (super.performAccessibilityAction(host, action, args)) {
-                return true;
-            }
-            if (action == AccessibilityNodeInfo.ACTION_COLLAPSE
-                    || action == AccessibilityNodeInfo.ACTION_EXPAND) {
-                mExpandClickListener.onClick(mExpandButton);
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
-            super.onInitializeAccessibilityNodeInfo(host, info);
-            // Avoid that the button description is also spoken
-            info.setClassName(getClass().getName());
-            if (mExpanded) {
-                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
-            } else {
-                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
-            }
-        }
-    };
+    private boolean mAcceptAllTouches;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -119,10 +94,7 @@ public class NotificationHeaderView extends ViewGroup {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
-        mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
-        if (mExpandButton != null) {
-            mExpandButton.setAccessibilityDelegate(mExpandDelegate);
-        }
+        mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
     }
@@ -291,13 +263,19 @@ public class NotificationHeaderView extends ViewGroup {
 
     private void updateExpandButton() {
         int drawableId;
+        int contentDescriptionId;
         if (mExpanded) {
             drawableId = com.android.internal.R.drawable.ic_collapse_notification;
+            contentDescriptionId
+                    = com.android.internal.R.string.expand_button_content_description_expanded;
         } else {
             drawableId = com.android.internal.R.drawable.ic_expand_notification;
+            contentDescriptionId
+                    = com.android.internal.R.string.expand_button_content_description_collapsed;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
         mExpandButton.setColorFilter(mOriginalNotificationColor);
+        mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
@@ -309,6 +287,10 @@ public class NotificationHeaderView extends ViewGroup {
 
     public View getWorkProfileIcon() {
         return mProfileBadge;
+    }
+
+    public CachingIconView getIcon() {
+        return mIcon;
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {
@@ -367,6 +349,8 @@ public class NotificationHeaderView extends ViewGroup {
                 case MotionEvent.ACTION_DOWN:
                     mTrackGesture = false;
                     if (isInside(x, y)) {
+                        mDownX = x;
+                        mDownY = y;
                         mTrackGesture = true;
                         return true;
                     }
@@ -381,7 +365,7 @@ public class NotificationHeaderView extends ViewGroup {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (mTrackGesture) {
-                        mExpandClickListener.onClick(NotificationHeaderView.this);
+                        mExpandButton.performClick();
                     }
                     break;
             }
@@ -389,11 +373,12 @@ public class NotificationHeaderView extends ViewGroup {
         }
 
         private boolean isInside(float x, float y) {
+            if (mAcceptAllTouches) {
+                return true;
+            }
             for (int i = 0; i < mTouchRects.size(); i++) {
                 Rect r = mTouchRects.get(i);
                 if (r.contains((int) x, (int) y)) {
-                    mDownX = x;
-                    mDownY = y;
                     return true;
                 }
             }
@@ -425,5 +410,10 @@ public class NotificationHeaderView extends ViewGroup {
             return false;
         }
         return mTouchListener.isInside(x, y);
+    }
+
+    @RemotableViewMethod
+    public void setAcceptAllTouches(boolean acceptAllTouches) {
+        mAcceptAllTouches = acceptAllTouches;
     }
 }

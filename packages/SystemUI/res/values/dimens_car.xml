@@ -29,4 +29,5 @@
     <dimen name="car_fullscreen_user_pod_image_avatar_height">128dp</dimen>
     <dimen name="car_fullscreen_user_pod_text_size">24sp</dimen>
     <dimen name="car_navigation_button_width">64dp</dimen>
+    <dimen name="car_navigation_bar_width">760dp</dimen>
 </resources>

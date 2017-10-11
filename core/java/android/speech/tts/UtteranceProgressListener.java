@@ -122,8 +122,35 @@ public abstract class UtteranceProgressListener {
     }
 
     /**
-     * Wraps an old deprecated OnUtteranceCompletedListener with a shiny new
-     * progress listener.
+     * This is called when the TTS service is about to speak the specified range of the utterance
+     * with the given utteranceId.
+     *
+     * <p>This method is called when the audio is expected to start playing on the speaker. Note
+     * that this is different from {@link #onAudioAvailable} which is called as soon as the audio is
+     * generated.
+
+     * <p>This information can be used, for example, to highlight ranges of the text while it is
+     * spoken.
+     *
+     * <p>Only called if the engine supplies timing information by calling {@link
+     * SynthesisCallback#rangeStart(int, int, int)}.
+     *
+     * @param utteranceId Unique id identifying the synthesis request.
+     * @param start The start index of the range in the utterance text.
+     * @param end The end index of the range (exclusive) in the utterance text.
+     * @param frame The position in frames in the audio of the request where this range is spoken.
+     */
+    public void onRangeStart(String utteranceId, int start, int end, int frame) {
+        onUtteranceRangeStart(utteranceId, start, end);
+    }
+
+    /** @removed */
+    @Deprecated
+    public void onUtteranceRangeStart(String utteranceId, int start, int end) {
+    }
+
+    /**
+     * Wraps an old deprecated OnUtteranceCompletedListener with a shiny new progress listener.
      *
      * @hide
      */

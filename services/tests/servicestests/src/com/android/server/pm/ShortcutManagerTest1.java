@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyStringOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDisabled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamicOrPinned;
@@ -55,7 +57,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -75,6 +76,8 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -97,6 +100,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -244,6 +249,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.icon1);
         final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.icon2));
+        final Icon icon3 = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
+            getTestContext().getResources(), R.drawable.icon2));
 
         final ShortcutInfo si1 = makeShortcut(
                 "shortcut1",
@@ -261,12 +268,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 icon2,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
                 /* weight */ 12);
-        final ShortcutInfo si3 = makeShortcut("shortcut3");
+        final ShortcutInfo si3 = makeShortcut(
+                "shortcut3",
+                "Title 3",
+                /* activity */ null,
+                icon3,
+                makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                /* weight */ 13);
 
-        assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
+        assertTrue(mManager.setDynamicShortcuts(list(si1, si2, si3)));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut1", "shortcut2");
+                "shortcut1", "shortcut2", "shortcut3");
         assertEquals(2, mManager.getRemainingCallCount());
 
         // TODO: Check fields
@@ -550,7 +563,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
-        final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+        final Icon bmp64x64_maskable = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_64x64));
         final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_512x512));
@@ -561,7 +574,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 makeShortcutWithIcon("res32x32", res32x32),
                 makeShortcutWithIcon("res64x64", res64x64),
                 makeShortcutWithIcon("bmp32x32", bmp32x32),
-                makeShortcutWithIcon("bmp64x64", bmp64x64),
+                makeShortcutWithIcon("bmp64x64", bmp64x64_maskable),
                 makeShortcutWithIcon("bmp512x512", bmp512x512),
                 makeShortcut("none")
         )));
@@ -691,6 +704,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         bmp = pfdToBitmap(
                 mLauncherApps.getShortcutIconFd(CALLING_PACKAGE_1, "bmp32x32", HANDLE_USER_P0));
         assertBitmapSize(128, 128, bmp);
+
+        Drawable dr = mLauncherApps.getShortcutIconDrawable(
+            makeShortcutWithIcon("bmp64x64", bmp64x64_maskable), 0);
+        assertTrue(dr instanceof AdaptiveIconDrawable);
+        float viewportPercentage = 1 / (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction());
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getWidth() * viewportPercentage),
+            dr.getIntrinsicWidth());
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getHeight() * viewportPercentage),
+            dr.getIntrinsicHeight());
     }
 
     public void testCleanupDanglingBitmaps() throws Exception {
@@ -2099,6 +2121,24 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     list("s1", "s2", "s3"), HANDLE_USER_10);
         });
 
+        // First, make sure managed profile can't see other profiles.
+        runWithCaller(LAUNCHER_1, USER_P1, () -> {
+
+            final ShortcutQuery q = new ShortcutQuery().setQueryFlags(
+                    ShortcutQuery.FLAG_MATCH_DYNAMIC | ShortcutQuery.FLAG_MATCH_PINNED
+                    | ShortcutQuery.FLAG_MATCH_MANIFEST);
+
+            // No shortcuts are visible.
+            assertWith(mLauncherApps.getShortcuts(q, HANDLE_USER_0)).isEmpty();
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_0);
+
+            // Should have no effects.
+            assertWith(mLauncherApps.getShortcuts(q, HANDLE_USER_0)).isEmpty();
+
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "s1", USER_0);
+        });
+
         // Cross profile pinning.
         final int PIN_AND_DYNAMIC = ShortcutQuery.FLAG_GET_PINNED | ShortcutQuery.FLAG_GET_DYNAMIC;
 
@@ -2736,7 +2776,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             // Not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
                     .when(mMockActivityManagerInternal).startActivitiesAsPackage(
-                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+                            anyStringOrNull(), anyInt(),
+                            anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
 
@@ -2744,7 +2785,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
                     .when(mMockActivityManagerInternal)
                     .startActivitiesAsPackage(
-                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+                            anyStringOrNull(), anyInt(),
+                            anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
         });
@@ -2930,6 +2972,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final LauncherApps.Callback c0_4 = mock(LauncherApps.Callback.class);
 
         final LauncherApps.Callback cP0_1 = mock(LauncherApps.Callback.class);
+        final LauncherApps.Callback cP1_1 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c10_1 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c10_2 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c11_1 = mock(LauncherApps.Callback.class);
@@ -2942,6 +2985,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 case USER_0:
                     return LAUNCHER_2.equals(pkg);
                 case USER_P0:
+                    return LAUNCHER_1.equals(pkg);
+                case USER_P1:
                     return LAUNCHER_1.equals(pkg);
                 case USER_10:
                     return LAUNCHER_1.equals(pkg);
@@ -2957,6 +3002,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(LAUNCHER_3, USER_0, () -> mLauncherApps.registerCallback(c0_3, h));
         runWithCaller(LAUNCHER_4, USER_0, () -> mLauncherApps.registerCallback(c0_4, h));
         runWithCaller(LAUNCHER_1, USER_P0, () -> mLauncherApps.registerCallback(cP0_1, h));
+        runWithCaller(LAUNCHER_1, USER_P1, () -> mLauncherApps.registerCallback(cP1_1, h));
         runWithCaller(LAUNCHER_1, USER_10, () -> mLauncherApps.registerCallback(c10_1, h));
         runWithCaller(LAUNCHER_2, USER_10, () -> mLauncherApps.registerCallback(c10_2, h));
         runWithCaller(LAUNCHER_1, USER_11, () -> mLauncherApps.registerCallback(c11_1, h));
@@ -2977,6 +3023,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c0_2, HANDLE_USER_0, CALLING_PACKAGE_1, "s1", "s2", "s3");
         assertCallbackReceived(cP0_1, HANDLE_USER_0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s4");
+        assertCallbackNotReceived(cP1_1);
 
         // User 0, different package.
 
@@ -2995,6 +3042,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackReceived(c0_2, HANDLE_USER_0, CALLING_PACKAGE_3, "s1", "s2", "s3", "s4");
         assertCallbackReceived(cP0_1, HANDLE_USER_0, CALLING_PACKAGE_3,
                 "s1", "s2", "s3", "s4", "s5", "s6");
+        assertCallbackNotReceived(cP1_1);
 
         // Work profile.
         resetAll(all);
@@ -3011,6 +3059,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c0_2, HANDLE_USER_P0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s5");
         assertCallbackReceived(cP0_1, HANDLE_USER_P0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s4");
+        assertCallbackNotReceived(cP1_1);
 
         // Normal secondary user.
         mRunningUsers.put(USER_10, true);
@@ -3030,6 +3079,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c10_1, HANDLE_USER_10, CALLING_PACKAGE_1,
                 "x1", "x2", "x3", "x4", "x5");
+        assertCallbackNotReceived(cP1_1);
     }
 
     // === Test for persisting ===
@@ -3191,7 +3241,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(mService.getShortcutsForTest().get(USER_10).getLastKnownLauncher());
 
         // Try stopping the user
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());
@@ -3852,6 +3902,22 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testHandlePackageDelete() {
+        checkHandlePackageDeleteInner((userId, packageName) -> {
+            uninstallPackage(userId, packageName);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageDeleteIntent(packageName, userId));
+        });
+    }
+
+    public void testHandlePackageDisable() {
+        checkHandlePackageDeleteInner((userId, packageName) -> {
+            disablePackage(userId, packageName);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageChangedIntent(packageName, userId));
+        });
+    }
+
+    private void checkHandlePackageDeleteInner(BiConsumer<Integer, String> remover) {
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
         setCaller(CALLING_PACKAGE_1, USER_0);
@@ -3904,9 +3970,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
-        uninstallPackage(USER_0, CALLING_PACKAGE_1);
-                mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageDeleteIntent(CALLING_PACKAGE_1, USER_0));
+        remover.accept(USER_0, CALLING_PACKAGE_1);
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
@@ -3924,9 +3988,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         mRunningUsers.put(USER_10, true);
 
-        uninstallPackage(USER_10, CALLING_PACKAGE_2);
-                mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageDeleteIntent(CALLING_PACKAGE_2, USER_10));
+        remover.accept(USER_10, CALLING_PACKAGE_2);
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
@@ -4181,7 +4243,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(START_TIME,
                 findShortcut(shortcuts.getValue(), "s4").getLastChangedTimestamp());
 
-        // Next, send unlock even on user-10.  Now we scan packages on this user and send a
+        // Next, send an unlock event on user-10.  Now we scan packages on this user and send a
         // notification to the launcher.
         mInjectedCurrentTimeMillis = START_TIME + 200;
 
@@ -4222,9 +4284,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_2, 10);
 
         // Then send the broadcast, to only user-0.
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_2, USER_0));
-        mService.checkPackageChanges(USER_10);
 
         waitOnMainThread();
 
@@ -4395,7 +4456,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // Next.
-        // Update the build finger print.  All system apps will be scanned now.
+        // Update the build finger print.  All apps will be scanned now.
         mInjectedBuildFingerprint = "update1";
         mInjectedCurrentTimeMillis += 1000;
         mService.checkPackageChanges(USER_0);
@@ -4406,12 +4467,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1");
         });
 
         // Next.
         // Update manifest shortcuts.
-        mInjectedBuildFingerprint = "update2";
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
@@ -4421,35 +4481,20 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedCurrentTimeMillis += 1000;
         mService.checkPackageChanges(USER_0);
 
-        // Fingerprint hasn't changed, so CALLING_PACKAGE_1 wasn't scanned.
+        // Fingerprint hasn't changed, so there packages weren't scanned.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1");
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1");
         });
 
-        // Update the fingerprint, but CALLING_PACKAGE_1's version code hasn't changed, so
-        // still not scanned.
+        // Update the fingerprint.  CALLING_PACKAGE_1's version code hasn't changed, but we scan
+        // all apps anyway.
         mInjectedBuildFingerprint = "update2";
         mInjectedCurrentTimeMillis += 1000;
-        mService.checkPackageChanges(USER_0);
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertWith(getCallerShortcuts())
-                    .haveIds("ms1");
-        });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            assertWith(getCallerShortcuts())
-                    .isEmpty();
-        });
-
-        // Now update the version code, so CALLING_PACKAGE_1 is scanned again.
-        mInjectedBuildFingerprint = "update3";
-        mInjectedCurrentTimeMillis += 1000;
-        updatePackageVersion(CALLING_PACKAGE_1, 1);
         mService.checkPackageChanges(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -4458,7 +4503,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .isEmpty();
+                    .haveIds("ms1", "ms2");
         });
 
         // Make sure getLastAppScanTime / getLastAppScanOsFingerprint are persisted.
@@ -5730,6 +5775,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 R.xml.shortcut_5);
 
         // Unlock user-0.
+        mInjectedCurrentTimeMillis += 100;
         mService.handleUnlockUser(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5759,6 +5805,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
         uninstallPackage(USER_10, CALLING_PACKAGE_3);
 
+        mInjectedCurrentTimeMillis += 100;
         mService.handleUnlockUser(USER_10);
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -5783,6 +5830,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // hasn't changed.
         shutdownServices();
 
+        mInjectedCurrentTimeMillis += 100;
+
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
@@ -5794,7 +5843,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mService.handleUnlockUser(USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
+            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled( // FAIL
                     mManager.getManifestShortcuts()))),
                     "ms1");
             assertEmpty(mManager.getPinnedShortcuts());
@@ -5816,6 +5865,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Do it again, but this time we change the app version, so we do detect the changes.
         shutdownServices();
+
+        mInjectedCurrentTimeMillis += 100;
 
         updatePackageVersion(CALLING_PACKAGE_1, 1);
         updatePackageLastUpdateTime(CALLING_PACKAGE_3, 1);
@@ -5878,6 +5929,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         shutdownServices();
+
+        mInjectedCurrentTimeMillis += 100;
 
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
@@ -6053,7 +6106,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEmpty(mManager.getPinnedShortcuts());
         });
         // Send add broadcast, but the user is not running, so should be ignored.
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
         mRunningUsers.put(USER_10, false);
         mUnlockedUsers.put(USER_10, false);
 
@@ -7344,6 +7397,52 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
                     "s11", "s12",
                     "s21", "s22");
+        });
+    }
+
+    public void testReturnedByServer() {
+        // Package 1 updated, with manifest shortcuts.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getManifestShortcuts())
+                    .haveIds("ms1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+
+            assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
+
+            assertWith(mManager.getDynamicShortcuts())
+                    .haveIds("s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        // Pin them.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("ms1", "s1"), getCallingUser());
+            assertWith(getShortcutAsLauncher(USER_0))
+                    .haveIds("ms1", "s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getPinnedShortcuts())
+                    .haveIds("ms1", "s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // This shows a warning log, but should still work.
+            assertTrue(mManager.setDynamicShortcuts(mManager.getDynamicShortcuts()));
+
+            assertWith(mManager.getDynamicShortcuts())
+                    .haveIds("s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
         });
     }
 }

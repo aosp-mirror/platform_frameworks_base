@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_VPATH_H
 
 #include "hwui/Canvas.h"
+#include "hwui/Bitmap.h"
 #include "DisplayList.h"
 
 #include <SkBitmap.h>
@@ -38,6 +39,13 @@
 
 namespace android {
 namespace uirenderer {
+
+// Debug
+#if DEBUG_VECTOR_DRAWABLE
+    #define VECTOR_DRAWABLE_LOGD(...) ALOGD(__VA_ARGS__)
+#else
+    #define VECTOR_DRAWABLE_LOGD(...)
+#endif
 
 namespace VectorDrawable {
 #define VD_SET_PRIMITIVE_FIELD_WITH_FLAG(field, value, flag) (VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(field, (value)) ? ((flag) = true, true) : false)
@@ -101,8 +109,7 @@ public:
         mName = node.mName;
     }
     Node() {}
-    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
-            float scaleX, float scaleY, bool useStagingData) = 0;
+    virtual void draw(SkCanvas* outCanvas, bool useStagingData) = 0;
     virtual void dump() = 0;
     void setName(const char* name) {
         mName = name;
@@ -161,9 +168,6 @@ public:
     Path() {}
 
     void dump() override;
-    void draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix,
-            float scaleX, float scaleY, bool useStagingData) override;
-    static float getMatrixScale(const SkMatrix& groupStackedMatrix);
     virtual void syncProperties() override;
     virtual void onPropertyChanged(Properties* prop) override {
         if (prop == &mStagingProperties) {
@@ -185,10 +189,7 @@ public:
     PathProperties* mutateProperties() { return &mProperties; }
 
 protected:
-    virtual const SkPath& getUpdatedPath();
-    virtual void getStagingPath(SkPath* outPath);
-    virtual void drawPath(SkCanvas *outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) = 0;
+    virtual const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath);
 
     // Internal data, render thread only.
     bool mSkPathDirty = true;
@@ -356,6 +357,7 @@ public:
     FullPath(const FullPath& path); // for cloning
     FullPath(const char* path, size_t strLength) : Path(path, strLength) {}
     FullPath() : Path() {}
+    void draw(SkCanvas* outCanvas, bool useStagingData) override;
     void dump() override;
     FullPathProperties* mutateStagingProperties() { return &mStagingProperties; }
     const FullPathProperties* stagingProperties() { return &mStagingProperties; }
@@ -379,10 +381,7 @@ public:
     }
 
 protected:
-    const SkPath& getUpdatedPath() override;
-    void getStagingPath(SkPath* outPath) override;
-    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) override;
+    const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) override;
 private:
 
     FullPathProperties mProperties = FullPathProperties(this);
@@ -399,10 +398,7 @@ public:
     ClipPath(const ClipPath& path) : Path(path) {}
     ClipPath(const char* path, size_t strLength) : Path(path, strLength) {}
     ClipPath() : Path() {}
-
-protected:
-    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
-            float strokeScale, const SkMatrix& matrix, bool useStagingData) override;
+    void draw(SkCanvas* outCanvas, bool useStagingData) override;
 };
 
 class ANDROID_API Group: public Node {
@@ -511,8 +507,7 @@ public:
     GroupProperties* mutateProperties() { return &mProperties; }
 
     // Methods below could be called from either UI thread or Render Thread.
-    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
-            float scaleX, float scaleY, bool useStagingData) override;
+    virtual void draw(SkCanvas* outCanvas, bool useStagingData) override;
     void getLocalMatrix(SkMatrix* outMatrix, const GroupProperties& properties);
     void dump() override;
     static bool isValidProperty(int propertyId);
@@ -554,7 +549,7 @@ public:
             const SkRect& bounds, bool needsMirroring, bool canReuseCache);
     void drawStaging(Canvas* canvas);
 
-    const SkBitmap& getBitmapUpdateIfDirty();
+    Bitmap& getBitmapUpdateIfDirty();
     void setAllowCaching(bool allowCaching) {
         mAllowCaching = allowCaching;
     }
@@ -689,11 +684,15 @@ public:
     void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
 
 private:
+    struct Cache {
+        sk_sp<Bitmap> bitmap;
+        bool dirty = true;
+    };
 
     SkPaint* updatePaint(SkPaint* outPaint, TreeProperties* prop);
-    bool allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height);
-    bool canReuseBitmap(const SkBitmap&, int width, int height);
-    void updateBitmapCache(SkBitmap* outCache, bool useStagingData);
+    bool allocateBitmapIfNeeded(Cache& cache, int width, int height);
+    bool canReuseBitmap(Bitmap*, int width, int height);
+    void updateBitmapCache(Bitmap& outCache, bool useStagingData);
     // Cap the bitmap size, such that it won't hurt the performance too much
     // and it won't crash due to a very large scale.
     // The drawable will look blurry above this size.
@@ -706,10 +705,6 @@ private:
     TreeProperties mStagingProperties = TreeProperties(this);
 
     SkPaint mPaint;
-    struct Cache {
-        SkBitmap bitmap;
-        bool dirty = true;
-    };
 
     Cache mStagingCache;
     Cache mCache;

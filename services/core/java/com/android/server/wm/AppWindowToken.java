@@ -17,39 +17,62 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.WINDOW_REPLACEMENT_TIMEOUT_DURATION;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
-
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.wm.WindowManagerService.H;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
+import static com.android.server.wm.WindowManagerService.logWithStack;
 
 import android.annotation.NonNull;
-import android.content.pm.ActivityInfo;
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Message;
-import android.os.RemoteException;
+import android.os.Binder;
+import android.os.Debug;
+import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.view.IApplicationToken;
-import android.view.View;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.view.animation.Animation;
+import android.view.WindowManagerPolicy.StartingSurface;
+
+import com.android.internal.util.ToBooleanFunction;
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import static android.os.Build.VERSION_CODES.O;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -58,46 +81,52 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken {
+class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
-    // All of the windows and child windows that are included in this
-    // application token.  Note this list is NOT sorted!
-    final WindowList allAppWindows = new WindowList();
     @NonNull final AppWindowAnimator mAppAnimator;
 
-    final boolean voiceInteraction;
+    final boolean mVoiceInteraction;
 
-    Task mTask;
-    boolean appFullscreen;
-    int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    /** @see WindowContainer#fillsParent() */
+    private boolean mFillsParent;
     boolean layoutConfigChanges;
-    boolean showForAllUsers;
-    int targetSdk;
+    boolean mShowForAllUsers;
+    int mTargetSdk;
+
+    // Flag set while reparenting to prevent actions normally triggered by an individual parent
+    // change.
+    private boolean mReparenting;
+
+    // True if we are current in the process of removing this app token from the display
+    private boolean mRemovingFromDisplay = false;
 
     // The input dispatching timeout for this application token in nanoseconds.
-    long inputDispatchingTimeoutNanos;
+    long mInputDispatchingTimeoutNanos;
 
     // These are used for determining when all windows associated with
     // an activity have been drawn, so they can be made visible together
     // at the same time.
     // initialize so that it doesn't match mTransactionSequence which is an int.
-    long lastTransactionSequence = Long.MIN_VALUE;
-    int numInterestingWindows;
-    int numDrawnWindows;
+    private long mLastTransactionSequence = Long.MIN_VALUE;
+    private int mNumInterestingWindows;
+    private int mNumDrawnWindows;
     boolean inPendingTransaction;
     boolean allDrawn;
     // Set to true when this app creates a surface while in the middle of an animation. In that
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
 
-    // These are to track the app's real drawing status if there were no saved surfaces.
+    /**
+     * These are to track the app's real drawing status if there were no saved surfaces.
+     * @see #updateDrawnWindowStates
+     */
     boolean allDrawnExcludingSaved;
-    int numInterestingWindowsExcludingSaved;
-    int numDrawnWindowsExclusingSaved;
+    private int mNumInterestingWindowsExcludingSaved;
+    private int mNumDrawnWindowsExcludingSaved;
 
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
@@ -106,13 +135,17 @@ class AppWindowToken extends WindowToken {
     boolean hiddenRequested;
 
     // Have we told the window clients to hide themselves?
-    boolean clientHidden;
+    private boolean mClientHidden;
+
+    // If true we will defer setting mClientHidden to true and reporting to the client that it is
+    // hidden.
+    boolean mDeferHidingClient;
 
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
     // Last drawn state we reported to the app token.
-    boolean reportedDrawn;
+    private boolean reportedDrawn;
 
     // Set to true when the token has been removed from the window mgr.
     boolean removed;
@@ -120,81 +153,118 @@ class AppWindowToken extends WindowToken {
     // Information about an application starting window if displayed.
     StartingData startingData;
     WindowState startingWindow;
-    View startingView;
+    StartingSurface startingSurface;
     boolean startingDisplayed;
     boolean startingMoved;
+    // True if the hidden state of this token was forced to false due to a transferred starting
+    // window.
+    private boolean mHiddenSetFromTransferredStartingWindow;
     boolean firstWindowDrawn;
+    private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
+            new WindowState.UpdateReportedVisibilityResults();
 
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
+    // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
 
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
-    boolean mAlwaysFocusable;
+    private boolean mAlwaysFocusable;
 
     boolean mAppStopped;
     int mRotationAnimationHint;
-    int mPendingRelaunchCount;
+    private int mPendingRelaunchCount;
 
-    private ArrayList<WindowSurfaceController.SurfaceControlWithBackground> mSurfaceViewBackgrounds =
-        new ArrayList<WindowSurfaceController.SurfaceControlWithBackground>();
+    private boolean mLastContainsShowWhenLockedWindow;
+    private boolean mLastContainsDismissKeyguardWindow;
+
+    // The bounds of this activity. Mainly used for aspect-ratio compatibility.
+    // TODO(b/36505427): Every level on WindowContainer now has bounds information, which directly
+    // affects the configuration. We should probably move this into that class.
+    private final Rect mBounds = new Rect();
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
-    AppWindowToken(WindowManagerService _service, IApplicationToken _token,
-            boolean _voiceInteraction) {
-        super(_service, _token.asBinder(),
-                WindowManager.LayoutParams.TYPE_APPLICATION, true);
-        appWindowToken = this;
-        appToken = _token;
-        voiceInteraction = _voiceInteraction;
+    private boolean mDisablePreviewScreenshots;
+
+    Task mLastParent;
+
+    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
+            DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
+            boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
+            int configChanges, boolean launchTaskBehind, boolean alwaysFocusable,
+            AppWindowContainerController controller, Configuration overrideConfig, Rect bounds) {
+        this(service, token, voiceInteraction, dc, fullscreen, overrideConfig, bounds);
+        setController(controller);
+        mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
+        mShowForAllUsers = showForAllUsers;
+        mTargetSdk = targetSdk;
+        mOrientation = orientation;
+        layoutConfigChanges = (configChanges & (CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION)) != 0;
+        mLaunchTaskBehind = launchTaskBehind;
+        mAlwaysFocusable = alwaysFocusable;
+        mRotationAnimationHint = rotationAnimationHint;
+
+        // Application tokens start out hidden.
+        hidden = true;
+        hiddenRequested = true;
+    }
+
+    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
+            DisplayContent dc, boolean fillsParent, Configuration overrideConfig, Rect bounds) {
+        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
+                false /* ownerCanManageAppTokens */);
+        appToken = token;
+        mVoiceInteraction = voiceInteraction;
+        mFillsParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(this);
-        mAppAnimator = new AppWindowAnimator(this);
-    }
-
-    void sendAppVisibilityToClients() {
-        final int N = allAppWindows.size();
-        for (int i=0; i<N; i++) {
-            WindowState win = allAppWindows.get(i);
-            if (win == startingWindow && clientHidden) {
-                // Don't hide the starting window.
-                continue;
-            }
-            try {
-                if (DEBUG_VISIBILITY) Slog.v(TAG,
-                        "Setting visibility of " + win + ": " + (!clientHidden));
-                win.mClient.dispatchAppVisibility(!clientHidden);
-            } catch (RemoteException e) {
-            }
+        mAppAnimator = new AppWindowAnimator(this, service);
+        if (overrideConfig != null) {
+            onOverrideConfigurationChanged(overrideConfig);
+        }
+        if (bounds != null) {
+            mBounds.set(bounds);
         }
     }
 
-    void setVisibleBeforeClientHidden() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            w.setVisibleBeforeClientHidden();
+    void onOverrideConfigurationChanged(Configuration overrideConfiguration, Rect bounds) {
+        onOverrideConfigurationChanged(overrideConfiguration);
+        if (mBounds.equals(bounds)) {
+            return;
         }
+        // TODO(b/36505427): If bounds is in WC, then we can automatically call onResize() when set.
+        mBounds.set(bounds);
+        onResize();
+    }
+
+    void getBounds(Rect outBounds) {
+        outBounds.set(mBounds);
+    }
+
+    boolean hasBounds() {
+        return !mBounds.isEmpty();
     }
 
     void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
         firstWindowDrawn = true;
 
         // We now have a good window to show, remove dead placeholders
-        removeAllDeadWindows();
+        removeDeadWindows();
 
-        if (startingData != null) {
+        if (startingWindow != null) {
             if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Slog.v(TAG, "Finish starting "
                     + win.mToken + ": first real window is shown, no animation");
             // If this initial window is animating, stop it -- we will do an animation to reveal
             // it from behind the starting window, so there is no need for it to also be doing its
             // own stuff.
             winAnimator.clearAnimation();
-            winAnimator.mService.mFinishedStarting.add(this);
-            winAnimator.mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
         }
         updateReportedVisibilityLocked();
     }
@@ -204,49 +274,20 @@ class AppWindowToken extends WindowToken {
             return;
         }
 
-        int numInteresting = 0;
-        int numVisible = 0;
-        int numDrawn = 0;
-        boolean nowGone = true;
+        if (DEBUG_VISIBILITY) Slog.v(TAG, "Update reported visibility: " + this);
+        final int count = mChildren.size();
 
-        if (DEBUG_VISIBILITY) Slog.v(TAG,
-                "Update reported visibility: " + this);
-        final int N = allAppWindows.size();
-        for (int i=0; i<N; i++) {
-            WindowState win = allAppWindows.get(i);
-            if (win == startingWindow || win.mAppFreezing
-                    || win.mViewVisibility != View.VISIBLE
-                    || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                    || win.mDestroying) {
-                continue;
-            }
-            if (DEBUG_VISIBILITY) {
-                Slog.v(TAG, "Win " + win + ": isDrawn="
-                        + win.isDrawnLw()
-                        + ", isAnimationSet=" + win.mWinAnimator.isAnimationSet());
-                if (!win.isDrawnLw()) {
-                    Slog.v(TAG, "Not displayed: s=" +
-                            win.mWinAnimator.mSurfaceController
-                            + " pv=" + win.mPolicyVisibility
-                            + " mDrawState=" + win.mWinAnimator.mDrawState
-                            + " ah=" + win.mAttachedHidden
-                            + " th="
-                            + (win.mAppToken != null
-                                    ? win.mAppToken.hiddenRequested : false)
-                            + " a=" + win.mWinAnimator.mAnimating);
-                }
-            }
-            numInteresting++;
-            if (win.isDrawnLw()) {
-                numDrawn++;
-                if (!win.mWinAnimator.isAnimationSet()) {
-                    numVisible++;
-                }
-                nowGone = false;
-            } else if (win.mWinAnimator.isAnimationSet()) {
-                nowGone = false;
-            }
+        mReportedVisibilityResults.reset();
+
+        for (int i = 0; i < count; i++) {
+            final WindowState win = mChildren.get(i);
+            win.updateReportedVisibility(mReportedVisibilityResults);
         }
+
+        int numInteresting = mReportedVisibilityResults.numInteresting;
+        int numVisible = mReportedVisibilityResults.numVisible;
+        int numDrawn = mReportedVisibilityResults.numDrawn;
+        boolean nowGone = mReportedVisibilityResults.nowGone;
 
         boolean nowDrawn = numInteresting > 0 && numDrawn >= numInteresting;
         boolean nowVisible = numInteresting > 0 && numVisible >= numInteresting;
@@ -261,36 +302,172 @@ class AppWindowToken extends WindowToken {
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
+        final AppWindowContainerController controller = getController();
         if (nowDrawn != reportedDrawn) {
             if (nowDrawn) {
-                Message m = service.mH.obtainMessage(
-                        H.REPORT_APPLICATION_TOKEN_DRAWN, this);
-                service.mH.sendMessage(m);
+                if (controller != null) {
+                    controller.reportWindowsDrawn();
+                }
             }
             reportedDrawn = nowDrawn;
         }
         if (nowVisible != reportedVisible) {
-            if (DEBUG_VISIBILITY) Slog.v(
-                    TAG, "Visibility changed in " + this
-                    + ": vis=" + nowVisible);
+            if (DEBUG_VISIBILITY) Slog.v(TAG,
+                    "Visibility changed in " + this + ": vis=" + nowVisible);
             reportedVisible = nowVisible;
-            Message m = service.mH.obtainMessage(
-                    H.REPORT_APPLICATION_TOKEN_WINDOWS,
-                    nowVisible ? 1 : 0,
-                    nowGone ? 1 : 0,
-                    this);
-            service.mH.sendMessage(m);
+            if (controller != null) {
+                if (nowVisible) {
+                    controller.reportWindowsVisible();
+                } else {
+                    controller.reportWindowsGone();
+                }
+            }
         }
+    }
+
+    boolean isClientHidden() {
+        return mClientHidden;
+    }
+
+    void setClientHidden(boolean hideClient) {
+        if (mClientHidden == hideClient || (hideClient && mDeferHidingClient)) {
+            return;
+        }
+        mClientHidden = hideClient;
+        sendAppVisibilityToClients();
+    }
+
+    boolean setVisibility(WindowManager.LayoutParams lp,
+            boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
+
+        boolean delayed = false;
+        inPendingTransaction = false;
+        // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
+        // been set by the app now.
+        mHiddenSetFromTransferredStartingWindow = false;
+        setClientHidden(!visible);
+
+        // Allow for state changes and animation to be applied if:
+        // * token is transitioning visibility state
+        // * or the token was marked as hidden and is exiting before we had a chance to play the
+        // transition animation
+        // * or this is an opening app and windows are being replaced.
+        boolean visibilityChanged = false;
+        if (hidden == visible || (hidden && mIsExiting) || (visible && waitingForReplacement())) {
+            final AccessibilityController accessibilityController = mService.mAccessibilityController;
+            boolean changed = false;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
+                    "Changing app " + this + " hidden=" + hidden + " performLayout=" + performLayout);
+
+            boolean runningAppAnimation = false;
+
+            if (transit != AppTransition.TRANSIT_UNSET) {
+                if (mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
+                    mAppAnimator.setNullAnimation();
+                }
+                if (mService.applyAnimationLocked(this, lp, transit, visible, isVoiceInteraction)) {
+                    delayed = runningAppAnimation = true;
+                }
+                final WindowState window = findMainWindow();
+                //TODO (multidisplay): Magnification is supported only for the default display.
+                if (window != null && accessibilityController != null
+                        && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+                    accessibilityController.onAppWindowTransitionLocked(window, transit);
+                }
+                changed = true;
+            }
+
+            final int windowsCount = mChildren.size();
+            for (int i = 0; i < windowsCount; i++) {
+                final WindowState win = mChildren.get(i);
+                changed |= win.onAppVisibilityChanged(visible, runningAppAnimation);
+            }
+
+            hidden = hiddenRequested = !visible;
+            visibilityChanged = true;
+            if (!visible) {
+                stopFreezingScreen(true, true);
+            } else {
+                // If we are being set visible, and the starting window is not yet displayed,
+                // then make sure it doesn't get displayed.
+                if (startingWindow != null && !startingWindow.isDrawnLw()) {
+                    startingWindow.mPolicyVisibility = false;
+                    startingWindow.mPolicyVisibilityAfterAnim = false;
+                }
+
+                // We are becoming visible, so better freeze the screen with the windows that are
+                // getting visible so we also wait for them.
+                forAllWindows(mService::makeWindowFreezingScreenIfNeededLocked, true);
+            }
+
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "setVisibility: " + this
+                    + ": hidden=" + hidden + " hiddenRequested=" + hiddenRequested);
+
+            if (changed) {
+                mService.mInputMonitor.setUpdateInputWindowsNeededLw();
+                if (performLayout) {
+                    mService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                            false /*updateInputWindows*/);
+                    mService.mWindowPlacerLocked.performSurfacePlacement();
+                }
+                mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+            }
+        }
+
+        if (mAppAnimator.animation != null) {
+            delayed = true;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0 && !delayed; i--) {
+            if ((mChildren.get(i)).isWindowAnimationSet()) {
+                delayed = true;
+            }
+        }
+
+        if (visibilityChanged) {
+            if (visible && !delayed) {
+                // The token was made immediately visible, there will be no entrance animation.
+                // We need to inform the client the enter animation was finished.
+                mEnteringAnimation = true;
+                mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+            }
+            // If we are hidden but there is no delay needed we immediately
+            // apply the Surface transaction so that the ActivityManager
+            // can have some guarantee on the Surface state
+            // following setting the visibility.
+            if (hidden && !delayed) {
+                SurfaceControl.openTransaction();
+                for (int i = mChildren.size() - 1; i >= 0; i--) {
+                    mChildren.get(i).mWinAnimator.hide("immediately hidden");
+                }
+                SurfaceControl.closeTransaction();
+            }
+
+            if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
+                // The token is not closing nor opening, so even if there is an animation set, that
+                // doesn't mean that it goes through the normal app transition cycle so we have
+                // to inform the docked controller about visibility change.
+                // TODO(multi-display): notify docked divider on all displays where visibility was
+                // affected.
+                mService.getDefaultDisplayContentLocked().getDockedDividerController()
+                        .notifyAppVisibilityChanged();
+                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
+            }
+        }
+
+        return delayed;
     }
 
     WindowState findMainWindow() {
         WindowState candidate = null;
-        int j = windows.size();
+        int j = mChildren.size();
         while (j > 0) {
             j--;
-            WindowState win = windows.get(j);
-            if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
-                    || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            final WindowState win = mChildren.get(j);
+            final int type = win.mAttrs.type;
+            // No need to loop through child window as base application and starting types can't be
+            // child windows.
+            if (type == TYPE_BASE_APPLICATION || type == TYPE_APPLICATION_STARTING) {
                 // In cases where there are multiple windows, we prefer the non-exiting window. This
                 // happens for example when replacing windows during an activity relaunch. When
                 // constructing the animation, we want the new window, not the exiting one.
@@ -305,75 +482,122 @@ class AppWindowToken extends WindowToken {
     }
 
     boolean windowsAreFocusable() {
-        return StackId.canReceiveKeys(mTask.mStack.mStackId) || mAlwaysFocusable;
+        return StackId.canReceiveKeys(getTask().mStack.mStackId) || mAlwaysFocusable;
     }
 
+    AppWindowContainerController getController() {
+        final WindowContainerController controller = super.getController();
+        return controller != null ? (AppWindowContainerController) controller : null;
+    }
+
+    @Override
     boolean isVisible() {
-        final int N = allAppWindows.size();
-        for (int i=0; i<N; i++) {
-            WindowState win = allAppWindows.get(i);
-            // If we're animating with a saved surface, we're already visible.
-            // Return true so that the alpha doesn't get cleared.
-            if (!win.mAppFreezing
-                    && (win.mViewVisibility == View.VISIBLE || win.isAnimatingWithSavedSurface()
-                            || (win.mWinAnimator.isAnimationSet()
-                                    && !service.mAppTransition.isTransitionSet()))
-                    && !win.mDestroying
-                    && win.isDrawnLw()) {
-                return true;
-            }
-        }
-        return false;
+        // If the app token isn't hidden then it is considered visible and there is no need to check
+        // its children windows to see if they are visible.
+        return !hidden;
     }
 
-    void removeAppFromTaskLocked() {
-        mIsExiting = false;
-        removeAllWindows();
+    @Override
+    void removeImmediately() {
+        onRemovedFromDisplay();
+        super.removeImmediately();
+    }
 
-        // Use local variable because removeAppToken will null out mTask.
-        final Task task = mTask;
-        if (task != null) {
-            if (!task.removeAppToken(this)) {
-                Slog.e(TAG, "removeAppFromTaskLocked: token=" + this
-                        + " not found.");
-            }
-            task.mStack.mExitingAppTokens.remove(this);
+    @Override
+    void removeIfPossible() {
+        mIsExiting = false;
+        removeAllWindowsIfPossible();
+        removeImmediately();
+    }
+
+    @Override
+    boolean checkCompleteDeferredRemoval() {
+        if (mIsExiting) {
+            removeIfPossible();
         }
+        return super.checkCompleteDeferredRemoval();
+    }
+
+    void onRemovedFromDisplay() {
+        if (mRemovingFromDisplay) {
+            return;
+        }
+        mRemovingFromDisplay = true;
+
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
+
+        boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
+
+        mService.mOpeningApps.remove(this);
+        mService.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        mService.mTaskSnapshotController.onAppRemoved(this);
+        waitingToShow = false;
+        if (mService.mClosingApps.contains(this)) {
+            delayed = true;
+        } else if (mService.mAppTransition.isTransitionSet()) {
+            mService.mClosingApps.add(this);
+            delayed = true;
+        }
+
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app " + this + " delayed=" + delayed
+                + " animation=" + mAppAnimator.animation + " animating=" + mAppAnimator.animating);
+
+        if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
+                + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
+
+        if (startingData != null && getController() != null) {
+            getController().removeStartingWindow();
+        }
+
+        // If this window was animating, then we need to ensure that the app transition notifies
+        // that animations have completed in WMS.handleAnimatingStoppedAndTransitionLocked(), so
+        // add to that list now
+        if (mAppAnimator.animating) {
+            mService.mNoAnimationNotifyOnTransitionFinished.add(token);
+        }
+
+        final TaskStack stack = getStack();
+        if (delayed && !isEmpty()) {
+            // set the token aside because it has an active animation to be finished
+            if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
+                    "removeAppToken make exiting: " + this);
+            if (stack != null) {
+                stack.mExitingAppTokens.add(this);
+            }
+            mIsExiting = true;
+        } else {
+            // Make sure there is no animation running on this token, so any windows associated
+            // with it will be removed as soon as their animations are complete
+            mAppAnimator.clearAnimation();
+            mAppAnimator.animating = false;
+            if (stack != null) {
+                stack.mExitingAppTokens.remove(this);
+            }
+            removeIfPossible();
+        }
+
+        removed = true;
+        stopFreezingScreen(true, true);
+
+        if (mService.mFocusedApp == this) {
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this);
+            mService.mFocusedApp = null;
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+            mService.mInputMonitor.setFocusedAppLw(null);
+        }
+
+        if (!delayed) {
+            updateReportedVisibilityLocked();
+        }
+
+        mRemovingFromDisplay = false;
     }
 
     void clearAnimatingFlags() {
         boolean wallpaperMightChange = false;
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = allAppWindows.get(i);
-            // We don't want to clear it out for windows that get replaced, because the
-            // animation depends on the flag to remove the replaced window.
-            //
-            // We also don't clear the mAnimatingExit flag for windows which have the
-            // mRemoveOnExit flag. This indicates an explicit remove request has been issued
-            // by the client. We should let animation proceed and not clear this flag or
-            // they won't eventually be removed by WindowStateAnimator#finishExit.
-            if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
-                // Clear mAnimating flag together with mAnimatingExit. When animation
-                // changes from exiting to entering, we need to clear this flag until the
-                // new animation gets applied, so that isAnimationStarting() becomes true
-                // until then.
-                // Otherwise applySurfaceChangesTransaction will faill to skip surface
-                // placement for this window during this period, one or more frame will
-                // show up with wrong position or scale.
-                if (win.mAnimatingExit) {
-                    win.mAnimatingExit = false;
-                    wallpaperMightChange = true;
-                }
-                if (win.mWinAnimator.mAnimating) {
-                    win.mWinAnimator.mAnimating = false;
-                    wallpaperMightChange = true;
-                }
-                if (win.mDestroying) {
-                    win.mDestroying = false;
-                    service.mDestroySurface.remove(win);
-                    wallpaperMightChange = true;
-                }
-            }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            wallpaperMightChange |= win.clearAnimatingFlags();
         }
         if (wallpaperMightChange) {
             requestUpdateWallpaperIfNeeded();
@@ -393,47 +617,15 @@ class AppWindowToken extends WindowToken {
      * others so that they are ready to be reused. If set to false (common case), destroy all
      * surfaces that's eligible, if the app is already stopped.
      */
-
     private void destroySurfaces(boolean cleanupOnResume) {
-        final ArrayList<WindowState> allWindows = (ArrayList<WindowState>) allAppWindows.clone();
-        final DisplayContentList displayList = new DisplayContentList();
-        for (int i = allWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = allWindows.get(i);
-
-            if (!(mAppStopped || win.mWindowRemovalAllowed || cleanupOnResume)) {
-                continue;
-            }
-
-            win.mWinAnimator.destroyPreservedSurfaceLocked();
-
-            if (!win.mDestroying) {
-                continue;
-            }
-
-            if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + win
-                    + " destroySurfaces: mAppStopped=" + mAppStopped
-                    + " win.mWindowRemovalAllowed=" + win.mWindowRemovalAllowed
-                    + " win.mRemoveOnExit=" + win.mRemoveOnExit);
-
-            if (!cleanupOnResume || win.mRemoveOnExit) {
-                win.destroyOrSaveSurface();
-            }
-            if (win.mRemoveOnExit) {
-                service.removeWindowInnerLocked(win);
-            }
-            final DisplayContent displayContent = win.getDisplayContent();
-            if (displayContent != null && !displayList.contains(displayContent)) {
-                displayList.add(displayContent);
-            }
-            if (cleanupOnResume) {
-                win.requestUpdateWallpaperIfNeeded();
-            }
-            win.mDestroying = false;
+        boolean destroyedSomething = false;
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            destroyedSomething |= win.destroySurface(cleanupOnResume, mAppStopped);
         }
-        for (int i = 0; i < displayList.size(); i++) {
-            final DisplayContent displayContent = displayList.get(i);
-            service.mLayersController.assignLayersLocked(displayContent.getWindowList());
-            displayContent.layoutNeeded = true;
+        if (destroyedSomething) {
+            final DisplayContent dc = getDisplayContent();
+            dc.assignWindowLayers(true /*setLayoutNeeded*/);
         }
     }
 
@@ -441,15 +633,12 @@ class AppWindowToken extends WindowToken {
      * Notify that the app is now resumed, and it was not stopped before, perform a clean
      * up of the surfaces
      */
-    void notifyAppResumed(boolean wasStopped, boolean allowSavedSurface) {
+    void notifyAppResumed(boolean wasStopped) {
         if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped
-                + " allowSavedSurface=" + allowSavedSurface + " " + this);
+                + " " + this);
         mAppStopped = false;
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
-        }
-        if (!allowSavedSurface) {
-            destroySavedSurfaces();
         }
     }
 
@@ -462,7 +651,9 @@ class AppWindowToken extends WindowToken {
         mAppStopped = true;
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
-        mTask.mService.scheduleRemoveStartingWindowLocked(this);
+        if (getController() != null) {
+            getController().removeStartingWindow();
+        }
     }
 
     /**
@@ -478,9 +669,9 @@ class AppWindowToken extends WindowToken {
         return allDrawn;
     }
 
-    boolean canRestoreSurfaces() {
-        for (int i = allAppWindows.size() -1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
+    private boolean canRestoreSurfaces() {
+        for (int i = mChildren.size() -1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
             if (w.canRestoreSurface()) {
                 return true;
             }
@@ -488,10 +679,10 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
-    void clearVisibleBeforeClientHidden() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            w.clearVisibleBeforeClientHidden();
+    private void clearWasVisibleBeforeClientHidden() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.clearWasVisibleBeforeClientHidden();
         }
     }
 
@@ -500,8 +691,8 @@ class AppWindowToken extends WindowToken {
      * animating with saved surface.
      */
     boolean isAnimatingInvisibleWithSavedSurface() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
             if (w.isAnimatingInvisibleWithSavedSurface()) {
                 return true;
             }
@@ -514,68 +705,50 @@ class AppWindowToken extends WindowToken {
      * with a saved surface, and mark them destroying.
      */
     void stopUsingSavedSurfaceLocked() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            if (w.isAnimatingInvisibleWithSavedSurface()) {
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
-                        "stopUsingSavedSurfaceLocked: " + w);
-                w.clearAnimatingWithSavedSurface();
-                w.mDestroying = true;
-                w.mWinAnimator.hide("stopUsingSavedSurfaceLocked");
-                w.mWinAnimator.mWallpaperControllerLocked.hideWallpapers(w);
-            }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.stopUsingSavedSurface();
         }
         destroySurfaces();
     }
 
     void markSavedSurfaceExiting() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            if (w.isAnimatingInvisibleWithSavedSurface()) {
-                w.mAnimatingExit = true;
-                w.mWinAnimator.mAnimating = true;
-            }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.markSavedSurfaceExiting();
         }
     }
 
-    void restoreSavedSurfaces() {
+    void restoreSavedSurfaceForInterestingWindows() {
         if (!canRestoreSurfaces()) {
-            clearVisibleBeforeClientHidden();
+            clearWasVisibleBeforeClientHidden();
             return;
         }
-        // Check if we have enough drawn windows to mark allDrawn= true.
-        int numInteresting = 0;
-        int numDrawn = 0;
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            WindowState w = allAppWindows.get(i);
-            if (w != startingWindow && !w.mAppDied && w.wasVisibleBeforeClientHidden()
-                    && (!mAppAnimator.freezingScreen || !w.mAppFreezing)) {
-                numInteresting++;
-                if (w.hasSavedSurface()) {
-                    w.restoreSavedSurface();
-                }
-                if (w.isDrawnLw()) {
-                    numDrawn++;
-                }
-            }
+
+        // Check if all interesting windows are drawn and we can mark allDrawn=true.
+        int interestingNotDrawn = -1;
+
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            interestingNotDrawn = w.restoreSavedSurfaceForInterestingWindow();
         }
 
         if (!allDrawn) {
-            allDrawn = (numInteresting > 0) && (numInteresting == numDrawn);
+            allDrawn = (interestingNotDrawn == 0);
             if (allDrawn) {
-                service.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+                mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
             }
         }
-        clearVisibleBeforeClientHidden();
+        clearWasVisibleBeforeClientHidden();
 
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
-                "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn
-                + " numInteresting=" + numInteresting + " numDrawn=" + numDrawn);
+                "restoreSavedSurfaceForInterestingWindows: " + this + " allDrawn=" + allDrawn
+                + " interestingNotDrawn=" + interestingNotDrawn);
     }
 
     void destroySavedSurfaces() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            WindowState win = allAppWindows.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
             win.destroySavedSurface();
         }
     }
@@ -586,97 +759,134 @@ class AppWindowToken extends WindowToken {
         allDrawnExcludingSaved = false;
     }
 
-    @Override
-    void removeAllWindows() {
-        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
-                // removeWindowLocked at bottom of loop may remove multiple entries from
-                // allAppWindows if the window to be removed has child windows. It also may
-                // not remove any windows from allAppWindows at all if win is exiting and
-                // currently animating away. This ensures that winNdx is monotonically decreasing
-                // and never beyond allAppWindows bounds.
-                winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
-            WindowState win = allAppWindows.get(winNdx);
-            if (DEBUG_WINDOW_MOVEMENT) {
-                Slog.w(TAG, "removeAllWindows: removing win=" + win);
-            }
-
-            service.removeWindowLocked(win);
-        }
-        allAppWindows.clear();
-        windows.clear();
+    Task getTask() {
+        return (Task) getParent();
     }
 
-    void removeAllDeadWindows() {
-        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
-            // removeWindowLocked at bottom of loop may remove multiple entries from
-            // allAppWindows if the window to be removed has child windows. It also may
-            // not remove any windows from allAppWindows at all if win is exiting and
-            // currently animating away. This ensures that winNdx is monotonically decreasing
-            // and never beyond allAppWindows bounds.
-            winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
-            WindowState win = allAppWindows.get(winNdx);
+    TaskStack getStack() {
+        final Task task = getTask();
+        if (task != null) {
+            return task.mStack;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    void onParentSet() {
+        super.onParentSet();
+
+        final Task task = getTask();
+
+        // When the associated task is {@code null}, the {@link AppWindowToken} can no longer
+        // access visual elements like the {@link DisplayContent}. We must remove any associations
+        // such as animations.
+        if (!mReparenting) {
+            if (task == null) {
+                // It is possible we have been marked as a closing app earlier. We must remove ourselves
+                // from this list so we do not participate in any future animations.
+                mService.mClosingApps.remove(this);
+            } else if (mLastParent != null && mLastParent.mStack != null) {
+                task.mStack.mExitingAppTokens.remove(this);
+            }
+        }
+        mLastParent = task;
+    }
+
+    void postWindowRemoveStartingWindowCleanup(WindowState win) {
+        // TODO: Something smells about the code below...Is there a better way?
+        if (startingWindow == win) {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Notify removed startingWindow " + win);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
+        } else if (mChildren.size() == 0) {
+            // If this is the last window and we had requested a starting transition window,
+            // well there is no point now.
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingData");
+            startingData = null;
+            if (mHiddenSetFromTransferredStartingWindow) {
+                // We set the hidden state to false for the token from a transferred starting window.
+                // We now reset it back to true since the starting window was the last window in the
+                // token.
+                hidden = true;
+            }
+        } else if (mChildren.size() == 1 && startingSurface != null && !isRelaunching()) {
+            // If this is the last window except for a starting transition window,
+            // we need to get rid of the starting transition.
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Last window, removing starting window "
+                    + win);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
+        }
+    }
+
+    void removeDeadWindows() {
+        for (int winNdx = mChildren.size() - 1; winNdx >= 0; --winNdx) {
+            WindowState win = mChildren.get(winNdx);
             if (win.mAppDied) {
-                if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
-                    Slog.w(TAG, "removeAllDeadWindows: " + win);
-                }
+                if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.w(TAG,
+                        "removeDeadWindows: " + win);
                 // Set mDestroying, we don't want any animation or delayed removal here.
                 win.mDestroying = true;
-                service.removeWindowLocked(win);
+                // Also removes child windows.
+                win.removeIfPossible();
             }
         }
     }
 
     boolean hasWindowsAlive() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            if (!allAppWindows.get(i).mAppDied) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            // No need to loop through child windows as the answer should be the same as that of the
+            // parent window.
+            if (!(mChildren.get(i)).mAppDied) {
                 return true;
             }
         }
         return false;
     }
 
-    void setReplacingWindows(boolean animate) {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
-                + " with replacing windows.");
+    void setWillReplaceWindows(boolean animate) {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
+                "Marking app token " + this + " with replacing windows.");
 
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            w.setReplacing(animate);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.setWillReplaceWindow(animate);
         }
         if (animate) {
             // Set-up dummy animation so we can start treating windows associated with this
             // token like they are in transition before the new app window is ready for us to
             // run the real transition animation.
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
-                    "setReplacingWindow() Setting dummy animation on: " + this);
+                    "setWillReplaceWindow() Setting dummy animation on: " + this);
             mAppAnimator.setDummyAnimation();
         }
     }
 
-    void setReplacingChildren() {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
+    void setWillReplaceChildWindows() {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + this
                 + " with replacing child windows.");
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            if (w.shouldBeReplacedWithChildren()) {
-                w.setReplacing(false /* animate */);
-            }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.setWillReplaceChildWindows();
         }
     }
 
-    void resetReplacingWindows() {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Resetting app token " + appWindowToken
-                + " of replacing window marks.");
+    void clearWillReplaceWindows() {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
+                "Resetting app token " + this + " of replacing window marks.");
 
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
-            w.resetReplacing();
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.clearWillReplaceWindow();
         }
     }
 
     void requestUpdateWallpaperIfNeeded() {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState w = allAppWindows.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
             w.requestUpdateWallpaperIfNeeded();
         }
     }
@@ -685,85 +895,158 @@ class AppWindowToken extends WindowToken {
         return mPendingRelaunchCount > 0;
     }
 
+    boolean shouldFreezeBounds() {
+        final Task task = getTask();
+
+        // For freeform windows, we can't freeze the bounds at the moment because this would make
+        // the resizing unresponsive.
+        if (task == null || task.inFreeformWorkspace()) {
+            return false;
+        }
+
+        // We freeze the bounds while drag resizing to deal with the time between
+        // the divider/drag handle being released, and the handling it's new
+        // configuration. If we are relaunched outside of the drag resizing state,
+        // we need to be careful not to do this.
+        return getTask().isDragResizing();
+    }
+
     void startRelaunching() {
-        if (canFreezeBounds()) {
+        if (shouldFreezeBounds()) {
             freezeBounds();
         }
+
+        // In the process of tearing down before relaunching, the app will
+        // try and clean up it's child surfaces. We need to prevent this from
+        // happening, so we sever the children, transfering their ownership
+        // from the client it-self to the parent surface (owned by us).
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            w.mWinAnimator.detachChildren();
+        }
+
         mPendingRelaunchCount++;
     }
 
     void finishRelaunching() {
-        if (canFreezeBounds()) {
-            unfreezeBounds();
-        }
+        unfreezeBounds();
+
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
+        } else {
+            // Update keyguard flags upon finishing relaunch.
+            checkKeyguardFlagsChanged();
         }
+
+        updateAllDrawn();
     }
 
     void clearRelaunching() {
         if (mPendingRelaunchCount == 0) {
             return;
         }
-        if (canFreezeBounds()) {
-            unfreezeBounds();
-        }
+        unfreezeBounds();
         mPendingRelaunchCount = 0;
     }
 
-    void addWindow(WindowState w) {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            WindowState candidate = allAppWindows.get(i);
-            if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
-                    candidate.getWindowTag().toString().equals(w.getWindowTag().toString())) {
-                candidate.mReplacingWindow = w;
-                w.mSkipEnterAnimationForSeamlessReplacement = !candidate.mAnimateReplacingWindow;
+    /**
+     * Returns true if the new child window we are adding to this token is considered greater than
+     * the existing child window in this token in terms of z-order.
+     */
+    @Override
+    protected boolean isFirstChildWindowGreaterThanSecond(WindowState newWindow,
+            WindowState existingWindow) {
+        final int type1 = newWindow.mAttrs.type;
+        final int type2 = existingWindow.mAttrs.type;
 
-                // if we got a replacement window, reset the timeout to give drawing more time
-                service.scheduleReplacingWindowTimeouts(this);
-            }
+        // Base application windows should be z-ordered BELOW all other windows in the app token.
+        if (type1 == TYPE_BASE_APPLICATION && type2 != TYPE_BASE_APPLICATION) {
+            return false;
+        } else if (type1 != TYPE_BASE_APPLICATION && type2 == TYPE_BASE_APPLICATION) {
+            return true;
         }
-        allAppWindows.add(w);
+
+        // Starting windows should be z-ordered ABOVE all other windows in the app token.
+        if (type1 == TYPE_APPLICATION_STARTING && type2 != TYPE_APPLICATION_STARTING) {
+            return true;
+        } else if (type1 != TYPE_APPLICATION_STARTING && type2 == TYPE_APPLICATION_STARTING) {
+            return false;
+        }
+
+        // Otherwise the new window is greater than the existing window.
+        return true;
     }
 
-    boolean waitingForReplacement() {
-        for (int i = allAppWindows.size() -1; i >= 0; i--) {
-            WindowState candidate = allAppWindows.get(i);
-            if (candidate.mWillReplaceWindow) {
+    @Override
+    void addWindow(WindowState w) {
+        super.addWindow(w);
+
+        boolean gotReplacementWindow = false;
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState candidate = mChildren.get(i);
+            gotReplacementWindow |= candidate.setReplacementWindowIfNeeded(w);
+        }
+
+        // if we got a replacement window, reset the timeout to give drawing more time
+        if (gotReplacementWindow) {
+            mService.scheduleWindowReplacementTimeouts(this);
+        }
+        checkKeyguardFlagsChanged();
+    }
+
+    @Override
+    void removeChild(WindowState child) {
+        super.removeChild(child);
+        checkKeyguardFlagsChanged();
+    }
+
+    private boolean waitingForReplacement() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState candidate = mChildren.get(i);
+            if (candidate.waitingForReplacement()) {
                 return true;
             }
         }
         return false;
     }
 
-    void clearTimedoutReplacesLocked() {
-        for (int i = allAppWindows.size() - 1; i >= 0;
-             // removeWindowLocked at bottom of loop may remove multiple entries from
-             // allAppWindows if the window to be removed has child windows. It also may
-             // not remove any windows from allAppWindows at all if win is exiting and
-             // currently animating away. This ensures that winNdx is monotonically decreasing
-             // and never beyond allAppWindows bounds.
-             i = Math.min(i - 1, allAppWindows.size() - 1)) {
-            WindowState candidate = allAppWindows.get(i);
-            if (candidate.mWillReplaceWindow == false) {
-                continue;
-            }
-            candidate.mWillReplaceWindow = false;
-            if (candidate.mReplacingWindow != null) {
-                candidate.mReplacingWindow.mSkipEnterAnimationForSeamlessReplacement = false;
-            }
-            // Since the window already timed out, remove it immediately now.
-            // Use removeWindowInnerLocked() instead of removeWindowLocked(), as the latter
-            // delays removal on certain conditions, which will leave the stale window in the
-            // stack and marked mWillReplaceWindow=false, so the window will never be removed.
-            service.removeWindowInnerLocked(candidate);
+    void onWindowReplacementTimeout() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            (mChildren.get(i)).onWindowReplacementTimeout();
         }
     }
 
-    private boolean canFreezeBounds() {
-        // For freeform windows, we can't freeze the bounds at the moment because this would make
-        // the resizing unresponsive.
-        return mTask != null && !mTask.inFreeformWorkspace();
+    void reparent(Task task, int position) {
+        final Task currentTask = getTask();
+        if (task == currentTask) {
+            throw new IllegalArgumentException(
+                    "window token=" + this + " already child of task=" + currentTask);
+        }
+
+        if (currentTask.mStack != task.mStack) {
+            throw new IllegalArgumentException(
+                    "window token=" + this + " current task=" + currentTask
+                        + " belongs to a different stack than " + task);
+        }
+
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "reParentWindowToken: removing window token=" + this
+                + " from task=" + currentTask);
+        final DisplayContent prevDisplayContent = getDisplayContent();
+
+        mReparenting = true;
+
+        getParent().removeChild(this);
+        task.addChild(this, position);
+
+        mReparenting = false;
+
+        // Relayout display(s).
+        final DisplayContent displayContent = task.getDisplayContent();
+        displayContent.setLayoutNeeded();
+        if (prevDisplayContent != displayContent) {
+            onDisplayChanged(displayContent);
+            prevDisplayContent.setLayoutNeeded();
+        }
     }
 
     /**
@@ -773,115 +1056,584 @@ class AppWindowToken extends WindowToken {
      * with a queue.
      */
     private void freezeBounds() {
-        mFrozenBounds.offer(new Rect(mTask.mPreparedFrozenBounds));
+        final Task task = getTask();
+        mFrozenBounds.offer(new Rect(task.mPreparedFrozenBounds));
 
-        if (mTask.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
+        if (task.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
             // We didn't call prepareFreezingBounds on the task, so use the current value.
-            final Configuration config = new Configuration(service.mCurConfiguration);
-            config.updateFrom(mTask.mOverrideConfig);
-            mFrozenMergedConfig.offer(config);
+            mFrozenMergedConfig.offer(new Configuration(task.getConfiguration()));
         } else {
-            mFrozenMergedConfig.offer(new Configuration(mTask.mPreparedFrozenMergedConfig));
+            mFrozenMergedConfig.offer(new Configuration(task.mPreparedFrozenMergedConfig));
         }
-        mTask.mPreparedFrozenMergedConfig.setToDefaults();
+        // Calling unset() to make it equal to Configuration.EMPTY.
+        task.mPreparedFrozenMergedConfig.unset();
     }
 
     /**
      * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
      */
     private void unfreezeBounds() {
-        if (!mFrozenBounds.isEmpty()) {
-            mFrozenBounds.remove();
+        if (mFrozenBounds.isEmpty()) {
+            return;
         }
+        mFrozenBounds.remove();
         if (!mFrozenMergedConfig.isEmpty()) {
             mFrozenMergedConfig.remove();
         }
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState win = windows.get(i);
-            if (!win.mHasSurface) {
-                continue;
-            }
-            win.mLayoutNeeded = true;
-            win.setDisplayLayoutNeeded();
-            if (!service.mResizingWindows.contains(win)) {
-                service.mResizingWindows.add(win);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            win.onUnfreezeBounds();
+        }
+        mService.mWindowPlacerLocked.performSurfacePlacement();
+    }
+
+    void setAppLayoutChanges(int changes, String reason) {
+        if (!mChildren.isEmpty()) {
+            final DisplayContent dc = getDisplayContent();
+            dc.pendingLayoutChanges |= changes;
+            if (DEBUG_LAYOUT_REPEATS) {
+                mService.mWindowPlacerLocked.debugLayoutRepeats(reason, dc.pendingLayoutChanges);
             }
         }
-        service.mWindowPlacerLocked.performSurfacePlacement();
     }
 
-    void addSurfaceViewBackground(WindowSurfaceController.SurfaceControlWithBackground background) {
-        mSurfaceViewBackgrounds.add(background);
-    }
-
-    void removeSurfaceViewBackground(WindowSurfaceController.SurfaceControlWithBackground background) {
-        mSurfaceViewBackgrounds.remove(background);
-        updateSurfaceViewBackgroundVisibilities();
-    }
-
-    // We use DimLayers behind SurfaceViews to prevent holes while resizing and creating.
-    // However, we need to ensure one SurfaceView doesn't cover another when they are both placed
-    // below the main app window (as traditionally a SurfaceView which is never drawn
-    // to is totally translucent). So we look at all our SurfaceView backgrounds and only enable
-    // the background for the SurfaceView with lowest Z order
-    void updateSurfaceViewBackgroundVisibilities() {
-        WindowSurfaceController.SurfaceControlWithBackground bottom = null;
-        int bottomLayer = Integer.MAX_VALUE;
-        for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
-            WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
-            if (sc.mVisible && sc.mLayer < bottomLayer) {
-                bottomLayer = sc.mLayer;
-                bottom = sc;
+    void removeReplacedWindowIfNeeded(WindowState replacement) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            if (win.removeReplacedWindowIfNeeded(replacement)) {
+                return;
             }
         }
-        for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
-            WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
-            sc.updateBackgroundVisibility(sc != bottom);
+    }
+
+    void startFreezingScreen() {
+        if (DEBUG_ORIENTATION) logWithStack(TAG, "Set freezing of " + appToken + ": hidden="
+                + hidden + " freezing=" + mAppAnimator.freezingScreen + " hiddenRequested="
+                + hiddenRequested);
+        if (!hiddenRequested) {
+            if (!mAppAnimator.freezingScreen) {
+                mAppAnimator.freezingScreen = true;
+                mService.registerAppFreezeListener(this);
+                mAppAnimator.lastFreezeDuration = 0;
+                mService.mAppsFreezingScreen++;
+                if (mService.mAppsFreezingScreen == 1) {
+                    mService.startFreezingDisplayLocked(false, 0, 0, getDisplayContent());
+                    mService.mH.removeMessages(H.APP_FREEZE_TIMEOUT);
+                    mService.mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 2000);
+                }
+            }
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                final WindowState w = mChildren.get(i);
+                w.onStartFreezingScreen();
+            }
+        }
+    }
+
+    void stopFreezingScreen(boolean unfreezeSurfaceNow, boolean force) {
+        if (!mAppAnimator.freezingScreen) {
+            return;
+        }
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + this + " force=" + force);
+        final int count = mChildren.size();
+        boolean unfrozeWindows = false;
+        for (int i = 0; i < count; i++) {
+            final WindowState w = mChildren.get(i);
+            unfrozeWindows |= w.onStopFreezingScreen();
+        }
+        if (force || unfrozeWindows) {
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "No longer freezing: " + this);
+            mAppAnimator.freezingScreen = false;
+            mService.unregisterAppFreezeListener(this);
+            mAppAnimator.lastFreezeDuration =
+                    (int)(SystemClock.elapsedRealtime() - mService.mDisplayFreezeTime);
+            mService.mAppsFreezingScreen--;
+            mService.mLastFinishedFreezeSource = this;
+        }
+        if (unfreezeSurfaceNow) {
+            if (unfrozeWindows) {
+                mService.mWindowPlacerLocked.performSurfacePlacement();
+            }
+            mService.stopFreezingDisplayLocked();
+        }
+    }
+
+    @Override
+    public void onAppFreezeTimeout() {
+        Slog.w(TAG_WM, "Force clearing freeze: " + this);
+        stopFreezingScreen(true, true);
+    }
+
+    boolean transferStartingWindow(IBinder transferFrom) {
+        final AppWindowToken fromToken = getDisplayContent().getAppWindowToken(transferFrom);
+        if (fromToken == null) {
+            return false;
+        }
+
+        final WindowState tStartingWindow = fromToken.startingWindow;
+        if (tStartingWindow != null && fromToken.startingSurface != null) {
+            // In this case, the starting icon has already been displayed, so start
+            // letting windows get shown immediately without any more transitions.
+            mService.mSkipAppTransitionAnimation = true;
+
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Moving existing starting " + tStartingWindow
+                    + " from " + fromToken + " to " + this);
+
+            final long origId = Binder.clearCallingIdentity();
+
+            // Transfer the starting window over to the new token.
+            startingData = fromToken.startingData;
+            startingSurface = fromToken.startingSurface;
+            startingDisplayed = fromToken.startingDisplayed;
+            fromToken.startingDisplayed = false;
+            startingWindow = tStartingWindow;
+            reportedVisible = fromToken.reportedVisible;
+            fromToken.startingData = null;
+            fromToken.startingSurface = null;
+            fromToken.startingWindow = null;
+            fromToken.startingMoved = true;
+            tStartingWindow.mToken = this;
+            tStartingWindow.mAppToken = this;
+
+            if (DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                    "Removing starting " + tStartingWindow + " from " + fromToken);
+            fromToken.removeChild(tStartingWindow);
+            fromToken.postWindowRemoveStartingWindowCleanup(tStartingWindow);
+            fromToken.mHiddenSetFromTransferredStartingWindow = false;
+            addWindow(tStartingWindow);
+
+            // Propagate other interesting state between the tokens. If the old token is displayed,
+            // we should immediately force the new one to be displayed. If it is animating, we need
+            // to move that animation to the new one.
+            if (fromToken.allDrawn) {
+                allDrawn = true;
+                deferClearAllDrawn = fromToken.deferClearAllDrawn;
+            }
+            if (fromToken.firstWindowDrawn) {
+                firstWindowDrawn = true;
+            }
+            if (!fromToken.hidden) {
+                hidden = false;
+                hiddenRequested = false;
+                mHiddenSetFromTransferredStartingWindow = true;
+            }
+            setClientHidden(fromToken.mClientHidden);
+            fromToken.mAppAnimator.transferCurrentAnimation(
+                    mAppAnimator, tStartingWindow.mWinAnimator);
+
+            mService.updateFocusedWindowLocked(
+                    UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
+            getDisplayContent().setLayoutNeeded();
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+            Binder.restoreCallingIdentity(origId);
+            return true;
+        } else if (fromToken.startingData != null) {
+            // The previous app was getting ready to show a
+            // starting window, but hasn't yet done so.  Steal it!
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                    "Moving pending starting from " + fromToken + " to " + this);
+            startingData = fromToken.startingData;
+            fromToken.startingData = null;
+            fromToken.startingMoved = true;
+            if (getController() != null) {
+                getController().scheduleAddStartingWindow();
+            }
+            return true;
+        }
+
+        final AppWindowAnimator tAppAnimator = fromToken.mAppAnimator;
+        final AppWindowAnimator wAppAnimator = mAppAnimator;
+        if (tAppAnimator.thumbnail != null) {
+            // The old token is animating with a thumbnail, transfer that to the new token.
+            if (wAppAnimator.thumbnail != null) {
+                wAppAnimator.thumbnail.destroy();
+            }
+            wAppAnimator.thumbnail = tAppAnimator.thumbnail;
+            wAppAnimator.thumbnailLayer = tAppAnimator.thumbnailLayer;
+            wAppAnimator.thumbnailAnimation = tAppAnimator.thumbnailAnimation;
+            tAppAnimator.thumbnail = null;
+        }
+        return false;
+    }
+
+    boolean isLastWindow(WindowState win) {
+        return mChildren.size() == 1 && mChildren.get(0) == win;
+    }
+
+    void setAllAppWinAnimators() {
+        final ArrayList<WindowStateAnimator> allAppWinAnimators = mAppAnimator.mAllAppWinAnimators;
+        allAppWinAnimators.clear();
+
+        final int windowsCount = mChildren.size();
+        for (int j = 0; j < windowsCount; j++) {
+            (mChildren.get(j)).addWinAnimatorToList(allAppWinAnimators);
+        }
+    }
+
+    @Override
+    void onAppTransitionDone() {
+        sendingToBottom = false;
+    }
+
+    /**
+     * We override because this class doesn't want its children affecting its reported orientation
+     * in anyway.
+     */
+    @Override
+    int getOrientation(int candidate) {
+        // We do not allow non-fullscreen apps to influence orientation beyond O. While we do
+        // throw an exception in {@link Activity#onCreate} and
+        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
+        // other calculations aren't affected.
+        if (!fillsParent() && mTargetSdk > O) {
+            // Can't specify orientation if app doesn't fill parent.
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
+        if (candidate == SCREEN_ORIENTATION_BEHIND) {
+            // Allow app to specify orientation regardless of its visibility state if the current
+            // candidate want us to use orientation behind. I.e. the visible app on-top of this one
+            // wants us to use the orientation of the app behind it.
+            return mOrientation;
+        }
+
+        // The {@link AppWindowToken} should only specify an orientation when it is not closing or
+        // going to the bottom. Allowing closing {@link AppWindowToken} to participate can lead to
+        // an Activity in another task being started in the wrong orientation during the transition.
+        if (!(sendingToBottom || mService.mClosingApps.contains(this))
+                && (isVisible() || mService.mOpeningApps.contains(this))) {
+            return mOrientation;
+        }
+
+        return SCREEN_ORIENTATION_UNSET;
+    }
+
+    /** Returns the app's preferred orientation regardless of its currently visibility state. */
+    int getOrientationIgnoreVisibility() {
+        return mOrientation;
+    }
+
+    @Override
+    void checkAppWindowsReadyToShow() {
+        if (allDrawn == mAppAnimator.allDrawn) {
+            return;
+        }
+
+        mAppAnimator.allDrawn = allDrawn;
+        if (!allDrawn) {
+            return;
+        }
+
+        // The token has now changed state to having all windows shown...  what to do, what to do?
+        if (mAppAnimator.freezingScreen) {
+            mAppAnimator.showAllWindowsLocked();
+            stopFreezingScreen(false, true);
+            if (DEBUG_ORIENTATION) Slog.i(TAG,
+                    "Setting mOrientationChangeComplete=true because wtoken " + this
+                    + " numInteresting=" + mNumInterestingWindows + " numDrawn=" + mNumDrawnWindows);
+            // This will set mOrientationChangeComplete and cause a pass through layout.
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
+                    "checkAppWindowsReadyToShow: freezingScreen");
+        } else {
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM, "checkAppWindowsReadyToShow");
+
+            // We can now show all of the drawn windows!
+            if (!mService.mOpeningApps.contains(this)) {
+                mService.mAnimator.orAnimating(mAppAnimator.showAllWindowsLocked());
+            }
+        }
+    }
+
+    void updateAllDrawn() {
+        if (!allDrawn) {
+            // Number of drawn windows can be less when a window is being relaunched, wait for
+            // all windows to be launched and drawn for this token be considered all drawn
+            final int numInteresting = mNumInterestingWindows;
+            if (numInteresting > 0 && mNumDrawnWindows >= numInteresting && !isRelaunching()) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawn: " + this
+                        + " interesting=" + numInteresting + " drawn=" + mNumDrawnWindows);
+                allDrawn = true;
+                // Force an additional layout pass where
+                // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
+                if (mDisplayContent != null) {
+                    mDisplayContent.setLayoutNeeded();
+                }
+                mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+
+                // Notify the pinned stack upon all windows drawn. If there was an animation in
+                // progress then this signal will resume that animation.
+                final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);
+                if (pinnedStack != null) {
+                    pinnedStack.onAllWindowsDrawn();
+                }
+            }
+        }
+
+        if (!allDrawnExcludingSaved) {
+            int numInteresting = mNumInterestingWindowsExcludingSaved;
+            if (numInteresting > 0 && mNumDrawnWindowsExcludingSaved >= numInteresting) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawnExcludingSaved: " + this
+                        + " interesting=" + numInteresting
+                        + " drawn=" + mNumDrawnWindowsExcludingSaved);
+                allDrawnExcludingSaved = true;
+                if (mDisplayContent != null) {
+                    mDisplayContent.setLayoutNeeded();
+                }
+                if (isAnimatingInvisibleWithSavedSurface()
+                        && !mService.mFinishedEarlyAnim.contains(this)) {
+                    mService.mFinishedEarlyAnim.add(this);
+                }
+            }
         }
     }
 
     /**
-     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     * Updated this app token tracking states for interesting and drawn windows based on the window.
+     *
+     * @return Returns true if the input window is considered interesting and drawn while all the
+     *         windows in this app token where not considered drawn as of the last pass.
      */
-    void overridePlayingAppAnimations(Animation a) {
-        if (mAppAnimator.isAnimating()) {
-            final WindowState win = findMainWindow();
-            if (win == null) {
-                return;
-            }
-            final int width = win.mContainingFrame.width();
-            final int height = win.mContainingFrame.height();
-            mAppAnimator.setAnimation(a, width, height, false, STACK_CLIP_NONE);
+    boolean updateDrawnWindowStates(WindowState w) {
+        if (DEBUG_STARTING_WINDOW_VERBOSE && w == startingWindow) {
+            Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen=" + w.isOnScreen()
+                    + " allDrawn=" + allDrawn + " freezingScreen=" + mAppAnimator.freezingScreen);
         }
+
+        if (allDrawn && allDrawnExcludingSaved && !mAppAnimator.freezingScreen) {
+            return false;
+        }
+
+        if (mLastTransactionSequence != mService.mTransactionSequence) {
+            mLastTransactionSequence = mService.mTransactionSequence;
+            mNumInterestingWindows = mNumDrawnWindows = 0;
+            mNumInterestingWindowsExcludingSaved = 0;
+            mNumDrawnWindowsExcludingSaved = 0;
+            startingDisplayed = false;
+        }
+
+        final WindowStateAnimator winAnimator = w.mWinAnimator;
+
+        boolean isInterestingAndDrawn = false;
+
+        if (!allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
+            if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
+                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                        + ", isAnimationSet=" + winAnimator.isAnimationSet());
+                if (!w.isDrawnLw()) {
+                    Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
+                            + " pv=" + w.mPolicyVisibility
+                            + " mDrawState=" + winAnimator.drawStateToString()
+                            + " ph=" + w.isParentWindowHidden() + " th=" + hiddenRequested
+                            + " a=" + winAnimator.mAnimating);
+                }
+            }
+
+            if (w != startingWindow) {
+                if (w.isInteresting()) {
+                    mNumInterestingWindows++;
+                    if (w.isDrawnLw()) {
+                        mNumDrawnWindows++;
+
+                        if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG, "tokenMayBeDrawn: "
+                                + this + " w=" + w + " numInteresting=" + mNumInterestingWindows
+                                + " freezingScreen=" + mAppAnimator.freezingScreen
+                                + " mAppFreezing=" + w.mAppFreezing);
+
+                        isInterestingAndDrawn = true;
+                    }
+                }
+            } else if (w.isDrawnLw()) {
+                if (getController() != null) {
+                    getController().reportStartingWindowDrawn();
+                }
+                startingDisplayed = true;
+            }
+        }
+
+        if (!allDrawnExcludingSaved && w.mightAffectAllDrawn(true /* visibleOnly */)) {
+            if (w != startingWindow && w.isInteresting()) {
+                mNumInterestingWindowsExcludingSaved++;
+                if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
+                    mNumDrawnWindowsExcludingSaved++;
+
+                    if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
+                            "tokenMayBeDrawnExcludingSaved: " + this + " w=" + w
+                            + " numInteresting=" + mNumInterestingWindowsExcludingSaved
+                            + " freezingScreen=" + mAppAnimator.freezingScreen
+                            + " mAppFreezing=" + w.mAppFreezing);
+
+                    isInterestingAndDrawn = true;
+                }
+            }
+        }
+
+        return isInterestingAndDrawn;
+    }
+
+    @Override
+    void stepAppWindowsAnimation(long currentTime) {
+        mAppAnimator.wasAnimating = mAppAnimator.animating;
+        if (mAppAnimator.stepAnimationLocked(currentTime)) {
+            mAppAnimator.animating = true;
+            mService.mAnimator.setAnimating(true);
+            mService.mAnimator.mAppWindowAnimating = true;
+        } else if (mAppAnimator.wasAnimating) {
+            // stopped animating, do one more pass through the layout
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
+                    DEBUG_LAYOUT_REPEATS ? "appToken " + this + " done" : null);
+            if (DEBUG_ANIM) Slog.v(TAG, "updateWindowsApps...: done animating " + this);
+        }
+    }
+
+    @Override
+    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
+        // For legacy reasons we process the TaskStack.mExitingAppTokens first in DisplayContent
+        // before the non-exiting app tokens. So, we skip the exiting app tokens here.
+        // TODO: Investigate if we need to continue to do this or if we can just process them
+        // in-order.
+        if (mIsExiting && !waitingForReplacement()) {
+            return false;
+        }
+        return forAllWindowsUnchecked(callback, traverseTopToBottom);
+    }
+
+    boolean forAllWindowsUnchecked(ToBooleanFunction<WindowState> callback,
+            boolean traverseTopToBottom) {
+        return super.forAllWindows(callback, traverseTopToBottom);
+    }
+
+    @Override
+    AppWindowToken asAppWindowToken() {
+        // I am an app window token!
+        return this;
+    }
+
+    @Override
+    boolean fillsParent() {
+        return mFillsParent;
+    }
+
+    void setFillsParent(boolean fillsParent) {
+        mFillsParent = fillsParent;
+    }
+
+    boolean containsDismissKeyguardWindow() {
+        // Window state is transient during relaunch. We are not guaranteed to be frozen during the
+        // entirety of the relaunch.
+        if (isRelaunching()) {
+            return mLastContainsDismissKeyguardWindow;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if ((mChildren.get(i).mAttrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsShowWhenLockedWindow() {
+        // When we are relaunching, it is possible for us to be unfrozen before our previous
+        // windows have been added back. Using the cached value ensures that our previous
+        // showWhenLocked preference is honored until relaunching is complete.
+        if (isRelaunching()) {
+            return mLastContainsShowWhenLockedWindow;
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if ((mChildren.get(i).mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void checkKeyguardFlagsChanged() {
+        final boolean containsDismissKeyguard = containsDismissKeyguardWindow();
+        final boolean containsShowWhenLocked = containsShowWhenLockedWindow();
+        if (containsDismissKeyguard != mLastContainsDismissKeyguardWindow
+                || containsShowWhenLocked != mLastContainsShowWhenLockedWindow) {
+            mService.notifyKeyguardFlagsChanged(null /* callback */);
+        }
+        mLastContainsDismissKeyguardWindow = containsDismissKeyguard;
+        mLastContainsShowWhenLockedWindow = containsShowWhenLocked;
+    }
+
+    WindowState getImeTargetBelowWindow(WindowState w) {
+        final int index = mChildren.indexOf(w);
+        if (index > 0) {
+            final WindowState target = mChildren.get(index - 1);
+            if (target.canBeImeTarget()) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    WindowState getHighestAnimLayerWindow(WindowState currentTarget) {
+        WindowState candidate = null;
+        for (int i = mChildren.indexOf(currentTarget); i >= 0; i--) {
+            final WindowState w = mChildren.get(i);
+            if (w.mRemoved) {
+                continue;
+            }
+            if (candidate == null || w.mWinAnimator.mAnimLayer >
+                    candidate.mWinAnimator.mAnimLayer) {
+                candidate = w;
+            }
+        }
+        return candidate;
+    }
+
+    /**
+     * See {@link Activity#setDisablePreviewScreenshots}.
+     */
+    void setDisablePreviewScreenshots(boolean disable) {
+        mDisablePreviewScreenshots = disable;
+    }
+
+    /**
+     * Retrieves whether we'd like to generate a snapshot that's based solely on the theme. This is
+     * the case when preview screenshots are disabled {@link #setDisablePreviewScreenshots} or when
+     * we can't take a snapshot for other reasons, for example, if we have a secure window.
+     *
+     * @return True if we need to generate an app theme snapshot, false if we'd like to take a real
+     *         screenshot.
+     */
+    boolean shouldUseAppThemeSnapshot() {
+        return mDisablePreviewScreenshots || forAllWindows(w -> (w.mAttrs.flags & FLAG_SECURE) != 0,
+                true /* topToBottom */);
+    }
+
+    @Override
+    int getAnimLayerAdjustment() {
+        return mAppAnimator.animLayerAdjustment;
     }
 
     @Override
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {
-            pw.print(prefix); pw.print("app=true voiceInteraction="); pw.println(voiceInteraction);
+            pw.println(prefix + "app=true mVoiceInteraction=" + mVoiceInteraction);
         }
-        if (allAppWindows.size() > 0) {
-            pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
-        }
-        pw.print(prefix); pw.print("task="); pw.println(mTask);
-        pw.print(prefix); pw.print(" appFullscreen="); pw.print(appFullscreen);
-                pw.print(" requestedOrientation="); pw.println(requestedOrientation);
-        pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
-                pw.print(" clientHidden="); pw.print(clientHidden);
-                pw.print(" reportedDrawn="); pw.print(reportedDrawn);
-                pw.print(" reportedVisible="); pw.println(reportedVisible);
+        pw.print(prefix); pw.print("task="); pw.println(getTask());
+        pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
+                pw.print(" mOrientation="); pw.println(mOrientation);
+        pw.println(prefix + "hiddenRequested=" + hiddenRequested + " mClientHidden=" + mClientHidden
+            + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
+            + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }
         if (mAppStopped) {
             pw.print(prefix); pw.print("mAppStopped="); pw.println(mAppStopped);
         }
-        if (numInterestingWindows != 0 || numDrawnWindows != 0
+        if (mNumInterestingWindows != 0 || mNumDrawnWindows != 0
                 || allDrawn || mAppAnimator.allDrawn) {
-            pw.print(prefix); pw.print("numInterestingWindows=");
-                    pw.print(numInterestingWindows);
-                    pw.print(" numDrawnWindows="); pw.print(numDrawnWindows);
+            pw.print(prefix); pw.print("mNumInterestingWindows=");
+                    pw.print(mNumInterestingWindows);
+                    pw.print(" mNumDrawnWindows="); pw.print(mNumDrawnWindows);
                     pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
                     pw.print(" allDrawn="); pw.print(allDrawn);
                     pw.print(" (animator="); pw.print(mAppAnimator.allDrawn);
@@ -897,12 +1649,14 @@ class AppWindowToken extends WindowToken {
                     pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
                     pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
-        if (startingWindow != null || startingView != null
-                || startingDisplayed || startingMoved) {
+        if (startingWindow != null || startingSurface != null
+                || startingDisplayed || startingMoved || mHiddenSetFromTransferredStartingWindow) {
             pw.print(prefix); pw.print("startingWindow="); pw.print(startingWindow);
-                    pw.print(" startingView="); pw.print(startingView);
+                    pw.print(" startingSurface="); pw.print(startingSurface);
                     pw.print(" startingDisplayed="); pw.print(startingDisplayed);
-                    pw.print(" startingMoved="); pw.println(startingMoved);
+                    pw.print(" startingMoved="); pw.print(startingMoved);
+                    pw.println(" mHiddenSetFromTransferredStartingWindow="
+                            + mHiddenSetFromTransferredStartingWindow);
         }
         if (!mFrozenBounds.isEmpty()) {
             pw.print(prefix); pw.print("mFrozenBounds="); pw.println(mFrozenBounds);
@@ -910,6 +1664,12 @@ class AppWindowToken extends WindowToken {
         }
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
+        }
+        if (getController() != null) {
+            pw.print(prefix); pw.print("controller="); pw.println(getController());
+        }
+        if (mRemovingFromDisplay) {
+            pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
         }
     }
 
@@ -922,6 +1682,6 @@ class AppWindowToken extends WindowToken {
             sb.append(" token="); sb.append(token); sb.append('}');
             stringName = sb.toString();
         }
-        return stringName;
+        return stringName + ((mIsExiting) ? " mIsExiting=" : "");
     }
 }

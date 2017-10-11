@@ -24,17 +24,36 @@
     android:outlineProvider="none"
     android:elevation="5dp" > <!-- Put it above the status bar header -->
 
-    <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-        android:id="@+id/keyguard_indication_text"
+    <LinearLayout
+        android:id="@+id/keyguard_indication_area"
+        android:forceHasOverlappingRendering="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
         android:layout_gravity="bottom|center_horizontal"
-        android:gravity="center_horizontal"
-        android:textStyle="italic"
-        android:textColor="#ffffff"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:accessibilityLiveRegion="polite" />
+        android:orientation="vertical">
+
+        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+            android:id="@+id/keyguard_indication_enterprise_disclosure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textStyle="italic"
+            android:textColor="#ffffff"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:visibility="gone" />
+
+        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+            android:id="@+id/keyguard_indication_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textStyle="italic"
+            android:textColor="#ffffff"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:accessibilityLiveRegion="polite" />
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/preview_container"
@@ -47,7 +66,6 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|end"
-        android:tint="#ffffffff"
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button" />
@@ -57,7 +75,6 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
-        android:tint="#ffffffff"
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button" />
@@ -68,6 +85,7 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
+        android:contentDescription="@string/accessibility_unlock_button"
         android:scaleType="center" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

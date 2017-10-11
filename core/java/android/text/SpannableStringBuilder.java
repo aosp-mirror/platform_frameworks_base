@@ -17,7 +17,7 @@
 package android.text;
 
 import android.annotation.Nullable;
-import android.graphics.Canvas;
+import android.graphics.BaseCanvas;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -98,7 +98,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (en > end - start)
                     en = end - start;
 
-                setSpan(false, spans[i], st, en, fl);
+                setSpan(false, spans[i], st, en, fl, false/*enforceParagraph*/);
             }
             restoreInvariants();
         }
@@ -355,7 +355,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 }
 
                 if (spanStart != ost || spanEnd != oen) {
-                    setSpan(false, mSpans[i], spanStart, spanEnd, mSpanFlags[i]);
+                    setSpan(false, mSpans[i], spanStart, spanEnd, mSpanFlags[i],
+                            true/*enforceParagraph*/);
                     changed = true;
                 }
             }
@@ -430,13 +431,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                     int copySpanEnd = en - csStart + start;
                     int copySpanFlags = sp.getSpanFlags(spans[i]) | SPAN_ADDED;
 
-                    int flagsStart = (copySpanFlags & START_MASK) >> START_SHIFT;
-                    int flagsEnd = copySpanFlags & END_MASK;
-
-                    if(!isInvalidParagraphStart(copySpanStart, flagsStart) &&
-                            !isInvalidParagraphEnd(copySpanEnd, flagsEnd)) {
-                        setSpan(false, spans[i], copySpanStart, copySpanEnd, copySpanFlags);
-                    }
+                    setSpan(false, spans[i], copySpanStart, copySpanEnd, copySpanFlags,
+                            false/*enforceParagraph*/);
                 }
             }
             restoreInvariants();
@@ -558,7 +554,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
                 changed = true;
                 setSpan(false, Selection.SELECTION_START, selectionStart, selectionStart,
-                        Spanned.SPAN_POINT_POINT);
+                        Spanned.SPAN_POINT_POINT, true/*enforceParagraph*/);
             }
             if (selectionEnd > start && selectionEnd < end) {
                 final long diff = selectionEnd - start;
@@ -567,7 +563,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
                 changed = true;
                 setSpan(false, Selection.SELECTION_END, selectionEnd, selectionEnd,
-                        Spanned.SPAN_POINT_POINT);
+                        Spanned.SPAN_POINT_POINT, true/*enforceParagraph*/);
             }
             if (changed) {
                 restoreInvariants();
@@ -673,23 +669,34 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * inserted at the start or end of the span's range.
      */
     public void setSpan(Object what, int start, int end, int flags) {
-        setSpan(true, what, start, end, flags);
+        setSpan(true, what, start, end, flags, true/*enforceParagraph*/);
     }
 
     // Note: if send is false, then it is the caller's responsibility to restore
     // invariants. If send is false and the span already exists, then this method
     // will not change the index of any spans.
-    private void setSpan(boolean send, Object what, int start, int end, int flags) {
+    private void setSpan(boolean send, Object what, int start, int end, int flags,
+            boolean enforceParagraph) {
         checkRange("setSpan", start, end);
 
         int flagsStart = (flags & START_MASK) >> START_SHIFT;
-        if(isInvalidParagraphStart(start, flagsStart)) {
-            throw new RuntimeException("PARAGRAPH span must start at paragraph boundary");
+        if (isInvalidParagraph(start, flagsStart)) {
+            if (!enforceParagraph) {
+                // do not set the span
+                return;
+            }
+            throw new RuntimeException("PARAGRAPH span must start at paragraph boundary"
+                    + " (" + start + " follows " + charAt(start - 1) + ")");
         }
 
         int flagsEnd = flags & END_MASK;
-        if(isInvalidParagraphEnd(end, flagsEnd)) {
-            throw new RuntimeException("PARAGRAPH span must end at paragraph boundary");
+        if (isInvalidParagraph(end, flagsEnd)) {
+            if (!enforceParagraph) {
+                // do not set the span
+                return;
+            }
+            throw new RuntimeException("PARAGRAPH span must end at paragraph boundary"
+                    + " (" + end + " follows " + charAt(end - 1) + ")");
         }
 
         // 0-length Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -767,26 +774,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         }
     }
 
-    private final boolean isInvalidParagraphStart(int start, int flagsStart) {
-        if (flagsStart == PARAGRAPH) {
-            if (start != 0 && start != length()) {
-                char c = charAt(start - 1);
-
-                if (c != '\n') return true;
-            }
-        }
-        return false;
-    }
-
-    private final boolean isInvalidParagraphEnd(int end, int flagsEnd) {
-        if (flagsEnd == PARAGRAPH) {
-            if (end != 0 && end != length()) {
-                char c = charAt(end - 1);
-
-                if (c != '\n') return true;
-            }
-        }
-        return false;
+    private boolean isInvalidParagraph(int index, int flag) {
+        return flag == PARAGRAPH && index != 0 && index != length() && charAt(index - 1) != '\n';
     }
 
     /**
@@ -1412,7 +1401,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawText(Canvas c, int start, int end, float x, float y, Paint p) {
+    @Override
+    public void drawText(BaseCanvas c, int start, int end, float x, float y, Paint p) {
         checkRange("drawText", start, end);
 
         if (end <= mGapStart) {
@@ -1433,7 +1423,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
+    @Override
+    public void drawTextRun(BaseCanvas c, int start, int end, int contextStart, int contextEnd,
             float x, float y, boolean isRtl, Paint p) {
         checkRange("drawTextRun", start, end);
 

@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 #include <RecordingCanvas.h>
+#include <SkBlurDrawLooper.h>
+#include <SkCanvasStateUtils.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 
@@ -28,7 +30,7 @@ using namespace android::uirenderer;
  * Verify that we get the same culling bounds for text for (1) drawing glyphs
  * directly to a Canvas or (2) going through a SkPicture as an intermediate step.
  */
-TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
+OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // setup test variables
         SkPaint paint;
@@ -43,9 +45,10 @@ TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
         // record the same text draw into a SkPicture and replay it into a Recording canvas
         SkPictureRecorder recorder;
         SkCanvas* skCanvas = recorder.beginRecording(200, 200, NULL, 0);
-        std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas));
+        std::unique_ptr<Canvas> pictCanvas(Canvas::create_canvas(skCanvas,
+                Canvas::XformToSRGB::kDefer));
         TestUtils::drawUtf8ToCanvas(pictCanvas.get(), text, paint, 25, 25);
-        SkAutoTUnref<const SkPicture> picture(recorder.endRecording());
+        sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
         canvas.asSkCanvas()->drawPicture(picture);
     });
@@ -58,4 +61,106 @@ TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
     EXPECT_EQ(directOp->opId, pictureOp->opId);
     EXPECT_EQ(directOp->unmappedBounds, pictureOp->unmappedBounds);
     EXPECT_EQ(directOp->localMatrix, pictureOp->localMatrix);
+}
+
+TEST(SkiaCanvas, drawShadowLayer) {
+    auto surface = SkSurface::MakeRasterN32Premul(10, 10);
+    SkiaCanvas canvas(surface->getCanvas(), Canvas::XformToSRGB::kDefer);
+
+    // clear to white
+    canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrc);
+
+    SkPaint paint;
+    // it is transparent to ensure that we still draw the rect since it has a looper
+    paint.setColor(SK_ColorTRANSPARENT);
+    // this is how view's shadow layers are implemented
+    paint.setLooper(SkBlurDrawLooper::Make(0xF0000000, 6.0f, 0, 10));
+    canvas.drawRect(3, 3, 7, 7, paint);
+
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
+    ASSERT_NE(TestUtils::getColor(surface, 5, 5), SK_ColorWHITE);
+}
+
+TEST(SkiaCanvas, colorSpaceXform) {
+    sk_sp<SkColorSpace> adobe = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
+                                                      SkColorSpace::kAdobeRGB_Gamut);
+
+    SkImageInfo adobeInfo = SkImageInfo::Make(1, 1, kN32_SkColorType, kOpaque_SkAlphaType, adobe);
+    sk_sp<Bitmap> adobeBitmap = Bitmap::allocateHeapBitmap(adobeInfo);
+    SkBitmap adobeSkBitmap;
+    adobeBitmap->getSkBitmap(&adobeSkBitmap);
+    adobeSkBitmap.lockPixels();
+    *adobeSkBitmap.getAddr32(0, 0) = 0xFF0000F0; // Opaque, almost fully-red
+
+    SkImageInfo info = adobeInfo.makeColorSpace(nullptr);
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+
+    // Create a software canvas.
+    SkiaCanvas canvas(skBitmap);
+    canvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
+    // The result should be fully red, since we convert to sRGB at draw time.
+    skBitmap.lockPixels();
+    ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
+
+    // Create a software canvas with an Adobe color space.
+    SkiaCanvas adobeSkCanvas(adobeSkBitmap);
+    adobeSkCanvas.drawBitmap(*bitmap, 0, 0, nullptr);
+    // The result should be less than fully red, since we convert to Adobe RGB at draw time.
+    ASSERT_EQ(0xFF0000DC, *adobeSkBitmap.getAddr32(0, 0));
+
+    // Now try in kDefer mode.  This is a little strange given that, in practice, all software
+    // canvases are kImmediate.
+    SkCanvas skCanvas(skBitmap);
+    SkiaCanvas deferCanvas(&skCanvas, Canvas::XformToSRGB::kDefer);
+    deferCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
+    // The result should be as before, since we deferred the conversion to sRGB.
+    skBitmap.lockPixels();
+    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
+
+    // Test picture recording.  We will kDefer the xform at recording time, but handle it when
+    // we playback to the software canvas.
+    SkPictureRecorder recorder;
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkiaCanvas picCanvas(skPicCanvas, Canvas::XformToSRGB::kDefer);
+    picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+
+    // Playback to a deferred canvas.  The result should be as before.
+    deferCanvas.asSkCanvas()->drawPicture(picture);
+    ASSERT_EQ(0xFF0000DC, *skBitmap.getAddr32(0, 0));
+
+    // Playback to an immediate canvas.  The result should be fully red.
+    canvas.asSkCanvas()->drawPicture(picture);
+    ASSERT_EQ(0xFF0000FF, *skBitmap.getAddr32(0, 0));
+}
+
+TEST(SkiaCanvas, captureCanvasState) {
+    // Create a software canvas.
+    SkImageInfo info = SkImageInfo::Make(1, 1, kN32_SkColorType, kOpaque_SkAlphaType);
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+    skBitmap.eraseColor(0);
+    SkiaCanvas canvas(skBitmap);
+
+    // Translate, then capture and verify the CanvasState.
+    canvas.translate(1.0f, 1.0f);
+    SkCanvasState* state = canvas.captureCanvasState();
+    ASSERT_NE(state, nullptr);
+    std::unique_ptr<SkCanvas> newCanvas = SkCanvasStateUtils::MakeFromCanvasState(state);
+    ASSERT_NE(newCanvas.get(), nullptr);
+    newCanvas->translate(-1.0f, -1.0f);
+    ASSERT_TRUE(newCanvas->getTotalMatrix().isIdentity());
+    SkCanvasStateUtils::ReleaseCanvasState(state);
+
+    // Create a picture canvas.
+    SkPictureRecorder recorder;
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkiaCanvas picCanvas(skPicCanvas, Canvas::XformToSRGB::kDefer);
+    state = picCanvas.captureCanvasState();
+
+    // Verify that we cannot get the CanvasState.
+    ASSERT_EQ(state, nullptr);
 }

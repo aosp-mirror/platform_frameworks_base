@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2017, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    <!-- List of package names or class names which are considered as Settings,
+         so PIP location should be adjusted to the left of the side panel.
+         If it should be applied for all activities in a package, add the package name.
+         If it should be applied for an activity in a package, add its class name with package name.
+         The class name must follow format 'package_name/.class_name' ('/.' in between).
+         This can be overriden in an overlay.
+         -->
+    <string-array name="tv_pip_settings_class_name" translatable="false">
+        <item>com.android.tv.settings</item>
+        <item>com.google.android.leanbacklauncher/.settings.HomeScreenSettingsActivity</item>
+        <item>com.google.android.apps.mediashell/.settings.CastSettingsActivity</item>
+        <item>com.google.android.katniss.setting/.SpeechSettingsActivity</item>
+        <item>com.google.android.katniss.setting/.SearchSettingsActivity</item>
+        <item>com.google.android.gsf.notouch/.UsageDiagnosticsSettingActivity</item>
+        <item>com.google.android.tvlauncher/.notifications.NotificationsSidePanelActivity</item>
+    </string-array>
+</resources>

@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.notification.TransformState;
  * A view that can be transformed to and from.
  */
 public interface TransformableView {
-    int TRANSFORMING_VIEW_HEADER = 0;
+    int TRANSFORMING_VIEW_ICON = 0;
     int TRANSFORMING_VIEW_TITLE = 1;
     int TRANSFORMING_VIEW_TEXT = 2;
     int TRANSFORMING_VIEW_IMAGE = 3;

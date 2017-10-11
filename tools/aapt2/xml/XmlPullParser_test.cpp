@@ -14,42 +14,46 @@
  * limitations under the License.
  */
 
-#include "util/StringPiece.h"
 #include "xml/XmlPullParser.h"
 
-#include <gtest/gtest.h>
 #include <sstream>
+
+#include "androidfw/StringPiece.h"
+
+#include "test/Test.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
 TEST(XmlPullParserTest, NextChildNodeTraversesCorrectly) {
-    std::stringstream str;
-    str << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-            "<a><b><c xmlns:a=\"http://schema.org\"><d/></c><e/></b></a>";
-    xml::XmlPullParser parser(str);
+  std::stringstream str;
+  str << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+         "<a><b><c xmlns:a=\"http://schema.org\"><d/></c><e/></b></a>";
+  xml::XmlPullParser parser(str);
 
-    const size_t depthOuter = parser.getDepth();
-    ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthOuter));
+  const size_t depth_outer = parser.depth();
+  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_outer));
 
-    EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"a"), StringPiece16(parser.getElementName()));
+  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
+  EXPECT_EQ(StringPiece("a"), StringPiece(parser.element_name()));
 
-    const size_t depthA = parser.getDepth();
-    ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthA));
-    EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"b"), StringPiece16(parser.getElementName()));
+  const size_t depth_a = parser.depth();
+  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_a));
+  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
+  EXPECT_EQ(StringPiece("b"), StringPiece(parser.element_name()));
 
-    const size_t depthB = parser.getDepth();
-    ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthB));
-    EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"c"), StringPiece16(parser.getElementName()));
+  const size_t depth_b = parser.depth();
+  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_b));
+  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
+  EXPECT_EQ(StringPiece("c"), StringPiece(parser.element_name()));
 
-    ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthB));
-    EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"e"), StringPiece16(parser.getElementName()));
+  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_b));
+  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
+  EXPECT_EQ(StringPiece("e"), StringPiece(parser.element_name()));
 
-    ASSERT_FALSE(xml::XmlPullParser::nextChildNode(&parser, depthOuter));
-    EXPECT_EQ(xml::XmlPullParser::Event::kEndDocument, parser.getEvent());
+  ASSERT_FALSE(xml::XmlPullParser::NextChildNode(&parser, depth_outer));
+  EXPECT_EQ(xml::XmlPullParser::Event::kEndDocument, parser.event());
 }
 
-} // namespace aapt
+}  // namespace aapt

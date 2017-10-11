@@ -16,20 +16,14 @@
 
 package android.widget;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 import android.annotation.NonNull;
-import android.util.ArrayMap;
-import com.android.internal.R;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
@@ -41,7 +35,13 @@ import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import com.android.internal.R;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -209,7 +209,7 @@ public class RelativeLayout extends ViewGroup {
     private int mIgnoreGravity;
 
     private SortedSet<View> mTopToBottomLeftToRightSet = null;
-    
+
     private boolean mDirtyHierarchy;
     private View[] mSortedHorizontalChildren;
     private View[] mSortedVerticalChildren;
@@ -1013,7 +1013,8 @@ public class RelativeLayout extends ViewGroup {
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules(v.getLayoutDirection());
                 node = mGraph.mKeyNodes.get((rules[relation]));
-                if (node == null) return null;
+                // ignore self dependency. for more info look in git commit: da3003
+                if (node == null || v == node.view) return null;
                 v = node.view;
             }
 
@@ -1173,7 +1174,19 @@ public class RelativeLayout extends ViewGroup {
     }
 
     /**
-     * Per-child layout information associated with RelativeLayout.
+     * Specifies how a view is positioned within a {@link RelativeLayout}.
+     * The relative layout containing the view uses the value of these layout parameters to
+     * determine where to position the view on the screen.  If the view is not contained
+     * within a relative layout, these attributes are ignored.
+     *
+     * See the <a href=“https://developer.android.com/guide/topics/ui/layout/relative.html”>
+     * Relative Layout</a> guide for example code demonstrating how to use relative layout’s
+     * layout parameters in a layout XML.
+     *
+     * To learn more about layout parameters and how they differ from typical view attributes,
+     * see the <a href=“https://developer.android.com/guide/topics/ui/declaring-layout.html#attributes”>
+     *     Layouts guide</a>.
+     *
      *
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_alignWithParentIfMissing
      * @attr ref android.R.styleable#RelativeLayout_Layout_layout_toLeftOf

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import dalvik.annotation.optimization.FastNative;
+
 /**
  * Writes trace events to the system trace buffer.  These trace events can be
  * collected and visualized using the Systrace tool.
@@ -93,13 +95,19 @@ public final class Trace {
     private static volatile long sEnabledTags = TRACE_TAG_NOT_READY;
 
     private static native long nativeGetEnabledTags();
-    private static native void nativeTraceCounter(long tag, String name, int value);
-    private static native void nativeTraceBegin(long tag, String name);
-    private static native void nativeTraceEnd(long tag);
-    private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
-    private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
     private static native void nativeSetAppTracingAllowed(boolean allowed);
     private static native void nativeSetTracingEnabled(boolean allowed);
+
+    @FastNative
+    private static native void nativeTraceCounter(long tag, String name, int value);
+    @FastNative
+    private static native void nativeTraceBegin(long tag, String name);
+    @FastNative
+    private static native void nativeTraceEnd(long tag);
+    @FastNative
+    private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
+    @FastNative
+    private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
 
     static {
         // We configure two separate change callbacks, one in Trace.cpp and one here.  The

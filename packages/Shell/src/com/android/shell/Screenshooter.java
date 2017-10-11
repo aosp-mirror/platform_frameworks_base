@@ -20,8 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Binder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;

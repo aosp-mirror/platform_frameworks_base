@@ -20,7 +20,7 @@ import android.view.View;
 import android.view.ViewStub;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
@@ -32,7 +32,7 @@ public class FullscreenUserSwitcher {
     private UserGridView mUserGridView;
     private UserSwitcherController mUserSwitcherController;
 
-    public FullscreenUserSwitcher(PhoneStatusBar statusBar,
+    public FullscreenUserSwitcher(StatusBar statusBar,
             UserSwitcherController userSwitcherController,
             ViewStub containerStub) {
         mUserSwitcherController = userSwitcherController;

@@ -583,4 +583,17 @@ public class RectF implements Parcelable {
         right = in.readFloat();
         bottom = in.readFloat();
     }
+
+    /**
+     * Scales up the rect by the given scale.
+     * @hide
+     */
+    public void scale(float scale) {
+        if (scale != 1.0f) {
+            left = left * scale;
+            top = top * scale ;
+            right = right * scale;
+            bottom = bottom * scale;
+        }
+    }
 }

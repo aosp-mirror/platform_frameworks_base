@@ -6,17 +6,23 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
+import android.net.NetworkBadging;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
+import android.view.View;
+
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 
@@ -27,6 +33,14 @@ public class Utils {
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
+
+    public static final int[] WIFI_PIE_FOR_BADGING = {
+          com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
+    };
 
     /**
      * Return string resource that best describes combination of tethering
@@ -98,6 +112,12 @@ public class Utils {
                 UserIcons.getDefaultUserIcon(user.id, /* light= */ false)).bake();
     }
 
+    /** Formats a double from 0.0..100.0 with an option to round **/
+    public static String formatPercentage(double percentage, boolean round) {
+        final int localPercentage = round ? Math.round((float) percentage) : (int) percentage;
+        return formatPercentage(localPercentage);
+    }
+
     /** Formats the ratio of amount/total as a percentage. */
     public static String formatPercentage(long amount, long total) {
         return formatPercentage(((double) amount) / total);
@@ -110,7 +130,7 @@ public class Utils {
 
     /** Formats a double from 0.0..1.0 as a percentage. */
     private static String formatPercentage(double percentage) {
-      return NumberFormat.getPercentInstance().format(percentage);
+        return NumberFormat.getPercentInstance().format(percentage);
     }
 
     public static int getBatteryLevel(Intent batteryChangedIntent) {
@@ -120,30 +140,11 @@ public class Utils {
     }
 
     public static String getBatteryStatus(Resources res, Intent batteryChangedIntent) {
-        return Utils.getBatteryStatus(res, batteryChangedIntent, false);
-    }
-
-    public static String getBatteryStatus(Resources res, Intent batteryChangedIntent,
-            boolean shortString) {
-        int plugType = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
         int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
                 BatteryManager.BATTERY_STATUS_UNKNOWN);
         String statusString;
         if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-            int resId;
-            if (plugType == BatteryManager.BATTERY_PLUGGED_AC) {
-                resId = shortString ? R.string.battery_info_status_charging_ac_short
-                        : R.string.battery_info_status_charging_ac;
-            } else if (plugType == BatteryManager.BATTERY_PLUGGED_USB) {
-                resId = shortString ? R.string.battery_info_status_charging_usb_short
-                        : R.string.battery_info_status_charging_usb;
-            } else if (plugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
-                resId = shortString ? R.string.battery_info_status_charging_wireless_short
-                        : R.string.battery_info_status_charging_wireless;
-            } else {
-                resId = R.string.battery_info_status_charging;
-            }
-            statusString = res.getString(resId);
+            statusString = res.getString(R.string.battery_info_status_charging);
         } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
             statusString = res.getString(R.string.battery_info_status_discharging);
         } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
@@ -159,10 +160,62 @@ public class Utils {
 
     @ColorInt
     public static int getColorAccent(Context context) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+        return getColorAttr(context, android.R.attr.colorAccent);
+    }
+
+    @ColorInt
+    public static int getColorError(Context context) {
+        return getColorAttr(context, android.R.attr.colorError);
+    }
+
+    @ColorInt
+    public static int getDefaultColor(Context context, int resId) {
+        final ColorStateList list =
+                context.getResources().getColorStateList(resId, context.getTheme());
+
+        return list.getDefaultColor();
+    }
+
+    @ColorInt
+    public static int getDisabled(Context context, int inputColor) {
+        return applyAlphaAttr(context, android.R.attr.disabledAlpha, inputColor);
+    }
+
+    @ColorInt
+    public static int applyAlphaAttr(Context context, int attr, int inputColor) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        float alpha = ta.getFloat(0, 0);
+        ta.recycle();
+        return applyAlpha(alpha, inputColor);
+    }
+
+    @ColorInt
+    public static int applyAlpha(float alpha, int inputColor) {
+        alpha *= Color.alpha(inputColor);
+        return Color.argb((int) (alpha), Color.red(inputColor), Color.green(inputColor),
+                Color.blue(inputColor));
+    }
+
+    @ColorInt
+    public static int getColorAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
         @ColorInt int colorAccent = ta.getColor(0, 0);
         ta.recycle();
         return colorAccent;
+    }
+
+    public static int getThemeAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int theme = ta.getResourceId(0, 0);
+        ta.recycle();
+        return theme;
+    }
+
+    public static Drawable getDrawable(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        Drawable drawable = ta.getDrawable(0);
+        ta.recycle();
+        return drawable;
     }
 
     /**
@@ -215,5 +268,49 @@ public class Utils {
         String deviceProvisioningPackage = resources.getString(
                 com.android.internal.R.string.config_deviceProvisioningPackage);
         return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
+    /**
+     * Returns a badged Wifi icon drawable.
+     *
+     * <p>The first layer contains the Wifi pie and the second layer contains the badge. Callers
+     * should set the drawable to the appropriate size and tint color.
+     *
+     * @param context The caller's context (must have access to internal resources)
+     * @param level The number of bars to show (0-4)
+     * @param badge The badge enum {@see android.net.ScoredNetwork}
+     *
+     * @throws IllegalArgumentException if an invalid badge enum is given
+     *
+     * @deprecated TODO(sghuman): Finalize the form of this method and then move it to a new
+     *         location.
+     */
+    public static LayerDrawable getBadgedWifiIcon(Context context, int level, int badge) {
+        return new LayerDrawable(
+                new Drawable[] {
+                        context.getDrawable(WIFI_PIE_FOR_BADGING[level]),
+                        context.getDrawable(getWifiBadgeResource(badge))
+                });
+    }
+
+    /**
+     * Returns the resource id for the given badge or {@link View.NO_ID} if no badge is to be shown.
+     *
+     * @throws IllegalArgumentException if the given badge value is not supported.
+     */
+    public static int getWifiBadgeResource(int badge) {
+        switch (badge) {
+            case NetworkBadging.BADGING_NONE:
+                return View.NO_ID;
+            case NetworkBadging.BADGING_SD:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
+            case NetworkBadging.BADGING_HD:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
+            case NetworkBadging.BADGING_4K:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
+            default:
+                throw new IllegalArgumentException(
+                    "No badge resource found for badge value: " + badge);
+        }
     }
 }

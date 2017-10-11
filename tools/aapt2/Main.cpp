@@ -14,45 +14,67 @@
  * limitations under the License.
  */
 
-#include "util/StringPiece.h"
-
 #include <iostream>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
+#include "Diagnostics.h"
+
 namespace aapt {
 
-extern int compile(const std::vector<StringPiece>& args);
-extern int link(const std::vector<StringPiece>& args);
-extern int dump(const std::vector<StringPiece>& args);
-extern int diff(const std::vector<StringPiece>& args);
+// DO NOT UPDATE, this is more of a marketing version.
+static const char* sMajorVersion = "2";
 
-} // namespace aapt
+// Update minor version whenever a feature or flag is added.
+static const char* sMinorVersion = "16";
+
+int PrintVersion() {
+  std::cerr << "Android Asset Packaging Tool (aapt) " << sMajorVersion << "."
+            << sMinorVersion << std::endl;
+  return 0;
+}
+
+extern int Compile(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
+extern int Link(const std::vector<android::StringPiece>& args, IDiagnostics* diagnostics);
+extern int Dump(const std::vector<android::StringPiece>& args);
+extern int Diff(const std::vector<android::StringPiece>& args);
+extern int Optimize(const std::vector<android::StringPiece>& args);
+
+}  // namespace aapt
 
 int main(int argc, char** argv) {
-    if (argc >= 2) {
-        argv += 1;
-        argc -= 1;
+  if (argc >= 2) {
+    argv += 1;
+    argc -= 1;
 
-        std::vector<aapt::StringPiece> args;
-        for (int i = 1; i < argc; i++) {
-            args.push_back(argv[i]);
-        }
-
-        aapt::StringPiece command(argv[0]);
-        if (command == "compile" || command == "c") {
-            return aapt::compile(args);
-        } else if (command == "link" || command == "l") {
-            return aapt::link(args);
-        } else if (command == "dump" || command == "d") {
-            return aapt::dump(args);
-        } else if (command == "diff") {
-            return aapt::diff(args);
-        }
-        std::cerr << "unknown command '" << command << "'\n";
-    } else {
-        std::cerr << "no command specified\n";
+    std::vector<android::StringPiece> args;
+    for (int i = 1; i < argc; i++) {
+      args.push_back(argv[i]);
     }
 
-    std::cerr << "\nusage: aapt2 [compile|link|dump|diff] ..." << std::endl;
-    return 1;
+    android::StringPiece command(argv[0]);
+    if (command == "compile" || command == "c") {
+      aapt::StdErrDiagnostics diagnostics;
+      return aapt::Compile(args, &diagnostics);
+    } else if (command == "link" || command == "l") {
+      aapt::StdErrDiagnostics diagnostics;
+      return aapt::Link(args, &diagnostics);
+    } else if (command == "dump" || command == "d") {
+      return aapt::Dump(args);
+    } else if (command == "diff") {
+      return aapt::Diff(args);
+    } else if (command == "optimize") {
+      return aapt::Optimize(args);
+    } else if (command == "version") {
+      return aapt::PrintVersion();
+    }
+    std::cerr << "unknown command '" << command << "'\n";
+  } else {
+    std::cerr << "no command specified\n";
+  }
+
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|optimize|version] ..."
+            << std::endl;
+  return 1;
 }

@@ -16,11 +16,11 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="root"
-    android:alpha="0.3"
     android:height="48dp"
     android:width="48dp"
     android:viewportHeight="48"
-    android:viewportWidth="48" >
+    android:viewportWidth="48"
+    android:tint="?android:attr/colorControlNormal" >
     <group
         android:name="icon"
         android:translateX="21.9995"

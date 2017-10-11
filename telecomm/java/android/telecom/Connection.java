@@ -20,7 +20,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -37,14 +36,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArraySet;
 import android.view.Surface;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -526,6 +524,26 @@ public abstract class Connection extends Conferenceable {
     public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
 
     /**
+     * Connection event used to inform {@link InCallService}s when the process of merging a
+     * Connection into a conference has begun.
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_MERGE_START = "android.telecom.event.MERGE_START";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when the process of merging a
+     * Connection into a conference has completed.
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_MERGE_COMPLETE = "android.telecom.event.MERGE_COMPLETE";
+
+    /**
      * Connection event used to inform {@link InCallService}s when a call has been put on hold by
      * the remote party.
      * <p>
@@ -788,6 +806,8 @@ public abstract class Connection extends Conferenceable {
         public void onRttInitiationFailure(Connection c, int reason) {}
         public void onRttSessionRemotelyTerminated(Connection c) {}
         public void onRemoteRttRequest(Connection c) {}
+        /** @hide */
+        public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {}
     }
 
     /**
@@ -1658,6 +1678,7 @@ public abstract class Connection extends Conferenceable {
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
+    private long mConnectElapsedTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
     private int mVideoState;
     private DisconnectCause mDisconnectCause;
@@ -1799,6 +1820,22 @@ public abstract class Connection extends Conferenceable {
      */
     public final long getConnectTimeMillis() {
         return mConnectTimeMillis;
+    }
+
+    /**
+     * Retrieves the connection start time of the {@link Connection}, if specified.  A value of
+     * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
+     * start time of the conference.
+     *
+     * Based on the value of {@link SystemClock#elapsedRealtime()}, which ensures that wall-clock
+     * changes do not impact the call duration.
+     *
+     * @return The time at which the {@link Connection} was connected.
+     *
+     * @hide
+     */
+    public final long getConnectElapsedTimeMillis() {
+        return mConnectElapsedTimeMillis;
     }
 
     /**
@@ -2212,12 +2249,26 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      *
-     * @param connectionTimeMillis The connection time, in milliseconds.
+     * @param connectTimeMillis The connection time, in milliseconds.  Should be set using a value
+     *                          obtained from {@link System#currentTimeMillis()}.
      *
      * @hide
      */
     public final void setConnectTimeMillis(long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
+    }
+
+    /**
+     * Sets the time at which a call became active on this Connection. This is set only
+     * when a conference call becomes active on this connection.
+     *
+     * @param connectElapsedTimeMillis The connection time, in milliseconds.  Stored in the format
+     *                              {@link SystemClock#elapsedRealtime()}.
+     *
+     * @hide
+     */
+    public final void setConnectElapsedTimeMillis(long connectElapsedTimeMillis) {
+        mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
     /**
@@ -2991,6 +3042,18 @@ public abstract class Connection extends Conferenceable {
     protected void notifyConferenceSupportedChanged(boolean isConferenceSupported) {
         for (Listener l : mListeners) {
             l.onConferenceSupportedChanged(this, isConferenceSupported);
+        }
+    }
+
+    /**
+     * Notifies listeners when phone account is changed. For example, when the PhoneAccount is
+     * changed due to an emergency call being redialed.
+     * @param pHandle The new PhoneAccountHandle for this connection.
+     * @hide
+     */
+    public void notifyPhoneAccountChanged(PhoneAccountHandle pHandle) {
+        for (Listener l : mListeners) {
+            l.onPhoneAccountChanged(this, pHandle);
         }
     }
 

@@ -4,7 +4,8 @@
         android:height="76dp"
         android:width="76dp"
         android:viewportHeight="48"
-        android:viewportWidth="48">
+        android:viewportWidth="48"
+        android:alpha="0.6">
 
     <group
         android:name="root"
@@ -79,7 +80,7 @@
             android:fillType="nonZero"
             android:strokeWidth="1"
             android:strokeColor="#AABBCC"
-            android:fillColor="#AAEFCC"
+            android:fillColor="#40AAEFCC"
             android:pathData="M0,-40 l0, 10 l10, 0 l0, -10 l-10,0 m5,0 l0, 10 l10, 0 l0, -10 l-10,0"
         />
     </group>

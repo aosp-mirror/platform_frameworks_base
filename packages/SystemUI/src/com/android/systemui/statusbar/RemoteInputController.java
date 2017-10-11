@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import com.android.internal.util.Preconditions;
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -39,8 +40,8 @@ public class RemoteInputController {
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
     private final HeadsUpManager mHeadsUpManager;
 
-    public RemoteInputController(StatusBarWindowManager sbwm, HeadsUpManager headsUpManager) {
-        addCallback(sbwm);
+    public RemoteInputController(HeadsUpManager headsUpManager) {
+        addCallback(Dependency.get(StatusBarWindowManager.class));
         mHeadsUpManager = headsUpManager;
     }
 

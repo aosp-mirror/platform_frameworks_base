@@ -16,8 +16,9 @@
 package android.bluetooth;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.ParcelUuid;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,30 +45,35 @@ public class BluetoothGattService implements Parcelable {
     /**
      * The remote device his service is associated with.
      * This applies to client applications only.
+     *
      * @hide
      */
     protected BluetoothDevice mDevice;
 
     /**
      * The UUID of this service.
+     *
      * @hide
      */
     protected UUID mUuid;
 
     /**
      * Instance ID for this service.
+     *
      * @hide
      */
     protected int mInstanceId;
 
     /**
      * Handle counter override (for conformance testing).
+     *
      * @hide
      */
     protected int mHandles = 0;
 
     /**
      * Service type (Primary/Secondary).
+     *
      * @hide
      */
     protected int mServiceType;
@@ -93,8 +99,8 @@ public class BluetoothGattService implements Parcelable {
      *
      * @param uuid The UUID for this service
      * @param serviceType The type of this service,
-     *        {@link BluetoothGattService#SERVICE_TYPE_PRIMARY} or
-     *        {@link BluetoothGattService#SERVICE_TYPE_SECONDARY}
+     * {@link BluetoothGattService#SERVICE_TYPE_PRIMARY}
+     * or {@link BluetoothGattService#SERVICE_TYPE_SECONDARY}
      */
     public BluetoothGattService(UUID uuid, int serviceType) {
         mDevice = null;
@@ -107,10 +113,11 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Create a new BluetoothGattService
+     *
      * @hide
      */
     /*package*/ BluetoothGattService(BluetoothDevice device, UUID uuid,
-                                     int instanceId, int serviceType) {
+            int instanceId, int serviceType) {
         mDevice = device;
         mUuid = uuid;
         mInstanceId = instanceId;
@@ -121,6 +128,7 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Create a new BluetoothGattService
+     *
      * @hide
      */
     public BluetoothGattService(UUID uuid, int instanceId, int serviceType) {
@@ -148,15 +156,15 @@ public class BluetoothGattService implements Parcelable {
 
         ArrayList<BluetoothGattIncludedService> includedServices =
                 new ArrayList<BluetoothGattIncludedService>(mIncludedServices.size());
-        for(BluetoothGattService s : mIncludedServices) {
+        for (BluetoothGattService s : mIncludedServices) {
             includedServices.add(new BluetoothGattIncludedService(s.getUuid(),
-                                                                  s.getInstanceId(), s.getType()));
+                    s.getInstanceId(), s.getType()));
         }
         out.writeTypedList(includedServices);
-     }
+    }
 
-    public static final Parcelable.Creator<BluetoothGattService> CREATOR
-            = new Parcelable.Creator<BluetoothGattService>() {
+    public static final Parcelable.Creator<BluetoothGattService> CREATOR =
+            new Parcelable.Creator<BluetoothGattService>() {
         public BluetoothGattService createFromParcel(Parcel in) {
             return new BluetoothGattService(in);
         }
@@ -167,7 +175,7 @@ public class BluetoothGattService implements Parcelable {
     };
 
     private BluetoothGattService(Parcel in) {
-        mUuid = ((ParcelUuid)in.readParcelable(null)).getUuid();
+        mUuid = ((ParcelUuid) in.readParcelable(null)).getUuid();
         mInstanceId = in.readInt();
         mServiceType = in.readInt();
 
@@ -189,13 +197,14 @@ public class BluetoothGattService implements Parcelable {
         if (chrcs != null) {
             for (BluetoothGattIncludedService isvc : inclSvcs) {
                 mIncludedServices.add(new BluetoothGattService(null, isvc.getUuid(),
-                                                            isvc.getInstanceId(), isvc.getType()));
+                        isvc.getInstanceId(), isvc.getType()));
             }
         }
     }
 
     /**
      * Returns the device associated with this service.
+     *
      * @hide
      */
     /*package*/ BluetoothDevice getDevice() {
@@ -204,10 +213,11 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Returns the device associated with this service.
+     *
      * @hide
      */
     /*package*/ void setDevice(BluetoothDevice device) {
-        this.mDevice = device;
+        mDevice = device;
     }
 
     /**
@@ -237,19 +247,22 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Get characteristic by UUID and instanceId.
+     *
      * @hide
      */
     /*package*/ BluetoothGattCharacteristic getCharacteristic(UUID uuid, int instanceId) {
-        for(BluetoothGattCharacteristic characteristic : mCharacteristics) {
+        for (BluetoothGattCharacteristic characteristic : mCharacteristics) {
             if (uuid.equals(characteristic.getUuid())
-             && characteristic.getInstanceId() == instanceId)
+                    && characteristic.getInstanceId() == instanceId) {
                 return characteristic;
+            }
         }
         return null;
     }
 
     /**
      * Force the instance ID.
+     *
      * @hide
      */
     public void setInstanceId(int instanceId) {
@@ -258,6 +271,7 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Get the handle count override (conformance testing.
+     *
      * @hide
      */
     /*package*/ int getHandles() {
@@ -267,6 +281,7 @@ public class BluetoothGattService implements Parcelable {
     /**
      * Force the number of handles to reserve for this service.
      * This is needed for conformance testing only.
+     *
      * @hide
      */
     public void setHandles(int handles) {
@@ -275,6 +290,7 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Add an included service to the internal map.
+     *
      * @hide
      */
     public void addIncludedService(BluetoothGattService includedService) {
@@ -313,8 +329,7 @@ public class BluetoothGattService implements Parcelable {
     /**
      * Get the list of included GATT services for this service.
      *
-     * @return List of included services or empty list if no included services
-     *         were discovered.
+     * @return List of included services or empty list if no included services were discovered.
      */
     public List<BluetoothGattService> getIncludedServices() {
         return mIncludedServices;
@@ -341,30 +356,33 @@ public class BluetoothGattService implements Parcelable {
      * UUID, the first instance of a characteristic with the given UUID
      * is returned.
      *
-     * @return GATT characteristic object or null if no characteristic with the
-     *         given UUID was found.
+     * @return GATT characteristic object or null if no characteristic with the given UUID was
+     * found.
      */
     public BluetoothGattCharacteristic getCharacteristic(UUID uuid) {
-        for(BluetoothGattCharacteristic characteristic : mCharacteristics) {
-            if (uuid.equals(characteristic.getUuid()))
+        for (BluetoothGattCharacteristic characteristic : mCharacteristics) {
+            if (uuid.equals(characteristic.getUuid())) {
                 return characteristic;
+            }
         }
         return null;
     }
 
     /**
      * Returns whether the uuid of the service should be advertised.
+     *
      * @hide
      */
     public boolean isAdvertisePreferred() {
-      return mAdvertisePreferred;
+        return mAdvertisePreferred;
     }
 
     /**
      * Set whether the service uuid should be advertised.
+     *
      * @hide
      */
     public void setAdvertisePreferred(boolean advertisePreferred) {
-      this.mAdvertisePreferred = advertisePreferred;
+        mAdvertisePreferred = advertisePreferred;
     }
 }

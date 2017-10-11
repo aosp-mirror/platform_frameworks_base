@@ -67,13 +67,13 @@ void GpuMemoryTracker::stopTrackingObject() {
     gObjectStats[static_cast<int>(mType)].count--;
 }
 
-void GpuMemoryTracker::onGLContextCreated() {
-    LOG_ALWAYS_FATAL_IF(gGpuThread != 0, "We already have a GL thread? "
-            "current = %lu, gl thread = %lu", pthread_self(), gGpuThread);
+void GpuMemoryTracker::onGpuContextCreated() {
+    LOG_ALWAYS_FATAL_IF(gGpuThread != 0, "We already have a gpu thread? "
+            "current = %lu, gpu thread = %lu", pthread_self(), gGpuThread);
     gGpuThread = pthread_self();
 }
 
-void GpuMemoryTracker::onGLContextDestroyed() {
+void GpuMemoryTracker::onGpuContextDestroyed() {
     gGpuThread = 0;
     if (CC_UNLIKELY(gObjectSet.size() > 0)) {
         std::stringstream os;

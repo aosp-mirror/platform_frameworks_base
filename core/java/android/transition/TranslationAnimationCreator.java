@@ -15,8 +15,6 @@
  */
 package android.transition;
 
-import com.android.internal.R;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -24,6 +22,8 @@ import android.animation.TimeInterpolator;
 import android.graphics.Path;
 import android.transition.Transition.TransitionListener;
 import android.view.View;
+
+import com.android.internal.R;
 
 /**
  * This class is used by Slide and Explode to create an animator that goes from the start
@@ -145,6 +145,7 @@ class TranslationAnimationCreator {
         public void onTransitionEnd(Transition transition) {
             mMovingView.setTranslationX(mTerminalX);
             mMovingView.setTranslationY(mTerminalY);
+            transition.removeListener(this);
         }
 
         @Override

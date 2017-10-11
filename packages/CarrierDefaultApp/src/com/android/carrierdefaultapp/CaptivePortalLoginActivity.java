@@ -68,7 +68,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private static final boolean DBG = true;
 
     private static final int SOCKET_TIMEOUT_MS = 10 * 1000;
-    private static final int NETWORK_REQUEST_TIMEOUT_MS = 5 * 1000;
+    public static final int NETWORK_REQUEST_TIMEOUT_MS = 5 * 1000;
 
     private URL mUrl;
     private Network mNetwork;
@@ -91,7 +91,7 @@ public class CaptivePortalLoginActivity extends Activity {
         setContentView(R.layout.activity_captive_portal_login);
         getActionBar().setDisplayShowHomeEnabled(false);
 
-        mWebView = (WebView) findViewById(R.id.webview);
+        mWebView = findViewById(R.id.webview);
         mWebView.clearCache(true);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -117,7 +117,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        WebView myWebView = (WebView) findViewById(R.id.webview);
+        WebView myWebView = findViewById(R.id.webview);
         if (myWebView.canGoBack() && mWebViewClient.allowBack()) {
             myWebView.goBack();
         } else {
@@ -170,7 +170,8 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void done(boolean success) {
-        if (DBG) logd(String.format("Result success %b for %s", success, mUrl.toString()));
+        if (DBG) logd(String.format("Result success %b for %s", success,
+                mUrl != null ? mUrl.toString() : "null"));
         if (success) {
             // Trigger re-evaluation upon success http response code
             CarrierActionUtils.applyCarrierAction(
@@ -224,9 +225,10 @@ public class CaptivePortalLoginActivity extends Activity {
                 }
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
-                TrafficStats.setThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
+                int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
                 try {
-                    urlConnection = (HttpURLConnection) mNetwork.openConnection(mUrl);
+                    urlConnection = (HttpURLConnection) mNetwork.openConnection(
+                            new URL(mCm.getCaptivePortalServerUrl()));
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
@@ -234,8 +236,10 @@ public class CaptivePortalLoginActivity extends Activity {
                     urlConnection.getInputStream();
                     httpResponseCode = urlConnection.getResponseCode();
                 } catch (IOException e) {
+                    loge(e.getMessage());
                 } finally {
                     if (urlConnection != null) urlConnection.disconnect();
+                    TrafficStats.setThreadStatsTag(oldTag);
                 }
                 if (httpResponseCode == 204) {
                     done(true);
@@ -331,7 +335,7 @@ public class CaptivePortalLoginActivity extends Activity {
             // For internally generated pages, leave URL bar listing prior URL as this is the URL
             // the page refers to.
             if (!url.startsWith(INTERNAL_ASSETS)) {
-                final TextView myUrlBar = (TextView) findViewById(R.id.url_bar);
+                final TextView myUrlBar = findViewById(R.id.url_bar);
                 myUrlBar.setText(url);
             }
             if (mNetwork != null) {
@@ -415,7 +419,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private class MyWebChromeClient extends WebChromeClient {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
-            final ProgressBar myProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            final ProgressBar myProgressBar = findViewById(R.id.progress_bar);
             myProgressBar.setProgress(newProgress);
         }
     }

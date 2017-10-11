@@ -19,6 +19,8 @@
 
 #include <SkBitmap.h>
 
+#include <cutils/compiler.h>
+
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
 
@@ -28,6 +30,9 @@
 #include <unordered_map>
 
 namespace android {
+
+class Bitmap;
+
 namespace uirenderer {
 
 class Texture;
@@ -46,8 +51,6 @@ class Texture;
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
-
-class AssetAtlas;
 
 /**
  * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
@@ -75,40 +78,26 @@ public:
      * acquired for the bitmap, false otherwise. If a Texture was acquired it is
      * marked as in use.
      */
-    bool prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap);
+    bool prefetchAndMarkInUse(void* ownerToken, Bitmap* bitmap);
 
     /**
      * Attempts to precache the SkBitmap. Returns true if a Texture was successfully
      * acquired for the bitmap, false otherwise. Does not mark the Texture
      * as in use and won't update currently in-use Textures.
      */
-    bool prefetch(const SkBitmap* bitmap);
+    bool prefetch(Bitmap* bitmap);
 
     /**
-     * Returns the texture associated with the specified bitmap from either within the cache, or
-     * the AssetAtlas. If the texture cannot be found in the cache, a new texture is generated.
+     * Returns the texture associated with the specified bitmap from within the cache.
+     * If the texture cannot be found in the cache, a new texture is generated.
      */
-    Texture* get(const SkBitmap* bitmap) {
-        return get(bitmap, AtlasUsageType::Use);
-    }
+    Texture* get(Bitmap* bitmap);
 
     /**
-     * Returns the texture associated with the specified bitmap. If the texture cannot be found in
-     * the cache, a new texture is generated, even if it resides in the AssetAtlas.
+     * Removes the texture associated with the specified pixelRef. Must be called from RenderThread
+     * Returns true if a texture was destroyed, false if no texture with that id was found
      */
-    Texture* getAndBypassAtlas(const SkBitmap* bitmap) {
-        return get(bitmap, AtlasUsageType::Bypass);
-    }
-
-    /**
-     * Removes the texture associated with the specified pixelRef. This is meant
-     * to be called from threads that are not the EGL context thread.
-     */
-    ANDROID_API void releaseTexture(uint32_t pixelRefStableID);
-    /**
-     * Process deferred removals.
-     */
-    void clearGarbage();
+    bool destroyTexture(uint32_t pixelRefStableID);
 
     /**
      * Clears the cache. This causes all textures to be deleted.
@@ -130,18 +119,11 @@ public:
      */
     void flush();
 
-    void setAssetAtlas(AssetAtlas* assetAtlas);
-
 private:
-    enum class AtlasUsageType {
-        Use,
-        Bypass,
-    };
+    bool canMakeTextureFromBitmap(Bitmap* bitmap);
 
-    bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
-
-    Texture* get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
-    Texture* getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType);
+    Texture* getCachedTexture(Bitmap* bitmap);
+    Texture* createTexture(Bitmap* bitmap);
 
     LruCache<uint32_t, Texture*> mCache;
 
@@ -153,10 +135,7 @@ private:
 
     bool mDebugEnabled;
 
-    std::vector<uint32_t> mGarbage;
-    mutable Mutex mLock;
-
-    AssetAtlas* mAssetAtlas;
+    std::unordered_map<uint32_t, std::unique_ptr<Texture>> mHardwareTextures;
 }; // class TextureCache
 
 }; // namespace uirenderer

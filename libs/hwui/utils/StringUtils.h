@@ -16,10 +16,14 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
+#include <iomanip>
+#include <iostream>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <unordered_set>
-#include <ostream>
-#include <iomanip>
+
+#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -48,6 +52,22 @@ struct SizePrinter {
         }
         stream << std::fixed << std::setprecision(2) << temp << SUFFIXES[suffix];
         return stream;
+    }
+};
+
+class LogcatStream: public std::ostream {
+    class LogcatStreamBuf: public std::stringbuf {
+        virtual int sync() {
+            ALOGD("%s", str().c_str());
+            str("");
+            return 0;
+        }
+    };
+
+    LogcatStreamBuf buffer;
+public:
+    LogcatStream()
+            :std::ostream(&buffer) {
     }
 };
 

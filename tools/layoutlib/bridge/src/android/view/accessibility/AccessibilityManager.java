@@ -92,6 +92,12 @@ public final class AccessibilityManager {
             new IAccessibilityManagerClient.Stub() {
                 public void setState(int state) {
                 }
+
+                public void notifyServicesStateChanged() {
+                }
+
+                public void setRelevantEventTypes(int eventTypes) {
+                }
             };
 
     /**

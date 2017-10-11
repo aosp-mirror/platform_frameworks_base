@@ -41,10 +41,10 @@ public class CrossfadeImage extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.crossfade_image);
 
-        ViewGroup container = (ViewGroup) findViewById(R.id.container);
+        ViewGroup container = findViewById(R.id.container);
         mSceneRoot = container;
 
-        mImageView = (ImageView) findViewById(R.id.contact_picture);
+        mImageView = findViewById(R.id.contact_picture);
         mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         Crossfade mCrossfade = new Crossfade();

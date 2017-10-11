@@ -16,17 +16,28 @@
 
 package android.os;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
+
+import libcore.io.Streams;
 
 import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -39,6 +50,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import com.android.internal.logging.MetricsLogger;
 
@@ -57,6 +70,7 @@ import sun.security.pkcs.SignerInfo;
  * recovery system (the separate partition that can be used to install
  * system updates, wipe user data, etc.)
  */
+@SystemService(Context.RECOVERY_SERVICE)
 public class RecoverySystem {
     private static final String TAG = "RecoverySystem";
 
@@ -317,6 +331,71 @@ public class RecoverySystem {
         } finally {
             raf.close();
         }
+
+        // Additionally verify the package compatibility.
+        if (!readAndVerifyPackageCompatibilityEntry(packageFile)) {
+            throw new SignatureException("package compatibility verification failed");
+        }
+    }
+
+    /**
+     * Verifies the compatibility entry from an {@link InputStream}.
+     *
+     * @return the verification result.
+     */
+    private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
+        ArrayList<String> list = new ArrayList<>();
+        ZipInputStream zis = new ZipInputStream(inputStream);
+        ZipEntry entry;
+        while ((entry = zis.getNextEntry()) != null) {
+            long entrySize = entry.getSize();
+            if (entrySize > Integer.MAX_VALUE || entrySize < 0) {
+                throw new IOException(
+                        "invalid entry size (" + entrySize + ") in the compatibility file");
+            }
+            byte[] bytes = new byte[(int) entrySize];
+            Streams.readFully(zis, bytes);
+            list.add(new String(bytes, UTF_8));
+        }
+        if (list.isEmpty()) {
+            throw new IOException("no entries found in the compatibility file");
+        }
+        return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
+    }
+
+    /**
+     * Reads and verifies the compatibility entry in an OTA zip package. The compatibility entry is
+     * a zip file (inside the OTA package zip).
+     *
+     * @return {@code true} if the entry doesn't exist or verification passes.
+     */
+    private static boolean readAndVerifyPackageCompatibilityEntry(File packageFile)
+            throws IOException {
+        try (ZipFile zip = new ZipFile(packageFile)) {
+            ZipEntry entry = zip.getEntry("compatibility.zip");
+            if (entry == null) {
+                return true;
+            }
+            InputStream inputStream = zip.getInputStream(entry);
+            return verifyPackageCompatibility(inputStream);
+        }
+    }
+
+    /**
+     * Verifies the package compatibility info against the current system.
+     *
+     * @param compatibilityFile the {@link File} that contains the package compatibility info.
+     * @throws IOException if there were any errors reading the compatibility file.
+     * @return the compatibility verification result.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    @SuppressLint("Doclava125")
+    public static boolean verifyPackageCompatibility(File compatibilityFile) throws IOException {
+        try (InputStream inputStream = new FileInputStream(compatibilityFile)) {
+            return verifyPackageCompatibility(inputStream);
+        }
     }
 
     /**
@@ -335,6 +414,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void processPackage(Context context,
                                       File packageFile,
                                       final ProgressListener listener,
@@ -395,6 +475,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void processPackage(Context context,
                                       File packageFile,
                                       final ProgressListener listener)
@@ -416,6 +497,7 @@ public class RecoverySystem {
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void installPackage(Context context, File packageFile)
             throws IOException {
         installPackage(context, packageFile, false);
@@ -437,6 +519,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void installPackage(Context context, File packageFile, boolean processed)
             throws IOException {
         synchronized (sRequestLock) {
@@ -499,7 +582,16 @@ public class RecoverySystem {
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            pm.reboot(PowerManager.REBOOT_RECOVERY_UPDATE);
+            String reason = PowerManager.REBOOT_RECOVERY_UPDATE;
+
+            // On TV, reboot quiescently if the screen is off
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                if (wm.getDefaultDisplay().getState() != Display.STATE_ON) {
+                    reason += ",quiescent";
+                }
+            }
+            pm.reboot(reason);
 
             throw new IOException("Reboot failed (no permissions?)");
         }
@@ -519,6 +611,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void scheduleUpdateOnBoot(Context context, File packageFile)
             throws IOException {
         String filename = packageFile.getCanonicalPath();
@@ -556,6 +649,7 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void cancelScheduledUpdate(Context context)
             throws IOException {
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
@@ -623,7 +717,8 @@ public class RecoverySystem {
         final ConditionVariable condition = new ConditionVariable();
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         context.sendOrderedBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.MASTER_CLEAR,
                 new BroadcastReceiver() {
@@ -648,6 +743,18 @@ public class RecoverySystem {
 
         final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
+    }
+
+    /** {@hide} */
+    public static void rebootPromptAndWipeUserData(Context context, String reason)
+            throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, null, "--prompt_and_wipe_data", reasonArg, localeArg);
     }
 
     /**
@@ -681,6 +788,10 @@ public class RecoverySystem {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.RECOVERY,
+            android.Manifest.permission.REBOOT
+    })
     public static void rebootWipeAb(Context context, File packageFile, String reason)
             throws IOException {
         String reasonArg = null;

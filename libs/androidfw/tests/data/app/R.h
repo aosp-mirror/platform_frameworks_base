@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef __APP_R_H
-#define __APP_R_H
+#ifndef TEST_DATA_APP_R_H_
+#define TEST_DATA_APP_R_H_
 
+#include <cstdint>
+
+namespace com {
+namespace android {
 namespace app {
-namespace R {
 
-namespace attr {
-    enum {
-        number         = 0x7f010000,   // default
+struct R {
+  struct attr {
+    enum : uint32_t {
+      number = 0x7f010000,  // default
     };
-}
+  };
 
-namespace style {
-    enum {
-        Theme_One      = 0x7f020000,   // default
+  struct style {
+    enum : uint32_t {
+      Theme_One = 0x7f020000,  // default
     };
-}
+  };
+};
 
-} // namespace R
-} // namespace app
+}  // namespace app
+}  // namespace android
+}  // namespace com
 
-#endif // __APP_R_H
+#endif  // TEST_DATA_APP_R_H_

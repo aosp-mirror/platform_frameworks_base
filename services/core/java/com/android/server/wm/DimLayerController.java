@@ -11,6 +11,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.DimLayer.DimLayerUser;
 
 import java.io.PrintWriter;
@@ -187,19 +188,44 @@ class DimLayerController {
     boolean animateDimLayers() {
         int fullScreen = -1;
         int fullScreenAndDimming = -1;
+        int topFullScreenUserLayer = 0;
         boolean result = false;
 
         for (int i = mState.size() - 1; i >= 0; i--) {
-            DimLayer.DimLayerUser user = mState.keyAt(i);
-            DimLayerState state = mState.valueAt(i);
+            final DimLayer.DimLayerUser user = mState.keyAt(i);
+            final DimLayerState state = mState.valueAt(i);
+
+            if (!user.isAttachedToDisplay()) {
+                // Leaked dim user that is no longer attached to the display. Go ahead and clean it
+                // clean-up and log what happened.
+                // TODO: This is a work around for b/34395537 as the dim user should have cleaned-up
+                // it self when it was detached from the display. Need to investigate how the dim
+                // user is leaking...
+                //Slog.wtfStack(TAG_WM, "Leaked dim user=" + user.toShortString()
+                //        + " state=" + state);
+                Slog.w(TAG_WM, "Leaked dim user=" + user.toShortString() + " state=" + state);
+                removeDimLayerUser(user);
+                continue;
+            }
+
             // We have to check that we are actually the shared fullscreen layer
             // for this path. If we began as non fullscreen and became fullscreen
             // (e.g. Docked stack closing), then we may not be the shared layer
             // and we have to make sure we always animate the layer.
             if (user.dimFullscreen() && state.dimLayer == mSharedFullScreenDimLayer) {
                 fullScreen = i;
-                if (mState.valueAt(i).continueDimming) {
+                if (!state.continueDimming) {
+                    continue;
+                }
+
+                // When choosing which user to assign the shared fullscreen layer to
+                // we need to look at Z-order.
+                if (topFullScreenUserLayer == 0 ||
+                        (state.animator != null && state.animator.mAnimLayer > topFullScreenUserLayer)) {
                     fullScreenAndDimming = i;
+                    if (state.animator != null) {
+                        topFullScreenUserLayer = state.animator.mAnimLayer;
+                    }
                 }
             } else {
                 // We always want to animate the non fullscreen windows, they don't share their
@@ -256,7 +282,7 @@ class DimLayerController {
                 // on whether a dim layer is showing or not.
                 if (targetAlpha == 0) {
                     mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-                    mDisplayContent.layoutNeeded = true;
+                    mDisplayContent.setLayoutNeeded();
                 }
             }
         } else if (state.dimLayer.getLayer() != dimLayer) {
@@ -308,6 +334,19 @@ class DimLayerController {
             }
             mState.remove(dimLayerUser);
         }
+        if (mState.isEmpty()) {
+            mSharedFullScreenDimLayer = null;
+        }
+    }
+
+    @VisibleForTesting
+    boolean hasDimLayerUser(DimLayer.DimLayerUser dimLayerUser) {
+        return mState.containsKey(dimLayerUser);
+    }
+
+    @VisibleForTesting
+    boolean hasSharedFullScreenDimLayer() {
+        return mSharedFullScreenDimLayer != null;
     }
 
     void applyDimBehind(DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator) {

@@ -16,10 +16,10 @@
 
 package android.text;
 
+import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
+
 import android.annotation.Nullable;
 import android.view.View;
-
-import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
 
 import java.util.Locale;
 
@@ -355,7 +355,11 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #isRtl(String)}, but takes a CharSequence instead of a string
+     *
+     * @param str CharSequence whose directionality is to be estimated.
+     * @return true if {@code str}'s estimated overall directionality is RTL. Otherwise returns
+     *          false.
      */
     public boolean isRtl(CharSequence str) {
         return mDefaultTextDirectionHeuristic.isRtl(str, 0, str.length());
@@ -398,7 +402,16 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(String, TextDirectionHeuristic, boolean)}, but takes a
+     * CharSequence instead of a string
+     *
+     * @param str The input CharSequence.
+     * @param heuristic The algorithm to be used to estimate the CharSequence's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
+     * @param isolate Whether to directionally isolate the CharSequence to prevent it from garbling
+     *     the content around it
+     * @return Input CharSequence after applying the above processing. {@code null} if {@code str}
+     *     is {@code null}.
      */
     public @Nullable CharSequence unicodeWrap(@Nullable CharSequence str,
             TextDirectionHeuristic heuristic, boolean isolate) {
@@ -437,7 +450,13 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but
+     * assumes {@code isolate} is true.
+     *
+     * @param str The input CharSequence.
+     * @param heuristic The algorithm to be used to estimate the CharSequence's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str, TextDirectionHeuristic heuristic) {
         return unicodeWrap(str, heuristic, true /* isolate */);
@@ -458,7 +477,13 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but uses
+     * the formatter's default direction estimation algorithm.
+     *
+     * @param str The input CharSequence.
+     * @param isolate Whether to directionally isolate the CharSequence to prevent it from garbling
+     *     the content around it
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str, boolean isolate) {
         return unicodeWrap(str, mDefaultTextDirectionHeuristic, isolate);
@@ -476,7 +501,11 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but uses
+     * the formatter's default direction estimation algorithm and assumes {@code isolate} is true.
+     *
+     * @param str The input CharSequence.
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str) {
         return unicodeWrap(str, mDefaultTextDirectionHeuristic, true /* isolate */);
@@ -563,7 +592,18 @@ public final class BidiFormatter {
         static {
             DIR_TYPE_CACHE = new byte[DIR_TYPE_CACHE_SIZE];
             for (int i = 0; i < DIR_TYPE_CACHE_SIZE; i++) {
+                // Calling Character.getDirectionality() is OK here, since new emojis start after
+                // the end of our cache.
                 DIR_TYPE_CACHE[i] = Character.getDirectionality(i);
+            }
+        }
+
+        private static byte getDirectionality(int codePoint) {
+            if (Emoji.isNewEmoji(codePoint)) {
+                // TODO: Fix or remove once emoji-data.text 5.0 is in ICU or update to 6.0.
+                return Character.DIRECTIONALITY_OTHER_NEUTRALS;
+            } else {
+                return Character.getDirectionality(codePoint);
             }
         }
 
@@ -780,7 +820,7 @@ public final class BidiFormatter {
          * cache.
          */
         private static byte getCachedDirectionality(char c) {
-            return c < DIR_TYPE_CACHE_SIZE ? DIR_TYPE_CACHE[c] : Character.getDirectionality(c);
+            return c < DIR_TYPE_CACHE_SIZE ? DIR_TYPE_CACHE[c] : getDirectionality(c);
         }
 
         /**
@@ -797,7 +837,7 @@ public final class BidiFormatter {
             if (Character.isHighSurrogate(lastChar)) {
                 int codePoint = Character.codePointAt(text, charIndex);
                 charIndex += Character.charCount(codePoint);
-                return Character.getDirectionality(codePoint);
+                return getDirectionality(codePoint);
             }
             charIndex++;
             byte dirType = getCachedDirectionality(lastChar);
@@ -827,7 +867,7 @@ public final class BidiFormatter {
             if (Character.isLowSurrogate(lastChar)) {
                 int codePoint = Character.codePointBefore(text, charIndex);
                 charIndex -= Character.charCount(codePoint);
-                return Character.getDirectionality(codePoint);
+                return getDirectionality(codePoint);
             }
             charIndex--;
             byte dirType = getCachedDirectionality(lastChar);

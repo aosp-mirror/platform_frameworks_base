@@ -25,6 +25,7 @@ import android.system.ErrnoException;
 import android.system.StructPollfd;
 import android.util.Log;
 
+import android.util.Slog;
 import java.io.IOException;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
@@ -45,7 +46,16 @@ class ZygoteServer {
 
     private LocalServerSocket mServerSocket;
 
+    /**
+     * Set by the child process, immediately after a call to {@code Zygote.forkAndSpecialize}.
+     */
+    private boolean mIsForkChild;
+
     ZygoteServer() {
+    }
+
+    void setForkChild() {
+        mIsForkChild = true;
     }
 
     /**
@@ -129,11 +139,8 @@ class ZygoteServer {
      * Runs the zygote process's select loop. Accepts new connections as
      * they happen, and reads commands from connections one spawn-request's
      * worth at a time.
-     *
-     * @throws Zygote.MethodAndArgsCaller in a child process when a main()
-     * should be executed.
      */
-    void runSelectLoop(String abiList) throws Zygote.MethodAndArgsCaller {
+    Runnable runSelectLoop(String abiList) {
         ArrayList<FileDescriptor> fds = new ArrayList<FileDescriptor>();
         ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
 
@@ -156,15 +163,62 @@ class ZygoteServer {
                 if ((pollFds[i].revents & POLLIN) == 0) {
                     continue;
                 }
+
                 if (i == 0) {
                     ZygoteConnection newPeer = acceptCommandPeer(abiList);
                     peers.add(newPeer);
                     fds.add(newPeer.getFileDesciptor());
                 } else {
-                    boolean done = peers.get(i).runOnce(this);
-                    if (done) {
-                        peers.remove(i);
-                        fds.remove(i);
+                    try {
+                        ZygoteConnection connection = peers.get(i);
+                        final Runnable command = connection.processOneCommand(this);
+
+                        if (mIsForkChild) {
+                            // We're in the child. We should always have a command to run at this
+                            // stage if processOneCommand hasn't called "exec".
+                            if (command == null) {
+                                throw new IllegalStateException("command == null");
+                            }
+
+                            return command;
+                        } else {
+                            // We're in the server - we should never have any commands to run.
+                            if (command != null) {
+                                throw new IllegalStateException("command != null");
+                            }
+
+                            // We don't know whether the remote side of the socket was closed or
+                            // not until we attempt to read from it from processOneCommand. This shows up as
+                            // a regular POLLIN event in our regular processing loop.
+                            if (connection.isClosedByPeer()) {
+                                connection.closeSocket();
+                                peers.remove(i);
+                                fds.remove(i);
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (!mIsForkChild) {
+                            // We're in the server so any exception here is one that has taken place
+                            // pre-fork while processing commands or reading / writing from the
+                            // control socket. Make a loud noise about any such exceptions so that
+                            // we know exactly what failed and why.
+
+                            Slog.e(TAG, "Exception executing zygote command: ", e);
+
+                            // Make sure the socket is closed so that the other end knows immediately
+                            // that something has gone wrong and doesn't time out waiting for a
+                            // response.
+                            ZygoteConnection conn = peers.remove(i);
+                            conn.closeSocket();
+
+                            fds.remove(i);
+                        } else {
+                            // We're in the child so any exception caught here has happened post
+                            // fork and before we execute ActivityThread.main (or any other main()
+                            // method). Log the details of the exception and bring down the process.
+                            Log.e(TAG, "Caught post-fork exception in child process.", e);
+                            throw e;
+                        }
                     }
                 }
             }

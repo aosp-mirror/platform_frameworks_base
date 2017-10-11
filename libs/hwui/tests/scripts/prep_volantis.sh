@@ -16,16 +16,8 @@
 
 adb root
 adb wait-for-device
-adb shell stop mpdecision
 adb shell stop perfd
-adb shell stop
-for pid in $( adb shell ps | awk '{ if ( $9 == "surfaceflinger" ) { print $2 } }' ); do
-    adb shell kill $pid
-done
-adb shell setprop debug.egl.traceGpuCompletion 1
-adb shell daemonize surfaceflinger
-sleep 3
-adb shell setprop service.bootanim.exit 1
+adb shell stop thermal-engine
 
 # cpu possible frequencies
 # 204000 229500 255000 280500 306000 331500 357000 382500 408000 433500 459000

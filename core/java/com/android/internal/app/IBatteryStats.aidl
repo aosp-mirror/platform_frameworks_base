@@ -125,13 +125,14 @@ interface IBatteryStats {
     void noteNetworkStatsEnabled();
     void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt,
-            int chargeUAh);
+            int chargeUAh, int chargeFullUAh);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 
-    void noteBleScanStarted(in WorkSource ws);
+    void noteBleScanStarted(in WorkSource ws, boolean isUnoptimized);
     void noteBleScanStopped(in WorkSource ws);
     void noteResetBleScan();
+    void noteBleScanResults(in WorkSource ws, int numNewResults);
 
     HealthStatsParceler takeUidSnapshot(int uid);
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);

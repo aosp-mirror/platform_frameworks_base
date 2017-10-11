@@ -37,15 +37,22 @@ public class ReflectionUtils {
         }
     }
 
+    @NonNull
+    public static Method getAccessibleMethod(@NonNull Class<?> clazz, @NonNull String name,
+      @Nullable Class<?>... params) throws ReflectionException {
+        Method method = getMethod(clazz, name, params);
+        method.setAccessible(true);
+
+        return method;
+    }
+
     @Nullable
     public static Object invoke(@NonNull Method method, @Nullable Object object,
             @Nullable Object... args) throws ReflectionException {
         Exception ex;
         try {
             return method.invoke(object, args);
-        } catch (IllegalAccessException e) {
-            ex = e;
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             ex = e;
         }
         throw new ReflectionException(ex);
@@ -71,6 +78,25 @@ public class ReflectionUtils {
     public static Throwable getCause(@NonNull Throwable throwable) {
         Throwable cause = throwable.getCause();
         return cause == null ? throwable : cause;
+    }
+
+    /**
+     * Looks through the class hierarchy of {@code object} at runtime and returns the class matching
+     * the name {@code className}.
+     * <p>
+     * This is used when we cannot use Class.forName() since the class we want was loaded from a
+     * different ClassLoader.
+     */
+    @NonNull
+    public static Class<?> getClassInstance(@NonNull Object object, @NonNull String className) {
+        Class<?> superClass = object.getClass();
+        while (superClass != null) {
+            if (className.equals(superClass.getName())) {
+                return superClass;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        throw new RuntimeException("invalid object/classname combination.");
     }
 
     /**

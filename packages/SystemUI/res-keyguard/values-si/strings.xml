@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3171996292755059205">"යතුරු ආරක්ෂාව"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"PIN කේතය ටයිප් කරන්න"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"SIM PUK සහ නව PIN කේතය ටයිප් කරන්න"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK කේතය"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"නව SIM PIN කේතය"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"මුරපදය ටයිප් කිරීමට ස්පර්ශ කරන්න"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"අගුළු ඇරීමට මුරපදය ටයිප් කරන්න"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"අගුළු හැරීමට PIN එක ටයිප් කරන්න"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"වැරදි PIN කේතයකි."</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"අරෝපිතයි"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"වේගයෙන් ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"සෙමින් ආරෝපණය වෙමින්"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"ඔබගේ ආරෝපකයට සම්බන්ධ කරන්න."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ජාලය අගුළු දමා ඇත"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM පත නැත"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"ටැබ්ලටයේ SIM පත නොමැත."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"දුරකථනය තුල SIM පතක් නැත."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM කාඩ්පතක් ඇතුළු කරන්න."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM පත නොමැත හෝ කියවිය නොහැක. SIM පතක් ඇතුලත් කරන්න."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"භාවිතා කළ නොහැකි SIM පත."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"ඔබගේ SIM පත ස්ථිරව අබල කර තිබේ.\n වෙනත් SIM පතක් සඳහා ඔබගේ නොරැහැන් සේවා සැපයුම්කරු සම්බන්ධ කර ගන්න."</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM පත අගුළු දමා ඇත."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM පත PUK අගුළු ලා ඇත."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM පත අගුළු හරිමින්..."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN කොටස"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN කොටස"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK කොටස"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g>ට ඊළඟ එලාමය සකසා ඇත"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"මකන්න"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"ඇතුල් කරන්න"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"රටාව අමතකයි"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"වැරදි රටාවකි"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"වැරදි මුරපදය"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN එක වැරදියි"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"තත්පර <xliff:g id="NUMBER">%d</xliff:g> කින් නැවත උත්සහ කරන්න."</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"ඔබගේ රටාව අඳින්න"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"SIM PIN ඇතුලු කරන්න"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" සඳහා SIM PIN ඇතුළත් කරන්න"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN එක ඇතුළු කරන්න"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"මුරපදය ඇතුළු කරන්න"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"දැන් SIM එක අබල කර ඇත. ඉදිරියට යාමට PUK කේතය යොදන්න. විස්තර සඳහා වාහකයා අමතන්න."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" දැන් අබල කර ඇත. දිගටම පවත්වා ගෙන යාමට PUK කේතය ඇතුළත් කරන්න. විස්තර සඳහා වාහකයා සම්බන්ධ කර ගන්න."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"අපේක්ෂිත PIN කේතය ඇතුළත් කරන්න"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"අපේක්ෂිත PIN කේතය ස්ථිර කරන්න"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM පත අගුළු හරිමින්..."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 සිට 8 දක්වා අංක සහිත PIN එකක් ටයිප් කරන්න."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK කේතය සංඛ්‍යා 8 ක් හෝ වැඩි විය යුතුය."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"නිවැරදි PUK කේතය නැවත ඇතුලත් කරන්න. නැවත නැවත උත්සාහ කිරීමෙන් SIM එක ස්ථිරවම අබල කරයි."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN කේත නොගැළපේ."</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"රටා උත්සාහ කිරීම් වැඩිය"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"ඔබ PIN අංකය <xliff:g id="NUMBER_0">%1$d</xliff:g> වාරයක් වැරදියට ටයිප් කොට ඇත.\n\n තත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් ඇතුළත නැවත උත්සාහ කරන්න."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"ඔබ මුරපදය වාර <xliff:g id="NUMBER_0">%1$d</xliff:g> ක් වැරදියට ටයිප්කොට ඇත. \n\nතත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් නැවත උත්සහ කරන්න."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"ඔබ <xliff:g id="NUMBER_0">%1$d</xliff:g> වාරයක් අගුළු ඇරීමේ රටාව වැරදියට ඇඳ ඇත. \n\nතත්පර <xliff:g id="NUMBER_1">%2$d</xliff:g> ක් ඇතුළත නැවත උත්සාහ කරන්න."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, මෙම ටැබ්ලට් පරිගණකය යළි සකසනු ඇති අතර, එය එහි සියලු දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, මෙම දුරකථනය යළි සකසනු ඇති අතර, එය එහි සියලු දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. මෙම ටැබ්ලට් පරිගණකය යළි සකසනු ඇති අතර, එය එහි සියලු පදත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. මෙම දුරකථනය යළි සකසනු ඇති අතර, එය එහි සියලු පදත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, මෙම පරිශීලකයා ඉවත් කරනු ඇති අතර, එය සියලු පරිශීලක දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, මෙම පරිශීලකයා ඉවත් කරනු ඇති අතර, එය සියලු පරිශීලක දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. මෙම පරිශීලකයා ඉවත් කරනු ඇති අතර, එය සියලු පරිශීලක දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. මෙම පරිශීලකයා ඉවත් කරනු ඇති අතර, එය සියලු පරිශීලක දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, කාර්යාල පැතිකඩ ඉවත් කරනු ඇති අතර, එය සියලු පැතිකඩ දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER_0">%1$d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. තවත් අසාර්ථක උත්සාහයන් <xliff:g id="NUMBER_1">%2$d</xliff:g>කින් පසුව, කාර්යාල පැතිකඩ ඉවත් කරනු ඇති අතර, එය සියලු පැතිකඩ දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"ඔබ ටැබ්ලට් පරිගණකය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. කාර්යාල පැතිකඩ ඉවත් කරනු ඇති අතර, එය සියලු පැතිකඩ දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"ඔබ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදියට උත්සාහ කර ඇත. කාර්යාල පැතිකඩ ඉවත් කරනු ඇති අතර, එය සියලු පැතිකඩ දත්ත මකනු ඇත."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"ඔබ අගුළු ඇරිමේ රටාව <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහ <xliff:g id="NUMBER_1">%2$d</xliff:g> කින් පසුව, ඊ-තැපැල් ගිණුම භාවිතා කරමින් ඔබගේ ටැබ්ලටයේ අගුළු ඇරීමට ඔබට පවසනු ඇත.\n\n නැවත තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> කින් උත්සාහ කරන්න."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g> න් පසුව, ඔබගේ ඊ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> න් පසුව නැවත උත්සහ කරන්න."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"වැරදී SIM PIN කේතයකි, ඔබගේ දුරකතනයේ අඟුල හැරීමට ඔබගේ වාහකයා ඔබ දැන් සම්බන්ධ කරගත යුතුය."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="one">වැරදී SIM PIN කේතයකි, ඔබගේ දුරකථනයේ අඟුල හැරීමට ඔබගේ වාහකයා සම්බන්ධ කරගැනීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+      <item quantity="other">වැරදී SIM PIN කේතයකි, ඔබගේ දුරකථනයේ අගුල හැරීමට ඔබගේ වාහකයා සම්බන්ධ කරගැනීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM කාඩ් පත භාවිතා කළ නොහැක. ඔබගේ වාහකය සම්බන්ධ කරගන්න."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="one">වැරදි SIM PUK කේතයකි, SIM කාඩ්පත ස්ථිරවම භාවිත කළ නොහැකි බවට පත්වීමට පෙර ඔබට තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+      <item quantity="other">වැරදි SIM PUK කේතයකි, SIM කාඩ්පත ස්ථිරවම භාවිත කළ නොහැකි බවට පත්වීමට පෙර ඔබට තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"SIM PIN මෙහෙයුම අසාර්ථක විය!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK මෙහෙයුම අසාර්ථක විය!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"කේතය පිළිගැණුනි!"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"සේවාව නැත."</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ආදාන ක්‍රමය මාරු කිරීම"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"ගුවන් යානා ප්‍රකාරය"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"උපාංගය නැවත ආරම්භ වූ පසු රටාව අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"උපාංගය නැවත ආරම්භ වූ පසු PIN අංකය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"උපාංගය නැවත ආරම්භ වූ පසු මුරපදය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"අමතර ආරක්ෂාව සඳහා රටාව අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"අමතර ආරක්ෂාව සඳහා PIN අංකය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"අමතර ආරක්ෂාව සඳහා මුරපදය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"ඔබ පැතිකඩවල් මාරු කරන විට රටාව අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ඔබ පැතිකඩවල් මාරු කරන විට PIN අංකය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"ඔබ පැතිකඩවල් මාරු කරන විට මුරපදය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"ඔබගේ පරිපාලක විසින් උපාංගය අගුළු දමා ඇත"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"උපාංගය හස්තීයව අගුලු දමන ලදී"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. රටාව තහවුරු කරන්න.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. PIN අංකය තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. PIN අංකය තහවුරු කරන්න.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
+      <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"හඳුනා නොගන්නා ලදී"</string>
+</resources>

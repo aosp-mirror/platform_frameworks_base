@@ -13,29 +13,39 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.qs.QSContainer
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/quick_settings_container"
+<com.android.systemui.qs.QSContainerImpl
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/quick_settings_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/colorPrimaryDark"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <View
+        android:id="@+id/qs_background"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@drawable/qs_background_primary"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:elevation="4dp">
+        android:elevation="4dp" />
 
     <com.android.systemui.qs.QSPanel
-            android:id="@+id/quick_settings_panel"
-            android:background="#0000"
-            android:layout_marginTop="80dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp" />
+        android:id="@+id/quick_settings_panel"
+        android:layout_marginTop="28dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:background="#00000000"
+        android:layout_marginBottom="48dp" />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
+
+    <include android:id="@+id/qs_footer"
+        layout="@layout/qs_footer" />
 
     <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
 
     <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
         android:visibility="gone" />
 
-</com.android.systemui.qs.QSContainer>
+</com.android.systemui.qs.QSContainerImpl>

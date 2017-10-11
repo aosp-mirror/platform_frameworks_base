@@ -15,12 +15,11 @@
  */
 package com.android.systemui.statusbar.policy;
 
-import static org.mockito.Mockito.mock;
-
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
+import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -31,29 +30,41 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SignalDrawable;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
+
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
+    @Test
     public void testNoIconWithoutMobile() {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockNetworkScoreManager,
+                mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults);
+                mMockSubDefaults, mock(DeviceProvisionedController.class));
         setupNetworkController();
 
-        verifyLastMobileDataIndicators(false, 0, 0);
+        verifyLastMobileDataIndicators(false, -1, 0);
     }
 
+    @Test
     public void testNoSimsIconPresent() {
         // No Subscriptions.
         mNetworkController.mMobileSignalControllers.clear();
@@ -62,6 +73,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyHasNoSims(true);
     }
 
+    @Test
     public void testEmergencyOnly() {
         setupDefaultSignal();
         mNetworkController.recalculateEmergency();
@@ -72,6 +84,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyEmergencyOnly(true);
     }
 
+    @Test
     public void testEmergencyOnlyNoSubscriptions() {
         setupDefaultSignal();
         setSubscriptions();
@@ -81,6 +94,15 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyEmergencyOnly(true);
     }
 
+    @Test
+    public void testNoEmergencyOnlyWrongSubscription() {
+        setupDefaultSignal();
+        setDefaultSubId(42);
+        mNetworkController.recalculateEmergency();
+        verifyEmergencyOnly(false);
+    }
+
+    @Test
     public void testNoEmengencyNoSubscriptions() {
         setupDefaultSignal();
         setSubscriptions();
@@ -90,14 +112,16 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyEmergencyOnly(false);
     }
 
+    @Test
     public void testNoSimlessIconWithoutMobile() {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockNetworkScoreManager,
+                mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults);
+                mMockSubDefaults, mock(DeviceProvisionedController.class));
         setupNetworkController();
 
         // No Subscriptions.
@@ -107,48 +131,52 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyHasNoSims(false);
     }
 
+    @Test
     public void testSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength], DEFAULT_ICON);
+                    testStrength, DEFAULT_ICON);
 
             // Verify low inet number indexing.
             setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[0][testStrength], DEFAULT_ICON);
+                    testStrength, DEFAULT_ICON, false, false);
         }
     }
 
+    @Test
     public void testCdmaSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setCdma();
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
-                    TelephonyIcons.DATA_1X[1][0 /* No direction */]);
+                    testStrength,
+                    TelephonyIcons.ICON_1X);
         }
     }
 
+    @Test
     public void testSignalRoaming() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-                testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
+        for (int testStrength = 0;
+                testStrength < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; testStrength++) {
             setupDefaultSignal();
             setGsmRoaming(true);
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][testStrength],
+                    testStrength,
                     DEFAULT_ICON, true);
         }
     }
 
+    @Test
     public void testCdmaSignalRoaming() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -158,11 +186,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][testStrength],
-                    TelephonyIcons.DATA_1X[1][0 /* No direction */], true);
+                    testStrength,
+                    TelephonyIcons.ICON_1X, true);
         }
     }
 
+    @Test
     public void testQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -170,11 +199,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastQsMobileDataIndicators(true,
-                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
+                    testStrength,
                     DEFAULT_QS_ICON, false, false);
         }
     }
 
+    @Test
     public void testCdmaQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
@@ -183,21 +213,23 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastQsMobileDataIndicators(true,
-                    TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
-                    TelephonyIcons.QS_ICON_1X, false, false);
+                    testStrength,
+                    TelephonyIcons.QS_DATA_1X, false, false);
         }
     }
 
+    @Test
     public void testNoBangWithWifi() {
         setupDefaultSignal();
         setConnectivity(mMobileSignalController.mTransportType, false, false);
         setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
-        verifyLastMobileDataIndicators(true, TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][2], 0);
+        verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
     }
 
     // Some tests of actual NetworkController code, just internals not display stuff
     // TODO: Put this somewhere else, maybe in its own file.
+    @Test
     public void testHasCorrectMobileControllers() {
         int[] testSubscriptions = new int[] { 1, 5, 3 };
         int notTestSubscription = 0;
@@ -224,6 +256,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         assertFalse(mNetworkController.hasCorrectMobileControllers(subscriptions));
     }
 
+    @Test
     public void testSetCurrentSubscriptions() {
         // We will not add one controller to make sure it gets created.
         int indexToSkipController = 0;
@@ -262,12 +295,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         for (int i = 0; i < testSubscriptions.length; i++) {
             if (i == indexToSkipController) {
                 // Make sure a controller was created despite us not adding one.
-                assertTrue(mNetworkController.mMobileSignalControllers.containsKey(
-                        testSubscriptions[i]));
+                assertTrue(mNetworkController.mMobileSignalControllers.indexOfKey(
+                        testSubscriptions[i]) >= 0);
             } else if (i == indexToSkipSubscription) {
                 // Make sure the controller that did exist was removed
-                assertFalse(mNetworkController.mMobileSignalControllers.containsKey(
-                        testSubscriptions[i]));
+                assertFalse(mNetworkController.mMobileSignalControllers.indexOfKey(
+                        testSubscriptions[i]) >= 0);
             } else {
                 // If a MobileSignalController is around it needs to not be unregistered.
                 Mockito.verify(mobileSignalControllers[i], Mockito.never())
@@ -276,6 +309,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         }
     }
 
+    @Test
     public void testHistorySize() {
         // Verify valid history size, otherwise it gits printed out the wrong order and whatnot.
         assertEquals(0, SignalController.HISTORY_SIZE & (SignalController.HISTORY_SIZE - 1));
@@ -288,6 +322,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setCdmaRoaming(false);
     }
 
+    @Test
     public void testOnReceive_stringsUpdatedAction_spn() {
         String expectedMNetworkName = "Test";
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
@@ -300,6 +335,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         assertNetworkNameEquals(expectedMNetworkName);
     }
 
+    @Test
     public void testOnReceive_stringsUpdatedAction_plmn() {
         String expectedMNetworkName = "Test";
 
@@ -313,6 +349,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         assertNetworkNameEquals(expectedMNetworkName);
     }
 
+    @Test
     public void testOnReceive_stringsUpdatedAction_bothFalse() {
         Intent intent = createStringsUpdatedIntent(false /* showSpn */,
               "Irrelevant" /* spn */,
@@ -327,6 +364,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         assertNetworkNameEquals(defaultNetworkName);
     }
 
+    @Test
     public void testOnReceive_stringsUpdatedAction_bothTrueAndNull() {
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
             null /* spn */,
@@ -340,6 +378,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         assertNetworkNameEquals(defaultNetworkName);
     }
 
+    @Test
     public void testOnReceive_stringsUpdatedAction_bothTrueAndNonNull() {
         String spn = "Test1";
         String plmn = "Test2";
@@ -373,58 +412,62 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         return intent;
     }
 
+    @Test
     public void testOnUpdateDataActivity_dataIn() {
         setupDefaultSignal();
 
         updateDataActivity(TelephonyManager.DATA_ACTIVITY_IN);
 
         verifyLastQsMobileDataIndicators(true /* visible */,
-                TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+                DEFAULT_LEVEL /* icon */,
                 DEFAULT_QS_ICON /* typeIcon */,
                 true /* dataIn */,
                 false /* dataOut */);
 
     }
 
+    @Test
     public void testOnUpdateDataActivity_dataOut() {
       setupDefaultSignal();
 
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_OUT);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               false /* dataIn */,
               true /* dataOut */);
-
     }
 
+    @Test
     public void testOnUpdateDataActivity_dataInOut() {
       setupDefaultSignal();
 
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               true /* dataIn */,
               true /* dataOut */);
 
     }
 
+    @Test
     public void testOnUpdateDataActivity_dataActivityNone() {
       setupDefaultSignal();
 
       updateDataActivity(TelephonyManager.DATA_ACTIVITY_NONE);
 
       verifyLastQsMobileDataIndicators(true /* visible */,
-              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_LEVEL /* icon */,
               DEFAULT_QS_ICON /* typeIcon */,
               false /* dataIn */,
               false /* dataOut */);
 
     }
 
+    @Test
     public void testCarrierNetworkChange_carrierNetworkChange() {
       int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
@@ -433,7 +476,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Verify baseline
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              strength /* strengthIcon */,
               DEFAULT_ICON /* typeIcon */);
 
       // API call is made
@@ -441,7 +484,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Carrier network change is true, show special indicator
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE[0][0] /* strengthIcon */,
+              SignalDrawable.getCarrierChangeState(SignalStrength.NUM_SIGNAL_STRENGTH_BINS),
               0 /* typeIcon */);
 
       // Revert back
@@ -449,7 +492,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
       // Verify back in previous state
       verifyLastMobileDataIndicators(true /* visible */,
-              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              strength /* strengthIcon */,
               DEFAULT_ICON /* typeIcon */);
     }
 

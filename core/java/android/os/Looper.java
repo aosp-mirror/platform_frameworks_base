@@ -18,8 +18,11 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.LooperProto;
 import android.util.Log;
 import android.util.Printer;
+import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 /**
   * Class used to run a message loop for a thread.  Threads by default do
@@ -73,6 +76,9 @@ public final class Looper {
 
     private Printer mLogging;
     private long mTraceTag;
+
+    /* If set, the looper will show a warning log if a message dispatch takes longer than time. */
+    private long mSlowDispatchThresholdMs;
 
      /** Initialize the current thread as a looper.
       * This gives you a chance to create handlers that then reference
@@ -146,15 +152,28 @@ public final class Looper {
                         msg.callback + ": " + msg.what);
             }
 
+            final long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
+
             final long traceTag = me.mTraceTag;
             if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
+            final long start = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+            final long end;
             try {
                 msg.target.dispatchMessage(msg);
+                end = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
             } finally {
                 if (traceTag != 0) {
                     Trace.traceEnd(traceTag);
+                }
+            }
+            if (slowDispatchThresholdMs > 0) {
+                final long time = end - start;
+                if (time > slowDispatchThresholdMs) {
+                    Slog.w(TAG, "Dispatch took " + time + "ms on "
+                            + Thread.currentThread().getName() + ", h=" +
+                            msg.target + " cb=" + msg.callback + " msg=" + msg.what);
                 }
             }
 
@@ -224,6 +243,11 @@ public final class Looper {
         mTraceTag = traceTag;
     }
 
+    /** {@hide} */
+    public void setSlowDispatchThresholdMs(long slowDispatchThresholdMs) {
+        mSlowDispatchThresholdMs = slowDispatchThresholdMs;
+    }
+
     /**
      * Quits the looper.
      * <p>
@@ -286,7 +310,30 @@ public final class Looper {
      */
     public void dump(@NonNull Printer pw, @NonNull String prefix) {
         pw.println(prefix + toString());
-        mQueue.dump(pw, prefix + "  ");
+        mQueue.dump(pw, prefix + "  ", null);
+    }
+
+    /**
+     * Dumps the state of the looper for debugging purposes.
+     *
+     * @param pw A printer to receive the contents of the dump.
+     * @param prefix A prefix to prepend to each line which is printed.
+     * @param handler Only dump messages for this Handler.
+     * @hide
+     */
+    public void dump(@NonNull Printer pw, @NonNull String prefix, Handler handler) {
+        pw.println(prefix + toString());
+        mQueue.dump(pw, prefix + "  ", handler);
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long looperToken = proto.start(fieldId);
+        proto.write(LooperProto.THREAD_NAME, mThread.getName());
+        proto.write(LooperProto.THREAD_ID, mThread.getId());
+        proto.write(LooperProto.IDENTITY_HASH_CODE, System.identityHashCode(this));
+        mQueue.writeToProto(proto, LooperProto.QUEUE);
+        proto.end(looperToken);
     }
 
     @Override

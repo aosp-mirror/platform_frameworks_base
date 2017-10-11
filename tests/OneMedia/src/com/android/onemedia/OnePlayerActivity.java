@@ -68,16 +68,16 @@ public class OnePlayerActivity extends Activity {
         mPlayer = new PlayerController(this, OnePlayerService.getServiceIntent(this));
 
 
-        mStartButton = (Button) findViewById(R.id.start_button);
-        mPlayButton = (Button) findViewById(R.id.play_button);
-        mRouteButton = (Button) findViewById(R.id.route_button);
-        mStatusView = (TextView) findViewById(R.id.status);
-        mContentText = (EditText) findViewById(R.id.content);
-        mNextContentText = (EditText) findViewById(R.id.next_content);
-        mHasVideo = (CheckBox) findViewById(R.id.has_video);
-        mArtView = (ImageView) findViewById(R.id.art);
+        mStartButton = findViewById(R.id.start_button);
+        mPlayButton = findViewById(R.id.play_button);
+        mRouteButton = findViewById(R.id.route_button);
+        mStatusView = findViewById(R.id.status);
+        mContentText = findViewById(R.id.content);
+        mNextContentText = findViewById(R.id.next_content);
+        mHasVideo = findViewById(R.id.has_video);
+        mArtView = findViewById(R.id.art);
 
-        final Button artPicker = (Button) findViewById(R.id.art_picker);
+        final Button artPicker = findViewById(R.id.art_picker);
         artPicker.setOnClickListener(mButtonListener);
 
         mStartButton.setOnClickListener(mButtonListener);

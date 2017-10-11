@@ -41,7 +41,6 @@ public class Script extends BaseObj {
             mScript = s;
             mSlot = slot;
             mSig = sig;
-            guard.open("destroy");
         }
     }
 
@@ -119,7 +118,6 @@ public class Script extends BaseObj {
             super(id, rs);
             mScript = s;
             mSlot = slot;
-            guard.open("destroy");
         }
     }
 

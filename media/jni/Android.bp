@@ -2,16 +2,17 @@ cc_library_shared {
     name: "libmedia_jni",
 
     srcs: [
-        "android_media_ExifInterface.cpp",
         "android_media_ImageWriter.cpp",
         "android_media_ImageReader.cpp",
         "android_media_MediaCrypto.cpp",
         "android_media_MediaCodec.cpp",
         "android_media_MediaCodecList.cpp",
         "android_media_MediaDataSource.cpp",
+        "android_media_MediaDescrambler.cpp",
         "android_media_MediaDrm.cpp",
         "android_media_MediaExtractor.cpp",
         "android_media_MediaHTTPConnection.cpp",
+        "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaMetadataRetriever.cpp",
         "android_media_MediaMuxer.cpp",
         "android_media_MediaPlayer.cpp",
@@ -25,6 +26,7 @@ cc_library_shared {
         "android_mtp_MtpDatabase.cpp",
         "android_mtp_MtpDevice.cpp",
         "android_mtp_MtpServer.cpp",
+        "midi/android_media_midi_MidiDevice.cpp",
     ],
 
     shared_libs: [
@@ -33,7 +35,9 @@ cc_library_shared {
         "libutils",
         "libbinder",
         "libmedia",
+        "libmediametrics",
         "libmediadrm",
+        "libmidi",
         "libskia",
         "libui",
         "liblog",
@@ -43,13 +47,14 @@ cc_library_shared {
         "libstagefright_foundation",
         "libcamera_client",
         "libmtp",
-        "libusbhost",
         "libexif",
         "libpiex",
         "libandroidfw",
     ],
 
     header_libs: ["libhardware_headers"],
+
+    static_libs: ["libgrallocusage"],
 
     include_dirs: [
         "frameworks/base/core/jni",

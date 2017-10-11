@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Шел"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Алдааны тайлан"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Програмд гарсан алдааны мэдээллийн <xliff:g id="ID">#%d</xliff:g> үүсгэгдэж байна"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Програмд гарсан алдааны мэдээллийн <xliff:g id="ID">#%d</xliff:g>-г бүртгэгдлээ"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Алдааны тайланд дэлгэрэнгүй мэдээлэл нэмж байна"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Түр хүлээнэ үү..."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Утсанд удахгүй алдааны тайлан гарч ирэх болно"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Алдааны тайлангаа хуваалцахын тулд сонгоно уу"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Програмд гарсан алдааны мэдээллээ хуваалцах бол дарна уу"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Алдааны тайлангаа дэлгэцээс авсан зураггүйгээр хуваалцахын тулд сонгох эсвэл дэлгэцээс авсан зургийг дуустал хүлээнэ үү"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Алдааны тайлангаа дэлгэцээс авсан зураггүйгээр хуваалцах бол дарж, эсвэл дэлгэцээс авсан зургийг бэлэн болтол нь хүлээнэ үү"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Алдааны тайлангаа дэлгэцээс авсан зураггүйгээр хуваалцах бол дарж, эсвэл дэлгэцээс авсан зургийг бэлэн болтол нь хүлээнэ үү"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Алдааны тайланд системийн төрөл бүрийн лог файлын өгөгдөл агуулагдах бөгөөд үүнд таны хувийн өгөгдөл (апп-н хэрэглээ болон байршлын өгөгдөл гэх мэт) багтана. Та алдааны тайланг зөвхөн итгэдэг хүмүүс болон апп-тай хуваалцана уу."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Дахиж бүү харуул"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Гэмтлийн тухай тайлан"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Алдааны тайлангийн файлыг уншиж чадахгүй байна"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Алдааны тайлангийн дэлгэрэнгүй мэдээллийг zip файлд нэмж чадсангүй"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"нэр байхгүй"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Дэлгэрэнгүй"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Дэлгэцийн зураг"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Дэлгэцийн зургийг амжилттай авлаа."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Дэлгэцийн зураг авах боломжгүй."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Програмд гарсан алдааны мэдээллийн <xliff:g id="ID">#%d</xliff:g>-ны дэлгэрэнгүй"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Файлын нэр"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Алдааны нэр"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Алдааны хураангуй"</string>
+    <string name="save" msgid="4781509040564835759">"Хадгалах"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Алдааны тайланг хуваалцах"</string>
+</resources>

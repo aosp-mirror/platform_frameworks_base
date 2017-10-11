@@ -66,7 +66,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     private static final int DEFAULT_IMAGE_HEIGHT = 480;
     private static final int MAX_NUM_IMAGES = 5;
 
-    private int mCameraId;
+    private String mCameraId;
     private ICameraDeviceUser mCameraUser;
     private CameraBinderTestUtils mUtils;
     private ICameraDeviceCallbacks.Stub mMockCb;
@@ -142,6 +142,16 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
          */
         @Override
         public void onPrepared(int streamId) throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onRequestQueueEmpty()
+         */
+        @Override
+        public void onRequestQueueEmpty() throws RemoteException {
             // TODO Auto-generated method stub
 
         }

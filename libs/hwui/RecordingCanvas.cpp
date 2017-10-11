@@ -20,6 +20,7 @@
 #include "RecordedOp.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
+#include "hwui/MinikinUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -35,7 +36,7 @@ RecordingCanvas::~RecordingCanvas() {
             "Destroyed a RecordingCanvas during a record!");
 }
 
-void RecordingCanvas::resetRecording(int width, int height) {
+void RecordingCanvas::resetRecording(int width, int height, RenderNode* node) {
     LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
     mDisplayList = new DisplayList();
@@ -43,7 +44,6 @@ void RecordingCanvas::resetRecording(int width, int height) {
     mState.initializeRecordingSaveStack(width, height);
 
     mDeferredBarrierType = DeferredBarrierType::InOrder;
-    mState.setDirtyClip(false);
 }
 
 DisplayList* RecordingCanvas::finishRecording() {
@@ -234,20 +234,17 @@ bool RecordingCanvas::quickRejectPath(const SkPath& path) const {
     SkRect bounds = path.getBounds();
     return mState.quickRejectConservative(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom);
 }
-bool RecordingCanvas::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+bool RecordingCanvas::clipRect(float left, float top, float right, float bottom, SkClipOp op) {
     return mState.clipRect(left, top, right, bottom, op);
 }
-bool RecordingCanvas::clipPath(const SkPath* path, SkRegion::Op op) {
+bool RecordingCanvas::clipPath(const SkPath* path, SkClipOp op) {
     return mState.clipPath(path, op);
-}
-bool RecordingCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
-    return mState.clipRegion(region, op);
 }
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas draw operations
 // ----------------------------------------------------------------------------
-void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
+void RecordingCanvas::drawColor(int color, SkBlendMode mode) {
     addOp(alloc().create_trivial<ColorOp>(
             getRecordedClip(),
             color,
@@ -271,7 +268,7 @@ static Rect calcBoundsOfPoints(const float* points, int floatCount) {
 
 // Geometry
 void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPaint& paint) {
-    if (CC_UNLIKELY(floatCount < 2 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(floatCount < 2 || paint.nothingToDraw())) return;
     floatCount &= ~0x1; // round down to nearest two
 
     addOp(alloc().create_trivial<PointsOp>(
@@ -282,7 +279,7 @@ void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPa
 }
 
 void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPaint& paint) {
-    if (CC_UNLIKELY(floatCount < 4 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(floatCount < 4 || paint.nothingToDraw())) return;
     floatCount &= ~0x3; // round down to nearest four
 
     addOp(alloc().create_trivial<LinesOp>(
@@ -293,7 +290,7 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
 }
 
 void RecordingCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     addOp(alloc().create_trivial<RectOp>(
             Rect(left, top, right, bottom),
@@ -336,7 +333,7 @@ void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const
 }
 
 void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     if (paint.getStyle() == SkPaint::kFill_Style
             && (!paint.isAntiAlias() || mState.currentTransform()->isSimple())) {
@@ -365,7 +362,7 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
 
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     if (CC_LIKELY(MathUtils::isPositive(rx) || MathUtils::isPositive(ry))) {
         addOp(alloc().create_trivial<RoundRectOp>(
@@ -401,7 +398,7 @@ void RecordingCanvas::drawRoundRect(
 
 void RecordingCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
     // TODO: move to Canvas.h
-    if (CC_UNLIKELY(radius <= 0 || PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(radius <= 0 || paint.nothingToDraw())) return;
 
     drawOval(x - radius, y - radius, x + radius, y + radius, paint);
 }
@@ -422,7 +419,7 @@ void RecordingCanvas::drawCircle(
 }
 
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     addOp(alloc().create_trivial<OvalOp>(
             Rect(left, top, right, bottom),
@@ -433,7 +430,7 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
 
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     if (fabs(sweepAngle) >= 360.0f) {
         drawOval(left, top, right, bottom, paint);
@@ -448,7 +445,7 @@ void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
 }
 
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
-    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
 
     addOp(alloc().create_trivial<PathOp>(
             Rect(path.getBounds()),
@@ -468,17 +465,17 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 }
 
 // Bitmap-based
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) {
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
     save(SaveFlags::Matrix);
     translate(left, top);
-    drawBitmap(&bitmap, paint);
+    drawBitmap(bitmap, paint);
     restore();
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix,
                             const SkPaint* paint) {
     if (matrix.isIdentity()) {
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
     } else if (!(matrix.getType() & ~(SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask))
             && MathUtils::isPositive(matrix.getScaleX())
             && MathUtils::isPositive(matrix.getScaleY())) {
@@ -492,12 +489,12 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
     } else {
         save(SaveFlags::Matrix);
         concat(matrix);
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
         restore();
     }
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) {
     if (srcLeft == 0 && srcTop == 0
@@ -508,7 +505,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
         save(SaveFlags::Matrix);
         translate(dstLeft, dstTop);
-        drawBitmap(&bitmap, paint);
+        drawBitmap(bitmap, paint);
         restore();
     } else {
         addOp(alloc().create_trivial<BitmapRectOp>(
@@ -520,7 +517,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
     }
 }
 
-void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
+void RecordingCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
     int vertexCount = (meshWidth + 1) * (meshHeight + 1);
     addOp(alloc().create_trivial<BitmapMeshOp>(
@@ -532,7 +529,7 @@ void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int 
             refBuffer<int>(colors, vertexCount))); // 1 color per vertex
 }
 
-void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& patch,
+void RecordingCanvas::drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& patch,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {
     addOp(alloc().create_trivial<PatchOp>(
@@ -546,7 +543,7 @@ void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_p
 void RecordingCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions, int glyphCount,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) {
-    if (!glyphs || !positions || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
+    if (!glyphs || !positions || glyphCount <= 0 || paint.nothingToDraw()) return;
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
     positions = refBuffer<float>(positions, glyphCount * 2);
 
@@ -559,22 +556,28 @@ void RecordingCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions,
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void RecordingCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) {
-    if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
-    glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
-    addOp(alloc().create_trivial<TextOnPathOp>(
-            *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            refPaint(&paint), glyphs, glyphCount, refPath(&path), hOffset, vOffset));
+void RecordingCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+        const SkPaint& paint, const SkPath& path, size_t start, size_t end) {
+    uint16_t glyphs[1];
+    for (size_t i = start; i < end; i++) {
+        glyphs[0] = layout.getGlyphId(i);
+        float x = hOffset + layout.getX(i);
+        float y = vOffset + layout.getY(i);
+        if (paint.nothingToDraw()) return;
+        const uint16_t* tempGlyphs = refBuffer<glyph_t>(glyphs, 1);
+        addOp(alloc().create_trivial<TextOnPathOp>(
+                *(mState.currentSnapshot()->transform),
+                getRecordedClip(),
+                refPaint(&paint), tempGlyphs, 1, refPath(&path), x, y));
+    }
 }
 
-void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
+void RecordingCanvas::drawBitmap(Bitmap& bitmap, const SkPaint* paint) {
     addOp(alloc().create_trivial<BitmapOp>(
-            Rect(bitmap->width(), bitmap->height()),
+            Rect(bitmap.width(), bitmap.height()),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
-            refPaint(paint), refBitmap(*bitmap)));
+            refPaint(paint), refBitmap(bitmap)));
 }
 
 void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
@@ -603,13 +606,13 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting semantics.
     mDisplayList->ref(layerHandle);
 
+    LOG_ALWAYS_FATAL_IF(layerHandle->getBackingLayerApi() != Layer::Api::OpenGL);
     // Note that the backing layer has *not* yet been updated, so don't trust
     // its width, height, transform, etc...!
     addOp(alloc().create_trivial<TextureLayerOp>(
             Rect(layerHandle->getWidth(), layerHandle->getHeight()),
             *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            layerHandle->backingLayer()));
+            getRecordedClip(), layerHandle));
 }
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor,
@@ -660,7 +663,8 @@ void RecordingCanvas::refBitmapsInShader(const SkShader* shader) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
     if (shader->isABitmap(&bitmap, nullptr, xy)) {
-        refBitmap(bitmap);
+        Bitmap* hwuiBitmap = static_cast<Bitmap*>(bitmap.pixelRef());
+        refBitmap(*hwuiBitmap);
         return;
     }
     SkShader::ComposeRec rec;

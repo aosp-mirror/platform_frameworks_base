@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -62,7 +63,18 @@ final class LogicalDisplay {
 
     private final int mDisplayId;
     private final int mLayerStack;
-    private DisplayInfo mOverrideDisplayInfo; // set by the window manager
+    /**
+     * Override information set by the window manager. Will be reported instead of {@link #mInfo}
+     * if not null.
+     * @see #setDisplayInfoOverrideFromWindowManagerLocked(DisplayInfo)
+     * @see #getDisplayInfoLocked()
+     */
+    private DisplayInfo mOverrideDisplayInfo;
+    /**
+     * Current display info. Initialized with {@link #mBaseDisplayInfo}. Set to {@code null} if
+     * needs to be updated.
+     * @see #getDisplayInfoLocked()
+     */
     private DisplayInfo mInfo;
 
     // The display device that this logical display is based on and which
@@ -142,6 +154,13 @@ final class LogicalDisplay {
     }
 
     /**
+     * @see DisplayManagerInternal#getNonOverrideDisplayInfo(int, DisplayInfo)
+     */
+    void getNonOverrideDisplayInfoLocked(DisplayInfo outInfo) {
+        outInfo.copyFrom(mBaseDisplayInfo);
+    }
+
+    /**
      * Sets overridden logical display information from the window manager.
      * This method can be used to adjust application insets, rotation, and other
      * properties that the window manager takes care of.
@@ -216,12 +235,17 @@ final class LogicalDisplay {
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRIVATE;
+                // For private displays by default content is destroyed on removal.
+                mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_DESTROY_CONTENT;
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRESENTATION) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRESENTATION;
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ROUND) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_ROUND;
+            }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
             }
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;

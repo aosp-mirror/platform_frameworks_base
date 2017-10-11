@@ -28,7 +28,7 @@ static TestScene::Registrar _Recents(TestScene::Info{
 
 class RecentsAnimation : public TestScene {
 public:
-    void createContent(int width, int height, TestCanvas& renderer) override {
+    void createContent(int width, int height, Canvas& renderer) override {
         static SkColor COLORS[] = {
                 Color::Red_500,
                 Color::Purple_500,
@@ -39,18 +39,20 @@ public:
         thumbnailSize = std::min(std::min(width, height) / 2, 720);
         int cardsize = std::min(width, height) - dp(64);
 
-        renderer.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+        renderer.drawColor(Color::White, SkBlendMode::kSrcOver);
         renderer.insertReorderBarrier(true);
 
         int x = dp(32);
         for (int i = 0; i < 4; i++) {
             int y = (height / 4) * i;
-            SkBitmap thumb = TestUtils::createSkBitmap(thumbnailSize, thumbnailSize);
-            thumb.eraseColor(COLORS[i]);
-            sp<RenderNode> card = createCard(x, y, cardsize, cardsize, thumb);
+            SkBitmap bitmap;
+            sk_sp<Bitmap> thumb(TestUtils::createBitmap(thumbnailSize, thumbnailSize, &bitmap));
+
+            bitmap.eraseColor(COLORS[i]);
+            sp<RenderNode> card = createCard(x, y, cardsize, cardsize, *thumb);
             card->mutateStagingProperties().setElevation(i * dp(8));
             renderer.drawRenderNode(card.get());
-            mThumbnail = thumb;
+            mThumbnail = bitmap;
             mCards.push_back(card);
         }
 
@@ -68,15 +70,14 @@ public:
     }
 
 private:
-    sp<RenderNode> createCard(int x, int y, int width, int height,
-            const SkBitmap& thumb) {
+    sp<RenderNode> createCard(int x, int y, int width, int height, Bitmap& thumb) {
         return TestUtils::createNode(x, y, x + width, y + height,
-                [&thumb, width, height](RenderProperties& props, TestCanvas& canvas) {
+                [&thumb, width, height](RenderProperties& props, Canvas& canvas) {
             props.setElevation(dp(16));
             props.mutableOutline().setRoundRect(0, 0, width, height, dp(10), 1);
             props.mutableOutline().setShouldClip(true);
 
-            canvas.drawColor(Color::Grey_200, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(Color::Grey_200, SkBlendMode::kSrcOver);
             canvas.drawBitmap(thumb, 0, 0, thumb.width(), thumb.height(),
                     0, 0, width, height, nullptr);
         });

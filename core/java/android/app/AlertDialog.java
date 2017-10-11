@@ -25,6 +25,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ResourceId;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -48,7 +49,7 @@ import com.android.internal.R;
  * and add your view to it:
  *
  * <pre>
- * FrameLayout fl = (FrameLayout) findViewById(android.R.id.custom);
+ * FrameLayout fl = findViewById(android.R.id.custom);
  * fl.addView(myView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
  * </pre>
  *
@@ -204,7 +205,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
         mAlert = AlertController.create(getContext(), this, getWindow());
     }
 
-    static int resolveDialogTheme(Context context, int themeResId) {
+    static @StyleRes int resolveDialogTheme(Context context, @StyleRes int themeResId) {
         if (themeResId == THEME_TRADITIONAL) {
             return R.style.Theme_Dialog_Alert;
         } else if (themeResId == THEME_HOLO_DARK) {
@@ -215,7 +216,8 @@ public class AlertDialog extends Dialog implements DialogInterface {
             return R.style.Theme_DeviceDefault_Dialog_Alert;
         } else if (themeResId == THEME_DEVICE_DEFAULT_LIGHT) {
             return R.style.Theme_DeviceDefault_Light_Dialog_Alert;
-        } else if (themeResId >= 0x01000000) {   // start of real resource IDs.
+        } else if (ResourceId.isValid(themeResId)) {
+            // start of real resource IDs.
             return themeResId;
         } else {
             final TypedValue outValue = new TypedValue();
@@ -449,7 +451,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param context the parent context
          */
         public Builder(Context context) {
-            this(context, resolveDialogTheme(context, 0));
+            this(context, resolveDialogTheme(context, ResourceId.ID_NULL));
         }
 
         /**

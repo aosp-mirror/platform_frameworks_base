@@ -23,7 +23,7 @@
 using namespace android;
 using namespace android::uirenderer;
 
-RENDERTHREAD_TEST(GradientCache, addRemove) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(GradientCache, addRemove) {
     Extensions extensions;
     GradientCache cache(extensions);
     ASSERT_LT(1000u, cache.getMaxSize()) << "Expect non-trivial size";

@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 
 /**
  * Describes the mode in which a window is drag resizing.
@@ -45,7 +46,8 @@ class DragResizeMode {
             case DRAG_RESIZE_MODE_DOCKED_DIVIDER:
                 return stackId == DOCKED_STACK_ID
                         || stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                        || stackId == HOME_STACK_ID;
+                        || stackId == HOME_STACK_ID
+                        || stackId == RECENTS_STACK_ID;
             default:
                 return false;
         }

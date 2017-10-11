@@ -28,6 +28,7 @@ import android.util.Log;
 import com.google.android.collect.Maps;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ExponentiallyBucketedHistogram;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.system.BlockGuard;
@@ -54,23 +55,37 @@ import libcore.io.IoUtils;
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
     private static final boolean DEBUG = false;
+    private static final Object CONTENT = new Object();
+
+    /** If a fsync takes more than {@value #MAX_FSYNC_DURATION_MILLIS} ms, warn */
+    private static final long MAX_FSYNC_DURATION_MILLIS = 256;
 
     // Lock ordering rules:
-    //  - acquire SharedPreferencesImpl.this before EditorImpl.this
-    //  - acquire mWritingToDiskLock before EditorImpl.this
+    //  - acquire SharedPreferencesImpl.mLock before EditorImpl.mLock
+    //  - acquire mWritingToDiskLock before EditorImpl.mLock
 
     private final File mFile;
     private final File mBackupFile;
     private final int mMode;
-
-    private Map<String, Object> mMap;     // guarded by 'this'
-    private int mDiskWritesInFlight = 0;  // guarded by 'this'
-    private boolean mLoaded = false;      // guarded by 'this'
-    private long mStatTimestamp;          // guarded by 'this'
-    private long mStatSize;               // guarded by 'this'
-
+    private final Object mLock = new Object();
     private final Object mWritingToDiskLock = new Object();
-    private static final Object mContent = new Object();
+
+    @GuardedBy("mLock")
+    private Map<String, Object> mMap;
+
+    @GuardedBy("mLock")
+    private int mDiskWritesInFlight = 0;
+
+    @GuardedBy("mLock")
+    private boolean mLoaded = false;
+
+    @GuardedBy("mLock")
+    private long mStatTimestamp;
+
+    @GuardedBy("mLock")
+    private long mStatSize;
+
+    @GuardedBy("mLock")
     private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners =
             new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
 
@@ -82,6 +97,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
     @GuardedBy("mWritingToDiskLock")
     private long mDiskStateGeneration;
 
+    /** Time (and number of instances) of file-system sync requests */
+    @GuardedBy("mWritingToDiskLock")
+    private final ExponentiallyBucketedHistogram mSyncTimes = new ExponentiallyBucketedHistogram(16);
+    private int mNumSync = 0;
+
     SharedPreferencesImpl(File file, int mode) {
         mFile = file;
         mBackupFile = makeBackupFile(file);
@@ -92,7 +112,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     private void startLoadFromDisk() {
-        synchronized (this) {
+        synchronized (mLock) {
             mLoaded = false;
         }
         new Thread("SharedPreferencesImpl-load") {
@@ -103,7 +123,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     private void loadFromDisk() {
-        synchronized (SharedPreferencesImpl.this) {
+        synchronized (mLock) {
             if (mLoaded) {
                 return;
             }
@@ -128,8 +148,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     str = new BufferedInputStream(
                             new FileInputStream(mFile), 16*1024);
                     map = XmlUtils.readMapXml(str);
-                } catch (XmlPullParserException | IOException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (Exception e) {
+                    Log.w(TAG, "Cannot read " + mFile.getAbsolutePath(), e);
                 } finally {
                     IoUtils.closeQuietly(str);
                 }
@@ -138,7 +158,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             /* ignore */
         }
 
-        synchronized (SharedPreferencesImpl.this) {
+        synchronized (mLock) {
             mLoaded = true;
             if (map != null) {
                 mMap = map;
@@ -147,7 +167,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             } else {
                 mMap = new HashMap<>();
             }
-            notifyAll();
+            mLock.notifyAll();
         }
     }
 
@@ -156,7 +176,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     void startReloadIfChangedUnexpectedly() {
-        synchronized (this) {
+        synchronized (mLock) {
             // TODO: wait for any pending writes to disk?
             if (!hasFileChangedUnexpectedly()) {
                 return;
@@ -168,7 +188,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     // Has the file changed out from under us?  i.e. writes that
     // we didn't instigate.
     private boolean hasFileChangedUnexpectedly() {
-        synchronized (this) {
+        synchronized (mLock) {
             if (mDiskWritesInFlight > 0) {
                 // If we know we caused it, it's not unexpected.
                 if (DEBUG) Log.d(TAG, "disk write in flight, not unexpected.");
@@ -188,19 +208,19 @@ final class SharedPreferencesImpl implements SharedPreferences {
             return true;
         }
 
-        synchronized (this) {
+        synchronized (mLock) {
             return mStatTimestamp != stat.st_mtime || mStatSize != stat.st_size;
         }
     }
 
     public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-        synchronized(this) {
-            mListeners.put(listener, mContent);
+        synchronized(mLock) {
+            mListeners.put(listener, CONTENT);
         }
     }
 
     public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-        synchronized(this) {
+        synchronized(mLock) {
             mListeners.remove(listener);
         }
     }
@@ -214,14 +234,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
         while (!mLoaded) {
             try {
-                wait();
+                mLock.wait();
             } catch (InterruptedException unused) {
             }
         }
     }
 
     public Map<String, ?> getAll() {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             //noinspection unchecked
             return new HashMap<String, Object>(mMap);
@@ -230,7 +250,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     @Nullable
     public String getString(String key, @Nullable String defValue) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             String v = (String)mMap.get(key);
             return v != null ? v : defValue;
@@ -239,7 +259,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     @Nullable
     public Set<String> getStringSet(String key, @Nullable Set<String> defValues) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             Set<String> v = (Set<String>) mMap.get(key);
             return v != null ? v : defValues;
@@ -247,28 +267,28 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     public int getInt(String key, int defValue) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             Integer v = (Integer)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public long getLong(String key, long defValue) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             Long v = (Long)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public float getFloat(String key, float defValue) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             Float v = (Float)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     public boolean getBoolean(String key, boolean defValue) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             Boolean v = (Boolean)mMap.get(key);
             return v != null ? v : defValue;
@@ -276,7 +296,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     public boolean contains(String key) {
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
             return mMap.containsKey(key);
         }
@@ -290,7 +310,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         //      context.getSharedPreferences(..).edit().putString(..).apply()
         //
         // ... all without blocking.
-        synchronized (this) {
+        synchronized (mLock) {
             awaitLoadedLocked();
         }
 
@@ -299,76 +319,96 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     // Return value from EditorImpl#commitToMemory()
     private static class MemoryCommitResult {
-        public long memoryStateGeneration;
-        public List<String> keysModified;  // may be null
-        public Set<OnSharedPreferenceChangeListener> listeners;  // may be null
-        public Map<?, ?> mapToWriteToDisk;
-        public final CountDownLatch writtenToDiskLatch = new CountDownLatch(1);
-        public volatile boolean writeToDiskResult = false;
+        final long memoryStateGeneration;
+        @Nullable final List<String> keysModified;
+        @Nullable final Set<OnSharedPreferenceChangeListener> listeners;
+        final Map<String, Object> mapToWriteToDisk;
+        final CountDownLatch writtenToDiskLatch = new CountDownLatch(1);
 
-        public void setDiskWriteResult(boolean result) {
+        @GuardedBy("mWritingToDiskLock")
+        volatile boolean writeToDiskResult = false;
+        boolean wasWritten = false;
+
+        private MemoryCommitResult(long memoryStateGeneration, @Nullable List<String> keysModified,
+                @Nullable Set<OnSharedPreferenceChangeListener> listeners,
+                Map<String, Object> mapToWriteToDisk) {
+            this.memoryStateGeneration = memoryStateGeneration;
+            this.keysModified = keysModified;
+            this.listeners = listeners;
+            this.mapToWriteToDisk = mapToWriteToDisk;
+        }
+
+        void setDiskWriteResult(boolean wasWritten, boolean result) {
+            this.wasWritten = wasWritten;
             writeToDiskResult = result;
             writtenToDiskLatch.countDown();
         }
     }
 
     public final class EditorImpl implements Editor {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
         private final Map<String, Object> mModified = Maps.newHashMap();
+
+        @GuardedBy("mLock")
         private boolean mClear = false;
 
         public Editor putString(String key, @Nullable String value) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
         public Editor putStringSet(String key, @Nullable Set<String> values) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key,
                         (values == null) ? null : new HashSet<String>(values));
                 return this;
             }
         }
         public Editor putInt(String key, int value) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
         public Editor putLong(String key, long value) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
         public Editor putFloat(String key, float value) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
         public Editor putBoolean(String key, boolean value) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
 
         public Editor remove(String key) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mModified.put(key, this);
                 return this;
             }
         }
 
         public Editor clear() {
-            synchronized (this) {
+            synchronized (mLock) {
                 mClear = true;
                 return this;
             }
         }
 
         public void apply() {
+            final long startTime = System.currentTimeMillis();
+
             final MemoryCommitResult mcr = commitToMemory();
             final Runnable awaitCommit = new Runnable() {
                     public void run() {
@@ -376,15 +416,21 @@ final class SharedPreferencesImpl implements SharedPreferences {
                             mcr.writtenToDiskLatch.await();
                         } catch (InterruptedException ignored) {
                         }
+
+                        if (DEBUG && mcr.wasWritten) {
+                            Log.d(TAG, mFile.getName() + ":" + mcr.memoryStateGeneration
+                                    + " applied after " + (System.currentTimeMillis() - startTime)
+                                    + " ms");
+                        }
                     }
                 };
 
-            QueuedWork.add(awaitCommit);
+            QueuedWork.addFinisher(awaitCommit);
 
             Runnable postWriteRunnable = new Runnable() {
                     public void run() {
                         awaitCommit.run();
-                        QueuedWork.remove(awaitCommit);
+                        QueuedWork.removeFinisher(awaitCommit);
                     }
                 };
 
@@ -399,8 +445,12 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
         // Returns true if any changes were made
         private MemoryCommitResult commitToMemory() {
-            MemoryCommitResult mcr = new MemoryCommitResult();
-            synchronized (SharedPreferencesImpl.this) {
+            long memoryStateGeneration;
+            List<String> keysModified = null;
+            Set<OnSharedPreferenceChangeListener> listeners = null;
+            Map<String, Object> mapToWriteToDisk;
+
+            synchronized (SharedPreferencesImpl.this.mLock) {
                 // We optimistically don't make a deep copy until
                 // a memory commit comes in when we're already
                 // writing to disk.
@@ -411,17 +461,16 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     // noinspection unchecked
                     mMap = new HashMap<String, Object>(mMap);
                 }
-                mcr.mapToWriteToDisk = mMap;
+                mapToWriteToDisk = mMap;
                 mDiskWritesInFlight++;
 
                 boolean hasListeners = mListeners.size() > 0;
                 if (hasListeners) {
-                    mcr.keysModified = new ArrayList<String>();
-                    mcr.listeners =
-                            new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
+                    keysModified = new ArrayList<String>();
+                    listeners = new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                 }
 
-                synchronized (this) {
+                synchronized (mLock) {
                     boolean changesMade = false;
 
                     if (mClear) {
@@ -455,7 +504,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
                         changesMade = true;
                         if (hasListeners) {
-                            mcr.keysModified.add(k);
+                            keysModified.add(k);
                         }
                     }
 
@@ -465,20 +514,34 @@ final class SharedPreferencesImpl implements SharedPreferences {
                         mCurrentMemoryStateGeneration++;
                     }
 
-                    mcr.memoryStateGeneration = mCurrentMemoryStateGeneration;
+                    memoryStateGeneration = mCurrentMemoryStateGeneration;
                 }
             }
-            return mcr;
+            return new MemoryCommitResult(memoryStateGeneration, keysModified, listeners,
+                    mapToWriteToDisk);
         }
 
         public boolean commit() {
+            long startTime = 0;
+
+            if (DEBUG) {
+                startTime = System.currentTimeMillis();
+            }
+
             MemoryCommitResult mcr = commitToMemory();
+
             SharedPreferencesImpl.this.enqueueDiskWrite(
                 mcr, null /* sync write on this thread okay */);
             try {
                 mcr.writtenToDiskLatch.await();
             } catch (InterruptedException e) {
                 return false;
+            } finally {
+                if (DEBUG) {
+                    Log.d(TAG, mFile.getName() + ":" + mcr.memoryStateGeneration
+                            + " committed after " + (System.currentTimeMillis() - startTime)
+                            + " ms");
+                }
             }
             notifyListeners(mcr);
             return mcr.writeToDiskResult;
@@ -534,7 +597,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     synchronized (mWritingToDiskLock) {
                         writeToFile(mcr, isFromSyncCommit);
                     }
-                    synchronized (SharedPreferencesImpl.this) {
+                    synchronized (mLock) {
                         mDiskWritesInFlight--;
                     }
                     if (postWriteRunnable != null) {
@@ -547,7 +610,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         // the current thread.
         if (isFromSyncCommit) {
             boolean wasEmpty = false;
-            synchronized (SharedPreferencesImpl.this) {
+            synchronized (mLock) {
                 wasEmpty = mDiskWritesInFlight == 1;
             }
             if (wasEmpty) {
@@ -556,11 +619,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "added " + mcr.memoryStateGeneration + " -> " + mFile.getName());
-        }
-
-        QueuedWork.singleThreadExecutor().execute(writeToDiskRunnable);
+        QueuedWork.queue(writeToDiskRunnable, !isFromSyncCommit);
     }
 
     private static FileOutputStream createFileOutputStream(File file) {
@@ -588,8 +647,31 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     // Note: must hold mWritingToDiskLock
     private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {
+        long startTime = 0;
+        long existsTime = 0;
+        long backupExistsTime = 0;
+        long outputStreamCreateTime = 0;
+        long writeTime = 0;
+        long fsyncTime = 0;
+        long setPermTime = 0;
+        long fstatTime = 0;
+        long deleteTime = 0;
+
+        if (DEBUG) {
+            startTime = System.currentTimeMillis();
+        }
+
+        boolean fileExists = mFile.exists();
+
+        if (DEBUG) {
+            existsTime = System.currentTimeMillis();
+
+            // Might not be set, hence init them to a default value
+            backupExistsTime = existsTime;
+        }
+
         // Rename the current file so it may be used as a backup during the next read
-        if (mFile.exists()) {
+        if (fileExists) {
             boolean needsWrite = false;
 
             // Only need to write if the disk state is older than this commit
@@ -597,7 +679,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 if (isFromSyncCommit) {
                     needsWrite = true;
                 } else {
-                    synchronized (this) {
+                    synchronized (mLock) {
                         // No need to persist intermediate states. Just wait for the latest state to
                         // be persisted.
                         if (mCurrentMemoryStateGeneration == mcr.memoryStateGeneration) {
@@ -608,18 +690,21 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
 
             if (!needsWrite) {
-                if (DEBUG) {
-                    Log.d(TAG, "skipped " + mcr.memoryStateGeneration + " -> " + mFile.getName());
-                }
-                mcr.setDiskWriteResult(true);
+                mcr.setDiskWriteResult(false, true);
                 return;
             }
 
-            if (!mBackupFile.exists()) {
+            boolean backupFileExists = mBackupFile.exists();
+
+            if (DEBUG) {
+                backupExistsTime = System.currentTimeMillis();
+            }
+
+            if (!backupFileExists) {
                 if (!mFile.renameTo(mBackupFile)) {
                     Log.e(TAG, "Couldn't rename file " + mFile
                           + " to backup file " + mBackupFile);
-                    mcr.setDiskWriteResult(false);
+                    mcr.setDiskWriteResult(false, false);
                     return;
                 }
             } else {
@@ -632,34 +717,73 @@ final class SharedPreferencesImpl implements SharedPreferences {
         // from the backup.
         try {
             FileOutputStream str = createFileOutputStream(mFile);
+
+            if (DEBUG) {
+                outputStreamCreateTime = System.currentTimeMillis();
+            }
+
             if (str == null) {
-                mcr.setDiskWriteResult(false);
+                mcr.setDiskWriteResult(false, false);
                 return;
             }
             XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
+
+            writeTime = System.currentTimeMillis();
+
             FileUtils.sync(str);
 
-            if (DEBUG) {
-                Log.d(TAG, "wrote " + mcr.memoryStateGeneration + " -> " + mFile.getName());
-            }
+            fsyncTime = System.currentTimeMillis();
 
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
+
+            if (DEBUG) {
+                setPermTime = System.currentTimeMillis();
+            }
+
             try {
                 final StructStat stat = Os.stat(mFile.getPath());
-                synchronized (this) {
+                synchronized (mLock) {
                     mStatTimestamp = stat.st_mtime;
                     mStatSize = stat.st_size;
                 }
             } catch (ErrnoException e) {
                 // Do nothing
             }
+
+            if (DEBUG) {
+                fstatTime = System.currentTimeMillis();
+            }
+
             // Writing was successful, delete the backup file if there is one.
             mBackupFile.delete();
 
+            if (DEBUG) {
+                deleteTime = System.currentTimeMillis();
+            }
+
             mDiskStateGeneration = mcr.memoryStateGeneration;
 
-            mcr.setDiskWriteResult(true);
+            mcr.setDiskWriteResult(true, true);
+
+            if (DEBUG) {
+                Log.d(TAG, "write: " + (existsTime - startTime) + "/"
+                        + (backupExistsTime - startTime) + "/"
+                        + (outputStreamCreateTime - startTime) + "/"
+                        + (writeTime - startTime) + "/"
+                        + (fsyncTime - startTime) + "/"
+                        + (setPermTime - startTime) + "/"
+                        + (fstatTime - startTime) + "/"
+                        + (deleteTime - startTime));
+            }
+
+            long fsyncDuration = fsyncTime - writeTime;
+            mSyncTimes.add(Long.valueOf(fsyncDuration).intValue());
+            mNumSync++;
+
+            if (DEBUG || mNumSync % 1024 == 0 || fsyncDuration > MAX_FSYNC_DURATION_MILLIS) {
+                mSyncTimes.log(TAG, "Time required to fsync " + mFile + ": ");
+            }
 
             return;
         } catch (XmlPullParserException e) {
@@ -667,12 +791,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
         } catch (IOException e) {
             Log.w(TAG, "writeToFile: Got exception:", e);
         }
+
         // Clean up an unsuccessfully written file
         if (mFile.exists()) {
             if (!mFile.delete()) {
                 Log.e(TAG, "Couldn't clean up partially-written file " + mFile);
             }
         }
-        mcr.setDiskWriteResult(false);
+        mcr.setDiskWriteResult(false, false);
     }
 }

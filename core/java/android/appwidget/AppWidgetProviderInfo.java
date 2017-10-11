@@ -20,12 +20,15 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.content.ComponentName;
 import android.os.UserHandle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 /**
  * Describes the meta data for an installed AppWidget provider.  The fields in this class
@@ -366,16 +369,27 @@ public class AppWidgetProviderInfo implements Parcelable {
         try {
             Resources resources = context.getPackageManager().getResourcesForApplication(
                     providerInfo.applicationInfo);
-            if (resourceId > 0) {
-                if (density <= 0) {
-                    density = context.getResources().getDisplayMetrics().densityDpi;
+            if (ResourceId.isValid(resourceId)) {
+                if (density < 0) {
+                    density = 0;
                 }
-                return resources.getDrawableForDensity(resourceId, density);
+                return resources.getDrawableForDensity(resourceId, density, null);
             }
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
             /* ignore */
         }
         return loadDefaultIcon ? providerInfo.loadIcon(context.getPackageManager()) : null;
+    }
+
+    /**
+     * @hide
+     */
+    public void updateDimensions(DisplayMetrics displayMetrics) {
+        // Converting complex to dp.
+        minWidth = TypedValue.complexToDimensionPixelSize(minWidth, displayMetrics);
+        minHeight = TypedValue.complexToDimensionPixelSize(minHeight, displayMetrics);
+        minResizeWidth = TypedValue.complexToDimensionPixelSize(minResizeWidth, displayMetrics);
+        minResizeHeight = TypedValue.complexToDimensionPixelSize(minResizeHeight, displayMetrics);
     }
 
     /**

@@ -24,8 +24,8 @@ import android.util.SparseArray;
 
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * This is used in conjunction with layoublib_create: certain Android java classes are mere
  * wrappers around a heavily native based implementation, and we need a way to run these classes
- * in our Eclipse rendering framework without bringing all the native code from the Android
+ * in our Android Studio rendering framework without bringing all the native code from the Android
  * platform.
  *
  * Thus we instruct layoutlib_create to modify the bytecode of these classes to replace their
@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * following mechanism:
  *
  * - {@link #addNewDelegate(Object)} and {@link #removeJavaReferenceFor(long)} adds and removes
- *   the delegate to/from a list. This list hold the reference and prevents the GC from reclaiming
+ *   the delegate to/from a set. This set holds the reference and prevents the GC from reclaiming
  *   the delegate.
  *
  * - {@link #addNewDelegate(Object)} also adds the delegate to a {@link SparseArray} that holds a
@@ -76,12 +76,12 @@ public final class DelegateManager<T> {
     @SuppressWarnings("FieldCanBeLocal")
     private final Class<T> mClass;
     private static final SparseWeakArray<Object> sDelegates = new SparseWeakArray<>();
-    /** list used to store delegates when their main object holds a reference to them.
+    /** Set used to store delegates when their main object holds a reference to them.
      * This is to ensure that the WeakReference in the SparseWeakArray doesn't get GC'ed
      * @see #addNewDelegate(Object)
      * @see #removeJavaReferenceFor(long)
      */
-    private static final List<Object> sJavaReferences = new ArrayList<>();
+    private static final Set<Object> sJavaReferences = new HashSet<>();
     private static final AtomicLong sDelegateCounter = new AtomicLong(1);
 
     public DelegateManager(Class<T> theClass) {
@@ -129,7 +129,7 @@ public final class DelegateManager<T> {
         long native_object = sDelegateCounter.getAndIncrement();
         synchronized (DelegateManager.class) {
             sDelegates.put(native_object, newDelegate);
-            assert !sJavaReferences.contains(newDelegate);
+            // Only for development: assert !sJavaReferences.contains(newDelegate);
             sJavaReferences.add(newDelegate);
         }
 
@@ -165,5 +165,6 @@ public final class DelegateManager<T> {
             int idx = sDelegates.indexOfValue(reference);
             out.printf("[%d] %s\n", sDelegates.keyAt(idx), reference.getClass().getSimpleName());
         }
+        out.printf("\nTotal number of objects: %d\n", sJavaReferences.size());
     }
 }

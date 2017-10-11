@@ -176,7 +176,8 @@ public class FrameworkActionBar extends BridgeActionBar {
         ArrayList<MenuItemImpl> menus = mActionBar.getMenuBuilder().getNonActionItems();
         ActionMenuPresenter presenter = mActionBar.getActionMenuPresenter();
         if (presenter == null) {
-            throw new RuntimeException("Failed to create a Presenter for Action Bar Menus.");
+            assert false : "Failed to create a Presenter for Action Bar Menus.";
+            return false;
         }
         if (presenter.isOverflowReserved() &&
                 menus != null) {

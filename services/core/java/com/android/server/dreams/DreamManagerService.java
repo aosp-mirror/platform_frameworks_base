@@ -353,6 +353,7 @@ public final class DreamManagerService extends SystemService {
                 && mCurrentDreamIsTest == isTest
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
+            Slog.i(TAG, "Already in target dream.");
             return;
         }
 
@@ -388,6 +389,7 @@ public final class DreamManagerService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Slog.i(TAG, "Performing gentle wake from dream.");
                     mController.stopDream(immediate);
                 }
             });
@@ -479,14 +481,7 @@ public final class DreamManagerService extends SystemService {
     private final class BinderService extends IDreamManager.Stub {
         @Override // Binder call
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump DreamManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid());
-                return;
-            }
-
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             final long ident = Binder.clearCallingIdentity();
             try {
                 dumpInternal(pw);

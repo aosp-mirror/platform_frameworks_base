@@ -171,6 +171,11 @@ public class PowerProfile {
     public static final String POWER_FLASHLIGHT = "camera.flashlight";
 
     /**
+     * Power consumption when DDR is being used.
+     */
+    public static final String POWER_MEMORY = "memory.bandwidths";
+
+    /**
      * Average power consumption when the camera is on over all standard use cases.
      *
      * TODO: Add more fine-grained camera power metrics.
@@ -360,6 +365,24 @@ public class PowerProfile {
     public double getAveragePowerForCpu(int cluster, int step) {
         if (cluster >= 0 && cluster < mCpuClusters.length) {
             return getAveragePower(mCpuClusters[cluster].powerKey, step);
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the number of memory bandwidth buckets defined in power_profile.xml, or a
+     * default value if the subsystem has no recorded value.
+     * @return the number of memory bandwidth buckets.
+     */
+    public int getNumElements(String key) {
+        if (sPowerMap.containsKey(key)) {
+            Object data = sPowerMap.get(key);
+            if (data instanceof Double[]) {
+                final Double[] values = (Double[]) data;
+                return values.length;
+            } else {
+                return 1;
+            }
         }
         return 0;
     }

@@ -20,16 +20,31 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.job.JobService;
-import android.app.job.JobParameters;
+import android.app.job.JobServiceEngine;
+import android.app.usage.ExternalStorageStats;
+import android.app.usage.StorageStatsManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
+import android.os.BatteryManager;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.mock.MockContentResolver;
 
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.storage.DiskStatsLoggingService.LogRunnable;
 
 import libcore.io.IoUtils;
@@ -46,14 +61,17 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 @RunWith(JUnit4.class)
 public class DiskStatsLoggingServiceTest extends AndroidTestCase {
     @Rule public TemporaryFolder mTemporaryFolder;
     @Rule public TemporaryFolder mDownloads;
-    @Rule public TemporaryFolder mRootDirectory;
     @Mock private AppCollector mCollector;
+    @Mock private JobService mJobService;
+    @Mock private StorageStatsManager mSsm;
+    private ExternalStorageStats mStorageStats;
     private File mInputFile;
 
 
@@ -66,8 +84,10 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         mInputFile = mTemporaryFolder.newFile();
         mDownloads = new TemporaryFolder();
         mDownloads.create();
-        mRootDirectory = new TemporaryFolder();
-        mRootDirectory.create();
+        mStorageStats = new ExternalStorageStats();
+        when(mSsm.queryExternalStatsForUser(isNull(String.class), any(UserHandle.class)))
+                .thenReturn(mStorageStats);
+        when(mJobService.getSystemService(anyString())).thenReturn(mSsm);
     }
 
     @Test
@@ -75,9 +95,9 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(0L);
+        task.setContext(mJobService);
         task.run();
 
         JSONObject json = getJsonOutput();
@@ -99,10 +119,10 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
     public void testPopulatedLogTask() throws Exception {
         // Write data to directories.
         writeDataToFile(mDownloads.newFile(), "lol");
-        writeDataToFile(mRootDirectory.newFile("test.jpg"), "1234");
-        writeDataToFile(mRootDirectory.newFile("test.mp4"), "12345");
-        writeDataToFile(mRootDirectory.newFile("test.mp3"), "123456");
-        writeDataToFile(mRootDirectory.newFile("test.whatever"), "1234567");
+        mStorageStats.audioBytes = 6L;
+        mStorageStats.imageBytes = 4L;
+        mStorageStats.videoBytes = 5L;
+        mStorageStats.totalBytes = 22L;
 
         // Write apps.
         ArrayList<PackageStats> apps = new ArrayList<>();
@@ -110,15 +130,16 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         testApp.dataSize = 5L;
         testApp.cacheSize = 55L;
         testApp.codeSize = 10L;
+        testApp.userHandle = UserHandle.USER_SYSTEM;
         apps.add(testApp);
-        when(mCollector.getPackageStats(anyInt())).thenReturn(apps);
+        when(mCollector.getPackageStats(anyLong())).thenReturn(apps);
 
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(10L);
+        task.setContext(mJobService);
         task.run();
 
         JSONObject json = getJsonOutput();
@@ -143,12 +164,55 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         LogRunnable task = new LogRunnable();
         task.setAppCollector(mCollector);
         task.setDownloadsDirectory(mDownloads.getRoot());
-        task.setRootDirectory(mRootDirectory.getRoot());
         task.setLogOutputFile(mInputFile);
         task.setSystemSize(10L);
+        task.setContext(mJobService);
         task.run();
 
         // No exception should be thrown.
+    }
+
+    @Test
+    public void testDontCrashOnRun() throws Exception {
+        DiskStatsLoggingService service = spy(new DiskStatsLoggingService());
+        BatteryManager batteryManager = mock(BatteryManager.class);
+        when(batteryManager.isCharging()).thenReturn(true);
+        doReturn(batteryManager).when(service).getSystemService(Context.BATTERY_SERVICE);
+        UserManager userManager = mock(UserManager.class);
+        when(userManager.getUsers()).thenReturn(new ArrayList<>());
+        doReturn(userManager).when(service).getSystemService(Context.USER_SERVICE);
+        doReturn(mSsm).when(service).getSystemService(Context.STORAGE_STATS_SERVICE);
+        doReturn(mock(StorageManager.class))
+                .when(service)
+                .getSystemService(Context.STORAGE_SERVICE);
+
+        MockContentResolver cr = new MockContentResolver();
+        cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        doReturn(cr).when(service).getContentResolver();
+
+        PackageManager pm = mock(PackageManager.class);
+        VolumeInfo volumeInfo =
+                new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL, VolumeInfo.TYPE_PRIVATE, null, null);
+        when(pm.getPrimaryStorageCurrentVolume()).thenReturn(volumeInfo);
+        doReturn(pm).when(service).getPackageManager();
+
+        doReturn(0).when(service).getUserId();
+
+        // UGGGGGHHHHHHH! jobFinished is a final method on JobService which crashes when called if
+        // the JobService isn't initialized for real. ServiceTestCase doesn't let us initialize a
+        // service which is built into the framework without crashing, though, so we can't make a
+        // real initialized service.
+        //
+        // And so, we use reflection to set the JobServiceEngine, which is used by the final method,
+        // to be something which won't crash when called.
+        final Field field = JobService.class.getDeclaredField("mEngine");
+        field.setAccessible(true);
+        field.set(service, mock(JobServiceEngine.class));
+
+        // Note: This won't clobber your on-device cache file because, technically,
+        // FrameworkServicesTests don't have write permission to actually overwrite the cache file.
+        // We log and fail on the write silently in this case.
+        service.onStartJob(null);
     }
 
     private void writeDataToFile(File f, String data) throws Exception{

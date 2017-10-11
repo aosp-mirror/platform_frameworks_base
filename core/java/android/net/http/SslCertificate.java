@@ -506,6 +506,6 @@ public class SslCertificate {
         if (certificateDate == null) {
             return "";
         }
-        return DateFormat.getDateFormat(context).format(certificateDate);
+        return DateFormat.getMediumDateFormat(context).format(certificateDate);
     }
 }

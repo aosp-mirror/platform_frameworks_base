@@ -108,6 +108,8 @@ public class SearchIndexablesContract {
             RawData.COLUMN_INTENT_TARGET_CLASS,     // 11
             RawData.COLUMN_KEY,                     // 12
             RawData.COLUMN_USER_ID,                 // 13
+            RawData.PAYLOAD_TYPE,                   // 14
+            RawData.PAYLOAD                         // 15
     };
 
     /**
@@ -127,6 +129,14 @@ public class SearchIndexablesContract {
     public static final int COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11;
     public static final int COLUMN_INDEX_RAW_KEY = 12;
     public static final int COLUMN_INDEX_RAW_USER_ID = 13;
+    /**
+     * @hide
+     */
+    public static final int COLUMN_INDEX_RAW_PAYLOAD_TYPE = 14;
+    /**
+     * @hide
+     */
+    public static final int COLUMN_INDEX_RAW_PAYLOAD = 15;
 
     /**
      * Indexable raw data columns.
@@ -213,6 +223,18 @@ public class SearchIndexablesContract {
          * UserId associated with the raw data.
          */
         public static final String COLUMN_USER_ID = "user_id";
+
+        /**
+         * Identifier for the Payload object type.
+         * @hide
+         */
+        public static final String PAYLOAD_TYPE = "payload_type";
+
+        /**
+         * Generic payload for improving Search result expressiveness.
+         * @hide
+         */
+        public static final String PAYLOAD = "payload";
     }
 
     /**

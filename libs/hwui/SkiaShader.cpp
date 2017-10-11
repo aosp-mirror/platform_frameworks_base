@@ -18,9 +18,9 @@
 
 #include "Caches.h"
 #include "Extensions.h"
-#include "Layer.h"
 #include "Matrix.h"
 #include "Texture.h"
+#include "hwui/Bitmap.h"
 
 #include <SkMatrix.h>
 #include <utils/Log.h>
@@ -57,7 +57,7 @@ static inline void bindUniformColor(int slot, FloatColor color) {
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->textureState().bindTexture(texture->id());
+    caches->textureState().bindTexture(texture->target(), texture->id());
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -80,7 +80,7 @@ static void computeScreenSpaceMatrix(mat4& screenSpace, const SkMatrix& unitMatr
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// gradient shader matrix helpers
+// Gradient shader matrix helpers
 ///////////////////////////////////////////////////////////////////////////////
 
 static void toLinearUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
@@ -160,7 +160,7 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
     gradInfo.fColorOffsets = &colorOffsets[0];
     shader.asAGradient(&gradInfo);
 
-    if (CC_UNLIKELY(!isSimpleGradient(gradInfo))) {
+    if (CC_UNLIKELY(!description->isSimpleGradient)) {
         outData->gradientSampler = (*textureUnit)++;
 
 #ifndef SK_SCALAR_IS_FLOAT
@@ -177,11 +177,12 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
         outData->endColor.set(gradInfo.fColors[1]);
     }
 
-    outData->ditherSampler = (*textureUnit)++;
     return true;
 }
 
-void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& data) {
+void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& data,
+        const GLsizei width, const GLsizei height) {
+
     if (CC_UNLIKELY(data.gradientTexture)) {
         caches.textureState().activateTexture(data.gradientSampler);
         bindTexture(&caches, data.gradientTexture, data.wrapST, data.wrapST);
@@ -191,10 +192,7 @@ void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& dat
         bindUniformColor(caches.program().getUniform("endColor"), data.endColor);
     }
 
-    // TODO: remove sampler slot incrementing from dither.setupProgram,
-    // since this assignment of slots is done at store, not apply time
-    GLuint ditherSampler = data.ditherSampler;
-    caches.dither.setupProgram(caches.program(), &ditherSampler);
+    glUniform2f(caches.program().getUniform("screenSize"), 1.0f / width, 1.0f / height);
     glUniformMatrix4fv(caches.program().getUniform("screenSpace"), 1,
             GL_FALSE, &data.screenSpace.data[0]);
 }
@@ -208,13 +206,9 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
         return false;
     }
 
-    /*
-     * Bypass the AssetAtlas, since those textures:
-     * 1) require UV mapping, which isn't implemented in matrix computation below
-     * 2) can't handle REPEAT simply
-     * 3) are safe to upload here (outside of sync stage), since they're static
-     */
-    outData->bitmapTexture = caches.textureCache.getAndBypassAtlas(&bitmap);
+    // TODO: create  hwui-owned BitmapShader.
+    Bitmap* hwuiBitmap = static_cast<Bitmap*>(bitmap.pixelRef());
+    outData->bitmapTexture = caches.textureCache.get(hwuiBitmap);
     if (!outData->bitmapTexture) return false;
 
     outData->bitmapSampler = (*textureUnit)++;
@@ -222,11 +216,21 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
     const float width = outData->bitmapTexture->width();
     const float height = outData->bitmapTexture->height();
 
+    Texture* texture = outData->bitmapTexture;
+
     description->hasBitmap = true;
-    if (!caches.extensions().hasNPot()
+    description->hasLinearTexture = texture->isLinear();
+    description->hasColorSpaceConversion = texture->hasColorSpaceConversion();
+    description->transferFunction = texture->getTransferFunctionType();
+    description->hasTranslucentConversion = texture->blend;
+    description->isShaderBitmapExternal = hwuiBitmap->isHardware();
+    // gralloc doesn't support non-clamp modes
+    if (hwuiBitmap->isHardware() || (!caches.extensions().hasNPot()
             && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
-            && (xy[0] != SkShader::kClamp_TileMode || xy[1] != SkShader::kClamp_TileMode)) {
-        description->isBitmapNpot = true;
+            && (xy[0] != SkShader::kClamp_TileMode || xy[1] != SkShader::kClamp_TileMode))) {
+        // need non-clamp mode, but it's not supported for this draw,
+        // so enable custom shader logic to mimic
+        description->useShaderBasedWrap = true;
         description->bitmapWrapS = gTileModes[xy[0]];
         description->bitmapWrapT = gTileModes[xy[1]];
 
@@ -314,47 +318,8 @@ bool tryStoreCompose(Caches& caches, const SkShader& shader, const Matrix4& mode
         storeCompose(caches, *rec.fShaderB, *rec.fShaderA,
                 transform, textureUnit, description, outData);
     }
-    if (!SkXfermode::AsMode(rec.fMode, &description->shadersMode)) {
-        // TODO: Support other modes.
-        description->shadersMode = SkXfermode::kSrcOver_Mode;
-    }
+    description->shadersMode = rec.fBlendMode;
     return true;
-}
-
-bool tryStoreLayer(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
-        GLuint* textureUnit, ProgramDescription* description,
-        SkiaShaderData::LayerShaderData* outData) {
-    Layer* layer;
-    if (!shader.asACustomShader(reinterpret_cast<void**>(&layer))) {
-        return false;
-    }
-
-    description->hasBitmap = true;
-    outData->layer = layer;
-    outData->bitmapSampler = (*textureUnit)++;
-
-    const float width = layer->getWidth();
-    const float height = layer->getHeight();
-
-    computeScreenSpaceMatrix(outData->textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
-            modelViewMatrix);
-
-    outData->textureDimension[0] = 1.0f / width;
-    outData->textureDimension[1] = 1.0f / height;
-    return true;
-}
-
-void applyLayer(Caches& caches, const SkiaShaderData::LayerShaderData& data) {
-    caches.textureState().activateTexture(data.bitmapSampler);
-
-    data.layer->bindTexture();
-    data.layer->setWrap(GL_CLAMP_TO_EDGE);
-    data.layer->setFilter(GL_LINEAR);
-
-    glUniform1i(caches.program().getUniform("bitmapSampler"), data.bitmapSampler);
-    glUniformMatrix4fv(caches.program().getUniform("textureTransform"), 1,
-            GL_FALSE, &data.textureTransform.data[0]);
-    glUniform2fv(caches.program().getUniform("textureDimension"), 1, &data.textureDimension[0]);
 }
 
 void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
@@ -378,28 +343,19 @@ void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& mo
         return;
     }
 
-    if (tryStoreLayer(caches, shader, modelViewMatrix,
-            textureUnit, description, &outData->layerData)) {
-        outData->skiaShaderType = kLayer_SkiaShaderType;
-        return;
-    }
-
     // Unknown/unsupported type, so explicitly ignore shader
     outData->skiaShaderType = kNone_SkiaShaderType;
 }
 
-void SkiaShader::apply(Caches& caches, const SkiaShaderData& data) {
+void SkiaShader::apply(Caches& caches, const SkiaShaderData& data,
+        const GLsizei width, const GLsizei height) {
     if (!data.skiaShaderType) return;
 
     if (data.skiaShaderType & kGradient_SkiaShaderType) {
-        applyGradient(caches, data.gradientData);
+        applyGradient(caches, data.gradientData, width, height);
     }
     if (data.skiaShaderType & kBitmap_SkiaShaderType) {
         applyBitmap(caches, data.bitmapData);
-    }
-
-    if (data.skiaShaderType == kLayer_SkiaShaderType) {
-        applyLayer(caches, data.layerData);
     }
 }
 

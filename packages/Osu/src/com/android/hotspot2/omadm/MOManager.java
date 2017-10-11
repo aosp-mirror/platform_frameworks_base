@@ -220,7 +220,7 @@ public class MOManager {
 
     public HomeSP addSP(String xml, OSUManager osuManager) throws IOException, SAXException {
         OMAParser omaParser = new OMAParser();
-        return addSP(omaParser.parse(xml, OMAConstants.PPS_URN), osuManager);
+        return addSP(omaParser.parse(xml, OMAConstants.PPS_URN));
     }
 
     private static final List<String> FQDNPath = Arrays.asList(TAG_HomeSP, TAG_FQDN);
@@ -231,7 +231,7 @@ public class MOManager {
      * @param homeSP
      * @throws IOException
      */
-    public void addSP(HomeSP homeSP, OSUManager osuManager) throws IOException {
+    public void addSP(HomeSP homeSP) throws IOException {
         if (!mEnabled) {
             throw new IOException("HS2.0 not enabled on this device");
         }
@@ -245,18 +245,18 @@ public class MOManager {
         OMAConstructed dummyRoot = new OMAConstructed(null, TAG_PerProviderSubscription, null);
         buildHomeSPTree(homeSP, dummyRoot, mSPs.size() + 1);
         try {
-            addSP(dummyRoot, osuManager);
+            addSP(dummyRoot);
         } catch (FileNotFoundException fnfe) {
             MOTree tree =
                     MOTree.buildMgmtTree(OMAConstants.PPS_URN, OMAConstants.OMAVersion, dummyRoot);
             // No file to load a pre-build MO tree from, create a new one and save it.
             //MOTree tree = new MOTree(OMAConstants.PPS_URN, OMAConstants.OMAVersion, dummyRoot);
-            writeMO(tree, mPpsFile, osuManager);
+            writeMO(tree, mPpsFile);
         }
         mSPs.put(homeSP.getFQDN(), homeSP);
     }
 
-    public HomeSP addSP(MOTree instanceTree, OSUManager osuManager) throws IOException {
+    public HomeSP addSP(MOTree instanceTree) throws IOException {
         List<HomeSP> spList = buildSPs(instanceTree);
         if (spList.size() != 1) {
             throw new OMAException("Expected exactly one HomeSP, got " + spList.size());
@@ -272,11 +272,11 @@ public class MOManager {
                 getChild(TAG_PerProviderSubscription);
 
         try {
-            addSP(pps, osuManager);
+            addSP(pps);
         } catch (FileNotFoundException fnfe) {
             MOTree tree = new MOTree(instanceTree.getUrn(), instanceTree.getDtdRev(),
                     instanceTree.getRoot());
-            writeMO(tree, mPpsFile, osuManager);
+            writeMO(tree, mPpsFile);
         }
 
         return sp;
@@ -289,7 +289,7 @@ public class MOManager {
      * @param mo The new MO
      * @throws IOException
      */
-    private void addSP(OMANode mo, OSUManager osuManager) throws IOException {
+    private void addSP(OMANode mo) throws IOException {
         MOTree moTree;
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(mPpsFile))) {
             moTree = MOTree.unmarshal(in);
@@ -315,7 +315,7 @@ public class MOManager {
             }
                 */
         }
-        writeMO(moTree, mPpsFile, osuManager);
+        writeMO(moTree, mPpsFile);
     }
 
     private static OMAConstructed findTargetTree(MOTree moTree, String fqdn) throws OMAException {
@@ -347,7 +347,53 @@ public class MOManager {
         throw new OMAException("Cannot find instance node");
     }
 
-    public HomeSP modifySP(HomeSP homeSP, Collection<MOData> mods, OSUManager osuManager)
+    public static HomeSP modifySP(HomeSP homeSP, MOTree moTree, Collection<MOData> mods)
+            throws OMAException {
+
+        OMAConstructed ppsTree =
+                (OMAConstructed) moTree.getRoot().getChildren().iterator().next();
+        OMAConstructed instance = getInstanceNode(ppsTree);
+
+        int ppsMods = 0;
+        int updateIdentifier = homeSP.getUpdateIdentifier();
+        for (MOData mod : mods) {
+            LinkedList<String> tailPath =
+                    getTailPath(mod.getBaseURI(), TAG_PerProviderSubscription);
+            OMAConstructed modRoot = mod.getMOTree().getRoot();
+            // modRoot is the MgmtTree with the actual object as a direct child
+            // (e.g. Credential)
+
+            if (tailPath.getFirst().equals(TAG_UpdateIdentifier)) {
+                updateIdentifier = getInteger(modRoot.getChildren().iterator().next());
+                OMANode oldUdi = ppsTree.getChild(TAG_UpdateIdentifier);
+                if (getInteger(oldUdi) != updateIdentifier) {
+                    ppsMods++;
+                }
+                if (oldUdi != null) {
+                    ppsTree.replaceNode(oldUdi, modRoot.getChild(TAG_UpdateIdentifier));
+                } else {
+                    ppsTree.addChild(modRoot.getChild(TAG_UpdateIdentifier));
+                }
+            } else {
+                tailPath.removeFirst();     // Drop the instance
+                OMANode current = instance.getListValue(tailPath.iterator());
+                if (current == null) {
+                    throw new OMAException("No previous node for " + tailPath + " in "
+                            + homeSP.getFQDN());
+                }
+                for (OMANode newNode : modRoot.getChildren()) {
+                    // newNode is something like Credential
+                    // current is the same existing node
+                    OMANode old = current.getParent().replaceNode(current, newNode);
+                    ppsMods++;
+                }
+            }
+        }
+
+        return ppsMods > 0 ? buildHomeSP(instance, updateIdentifier) : null;
+    }
+
+    public HomeSP modifySP(HomeSP homeSP, Collection<MOData> mods)
             throws IOException {
 
         Log.d(OSUManager.TAG, "modifying SP: " + mods);
@@ -398,7 +444,7 @@ public class MOManager {
                 }
             }
         }
-        writeMO(moTree, mPpsFile, osuManager);
+        writeMO(moTree, mPpsFile);
 
         if (ppsMods == 0) {
             return null;    // HomeSP not modified.
@@ -419,7 +465,7 @@ public class MOManager {
     }
 
     private static LinkedList<String> getTailPath(String pathString, String rootName)
-            throws IOException {
+            throws OMAException {
         String[] path = pathString.split("/");
         int pathIndex;
         for (pathIndex = 0; pathIndex < path.length; pathIndex++) {
@@ -429,7 +475,7 @@ public class MOManager {
             }
         }
         if (pathIndex >= path.length) {
-            throw new IOException("Bad node-path: " + pathString);
+            throw new OMAException("Bad node-path: " + pathString);
         }
         LinkedList<String> tailPath = new LinkedList<>();
         while (pathIndex < path.length) {
@@ -443,7 +489,7 @@ public class MOManager {
         return mSPs.get(fqdn);
     }
 
-    public void removeSP(String fqdn, OSUManager osuManager) throws IOException {
+    public void removeSP(String fqdn) throws IOException {
         if (mSPs.remove(fqdn) == null) {
             Log.d(OSUManager.TAG, "No HS20 profile to delete for " + fqdn);
             return;
@@ -464,8 +510,7 @@ public class MOManager {
                 throw new IOException("Failed to remove " + fqdn + " out of MO tree");
             }
         }
-        writeMO(moTree, mPpsFile, osuManager);
-        osuManager.spDeleted(fqdn);
+        writeMO(moTree, mPpsFile);
     }
 
     public MOTree getMOTree(HomeSP homeSP) throws IOException {
@@ -479,7 +524,7 @@ public class MOManager {
         }
     }
 
-    private static void writeMO(MOTree moTree, File f, OSUManager osuManager) throws IOException {
+    private static void writeMO(MOTree moTree, File f) throws IOException {
         try (BufferedOutputStream out =
                      new BufferedOutputStream(new FileOutputStream(f, false))) {
             moTree.marshal(out);

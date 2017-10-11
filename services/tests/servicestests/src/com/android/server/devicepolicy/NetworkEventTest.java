@@ -35,7 +35,7 @@ public class NetworkEventTest extends DpmTestBase {
         p.setDataPosition(0);
         ConnectEvent unparceledEvent = p.readParcelable(NetworkEventTest.class.getClassLoader());
         p.recycle();
-        assertEquals(event.getIpAddress(), unparceledEvent.getIpAddress());
+        assertEquals(event.getInetAddress(), unparceledEvent.getInetAddress());
         assertEquals(event.getPort(), unparceledEvent.getPort());
         assertEquals(event.getPackageName(), unparceledEvent.getPackageName());
         assertEquals(event.getTimestamp(), unparceledEvent.getTimestamp());
@@ -53,9 +53,10 @@ public class NetworkEventTest extends DpmTestBase {
         DnsEvent unparceledEvent = p.readParcelable(NetworkEventTest.class.getClassLoader());
         p.recycle();
         assertEquals(event.getHostname(), unparceledEvent.getHostname());
-        assertEquals(event.getIpAddresses()[0], unparceledEvent.getIpAddresses()[0]);
-        assertEquals(event.getIpAddresses()[1], unparceledEvent.getIpAddresses()[1]);
-        assertEquals(event.getIpAddressesCount(), unparceledEvent.getIpAddressesCount());
+        assertEquals(event.getInetAddresses().get(0), unparceledEvent.getInetAddresses().get(0));
+        assertEquals(event.getInetAddresses().get(1), unparceledEvent.getInetAddresses().get(1));
+        assertEquals(event.getTotalResolvedAddressCount(),
+                unparceledEvent.getTotalResolvedAddressCount());
         assertEquals(event.getPackageName(), unparceledEvent.getPackageName());
         assertEquals(event.getTimestamp(), unparceledEvent.getTimestamp());
     }

@@ -263,6 +263,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
                     mShownAnchorView, mOverflowOnly, mPopupStyleAttr, mPopupStyleRes);
             subPopup.setPresenterCallback(mPresenterCallback);
             subPopup.setForceShowIcon(MenuPopup.shouldPreserveIconSpacing(subMenu));
+            subPopup.setGravity(mDropDownGravity);
 
             // Pass responsibility for handling onDismiss to the submenu.
             subPopup.setOnDismissListener(mOnDismissListener);

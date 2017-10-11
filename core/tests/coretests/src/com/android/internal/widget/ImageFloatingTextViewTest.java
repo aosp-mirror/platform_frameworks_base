@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -38,6 +38,7 @@ public class ImageFloatingTextViewTest {
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
         mView = new ImageFloatingTextView(mContext, null, 0, 0);
+        mView.setMaxLines(9);
         mTextView = new TextView(mContext, null, 0, 0);
         mTextView.setMaxLines(9);
     }
@@ -111,6 +112,9 @@ public class ImageFloatingTextViewTest {
         mTextView.measure(widthMeasureSpec, heightMeasureSpec);
         mView.measure(widthMeasureSpec, heightMeasureSpec);
 
-        assertEquals(mTextView.getMeasuredHeight(), mView.getMeasuredHeight());
+        // We're at most allowed to be the same height as the regular textview and maybe a bit
+        // smaller since our layout snaps to full textlines.
+        assertTrue("The measured view should never be taller then the normal textview!",
+                mView.getMeasuredHeight() <= mTextView.getMeasuredHeight());
     }
 }

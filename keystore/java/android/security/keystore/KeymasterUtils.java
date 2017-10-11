@@ -89,7 +89,10 @@ public abstract class KeymasterUtils {
      * @param userAuthenticationValidityDurationSeconds duration of time (seconds) for which user
      *        authentication is valid as authorization for using the key or {@code -1} if every
      *        use of the key needs authorization.
-     *
+     * @param boundToSpecificSecureUserId if non-zero, specify which SID the key will be bound to,
+     *        overriding the default logic in this method where the key is bound to either the root
+     *        SID of the current user, or the fingerprint SID if explicit fingerprint authorization
+     *        is requested.
      * @throws IllegalStateException if user authentication is required but the system is in a wrong
      *         state (e.g., secure lock screen not set up) for generating or importing keys that
      *         require user authentication.
@@ -98,7 +101,8 @@ public abstract class KeymasterUtils {
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationValidWhileOnBody,
-            boolean invalidatedByBiometricEnrollment) {
+            boolean invalidatedByBiometricEnrollment,
+            long boundToSpecificSecureUserId) {
         if (!userAuthenticationRequired) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
             return;
@@ -120,7 +124,9 @@ public abstract class KeymasterUtils {
             }
 
             long sid;
-            if (invalidatedByBiometricEnrollment) {
+            if (boundToSpecificSecureUserId != GateKeeper.INVALID_SECURE_USER_ID) {
+                sid = boundToSpecificSecureUserId;
+            } else if (invalidatedByBiometricEnrollment) {
                 // The fingerprint-only SID will change on fingerprint enrollment or removal of all,
                 // enrolled fingerprints, invalidating the key.
                 sid = fingerprintOnlySid;
@@ -138,11 +144,16 @@ public abstract class KeymasterUtils {
                         + "supported for keys requiring fingerprint authentication");
             }
         } else {
-            // The key is authorized for use for the specified amount of time after the user has
-            // authenticated. Whatever unlocks the secure lock screen should authorize this key.
-            long rootSid = getRootSid();
+            long sid;
+            if (boundToSpecificSecureUserId != GateKeeper.INVALID_SECURE_USER_ID) {
+                sid = boundToSpecificSecureUserId;
+            } else {
+                // The key is authorized for use for the specified amount of time after the user has
+                // authenticated. Whatever unlocks the secure lock screen should authorize this key.
+                sid = getRootSid();
+            }
             args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
-                    KeymasterArguments.toUint64(rootSid));
+                    KeymasterArguments.toUint64(sid));
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_FINGERPRINT);
             args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,

@@ -14,235 +14,357 @@
  * limitations under the License.
  */
 
-#include "ResourceTable.h"
-#include "ResourceValues.h"
-#include "ValueVisitor.h"
 #include "compile/PseudolocaleGenerator.h"
-#include "compile/Pseudolocalizer.h"
 
 #include <algorithm>
 
+#include "ResourceTable.h"
+#include "ResourceValues.h"
+#include "ValueVisitor.h"
+#include "compile/Pseudolocalizer.h"
+#include "util/Util.h"
+
+using android::StringPiece;
+using android::StringPiece16;
+
 namespace aapt {
 
-std::unique_ptr<StyledString> pseudolocalizeStyledString(StyledString* string,
+// The struct that represents both Span objects and UntranslatableSections.
+struct UnifiedSpan {
+  // Only present for Span objects. If not present, this was an UntranslatableSection.
+  Maybe<std::string> tag;
+
+  // The UTF-16 index into the string where this span starts.
+  uint32_t first_char;
+
+  // The UTF-16 index into the string where this span ends, inclusive.
+  uint32_t last_char;
+};
+
+inline static bool operator<(const UnifiedSpan& left, const UnifiedSpan& right) {
+  if (left.first_char < right.first_char) {
+    return true;
+  } else if (left.first_char > right.first_char) {
+    return false;
+  } else if (left.last_char < right.last_char) {
+    return true;
+  }
+  return false;
+}
+
+inline static UnifiedSpan SpanToUnifiedSpan(const StringPool::Span& span) {
+  return UnifiedSpan{*span.name, span.first_char, span.last_char};
+}
+
+inline static UnifiedSpan UntranslatableSectionToUnifiedSpan(const UntranslatableSection& section) {
+  return UnifiedSpan{
+      {}, static_cast<uint32_t>(section.start), static_cast<uint32_t>(section.end) - 1};
+}
+
+// Merges the Span and UntranslatableSections of this StyledString into a single vector of
+// UnifiedSpans. This will first check that the Spans are sorted in ascending order.
+static std::vector<UnifiedSpan> MergeSpans(const StyledString& string) {
+  // Ensure the Spans are sorted and converted.
+  std::vector<UnifiedSpan> sorted_spans;
+  sorted_spans.reserve(string.value->spans.size());
+  std::transform(string.value->spans.begin(), string.value->spans.end(),
+                 std::back_inserter(sorted_spans), SpanToUnifiedSpan);
+
+  // Stable sort to ensure tag sequences like "<b><i>" are preserved.
+  std::stable_sort(sorted_spans.begin(), sorted_spans.end());
+
+  // Ensure the UntranslatableSections are sorted and converted.
+  std::vector<UnifiedSpan> sorted_untranslatable_sections;
+  sorted_untranslatable_sections.reserve(string.untranslatable_sections.size());
+  std::transform(string.untranslatable_sections.begin(), string.untranslatable_sections.end(),
+                 std::back_inserter(sorted_untranslatable_sections),
+                 UntranslatableSectionToUnifiedSpan);
+  std::sort(sorted_untranslatable_sections.begin(), sorted_untranslatable_sections.end());
+
+  std::vector<UnifiedSpan> merged_spans;
+  merged_spans.reserve(sorted_spans.size() + sorted_untranslatable_sections.size());
+  auto span_iter = sorted_spans.begin();
+  auto untranslatable_iter = sorted_untranslatable_sections.begin();
+  while (span_iter != sorted_spans.end() &&
+         untranslatable_iter != sorted_untranslatable_sections.end()) {
+    if (*span_iter < *untranslatable_iter) {
+      merged_spans.push_back(std::move(*span_iter));
+      ++span_iter;
+    } else {
+      merged_spans.push_back(std::move(*untranslatable_iter));
+      ++untranslatable_iter;
+    }
+  }
+
+  while (span_iter != sorted_spans.end()) {
+    merged_spans.push_back(std::move(*span_iter));
+    ++span_iter;
+  }
+
+  while (untranslatable_iter != sorted_untranslatable_sections.end()) {
+    merged_spans.push_back(std::move(*untranslatable_iter));
+    ++untranslatable_iter;
+  }
+  return merged_spans;
+}
+
+std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
                                                          Pseudolocalizer::Method method,
                                                          StringPool* pool) {
-    Pseudolocalizer localizer(method);
+  Pseudolocalizer localizer(method);
 
-    const StringPiece16 originalText = *string->value->str;
+  // Collect the spans and untranslatable sections into one set of spans, sorted by first_char.
+  // This will effectively subdivide the string into multiple sections that can be individually
+  // pseudolocalized, while keeping the span indices synchronized.
+  std::vector<UnifiedSpan> merged_spans = MergeSpans(*string);
 
-    StyleString localized;
+  // All Span indices are UTF-16 based, according to the resources.arsc format expected by the
+  // runtime. So we will do all our processing in UTF-16, then convert back.
+  const std::u16string text16 = util::Utf8ToUtf16(*string->value->str);
 
-    // Copy the spans. We will update their offsets when we localize.
-    localized.spans.reserve(string->value->spans.size());
-    for (const StringPool::Span& span : string->value->spans) {
-        localized.spans.push_back(Span{ *span.name, span.firstChar, span.lastChar });
+  // Convenient wrapper around the text that allows us to work with StringPieces.
+  const StringPiece16 text(text16);
+
+  // The new string.
+  std::string new_string = localizer.Start();
+
+  // The stack that keeps track of what nested Span we're in.
+  std::vector<size_t> span_stack;
+
+  // The current position in the original text.
+  uint32_t cursor = 0u;
+
+  // The current position in the new text.
+  uint32_t new_cursor = utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(new_string.data()),
+                                             new_string.size(), false);
+
+  // We assume no nesting of untranslatable sections, since XLIFF doesn't allow it.
+  bool translatable = true;
+  size_t span_idx = 0u;
+  while (span_idx < merged_spans.size() || !span_stack.empty()) {
+    UnifiedSpan* span = span_idx >= merged_spans.size() ? nullptr : &merged_spans[span_idx];
+    UnifiedSpan* parent_span = span_stack.empty() ? nullptr : &merged_spans[span_stack.back()];
+
+    if (span != nullptr) {
+      if (parent_span == nullptr || parent_span->last_char > span->first_char) {
+        // There is no parent, or this span is the child of the parent.
+        // Pseudolocalize all the text until this span.
+        const StringPiece16 substr = text.substr(cursor, span->first_char - cursor);
+        cursor += substr.size();
+
+        // Pseudolocalize the substring.
+        std::string new_substr = util::Utf16ToUtf8(substr);
+        if (translatable) {
+          new_substr = localizer.Text(new_substr);
+        }
+        new_cursor += utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(new_substr.data()),
+                                           new_substr.size(), false);
+        new_string += new_substr;
+
+        // Rewrite the first_char.
+        span->first_char = new_cursor;
+        if (!span->tag) {
+          // An untranslatable section has begun!
+          translatable = false;
+        }
+        span_stack.push_back(span_idx);
+        ++span_idx;
+        continue;
+      }
     }
 
-    // The ranges are all represented with a single value. This is the start of one range and
-    // end of another.
-    struct Range {
-        size_t start;
+    if (parent_span != nullptr) {
+      // There is a parent, and either this span is not a child of it, or there are no more spans.
+      // Pop this off the stack.
+      const StringPiece16 substr = text.substr(cursor, parent_span->last_char - cursor + 1);
+      cursor += substr.size();
 
-        // Once the new string is localized, these are the pointers to the spans to adjust.
-        // Since this struct represents the start of one range and end of another, we have
-        // the two pointers respectively.
-        uint32_t* updateStart;
-        uint32_t* updateEnd;
-    };
+      // Pseudolocalize the substring.
+      std::string new_substr = util::Utf16ToUtf8(substr);
+      if (translatable) {
+        new_substr = localizer.Text(new_substr);
+      }
+      new_cursor += utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(new_substr.data()),
+                                         new_substr.size(), false);
+      new_string += new_substr;
 
-    auto cmp = [](const Range& r, size_t index) -> bool {
-        return r.start < index;
-    };
-
-    // Construct the ranges. The ranges are represented like so: [0, 2, 5, 7]
-    // The ranges are the spaces in between. In this example, with a total string length of 9,
-    // the vector represents: (0,1], (2,4], (5,6], (7,9]
-    //
-    std::vector<Range> ranges;
-    ranges.push_back(Range{ 0 });
-    ranges.push_back(Range{ originalText.size() - 1 });
-    for (size_t i = 0; i < string->value->spans.size(); i++) {
-        const StringPool::Span& span = string->value->spans[i];
-
-        // Insert or update the Range marker for the start of this span.
-        auto iter = std::lower_bound(ranges.begin(), ranges.end(), span.firstChar, cmp);
-        if (iter != ranges.end() && iter->start == span.firstChar) {
-            iter->updateStart = &localized.spans[i].firstChar;
-        } else {
-            ranges.insert(iter,
-                          Range{ span.firstChar, &localized.spans[i].firstChar, nullptr });
-        }
-
-        // Insert or update the Range marker for the end of this span.
-        iter = std::lower_bound(ranges.begin(), ranges.end(), span.lastChar, cmp);
-        if (iter != ranges.end() && iter->start == span.lastChar) {
-            iter->updateEnd = &localized.spans[i].lastChar;
-        } else {
-            ranges.insert(iter,
-                          Range{ span.lastChar, nullptr, &localized.spans[i].lastChar });
-        }
+      parent_span->last_char = new_cursor - 1;
+      if (parent_span->tag) {
+        // An end to an untranslatable section.
+        translatable = true;
+      }
+      span_stack.pop_back();
     }
+  }
 
-    localized.str += localizer.start();
+  // Finish the pseudolocalization at the end of the string.
+  new_string += localizer.Text(util::Utf16ToUtf8(text.substr(cursor, text.size() - cursor)));
+  new_string += localizer.End();
 
-    // Iterate over the ranges and localize each section.
-    for (size_t i = 0; i < ranges.size(); i++) {
-        const size_t start = ranges[i].start;
-        size_t len = originalText.size() - start;
-        if (i + 1 < ranges.size()) {
-            len = ranges[i + 1].start - start;
-        }
+  StyleString localized;
+  localized.str = std::move(new_string);
 
-        if (ranges[i].updateStart) {
-            *ranges[i].updateStart = localized.str.size();
-        }
-
-        if (ranges[i].updateEnd) {
-            *ranges[i].updateEnd = localized.str.size();
-        }
-
-        localized.str += localizer.text(originalText.substr(start, len));
+  // Convert the UnifiedSpans into regular Spans, skipping the UntranslatableSections.
+  for (UnifiedSpan& span : merged_spans) {
+    if (span.tag) {
+      localized.spans.push_back(Span{std::move(span.tag.value()), span.first_char, span.last_char});
     }
-
-    localized.str += localizer.end();
-
-    std::unique_ptr<StyledString> localizedString = util::make_unique<StyledString>(
-            pool->makeRef(localized));
-    localizedString->setSource(string->getSource());
-    return localizedString;
+  }
+  return util::make_unique<StyledString>(pool->MakeRef(localized));
 }
 
 namespace {
 
-struct Visitor : public RawValueVisitor {
-    StringPool* mPool;
-    Pseudolocalizer::Method mMethod;
-    Pseudolocalizer mLocalizer;
+class Visitor : public RawValueVisitor {
+ public:
+  // Either value or item will be populated upon visiting the value.
+  std::unique_ptr<Value> value;
+  std::unique_ptr<Item> item;
 
-    // Either value or item will be populated upon visiting the value.
-    std::unique_ptr<Value> mValue;
-    std::unique_ptr<Item> mItem;
+  Visitor(StringPool* pool, Pseudolocalizer::Method method)
+      : pool_(pool), method_(method), localizer_(method) {}
 
-    Visitor(StringPool* pool, Pseudolocalizer::Method method) :
-            mPool(pool), mMethod(method), mLocalizer(method) {
-    }
-
-    void visit(Plural* plural) override {
-        std::unique_ptr<Plural> localized = util::make_unique<Plural>();
-        for (size_t i = 0; i < plural->values.size(); i++) {
-            Visitor subVisitor(mPool, mMethod);
-            if (plural->values[i]) {
-                plural->values[i]->accept(&subVisitor);
-                if (subVisitor.mValue) {
-                    localized->values[i] = std::move(subVisitor.mItem);
-                } else {
-                    localized->values[i] = std::unique_ptr<Item>(plural->values[i]->clone(mPool));
-                }
-            }
+  void Visit(Plural* plural) override {
+    std::unique_ptr<Plural> localized = util::make_unique<Plural>();
+    for (size_t i = 0; i < plural->values.size(); i++) {
+      Visitor sub_visitor(pool_, method_);
+      if (plural->values[i]) {
+        plural->values[i]->Accept(&sub_visitor);
+        if (sub_visitor.value) {
+          localized->values[i] = std::move(sub_visitor.item);
+        } else {
+          localized->values[i] = std::unique_ptr<Item>(plural->values[i]->Clone(pool_));
         }
-        localized->setSource(plural->getSource());
-        localized->setWeak(true);
-        mValue = std::move(localized);
+      }
+    }
+    localized->SetSource(plural->GetSource());
+    localized->SetWeak(true);
+    value = std::move(localized);
+  }
+
+  void Visit(String* string) override {
+    const StringPiece original_string = *string->value;
+    std::string result = localizer_.Start();
+
+    // Pseudolocalize only the translatable sections.
+    size_t start = 0u;
+    for (const UntranslatableSection& section : string->untranslatable_sections) {
+      // Pseudolocalize the content before the untranslatable section.
+      const size_t len = section.start - start;
+      if (len > 0u) {
+        result += localizer_.Text(original_string.substr(start, len));
+      }
+
+      // Copy the untranslatable content.
+      result += original_string.substr(section.start, section.end - section.start);
+      start = section.end;
     }
 
-    void visit(String* string) override {
-        std::u16string result = mLocalizer.start() + mLocalizer.text(*string->value) +
-                mLocalizer.end();
-        std::unique_ptr<String> localized = util::make_unique<String>(mPool->makeRef(result));
-        localized->setSource(string->getSource());
-        localized->setWeak(true);
-        mItem = std::move(localized);
+    // Pseudolocalize the content after the last untranslatable section.
+    if (start != original_string.size()) {
+      const size_t len = original_string.size() - start;
+      result += localizer_.Text(original_string.substr(start, len));
     }
+    result += localizer_.End();
 
-    void visit(StyledString* string) override {
-        mItem = pseudolocalizeStyledString(string, mMethod, mPool);
-        mItem->setWeak(true);
-    }
+    std::unique_ptr<String> localized = util::make_unique<String>(pool_->MakeRef(result));
+    localized->SetSource(string->GetSource());
+    localized->SetWeak(true);
+    item = std::move(localized);
+  }
+
+  void Visit(StyledString* string) override {
+    item = PseudolocalizeStyledString(string, method_, pool_);
+    item->SetSource(string->GetSource());
+    item->SetWeak(true);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Visitor);
+
+  StringPool* pool_;
+  Pseudolocalizer::Method method_;
+  Pseudolocalizer localizer_;
 };
 
-ConfigDescription modifyConfigForPseudoLocale(const ConfigDescription& base,
+ConfigDescription ModifyConfigForPseudoLocale(const ConfigDescription& base,
                                               Pseudolocalizer::Method m) {
-    ConfigDescription modified = base;
-    switch (m) {
+  ConfigDescription modified = base;
+  switch (m) {
     case Pseudolocalizer::Method::kAccent:
-        modified.language[0] = 'e';
-        modified.language[1] = 'n';
-        modified.country[0] = 'X';
-        modified.country[1] = 'A';
-        break;
+      modified.language[0] = 'e';
+      modified.language[1] = 'n';
+      modified.country[0] = 'X';
+      modified.country[1] = 'A';
+      break;
 
     case Pseudolocalizer::Method::kBidi:
-        modified.language[0] = 'a';
-        modified.language[1] = 'r';
-        modified.country[0] = 'X';
-        modified.country[1] = 'B';
-        break;
+      modified.language[0] = 'a';
+      modified.language[1] = 'r';
+      modified.country[0] = 'X';
+      modified.country[1] = 'B';
+      break;
     default:
-        break;
-    }
-    return modified;
+      break;
+  }
+  return modified;
 }
 
-void pseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
-                            ResourceConfigValue* originalValue,
-                            StringPool* pool,
-                            ResourceEntry* entry) {
-    Visitor visitor(pool, method);
-    originalValue->value->accept(&visitor);
+void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
+                            ResourceConfigValue* original_value,
+                            StringPool* pool, ResourceEntry* entry) {
+  Visitor visitor(pool, method);
+  original_value->value->Accept(&visitor);
 
-    std::unique_ptr<Value> localizedValue;
-    if (visitor.mValue) {
-        localizedValue = std::move(visitor.mValue);
-    } else if (visitor.mItem) {
-        localizedValue = std::move(visitor.mItem);
-    }
+  std::unique_ptr<Value> localized_value;
+  if (visitor.value) {
+    localized_value = std::move(visitor.value);
+  } else if (visitor.item) {
+    localized_value = std::move(visitor.item);
+  }
 
-    if (!localizedValue) {
-        return;
-    }
+  if (!localized_value) {
+    return;
+  }
 
-    ConfigDescription configWithAccent = modifyConfigForPseudoLocale(
-            originalValue->config, method);
+  ConfigDescription config_with_accent =
+      ModifyConfigForPseudoLocale(original_value->config, method);
 
-    ResourceConfigValue* newConfigValue = entry->findOrCreateValue(
-            configWithAccent, originalValue->product);
-    if (!newConfigValue->value) {
-        // Only use auto-generated pseudo-localization if none is defined.
-        newConfigValue->value = std::move(localizedValue);
-    }
+  ResourceConfigValue* new_config_value =
+      entry->FindOrCreateValue(config_with_accent, original_value->product);
+  if (!new_config_value->value) {
+    // Only use auto-generated pseudo-localization if none is defined.
+    new_config_value->value = std::move(localized_value);
+  }
 }
 
-/**
- * A value is pseudolocalizable if it does not define a locale (or is the default locale)
- * and is translateable.
- */
-static bool isPseudolocalizable(ResourceConfigValue* configValue) {
-    const int diff = configValue->config.diff(ConfigDescription::defaultConfig());
-    if (diff & ConfigDescription::CONFIG_LOCALE) {
-        return false;
-    }
-    return configValue->value->isTranslateable();
+// A value is pseudolocalizable if it does not define a locale (or is the default locale) and is
+// translatable.
+static bool IsPseudolocalizable(ResourceConfigValue* config_value) {
+  const int diff = config_value->config.diff(ConfigDescription::DefaultConfig());
+  if (diff & ConfigDescription::CONFIG_LOCALE) {
+    return false;
+  }
+  return config_value->value->IsTranslatable();
 }
 
-} // namespace
+}  // namespace
 
-bool PseudolocaleGenerator::consume(IAaptContext* context, ResourceTable* table) {
-    for (auto& package : table->packages) {
-        for (auto& type : package->types) {
-            for (auto& entry : type->entries) {
-                std::vector<ResourceConfigValue*> values = entry->findValuesIf(isPseudolocalizable);
-
-                for (ResourceConfigValue* value : values) {
-                    pseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value,
-                                           &table->stringPool, entry.get());
-                    pseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value,
-                                           &table->stringPool, entry.get());
-                }
-            }
+bool PseudolocaleGenerator::Consume(IAaptContext* context, ResourceTable* table) {
+  for (auto& package : table->packages) {
+    for (auto& type : package->types) {
+      for (auto& entry : type->entries) {
+        std::vector<ResourceConfigValue*> values = entry->FindValuesIf(IsPseudolocalizable);
+        for (ResourceConfigValue* value : values) {
+          PseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value, &table->string_pool,
+                                 entry.get());
+          PseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value, &table->string_pool,
+                                 entry.get());
         }
+      }
     }
-    return true;
+  }
+  return true;
 }
 
-} // namespace aapt
+}  // namespace aapt

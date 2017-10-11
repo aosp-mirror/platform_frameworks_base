@@ -229,7 +229,8 @@ public class TaskStack {
          * Notifies when a task has been removed from the stack.
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask,
-                AnimationProps animation, boolean fromDockGesture);
+                AnimationProps animation, boolean fromDockGesture,
+                boolean dismissRecentsIfAllRemoved);
 
         /**
          * Notifies when all tasks have been removed from the stack.
@@ -631,13 +632,22 @@ public class TaskStack {
      * how they should update themselves.
      */
     public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture) {
+        removeTask(t, animation, fromDockGesture, true /* dismissRecentsIfAllRemoved */);
+    }
+
+    /**
+     * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
+     * how they should update themselves.
+     */
+    public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture,
+            boolean dismissRecentsIfAllRemoved) {
         if (mStackTaskList.contains(t)) {
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, newFrontMostTask, animation,
-                        fromDockGesture);
+                        fromDockGesture, dismissRecentsIfAllRemoved);
             }
         }
         mRawTaskList.remove(t);
@@ -646,17 +656,25 @@ public class TaskStack {
     /**
      * Removes all tasks from the stack.
      */
-    public void removeAllTasks() {
+    public void removeAllTasks(boolean notifyStackChanges) {
         ArrayList<Task> tasks = mStackTaskList.getTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task t = tasks.get(i);
             removeTaskImpl(mStackTaskList, t);
             mRawTaskList.remove(t);
         }
-        if (mCb != null) {
+        if (mCb != null && notifyStackChanges) {
             // Notify that all tasks have been removed
             mCb.onStackTasksRemoved(this);
         }
+    }
+
+
+    /**
+     * @see #setTasks(Context, List, boolean, boolean)
+     */
+    public void setTasks(Context context, TaskStack stack, boolean notifyStackChanges) {
+        setTasks(context, stack.mRawTaskList, notifyStackChanges);
     }
 
     /**
@@ -723,7 +741,8 @@ public class TaskStack {
         Task newFrontMostTask = getStackFrontMostTask(false);
         for (int i = 0; i < removedTaskCount; i++) {
             mCb.onStackTaskRemoved(this, removedTasks.get(i), newFrontMostTask,
-                    AnimationProps.IMMEDIATE, false /* fromDockGesture */);
+                    AnimationProps.IMMEDIATE, false /* fromDockGesture */,
+                    true /* dismissRecentsIfAllRemoved */);
         }
 
         // Only callback for the newly added tasks after this stack has been updated
@@ -854,21 +873,46 @@ public class TaskStack {
     }
 
     /**
+     * Returns whether the next launch target should actually be the PiP task.
+     */
+    public boolean isNextLaunchTargetPip(long lastPipTime) {
+        Task launchTarget = getLaunchTarget();
+        Task nextLaunchTarget = getNextLaunchTargetRaw();
+        if (nextLaunchTarget != null && lastPipTime > 0) {
+            // If the PiP time is more recent than the next launch target, then launch the PiP task
+            return lastPipTime > nextLaunchTarget.key.lastActiveTime;
+        } else if (launchTarget != null && lastPipTime > 0 && getTaskCount() == 1) {
+            // Otherwise, if there is no next launch target, but there is a PiP, then launch
+            // the PiP task
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns the task in stack tasks which should be launched next if Recents are toggled
-     * again, or null if there is no task to be launched.
+     * again, or null if there is no task to be launched. Callers should check
+     * {@link #isNextLaunchTargetPip(long)} before fetching the next raw launch target from the
+     * stack.
      */
     public Task getNextLaunchTarget() {
+        Task nextLaunchTarget = getNextLaunchTargetRaw();
+        if (nextLaunchTarget != null) {
+            return nextLaunchTarget;
+        }
+        return getStackTasks().get(getTaskCount() - 1);
+    }
+
+    private Task getNextLaunchTargetRaw() {
         int taskCount = getTaskCount();
         if (taskCount == 0) {
             return null;
         }
         int launchTaskIndex = indexOfStackTask(getLaunchTarget());
-        if (launchTaskIndex != -1) {
-            launchTaskIndex = Math.max(0, launchTaskIndex - 1);
-        } else {
-            launchTaskIndex = getTaskCount() - 1;
+        if (launchTaskIndex != -1 && launchTaskIndex > 0) {
+            return getStackTasks().get(launchTaskIndex - 1);
         }
-        return getStackTasks().get(launchTaskIndex);
+        return null;
     }
 
     /** Returns the index of this task in this current task stack */

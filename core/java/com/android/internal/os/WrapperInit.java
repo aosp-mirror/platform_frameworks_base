@@ -17,13 +17,14 @@
 package com.android.internal.os;
 
 import android.os.Process;
+import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
+import android.util.BootTimingsTraceLog;
 import android.util.Slog;
-import com.android.internal.os.Zygote.MethodAndArgsCaller;
 import dalvik.system.VMRuntime;
 import java.io.DataOutputStream;
 import java.io.FileDescriptor;
@@ -59,36 +60,35 @@ public class WrapperInit {
      * @param args The command-line arguments.
      */
     public static void main(String[] args) {
-        try {
-            // Parse our mandatory arguments.
-            int fdNum = Integer.parseInt(args[0], 10);
-            int targetSdkVersion = Integer.parseInt(args[1], 10);
+        // Parse our mandatory arguments.
+        int fdNum = Integer.parseInt(args[0], 10);
+        int targetSdkVersion = Integer.parseInt(args[1], 10);
 
-            // Tell the Zygote what our actual PID is (since it only knows about the
-            // wrapper that it directly forked).
-            if (fdNum != 0) {
-                try {
-                    FileDescriptor fd = new FileDescriptor();
-                    fd.setInt$(fdNum);
-                    DataOutputStream os = new DataOutputStream(new FileOutputStream(fd));
-                    os.writeInt(Process.myPid());
-                    os.close();
-                    IoUtils.closeQuietly(fd);
-                } catch (IOException ex) {
-                    Slog.d(TAG, "Could not write pid of wrapped process to Zygote pipe.", ex);
-                }
+        // Tell the Zygote what our actual PID is (since it only knows about the
+        // wrapper that it directly forked).
+        if (fdNum != 0) {
+            try {
+                FileDescriptor fd = new FileDescriptor();
+                fd.setInt$(fdNum);
+                DataOutputStream os = new DataOutputStream(new FileOutputStream(fd));
+                os.writeInt(Process.myPid());
+                os.close();
+                IoUtils.closeQuietly(fd);
+            } catch (IOException ex) {
+                Slog.d(TAG, "Could not write pid of wrapped process to Zygote pipe.", ex);
             }
-
-            // Mimic system Zygote preloading.
-            ZygoteInit.preload();
-
-            // Launch the application.
-            String[] runtimeArgs = new String[args.length - 2];
-            System.arraycopy(args, 2, runtimeArgs, 0, runtimeArgs.length);
-            WrapperInit.wrapperInit(targetSdkVersion, runtimeArgs);
-        } catch (Zygote.MethodAndArgsCaller caller) {
-            caller.run();
         }
+
+        // Mimic system Zygote preloading.
+        ZygoteInit.preload(new BootTimingsTraceLog("WrapperInitTiming",
+                Trace.TRACE_TAG_DALVIK));
+
+        // Launch the application.
+        String[] runtimeArgs = new String[args.length - 2];
+        System.arraycopy(args, 2, runtimeArgs, 0, runtimeArgs.length);
+        Runnable r = wrapperInit(targetSdkVersion, runtimeArgs);
+
+        r.run();
     }
 
     /**
@@ -139,8 +139,7 @@ public class WrapperInit {
      * @param targetSdkVersion target SDK version
      * @param argv arg strings
      */
-    private static void wrapperInit(int targetSdkVersion, String[] argv)
-            throws Zygote.MethodAndArgsCaller {
+    private static Runnable wrapperInit(int targetSdkVersion, String[] argv) {
         if (RuntimeInit.DEBUG) {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from wrapper");
         }
@@ -160,7 +159,9 @@ public class WrapperInit {
             argv = removedArgs;
         }
 
-        RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+        // Perform the same initialization that would happen after the Zygote forks.
+        Zygote.nativePreApplicationInit();
+        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
     }
 
     /**

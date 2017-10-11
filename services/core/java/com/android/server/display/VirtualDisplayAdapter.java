@@ -16,8 +16,15 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.hardware.display.DisplayManager
+        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
@@ -33,6 +40,8 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.Iterator;
 
@@ -42,7 +51,8 @@ import java.util.Iterator;
  * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-final class VirtualDisplayAdapter extends DisplayAdapter {
+@VisibleForTesting
+public class VirtualDisplayAdapter extends DisplayAdapter {
     static final String TAG = "VirtualDisplayAdapter";
     static final boolean DEBUG = false;
 
@@ -51,27 +61,42 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
             new ArrayMap<IBinder, VirtualDisplayDevice>();
-    private Handler mHandler;
+    private final Handler mHandler;
+    private final SurfaceControlDisplayFactory mSurfaceControlDisplayFactory;
 
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
+        this(syncRoot, context, handler, listener,
+                (String name, boolean secure) -> SurfaceControl.createDisplay(name, secure));
+    }
+
+    @VisibleForTesting
+    VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener,
+            SurfaceControlDisplayFactory surfaceControlDisplayFactory) {
         super(syncRoot, context, handler, listener, TAG);
         mHandler = handler;
+        mSurfaceControlDisplayFactory = surfaceControlDisplayFactory;
     }
 
     public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallback callback,
-            IMediaProjection projection, int ownerUid, String ownerPackageName,
-            String name, int width, int height, int densityDpi, Surface surface, int flags) {
-        boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
+            IMediaProjection projection, int ownerUid, String ownerPackageName, String name,
+            int width, int height, int densityDpi, Surface surface, int flags, String uniqueId) {
+        boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
         IBinder appToken = callback.asBinder();
-        IBinder displayToken = SurfaceControl.createDisplay(name, secure);
+        IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure);
         final String baseUniqueId =
                 UNIQUE_ID_PREFIX + ownerPackageName + "," + ownerUid + "," + name + ",";
         final int uniqueIndex = getNextUniqueIndex(baseUniqueId);
+        if (uniqueId == null) {
+            uniqueId = baseUniqueId + uniqueIndex;
+        } else {
+            uniqueId = UNIQUE_ID_PREFIX + ownerPackageName + ":" + uniqueId;
+        }
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
                 ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags,
-                new Callback(callback, mHandler), baseUniqueId + uniqueIndex, uniqueIndex);
+                new Callback(callback, mHandler), uniqueId, uniqueIndex);
 
         mVirtualDisplayDevices.put(appToken, device);
 
@@ -143,13 +168,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     private void handleBinderDiedLocked(IBinder appToken) {
-        VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
-        if (device != null) {
-            Slog.i(TAG, "Virtual display device released because application token died: "
-                    + device.mOwnerPackageName);
-            device.destroyLocked(false);
-            sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
-        }
+        mVirtualDisplayDevices.remove(appToken);
     }
 
     private void handleMediaProjectionStoppedLocked(IBinder appToken) {
@@ -210,6 +229,10 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         public void binderDied() {
             synchronized (getSyncRoot()) {
                 handleBinderDiedLocked(mAppToken);
+                Slog.i(TAG, "Virtual display device released because application token died: "
+                    + mOwnerPackageName);
+                destroyLocked(false);
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_REMOVED);
             }
         }
 
@@ -308,23 +331,23 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.yDpi = mDensityDpi;
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) REFRESH_RATE; // 1 frame
                 mInfo.flags = 0;
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
                             | DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 }
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
                     mInfo.flags &= ~DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 } else {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                 }
 
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
                 }
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
 
-                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
                         // For demonstration purposes, allow rotation of the external display.
                         // In the future we might allow the user to configure this directly.
                         if ("portrait".equals(SystemProperties.get(
@@ -333,8 +356,12 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                         }
                     }
                 }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+                }
                 mInfo.type = Display.TYPE_VIRTUAL;
-                mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
+                mInfo.touch = ((mFlags & VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH) == 0) ?
+                        DisplayDeviceInfo.TOUCH_NONE : DisplayDeviceInfo.TOUCH_VIRTUAL;
                 mInfo.state = mSurface != null ? Display.STATE_ON : Display.STATE_OFF;
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
@@ -399,5 +426,10 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 handleMediaProjectionStoppedLocked(mAppToken);
             }
         }
+    }
+
+    @VisibleForTesting
+    public interface SurfaceControlDisplayFactory {
+        public IBinder createDisplay(String name, boolean secure);
     }
 }

@@ -16,7 +16,10 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <math.h>
+
 #include <SkColor.h>
+#include <SkColorSpace.h>
 
 namespace android {
 namespace uirenderer {
@@ -80,7 +83,55 @@ namespace uirenderer {
     };
     static constexpr int BrightColorsCount = sizeof(BrightColors) / sizeof(Color::Color);
 
+    enum class TransferFunctionType : int8_t {
+        None = 0,
+        Full,
+        Limited,
+        Gamma
+    };
+
+    // Opto-electronic conversion function for the sRGB color space
+    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
+    static constexpr float OECF_sRGB(float linear) {
+        // IEC 61966-2-1:1999
+        return linear <= 0.0031308f ?
+                linear * 12.92f : (powf(linear, 1.0f / 2.4f) * 1.055f) - 0.055f;
+    }
+
+    // Opto-electronic conversion function for the sRGB color space
+    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
+    // This function returns the input unmodified if linear blending is not enabled
+    static constexpr float OECF(float linear) {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+        return OECF_sRGB(linear);
+#else
+        return linear;
+#endif
+    }
+
+    // Electro-optical conversion function for the sRGB color space
+    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
+    static constexpr float EOCF_sRGB(float srgb) {
+        // IEC 61966-2-1:1999
+        return srgb <= 0.04045f ? srgb / 12.92f : powf((srgb + 0.055f) / 1.055f, 2.4f);
+    }
+
+    // Electro-optical conversion function for the sRGB color space
+    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
+    // This function returns the input unmodified if linear blending is not enabled
+    static constexpr float EOCF(float srgb) {
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+        return EOCF_sRGB(srgb);
+#else
+        return srgb;
+#endif
+    }
+
+    // Returns whether the specified color space's transfer function can be
+    // approximated with the native sRGB transfer function. This method
+    // returns true for sRGB, gamma 2.2 and Display P3 for instance
+    bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif /* TEST_UTILS_H */
+#endif /* COLOR_H */

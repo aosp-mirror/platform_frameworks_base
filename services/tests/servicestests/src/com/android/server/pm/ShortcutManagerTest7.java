@@ -68,7 +68,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                     /* fdin*/ null,
                     /* fdout*/ fd.getFileDescriptor(),
                     /* fderr*/ fd.getFileDescriptor(),
-                        args, rr);
+                        args, null, rr);
             }
             return readAll(out);
         } finally {

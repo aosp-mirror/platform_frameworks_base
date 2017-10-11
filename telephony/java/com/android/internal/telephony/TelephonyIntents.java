@@ -17,6 +17,9 @@
 package com.android.internal.telephony;
 import android.content.Intent;
 
+import android.content.Intent;
+import android.telephony.SubscriptionManager;
+
 /**
  * The intents that the telephony services broadcast.
  *
@@ -52,8 +55,9 @@ public class TelephonyIntents {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     * @deprecated use {@link Intent#ACTION_SERVICE_STATE}
      */
-    public static final String ACTION_SERVICE_STATE_CHANGED = "android.intent.action.SERVICE_STATE";
+    public static final String ACTION_SERVICE_STATE_CHANGED = Intent.ACTION_SERVICE_STATE;
 
     /**
      * <p>Broadcast Action: The radio technology has changed. The intent will have the following
@@ -185,7 +189,6 @@ public class TelephonyIntents {
     public static final String ACTION_DATA_CONNECTION_FAILED
             = "android.intent.action.DATA_CONNECTION_FAILED";
 
-
     /**
      * Broadcast Action: The sim card state has changed.
      * The intent will have the following extra values:</p>
@@ -205,6 +208,9 @@ public class TelephonyIntents {
      *       <dt>{@code PUK}</dt><dd>locked on PUK1</dd>
      *       <dt>{@code NETWORK}</dt><dd>locked on network personalization</dd>
      *   </dl>
+     *   <dt>rebroadcastOnUnlock</dt>
+     *   <dd>A boolean indicates a rebroadcast on unlock. optional extra, defaults to {@code false}
+     *   if not specified </dd>
      * </dl>
      *
      * <p class="note">
@@ -214,8 +220,9 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_SIM_STATE_CHANGED
-            = "android.intent.action.SIM_STATE_CHANGED";
+            = Intent.ACTION_SIM_STATE_CHANGED;
 
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK= "rebroadcastOnUnlock";
 
     /**
      * Broadcast Action: The time was set by the carrier (typically by the NITZ string).
@@ -271,7 +278,7 @@ public class TelephonyIntents {
      * Used in OMA-DM applications.
      */
     public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION
-            = "android.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+            = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
@@ -335,11 +342,11 @@ public class TelephonyIntents {
      * <ul>
      *   <li><em>subscription</em> - A int, the current default subscription.</li>
      * </ul>
-     * @deprecated Use {@link Intent#ACTION_DEFAULT_SUBSCRIPTION_CHANGED}
+     * @deprecated Use {@link SubscriptionManager#ACTION_DEFAULT_SUBSCRIPTION_CHANGED}
      */
     @Deprecated
     public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED
-            = Intent.ACTION_DEFAULT_SUBSCRIPTION_CHANGED;
+            = SubscriptionManager.ACTION_DEFAULT_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default data subscription has changed.  This has the following
@@ -367,11 +374,11 @@ public class TelephonyIntents {
      * <ul>
      *   <li><em>subscription</em> - A int, the current sms default subscription.</li>
      * </ul>
-     * @deprecated Use {@link Intent#ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED}
+     * @deprecated Use {@link SubscriptionManager#ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED}
      */
     @Deprecated
     public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
-            = Intent.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED;
+            = SubscriptionManager.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED;
 
     /*
      * Broadcast Action: An attempt to set phone radio type and access technology has changed.

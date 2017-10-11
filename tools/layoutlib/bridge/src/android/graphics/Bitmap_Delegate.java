@@ -62,7 +62,7 @@ public final class Bitmap_Delegate {
 
 
     public enum BitmapCreateFlags {
-        PREMULTIPLIED, MUTABLE
+        NONE, PREMULTIPLIED, MUTABLE
     }
 
     // ---- delegate manager ----
@@ -92,8 +92,7 @@ public final class Bitmap_Delegate {
 
     @Nullable
     public static Bitmap_Delegate getDelegate(@Nullable Bitmap bitmap) {
-        // refSkPixelRef is a hack to get the native pointer: see #nativeRefPixelRef()
-        return bitmap == null ? null : getDelegate(bitmap.refSkPixelRef());
+        return bitmap == null ? null : getDelegate(bitmap.getNativeInstance());
     }
 
     /**
@@ -327,7 +326,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeReconfigure(long nativeBitmap, int width, int height,
-            int config, int allocSize, boolean isPremultiplied) {
+            int config, boolean isPremultiplied) {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
                 "Bitmap.reconfigure() is not supported", null /*data*/);
     }
@@ -601,12 +600,68 @@ public final class Bitmap_Delegate {
         return Arrays.equals(argb1, argb2);
     }
 
-    // Only used by AssetAtlasService, which we don't care about.
     @LayoutlibDelegate
-    /*package*/ static long nativeRefPixelRef(long nativeBitmap) {
-        // Hack: This is called by Bitmap.refSkPixelRef() and LayoutLib uses that method to get
-        // the native pointer from a Bitmap. So, we return nativeBitmap here.
-        return nativeBitmap;
+    /*package*/ static int nativeGetAllocationByteCount(long nativeBitmap) {
+        // get the delegate from the native int.
+        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
+        if (delegate == null) {
+            return 0;
+        }
+        return nativeRowBytes(nativeBitmap) * delegate.mImage.getHeight();
+
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativePrepareToDraw(long nativeBitmap) {
+        // do nothing as Bitmap_Delegate does not have caches
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap) {
+        Bitmap_Delegate srcBmpDelegate = sManager.getDelegate(nativeBitmap);
+        if (srcBmpDelegate == null) {
+            return null;
+        }
+
+        BufferedImage srcImage = srcBmpDelegate.getImage();
+
+        // create the image
+        BufferedImage image = new BufferedImage(srcImage.getColorModel(), srcImage.copyData(null),
+                srcImage.isAlphaPremultiplied(), null);
+
+        // create a delegate with the content of the stream.
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, srcBmpDelegate.getConfig());
+
+        return createBitmap(delegate, EnumSet.of(BitmapCreateFlags.NONE),
+                Bitmap.getDefaultDensity());
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.nativeCreateHardwareBitmap() is not supported", null /*data*/);
+        return null;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.nativeCreateGraphicBufferHandle() is not supported", null /*data*/);
+        return null;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean nativeIsSRGB(long nativeBitmap) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Color spaces are not supported", null /*data*/);
+        return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Color spaces are not supported", null /*data*/);
+        return false;
     }
 
     // ---- Private delegate/helper methods ----
@@ -627,7 +682,7 @@ public final class Bitmap_Delegate {
         boolean isPremultiplied = createFlags.contains(BitmapCreateFlags.PREMULTIPLIED);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, null /* buffer */, width, height, density, isMutable,
+        return new Bitmap(nativeInt, width, height, density, isMutable,
                           isPremultiplied, null /*ninePatchChunk*/, null /* layoutBounds */);
     }
 

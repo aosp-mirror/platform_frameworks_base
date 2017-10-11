@@ -23,6 +23,7 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/StreamingZipInflater.h>
+#include <androidfw/Util.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
 #include <utils/Atomic.h>
@@ -298,6 +299,22 @@ Asset::Asset(void)
     return pAsset;
 }
 
+/*static*/ std::unique_ptr<Asset> Asset::createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
+    AccessMode mode)
+{
+    std::unique_ptr<_FileAsset> pAsset = util::make_unique<_FileAsset>();
+
+    status_t result = pAsset->openChunk(dataMap.get());
+    if (result != NO_ERROR) {
+        return NULL;
+    }
+
+    // We succeeded, so relinquish control of dataMap
+    (void) dataMap.release();
+    pAsset->mAccessMode = mode;
+    return std::move(pAsset);
+}
+
 /*
  * Create a new Asset from compressed data in a memory mapping.
  */
@@ -316,6 +333,21 @@ Asset::Asset(void)
     return pAsset;
 }
 
+/*static*/ std::unique_ptr<Asset> Asset::createFromCompressedMap(std::unique_ptr<FileMap> dataMap,
+    size_t uncompressedLen, AccessMode mode)
+{
+  std::unique_ptr<_CompressedAsset> pAsset = util::make_unique<_CompressedAsset>();
+
+  status_t result = pAsset->openChunk(dataMap.get(), uncompressedLen);
+  if (result != NO_ERROR) {
+      return NULL;
+  }
+
+  // We succeeded, so relinquish control of dataMap
+  (void) dataMap.release();
+  pAsset->mAccessMode = mode;
+  return std::move(pAsset);
+}
 
 /*
  * Do generic seek() housekeeping.  Pass in the offset/whence values from

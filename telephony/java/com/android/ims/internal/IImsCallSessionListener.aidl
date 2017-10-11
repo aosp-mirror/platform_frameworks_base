@@ -29,7 +29,7 @@ import com.android.ims.ImsSuppServiceNotification;
  * by having one of the methods called on the {@link IImsCallSessionListener}.
  * {@hide}
  */
-interface IImsCallSessionListener {
+oneway interface IImsCallSessionListener {
     /**
      * Notifies the result of the basic session operation (setup / terminate).
      */
@@ -106,6 +106,8 @@ interface IImsCallSessionListener {
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
     void callSessionHandoverFailed(in IImsCallSession session,
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
+    void callSessionMayHandover(in IImsCallSession session,
+            in int srcAccessTech, in int targetAccessTech);
 
     /**
      * Notifies the TTY mode change by remote party.

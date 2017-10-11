@@ -28,4 +28,8 @@ oneway interface ITrustAgentServiceCallback {
     void revokeTrust();
     void setManagingTrust(boolean managingTrust);
     void onConfigureCompleted(boolean result, IBinder token);
+    void addEscrowToken(in byte[] token, int userId);
+    void isEscrowTokenActive(long handle, int userId);
+    void removeEscrowToken(long handle, int userId);
+    void unlockUserWithToken(long handle, in byte[] token, int userId);
 }

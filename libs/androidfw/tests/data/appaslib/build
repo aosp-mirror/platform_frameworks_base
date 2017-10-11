@@ -15,14 +15,9 @@
 # limitations under the License.
 #
 
+set -e
+
 PATH_TO_FRAMEWORK_RES=$(gettop)/prebuilts/sdk/current/android.jar
 
-aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F bundle.apk -f && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc appaslib.arsc && \
-xxd -i appaslib.arsc > appaslib_arsc.h && \
-aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F bundle.apk -f --shared-lib && \
-unzip bundle.apk resources.arsc && \
-mv resources.arsc appaslib_lib.arsc && \
-xxd -i appaslib_lib.arsc > appaslib_lib_arsc.h \
-
+aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F appaslib.apk -f
+aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F appaslib_lib.apk -f --shared-lib

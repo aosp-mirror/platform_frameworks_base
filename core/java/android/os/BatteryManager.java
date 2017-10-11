@@ -16,11 +16,9 @@
 
 package android.os;
 
+import android.annotation.SystemService;
 import android.content.Context;
-import android.os.BatteryProperty;
-import android.os.IBatteryPropertiesRegistrar;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.hardware.health.V1_0.Constants;
 import com.android.internal.app.IBatteryStats;
 
 /**
@@ -28,6 +26,7 @@ import com.android.internal.app.IBatteryStats;
  * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent, and
  * provides a method for querying battery and charging properties.
  */
+@SystemService(Context.BATTERY_SERVICE)
 public class BatteryManager {
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
@@ -122,21 +121,28 @@ public class BatteryManager {
      */
      public static final String EXTRA_CHARGE_COUNTER = "charge_counter";
 
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Current int sequence number of the update.
+     * {@hide}
+     */
+    public static final String EXTRA_SEQUENCE = "seq";
+
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
-    public static final int BATTERY_STATUS_UNKNOWN = 1;
-    public static final int BATTERY_STATUS_CHARGING = 2;
-    public static final int BATTERY_STATUS_DISCHARGING = 3;
-    public static final int BATTERY_STATUS_NOT_CHARGING = 4;
-    public static final int BATTERY_STATUS_FULL = 5;
+    public static final int BATTERY_STATUS_UNKNOWN = Constants.BATTERY_STATUS_UNKNOWN;
+    public static final int BATTERY_STATUS_CHARGING = Constants.BATTERY_STATUS_CHARGING;
+    public static final int BATTERY_STATUS_DISCHARGING = Constants.BATTERY_STATUS_DISCHARGING;
+    public static final int BATTERY_STATUS_NOT_CHARGING = Constants.BATTERY_STATUS_NOT_CHARGING;
+    public static final int BATTERY_STATUS_FULL = Constants.BATTERY_STATUS_FULL;
 
     // values for "health" field in the ACTION_BATTERY_CHANGED Intent
-    public static final int BATTERY_HEALTH_UNKNOWN = 1;
-    public static final int BATTERY_HEALTH_GOOD = 2;
-    public static final int BATTERY_HEALTH_OVERHEAT = 3;
-    public static final int BATTERY_HEALTH_DEAD = 4;
-    public static final int BATTERY_HEALTH_OVER_VOLTAGE = 5;
-    public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
-    public static final int BATTERY_HEALTH_COLD = 7;
+    public static final int BATTERY_HEALTH_UNKNOWN = Constants.BATTERY_HEALTH_UNKNOWN;
+    public static final int BATTERY_HEALTH_GOOD = Constants.BATTERY_HEALTH_GOOD;
+    public static final int BATTERY_HEALTH_OVERHEAT = Constants.BATTERY_HEALTH_OVERHEAT;
+    public static final int BATTERY_HEALTH_DEAD = Constants.BATTERY_HEALTH_DEAD;
+    public static final int BATTERY_HEALTH_OVER_VOLTAGE = Constants.BATTERY_HEALTH_OVER_VOLTAGE;
+    public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = Constants.BATTERY_HEALTH_UNSPECIFIED_FAILURE;
+    public static final int BATTERY_HEALTH_COLD = Constants.BATTERY_HEALTH_COLD;
 
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.
@@ -205,6 +211,11 @@ public class BatteryManager {
      */
     public static final int BATTERY_PROPERTY_ENERGY_COUNTER = 5;
 
+    /**
+     * Battery charge status, from a BATTERY_STATUS_* value.
+     */
+    public static final int BATTERY_PROPERTY_STATUS = 6;
+
     private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
 
@@ -216,6 +227,13 @@ public class BatteryManager {
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(
                 ServiceManager.getService("batteryproperties"));
+    }
+
+    /** {@hide} */
+    public BatteryManager(IBatteryStats batteryStats,
+            IBatteryPropertiesRegistrar batteryPropertiesRegistrar) {
+        mBatteryStats = batteryStats;
+        mBatteryPropertiesRegistrar = batteryPropertiesRegistrar;
     }
 
     /**

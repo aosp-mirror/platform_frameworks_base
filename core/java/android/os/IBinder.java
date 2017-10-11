@@ -220,11 +220,13 @@ public interface IBinder {
      * @param out The raw file descriptor that normal command messages should be written to.
      * @param err The raw file descriptor that command error messages should be written to.
      * @param args Command-line arguments.
+     * @param shellCallback Optional callback to the caller's shell to perform operations in it.
      * @param resultReceiver Called when the command has finished executing, with the result code.
      * @hide
      */
     public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException;
+            String[] args, ShellCallback shellCallback,
+            ResultReceiver resultReceiver) throws RemoteException;
 
     /**
      * Perform a generic operation with the object.

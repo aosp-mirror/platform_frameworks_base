@@ -15,6 +15,8 @@
  */
 package android.view;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -23,8 +25,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 /**
  * A group of {@link KeyboardShortcutInfo}.

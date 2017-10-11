@@ -81,7 +81,7 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             }
             String location = args.getString("location");
             if (location != null) {
-                int iconId = location.equals("show") ? LocationControllerImpl.LOCATION_STATUS_ICON_ID
+                int iconId = location.equals("show") ? PhoneStatusBarPolicy.LOCATION_STATUS_ICON_ID
                         : 0;
                 updateSlot("location", null, iconId);
             }

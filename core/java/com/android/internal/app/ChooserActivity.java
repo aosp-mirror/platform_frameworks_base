@@ -16,9 +16,12 @@
 
 package com.android.internal.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,8 +71,10 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
 
 import java.io.File;
@@ -81,6 +86,14 @@ import java.util.List;
 public class ChooserActivity extends ResolverActivity {
     private static final String TAG = "ChooserActivity";
 
+    /**
+     * Boolean extra to change the following behavior: Normally, ChooserActivity finishes itself
+     * in onStop when launched in a new task. If this extra is set to true, we do not finish
+     * ourselves when onStop gets called.
+     */
+    public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
+            = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
+
     private static final boolean DEBUG = false;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
@@ -91,8 +104,12 @@ public class ChooserActivity extends ResolverActivity {
     private IntentSender mRefinementIntentSender;
     private RefinementResultReceiver mRefinementResultReceiver;
     private ChooserTarget[] mCallerChooserTargets;
+    private ComponentName[] mFilteredComponentNames;
 
     private Intent mReferrerFillInIntent;
+
+    private long mChooserShownTime;
+    protected boolean mIsSuccessfullySelected;
 
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
@@ -153,6 +170,8 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final long intentReceivedTime = System.currentTimeMillis();
+        mIsSuccessfullySelected = false;
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (!(targetParcelable instanceof Intent)) {
@@ -233,7 +252,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
                 names[i] = (ComponentName) pa[i];
             }
-            setFilteredComponents(names);
+            mFilteredComponentNames = names;
         }
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_CHOOSER_TARGETS);
@@ -251,10 +270,18 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         mPinnedSharedPrefs = getPinnedSharedPrefs(this);
+        setRetainInOnStop(intent.getBooleanExtra(EXTRA_PRIVATE_RETAIN_IN_ON_STOP, false));
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
 
         MetricsLogger.action(this, MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN);
+
+        mChooserShownTime = System.currentTimeMillis();
+        final long systemCost = mChooserShownTime - intentReceivedTime;
+        MetricsLogger.histogram(null, "system_cost_for_smart_sharing", (int) systemCost);
+        if (DEBUG) {
+            Log.d(TAG, "System Time Cost is " + systemCost);
+        }
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -298,6 +325,11 @@ public class ChooserActivity extends ResolverActivity {
                 || aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             result = Intent.createChooser(result,
                     getIntent().getCharSequenceExtra(Intent.EXTRA_TITLE));
+
+            // Don't auto-launch single intents if the intent is being forwarded. This is done
+            // because automatically launching a resolving application as a response to the user
+            // action of switching accounts is pretty unexpected.
+            result.putExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, false);
         }
         return result;
     }
@@ -319,8 +351,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
-            boolean alwaysUseOption) {
+    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter) {
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
         mChooserListAdapter = (ChooserListAdapter) adapter;
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
@@ -342,6 +373,15 @@ public class ChooserActivity extends ResolverActivity {
     @Override
     public boolean shouldGetActivityMetadata() {
         return true;
+    }
+
+    @Override
+    public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
+        // Note that this is only safe because the Intent handled by the ChooserActivity is
+        // guaranteed to contain no extras unknown to the local ClassLoader. That is why this
+        // method can not be replaced in the ResolverActivity whole hog.
+        return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE,
+                super.shouldAutoLaunchSingleChoice(target));
     }
 
     @Override
@@ -391,11 +431,13 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         }
+        updateModelAndChooserCounts(target);
         return super.onTargetSelected(target, alwaysCheck);
     }
 
     @Override
     public void startSelected(int which, boolean always, boolean filtered) {
+        final long selectionCost = System.currentTimeMillis() - mChooserShownTime;
         super.startSelected(which, always, filtered);
 
         if (mChooserListAdapter != null) {
@@ -420,6 +462,17 @@ public class ChooserActivity extends ResolverActivity {
 
             if (cat != 0) {
                 MetricsLogger.action(this, cat, value);
+            }
+
+            if (mIsSuccessfullySelected) {
+                if (DEBUG) {
+                    Log.d(TAG, "User Selection Time Cost is " + selectionCost);
+                    Log.d(TAG, "position of selected app/service/caller is " +
+                            Integer.toString(value));
+                }
+                MetricsLogger.histogram(null, "user_selection_cost_for_smart_sharing",
+                        (int) selectionCost);
+                MetricsLogger.histogram(null, "app_position_for_smart_sharing", value);
             }
         }
     }
@@ -535,20 +588,44 @@ public class ChooserActivity extends ResolverActivity {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
+    void updateModelAndChooserCounts(TargetInfo info) {
+        if (info != null) {
+            final ResolveInfo ri = info.getResolveInfo();
+            Intent targetIntent = getTargetIntent();
+            if (ri != null && ri.activityInfo != null && targetIntent != null) {
+                if (mAdapter != null) {
+                    mAdapter.updateModel(info.getResolvedComponentName());
+                    mAdapter.updateChooserCounts(ri.activityInfo.packageName, getUserId(),
+                            targetIntent.getAction());
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "ResolveInfo Package is " + ri.activityInfo.packageName);
+                    Log.d(TAG, "Action to be updated is " + targetIntent.getAction());
+                }
+            } else if(DEBUG) {
+                Log.d(TAG, "Can not log Chooser Counts of null ResovleInfo");
+            }
+        }
+        mIsSuccessfullySelected = true;
+    }
+
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
             mRefinementResultReceiver = null;
         }
-
         if (selectedTarget == null) {
             Log.e(TAG, "Refinement result intent did not match any known targets; canceling");
         } else if (!checkTargetSourceIntent(selectedTarget, matchingIntent)) {
             Log.e(TAG, "onRefinementResult: Selected target " + selectedTarget
                     + " cannot match refined source intent " + matchingIntent);
-        } else if (super.onTargetSelected(selectedTarget.cloneFilledIn(matchingIntent, 0), false)) {
-            finish();
-            return;
+        } else {
+            TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
+            if (super.onTargetSelected(clonedTarget, false)) {
+                updateModelAndChooserCounts(clonedTarget);
+                finish();
+                return;
+            }
         }
         onRefinementCanceled();
     }
@@ -602,15 +679,63 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    public class ChooserListController extends ResolverListController {
+        public ChooserListController(Context context,
+                PackageManager pm,
+                Intent targetIntent,
+                String referrerPackageName,
+                int launchedFromUid) {
+            super(context, pm, targetIntent, referrerPackageName, launchedFromUid);
+        }
+
+        @Override
+        boolean isComponentPinned(ComponentName name) {
+            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+        }
+
+        @Override
+        boolean isComponentFiltered(ComponentName name) {
+            if (mFilteredComponentNames == null) {
+                return false;
+            }
+            for (ComponentName filteredComponentName : mFilteredComponentNames) {
+                if (name.equals(filteredComponentName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public float getScore(DisplayResolveInfo target) {
+            if (target == null) {
+                return CALLER_TARGET_SCORE_BOOST;
+            }
+            float score = super.getScore(target);
+            if (target.isPinned()) {
+                score += PINNED_TARGET_SCORE_BOOST;
+            }
+            return score;
+        }
+    }
+
     @Override
     public ResolveListAdapter createAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
             boolean filterLastUsed) {
         final ChooserListAdapter adapter = new ChooserListAdapter(context, payloadIntents,
-                initialIntents, rList, launchedFromUid, filterLastUsed);
-        if (DEBUG) Log.d(TAG, "Adapter created; querying services");
-        queryTargetServices(adapter);
+                initialIntents, rList, launchedFromUid, filterLastUsed, createListController());
         return adapter;
+    }
+
+    @VisibleForTesting
+    protected ResolverListController createListController() {
+        return new ChooserListController(
+                this,
+                mPm,
+                getTargetIntent(),
+                getReferrerPackageName(),
+                mLaunchedFromUid);
     }
 
     final class ChooserTargetInfo implements TargetInfo {
@@ -813,10 +938,11 @@ public class ChooserActivity extends ResolverActivity {
 
         public ChooserListAdapter(Context context, List<Intent> payloadIntents,
                 Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
-                boolean filterLastUsed) {
+                boolean filterLastUsed, ResolverListController resolverListController) {
             // Don't send the initial intents through the shared ResolverActivity path,
             // we want to separate them into a different section.
-            super(context, payloadIntents, null, rList, launchedFromUid, filterLastUsed);
+            super(context, payloadIntents, null, rList, launchedFromUid, filterLastUsed,
+                    resolverListController);
 
             if (initialIntents != null) {
                 final PackageManager pm = getPackageManager();
@@ -882,18 +1008,6 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
-        public float getScore(DisplayResolveInfo target) {
-            if (target == null) {
-                return CALLER_TARGET_SCORE_BOOST;
-            }
-            float score = super.getScore(target);
-            if (target.isPinned()) {
-                score += PINNED_TARGET_SCORE_BOOST;
-            }
-            return score;
-        }
-
-        @Override
         public View onCreateView(ViewGroup parent) {
             return mInflater.inflate(
                     com.android.internal.R.layout.resolve_grid_item, parent, false);
@@ -904,6 +1018,8 @@ public class ChooserActivity extends ResolverActivity {
             if (mServiceTargets != null) {
                 pruneServiceTargets();
             }
+            if (DEBUG) Log.d(TAG, "List built querying services");
+            queryTargetServices(this);
         }
 
         @Override
@@ -1022,8 +1138,10 @@ public class ChooserActivity extends ResolverActivity {
          * Set to true to reveal all service targets at once.
          */
         public void setShowServiceTargets(boolean show) {
-            mShowServiceTargets = show;
-            notifyDataSetChanged();
+            if (show != mShowServiceTargets) {
+                mShowServiceTargets = show;
+                notifyDataSetChanged();
+            }
         }
 
         private void insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
@@ -1087,7 +1205,18 @@ public class ChooserActivity extends ResolverActivity {
                 return;
             }
 
-            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to).setDuration(DURATION);
+            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to)
+                .setDuration(DURATION);
+            mAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mAdapter.onAnimationStart();
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAdapter.onAnimationEnd();
+                }
+            });
         }
 
         public RowScale setInterpolator(Interpolator interpolator) {
@@ -1120,6 +1249,7 @@ public class ChooserActivity extends ResolverActivity {
         private final int mColumnCount = 4;
         private RowScale[] mServiceTargetScale;
         private final Interpolator mInterpolator;
+        private int mAnimationCount = 0;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
@@ -1186,6 +1316,21 @@ public class ChooserActivity extends ResolverActivity {
                 return mServiceTargetScale[rowPosition - start].get();
             }
             return 1.f;
+        }
+
+        public void onAnimationStart() {
+            final boolean lock = mAnimationCount == 0;
+            mAnimationCount++;
+            if (lock) {
+                mResolverDrawerLayout.setDismissLocked(true);
+            }
+        }
+
+        public void onAnimationEnd() {
+            mAnimationCount--;
+            if (mAnimationCount == 0) {
+                mResolverDrawerLayout.setDismissLocked(false);
+            }
         }
 
         @Override

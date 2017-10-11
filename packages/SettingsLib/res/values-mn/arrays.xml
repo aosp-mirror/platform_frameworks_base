@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1922181315419294640"></item>
+    <item msgid="8934131797783724664">"Скан хийж байна…"</item>
+    <item msgid="8513729475867537913">"Холбогдож байна..."</item>
+    <item msgid="515055375277271756">"Гэрчлэж байна"</item>
+    <item msgid="1943354004029184381">"IP хаягийг авч байна…"</item>
+    <item msgid="4221763391123233270">"Холбогдсон"</item>
+    <item msgid="624838831631122137">"Түр хаасан"</item>
+    <item msgid="7979680559596111948">"Салгаж байна…"</item>
+    <item msgid="1634960474403853625">"Салгагдсан"</item>
+    <item msgid="746097431216080650">"Амжилтгүй"</item>
+    <item msgid="6367044185730295334">"Хориглогдсон"</item>
+    <item msgid="503942654197908005">"Муу холболтоос түр зайлсхийж байна"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="7714855332363650812"></item>
+    <item msgid="8878186979715711006">"Скан хийж байна…"</item>
+    <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> руу холбогдож байна…"</item>
+    <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-тай гэрчилж байна…"</item>
+    <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-с IP хаягийг авч байна…"</item>
+    <item msgid="8937994881315223448">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> руу холбогдсон"</item>
+    <item msgid="1330262655415760617">"Түр хаасан"</item>
+    <item msgid="7698638434317271902">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-с салгагдаж байна…"</item>
+    <item msgid="197508606402264311">"Салгагдсан"</item>
+    <item msgid="8578370891960825148">"Амжилтгүй"</item>
+    <item msgid="5660739516542454527">"Хориглогдсон"</item>
+    <item msgid="1805837518286731242">"Муу холболтоос түр зайлсхийж байна"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Хэзээ ч шалгахгүй"</item>
+    <item msgid="6042769699089883931">"Зөвхөн DRM агуулгыг шалгах"</item>
+    <item msgid="9174900380056846820">"Байнга шалгах"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"HDCP шалгахыг хэзээ ч ашиглахгүй"</item>
+    <item msgid="3878793616631049349">"HDCP шалгахыг зөвхөн DRM контентэд ашиглах"</item>
+    <item msgid="45075631231212732">"Байнга HDCP шалгахыг ашиглах"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Өгөгдмөл)"</item>
+    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
+    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="2838624067805073303">"avrcp14"</item>
+    <item msgid="1913619118958233129">"avrcp15"</item>
+    <item msgid="7142710449249088270">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+    <item msgid="723675059572222462">"Нэмэлт кодлогчийг идэвхжүүлэх"</item>
+    <item msgid="3304843301758635896">"Нэмэлт кодлогчийг идэвхгүй болгох"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+    <item msgid="2209680154067241740">"Нэмэлт кодлогчийг идэвхжүүлэх"</item>
+    <item msgid="741805482892725657">"Нэмэлт кодлогчийг идэвхгүй болгох"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="8895532488906185219">"44.1 кГц"</item>
+    <item msgid="2909915718994807056">"48.0 кГц"</item>
+    <item msgid="3347287377354164611">"88.2 кГц"</item>
+    <item msgid="1234212100239985373">"96.0 кГц"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="4482862757811638365">"44.1 кГц"</item>
+    <item msgid="354495328188724404">"48.0 кГц"</item>
+    <item msgid="7329816882213695083">"88.2 кГц"</item>
+    <item msgid="6967397666254430476">"96.0 кГц"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="5618929009984956469">"16 бит/жишээ"</item>
+    <item msgid="3412640499234627248">"24 бит/жишээ"</item>
+    <item msgid="121583001492929387">"32 бит/жишээ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="4726688794884191540">"16 бит/жишээ"</item>
+    <item msgid="305344756485516870">"24 бит/жишээ"</item>
+    <item msgid="244568657919675099">"32 бит/жишээ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="4106832974775067314">"Моно"</item>
+    <item msgid="5571632958424639155">"Стерео"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Системийн сонголтыг ашиглах (Өгөгдмөл)"</item>
+    <item msgid="8900559293912978337">"Моно"</item>
+    <item msgid="8883739882299884241">"Стерео"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Аудио чанарт тааруулсан (990кб/цаг/909кб/цаг)"</item>
+    <item msgid="2921767058740704969">"Аудио, холболтын чанарыг тэнцүүлсэн (660кб/цаг/606кб/цаг)"</item>
+    <item msgid="8860982705384396512">"Холболтын чанарт тааруулсан (330кб/цаг/303кб/цаг)"</item>
+    <item msgid="4414060457677684127">"Шилдэг оролдлого (Тохируулж болох битийн хурд)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Аудио чанарт тааруулсан"</item>
+    <item msgid="4327143584633311908">"Аудио, холболтын чанарыг тэнцүүлсэн"</item>
+    <item msgid="4681409244565426925">"Холболтын чанарт тааруулсан"</item>
+    <item msgid="364670732877872677">"Шилдэг оролдлого (Тохируулж болох битийн хурд)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"Идэвхгүй"</item>
+    <item msgid="1593289376502312923">"64000"</item>
+    <item msgid="487545340236145324">"256000"</item>
+    <item msgid="2423528675294333831">"1 сая"</item>
+    <item msgid="180883774509476541">"4 сая"</item>
+    <item msgid="2803199102589126938">"16 сая"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"Идэвхгүй"</item>
+    <item msgid="4622460333038586791">"64000"</item>
+    <item msgid="2212125625169582330">"256000"</item>
+    <item msgid="1704946766699242653">"1 сая"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"Идэвхгүй"</item>
+    <item msgid="2969458029344750262">"лог буфер бүрт 64K"</item>
+    <item msgid="1342285115665698168">"лог буфер бүрт 256K"</item>
+    <item msgid="1314234299552254621">"лог буфер бүрт 1M"</item>
+    <item msgid="3606047780792894151">"лог буфер бүрт 4M"</item>
+    <item msgid="5431354956856655120">"лог буфер бүрт 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Идэвхгүй"</item>
+    <item msgid="3054662377365844197">"Бүгд"</item>
+    <item msgid="688870735111627832">"Радиогоос бусад бүх"</item>
+    <item msgid="2850427388488887328">"зөвхөн төвд"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Идэвхгүй"</item>
+    <item msgid="172978079776521897">"Бүх логийн хамгаалалт"</item>
+    <item msgid="3873873912383879240">"Радиогоос бусад бүх логийн хамгаалалт"</item>
+    <item msgid="8489661142527693381">"зөвхөн үйлдлийн системийн төв логийн хамгаалалтад"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Дүрс амилуулалт идэвхгүй"</item>
+    <item msgid="6624864048416710414">"Дүрс амилуулах далайц .5x"</item>
+    <item msgid="2219332261255416635">"Дүрс амилуулах далайц 1x"</item>
+    <item msgid="3544428804137048509">"Дүрс амилуулах далайц 1.5x"</item>
+    <item msgid="3110710404225974514">"Дүрс амилуулалтын далайц 2x"</item>
+    <item msgid="4402738611528318731">"Дүрс амилуулалтын далайц 5x"</item>
+    <item msgid="6189539267968330656">"Дүрс амилуулалтын далайц 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Дүрс амилуулалт идэвхгүй"</item>
+    <item msgid="3375781541913316411">"Дүрс амилуулах далайц .5x"</item>
+    <item msgid="1991041427801869945">"Дүрс амилуулах далайц 1x"</item>
+    <item msgid="4012689927622382874">"Дүрс амилуулах далайц 1.5x"</item>
+    <item msgid="3289156759925947169">"Дүрс амилуулалтын далайц 2x"</item>
+    <item msgid="7705857441213621835">"Дүрс амилуулалтын далайц 5x"</item>
+    <item msgid="6660750935954853365">"Дүрс амилуулалтын далайц 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Дүрс амилуулалт идэвхгүй"</item>
+    <item msgid="1138649021950863198">"Дүрс амилуулах далайц .5x"</item>
+    <item msgid="4394388961370833040">"Дүрс амилуулах далайц 1x"</item>
+    <item msgid="8125427921655194973">"Дүрс амилуулах далайц 1.5x"</item>
+    <item msgid="3334024790739189573">"Дүрс амилуулалтын далайц 2x"</item>
+    <item msgid="3170120558236848008">"Дүрс амилуулалтын далайц 5x"</item>
+    <item msgid="1069584980746680398">"Дүрс амилуулалтын далайц 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Байхгүй"</item>
+    <item msgid="9033194758688161545">"480пиксель"</item>
+    <item msgid="1025306206556583600">"480пиксель (найдвартай)"</item>
+    <item msgid="1853913333042744661">"720пиксель"</item>
+    <item msgid="3414540279805870511">"720пиксель (найдвартай)"</item>
+    <item msgid="9039818062847141551">"1080пиксель"</item>
+    <item msgid="4939496949750174834">"1080пиксель (найдвартай)"</item>
+    <item msgid="1833612718524903568">"4К"</item>
+    <item msgid="238303513127879234">"4К (найдвартай)"</item>
+    <item msgid="3547211260846843098">"4К (өндөр чанартай)"</item>
+    <item msgid="5411365648951414254">"4К (өндөр чанартай, найдвартай)"</item>
+    <item msgid="1311305077526792901">"720пиксель, 1080пиксель (хос дэлгэц)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Алийг нь ч биш"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (График)"</item>
+    <item msgid="1340692776955662664">"Стекийг glGetError дээр дуудах"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Идэвхгүй"</item>
+    <item msgid="675719912558941285">"Тэгш өнцөгт бус клипийн бүсийг цэнхэрээр зурах"</item>
+    <item msgid="1064373276095698656">"Шалгасан зурах командуудыг ногоон өнгөөр тэмдэглэх"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Идэвхгүй"</item>
+    <item msgid="2751513398307949636">"Дэлгэц дээр савхаар"</item>
+    <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>-д"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Идэвхгүй"</item>
+    <item msgid="7688197031296835369">"Давхар дүрслэлтэй хэсгийг харуулах"</item>
+    <item msgid="2290859360633824369">"Өнгө үл ялгагчид зориулсан бүсүүдийг харуулах"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (Өгөгдмөл)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Стандарт хязгаар"</item>
+    <item msgid="4071574792028999443">"Далд процесс байхгүй"</item>
+    <item msgid="4810006996171705398">"Хамгийн ихдээ 1 процесс"</item>
+    <item msgid="8586370216857360863">"Хамгийн ихдээ 2 процесс"</item>
+    <item msgid="836593137872605381">"Хамгийн ихдээ 3 процесс"</item>
+    <item msgid="7899496259191969307">"Хамгийн ихдээ 4 процесс"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Цэнэглэж байна"</item>
+    <item msgid="5220695614993094977">"MTP (Медиа дамжуулах протокол)"</item>
+    <item msgid="2086000968159047375">"PTP (Зураг Дамжуулах Протокол)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
+    <item msgid="1718924214939774352">"Аудио эх сурвалж"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
+</resources>

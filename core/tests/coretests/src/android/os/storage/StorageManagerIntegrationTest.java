@@ -18,15 +18,20 @@ package android.os.storage;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.ProxyFileDescriptorCallback;
+import android.os.ParcelFileDescriptor;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.frameworks.coretests.R;
-
+import com.android.internal.os.FuseAppLoop;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.concurrent.ThreadFactory;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -242,5 +247,48 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
         mountObb(filePath, null, OnObbStateChangeListener.ERROR_ALREADY_MOUNTED);
         verifyObb1Contents(filePath);
         unmountObb(filePath, DONT_FORCE);
+    }
+
+    @LargeTest
+    public void testOpenProxyFileDescriptor() throws Exception {
+        final ProxyFileDescriptorCallback callback = new ProxyFileDescriptorCallback() {
+            @Override
+            public long onGetSize() throws ErrnoException {
+                return 0;
+            }
+
+            @Override
+            public void onRelease() {}
+        };
+
+        final MyThreadFactory factory = new MyThreadFactory();
+        int firstMountId;
+        try (final ParcelFileDescriptor fd = mSm.openProxyFileDescriptor(
+                ParcelFileDescriptor.MODE_READ_ONLY, callback, null, factory)) {
+            assertNotSame(Thread.State.TERMINATED, factory.thread.getState());
+            firstMountId = mSm.getProxyFileDescriptorMountPointId();
+            assertNotSame(-1, firstMountId);
+        }
+
+        // After closing descriptor, the loop should terminate.
+        factory.thread.join(3000);
+        assertEquals(Thread.State.TERMINATED, factory.thread.getState());
+
+        // StorageManager should mount another bridge on the next open request.
+        try (final ParcelFileDescriptor fd = mSm.openProxyFileDescriptor(
+                ParcelFileDescriptor.MODE_WRITE_ONLY, callback, null, factory)) {
+            assertNotSame(Thread.State.TERMINATED, factory.thread.getState());
+            assertNotSame(firstMountId, mSm.getProxyFileDescriptorMountPointId());
+        }
+    }
+
+    private static class MyThreadFactory implements ThreadFactory {
+        Thread thread = null;
+
+        @Override
+        public Thread newThread(Runnable r) {
+            thread = new Thread(r);
+            return thread;
+        }
     }
 }

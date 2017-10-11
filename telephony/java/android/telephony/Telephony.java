@@ -25,8 +25,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.ContentObserver;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.telephony.Rlog;
@@ -38,6 +38,7 @@ import android.util.Patterns;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SmsApplication;
+
 
 import java.util.HashSet;
 import java.util.Set;
@@ -3030,8 +3031,7 @@ public final class Telephony {
          * @return the Uri used to observe {@link ServiceState} changes
          */
         public static Uri getUriForSubscriptionId(int subscriptionId) {
-            return CONTENT_URI.buildUpon()
-                    .appendEncodedPath(String.valueOf(subscriptionId)).build();
+            return CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(subscriptionId)).build();
         }
 
         /**

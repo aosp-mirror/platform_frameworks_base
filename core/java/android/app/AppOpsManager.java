@@ -17,7 +17,9 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.media.AudioAttributes.AttributeUsage;
@@ -42,10 +44,9 @@ import java.util.List;
  * API for interacting with "application operation" tracking.
  *
  * <p>This API is not generally intended for third party application developers; most
- * features are only available to system applications.  Obtain an instance of it through
- * {@link Context#getSystemService(String) Context.getSystemService} with
- * {@link Context#APP_OPS_SERVICE Context.APP_OPS_SERVICE}.</p>
+ * features are only available to system applications.
  */
+@SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
     /**
      * <p>App ops allows callers to:</p>
@@ -240,7 +241,19 @@ public class AppOpsManager {
     /** @hide Control whether an application is allowed to run in the background. */
     public static final int OP_RUN_IN_BACKGROUND = 63;
     /** @hide */
-    public static final int _NUM_OP = 64;
+    public static final int OP_AUDIO_ACCESSIBILITY_VOLUME = 64;
+    /** @hide Read the phone number. */
+    public static final int OP_READ_PHONE_NUMBERS = 65;
+    /** @hide Request package installs through package installer */
+    public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
+    /** @hide Enter picture-in-picture. */
+    public static final int OP_PICTURE_IN_PICTURE = 67;
+    /** @hide Instant app start foreground service. */
+    public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
+    /** @hide Answer incoming phone calls */
+    public static final int OP_ANSWER_PHONE_CALLS = 69;
+    /** @hide */
+    public static final int _NUM_OP = 70;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -311,6 +324,9 @@ public class AppOpsManager {
     /** Access APIs for SIP calling over VOIP or WiFi */
     public static final String OPSTR_USE_SIP
             = "android:use_sip";
+    /** Access APIs for diverting outgoing calls */
+    public static final String OPSTR_PROCESS_OUTGOING_CALLS
+            = "android:process_outgoing_calls";
     /** Use the fingerprint API. */
     public static final String OPSTR_USE_FINGERPRINT
             = "android:use_fingerprint";
@@ -338,8 +354,22 @@ public class AppOpsManager {
     /** @hide Get device accounts. */
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
+    public static final String OPSTR_READ_PHONE_NUMBERS
+            = "android:read_phone_numbers";
+    /** Access to picture-in-picture. */
+    public static final String OPSTR_PICTURE_IN_PICTURE
+            = "android:picture_in_picture";
+    /** @hide */
+    public static final String OPSTR_INSTANT_APP_START_FOREGROUND
+            = "android:instant_app_start_foreground";
+    /** Answer incoming phone calls */
+    public static final String OPSTR_ANSWER_PHONE_CALLS
+            = "android:answer_phone_calls";
 
-    private static final int[] RUNTIME_PERMISSIONS_OPS = {
+    // Warning: If an permission is added here it also has to be added to
+    // com.android.packageinstaller.permission.utils.EventLogger
+    private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
+            // RUNTIME PERMISSIONS
             // Contacts
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -362,18 +392,26 @@ public class AppOpsManager {
             OP_FINE_LOCATION,
             // Phone
             OP_READ_PHONE_STATE,
+            OP_READ_PHONE_NUMBERS,
             OP_CALL_PHONE,
             OP_READ_CALL_LOG,
             OP_WRITE_CALL_LOG,
             OP_ADD_VOICEMAIL,
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
+            OP_ANSWER_PHONE_CALLS,
             // Microphone
             OP_RECORD_AUDIO,
             // Camera
             OP_CAMERA,
             // Body sensors
-            OP_BODY_SENSORS
+            OP_BODY_SENSORS,
+
+            // APPOP PERMISSIONS
+            OP_ACCESS_NOTIFICATIONS,
+            OP_SYSTEM_ALERT_WINDOW,
+            OP_WRITE_SETTINGS,
+            OP_REQUEST_INSTALL_PACKAGES,
     };
 
     /**
@@ -449,6 +487,12 @@ public class AppOpsManager {
             OP_TURN_SCREEN_ON,
             OP_GET_ACCOUNTS,
             OP_RUN_IN_BACKGROUND,
+            OP_AUDIO_ACCESSIBILITY_VOLUME,
+            OP_READ_PHONE_NUMBERS,
+            OP_REQUEST_INSTALL_PACKAGES,
+            OP_PICTURE_IN_PICTURE,
+            OP_INSTANT_APP_START_FOREGROUND,
+            OP_ANSWER_PHONE_CALLS
     };
 
     /**
@@ -510,7 +554,7 @@ public class AppOpsManager {
             OPSTR_READ_PHONE_STATE,
             OPSTR_ADD_VOICEMAIL,
             OPSTR_USE_SIP,
-            null,
+            OPSTR_PROCESS_OUTGOING_CALLS,
             OPSTR_USE_FINGERPRINT,
             OPSTR_BODY_SENSORS,
             OPSTR_READ_CELL_BROADCASTS,
@@ -520,6 +564,12 @@ public class AppOpsManager {
             null,
             OPSTR_GET_ACCOUNTS,
             null,
+            null, // OP_AUDIO_ACCESSIBILITY_VOLUME
+            OPSTR_READ_PHONE_NUMBERS,
+            null, // OP_REQUEST_INSTALL_PACKAGES
+            OPSTR_PICTURE_IN_PICTURE,
+            OPSTR_INSTANT_APP_START_FOREGROUND,
+            OPSTR_ANSWER_PHONE_CALLS,
     };
 
     /**
@@ -591,6 +641,12 @@ public class AppOpsManager {
             "TURN_ON_SCREEN",
             "GET_ACCOUNTS",
             "RUN_IN_BACKGROUND",
+            "AUDIO_ACCESSIBILITY_VOLUME",
+            "READ_PHONE_NUMBERS",
+            "REQUEST_INSTALL_PACKAGES",
+            "PICTURE_IN_PICTURE",
+            "INSTANT_APP_START_FOREGROUND",
+            "ANSWER_PHONE_CALLS",
     };
 
     /**
@@ -662,6 +718,12 @@ public class AppOpsManager {
             null, // no permission for turning the screen on
             Manifest.permission.GET_ACCOUNTS,
             null, // no permission for running in background
+            null, // no permission for changing accessibility volume
+            Manifest.permission.READ_PHONE_NUMBERS,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES,
+            null, // no permission for entering picture-in-picture on hide
+            Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
+            Manifest.permission.ANSWER_PHONE_CALLS,
     };
 
     /**
@@ -734,6 +796,12 @@ public class AppOpsManager {
             null, // TURN_ON_SCREEN
             null, // GET_ACCOUNTS
             null, // RUN_IN_BACKGROUND
+            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
+            null, // READ_PHONE_NUMBERS
+            null, // REQUEST_INSTALL_PACKAGES
+            null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            null, // INSTANT_APP_START_FOREGROUND
+            null, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -805,6 +873,12 @@ public class AppOpsManager {
             false, // TURN_ON_SCREEN
             false, // GET_ACCOUNTS
             false, // RUN_IN_BACKGROUND
+            false, // AUDIO_ACCESSIBILITY_VOLUME
+            false, // READ_PHONE_NUMBERS
+            false, // REQUEST_INSTALL_PACKAGES
+            false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            false, // INSTANT_APP_START_FOREGROUND
+            false, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -875,6 +949,12 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
+            AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_DEFAULT,  // OP_REQUEST_INSTALL_PACKAGES
+            AppOpsManager.MODE_ALLOWED,  // OP_PICTURE_IN_PICTURE
+            AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
+            AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -949,6 +1029,12 @@ public class AppOpsManager {
             false,
             false,
             false,
+            false, // OP_AUDIO_ACCESSIBILITY_VOLUME
+            false,
+            false, // OP_REQUEST_INSTALL_PACKAGES
+            false, // OP_PICTURE_IN_PICTURE
+            false,
+            false, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -959,7 +1045,7 @@ public class AppOpsManager {
     /**
      * Mapping from a permission to the corresponding app op.
      */
-    private static HashMap<String, Integer> sRuntimePermToOp = new HashMap<>();
+    private static HashMap<String, Integer> sPermToOp = new HashMap<>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
@@ -999,9 +1085,9 @@ public class AppOpsManager {
                 sOpStrToOp.put(sOpToString[i], i);
             }
         }
-        for (int op : RUNTIME_PERMISSIONS_OPS) {
+        for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
             if (sOpPerms[op] != null) {
-                sRuntimePermToOp.put(sOpPerms[op], op);
+                sPermToOp.put(sOpPerms[op], op);
             }
         }
     }
@@ -1053,12 +1139,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve the app op code for a permission, or null if there is not one.
-     * This API is intended to be used for mapping runtime permissions to the
-     * corresponding app op.
+     * This API is intended to be used for mapping runtime or appop permissions
+     * to the corresponding app op.
      * @hide
      */
     public static int permissionToOpCode(String permission) {
-        Integer boxedOpCode = sRuntimePermToOp.get(permission);
+        Integer boxedOpCode = sPermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
     }
 
@@ -1324,6 +1410,7 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS)
     public void setUidMode(String appOp, int uid, int mode) {
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
@@ -1403,7 +1490,7 @@ public class AppOpsManager {
      * @return The app op associated with the permission or null.
      */
     public static String permissionToOp(String permission) {
-        final Integer opCode = sRuntimePermToOp.get(permission);
+        final Integer opCode = sPermToOp.get(permission);
         if (opCode == null) {
             return null;
         }

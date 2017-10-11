@@ -16,12 +16,22 @@
 
 package com.android.server.connectivity;
 
+import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
+import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.DefaultNetworkEvent;
@@ -31,36 +41,50 @@ import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
+import android.system.OsConstants;
 import android.os.Parcelable;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
-import com.android.server.connectivity.metrics.IpConnectivityLogClass;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IpConnectivityMetricsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class IpConnectivityMetricsTest {
     static final IpReachabilityEvent FAKE_EV =
-            new IpReachabilityEvent("wlan0", IpReachabilityEvent.NUD_FAILED);
+            new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED);
+
+    private static final String EXAMPLE_IPV4 = "192.0.2.1";
+    private static final String EXAMPLE_IPV6 = "2001:db8:1200::2:1";
 
     @Mock Context mCtx;
     @Mock IIpConnectivityMetrics mMockService;
+    @Mock ConnectivityManager mCm;
 
     IpConnectivityMetrics mService;
+    NetdEventListenerService mNetdListener;
 
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mService = new IpConnectivityMetrics(mCtx, (ctx) -> 2000);
+        mNetdListener = new NetdEventListenerService(mCm);
+        mService.mNetdListener = mNetdListener;
     }
 
-    @SmallTest
+    @Test
     public void testLoggingEvents() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -74,7 +98,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEventsEqual(expectedEvent(3), got.get(2));
     }
 
-    @SmallTest
+    @Test
     public void testLoggingEventsWithMultipleCallers() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -85,24 +109,24 @@ public class IpConnectivityMetricsTest extends TestCase {
             new Thread() {
                 public void run() {
                     for (int j = 0; j < nEvents; j++) {
-                        assertTrue(logger.log(i * 100 + j, FAKE_EV));
+                        assertTrue(logger.log(1 + i * 100 + j, FAKE_EV));
                     }
                 }
             }.start();
         }
 
-        List<ConnectivityMetricsEvent> got = verifyEvents(nCallers * nEvents, 100);
+        List<ConnectivityMetricsEvent> got = verifyEvents(nCallers * nEvents, 200);
         Collections.sort(got, EVENT_COMPARATOR);
         Iterator<ConnectivityMetricsEvent> iter = got.iterator();
         for (int i = 0; i < nCallers; i++) {
             for (int j = 0; j < nEvents; j++) {
-                int expectedTimestamp = i * 100 + j;
+                int expectedTimestamp = 1 + i * 100 + j;
                 assertEventsEqual(expectedEvent(expectedTimestamp), iter.next());
             }
         }
     }
 
-    @SmallTest
+    @Test
     public void testBufferFlushing() {
         String output1 = getdump("flush");
         assertEquals("", output1);
@@ -115,10 +139,10 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output3);
     }
 
-    @SmallTest
+    @Test
     public void testRateLimiting() {
         final IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
-        final ApfProgramEvent ev = new ApfProgramEvent(0, 0, 0, 0, 0);
+        final ApfProgramEvent ev = new ApfProgramEvent();
         final long fakeTimestamp = 1;
 
         int attempt = 100; // More than burst quota, but less than buffer size.
@@ -137,49 +161,118 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output2);
     }
 
-    @SmallTest
-    public void testEndToEndLogging() {
+    @Test
+    public void testEndToEndLogging() throws Exception {
+        // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
 
+        NetworkCapabilities ncWifi = new NetworkCapabilities();
+        NetworkCapabilities ncCell = new NetworkCapabilities();
+        ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+        ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+
+        when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
+        when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
+
+        ApfStats apfStats = new ApfStats();
+        apfStats.durationMs = 45000;
+        apfStats.receivedRas = 10;
+        apfStats.matchingRas = 2;
+        apfStats.droppedRas = 2;
+        apfStats.parseErrors = 2;
+        apfStats.zeroLifetimeRas = 1;
+        apfStats.programUpdates = 4;
+        apfStats.programUpdatesAll = 7;
+        apfStats.programUpdatesAllowingMulticast = 3;
+        apfStats.maxProgramSize = 2048;
+
+        ValidationProbeEvent validationEv = new ValidationProbeEvent();
+        validationEv.durationMs = 40730;
+        validationEv.probeType = ValidationProbeEvent.PROBE_HTTP;
+        validationEv.returnCode = 204;
+
         Parcelable[] events = {
-            new IpReachabilityEvent("wlan0", IpReachabilityEvent.NUD_FAILED),
-            new DhcpClientEvent("wlan0", "SomeState", 192),
+            new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED),
+            new DhcpClientEvent("SomeState", 192),
             new DefaultNetworkEvent(102, new int[]{1,2,3}, 101, true, false),
-            new IpManagerEvent("wlan0", IpManagerEvent.PROVISIONING_OK, 5678),
-            new ValidationProbeEvent(120, 40730, ValidationProbeEvent.PROBE_HTTP, 204),
-            new ApfStats(45000, 10, 2, 2, 1, 2, 4, 2048),
+            new IpManagerEvent(IpManagerEvent.PROVISIONING_OK, 5678),
+            validationEv,
+            apfStats,
             new RaEvent(2000, 400, 300, -1, 1000, -1)
         };
 
         for (int i = 0; i < events.length; i++) {
-            logger.log(100 * (i + 1), events[i]);
+            ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+            ev.timestamp = 100 * (i + 1);
+            ev.ifname = "wlan0";
+            ev.data = events[i];
+            logger.log(ev);
         }
 
-        String want = joinLines(
+        // netId, errno, latency, destination
+        connectEvent(100, OsConstants.EALREADY, 0, EXAMPLE_IPV4);
+        connectEvent(100, OsConstants.EINPROGRESS, 0, EXAMPLE_IPV6);
+        connectEvent(100, 0, 110, EXAMPLE_IPV4);
+        connectEvent(101, 0, 23, EXAMPLE_IPV4);
+        connectEvent(101, 0, 45, EXAMPLE_IPV6);
+        connectEvent(100, OsConstants.EAGAIN, 0, EXAMPLE_IPV4);
+
+        // netId, type, return code, latency
+        dnsEvent(100, EVENT_GETADDRINFO, 0, 3456);
+        dnsEvent(100, EVENT_GETADDRINFO, 3, 45);
+        dnsEvent(100, EVENT_GETHOSTBYNAME, 0, 638);
+        dnsEvent(101, EVENT_GETADDRINFO, 0, 56);
+        dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 34);
+
+        // iface, uid
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10123);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10008);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("wlan0", 10008);
+        wakeupEvent("rmnet0", 1000);
+
+        String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 100",
+                "  transports: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "  >",
-                "  time_ms: 100",
-                "  transport: 0",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 200",
+                "  transports: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
-                "    error_code: 0",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    state_transition: \"SomeState\"",
                 "  >",
-                "  time_ms: 200",
-                "  transport: 0",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 300",
+                "  transports: 0",
                 "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
                 "    network_id <",
                 "      network_id: 102",
                 "    >",
+                "    no_default_network_duration_ms: 0",
                 "    previous_network_id <",
                 "      network_id: 101",
                 "    >",
@@ -188,31 +281,37 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    transport_types: 2",
                 "    transport_types: 3",
                 "  >",
-                "  time_ms: 300",
-                "  transport: 0",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 400",
+                "  transports: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
-                "    if_name: \"wlan0\"",
+                "    if_name: \"\"",
                 "    latency_ms: 5678",
                 "  >",
-                "  time_ms: 400",
-                "  transport: 0",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
                 "  time_ms: 500",
-                "  transport: 0",
+                "  transports: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
-                "    network_id <",
-                "      network_id: 120",
-                "    >",
                 "    probe_result: 204",
                 "    probe_type: 1",
                 "  >",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 600",
+                "  transports: 0",
                 "  apf_statistics <",
                 "    dropped_ras: 2",
                 "    duration_ms: 45000",
@@ -220,13 +319,20 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    max_program_size: 2048",
                 "    parse_errors: 2",
                 "    program_updates: 4",
+                "    program_updates_all: 7",
+                "    program_updates_allowing_multicast: 3",
                 "    received_ras: 10",
+                "    total_packet_dropped: 0",
+                "    total_packet_processed: 0",
                 "    zero_lifetime_ras: 1",
                 "  >",
-                "  time_ms: 600",
-                "  transport: 0",
                 ">",
                 "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 700",
+                "  transports: 0",
                 "  ra_event <",
                 "    dnssl_lifetime: -1",
                 "    prefix_preferred_lifetime: 300",
@@ -235,10 +341,112 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    route_info_lifetime: -1",
                 "    router_lifetime: 2000",
                 "  >",
-                "  time_ms: 700",
-                "  transport: 0",
                 ">",
-                "version: 2");
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  connect_statistics <",
+                "    connect_blocking_count: 1",
+                "    connect_count: 3",
+                "    errnos_counters <",
+                "      key: 11",
+                "      value: 1",
+                "    >",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 110",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  connect_statistics <",
+                "    connect_blocking_count: 2",
+                "    connect_count: 2",
+                "    ipv6_addr_count: 1",
+                "    latencies_ms: 23",
+                "    latencies_ms: 45",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 2",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
+                "    latencies_ms: 3456",
+                "    latencies_ms: 45",
+                "    latencies_ms: 638",
+                "    return_codes: 0",
+                "    return_codes: 3",
+                "    return_codes: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 1",
+                "  dns_lookup_batch <",
+                "    event_types: 1",
+                "    event_types: 2",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
+                "    latencies_ms: 56",
+                "    latencies_ms: 34",
+                "    return_codes: 0",
+                "    return_codes: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 2",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 0",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 1",
+                "    total_wakeups: 3",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 1",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 1",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 2",
+                "    total_wakeups: 4",
+                "  >",
+                ">",
+                "version: 2\n");
 
         verifySerialization(want, getdump("flush"));
     }
@@ -248,6 +456,19 @@ public class IpConnectivityMetricsTest extends TestCase {
         PrintWriter writer = new PrintWriter(buffer);
         mService.impl.dump(null, writer, command);
         return buffer.toString();
+    }
+
+    void connectEvent(int netid, int error, int latencyMs, String ipAddr) throws Exception {
+        mNetdListener.onConnectEvent(netid, error, latencyMs, ipAddr, 80, 1);
+    }
+
+    void dnsEvent(int netId, int type, int result, int latency) throws Exception {
+        mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
+    }
+
+    void wakeupEvent(String iface, int uid) throws Exception {
+        String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
+        mNetdListener.onWakeupEvent(prefix, uid, uid, 0);
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
@@ -281,14 +502,15 @@ public class IpConnectivityMetricsTest extends TestCase {
     }
 
     static ConnectivityMetricsEvent expectedEvent(int timestamp) {
-        return new ConnectivityMetricsEvent((long)timestamp, 0, 0, FAKE_EV);
+        ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
+        ev.timestamp = timestamp;
+        ev.data = FAKE_EV;
+        return ev;
     }
 
     /** Outer equality for ConnectivityMetricsEvent to avoid overriding equals() and hashCode(). */
     static void assertEventsEqual(ConnectivityMetricsEvent expected, ConnectivityMetricsEvent got) {
         assertEquals(expected.timestamp, got.timestamp);
-        assertEquals(expected.componentTag, got.componentTag);
-        assertEquals(expected.eventTag, got.eventTag);
         assertEquals(expected.data, got.data);
     }
 

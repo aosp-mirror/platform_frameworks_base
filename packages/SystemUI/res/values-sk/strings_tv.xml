@@ -19,15 +19,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"Obraz v obraze"</string>
+    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(Program bez názvu)"</string>
     <string name="pip_close" msgid="3480680679023423574">"Zavrieť režim PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Celá obrazovka"</string>
-    <string name="pip_play" msgid="674145557658227044">"Prehrať"</string>
-    <string name="pip_pause" msgid="8412075640017218862">"Pozastaviť"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Režim PIP ovládajte pomocou tlačidla "<b>"PLOCHA"</b></string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Obraz v obraze"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Táto možnosť podrží video v obraze, dokým prehráte ďalšie. Stlačením a podržaním tlačidla "<b>"HOME"</b>" ho môžete ovládať."</string>
-    <string name="pip_onboarding_button" msgid="3957426748484904611">"Dobre"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Odmietnuť"</string>
-  <string-array name="recents_tv_blacklist_array">
-  </string-array>
 </resources>

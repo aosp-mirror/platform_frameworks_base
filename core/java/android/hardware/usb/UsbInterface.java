@@ -16,8 +16,10 @@
 
 package android.hardware.usb;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.android.internal.util.Preconditions;
 
 /**
  * A class representing an interface on a {@link UsbDevice}.
@@ -36,17 +38,19 @@ public class UsbInterface implements Parcelable {
 
     private final int mId;
     private final int mAlternateSetting;
-    private final String mName;
+    private @Nullable final String mName;
     private final int mClass;
     private final int mSubclass;
     private final int mProtocol;
+
+    /** All endpoints of this interface, only null during creation */
     private Parcelable[] mEndpoints;
 
     /**
      * UsbInterface should only be instantiated by UsbService implementation
      * @hide
      */
-    public UsbInterface(int id, int alternateSetting, String name,
+    public UsbInterface(int id, int alternateSetting, @Nullable String name,
             int Class, int subClass, int protocol) {
         mId = id;
         mAlternateSetting = alternateSetting;
@@ -83,9 +87,9 @@ public class UsbInterface implements Parcelable {
     /**
      * Returns the interface's name.
      *
-     * @return the interface's name
+     * @return the interface's name, or {@code null} if the property could not be read
      */
-    public String getName() {
+    public @Nullable String getName() {
         return mName;
     }
 
@@ -140,7 +144,7 @@ public class UsbInterface implements Parcelable {
      * @hide
      */
     public void setEndpoints(Parcelable[] endpoints) {
-        mEndpoints = endpoints;
+        mEndpoints = Preconditions.checkArrayElementsNotNull(endpoints, "endpoints");
     }
 
     @Override

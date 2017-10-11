@@ -93,6 +93,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class PendingIntent implements Parcelable {
     private final IIntentSender mTarget;
+    private IBinder mWhitelistToken;
 
     /** @hide */
     @IntDef(flag = true,
@@ -339,15 +340,15 @@ public final class PendingIntent implements Parcelable {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
                     flags, options, UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -364,15 +365,15 @@ public final class PendingIntent implements Parcelable {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
                     flags, options, user.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -481,14 +482,14 @@ public final class PendingIntent implements Parcelable {
         }
         try {
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes, flags, options,
                     UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -507,14 +508,14 @@ public final class PendingIntent implements Parcelable {
         }
         try {
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes,
                     flags, options, user.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -559,15 +560,15 @@ public final class PendingIntent implements Parcelable {
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
+                ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_BROADCAST, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
                     flags, null, userHandle.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -596,21 +597,57 @@ public final class PendingIntent implements Parcelable {
      */
     public static PendingIntent getService(Context context, int requestCode,
             @NonNull Intent intent, @Flags int flags) {
+        return buildServicePendingIntent(context, requestCode, intent, flags,
+                ActivityManager.INTENT_SENDER_SERVICE);
+    }
+
+    /**
+     * Retrieve a PendingIntent that will start a foreground service, like calling
+     * {@link Context#startForegroundService Context.startForegroundService()}.  The start
+     * arguments given to the service will come from the extras of the Intent.
+     *
+     * <p class="note">For security reasons, the {@link android.content.Intent}
+     * you supply here should almost always be an <em>explicit intent</em>,
+     * that is specify an explicit component to be delivered to through
+     * {@link Intent#setClass(android.content.Context, Class) Intent.setClass}</p>
+     *
+     * @param context The Context in which this PendingIntent should start
+     * the service.
+     * @param requestCode Private request code for the sender
+     * @param intent An Intent describing the service to be started.
+     * @param flags May be {@link #FLAG_ONE_SHOT}, {@link #FLAG_NO_CREATE},
+     * {@link #FLAG_CANCEL_CURRENT}, {@link #FLAG_UPDATE_CURRENT},
+     * {@link #FLAG_IMMUTABLE} or any of the flags as supported by
+     * {@link Intent#fillIn Intent.fillIn()} to control which unspecified parts
+     * of the intent that can be supplied when the actual send happens.
+     *
+     * @return Returns an existing or new PendingIntent matching the given
+     * parameters.  May return null only if {@link #FLAG_NO_CREATE} has been
+     * supplied.
+     */
+    public static PendingIntent getForegroundService(Context context, int requestCode,
+            @NonNull Intent intent, @Flags int flags) {
+        return buildServicePendingIntent(context, requestCode, intent, flags,
+                ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE);
+    }
+
+    private static PendingIntent buildServicePendingIntent(Context context, int requestCode,
+            Intent intent, int flags, int serviceKind) {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
-                ActivityManagerNative.getDefault().getIntentSender(
-                    ActivityManager.INTENT_SENDER_SERVICE, packageName,
+                ActivityManager.getService().getIntentSender(
+                    serviceKind, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
                     flags, null, UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -620,7 +657,7 @@ public final class PendingIntent implements Parcelable {
      *
      */
     public IntentSender getIntentSender() {
-        return new IntentSender(mTarget);
+        return new IntentSender(mTarget, mWhitelistToken);
     }
 
     /**
@@ -629,7 +666,7 @@ public final class PendingIntent implements Parcelable {
      */
     public void cancel() {
         try {
-            ActivityManagerNative.getDefault().cancelIntentSender(mTarget);
+            ActivityManager.getService().cancelIntentSender(mTarget);
         } catch (RemoteException e) {
         }
     }
@@ -833,8 +870,8 @@ public final class PendingIntent implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = ActivityManagerNative.getDefault().sendIntentSender(
-                    mTarget, code, intent, resolvedType,
+            int res = ActivityManager.getService().sendIntentSender(
+                    mTarget, mWhitelistToken, code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,
@@ -853,11 +890,10 @@ public final class PendingIntent implements Parcelable {
     @Deprecated
     public String getTargetPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -882,11 +918,10 @@ public final class PendingIntent implements Parcelable {
     @Nullable
     public String getCreatorPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -910,11 +945,10 @@ public final class PendingIntent implements Parcelable {
      */
     public int getCreatorUid() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getUidForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -941,12 +975,11 @@ public final class PendingIntent implements Parcelable {
     @Nullable
     public UserHandle getCreatorUserHandle() {
         try {
-            int uid = ActivityManagerNative.getDefault()
+            int uid = ActivityManager.getService()
                 .getUidForIntentSender(mTarget);
             return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -956,11 +989,10 @@ public final class PendingIntent implements Parcelable {
      */
     public boolean isTargetedToPackage() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .isIntentSenderTargetedToPackage(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -970,11 +1002,10 @@ public final class PendingIntent implements Parcelable {
      */
     public boolean isActivity() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .isIntentSenderAnActivity(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -984,11 +1015,10 @@ public final class PendingIntent implements Parcelable {
      */
     public Intent getIntent() {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getIntentForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -998,11 +1028,10 @@ public final class PendingIntent implements Parcelable {
      */
     public String getTag(String prefix) {
         try {
-            return ActivityManagerNative.getDefault()
+            return ActivityManager.getService()
                 .getTagForIntentSender(mTarget, prefix);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1057,7 +1086,9 @@ public final class PendingIntent implements Parcelable {
             = new Parcelable.Creator<PendingIntent>() {
         public PendingIntent createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();
-            return target != null ? new PendingIntent(target) : null;
+            return target != null
+                    ? new PendingIntent(target, in.getClassCookie(PendingIntent.class))
+                    : null;
         }
 
         public PendingIntent[] newArray(int size) {
@@ -1080,31 +1111,39 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * Convenience function for reading either a Messenger or null pointer from
-     * a Parcel.  You must have previously written the Messenger with
+     * Convenience function for reading either a PendingIntent or null pointer from
+     * a Parcel.  You must have previously written the PendingIntent with
      * {@link #writePendingIntentOrNullToParcel}.
      *
-     * @param in The Parcel containing the written Messenger.
+     * @param in The Parcel containing the written PendingIntent.
      *
-     * @return Returns the Messenger read from the Parcel, or null if null had
+     * @return Returns the PendingIntent read from the Parcel, or null if null had
      * been written.
      */
     @Nullable
     public static PendingIntent readPendingIntentOrNullFromParcel(@NonNull Parcel in) {
         IBinder b = in.readStrongBinder();
-        return b != null ? new PendingIntent(b) : null;
+        return b != null ? new PendingIntent(b, in.getClassCookie(PendingIntent.class)) : null;
     }
 
     /*package*/ PendingIntent(IIntentSender target) {
         mTarget = target;
     }
 
-    /*package*/ PendingIntent(IBinder target) {
+    /*package*/ PendingIntent(IBinder target, Object cookie) {
         mTarget = IIntentSender.Stub.asInterface(target);
+        if (cookie != null) {
+            mWhitelistToken = (IBinder)cookie;
+        }
     }
 
     /** @hide */
     public IIntentSender getTarget() {
         return mTarget;
+    }
+
+    /** @hide */
+    public IBinder getWhitelistToken() {
+        return mWhitelistToken;
     }
 }

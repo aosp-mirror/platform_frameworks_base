@@ -17,12 +17,12 @@
 package com.android.server.hdmi;
 
 import android.annotation.Nullable;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.RemoteException;
 import android.util.Slog;
-
 import java.util.List;
 
 /**
@@ -96,7 +96,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
+                if (error != SendMessageResult.SUCCESS) {
                     HdmiLogger.debug("Failed to send <System Audio Mode Request>:" + error);
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
@@ -133,7 +133,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     }
 
     protected void setSystemAudioMode(boolean mode) {
-        tv().setSystemAudioMode(mode, true);
+        tv().setSystemAudioMode(mode);
     }
 
     @Override

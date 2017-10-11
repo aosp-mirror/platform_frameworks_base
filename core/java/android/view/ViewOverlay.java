@@ -295,8 +295,9 @@ public class ViewOverlay {
             }
         }
 
+        /** @hide */
         @Override
-        void invalidate(boolean invalidateCache) {
+        public void invalidate(boolean invalidateCache) {
             super.invalidate(invalidateCache);
             if (mHostView != null) {
                 mHostView.invalidate(invalidateCache);
@@ -327,34 +328,22 @@ public class ViewOverlay {
             }
         }
 
-        /**
-         * @hide
-         */
         @Override
-        public void damageChild(View child, final Rect dirty) {
+        public void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
             if (mHostView != null) {
-                // Note: This is not a "fast" invalidation. Would be nice to instead invalidate
-                // using DisplayList properties and a dirty rect instead of causing a real
-                // invalidation of the host view
-                int left = child.mLeft;
-                int top = child.mTop;
-                if (!child.getMatrix().isIdentity()) {
-                    child.transformRect(dirty);
-                }
-                dirty.offset(left, top);
-                mHostView.invalidate(dirty);
-            }
-        }
+                if (mHostView instanceof ViewGroup) {
+                    // Propagate invalidate through the host...
+                    ((ViewGroup) mHostView).onDescendantInvalidated(mHostView, target);
 
-        /**
-         * @hide
-         */
-        @Override
-        protected ViewParent damageChildInParent(int left, int top, Rect dirty) {
-            if (mHostView instanceof ViewGroup) {
-                return ((ViewGroup) mHostView).damageChildInParent(left, top, dirty);
+                    // ...and also this view, since it will hold the descendant, and must later
+                    // propagate the calls to update display lists if dirty
+                    super.onDescendantInvalidated(child, target);
+                } else {
+                    // Can't use onDescendantInvalidated because host isn't a ViewGroup - fall back
+                    // to invalidating.
+                    invalidate();
+                }
             }
-            return null;
         }
 
         @Override

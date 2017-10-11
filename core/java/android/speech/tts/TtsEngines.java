@@ -471,9 +471,7 @@ public class TtsEngines {
         String[] ret = new String[]{"","",""};
         try {
             // Note that the default locale might have an empty variant
-            // or language, and we take care that the construction is
-            // the same as {@link #getV1Locale} i.e no trailing delimiters
-            // or spaces.
+            // or language.
             ret[0] = locale.getISO3Language();
             ret[1] = locale.getISO3Country();
             ret[2] = locale.getVariant();

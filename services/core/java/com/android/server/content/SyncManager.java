@@ -21,7 +21,6 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -82,6 +81,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal;
@@ -312,8 +313,8 @@ public class SyncManager {
     private final BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateRunningAccounts(EndPoint.USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL
-                        /* sync all targets */);
+            EndPoint target = new EndPoint(null, null, context.getUserId());
+            updateRunningAccounts(target /* sync targets for user */);
         }
     };
 
@@ -907,7 +908,12 @@ public class SyncManager {
                     Bundle finalExtras = new Bundle(extras);
                     String packageName = syncAdapterInfo.componentName.getPackageName();
                     // If the app did not run and has no account access, done
-                    if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                    try {
+                        if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                            continue;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // Package not found, race with an uninstall
                         continue;
                     }
                     mAccountManagerInternal.requestAccountAccess(account.account,
@@ -1020,8 +1026,7 @@ public class SyncManager {
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
         try {
-            if (ActivityManagerNative.getDefault().getAppStartMode(owningUid,
-                    owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
+            if (ActivityManager.getService().isAppStartModeDisabled(owningUid, owningPackage)) {
                 Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
                         + syncAdapterInfo.componentName
                         + " -- package not allowed to start");
@@ -1853,7 +1858,7 @@ public class SyncManager {
                     account.account.name, account.userId, account.account.type);
 
             pw.println("=======================================================================");
-            final PrintTable table = new PrintTable(12);
+            final PrintTable table = new PrintTable(13);
             table.set(0, 0,
                     "Authority", // 0
                     "Syncable",  // 1
@@ -1866,7 +1871,8 @@ public class SyncManager {
                     "User",      // 8
                     "Tot",       // 9
                     "Time",      // 10
-                    "Last Sync" // 11
+                    "Last Sync", // 11
+                    "Etc"        // 12
             );
 
             final List<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> sorted =
@@ -1916,6 +1922,7 @@ public class SyncManager {
                     }
                 }
 
+                row1 = row;
                 if (status.lastSuccessTime != 0) {
                     table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastSuccessSource]
                             + " " + "SUCCESS");
@@ -3165,8 +3172,9 @@ public class SyncManager {
                         info.provider, syncResult.stats.numDeletes,
                         info.userId);
             } else {
-                mNotificationMgr.cancelAsUser(null,
-                        info.account.hashCode() ^ info.provider.hashCode(),
+                mNotificationMgr.cancelAsUser(
+                        Integer.toString(info.account.hashCode() ^ info.provider.hashCode()),
+                        SystemMessage.NOTE_SYNC_ERROR,
                         new UserHandle(info.userId));
             }
             if (syncResult != null && syncResult.fullSyncRequested) {
@@ -3252,7 +3260,8 @@ public class SyncManager {
                     R.string.contentServiceTooManyDeletesNotificationDesc);
 
             Context contextForUser = getContextForUser(user);
-            Notification notification = new Notification.Builder(contextForUser)
+            Notification notification =
+                    new Notification.Builder(contextForUser, SystemNotificationChannels.ACCOUNT)
                     .setSmallIcon(R.drawable.stat_notify_sync_error)
                     .setTicker(mContext.getString(R.string.contentServiceSync))
                     .setWhen(System.currentTimeMillis())
@@ -3265,7 +3274,9 @@ public class SyncManager {
                     .setContentIntent(pendingIntent)
                     .build();
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
-            mNotificationMgr.notifyAsUser(null, account.hashCode() ^ authority.hashCode(),
+            mNotificationMgr.notifyAsUser(
+                    Integer.toString(account.hashCode() ^ authority.hashCode()),
+                    SystemMessage.NOTE_SYNC_ERROR,
                     notification, user);
         }
 

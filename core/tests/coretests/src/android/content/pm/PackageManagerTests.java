@@ -46,7 +46,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UserManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -620,7 +620,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 try {
                     pkgInfo = pm.getPackageInfo(pkg,
                             PackageManager.GET_PERMISSIONS
-                            | PackageManager.GET_UNINSTALLED_PACKAGES);
+                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 } catch (NameNotFoundException e) {
                     pkgInfo = null;
                 }
@@ -712,7 +712,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // Make sure the package doesn't exist
             try {
                 ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
                 invokeDeletePackage(pkg.packageName, 0, receiver);
             } catch (NameNotFoundException e) {
@@ -974,7 +974,7 @@ public class PackageManagerTests extends AndroidTestCase {
     public boolean invokeDeletePackage(final String pkgName, int flags, GenericReceiver receiver)
             throws Exception {
         ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
         mContext.registerReceiver(receiver, receiver.filter);
         try {
@@ -1019,7 +1019,7 @@ public class PackageManagerTests extends AndroidTestCase {
             Log.i(TAG, "okay4");
             try {
                 info = getPm().getApplicationInfo(ip.pkg.packageName,
-                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
             } catch (NameNotFoundException e) {
                 info = null;
             }
@@ -1149,12 +1149,12 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    IMountService getMs() {
+    IStorageManager getSm() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
-            return IMountService.Stub.asInterface(service);
+            return IStorageManager.Stub.asInterface(service);
         } else {
-            Log.e(TAG, "Can't get mount service");
+            Log.e(TAG, "Can't get storagemanager service");
         }
         return null;
     }
@@ -1185,7 +1185,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                int ret = getMs().mountVolume(path);
+                int ret = getSm().mountVolume(path);
                 if (ret != StorageResultCode.OperationSucceeded) {
                     throw new Exception("Could not mount the media");
                 }
@@ -1224,7 +1224,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized (observer) {
-                getMs().unmountVolume(path, true, false);
+                getSm().unmountVolume(path, true, false);
                 long waitTime = 0;
                 while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
                     observer.wait(WAIT_TIME_INCR);
@@ -1317,24 +1317,8 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
         Runtime.getRuntime().gc();
-
-        final String packageName = ip.pkg.packageName;
-        Log.i(TAG, "Deleting package : " + packageName);
-
-        ApplicationInfo info = null;
         try {
-            info = getPm().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-        } catch (NameNotFoundException ignored) {
-        }
-
-        DeleteObserver observer = new DeleteObserver(packageName);
-        getPm().deletePackage(packageName, observer, PackageManager.DELETE_ALL_USERS);
-        observer.waitForCompletion(MAX_WAIT_TIME);
-
-        try {
-            if (info != null) {
-                assertUninstalled(info);
-            }
+            cleanUpInstall(ip.pkg.packageName);
         } finally {
             File outFile = new File(ip.pkg.codePath);
             if (outFile != null && outFile.exists()) {
@@ -1349,16 +1333,15 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         Log.i(TAG, "Deleting package : " + pkgName);
         try {
-            ApplicationInfo info = getPm().getApplicationInfo(pkgName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES);
-
+            final ApplicationInfo info = getPm().getApplicationInfo(pkgName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
             if (info != null) {
                 DeleteObserver observer = new DeleteObserver(pkgName);
                 getPm().deletePackage(pkgName, observer, PackageManager.DELETE_ALL_USERS);
                 observer.waitForCompletion(MAX_WAIT_TIME);
                 assertUninstalled(info);
             }
-        } catch (NameNotFoundException e) {
+        } catch (IllegalArgumentException | NameNotFoundException e) {
         }
     }
 
@@ -2754,7 +2737,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    /* This test creates a stale container via MountService and then installs
+    /* This test creates a stale container via StorageManagerService and then installs
      * a package and verifies that the stale container is cleaned up and install
      * is successful.
      * Please note that this test is very closely tied to the framework's
@@ -3756,7 +3739,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testGetUnInstalledPackages() throws Exception {
         List<PackageInfo> packages = getPm().getInstalledPackages(
-                PackageManager.GET_UNINSTALLED_PACKAGES);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
         assertNotNull("installed packages cannot be null", packages);
         assertTrue("installed packages cannot be empty", packages.size() > 0);
     }
@@ -3769,7 +3752,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
         final InstallParams ip =
                 installFromRawResource("install.apk", R.raw.install_complete_package_info,
@@ -3809,12 +3792,12 @@ public class PackageManagerTests extends AndroidTestCase {
      * flags when the GET_UNINSTALLED_PACKAGES flag is set.
      */
     public void testGetUnInstalledPackagesAll() throws Exception {
-        final int flags = PackageManager.GET_UNINSTALLED_PACKAGES
+        final int flags = PackageManager.MATCH_UNINSTALLED_PACKAGES
                 | PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
-                | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
+                | PackageManager.GET_SIGNATURES;
 
         // first, install the package
         final InstallParams ip =

@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
@@ -47,13 +48,14 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import libcore.io.IoUtils;
 
 /**
- * Stores and restores state for the Device and Profile owners. By definition there can be
- * only one device owner, but there may be a profile owner for each user.
+ * Stores and restores state for the Device and Profile owners and related device-wide information.
+ * By definition there can be only one device owner, but there may be a profile owner for each user.
  *
  * <p>This class is thread safe, so individual methods can safely be called without locking.
  * However, caller must still synchronize on their side to ensure integrity between multiple calls.
@@ -65,6 +67,7 @@ class Owners {
 
     private static final String DEVICE_OWNER_XML_LEGACY = "device_owner.xml";
 
+    // XML storing device owner info, system update policy and pending OTA update information.
     private static final String DEVICE_OWNER_XML = "device_owner_2.xml";
 
     private static final String PROFILE_OWNER_XML = "profile_owner.xml";
@@ -73,6 +76,8 @@ class Owners {
 
     private static final String TAG_DEVICE_OWNER = "device-owner";
     private static final String TAG_DEVICE_INITIALIZER = "device-initializer";
+    private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
+    private static final String TAG_PENDING_OTA_INFO = "pending-ota-info";
     private static final String TAG_PROFILE_OWNER = "profile-owner";
     // Holds "context" for device-owner, this must not be show up before device-owner.
     private static final String TAG_DEVICE_OWNER_CONTEXT = "device-owner-context";
@@ -84,8 +89,6 @@ class Owners {
     private static final String ATTR_REMOTE_BUGREPORT_HASH = "remoteBugreportHash";
     private static final String ATTR_USERID = "userId";
     private static final String ATTR_USER_RESTRICTIONS_MIGRATED = "userRestrictionsMigrated";
-
-    private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
 
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
@@ -101,6 +104,10 @@ class Owners {
 
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
+
+    // Pending OTA info if there is one.
+    @Nullable
+    private SystemUpdateInfo mSystemUpdateInfo;
 
     private final Object mLock = new Object();
 
@@ -468,6 +475,32 @@ class Owners {
         }
     }
 
+    /**
+     * Saves the given {@link SystemUpdateInfo} if it is different from the existing one, or if
+     * none exists.
+     *
+     * @return Whether the saved system update information has changed.
+     */
+    boolean saveSystemUpdateInfo(@Nullable SystemUpdateInfo newInfo) {
+        synchronized (mLock) {
+            // Check if we already have the same update information.
+            if (Objects.equals(newInfo, mSystemUpdateInfo)) {
+                return false;
+            }
+
+            mSystemUpdateInfo = newInfo;
+            new DeviceOwnerReadWriter().writeToFileLocked();
+            return true;
+        }
+    }
+
+    @Nullable
+    public SystemUpdateInfo getSystemUpdateInfo() {
+        synchronized (mLock) {
+            return mSystemUpdateInfo;
+        }
+    }
+
     private abstract static class FileReadWriter {
         private final File mFile;
 
@@ -573,7 +606,7 @@ class Owners {
                     }
                 }
             } catch (XmlPullParserException | IOException e) {
-                Slog.e(TAG, "Error parsing device-owner file", e);
+                Slog.e(TAG, "Error parsing owners information file", e);
             } finally {
                 IoUtils.closeQuietly(input);
             }
@@ -592,7 +625,8 @@ class Owners {
 
         @Override
         boolean shouldWrite() {
-            return (mDeviceOwner != null) || (mSystemUpdatePolicy != null);
+            return (mDeviceOwner != null) || (mSystemUpdatePolicy != null)
+                    || (mSystemUpdateInfo != null);
         }
 
         @Override
@@ -608,6 +642,10 @@ class Owners {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 mSystemUpdatePolicy.saveToXml(out);
                 out.endTag(null, TAG_SYSTEM_UPDATE_POLICY);
+            }
+
+            if (mSystemUpdateInfo != null) {
+                mSystemUpdateInfo.writeToXml(out, TAG_PENDING_OTA_INFO);
             }
         }
 
@@ -636,6 +674,9 @@ class Owners {
                     break;
                 case TAG_SYSTEM_UPDATE_POLICY:
                     mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
+                    break;
+                case TAG_PENDING_OTA_INFO:
+                    mSystemUpdateInfo = SystemUpdateInfo.readFromXml(parser);
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);
@@ -783,7 +824,6 @@ class Owners {
         }
         if (mSystemUpdatePolicy != null) {
             if (needBlank) {
-                needBlank = false;
                 pw.println();
             }
             pw.println(prefix + "System Update Policy: " + mSystemUpdatePolicy);
@@ -792,13 +832,19 @@ class Owners {
         if (mProfileOwners != null) {
             for (Map.Entry<Integer, OwnerInfo> entry : mProfileOwners.entrySet()) {
                 if (needBlank) {
-                    needBlank = false;
                     pw.println();
                 }
                 pw.println(prefix + "Profile Owner (User " + entry.getKey() + "): ");
                 entry.getValue().dump(prefix + "  ", pw);
                 needBlank = true;
             }
+        }
+        if (mSystemUpdateInfo != null) {
+            if (needBlank) {
+                pw.println();
+            }
+            pw.println(prefix + "Pending System Update: " + mSystemUpdateInfo);
+            needBlank = true;
         }
     }
 

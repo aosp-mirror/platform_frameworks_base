@@ -19,19 +19,20 @@
 namespace android {
 
 Paint::Paint() :
-        SkPaint(), mLetterSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
-        mFontVariant(VARIANT_DEFAULT) {
+        SkPaint(), mLetterSpacing(0), mWordSpacing(0), mFontFeatureSettings(),
+        mMinikinLangListId(0), mFontVariant(minikin::VARIANT_DEFAULT) {
 }
 
 Paint::Paint(const Paint& paint) : SkPaint(paint),
-        mLetterSpacing(paint.mLetterSpacing), mFontFeatureSettings(paint.mFontFeatureSettings),
+        mLetterSpacing(paint.mLetterSpacing), mWordSpacing(paint.mWordSpacing),
+        mFontFeatureSettings(paint.mFontFeatureSettings),
         mMinikinLangListId(paint.mMinikinLangListId), mFontVariant(paint.mFontVariant),
         mHyphenEdit(paint.mHyphenEdit) {
 }
 
 Paint::Paint(const SkPaint& paint) : SkPaint(paint),
-        mLetterSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
-        mFontVariant(VARIANT_DEFAULT) {
+        mLetterSpacing(0), mWordSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
+        mFontVariant(minikin::VARIANT_DEFAULT) {
 }
 
 Paint::~Paint() {
@@ -40,6 +41,7 @@ Paint::~Paint() {
 Paint& Paint::operator=(const Paint& other) {
     SkPaint::operator=(other);
     mLetterSpacing = other.mLetterSpacing;
+    mWordSpacing = other.mWordSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
     mMinikinLangListId = other.mMinikinLangListId;
     mFontVariant = other.mFontVariant;
@@ -50,6 +52,7 @@ Paint& Paint::operator=(const Paint& other) {
 bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b)
             && a.mLetterSpacing == b.mLetterSpacing
+            && a.mWordSpacing == b.mWordSpacing
             && a.mFontFeatureSettings == b.mFontFeatureSettings
             && a.mMinikinLangListId == b.mMinikinLangListId
             && a.mFontVariant == b.mFontVariant

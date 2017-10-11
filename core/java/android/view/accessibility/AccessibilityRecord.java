@@ -91,7 +91,7 @@ public class AccessibilityRecord {
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
     AccessibilityNodeInfo mSourceNode;
-    int mSourceWindowId = UNDEFINED;
+    int mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
 
     CharSequence mClassName;
     CharSequence mContentDescription;
@@ -136,11 +136,12 @@ public class AccessibilityRecord {
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
         boolean important = true;
-        mSourceWindowId = UNDEFINED;
+        mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         clearSourceNode();
         if (root != null) {
-            if (virtualDescendantId == UNDEFINED ||
-                    virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            if (virtualDescendantId == View.NO_ID
+                    || virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID
+                    || virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID) {
                 important = root.isImportantForAccessibility();
                 mSourceNode = root.createAccessibilityNodeInfo();
             } else {
@@ -153,6 +154,25 @@ public class AccessibilityRecord {
             mSourceWindowId = root.getAccessibilityWindowId();
         }
         setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, important);
+    }
+
+    /**
+     * Set the source directly to an AccessibilityNodeInfo rather than indirectly via a View
+     *
+     * @param info The source
+     *
+     * @hide
+     */
+    public void setSource(AccessibilityNodeInfo info) {
+        enforceNotSealed();
+        clearSourceNode();
+        mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        if (info != null) {
+            mSourceNode = AccessibilityNodeInfo.obtain(info);
+            setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY,
+                    mSourceNode.isImportantForAccessibility());
+            mSourceWindowId = info.getWindowId();
+        }
     }
 
     /**
@@ -572,7 +592,8 @@ public class AccessibilityRecord {
      */
     public void setBeforeText(CharSequence beforeText) {
         enforceNotSealed();
-        mBeforeText = beforeText;
+        mBeforeText = (beforeText == null) ? null
+                : beforeText.subSequence(0, beforeText.length());
     }
 
     /**
@@ -593,7 +614,8 @@ public class AccessibilityRecord {
      */
     public void setContentDescription(CharSequence contentDescription) {
         enforceNotSealed();
-        mContentDescription = contentDescription;
+        mContentDescription = (contentDescription == null) ? null
+                : contentDescription.subSequence(0, contentDescription.length());
     }
 
     /**
@@ -831,6 +853,7 @@ public class AccessibilityRecord {
             mSourceNode.recycle();
             mSourceNode = null;
         }
+
     }
 
     @Override

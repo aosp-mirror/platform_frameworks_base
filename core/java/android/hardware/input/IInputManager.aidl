@@ -81,4 +81,6 @@ interface IInputManager {
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
+
+    void requestPointerCapture(IBinder windowToken, boolean enabled);
 }

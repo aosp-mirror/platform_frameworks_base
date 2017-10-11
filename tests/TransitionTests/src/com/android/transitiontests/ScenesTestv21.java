@@ -39,7 +39,7 @@ public class ScenesTestv21 extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_screen);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
         mSearchScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);

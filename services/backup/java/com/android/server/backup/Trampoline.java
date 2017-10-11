@@ -16,10 +16,14 @@
 
 package com.android.server.backup;
 
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.app.backup.ISelectBackupTransportCallback;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -31,6 +35,8 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
+
+import com.android.internal.util.DumpUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -224,14 +230,14 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void fullBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
+    public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean allApps,
-            boolean allIncludesSystem, boolean doCompress, String[] packageNames)
+            boolean allIncludesSystem, boolean doCompress, boolean doKeyValue, String[] packageNames)
                     throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.fullBackup(fd, includeApks, includeObbs, includeShared, doWidgets,
-                    allApps, allIncludesSystem, doCompress, packageNames);
+            svc.adbBackup(fd, includeApks, includeObbs, includeShared, doWidgets,
+                    allApps, allIncludesSystem, doCompress, doKeyValue, packageNames);
         }
     }
 
@@ -244,10 +250,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void fullRestore(ParcelFileDescriptor fd) throws RemoteException {
+    public void adbRestore(ParcelFileDescriptor fd) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.fullRestore(fd);
+            svc.adbRestore(fd);
         }
     }
 
@@ -257,7 +263,7 @@ public class Trampoline extends IBackupManager.Stub {
                     throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.acknowledgeFullBackupOrRestore(token, allow,
+            svc.acknowledgeAdbBackupOrRestore(token, allow,
                     curPassword, encryptionPassword, observer);
         }
     }
@@ -275,6 +281,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public ComponentName[] listAllTransportComponents() throws RemoteException {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.listAllTransportComponents() : null;
+    }
+
+    @Override
     public String[] getTransportWhitelist() {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.getTransportWhitelist() : null;
@@ -284,6 +296,23 @@ public class Trampoline extends IBackupManager.Stub {
     public String selectBackupTransport(String transport) throws RemoteException {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.selectBackupTransport(transport) : null;
+    }
+
+    @Override
+    public void selectBackupTransportAsync(ComponentName transport,
+            ISelectBackupTransportCallback listener) throws RemoteException {
+        BackupManagerService svc = mService;
+        if (svc != null) {
+            svc.selectBackupTransportAsync(transport, listener);
+        } else {
+            if (listener != null) {
+                try {
+                    listener.onFailure(BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                } catch (RemoteException ex) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override
@@ -338,14 +367,26 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public int requestBackup(String[] packages, IBackupObserver observer) throws RemoteException {
+    public int requestBackup(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.requestBackup(packages, observer) : null;
+        if (svc == null) {
+            return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
+        }
+        return svc.requestBackup(packages, observer, monitor, flags);
+    }
+
+    @Override
+    public void cancelBackups() throws RemoteException {
+        BackupManagerService svc = mService;
+        if (svc != null) {
+            svc.cancelBackups();
+        }
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         BackupManagerService svc = mService;
         if (svc != null) {

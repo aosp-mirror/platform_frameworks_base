@@ -27,7 +27,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -64,7 +64,7 @@ public class BackupRestoreConfirmation extends Activity {
 
     Handler mHandler;
     IBackupManager mBackupManager;
-    IMountService mMountService;
+    IStorageManager mStorageManager;
     FullObserver mObserver;
     int mToken;
     boolean mIsEncrypted;
@@ -158,7 +158,7 @@ public class BackupRestoreConfirmation extends Activity {
         }
 
         mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
         mHandler = new ObserverHandler(getApplicationContext());
         final Object oldObserver = getLastNonConfigurationInstance();
@@ -173,13 +173,13 @@ public class BackupRestoreConfirmation extends Activity {
         setContentView(layoutId);
 
         // Same resource IDs for each layout variant (backup / restore)
-        mStatusView = (TextView) findViewById(R.id.package_name);
-        mAllowButton = (Button) findViewById(R.id.button_allow);
-        mDenyButton = (Button) findViewById(R.id.button_deny);
+        mStatusView = findViewById(R.id.package_name);
+        mAllowButton = findViewById(R.id.button_allow);
+        mDenyButton = findViewById(R.id.button_deny);
 
-        mCurPassword = (TextView) findViewById(R.id.password);
-        mEncPassword = (TextView) findViewById(R.id.enc_password);
-        TextView curPwDesc = (TextView) findViewById(R.id.password_desc);
+        mCurPassword = findViewById(R.id.password);
+        mEncPassword = findViewById(R.id.enc_password);
+        TextView curPwDesc = findViewById(R.id.password_desc);
 
         mAllowButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +214,7 @@ public class BackupRestoreConfirmation extends Activity {
             curPwDesc.setVisibility(View.GONE);
             mCurPassword.setVisibility(View.GONE);
             if (layoutId == R.layout.confirm_backup) {
-                TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
+                TextView encPwDesc = findViewById(R.id.enc_password_desc);
                 if (mIsEncrypted) {
                     encPwDesc.setText(R.string.backup_enc_password_required);
                     monitorEncryptionPassword();
@@ -271,14 +271,14 @@ public class BackupRestoreConfirmation extends Activity {
 
     boolean deviceIsEncrypted() {
         try {
-            return mMountService.getEncryptionState()
-                     != IMountService.ENCRYPTION_STATE_NONE
-                && mMountService.getPasswordType()
+            return mStorageManager.getEncryptionState()
+                     != StorageManager.ENCRYPTION_STATE_NONE
+                && mStorageManager.getPasswordType()
                      != StorageManager.CRYPT_TYPE_DEFAULT;
         } catch (Exception e) {
-            // If we can't talk to the mount service we have a serious problem; fail
+            // If we can't talk to the storagemanager service we have a serious problem; fail
             // "secure" i.e. assuming that the device is encrypted.
-            Slog.e(TAG, "Unable to communicate with mount service: " + e.getMessage());
+            Slog.e(TAG, "Unable to communicate with storagemanager service: " + e.getMessage());
             return true;
         }
     }

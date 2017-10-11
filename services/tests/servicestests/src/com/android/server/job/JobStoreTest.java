@@ -10,7 +10,6 @@ import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
-import android.util.ArraySet;
 
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -278,6 +277,8 @@ public class JobStoreTest extends AndroidTestCase {
 
         assertEquals("Invalid charging constraint.", first.isRequireCharging(),
                 second.isRequireCharging());
+        assertEquals("Invalid battery not low constraint.", first.isRequireBatteryNotLow(),
+                second.isRequireBatteryNotLow());
         assertEquals("Invalid idle constraint.", first.isRequireDeviceIdle(),
                 second.isRequireDeviceIdle());
         assertEquals("Invalid unmetered constraint.",
@@ -294,6 +295,8 @@ public class JobStoreTest extends AndroidTestCase {
                 second.hasEarlyConstraint());
         assertEquals("Extras don't match",
                 first.getExtras().toString(), second.getExtras().toString());
+        assertEquals("Transient xtras don't match",
+                first.getTransientExtras().toString(), second.getTransientExtras().toString());
     }
 
     /**

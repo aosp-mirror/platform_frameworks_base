@@ -15,79 +15,73 @@
  */
 
 #include "java/AnnotationProcessor.h"
-#include "util/Util.h"
 
 #include <algorithm>
 
+#include "util/Util.h"
+
+using android::StringPiece;
+
 namespace aapt {
 
-void AnnotationProcessor::appendCommentLine(std::string& comment) {
-    static const std::string sDeprecated = "@deprecated";
-    static const std::string sSystemApi = "@SystemApi";
+void AnnotationProcessor::AppendCommentLine(std::string& comment) {
+  static const std::string sDeprecated = "@deprecated";
+  static const std::string sSystemApi = "@SystemApi";
 
-    if (comment.find(sDeprecated) != std::string::npos) {
-        mAnnotationBitMask |= kDeprecated;
-    }
+  if (comment.find(sDeprecated) != std::string::npos) {
+    annotation_bit_mask_ |= kDeprecated;
+  }
 
-    std::string::size_type idx = comment.find(sSystemApi);
-    if (idx != std::string::npos) {
-        mAnnotationBitMask |= kSystemApi;
-        comment.erase(comment.begin() + idx, comment.begin() + idx + sSystemApi.size());
-    }
+  std::string::size_type idx = comment.find(sSystemApi);
+  if (idx != std::string::npos) {
+    annotation_bit_mask_ |= kSystemApi;
+    comment.erase(comment.begin() + idx,
+                  comment.begin() + idx + sSystemApi.size());
+  }
 
-    if (util::trimWhitespace(comment).empty()) {
-        return;
-    }
+  if (util::TrimWhitespace(comment).empty()) {
+    return;
+  }
 
-    if (!mHasComments) {
-        mHasComments = true;
-        mComment << "/**";
-    }
+  if (!has_comments_) {
+    has_comments_ = true;
+    comment_ << "/**";
+  }
 
-    mComment << "\n * " << std::move(comment);
+  comment_ << "\n * " << std::move(comment);
 }
 
-void AnnotationProcessor::appendComment(const StringPiece16& comment) {
-    // We need to process line by line to clean-up whitespace and append prefixes.
-    for (StringPiece16 line : util::tokenize(comment, u'\n')) {
-        line = util::trimWhitespace(line);
-        if (!line.empty()) {
-            std::string utf8Line = util::utf16ToUtf8(line);
-            appendCommentLine(utf8Line);
-        }
+void AnnotationProcessor::AppendComment(const StringPiece& comment) {
+  // We need to process line by line to clean-up whitespace and append prefixes.
+  for (StringPiece line : util::Tokenize(comment, '\n')) {
+    line = util::TrimWhitespace(line);
+    if (!line.empty()) {
+      std::string lineCopy = line.to_string();
+      AppendCommentLine(lineCopy);
     }
+  }
 }
 
-void AnnotationProcessor::appendComment(const StringPiece& comment) {
-    for (StringPiece line : util::tokenize(comment, '\n')) {
-        line = util::trimWhitespace(line);
-        if (!line.empty()) {
-            std::string utf8Line = line.toString();
-            appendCommentLine(utf8Line);
-        }
+void AnnotationProcessor::AppendNewLine() { comment_ << "\n *"; }
+
+void AnnotationProcessor::WriteToStream(std::ostream* out,
+                                        const StringPiece& prefix) const {
+  if (has_comments_) {
+    std::string result = comment_.str();
+    for (StringPiece line : util::Tokenize(result, '\n')) {
+      *out << prefix << line << "\n";
     }
+    *out << prefix << " */"
+         << "\n";
+  }
+
+  if (annotation_bit_mask_ & kDeprecated) {
+    *out << prefix << "@Deprecated\n";
+  }
+
+  if (annotation_bit_mask_ & kSystemApi) {
+    *out << prefix << "@android.annotation.SystemApi\n";
+  }
 }
 
-void AnnotationProcessor::appendNewLine() {
-    mComment << "\n *";
-}
-
-void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) const {
-    if (mHasComments) {
-        std::string result = mComment.str();
-        for (StringPiece line : util::tokenize<char>(result, '\n')) {
-           *out << prefix << line << "\n";
-        }
-        *out << prefix << " */" << "\n";
-    }
-
-    if (mAnnotationBitMask & kDeprecated) {
-        *out << prefix << "@Deprecated\n";
-    }
-
-    if (mAnnotationBitMask & kSystemApi) {
-        *out << prefix << "@android.annotation.SystemApi\n";
-    }
-}
-
-} // namespace aapt
+}  // namespace aapt

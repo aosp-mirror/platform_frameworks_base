@@ -18,16 +18,20 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
 /** Quick settings tile: Work profile on/off */
-public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
+public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_signal_workmode_enable_animation,
@@ -38,9 +42,9 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
 
     private final ManagedProfileController mProfileController;
 
-    public WorkModeTile(Host host) {
+    public WorkModeTile(QSHost host) {
         super(host);
-        mProfileController = host.getManagedProfileController();
+        mProfileController = Dependency.get(ManagedProfileController.class);
     }
 
     @Override
@@ -59,12 +63,11 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_SYNC_SETTINGS);
+        return new Intent(Settings.ACTION_MANAGED_PROFILE_SETTINGS);
     }
 
     @Override
     public void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 
@@ -106,8 +109,8 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
         }
-        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
-                = Switch.class.getName();
+        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

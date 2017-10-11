@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <system/sound_trigger.h>
 #include <soundtrigger/SoundTriggerCallback.h>

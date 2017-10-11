@@ -36,7 +36,7 @@ import java.nio.ByteOrder;
 
 
 /**
- * A NetlinkMessage subclass for netlink error messages.
+ * A NetlinkMessage subclass for rtnetlink neighbor messages.
  *
  * see also: &lt;linux_src&gt;/include/uapi/linux/neighbour.h
  *

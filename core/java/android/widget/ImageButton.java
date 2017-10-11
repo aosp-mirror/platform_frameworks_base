@@ -18,6 +18,8 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.widget.RemoteViews.RemoteView;
 
 /**
@@ -93,5 +95,13 @@ public class ImageButton extends ImageView {
     @Override
     public CharSequence getAccessibilityClassName() {
         return ImageButton.class.getName();
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 }

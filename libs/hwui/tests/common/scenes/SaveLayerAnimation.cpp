@@ -28,17 +28,17 @@ static TestScene::Registrar _SaveLayer(TestScene::Info{
 class SaveLayerAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
-        canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode); // background
+    void createContent(int width, int height, Canvas& canvas) override {
+        canvas.drawColor(Color::White, SkBlendMode::kSrcOver); // background
 
         card = TestUtils::createNode(0, 0, 400, 800,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             // nested clipped saveLayers
             canvas.saveLayerAlpha(0, 0, 400, 400, 200, SaveFlags::ClipToLayer);
-            canvas.drawColor(Color::Green_700, SkXfermode::kSrcOver_Mode);
-            canvas.clipRect(50, 50, 350, 350, SkRegion::kIntersect_Op);
+            canvas.drawColor(Color::Green_700, SkBlendMode::kSrcOver);
+            canvas.clipRect(50, 50, 350, 350, SkClipOp::kIntersect);
             canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
-            canvas.drawColor(Color::Blue_500, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(Color::Blue_500, SkBlendMode::kSrcOver);
             canvas.restore();
             canvas.restore();
 

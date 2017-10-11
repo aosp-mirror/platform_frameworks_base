@@ -49,7 +49,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 
 /**
  *
@@ -575,6 +574,12 @@ public class NinePatchDrawable extends Drawable {
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mNinePatchState.mTint != null && mNinePatchState.mTint.hasFocusStateSpecified();
+    }
+
     final static class NinePatchState extends ConstantState {
         @Config int mChangingConfigurations;
 
@@ -630,15 +635,6 @@ public class NinePatchDrawable extends Drawable {
             return mThemeAttrs != null
                     || (mTint != null && mTint.canApplyTheme())
                     || super.canApplyTheme();
-        }
-
-        @Override
-        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
-            final Bitmap bitmap = mNinePatch.getBitmap();
-            if (isAtlasable(bitmap) && atlasList.add(bitmap)) {
-                return bitmap.getWidth() * bitmap.getHeight();
-            }
-            return 0;
         }
 
         @Override

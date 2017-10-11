@@ -23,7 +23,7 @@ import android.graphics.drawable.DrawableWrapper;
  * An extension of {@link DrawableWrapper} that will take a given Drawable and scale it by
  * the given factor.
  */
-class ScalingDrawableWrapper extends DrawableWrapper {
+public class ScalingDrawableWrapper extends DrawableWrapper {
     private float mScaleFactor;
 
     public ScalingDrawableWrapper(Drawable drawable, float scaleFactor) {

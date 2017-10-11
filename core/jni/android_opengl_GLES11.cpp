@@ -25,7 +25,7 @@
 #include <GLES/glext.h>
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <assert.h>
@@ -272,6 +272,19 @@ getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
  */
 static int getNeededCount(GLint pname) {
     int needed = 1;
+#ifdef GL_ES_VERSION_3_0
+    // GLES 3.x pnames
+    switch (pname) {
+        case GL_MAX_VIEWPORT_DIMS:
+            needed = 2;
+            break;
+
+        case GL_PROGRAM_BINARY_FORMATS:
+            glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &needed);
+            break;
+    }
+#endif
+
 #ifdef GL_ES_VERSION_2_0
     // GLES 2.x pnames
     switch (pname) {
@@ -505,6 +518,12 @@ android_glBufferSubData__IIILjava_nio_Buffer_2
     jint _remaining;
     GLvoid *data = (GLvoid *) 0;
 
+    if (!data_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "data == null";
+        goto exit;
+    }
     data = (GLvoid *)getPointer(_env, data_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < size) {
         _exception = 1;
@@ -587,6 +606,12 @@ android_glClipPlanef__ILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *equation = (GLfloat *) 0;
 
+    if (!equation_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "equation == null";
+        goto exit;
+    }
     equation = (GLfloat *)getPointer(_env, equation_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (equation == NULL) {
         char * _equationBase = (char *)_env->GetFloatArrayElements(_array, (jboolean *) 0);
@@ -596,6 +621,8 @@ android_glClipPlanef__ILjava_nio_FloatBuffer_2
         (GLenum)plane,
         (GLfloat *)equation
     );
+
+exit:
     if (_array) {
         _env->ReleaseFloatArrayElements(_array, (jfloat*)equation, JNI_ABORT);
     }
@@ -659,6 +686,12 @@ android_glClipPlanex__ILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *equation = (GLfixed *) 0;
 
+    if (!equation_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "equation == null";
+        goto exit;
+    }
     equation = (GLfixed *)getPointer(_env, equation_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (equation == NULL) {
         char * _equationBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
@@ -668,6 +701,8 @@ android_glClipPlanex__ILjava_nio_IntBuffer_2
         (GLenum)plane,
         (GLfixed *)equation
     );
+
+exit:
     if (_array) {
         _env->ReleaseIntArrayElements(_array, (jint*)equation, JNI_ABORT);
     }
@@ -761,6 +796,12 @@ android_glDeleteBuffers__ILjava_nio_IntBuffer_2
     jint _remaining;
     GLuint *buffers = (GLuint *) 0;
 
+    if (!buffers_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "buffers == null";
+        goto exit;
+    }
     buffers = (GLuint *)getPointer(_env, buffers_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < n) {
         _exception = 1;
@@ -865,6 +906,12 @@ android_glGenBuffers__ILjava_nio_IntBuffer_2
     jint _remaining;
     GLuint *buffers = (GLuint *) 0;
 
+    if (!buffers_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "buffers == null";
+        goto exit;
+    }
     buffers = (GLuint *)getPointer(_env, buffers_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < n) {
         _exception = 1;
@@ -967,6 +1014,12 @@ android_glGetBufferParameteriv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLint *params = (GLint *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -1054,6 +1107,12 @@ android_glGetClipPlanef__ILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *eqn = (GLfloat *) 0;
 
+    if (!eqn_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "eqn == null";
+        goto exit;
+    }
     eqn = (GLfloat *)getPointer(_env, eqn_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 4) {
         _exception = 1;
@@ -1140,6 +1199,12 @@ android_glGetClipPlanex__ILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *eqn = (GLfixed *) 0;
 
+    if (!eqn_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "eqn == null";
+        goto exit;
+    }
     eqn = (GLfixed *)getPointer(_env, eqn_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 4) {
         _exception = 1;
@@ -1212,11 +1277,20 @@ exit:
 static void
 android_glGetFixedv__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
+    jint _exception = 0;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
         char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
@@ -1226,8 +1300,13 @@ android_glGetFixedv__ILjava_nio_IntBuffer_2
         (GLenum)pname,
         (GLfixed *)params
     );
+
+exit:
     if (_array) {
-        _env->ReleaseIntArrayElements(_array, (jint*)params, 0);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, _exception ? JNI_ABORT : 0);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
 }
 
@@ -1333,6 +1412,12 @@ android_glGetLightfv__IILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -1471,6 +1556,12 @@ android_glGetLightxv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -1607,6 +1698,12 @@ android_glGetMaterialfv__IILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -1741,6 +1838,12 @@ android_glGetMaterialxv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -1863,6 +1966,12 @@ android_glGetTexEnvfv__IILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -1973,6 +2082,12 @@ android_glGetTexEnviv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLint *params = (GLint *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -2083,6 +2198,12 @@ android_glGetTexEnvxv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -2182,6 +2303,12 @@ android_glGetTexParameterfv__IILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2270,6 +2397,12 @@ android_glGetTexParameteriv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLint *params = (GLint *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2358,6 +2491,12 @@ android_glGetTexParameterxv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2499,6 +2638,12 @@ android_glPointParameterfv__ILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2595,6 +2740,12 @@ android_glPointParameterxv__ILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2624,6 +2775,9 @@ exit:
 static void
 android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I
   (JNIEnv *_env, jobject _this, jint type, jint stride, jobject pointer_buf, jint remaining) {
+    jint _exception = 0;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
     jarray _array = (jarray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
@@ -2641,6 +2795,9 @@ android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I
         (GLvoid *)pointer,
         (GLsizei)remaining
     );
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
 }
 
 /* void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset ) */
@@ -2739,6 +2896,12 @@ android_glTexEnviv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLint *params = (GLint *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     int _needed;
     switch (pname) {
@@ -2838,6 +3001,12 @@ android_glTexParameterfv__IILjava_nio_FloatBuffer_2
     jint _remaining;
     GLfloat *params = (GLfloat *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfloat *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -2937,6 +3106,12 @@ android_glTexParameteriv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLint *params = (GLint *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;
@@ -3025,6 +3200,12 @@ android_glTexParameterxv__IILjava_nio_IntBuffer_2
     jint _remaining;
     GLfixed *params = (GLfixed *) 0;
 
+    if (!params_buf) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "params == null";
+        goto exit;
+    }
     params = (GLfixed *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (_remaining < 1) {
         _exception = 1;

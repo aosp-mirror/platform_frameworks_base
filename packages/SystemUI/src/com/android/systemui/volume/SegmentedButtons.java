@@ -36,7 +36,7 @@ public class SegmentedButtons extends LinearLayout {
 
     private final Context mContext;
     protected final LayoutInflater mInflater;
-    private final SpTexts mSpTexts;
+    private final ConfigurableTexts mConfigurableTexts;
 
     private Callback mCallback;
     protected Object mSelectedValue;
@@ -46,7 +46,7 @@ public class SegmentedButtons extends LinearLayout {
         mContext = context;
         mInflater = LayoutInflater.from(mContext);
         setOrientation(HORIZONTAL);
-        mSpTexts = new SpTexts(mContext);
+        mConfigurableTexts = new ConfigurableTexts(mContext);
     }
 
     public void setCallback(Callback callback) {
@@ -97,15 +97,11 @@ public class SegmentedButtons extends LinearLayout {
                 fireInteraction();
             }
         });
-        mSpTexts.add(b);
+        mConfigurableTexts.add(b, labelResId);
     }
 
-    public void updateLocale() {
-        for (int i = 0; i < getChildCount(); i++) {
-            final Button b = (Button) getChildAt(i);
-            final int labelResId = (Integer) b.getTag(LABEL_RES_KEY);
-            b.setText(labelResId);
-        }
+    public void update() {
+        mConfigurableTexts.update();
     }
 
     private void fireOnSelected(boolean fromClick) {

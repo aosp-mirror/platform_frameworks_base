@@ -361,7 +361,8 @@ public class PathParser_Delegate {
             }
             return Arrays.copyOf(results, count);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("error in parsing \"" + s + "\"", e);
+            assert false : "error in parsing \"" + s + "\"" + e;
+            return new float[0];
         }
     }
 

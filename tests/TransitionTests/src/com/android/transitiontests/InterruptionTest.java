@@ -40,17 +40,17 @@ public class InterruptionTest extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.interruption);
 
-        ViewGroup sceneRoot = (ViewGroup) findViewById(R.id.sceneRoot);
+        ViewGroup sceneRoot = findViewById(R.id.sceneRoot);
 
         mScene1 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_1, this);
         mScene2 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_2, this);
         mScene3 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_3, this);
         mScene4 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_4, this);
 
-        mScene1RB = (RadioButton) findViewById(R.id.scene1RB);
-        mScene2RB = (RadioButton) findViewById(R.id.scene2RB);
-        mScene3RB = (RadioButton) findViewById(R.id.scene3RB);
-        mScene4RB = (RadioButton) findViewById(R.id.scene4RB);
+        mScene1RB = findViewById(R.id.scene1RB);
+        mScene2RB = findViewById(R.id.scene2RB);
+        mScene3RB = findViewById(R.id.scene3RB);
+        mScene4RB = findViewById(R.id.scene4RB);
 
         ChangeBounds changeBounds1 = new ChangeBounds();
         changeBounds1.addTarget(R.id.button);

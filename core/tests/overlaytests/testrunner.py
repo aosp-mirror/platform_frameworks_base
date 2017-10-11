@@ -13,6 +13,7 @@ TASK_COMPILATION = 'compile'
 TASK_DISABLE_OVERLAYS = 'disable overlays'
 TASK_ENABLE_MULTIPLE_OVERLAYS = 'enable multiple overlays'
 TASK_ENABLE_SINGLE_OVERLAY = 'enable single overlay'
+TASK_ENABLE_FILTERED_OVERLAYS = 'enable filtered overlays'
 TASK_FILE_EXISTS_TEST = 'test (file exists)'
 TASK_GREP_IDMAP_TEST = 'test (grep idmap)'
 TASK_MD5_TEST = 'test (md5)'
@@ -25,6 +26,7 @@ TASK_PUSH = 'push'
 TASK_ROOT = 'root'
 TASK_REMOUNT = 'remount'
 TASK_RM = 'rm'
+TASK_SETPROP = 'setprop'
 TASK_SETUP_IDMAP_PATH = 'setup idmap --path'
 TASK_SETUP_IDMAP_SCAN = 'setup idmap --scan'
 TASK_START = 'start'
@@ -188,7 +190,10 @@ class PushTask:
         return "%s -> %s" % (self.src, self.dest)
 
     def execute(self):
-        src = os.getenv('OUT') + "/" + self.src
+        src = os.getenv('OUT')
+        if (src is None):
+          return 1, "", "Unable to proceed - $OUT environment var not set\n"
+        src += "/" + self.src
         argv = shlex.split(adb + ' push %s %s' % (src, self.dest))
         proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = proc.communicate()
@@ -219,9 +224,23 @@ class RmTask:
 
     def execute(self):
         returncode, stdout, stderr = _adb_shell('ls %s' % self.path)
-        if returncode != 0 and stdout.endswith(': No such file or directory\n'):
+        if returncode != 0 and stderr.endswith(': No such file or directory\n'):
             return 0, "", ""
         return _adb_shell('rm -r %s' % self.path)
+
+class SetPropTask:
+    def __init__(self, prop, value):
+        self.prop = prop
+        self.value = value
+
+    def get_type(self):
+        return TASK_SETPROP
+
+    def get_name(self):
+        return self.prop
+
+    def execute(self):
+      return _adb_shell('setprop %s %s' % (self.prop, self.value))
 
 class IdmapPathTask:
     def __init__(self, path_target_apk, path_overlay_apk, path_idmap):
@@ -236,7 +255,7 @@ class IdmapPathTask:
         return self.path_idmap
 
     def execute(self):
-        return _adb_shell('su system idmap --path "%s" "%s" "%s"' % (self.path_target_apk, self.path_overlay_apk, self.path_idmap))
+        return _adb_shell('su system idmap --scan "%s" "%s" "%s" "%s"' % (self.target_pkg_name, self.target_pkg, self.idmap_dir, self.overlay_dir))
 
 class IdmapScanTask:
     def __init__(self, overlay_dir, target_pkg_name, target_pkg, idmap_dir, symlink_dir):
@@ -411,8 +430,12 @@ def _create_disable_overlays_task():
         RmTask("/data/resource-cache/vendor@overlay@framework_b.apk@idmap"),
         RmTask("/vendor/overlay/app_a.apk"),
         RmTask("/vendor/overlay/app_b.apk"),
+        RmTask("/vendor/overlay/app_c.apk"),
         RmTask("/data/resource-cache/vendor@overlay@app_a.apk@idmap"),
         RmTask("/data/resource-cache/vendor@overlay@app_b.apk@idmap"),
+        RmTask("/data/resource-cache/vendor@overlay@app_c.apk@idmap"),
+        SetPropTask('persist.oem.overlay.test', '""'),
+        RmTask("/data/property/persist.oem.overlay.test"),
     ]
     return CompoundTask(TASK_DISABLE_OVERLAYS, tasks)
 
@@ -435,8 +458,22 @@ def _create_enable_multiple_overlays_task():
         PushTask('/data/app/com.android.overlaytest.overlay/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_b.apk'),
         PushTask('/data/app/com.android.overlaytest.first_app_overlay/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
         PushTask('/data/app/com.android.overlaytest.second_app_overlay/com.android.overlaytest.second_app_overlay.apk', '/vendor/overlay/app_b.apk'),
+        PushTask('/data/app/com.android.overlaytest.filtered_app_overlay/com.android.overlaytest.filtered_app_overlay.apk', '/vendor/overlay/app_c.apk'),
     ]
     return CompoundTask(TASK_ENABLE_MULTIPLE_OVERLAYS, tasks)
+
+def _create_enable_filtered_overlays_task():
+      tasks = [
+        _create_disable_overlays_task(),
+        SetPropTask('persist.oem.overlay.test', 'foo'),
+        MkdirTask('/system/vendor'),
+        MkdirTask('/vendor/overlay'),
+        PushTask('/data/app/com.android.overlaytest.overlay/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_b.apk'),
+        PushTask('/data/app/com.android.overlaytest.first_app_overlay/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
+        PushTask('/data/app/com.android.overlaytest.second_app_overlay/com.android.overlaytest.second_app_overlay.apk', '/vendor/overlay/app_b.apk'),
+        PushTask('/data/app/com.android.overlaytest.filtered_app_overlay/com.android.overlaytest.filtered_app_overlay.apk', '/vendor/overlay/app_c.apk'),
+      ]
+      return CompoundTask(TASK_ENABLE_FILTERED_OVERLAYS, tasks)
 
 def _create_setup_idmap_path_task(idmaps, symlinks):
     tasks = [
@@ -450,12 +487,11 @@ def _create_setup_idmap_path_task(idmaps, symlinks):
 
 def _create_setup_idmap_scan_task(idmaps, symlinks):
     tasks = [
-        _create_enable_single_overlay_task(),
+        _create_enable_filtered_overlays_task(),
         RmTask(symlinks),
         RmTask(idmaps),
         MkdirTask(idmaps),
         MkdirTask(symlinks),
-        _create_enable_multiple_overlays_task(),
     ]
     return CompoundTask(TASK_SETUP_IDMAP_SCAN, tasks)
 
@@ -538,7 +574,7 @@ def _create_opt_parser():
             help='do not rebuild test projects')
     parser.add_option('-i', '--test-idmap', action='store_true',
             dest='test_idmap', default=False,
-            help='run tests for single overlay')
+            help='run tests for idmap')
     parser.add_option('-0', '--test-no-overlay', action='store_true',
             dest='test_no_overlay', default=False,
             help='run tests without any overlay')
@@ -548,16 +584,21 @@ def _create_opt_parser():
     parser.add_option('-2', '--test-multiple-overlays', action='store_true',
             dest='test_multiple_overlays', default=False,
             help='run tests for multiple overlays')
+    parser.add_option('-3', '--test-filtered-overlays', action='store_true',
+            dest='test_filtered_overlays', default=False,
+            help='run tests for filtered (sys prop) overlays')
     return parser
 
 if __name__ == '__main__':
     opt_parser = _create_opt_parser()
     opts, args = opt_parser.parse_args(sys.argv[1:])
-    if not opts.test_idmap and not opts.test_no_overlay and not opts.test_single_overlay and not opts.test_multiple_overlays:
+    if not opts.test_idmap and not opts.test_no_overlay and not opts.test_single_overlay and not opts.test_multiple_overlays and not opts.test_filtered_overlays:
         opts.test_idmap = True
         opts.test_no_overlay = True
         opts.test_single_overlay = True
         opts.test_multiple_overlays = True
+        opts.test_filtered_overlays = True
+
     if len(args) > 0:
         opt_parser.error("unexpected arguments: %s" % " ".join(args))
         # will never reach this: opt_parser.error will call sys.exit
@@ -580,6 +621,7 @@ if __name__ == '__main__':
         tasks.append(CompilationTask('OverlayTestOverlay/Android.mk'))
         tasks.append(CompilationTask('OverlayAppFirst/Android.mk'))
         tasks.append(CompilationTask('OverlayAppSecond/Android.mk'))
+        tasks.append(CompilationTask('OverlayAppFiltered/Android.mk'))
 
     # remount filesystem, install test project
     tasks.append(RootTask())
@@ -600,13 +642,13 @@ if __name__ == '__main__':
         tasks.append(GrepIdmapTest(idmaps + '/a.idmap', 'bool/config_annoy_dianne', 1))
 
         # idmap --scan
-        idmap = idmaps + '/vendor@overlay@framework_b.apk@idmap'
         tasks.append(StopTask())
         tasks.append(_create_setup_idmap_scan_task(idmaps, symlinks))
         tasks.append(StartTask())
         tasks.append(IdmapScanTask('/vendor/overlay', 'android', '/system/framework/framework-res.apk', idmaps, symlinks))
-        tasks.append(FileExistsTest(idmap))
-        tasks.append(GrepIdmapTest(idmap, 'bool/config_annoy_dianne', 1))
+        tasks.append(FileExistsTest(idmaps + '/vendor@overlay@framework_b.apk@idmap'))
+        tasks.append(GrepIdmapTest(idmaps + '/vendor@overlay@framework_b.apk@idmap', 'bool/config_annoy_dianne', 1))
+
 
         # overlays.list
         overlays_list_path = idmaps + '/overlays.list'
@@ -620,26 +662,37 @@ if __name__ == '__main__':
         tasks.append(RmTask(symlinks))
         tasks.append(RmTask(idmaps))
 
-    # test no overlay
+    # test no overlay: all overlays cleared
     if opts.test_no_overlay:
         tasks.append(StopTask())
         tasks.append(_create_disable_overlays_task())
         tasks.append(StartTask())
         tasks.append(InstrumentationTask('com.android.overlaytest.WithoutOverlayTest'))
 
-    # test single overlay
+    # test single overlay: one overlay (a)
     if opts.test_single_overlay:
         tasks.append(StopTask())
         tasks.append(_create_enable_single_overlay_task())
         tasks.append(StartTask())
         tasks.append(InstrumentationTask('com.android.overlaytest.WithOverlayTest'))
 
-    # test multiple overlays
+    # test multiple overlays: all overlays - including 'disabled' filtered
+    # overlay (system property unset) so expect 'b[p=2]' overrides 'a[p=1]' but
+    # 'c[p=3]' should be ignored
     if opts.test_multiple_overlays:
         tasks.append(StopTask())
         tasks.append(_create_enable_multiple_overlays_task())
         tasks.append(StartTask())
         tasks.append(InstrumentationTask('com.android.overlaytest.WithMultipleOverlaysTest'))
+
+    # test filtered overlays: all overlays - including 'enabled' filtered
+    # overlay (system property set/matched) so expect c[p=3] to override both a
+    # & b where applicable
+    if opts.test_filtered_overlays:
+        tasks.append(StopTask())
+        tasks.append(_create_enable_filtered_overlays_task())
+        tasks.append(StartTask())
+        tasks.append(InstrumentationTask('com.android.overlaytest.WithFilteredOverlaysTest'))
 
     ignored_errors = 0
     for t in tasks:

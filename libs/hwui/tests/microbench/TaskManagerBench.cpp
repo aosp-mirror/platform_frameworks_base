@@ -29,7 +29,7 @@ class TrivialTask : public Task<char> {};
 
 class TrivialProcessor : public TaskProcessor<char> {
 public:
-    TrivialProcessor(TaskManager* manager)
+    explicit TrivialProcessor(TaskManager* manager)
             : TaskProcessor(manager) {}
     virtual ~TrivialProcessor() {}
     virtual void onProcess(const sp<Task<char> >& task) override {

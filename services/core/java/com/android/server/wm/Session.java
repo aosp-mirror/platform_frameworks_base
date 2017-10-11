@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -24,7 +29,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -34,7 +38,9 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.os.UserHandle;
+import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
@@ -53,34 +59,47 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class represents an active client session.  There is generally one
  * Session object per process that is interacting with the window manager.
  */
-final class Session extends IWindowSession.Stub
+// Needs to be public and not final so we can mock during tests...sucks I know :(
+public class Session extends IWindowSession.Stub
         implements IBinder.DeathRecipient {
     final WindowManagerService mService;
     final IWindowSessionCallback mCallback;
     final IInputMethodClient mClient;
-    final IInputContext mInputContext;
     final int mUid;
     final int mPid;
-    final String mStringName;
+    private final String mStringName;
     SurfaceSession mSurfaceSession;
-    int mNumWindow = 0;
-    boolean mClientDead = false;
-    float mLastReportedAnimatorScale;
+    private int mNumWindow = 0;
+    // Set of visible application overlay window surfaces connected to this session.
+    private final Set<WindowSurfaceController> mAppOverlaySurfaces = new HashSet<>();
+    // Set of visible alert window surfaces connected to this session.
+    private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
+    final boolean mCanAddInternalSystemWindow;
+    private AlertWindowNotification mAlertWindowNotification;
+    private boolean mShowingAlertWindowNotificationAllowed;
+    private boolean mClientDead = false;
+    private float mLastReportedAnimatorScale;
+    private String mPackageName;
+    private String mRelayoutTag;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback,
             IInputMethodClient client, IInputContext inputContext) {
         mService = service;
         mCallback = callback;
         mClient = client;
-        mInputContext = inputContext;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+        mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
+                INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
+        mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
@@ -194,35 +213,26 @@ final class Session extends IWindowSession.Stub
     }
 
     @Override
-    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
-        mService.repositionChild(this, window, left, top, right, bottom,
-                deferTransactionUntilFrame, outFrame);
-    }
-
-    @Override
     public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
-        mService.setReplacingWindows(appToken, childrenOnly);
+        mService.setWillReplaceWindows(appToken, childrenOnly);
     }
 
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags,
             int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
-            Configuration outConfig, Surface outSurface) {
+            MergedConfiguration mergedConfiguration, Surface outSurface) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
-                outStableInsets, outsets, outBackdropFrame, outConfig, outSurface);
+                outStableInsets, outsets, outBackdropFrame, mergedConfiguration, outSurface);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
         return res;
-    }
-
-    public void performDeferredDestroy(IWindow window) {
-        mService.performDeferredDestroyWindow(this, window);
     }
 
     public boolean outOfMemory(IWindow window) {
@@ -324,16 +334,16 @@ final class Session extends IWindowSession.Stub
             }
             Display display = displayContent.getDisplay();
             mService.mDragState.register(display);
-            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                    mService.mDragState.mServerChannel)) {
+                    mService.mDragState.getInputChannel())) {
                 Slog.e(TAG_WM, "Unable to transfer touch focus");
                 mService.mDragState.unregister();
+                mService.mDragState.reset();
                 mService.mDragState = null;
-                mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
                 return false;
             }
 
+            mService.mDragState.mDisplayContent = displayContent;
             mService.mDragState.mData = data;
             mService.mDragState.broadcastDragStartedLw(touchX, touchY);
             mService.mDragState.overridePointerIconLw(touchSource);
@@ -346,7 +356,7 @@ final class Session extends IWindowSession.Stub
             final SurfaceControl surfaceControl = mService.mDragState.mSurfaceControl;
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, ">>> OPEN TRANSACTION performDrag");
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             try {
                 surfaceControl.setPosition(touchX - thumbCenterX,
                         touchY - thumbCenterY);
@@ -354,7 +364,7 @@ final class Session extends IWindowSession.Stub
                 surfaceControl.setLayerStack(display.getLayerStack());
                 surfaceControl.show();
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                         TAG_WM, "<<< CLOSE TRANSACTION performDrag");
             }
@@ -461,7 +471,7 @@ final class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mWallpaperControllerLocked.setWindowWallpaperPosition(
+                mService.mRoot.mWallpaperController.setWindowWallpaperPosition(
                         mService.windowForClientLocked(this, window, true),
                         x, y, xStep, yStep);
             } finally {
@@ -472,7 +482,7 @@ final class Session extends IWindowSession.Stub
 
     public void wallpaperOffsetsComplete(IBinder window) {
         synchronized (mService.mWindowMap) {
-            mService.mWallpaperControllerLocked.wallpaperOffsetsComplete(window);
+            mService.mRoot.mWallpaperController.wallpaperOffsetsComplete(window);
         }
     }
 
@@ -480,7 +490,7 @@ final class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mWallpaperControllerLocked.setWindowWallpaperDisplayOffset(
+                mService.mRoot.mWallpaperController.setWindowWallpaperDisplayOffset(
                         mService.windowForClientLocked(this, window, true), x, y);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -493,7 +503,7 @@ final class Session extends IWindowSession.Stub
         synchronized(mService.mWindowMap) {
             long ident = Binder.clearCallingIdentity();
             try {
-                return mService.mWallpaperControllerLocked.sendWindowWallpaperCommand(
+                return mService.mRoot.mWallpaperController.sendWindowWallpaperCommand(
                         mService.windowForClientLocked(this, window, true),
                         action, x, y, z, extras, sync);
             } finally {
@@ -504,7 +514,7 @@ final class Session extends IWindowSession.Stub
 
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
         synchronized (mService.mWindowMap) {
-            mService.mWallpaperControllerLocked.wallpaperCommandComplete(window);
+            mService.mRoot.mWallpaperController.wallpaperCommandComplete(window);
         }
     }
 
@@ -543,7 +553,9 @@ final class Session extends IWindowSession.Stub
         }
     }
 
-    void windowAddedLocked() {
+    void windowAddedLocked(String packageName) {
+        mPackageName = packageName;
+        mRelayoutTag = "relayoutWindow: " + mPackageName;
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
                 TAG_WM, "First window added to " + this + ", creating SurfaceSession");
@@ -563,31 +575,111 @@ final class Session extends IWindowSession.Stub
         killSessionLocked();
     }
 
-    void killSessionLocked() {
-        if (mNumWindow <= 0 && mClientDead) {
-            mService.mSessions.remove(this);
-            if (mSurfaceSession != null) {
-                if (WindowManagerService.localLOGV) Slog.v(
-                    TAG_WM, "Last window removed from " + this
-                    + ", destroying " + mSurfaceSession);
-                if (SHOW_TRANSACTIONS) Slog.i(
-                        TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
-                try {
-                    mSurfaceSession.kill();
-                } catch (Exception e) {
-                    Slog.w(TAG_WM, "Exception thrown when killing surface session "
-                        + mSurfaceSession + " in session " + this
-                        + ": " + e.toString());
+
+    void onWindowSurfaceVisibilityChanged(WindowSurfaceController surfaceController,
+            boolean visible, int type) {
+
+        if (!isSystemAlertWindowType(type)) {
+            return;
+        }
+
+        boolean changed;
+
+        if (!mCanAddInternalSystemWindow) {
+            // We want to track non-system signature apps adding alert windows so we can post an
+            // on-going notification for the user to control their visibility.
+            if (visible) {
+                changed = mAlertWindowSurfaces.add(surfaceController);
+            } else {
+                changed = mAlertWindowSurfaces.remove(surfaceController);
+            }
+
+            if (changed) {
+                if (mAlertWindowSurfaces.isEmpty()) {
+                    cancelAlertWindowNotification();
+                } else if (mAlertWindowNotification == null){
+                    mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
+                    if (mShowingAlertWindowNotificationAllowed) {
+                        mAlertWindowNotification.post();
+                    }
                 }
-                mSurfaceSession = null;
+            }
+        }
+
+        if (type != TYPE_APPLICATION_OVERLAY) {
+            return;
+        }
+
+        if (visible) {
+            changed = mAppOverlaySurfaces.add(surfaceController);
+        } else {
+            changed = mAppOverlaySurfaces.remove(surfaceController);
+        }
+
+        if (changed) {
+            // Notify activity manager of changes to app overlay windows so it can adjust the
+            // importance score for the process.
+            setHasOverlayUi(!mAppOverlaySurfaces.isEmpty());
+        }
+    }
+
+    void setShowingAlertWindowNotificationAllowed(boolean allowed) {
+        mShowingAlertWindowNotificationAllowed = allowed;
+        if (mAlertWindowNotification != null) {
+            if (allowed) {
+                mAlertWindowNotification.post();
+            } else {
+                mAlertWindowNotification.cancel();
             }
         }
     }
 
+    private void killSessionLocked() {
+        if (mNumWindow > 0 || !mClientDead) {
+            return;
+        }
+
+        mService.mSessions.remove(this);
+        if (mSurfaceSession == null) {
+            return;
+        }
+
+        if (WindowManagerService.localLOGV) Slog.v(TAG_WM, "Last window removed from " + this
+                + ", destroying " + mSurfaceSession);
+        if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
+        try {
+            mSurfaceSession.kill();
+        } catch (Exception e) {
+            Slog.w(TAG_WM, "Exception thrown when killing surface session " + mSurfaceSession
+                    + " in session " + this + ": " + e.toString());
+        }
+        mSurfaceSession = null;
+        mAlertWindowSurfaces.clear();
+        mAppOverlaySurfaces.clear();
+        setHasOverlayUi(false);
+        cancelAlertWindowNotification();
+    }
+
+    private void setHasOverlayUi(boolean hasOverlayUi) {
+        mService.mH.obtainMessage(H.SET_HAS_OVERLAY_UI, mPid, hasOverlayUi ? 1 : 0).sendToTarget();
+    }
+
+    private void cancelAlertWindowNotification() {
+        if (mAlertWindowNotification == null) {
+            return;
+        }
+        mAlertWindowNotification.cancel();
+        mAlertWindowNotification = null;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
+                pw.print(" mCanAddInternalSystemWindow="); pw.print(mCanAddInternalSystemWindow);
+                pw.print(" mAppOverlaySurfaces="); pw.print(mAppOverlaySurfaces);
+                pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
+        pw.print(prefix); pw.print("mPackageName="); pw.println(mPackageName);
     }
 
     @Override

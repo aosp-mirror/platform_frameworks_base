@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -51,9 +52,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.os.storage.MountServiceInternal;
+import android.os.storage.StorageManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -68,6 +70,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -165,14 +168,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    final SparseArray<ArrayList<Callback>> mOpModeWatchers
-            = new SparseArray<ArrayList<Callback>>();
-    final ArrayMap<String, ArrayList<Callback>> mPackageModeWatchers
-            = new ArrayMap<String, ArrayList<Callback>>();
-    final ArrayMap<IBinder, Callback> mModeWatchers
-            = new ArrayMap<IBinder, Callback>();
-    final SparseArray<SparseArray<Restriction>> mAudioRestrictions
-            = new SparseArray<SparseArray<Restriction>>();
+    final SparseArray<ArraySet<Callback>> mOpModeWatchers = new SparseArray<>();
+    final ArrayMap<String, ArraySet<Callback>> mPackageModeWatchers = new ArrayMap<>();
+    final ArrayMap<IBinder, Callback> mModeWatchers = new ArrayMap<>();
+    final SparseArray<SparseArray<Restriction>> mAudioRestrictions = new SparseArray<>();
 
     public final class Callback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -237,6 +236,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public AppOpsService(File storagePath, Handler handler) {
+        LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath);
         mHandler = handler;
         readState();
@@ -293,10 +293,29 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        MountServiceInternal mountServiceInternal = LocalServices.getService(
-                MountServiceInternal.class);
-        mountServiceInternal.addExternalStoragePolicy(
-                new MountServiceInternal.ExternalStorageMountPolicy() {
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setExternalSourcesPolicy(
+                new PackageManagerInternal.ExternalSourcesPolicy() {
+                    @Override
+                    public int getPackageTrustedToInstallApps(String packageName, int uid) {
+                        int appOpMode = checkOperation(AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
+                                uid, packageName);
+                        switch (appOpMode) {
+                            case AppOpsManager.MODE_ALLOWED:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
+                            case AppOpsManager.MODE_ERRORED:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_BLOCKED;
+                            default:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_DEFAULT;
+                        }
+                    }
+                });
+
+        StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                StorageManagerInternal.class);
+        storageManagerInternal.addExternalStoragePolicy(
+                new StorageManagerInternal.ExternalStorageMountPolicy() {
                     @Override
                     public int getMountMode(int uid, String packageName) {
                         if (Process.isIsolated(uid)) {
@@ -397,6 +416,29 @@ public class AppOpsService extends IAppOpsService.Stub {
         return resOps;
     }
 
+    private ArrayList<AppOpsManager.OpEntry> collectOps(SparseIntArray uidOps, int[] ops) {
+        ArrayList<AppOpsManager.OpEntry> resOps = null;
+        if (ops == null) {
+            resOps = new ArrayList<>();
+            for (int j=0; j<uidOps.size(); j++) {
+                resOps.add(new AppOpsManager.OpEntry(uidOps.keyAt(j), uidOps.valueAt(j),
+                        0, 0, 0, -1, null));
+            }
+        } else {
+            for (int j=0; j<ops.length; j++) {
+                int index = uidOps.indexOfKey(ops[j]);
+                if (index >= 0) {
+                    if (resOps == null) {
+                        resOps = new ArrayList<>();
+                    }
+                    resOps.add(new AppOpsManager.OpEntry(uidOps.keyAt(index), uidOps.valueAt(index),
+                            0, 0, 0, -1, null));
+                }
+            }
+        }
+        return resOps;
+    }
+
     @Override
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
@@ -449,6 +491,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
             AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
                     pkgOps.packageName, pkgOps.uidState.uid, resOps);
+            res.add(resPackage);
+            return res;
+        }
+    }
+
+    @Override
+    public List<AppOpsManager.PackageOps> getUidOps(int uid, int[] ops) {
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+        synchronized (this) {
+            UidState uidState = getUidStateLocked(uid, false);
+            if (uidState == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.OpEntry> resOps = collectOps(uidState.opModes, ops);
+            if (resOps == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
+            AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
+                    null, uidState.uid, resOps);
             res.add(resPackage);
             return res;
         }
@@ -524,11 +587,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         ArrayMap<Callback, ArraySet<String>> callbackSpecs = null;
 
         synchronized (this) {
-            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
+            ArraySet<Callback> callbacks = mOpModeWatchers.get(code);
             if (callbacks != null) {
                 final int callbackCount = callbacks.size();
                 for (int i = 0; i < callbackCount; i++) {
-                    Callback callback = callbacks.get(i);
+                    Callback callback = callbacks.valueAt(i);
                     ArraySet<String> changedPackages = new ArraySet<>();
                     Collections.addAll(changedPackages, uidPackageNames);
                     callbackSpecs = new ArrayMap<>();
@@ -544,7 +607,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     final int callbackCount = callbacks.size();
                     for (int i = 0; i < callbackCount; i++) {
-                        Callback callback = callbacks.get(i);
+                        Callback callback = callbacks.valueAt(i);
                         ArraySet<String> changedPackages = callbackSpecs.get(callback);
                         if (changedPackages == null) {
                             changedPackages = new ArraySet<>();
@@ -602,17 +665,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
-                    ArrayList<Callback> cbs = mOpModeWatchers.get(code);
+                    ArraySet<Callback> cbs = mOpModeWatchers.get(code);
                     if (cbs != null) {
                         if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
+                            repCbs = new ArrayList<>();
                         }
                         repCbs.addAll(cbs);
                     }
                     cbs = mPackageModeWatchers.get(packageName);
                     if (cbs != null) {
                         if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
+                            repCbs = new ArrayList<>();
                         }
                         repCbs.addAll(cbs);
                     }
@@ -645,7 +708,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private static HashMap<Callback, ArrayList<ChangeRec>> addCallbacks(
             HashMap<Callback, ArrayList<ChangeRec>> callbacks,
-            int op, int uid, String packageName, ArrayList<Callback> cbs) {
+            int op, int uid, String packageName, ArraySet<Callback> cbs) {
         if (cbs == null) {
             return callbacks;
         }
@@ -653,8 +716,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             callbacks = new HashMap<>();
         }
         boolean duplicate = false;
-        for (int i=0; i<cbs.size(); i++) {
-            Callback cb = cbs.get(i);
+        final int N = cbs.size();
+        for (int i=0; i<N; i++) {
+            Callback cb = cbs.valueAt(i);
             ArrayList<ChangeRec> reports = callbacks.get(cb);
             if (reports == null) {
                 reports = new ArrayList<>();
@@ -809,17 +873,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mModeWatchers.put(callback.asBinder(), cb);
             }
             if (op != AppOpsManager.OP_NONE) {
-                ArrayList<Callback> cbs = mOpModeWatchers.get(op);
+                ArraySet<Callback> cbs = mOpModeWatchers.get(op);
                 if (cbs == null) {
-                    cbs = new ArrayList<Callback>();
+                    cbs = new ArraySet<>();
                     mOpModeWatchers.put(op, cbs);
                 }
                 cbs.add(cb);
             }
             if (packageName != null) {
-                ArrayList<Callback> cbs = mPackageModeWatchers.get(packageName);
+                ArraySet<Callback> cbs = mPackageModeWatchers.get(packageName);
                 if (cbs == null) {
-                    cbs = new ArrayList<Callback>();
+                    cbs = new ArraySet<>();
                     mPackageModeWatchers.put(packageName, cbs);
                 }
                 cbs.add(cb);
@@ -837,14 +901,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (cb != null) {
                 cb.unlinkToDeath();
                 for (int i=mOpModeWatchers.size()-1; i>=0; i--) {
-                    ArrayList<Callback> cbs = mOpModeWatchers.valueAt(i);
+                    ArraySet<Callback> cbs = mOpModeWatchers.valueAt(i);
                     cbs.remove(cb);
                     if (cbs.size() <= 0) {
                         mOpModeWatchers.removeAt(i);
                     }
                 }
                 for (int i=mPackageModeWatchers.size()-1; i>=0; i--) {
-                    ArrayList<Callback> cbs = mPackageModeWatchers.valueAt(i);
+                    ArraySet<Callback> cbs = mPackageModeWatchers.valueAt(i);
                     cbs.remove(cb);
                     if (cbs.size() <= 0) {
                         mPackageModeWatchers.removeAt(i);
@@ -880,11 +944,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
-            if (uidState != null && uidState.opModes != null) {
-                final int uidMode = uidState.opModes.get(code);
-                if (uidMode != AppOpsManager.MODE_ALLOWED) {
-                    return uidMode;
-                }
+            if (uidState != null && uidState.opModes != null
+                    && uidState.opModes.indexOfKey(code) >= 0) {
+                return uidState.opModes.get(code);
             }
             Op op = getOpLocked(code, uid, resolvedPackageName, false);
             if (op == null) {
@@ -1651,6 +1713,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int op;
         int mode;
         int packageUid;
+        int nonpackageUid;
 
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
@@ -1772,32 +1835,77 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = ActivityManager.getCurrentUser();
             }
-            if ("root".equals(packageName)) {
-                packageUid = 0;
-            } else {
-                packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            nonpackageUid = -1;
+            try {
+                nonpackageUid = Integer.parseInt(packageName);
+            } catch (NumberFormatException e) {
             }
-            if (packageUid < 0) {
-                err.println("Error: No UID for " + packageName + " in user " + userId);
-                return -1;
+            if (nonpackageUid == -1 && packageName.length() > 1 && packageName.charAt(0) == 'u'
+                    && packageName.indexOf('.') < 0) {
+                int i = 1;
+                while (i < packageName.length() && packageName.charAt(i) >= '0'
+                        && packageName.charAt(i) <= '9') {
+                    i++;
+                }
+                if (i > 1 && i < packageName.length()) {
+                    String userStr = packageName.substring(1, i);
+                    try {
+                        int user = Integer.parseInt(userStr);
+                        char type = packageName.charAt(i);
+                        i++;
+                        int startTypeVal = i;
+                        while (i < packageName.length() && packageName.charAt(i) >= '0'
+                                && packageName.charAt(i) <= '9') {
+                            i++;
+                        }
+                        if (i > startTypeVal) {
+                            String typeValStr = packageName.substring(startTypeVal, i);
+                            try {
+                                int typeVal = Integer.parseInt(typeValStr);
+                                if (type == 'a') {
+                                    nonpackageUid = UserHandle.getUid(user,
+                                            typeVal + Process.FIRST_APPLICATION_UID);
+                                } else if (type == 's') {
+                                    nonpackageUid = UserHandle.getUid(user, typeVal);
+                                }
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+            if (nonpackageUid != -1) {
+                packageName = null;
+            } else {
+                if ("root".equals(packageName)) {
+                    packageUid = 0;
+                } else {
+                    packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                }
+                if (packageUid < 0) {
+                    err.println("Error: No UID for " + packageName + " in user " + userId);
+                    return -1;
+                }
             }
             return 0;
         }
     }
 
     @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-        (new Shell(this, this)).exec(this, in, out, err, args, resultReceiver);
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new Shell(this, this)).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     static void dumpCommandHelp(PrintWriter pw) {
         pw.println("AppOps service (appops) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set [--user <USER_ID>] <PACKAGE> <OP> <MODE>");
+        pw.println("  set [--user <USER_ID>] <PACKAGE | UID> <OP> <MODE>");
         pw.println("    Set the mode for a particular application and operation.");
-        pw.println("  get [--user <USER_ID>] <PACKAGE> [<OP>]");
+        pw.println("  get [--user <USER_ID>] <PACKAGE | UID> [<OP>]");
         pw.println("    Return the mode for a particular application and optional operation.");
         pw.println("  query-op [--user <USER_ID>] <OP> [<MODE>]");
         pw.println("    Print all packages that currently have the given op in the given mode.");
@@ -1839,7 +1947,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return -1;
                     }
 
-                    shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName, mode);
+                    if (shell.packageName != null) {
+                        shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName,
+                                mode);
+                    } else {
+                        shell.mInterface.setUidMode(shell.op, shell.nonpackageUid, mode);
+                    }
                     return 0;
                 }
                 case "get": {
@@ -1848,9 +1961,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return res;
                     }
 
-                    List<AppOpsManager.PackageOps> ops = shell.mInterface.getOpsForPackage(
-                            shell.packageUid, shell.packageName,
-                            shell.op != AppOpsManager.OP_NONE ? new int[] {shell.op} : null);
+                    List<AppOpsManager.PackageOps> ops;
+                    if (shell.packageName != null) {
+                        ops = shell.mInterface.getOpsForPackage(
+                                shell.packageUid, shell.packageName,
+                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                    } else {
+                        ops = shell.mInterface.getUidOps(
+                                shell.nonpackageUid,
+                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
+                    }
                     if (ops == null || ops.size() <= 0) {
                         pw.println("No operations.");
                         return 0;
@@ -2010,13 +2130,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump ApOps service from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {
@@ -2046,10 +2160,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i=0; i<mOpModeWatchers.size(); i++) {
                     pw.print("    Op "); pw.print(AppOpsManager.opToName(mOpModeWatchers.keyAt(i)));
                     pw.println(":");
-                    ArrayList<Callback> callbacks = mOpModeWatchers.valueAt(i);
+                    ArraySet<Callback> callbacks = mOpModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
                         pw.print("      #"); pw.print(j); pw.print(": ");
-                        pw.println(callbacks.get(j));
+                        pw.println(callbacks.valueAt(j));
                     }
                 }
             }
@@ -2059,10 +2173,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i=0; i<mPackageModeWatchers.size(); i++) {
                     pw.print("    Pkg "); pw.print(mPackageModeWatchers.keyAt(i));
                     pw.println(":");
-                    ArrayList<Callback> callbacks = mPackageModeWatchers.valueAt(i);
+                    ArraySet<Callback> callbacks = mPackageModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
                         pw.print("      #"); pw.print(j); pw.print(": ");
-                        pw.println(callbacks.get(j));
+                        pw.println(callbacks.valueAt(j));
                     }
                 }
             }
@@ -2124,6 +2238,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 UidState uidState = mUidStates.valueAt(i);
 
                 pw.print("  Uid "); UserHandle.formatUid(pw, uidState.uid); pw.println(":");
+                needSep = true;
 
                 SparseIntArray opModes = uidState.opModes;
                 if (opModes != null) {
@@ -2161,6 +2276,55 @@ public class AppOpsService extends IAppOpsService.Stub {
                             pw.print("; duration="); TimeUtils.formatDuration(op.duration, pw);
                         }
                         pw.println();
+                    }
+                }
+            }
+            if (needSep) {
+                pw.println();
+            }
+
+            final int userRestrictionCount = mOpUserRestrictions.size();
+            for (int i = 0; i < userRestrictionCount; i++) {
+                IBinder token = mOpUserRestrictions.keyAt(i);
+                ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
+                pw.println("  User restrictions for token " + token + ":");
+
+                final int restrictionCount = restrictionState.perUserRestrictions != null
+                        ? restrictionState.perUserRestrictions.size() : 0;
+                if (restrictionCount > 0) {
+                    pw.println("      Restricted ops:");
+                    for (int j = 0; j < restrictionCount; j++) {
+                        int userId = restrictionState.perUserRestrictions.keyAt(j);
+                        boolean[] restrictedOps = restrictionState.perUserRestrictions.valueAt(j);
+                        if (restrictedOps == null) {
+                            continue;
+                        }
+                        StringBuilder restrictedOpsValue = new StringBuilder();
+                        restrictedOpsValue.append("[");
+                        final int restrictedOpCount = restrictedOps.length;
+                        for (int k = 0; k < restrictedOpCount; k++) {
+                            if (restrictedOps[k]) {
+                                if (restrictedOpsValue.length() > 1) {
+                                    restrictedOpsValue.append(", ");
+                                }
+                                restrictedOpsValue.append(AppOpsManager.opToName(k));
+                            }
+                        }
+                        restrictedOpsValue.append("]");
+                        pw.print("        "); pw.print("user: "); pw.print(userId);
+                                pw.print(" restricted ops: "); pw.println(restrictedOpsValue);
+                    }
+                }
+
+                final int excludedPackageCount = restrictionState.perUserExcludedPackages != null
+                        ? restrictionState.perUserExcludedPackages.size() : 0;
+                if (excludedPackageCount > 0) {
+                    pw.println("      Excluded packages:");
+                    for (int j = 0; j < excludedPackageCount; j++) {
+                        int userId = restrictionState.perUserExcludedPackages.keyAt(j);
+                        String[] packageNames = restrictionState.perUserExcludedPackages.valueAt(j);
+                        pw.print("        "); pw.print("user: "); pw.print(userId);
+                                pw.print(" packages: "); pw.println(Arrays.toString(packageNames));
                     }
                 }
             }
@@ -2240,23 +2404,23 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void notifyWatchersOfChange(int code) {
-        final ArrayList<Callback> clonedCallbacks;
+        final ArraySet<Callback> clonedCallbacks;
         synchronized (this) {
-            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
+            ArraySet<Callback> callbacks = mOpModeWatchers.get(code);
             if (callbacks == null) {
                 return;
             }
-            clonedCallbacks = new ArrayList<>(callbacks);
+            clonedCallbacks = new ArraySet<>(callbacks);
         }
 
         // There are components watching for mode changes such as window manager
         // and location manager which are in our process. The callbacks in these
-        // components may require permissions our remote caller does not have.s
+        // components may require permissions our remote caller does not have.
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = clonedCallbacks.size();
             for (int i = 0; i < callbackCount; i++) {
-                Callback callback = clonedCallbacks.get(i);
+                Callback callback = clonedCallbacks.valueAt(i);
                 try {
                     callback.mCallback.opChanged(code, -1, null);
                 } catch (RemoteException e) {
@@ -2276,6 +2440,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = tokenCount - 1; i >= 0; i--) {
                 ClientRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
                 opRestrictions.removeUser(userHandle);
+            }
+            removeUidsForUserLocked(userHandle);
+        }
+    }
+
+    private void removeUidsForUserLocked(int userHandle) {
+        for (int i = mUidStates.size() - 1; i >= 0; --i) {
+            final int uid = mUidStates.keyAt(i);
+            if (UserHandle.getUserId(uid) == userHandle) {
+                mUidStates.removeAt(i);
             }
         }
     }
@@ -2394,6 +2568,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 perUserExcludedPackages.remove(userId);
                 if (perUserExcludedPackages.size() <= 0) {
                     perUserExcludedPackages = null;
+                }
+            }
+            if (perUserRestrictions != null) {
+                perUserRestrictions.remove(userId);
+                if (perUserRestrictions.size() <= 0) {
+                    perUserRestrictions = null;
                 }
             }
         }

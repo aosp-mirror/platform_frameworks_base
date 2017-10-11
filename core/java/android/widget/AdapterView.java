@@ -31,9 +31,11 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.autofill.AutofillManager;
 
 /**
  * An AdapterView is a view whose children are determined by an {@link Adapter}.
@@ -215,7 +217,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @see #setFocusable(boolean)
      * @see #checkFocus()
      */
-    private boolean mDesiredFocusableState;
+    private int mDesiredFocusableState = FOCUSABLE_AUTO;
     private boolean mDesiredFocusableInTouchModeState;
 
     /** Lazily-constructed runnable for dispatching selection events. */
@@ -248,6 +250,12 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         // If not explicitly specified this view is important for accessibility.
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+
+        mDesiredFocusableState = getFocusable();
+        if (mDesiredFocusableState == FOCUSABLE_AUTO) {
+            // Starts off without an adapter, so NOT_FOCUSABLE by default.
+            super.setFocusable(NOT_FOCUSABLE);
         }
     }
 
@@ -709,16 +717,16 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     @Override
-    public void setFocusable(boolean focusable) {
+    public void setFocusable(@Focusable int focusable) {
         final T adapter = getAdapter();
         final boolean empty = adapter == null || adapter.getCount() == 0;
 
         mDesiredFocusableState = focusable;
-        if (!focusable) {
+        if ((focusable & (FOCUSABLE_AUTO | FOCUSABLE)) == 0) {
             mDesiredFocusableInTouchModeState = false;
         }
 
-        super.setFocusable(focusable && (!empty || isInFilterMode()));
+        super.setFocusable((!empty || isInFilterMode()) ? focusable : NOT_FOCUSABLE);
     }
 
     @Override
@@ -728,7 +736,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
         mDesiredFocusableInTouchModeState = focusable;
         if (focusable) {
-            mDesiredFocusableState = true;
+            mDesiredFocusableState = FOCUSABLE;
         }
 
         super.setFocusableInTouchMode(focusable && (!empty || isInFilterMode()));
@@ -742,7 +750,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         // for the client, see View.setFocusableInTouchMode() comments for more
         // details
         super.setFocusableInTouchMode(focusable && mDesiredFocusableInTouchModeState);
-        super.setFocusable(focusable && mDesiredFocusableState);
+        super.setFocusable(focusable ? mDesiredFocusableState : NOT_FOCUSABLE);
         if (mEmptyView != null) {
             updateEmptyStatus((adapter == null) || adapter.isEmpty());
         }
@@ -913,6 +921,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             } else {
                 dispatchOnItemSelected();
             }
+        }
+        // Always notify AutoFillManager - it will return right away if autofill is disabled.
+        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
+        if (afm != null) {
+            afm.notifyValueChanged(this);
         }
     }
 
@@ -1270,5 +1283,25 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         encoder.addProperty("list:nextSelectedRowId", mNextSelectedRowId);
         encoder.addProperty("list:selectedPosition", mSelectedPosition);
         encoder.addProperty("list:itemCount", mItemCount);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>It also sets the autofill options in the structure; when overridden, it should set it as
+     * well, either explicitly by calling {@link ViewStructure#setAutofillOptions(CharSequence[])}
+     * or implicitly by calling {@code super.onProvideAutofillStructure(structure, flags)}.
+     */
+    @Override
+    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutofillStructure(structure, flags);
+
+        final Adapter adapter = getAdapter();
+        if (adapter == null) return;
+
+        final CharSequence[] options = adapter.getAutofillOptions();
+        if (options != null) {
+            structure.setAutofillOptions(options);
+        }
     }
 }

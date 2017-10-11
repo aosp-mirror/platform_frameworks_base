@@ -22,10 +22,10 @@
 
 #include "android_os_HwParcel.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/Status.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
@@ -272,7 +272,6 @@ JHwRemoteBinder::JHwRemoteBinder(
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
-    mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 }
 
@@ -281,9 +280,6 @@ JHwRemoteBinder::~JHwRemoteBinder() {
 
     env->DeleteWeakGlobalRef(mObject);
     mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 sp<hardware::IBinder> JHwRemoteBinder::getBinder() const {

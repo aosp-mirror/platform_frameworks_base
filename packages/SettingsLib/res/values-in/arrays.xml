@@ -45,7 +45,7 @@
     <item msgid="7698638434317271902">"Diputus dari <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="197508606402264311">"Sambungan terputus"</item>
     <item msgid="8578370891960825148">"Gagal"</item>
-    <item msgid="5660739516542454527">"Dicekal"</item>
+    <item msgid="5660739516542454527">"Diblokir"</item>
     <item msgid="1805837518286731242">"Menghindari sambungan buruk untuk sementara"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
@@ -124,8 +124,18 @@
     <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Stereo"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:3 (4414060457677684127) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:3 (364670732877872677) -->
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"Dioptimalkan untuk Kualitas Audio (990kbps/909kbps)"</item>
+    <item msgid="2921767058740704969">"Kualitas Audio dan Sambungan Seimbang (660kbps/606kbps)"</item>
+    <item msgid="8860982705384396512">"Dioptimalkan untuk Kualitas Sambungan for Connection Quality (330kbps/303kbps)"</item>
+    <item msgid="4414060457677684127">"Best Effort (Kecepatan Bit Adaptif)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"Dioptimalkan untuk Kualitas Audio"</item>
+    <item msgid="4327143584633311908">"Kualitas Audio dan Sambungan Seimbang"</item>
+    <item msgid="4681409244565426925">"Dioptimalkan untuk Kualitas Sambungan"</item>
+    <item msgid="364670732877872677">"Best Effort (Kecepatan Bit Adaptif)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Nonaktif"</item>
     <item msgid="1593289376502312923">"64 K"</item>
@@ -215,12 +225,16 @@
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"Nonaktif"</item>
     <item msgid="2751513398307949636">"Di layar dalam bentuk batang"</item>
-    <item msgid="1851438178120770973">"Di adb shell dumpsys gfxinfo"</item>
+    <item msgid="2355151170975410323">"Dalam <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Nonaktif"</item>
     <item msgid="7688197031296835369">"Tampilkan area overdraw"</item>
     <item msgid="2290859360633824369">"Tampilkan area untuk Buta Warna"</item>
+  </string-array>
+  <string-array name="debug_hw_renderer_entries">
+    <item msgid="2578620445459945681">"OpenGL (Default)"</item>
+    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Batas standar"</item>

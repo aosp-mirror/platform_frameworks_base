@@ -291,18 +291,4 @@ final class HdmiUtils {
                 info.getPhysicalAddress(), info.getPortId(), info.getDeviceType(),
                 info.getVendorId(), info.getDisplayName(), newPowerStatus);
     }
-
-    /**
-     * Convert 3 byte-long language code in string to integer representation.
-     * English(eng), for example, is converted to 0x656e67.
-     *
-     * @param language language code in string
-     * @return language code in integer representation
-     */
-    static int languageToInt(String language) {
-        String normalized = language.toLowerCase();
-        return ((normalized.charAt(0) & 0xFF) << 16)
-                | ((normalized.charAt(1) & 0xFF) << 8)
-                | (normalized.charAt(2) & 0xFF);
-    }
 }

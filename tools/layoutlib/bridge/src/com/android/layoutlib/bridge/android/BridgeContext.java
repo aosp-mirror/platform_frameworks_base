@@ -40,6 +40,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.SystemServiceRegistry_Accessor;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -63,10 +65,10 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -76,6 +78,7 @@ import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -103,13 +106,37 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.os._Original_Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_APPLICATION_PACKAGE;
 
 /**
  * Custom implementation of Context/Activity to handle non compiled resources.
  */
 @SuppressWarnings("deprecation")  // For use of Pair.
-public final class BridgeContext extends Context {
+public class BridgeContext extends Context {
+    private static final String PREFIX_THEME_APPCOMPAT = "Theme.AppCompat";
+
+    private static final Map<String, ResourceValue> FRAMEWORK_PATCHED_VALUES = new HashMap<>(2);
+    private static final Map<String, ResourceValue> FRAMEWORK_REPLACE_VALUES = new HashMap<>(3);
+
+    static {
+        FRAMEWORK_PATCHED_VALUES.put("animateFirstView", new ResourceValue(
+                ResourceType.BOOL, "animateFirstView", "false", false));
+        FRAMEWORK_PATCHED_VALUES.put("animateLayoutChanges",
+                new ResourceValue(ResourceType.BOOL, "animateLayoutChanges", "false", false));
+
+
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionItemLayout",
+                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionItemLayout",
+                        "text_edit_suggestion_item", true));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionContainerLayout",
+                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionContainerLayout",
+                        "text_edit_suggestion_container", true));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionHighlightStyle",
+                new ResourceValue(ResourceType.STYLE, "textEditSuggestionHighlightStyle",
+                        "TextAppearance.Holo.SuggestionHighlight", true));
+
+    }
 
     /** The map adds cookies to each view so that IDE can link xml tags to views. */
     private final HashMap<View, Object> mViewKeyMap = new HashMap<>();
@@ -153,6 +180,7 @@ public final class BridgeContext extends Context {
     private ClassLoader mClassLoader;
     private IBinder mBinder;
     private PackageManager mPackageManager;
+    private Boolean mIsThemeAppCompat;
 
     /**
      * Some applications that target both pre API 17 and post API 17, set the newer attrs to
@@ -309,7 +337,7 @@ public final class BridgeContext extends Context {
      * Returns the current parser at the top the of the stack.
      * @return a parser or null.
      */
-    public BridgeXmlBlockParser getCurrentParser() {
+    private BridgeXmlBlockParser getCurrentParser() {
         return mParserStack.peek();
     }
 
@@ -354,6 +382,18 @@ public final class BridgeContext extends Context {
             return true;
         }
 
+        String stringValue = value.getValue();
+        if (!stringValue.isEmpty()) {
+            if (stringValue.charAt(0) == '#') {
+                outValue.type = TypedValue.TYPE_INT_COLOR_ARGB8;
+                outValue.data = Color.parseColor(value.getValue());
+            }
+            else if (stringValue.charAt(0) == '@') {
+                outValue.type = TypedValue.TYPE_REFERENCE;
+            }
+
+        }
+
         int a;
         // if this is a framework value.
         if (value.isFramework()) {
@@ -371,7 +411,9 @@ public final class BridgeContext extends Context {
             return true;
         }
 
-        return false;
+        // If the value is not a valid reference, fallback to pass the value as a string.
+        outValue.string = stringValue;
+        return true;
     }
 
 
@@ -401,7 +443,8 @@ public final class BridgeContext extends Context {
     }
 
     public Pair<View, Boolean> inflateView(ResourceReference resource, ViewGroup parent,
-            boolean attachToRoot, boolean skipCallbackParser) {
+            @SuppressWarnings("SameParameterValue") boolean attachToRoot,
+            boolean skipCallbackParser) {
         boolean isPlatformLayout = resource.isFramework();
 
         if (!isPlatformLayout && !skipCallbackParser) {
@@ -477,6 +520,36 @@ public final class BridgeContext extends Context {
         }
 
         return Pair.of(null, Boolean.FALSE);
+    }
+
+    /**
+     * Returns whether the current selected theme is based on AppCompat
+     */
+    public boolean isAppCompatTheme() {
+        // If a cached value exists, return it.
+        if (mIsThemeAppCompat != null) {
+            return mIsThemeAppCompat;
+        }
+        // Ideally, we should check if the corresponding activity extends
+        // android.support.v7.app.ActionBarActivity, and not care about the theme name at all.
+        StyleResourceValue defaultTheme = mRenderResources.getDefaultTheme();
+        // We can't simply check for parent using resources.themeIsParentOf() since the
+        // inheritance structure isn't really what one would expect. The first common parent
+        // between Theme.AppCompat.Light and Theme.AppCompat is Theme.Material (for v21).
+        boolean isThemeAppCompat = false;
+        for (int i = 0; i < 50; i++) {
+            if (defaultTheme == null) {
+                break;
+            }
+            // for loop ensures that we don't run into cyclic theme inheritance.
+            if (defaultTheme.getName().startsWith(PREFIX_THEME_APPCOMPAT)) {
+                isThemeAppCompat = true;
+                break;
+            }
+            defaultTheme = mRenderResources.getParent(defaultTheme);
+        }
+        mIsThemeAppCompat = isThemeAppCompat;
+        return isThemeAppCompat;
     }
 
     @SuppressWarnings("deprecation")
@@ -567,36 +640,21 @@ public final class BridgeContext extends Context {
             return AccessibilityManager.getInstance(this);
         }
 
-        throw new UnsupportedOperationException("Unsupported Service: " + service);
+        if (AUTOFILL_MANAGER_SERVICE.equals(service)) {
+            return null;
+        }
+
+        if (AUDIO_SERVICE.equals(service)) {
+            return null;
+        }
+
+        assert false : "Unsupported Service: " + service;
+        return null;
     }
 
     @Override
     public String getSystemServiceName(Class<?> serviceClass) {
-        if (serviceClass.equals(LayoutInflater.class)) {
-            return LAYOUT_INFLATER_SERVICE;
-        }
-
-        if (serviceClass.equals(TextServicesManager.class)) {
-            return TEXT_SERVICES_MANAGER_SERVICE;
-        }
-
-        if (serviceClass.equals(WindowManager.class)) {
-            return WINDOW_SERVICE;
-        }
-
-        if (serviceClass.equals(PowerManager.class)) {
-            return POWER_SERVICE;
-        }
-
-        if (serviceClass.equals(DisplayManager.class)) {
-            return DISPLAY_SERVICE;
-        }
-
-        if (serviceClass.equals(AccessibilityManager.class)) {
-            return ACCESSIBILITY_SERVICE;
-        }
-
-        throw new UnsupportedOperationException("Unsupported Service: " + serviceClass);
+        return SystemServiceRegistry_Accessor.getSystemServiceName(serviceClass);
     }
 
     @Override
@@ -621,7 +679,9 @@ public final class BridgeContext extends Context {
             }
 
             if (style == null) {
-                throw new Resources.NotFoundException();
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                        "Failed to find style with " + resId, null);
+                return null;
             }
         }
 
@@ -676,11 +736,7 @@ public final class BridgeContext extends Context {
 
             Object key = parser.getViewCookie();
             if (key != null) {
-                defaultPropMap = mDefaultPropMaps.get(key);
-                if (defaultPropMap == null) {
-                    defaultPropMap = new PropertiesMap();
-                    mDefaultPropMaps.put(key, defaultPropMap);
-                }
+                defaultPropMap = mDefaultPropMaps.computeIfAbsent(key, k -> new PropertiesMap());
             }
 
         } else if (set instanceof BridgeLayoutParamsMapAttributes) {
@@ -831,60 +887,85 @@ public final class BridgeContext extends Context {
                     }
                 }
 
-                // if there's no direct value for this attribute in the XML, we look for default
-                // values in the widget defStyle, and then in the theme.
-                if (value == null) {
-                    ResourceValue resValue = null;
-
+                // Calculate the default value from the Theme in two cases:
+                //   - If defaultPropMap is not null, get the default value to add it to the list
+                //   of default values of properties.
+                //   - If value is null, it means that the attribute is not directly set as an
+                //   attribute in the XML so try to get the default value.
+                ResourceValue defaultValue = null;
+                if (defaultPropMap != null || value == null) {
                     // look for the value in the custom style first (and its parent if needed)
                     if (customStyleValues != null) {
-                        resValue = mRenderResources.findItemInStyle(customStyleValues,
-                                attrName, frameworkAttr);
+                        defaultValue = mRenderResources.findItemInStyle(customStyleValues, attrName,
+                                frameworkAttr);
                     }
 
                     // then look for the value in the default Style (and its parent if needed)
-                    if (resValue == null && defStyleValues != null) {
-                        resValue = mRenderResources.findItemInStyle(defStyleValues,
-                                attrName, frameworkAttr);
+                    if (defaultValue == null && defStyleValues != null) {
+                        defaultValue = mRenderResources.findItemInStyle(defStyleValues, attrName,
+                                frameworkAttr);
                     }
 
                     // if the item is not present in the defStyle, we look in the main theme (and
                     // its parent themes)
-                    if (resValue == null) {
-                        resValue = mRenderResources.findItemInTheme(attrName, frameworkAttr);
+                    if (defaultValue == null) {
+                        defaultValue = mRenderResources.findItemInTheme(attrName, frameworkAttr);
                     }
 
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
-                    if (resValue != null) {
-                        String preResolve = resValue.getValue();
-                        resValue = mRenderResources.resolveResValue(resValue);
+                    if (defaultValue != null) {
+                        String preResolve = defaultValue.getValue();
+                        defaultValue = mRenderResources.resolveResValue(defaultValue);
 
                         if (defaultPropMap != null) {
                             defaultPropMap.put(
                                     frameworkAttr ? SdkConstants.PREFIX_ANDROID + attrName :
-                                            attrName,
-                                    new Property(preResolve, resValue.getValue()));
+                                            attrName, new Property(preResolve, defaultValue.getValue()));
                         }
+                    }
+                }
+                // Done calculating the defaultValue
 
+                // if there's no direct value for this attribute in the XML, we look for default
+                // values in the widget defStyle, and then in the theme.
+                if (value == null) {
+                    if (frameworkAttr) {
+                        // For some framework values, layoutlib patches the actual value in the
+                        // theme when it helps to improve the final preview. In most cases
+                        // we just disable animations.
+                        ResourceValue patchedValue = FRAMEWORK_PATCHED_VALUES.get(attrName);
+                        if (patchedValue != null) {
+                            defaultValue = patchedValue;
+                        }
+                    }
+
+                    // if we found a value, we make sure this doesn't reference another value.
+                    // So we resolve it.
+                    if (defaultValue != null) {
                         // If the value is a reference to another theme attribute that doesn't
                         // exist, we should log a warning and omit it.
-                        String val = resValue.getValue();
+                        String val = defaultValue.getValue();
                         if (val != null && val.startsWith(SdkConstants.PREFIX_THEME_REF)) {
-                            if (!attrName.equals(RTL_ATTRS.get(val)) ||
-                                    getApplicationInfo().targetSdkVersion <
-                                            VERSION_CODES.JELLY_BEAN_MR1) {
+                            // Because we always use the latest framework code, some resources might
+                            // fail to resolve when using old themes (they haven't been backported).
+                            // Since this is an artifact caused by us using always the latest
+                            // code, we check for some of those values and replace them here.
+                            defaultValue = FRAMEWORK_REPLACE_VALUES.get(attrName);
+
+                            if (defaultValue == null &&
+                                    (getApplicationInfo().targetSdkVersion < JELLY_BEAN_MR1 ||
+                                    !attrName.equals(RTL_ATTRS.get(val)))) {
                                 // Only log a warning if the referenced value isn't one of the RTL
                                 // attributes, or the app targets old API.
                                 Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
                                         String.format("Failed to find '%s' in current theme.", val),
                                         val);
                             }
-                            resValue = null;
                         }
                     }
 
-                    ta.bridgeSetValue(index, attrName, frameworkAttr, resValue);
+                    ta.bridgeSetValue(index, attrName, frameworkAttr, defaultValue);
                 } else {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
@@ -1138,7 +1219,7 @@ public final class BridgeContext extends Context {
 
                 @Override
                 public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                  String[] args, ResultReceiver resultReceiver) {
+                  String[] args, ShellCallback shellCallback, ResultReceiver resultReceiver) {
                 }
             };
         }
@@ -1245,6 +1326,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createContextForSplit(String splitName) {
+        // pass
+        return null;
+    }
+
+    @Override
     public String[] databaseList() {
         // pass
         return null;
@@ -1344,6 +1431,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public File getExternalCacheDir() {
+        // pass
+        return null;
+    }
+
+    @Override
+    public File getPreloadsFileCache() {
         // pass
         return null;
     }
@@ -1521,8 +1614,21 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1, int arg2) {
+        // pass
+        return null;
+    }
+
+    @Override
     public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1,
             String arg2, Handler arg3) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver arg0, IntentFilter arg1,
+            String arg2, Handler arg3, int arg4) {
         // pass
         return null;
     }
@@ -1542,6 +1648,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public void revokeUriPermission(Uri arg0, int arg1) {
+        // pass
+
+    }
+
+    @Override
+    public void revokeUriPermission(String arg0, Uri arg1, int arg2) {
         // pass
 
     }
@@ -1612,6 +1724,12 @@ public final class BridgeContext extends Context {
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission) {
+        // pass
+    }
+
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, Bundle options) {
         // pass
     }
 
@@ -1735,6 +1853,18 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public ComponentName startForegroundService(Intent service) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
+        // pass
+        return null;
+    }
+
+    @Override
     public boolean stopService(Intent arg0) {
         // pass
         return false;
@@ -1802,6 +1932,11 @@ public final class BridgeContext extends Context {
     public Display getDisplay() {
         // pass
         return null;
+    }
+
+    @Override
+    public void updateDisplay(int displayId) {
+        // pass
     }
 
     @Override
@@ -1873,6 +2008,11 @@ public final class BridgeContext extends Context {
         return false;
     }
 
+    @Override
+    public boolean canLoadUnsafeResources() {
+        return false;
+    }
+
     /**
      * The cached value depends on
      * <ol>
@@ -1893,7 +2033,7 @@ public final class BridgeContext extends Context {
                 Map<List<StyleResourceValue>,
                         Map<Integer, Pair<BridgeTypedArray, PropertiesMap>>>> mCache;
 
-        public TypedArrayCache() {
+        private TypedArrayCache() {
             mCache = new IdentityHashMap<>();
         }
 
@@ -1914,17 +2054,9 @@ public final class BridgeContext extends Context {
         public void put(int[] attrs, List<StyleResourceValue> themes, int resId,
                 Pair<BridgeTypedArray, PropertiesMap> value) {
             Map<List<StyleResourceValue>, Map<Integer, Pair<BridgeTypedArray, PropertiesMap>>>
-                    cacheFromThemes = mCache.get(attrs);
-            if (cacheFromThemes == null) {
-                cacheFromThemes = new HashMap<>();
-                mCache.put(attrs, cacheFromThemes);
-            }
+                    cacheFromThemes = mCache.computeIfAbsent(attrs, k -> new HashMap<>());
             Map<Integer, Pair<BridgeTypedArray, PropertiesMap>> cacheFromResId =
-                    cacheFromThemes.get(themes);
-            if (cacheFromResId == null) {
-                cacheFromResId = new HashMap<>();
-                cacheFromThemes.put(themes, cacheFromResId);
-            }
+                    cacheFromThemes.computeIfAbsent(themes, k -> new HashMap<>());
             cacheFromResId.put(resId, value);
         }
 

@@ -21,16 +21,22 @@ package com.android.commands.wm;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
+import android.system.Os;
 import android.view.Display;
 import android.view.IWindowManager;
 import com.android.internal.os.BaseCommand;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.DataInputStream;
 import java.io.PrintStream;
+import java.lang.Runtime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +75,9 @@ public class Wm extends BaseCommand {
                 "wm screen-capture: enable/disable screen capture.\n" +
                 "\n" +
                 "wm dismiss-keyguard: dismiss the keyguard, prompting the user for auth if " +
-                "necessary.\n"
+                "necessary.\n" +
+                "\n" +
+                "wm surface-trace: log surface commands to stdout in a binary format.\n"
                 );
     }
 
@@ -96,9 +104,26 @@ public class Wm extends BaseCommand {
             runSetScreenCapture();
         } else if (op.equals("dismiss-keyguard")) {
             runDismissKeyguard();
+        } else if (op.equals("surface-trace")) {
+            runSurfaceTrace();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
+        }
+    }
+
+    private void runSurfaceTrace() throws Exception {
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(FileDescriptor.out);
+        mWm.enableSurfaceTrace(pfd);
+
+        try {
+            // No one is going to wake us up, we are just waiting on SIGINT. Otherwise
+            // the WM can happily continue writing to our stdout.
+            synchronized (this) {
+                this.wait();
+            }
+        } finally {
+            mWm.disableSurfaceTrace();
         }
     }
 
@@ -249,7 +274,7 @@ public class Wm extends BaseCommand {
     }
 
     private void runDismissKeyguard() throws Exception {
-        mWm.dismissKeyguard();
+        mWm.dismissKeyguard(null /* callback */);
     }
 
     private int parseDimension(String s) throws NumberFormatException {

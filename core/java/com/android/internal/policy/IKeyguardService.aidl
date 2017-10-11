@@ -16,6 +16,7 @@
 package com.android.internal.policy;
 
 import com.android.internal.policy.IKeyguardDrawnCallback;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 
@@ -34,8 +35,7 @@ oneway interface IKeyguardService {
 
     void addStateMonitorCallback(IKeyguardStateCallback callback);
     void verifyUnlock(IKeyguardExitCallback callback);
-    void keyguardDone(boolean authenticated, boolean wakeup);
-    void dismiss(boolean allowWhileOccluded);
+    void dismiss(IKeyguardDismissCallback callback);
     void onDreamingStarted();
     void onDreamingStopped();
 
@@ -81,6 +81,7 @@ oneway interface IKeyguardService {
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
     void doKeyguardTimeout(in Bundle options);
+    void setSwitchingUser(boolean switching);
     void setCurrentUser(int userId);
     void onBootCompleted();
 
@@ -94,8 +95,8 @@ oneway interface IKeyguardService {
     void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
 
     /**
-     * Notifies the Keyguard that the activity that was starting has now been drawn and it's safe
-     * to start the keyguard dismiss sequence.
+     * Notifies the Keyguard that the power key was pressed while locked and launched Home rather
+     * than putting the device to sleep or waking up.
      */
-    void onActivityDrawn();
+    void onShortPowerPressedGoHome();
 }
