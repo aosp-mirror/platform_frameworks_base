@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"ਗੁੰਮਸ਼ੁਦਾ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਦੇ ਕਾਰਨ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਜਾਂ ਤਾਂ ਗੁੰਮਸ਼ੁਦਾ ਹੈ ਜਾਂ ਖਰਾਬ ਹੈ। ਨਤੀਜੇ ਵਜੋਂ, ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਸਬੰਧਿਤ ਡਾਟਾ ਮਿਟਾਇਆ ਗਿਆ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਹੁਣ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ਕਈ ਵਾਰ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮਿਟਾਇਆ ਜਾਏਗਾ"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ਪੌਪਅੱਪ ਵਿੰਡੋ"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

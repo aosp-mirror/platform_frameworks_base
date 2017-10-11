@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"گمشدہ منتظم ایپ کی وجہ سے دفتری پروفائل حذف کر دیا گیا"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"پاس ورڈ کی بہت ساری کوششیں"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"آلہ زیر انتظام ہے"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"‏SIM کی اجازت نہیں ہے"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"فون کی اجازت نہیں ہے"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"پاپ اپ ونڈو"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

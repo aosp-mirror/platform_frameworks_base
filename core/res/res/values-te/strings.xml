@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"నిర్వాహక యాప్ లేనందున కార్యాలయ ప్రొఫైల్ తొలగించబడింది"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"కార్యాలయ ప్రొఫైల్ నిర్వాహక యాప్ లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"చాలా ఎక్కువ పాస్‌వర్డ్ ప్రయత్నాలు చేసారు"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"పరికరం నిర్వహించబడింది"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM అనుమతించబడదు"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ఫోన్ అనుమతించబడదు"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"పాప్అప్ విండో"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

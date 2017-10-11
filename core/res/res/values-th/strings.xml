@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"ลบโปรไฟล์งานแล้วเนื่องจากไม่มีแอปผู้ดูแลระบบ"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"โปรไฟล์งานของคุณไม่สามารถใช้ในอุปกรณ์นี้อีกต่อไป"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ลองป้อนรหัสผ่านหลายครั้งเกินไป"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"อุปกรณ์มีการจัดการ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"องค์กรของคุณจัดการอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย แตะเพื่อดูรายละเอียด"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"ไม่อนุญาตให้ใช้ซิม"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ไม่อนุญาตให้ใช้โทรศัพท์"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"หน้าต่างป๊อปอัป"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

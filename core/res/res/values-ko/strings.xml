@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"관리 앱이 없어서 직장 프로필이 삭제되었습니다."</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"비밀번호 입력을 너무 많이 시도함"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"관리되는 기기"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM이 허용되지 않음"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"전화가 허용되지 않음"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"팝업 창"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

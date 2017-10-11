@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Werkprofiel is weens ontbrekende administrasieprogram uitgevee"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Die werkprofiel se administrasieprogram ontbreek of is korrup. Gevolglik is jou werkprofiel en verwante data uitgevee. Kontak jou administrateur vir bystand."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Te veel wagwoordpogings"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Toestel word bestuur"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Jou organisasie bestuur hierdie toestel en kan netwerkverkeer monitor. Tik vir besonderhede."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jou toestel sal uitgevee word"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM word nie toegelaat nie"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Foon word nie toegelaat nie"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Opspringvenster"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

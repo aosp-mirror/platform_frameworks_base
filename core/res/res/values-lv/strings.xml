@@ -174,8 +174,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Darba profils tika dzēsts, jo trūkst administratora lietotnes."</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Trūkst darba profila administratora lietotnes, vai šī lietotne ir bojāta. Šī iemesla dēļ jūsu darba profils un saistītie dati tika dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Jūsu darba profils šai ierīcē vairs nav pieejams."</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Veikts pārāk daudz paroles ievadīšanas mēģinājumu."</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Ierīce tiek pārvaldīta"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Jūsu organizācija pārvalda šo ierīci un var uzraudzīt tīkla datplūsmu. Pieskarieties, lai saņemtu detalizētu informāciju."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jūsu ierīces dati tiks dzēsti"</string>
@@ -1825,4 +1824,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM karti nav atļauts izmantot"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Tālruni nav atļauts izmantot"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Uznirstošais logs"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

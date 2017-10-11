@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Đã xóa hồ sơ công việc do thiếu ứng dụng quản trị"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Ứng dụng quản trị hồ sơ công việc bị thiếu hoặc hỏng. Do vậy, hồ sơ công việc của bạn và dữ liệu liên quan đã bị xóa. Hãy liên hệ với quản trị viên của bạn để được trợ giúp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Hồ sơ công việc của bạn không có sẵn trên thiết bị này nữa"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Quá nhiều lần nhập mật khẩu"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Thiết bị được quản lý"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Tổ chức của bạn sẽ quản lý thiết bị này và có thể theo dõi lưu lượng truy cập mạng. Nhấn để biết chi tiết."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Thiết bị của bạn sẽ bị xóa"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM không được cho phép"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Điện thoại không được cho phép"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Cửa sổ bật lên"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

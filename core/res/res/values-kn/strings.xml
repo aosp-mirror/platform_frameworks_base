@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ ತಪ್ಪಿಹೋಗಿರುವುದರಿಂದ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್ ಕಳೆದು ಹೋಗಿದೆ ಅಥವಾ ಹಾಳಾಗಿದೆ. ಇದರ ಪರಿಣಾಮವಾಗಿ ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಮತ್ತು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗಿದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಈ ಸಾಧನದಲ್ಲಿ ಈಗ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ಹಲವಾರು ಪಾಸ್‌ವರ್ಡ್ ಪ್ರಯತ್ನಗಳು"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ಸಾಧನವನ್ನು ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ಗಮನವಿರಿಸಬಹುದು. ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"ಸಿಮ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ಫೋನ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ಪಾಪ್‌ಅಪ್ ವಿಂಡೋ"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>
