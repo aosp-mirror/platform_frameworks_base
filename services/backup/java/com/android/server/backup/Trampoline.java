@@ -28,11 +28,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -75,6 +79,8 @@ public class Trampoline extends IBackupManager.Stub {
     final boolean mGlobalDisable;
     volatile BackupManagerServiceInterface mService;
 
+    private HandlerThread mHandlerThread;
+
     public Trampoline(Context context) {
         mContext = context;
         mGlobalDisable = isBackupDisabled();
@@ -111,11 +117,11 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
-        return new RefactoredBackupManagerService(mContext, this);
+        return new RefactoredBackupManagerService(mContext, this, mHandlerThread);
     }
 
     protected BackupManagerServiceInterface createBackupManagerService() {
-        return new BackupManagerService(mContext, this);
+        return new BackupManagerService(mContext, this, mHandlerThread);
     }
 
     // internal control API
@@ -140,10 +146,21 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     void unlockSystemUser() {
-        BackupManagerServiceInterface svc = mService;
-        if (svc != null) {
-            svc.unlockSystemUser();
-        }
+        mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
+
+        Handler h = new Handler(mHandlerThread.getLooper());
+        h.post(() -> {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
+            initialize(UserHandle.USER_SYSTEM);
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+            BackupManagerServiceInterface svc = mService;
+            Slog.i(TAG, "Unlocking system user; mService=" + mService);
+            if (svc != null) {
+                svc.unlockSystemUser();
+            }
+        });
     }
 
     public void setBackupServiceActive(final int userHandle, boolean makeActive) {
