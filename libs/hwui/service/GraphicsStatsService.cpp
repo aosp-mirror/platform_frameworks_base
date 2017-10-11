@@ -22,10 +22,11 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <log/log.h>
 
-#include <inttypes.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <sys/mman.h>
 
