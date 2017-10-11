@@ -33,6 +33,8 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.IProvisioningCallback;
+import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -3608,6 +3610,47 @@ public class WifiManager {
             mService.restoreSupplicantBackupData(supplicantData, ipConfigData);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start subscription provisioning flow
+     * @param provider {@link OsuProvider} to provision with
+     * @param callback {@link ProvisioningCallback} for updates regarding provisioning flow
+     * @hide
+     */
+    public void startSubscriptionProvisioning(OsuProvider provider, ProvisioningCallback callback,
+            @Nullable Handler handler) {
+        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+        try {
+            mService.startSubscriptionProvisioning(provider,
+                    new ProvisioningCallbackProxy(looper, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class ProvisioningCallbackProxy extends IProvisioningCallback.Stub {
+        private final Handler mHandler;
+        private final ProvisioningCallback mCallback;
+
+        ProvisioningCallbackProxy(Looper looper, ProvisioningCallback callback) {
+            mHandler = new Handler(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onProvisioningStatus(int status) {
+            mHandler.post(() -> {
+                mCallback.onProvisioningStatus(status);
+            });
+        }
+
+        @Override
+        public void onProvisioningFailure(int status) {
+            mHandler.post(() -> {
+                mCallback.onProvisioningFailure(status);
+            });
         }
     }
 }
