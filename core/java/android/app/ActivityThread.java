@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -76,7 +75,6 @@ import android.os.MessageQueue;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -5773,18 +5771,6 @@ public final class ActivityThread {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-        IntentFilter filter = new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
-
-        if (app != null) {
-            app.registerReceiver(
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            ThreadedRenderer.setFPSDivisor(context, 1);
-
-                        }
-                    }, filter);
         }
     }
 

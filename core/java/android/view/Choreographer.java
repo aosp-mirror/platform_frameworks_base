@@ -163,7 +163,6 @@ public final class Choreographer {
     private long mLastFrameTimeNanos;
     private long mFrameIntervalNanos;
     private boolean mDebugPrintNextFrameTimeDelta;
-    private int mFPSDivisor = 1;
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -598,11 +597,6 @@ public final class Choreographer {
         }
     }
 
-    void setFPSDivisor(int divisor) {
-        if (divisor == 0) divisor = 1;
-        mFPSDivisor = divisor;
-    }
-
     void doFrame(long frameTimeNanos, int frame) {
         final long startNanos;
         synchronized (mLock) {
@@ -643,14 +637,6 @@ public final class Choreographer {
                 }
                 scheduleVsyncLocked();
                 return;
-            }
-
-            if (mFPSDivisor > 1) {
-                long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
-                if (timeSinceVsync < (mFrameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
-                    scheduleVsyncLocked();
-                    return;
-                }
             }
 
             mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos);

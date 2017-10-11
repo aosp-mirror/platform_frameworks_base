@@ -34,7 +34,6 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
-#include "../Properties.h"
 
 #include <cutils/properties.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -387,9 +386,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     }
 
     if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
-        if (CC_UNLIKELY(!Properties::enableRTAnimations)) {
-            info.out.requiresUiRedraw = true;
-        }
         if (!info.out.requiresUiRedraw) {
             // If animationsNeedsRedraw is set don't bother posting for an RT anim
             // as we will just end up fighting the UI thread.

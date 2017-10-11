@@ -27,12 +27,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -946,8 +944,6 @@ public final class ThreadedRenderer {
             if (mInitialized) return;
             mInitialized = true;
             mAppContext = context.getApplicationContext();
-            // TODO: Init FPS limit here
-            setFPSDivisor(context, SystemProperties.getInt("debug.fps_devisor", 1));
             initSched(renderProxy);
             initGraphicsStats();
         }
@@ -998,25 +994,6 @@ public final class ThreadedRenderer {
     void removeFrameMetricsObserver(FrameMetricsObserver observer) {
         nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
         observer.mNative = null;
-    }
-
-    private static int getFPSDivisor(Context context, int inValue) {
-        PowerManager pm = context.getSystemService(PowerManager.class);
-        if (pm != null && pm.isPowerSaveMode()) {
-            inValue = Math.max(1, Settings.Global.getInt(context.getContentResolver(), "battery_saver_fps_divisor", 1));
-        }
-        return inValue;
-    }
-
-    /** For temporary experimentation b/66945974 */
-    public static void setFPSDivisor(Context context, int divisor) {
-        if (divisor == 0) divisor = 1;
-        divisor = getFPSDivisor(context, divisor);
-
-        Log.w("XXX", "Updating fpsDivisor: " + divisor);
-
-        Choreographer.getInstance().setFPSDivisor(divisor);
-        nHackySetRTAnimationsEnabled(divisor == 1);
     }
 
     /** Not actually public - internal use only. This doc to make lint happy */
@@ -1086,7 +1063,4 @@ public final class ThreadedRenderer {
             int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
-
-    // For temporary experimentation b/66945974
-    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
 }

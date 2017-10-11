@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -18,7 +17,6 @@
 #ifndef ANDROID_HWUI_PROPERTIES_H
 #define ANDROID_HWUI_PROPERTIES_H
 
-#include <cutils/compiler.h>
 #include <cutils/properties.h>
 
 /**
@@ -252,9 +250,6 @@ public:
     // Any existing RenderProxy & Surface combination will be unaffected, only things
     // created after changing this.
     static bool disableVsync;
-
-    // For experimentation b/66945974
-    ANDROID_API static bool enableRTAnimations;
 
     // Used for testing only to change the render pipeline.
 #ifdef HWUI_GLES_WRAP_ENABLED

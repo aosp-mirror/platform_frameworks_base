@@ -57,7 +57,6 @@ bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
-bool Properties::enableRTAnimations = true;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
