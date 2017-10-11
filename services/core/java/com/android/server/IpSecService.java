@@ -754,7 +754,7 @@ public class IpSecService extends IIpSecService.Stub {
      * and re-binding, during which the system could *technically* hand that port out to someone
      * else.
      */
-    private void bindToRandomPort(FileDescriptor sockFd) throws IOException {
+    private int bindToRandomPort(FileDescriptor sockFd) throws IOException {
         for (int i = MAX_PORT_BIND_ATTEMPTS; i > 0; i--) {
             try {
                 FileDescriptor probeSocket = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -763,7 +763,7 @@ public class IpSecService extends IIpSecService.Stub {
                 Os.close(probeSocket);
                 Log.v(TAG, "Binding to port " + port);
                 Os.bind(sockFd, INADDR_ANY, port);
-                return;
+                return port;
             } catch (ErrnoException e) {
                 // Someone miraculously claimed the port just after we closed probeSocket.
                 if (e.errno == OsConstants.EADDRINUSE) {
@@ -803,7 +803,7 @@ public class IpSecService extends IIpSecService.Stub {
                 Log.v(TAG, "Binding to port " + port);
                 Os.bind(sockFd, INADDR_ANY, port);
             } else {
-                bindToRandomPort(sockFd);
+                port = bindToRandomPort(sockFd);
             }
             // This code is common to both the unspecified and specified port cases
             Os.setsockoptInt(
