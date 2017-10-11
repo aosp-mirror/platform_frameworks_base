@@ -17,6 +17,8 @@
 #ifndef FRAMEWORKS_BASE_CORE_JNI_EVENTLOG_HELPER_H_
 #define FRAMEWORKS_BASE_CORE_JNI_EVENTLOG_HELPER_H_
 
+#include <memory>
+
 #include <fcntl.h>
 
 #include <android-base/macros.h>
@@ -26,6 +28,8 @@
 
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "core_jni_helpers.h"
 #include "jni.h"
 
@@ -91,20 +95,14 @@ public:
         android_log_event_list ctx(tag);
         // Don't throw NPE -- I feel like it's sort of mean for a logging function
         // to be all crashy if you pass in NULL -- but make the NULL value explicit.
-        if (value != NULL) {
-            const char *str = env->GetStringUTFChars(value, NULL);
-            ctx << str;
-            env->ReleaseStringUTFChars(value, str);
-        } else {
-            ctx << "NULL";
-        }
+        ctx << (value != nullptr ? ScopedUtfChars(env, value).c_str() : "NULL");
         return ctx.write(LogID);
     }
     static jint writeEventArray(JNIEnv* env, jobject clazz ATTRIBUTE_UNUSED, jint tag,
             jobjectArray value) {
         android_log_event_list ctx(tag);
 
-        if (value == NULL) {
+        if (value == nullptr) {
             ctx << "[NULL]";
             return ctx.write(LogID);
         }
@@ -112,26 +110,23 @@ public:
         jsize copied = 0, num = env->GetArrayLength(value);
         for (; copied < num && copied < 255; ++copied) {
             if (ctx.status()) break;
-            jobject item = env->GetObjectArrayElement(value, copied);
-            if (item == NULL) {
+            ScopedLocalRef<jobject> item(env, env->GetObjectArrayElement(value, copied));
+            if (item == nullptr) {
                 ctx << "NULL";
-            } else if (env->IsInstanceOf(item, gStringClass)) {
-                const char *str = env->GetStringUTFChars((jstring) item, NULL);
-                ctx << str;
-                env->ReleaseStringUTFChars((jstring) item, str);
-            } else if (env->IsInstanceOf(item, gIntegerClass)) {
-                ctx << (int32_t)env->GetIntField(item, gIntegerValueID);
-            } else if (env->IsInstanceOf(item, gLongClass)) {
-                ctx << (int64_t)env->GetLongField(item, gLongValueID);
-            } else if (env->IsInstanceOf(item, gFloatClass)) {
-                ctx << (float)env->GetFloatField(item, gFloatValueID);
+            } else if (env->IsInstanceOf(item.get(), gStringClass)) {
+                ctx << ScopedUtfChars(env, (jstring) item.get()).c_str();
+            } else if (env->IsInstanceOf(item.get(), gIntegerClass)) {
+                ctx << (int32_t)env->GetIntField(item.get(), gIntegerValueID);
+            } else if (env->IsInstanceOf(item.get(), gLongClass)) {
+                ctx << (int64_t)env->GetLongField(item.get(), gLongValueID);
+            } else if (env->IsInstanceOf(item.get(), gFloatClass)) {
+                ctx << (float)env->GetFloatField(item.get(), gFloatValueID);
             } else {
                 jniThrowException(env,
                         "java/lang/IllegalArgumentException",
                         "Invalid payload item type");
                 return -1;
             }
-            env->DeleteLocalRef(item);
         }
         return ctx.write(LogID);
     }
@@ -140,39 +135,37 @@ public:
         readEvents(env, loggerMode, nullptr, startTime, out);
     }
 
-    static void readEvents(JNIEnv* env, int loggerMode, jintArray tags, jlong startTime,
+    static void readEvents(JNIEnv* env, int loggerMode, jintArray jTags, jlong startTime,
             jobject out) {
-        struct logger_list *logger_list;
+        std::unique_ptr<struct logger_list, decltype(&android_logger_list_close)> logger_list(
+                nullptr, android_logger_list_close);
         if (startTime) {
-            logger_list = android_logger_list_alloc_time(loggerMode,
-                    log_time(startTime / NS_PER_SEC, startTime % NS_PER_SEC), 0);
+            logger_list.reset(android_logger_list_alloc_time(loggerMode,
+                    log_time(startTime / NS_PER_SEC, startTime % NS_PER_SEC), 0));
         } else {
-            logger_list = android_logger_list_alloc(loggerMode, 0, 0);
+            logger_list.reset(android_logger_list_alloc(loggerMode, 0, 0));
         }
         if (!logger_list) {
             jniThrowIOException(env, errno);
             return;
         }
 
-        if (!android_logger_open(logger_list, LogID)) {
+        if (!android_logger_open(logger_list.get(), LogID)) {
             jniThrowIOException(env, errno);
-            android_logger_list_free(logger_list);
             return;
         }
 
-        jsize tagLength = 0;
-        jint *tagValues = nullptr;
-        if (tags != nullptr) {
-            tagLength = env->GetArrayLength(tags);
-            tagValues = env->GetIntArrayElements(tags, NULL);
+        ScopedIntArrayRO tags(env);
+        if (jTags != nullptr) {
+            tags.reset(jTags);
         }
 
         while (1) {
             log_msg log_msg;
-            int ret = android_logger_list_read(logger_list, &log_msg);
+            int ret = android_logger_list_read(logger_list.get(), &log_msg);
 
             if (ret == 0) {
-                break;
+                return;
             }
             if (ret < 0) {
                 if (ret == -EINTR) {
@@ -183,7 +176,7 @@ public:
                 } else if (ret != -EAGAIN) {
                     jniThrowIOException(env, -ret);  // Will throw on return
                 }
-                break;
+                return;
             }
 
             if (log_msg.id() != LogID) {
@@ -192,10 +185,10 @@ public:
 
             int32_t tag = * (int32_t *) log_msg.msg();
 
-            if (tags != nullptr) {
+            if (jTags != nullptr) {
                 bool found = false;
-                for (int i = 0; !found && i < tagLength; ++i) {
-                    found = (tag == tagValues[i]);
+                for (size_t i = 0; !found && i < tags.size(); ++i) {
+                    found = (tag == tags[i]);
                 }
                 if (!found) {
                     continue;
@@ -203,32 +196,26 @@ public:
             }
 
             jsize len = ret;
-            jbyteArray array = env->NewByteArray(len);
-            if (array == NULL) {
-                break;
+            ScopedLocalRef<jbyteArray> array(env, env->NewByteArray(len));
+            if (array == nullptr) {
+                return;
             }
 
-            jbyte *bytes = env->GetByteArrayElements(array, NULL);
-            memcpy(bytes, log_msg.buf, len);
-            env->ReleaseByteArrayElements(array, bytes, 0);
-
-            jobject event = env->NewObject(gEventClass, gEventInitID, array);
-            if (event == NULL) {
-                break;
+            {
+                ScopedByteArrayRW bytes(env, array.get());
+                memcpy(bytes.get(), log_msg.buf, len);
             }
 
-            env->CallBooleanMethod(out, gCollectionAddID, event);
-            env->DeleteLocalRef(event);
-            env->DeleteLocalRef(array);
+            ScopedLocalRef<jobject> event(env,
+                    env->NewObject(gEventClass, gEventInitID, array.get()));
+            if (event == nullptr) {
+                return;
+            }
+
+            env->CallBooleanMethod(out, gCollectionAddID, event.get());
             if (env->ExceptionCheck() == JNI_TRUE) {
-                break;
+                return;
             }
-        }
-
-        android_logger_list_close(logger_list);
-
-        if (tags != nullptr) {
-            env->ReleaseIntArrayElements(tags, tagValues, 0);
         }
     }
 
