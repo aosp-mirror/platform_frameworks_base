@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"פתיחת הגדרות עבור <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> נכשלה"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ייתכן ששיטת קלט זו תוכל לאסוף את כל הטקסט שאתה מקליד, כולל נתונים אישיים כגון סיסמאות ומספרי כרטיס אשראי. היא מגיעה מהאפליקציה <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. האם להשתמש בשיטת קלט זו?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"שים לב: לאחר הפעלה מחדש של המכשיר, ניתן להפעיל את האפליקציה רק לאחר שתבטל את נעילת הטלפון"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"‏סטטוס הרשמה ל-IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"רשום"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"לא רשום"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"לא זמין"</string>
 </resources>

@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"បាន​បរាជ័យ​ក្នុង​ការ​បើក​ការ​កំណត់​សម្រាប់ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"វិធី​សាស្ត្រ​បញ្ចូល​នេះ​អាច​​ប្រមូល​អត្ថបទ​ដែល​អ្នក​វាយ​ទាំងអស់ រួម​មាន​ទិន្នន័យ​ផ្ទាល់ខ្លួន ដូច​ជ ពាក្យ​សម្ងាត់ និង​លេខ​កាត​ឥណទាន។ វា​បាន​មក​ពី​កម្មវិធី <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ។ ប្រើ​វិធី​សាស្ត្រ​បញ្ចូល​នេះ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ចំណាំ៖ បន្ទាប់ពីបិទបើកឡើងវិញហើយ កម្មវិធីនេះមិនអាចចាប់ផ្តើមបានទេ រហូតទាល់តែអ្នកដោះសោទូរស័ព្ទរបស់អ្នក"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"ស្ថានភាព​នៃការ​ចុះឈ្មោះ IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"បាន​ចុះឈ្មោះ"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"មិនបាន​ចុះឈ្មោះ"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"មិន​មាន"</string>
 </resources>

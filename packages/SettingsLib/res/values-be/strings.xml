@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Не атрымалася адкрыць параметры <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Гэты метад уводу можа збіраць увесь тэкст, які ўводзіцца, у тым лiку такiя персанальныя дадзеныя, як паролі і нумары крэдытных карт. Ён выкарыстоўваецца прыкладаннем <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Выкарыстоўваць гэты метад уводу?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Заўвага. Пасля перазагрузкі гэта праграма не зможа запусціцца, пакуль вы не разблакіруеце тэлефон"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Стан рэгістрацыі IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Зарэгістраваны"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не зарэгістраваны"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Адсутнічае"</string>
 </resources>

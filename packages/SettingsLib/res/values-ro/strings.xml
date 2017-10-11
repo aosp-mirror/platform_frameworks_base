@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Deschiderea setărilor pentru <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> a eșuat"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Această metodă de introducere de text poate culege în întregime textul introdus, inclusiv datele personale, cum ar fi parolele și numerele cardurilor de credit. Metoda provine de la aplicația <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Utilizați această metodă de introducere de text?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Notă: după repornire, această aplicație nu poate porni până nu deblocați telefonul"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Situația înregistrării IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Înregistrat"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neînregistrat"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Indisponibilă"</string>
 </resources>

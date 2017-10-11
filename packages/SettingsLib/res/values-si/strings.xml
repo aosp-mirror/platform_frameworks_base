@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> සඳහා සැකසීම් විවෘත කිරීම අසාර්ථක විය"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"මෙම ආදාන ක්‍රමය මුරපද සහ ණයපත් අංක වැනි පෞද්ගලික දත්ත ඇතුළුව ඔබ ටයිප් කරන පෙළ එකතු කිරීමට හැකිය, එය <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> යෙදුමන් ලැබේ. මෙම ආදාන ක්‍රමය භාවිතා කරන්නද?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"සටහන: නැවත පණ ගැන්වීමකට පසුව, ඔබ ඔබේ දුරකථනය අගුලු හරින තෙක් මෙම යෙදුම ආරම්භ කළ නොහැකිය"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS ලියාපදිංචි තත්ත්වය"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"ලියාපදිංචි වී ඇත"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ලියාපදිංචි වී නැත"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"ලබාගත නොහැක"</string>
 </resources>

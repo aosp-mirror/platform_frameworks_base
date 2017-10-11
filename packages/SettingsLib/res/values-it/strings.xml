@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Impossibile aprire le impostazioni di <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Questo metodo di immissione potrebbe riuscire a raccogliere tutto il testo digitato, compresi i dati personali come password e numeri di carte di credito. Deriva dall\'applicazione <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Utilizzare questo metodo di immissione?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Nota: dopo il riavvio, devi sbloccare il telefono per poter avviare l\'app."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Stato di registrazione IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrato"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non registrato"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Non disponibile"</string>
 </resources>

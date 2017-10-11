@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> کیلئے ترتیبات کھولنے میں ناکام ہوگیا"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"اندراج کا یہ طریقہ آپ کے ٹائپ کردہ سبھی متن کو جمع کر سکتا ہے، بشمول ذاتی ڈیٹا جیسے پاس ورڈز اور کریڈٹ کارڈ نمبرز۔ یہ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ایپ سے آتا ہے۔ اندراج کا یہ طریقہ استعمال کریں؟"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"نوٹ: ریبوٹ کرنے کے بعد یہ ایپ تب تک شروع نہیں ہو سکتی جب تک آپ اپنا فون غیر مقفل نہ کر لیں"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"‏IMS رجسٹریشن کی صورتحال"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"رجسٹر شدہ"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"رجسٹر نہیں ہے"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"غیر دستیاب"</string>
 </resources>

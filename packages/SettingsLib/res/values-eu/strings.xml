@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Ezin izan dira <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> aplikazioaren ezarpenak ireki."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Idazketa-metodoak idazten duzun testu guztia bil dezake, pasahitzak eta kreditu-txarteleko zenbakiak bezalako datu pertsonalak barne. <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> aplikazioak egin du eskaera. Idazketa-metodo hori erabili nahi duzu?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Oharra: berrabiarazi ondoren, ezin izango da abiarazi aplikazio hau telefonoa desblokeatzen duzun arte"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS erregistratzearen egoera"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Erregistratuta"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Erregistratu gabe"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Ez dago erabilgarri"</string>
 </resources>

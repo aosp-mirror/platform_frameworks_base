@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> എന്നതിനായുള്ള ക്രമീകരണങ്ങൾ തുറക്കുന്നതിൽ പരാജയപ്പെട്ടു"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"പാസ്‌വേഡുകൾ, ക്രെഡിറ്റ് കാർഡ് നമ്പറുകൾ എന്നിവ പോലുള്ള വ്യക്തിഗതമായ ഡാറ്റയുൾപ്പെടെ നിങ്ങൾ ടൈപ്പുചെയ്യുന്ന എല്ലാ വാചകവും ഈ ടൈപ്പുചെയ്യൽ രീതിയ്‌ക്ക് ശേഖരിക്കാനായേക്കും. ഇത് <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> അപ്ലിക്കേഷനിൽ നിന്നും വരുന്നു. ഈ ടൈപ്പുചെയ്യൽ രീതി ഉപയോഗിക്കണോ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ശ്രദ്ധിക്കുക: റീബൂട്ടിന് ശേഷം, ഫോൺ അൺലോക്കുചെയ്യുന്നത് വരെ ഈ ആപ്പ് ആരംഭിക്കാൻ കഴിയില്ല"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS രജിസ്‌ട്രേഷൻ നില"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"രജിസ്റ്റർ ചെയ്‌തു"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"രജിസ്‌റ്റർ ചെയ്‌തിട്ടില്ല"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"ലഭ്യമല്ല"</string>
 </resources>

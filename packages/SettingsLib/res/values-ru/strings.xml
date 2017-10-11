@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Не удалось открыть настройки приложения \"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>\""</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"При использовании этого способа могут собираться все вводимые данные, в том числе пароли и номера кредитных карт. Запрос поступил от приложения \"<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>\". Использовать этот способ ввода?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Примечание. Чтобы запустить это приложение после перезагрузки, разблокируйте экран."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Статус регистрации сервиса IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Зарегистрирован"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не зарегистрирован"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Недоступно"</string>
 </resources>

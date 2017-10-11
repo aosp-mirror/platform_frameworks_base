@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nepavyko atidaryti „<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>“ nustatymų"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Naudojant šį įvesties metodą galima rinkti visą įvedamą tekstą, įskaitant asmeninius duomenis, pvz., slaptažodžius ir kredito kortelių numerius. Jis pateikiamas naudojant programą „<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>“. Naudoti šį įvesties metodą?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Pastaba: paleidus iš naujo nebus galima paleisti programos, kol neatrakinsite telefono"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS registracijos būsena"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Užregistruota"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neužregistruota"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Užimta"</string>
 </resources>

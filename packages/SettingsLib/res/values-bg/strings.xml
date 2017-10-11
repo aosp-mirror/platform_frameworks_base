@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Отварянето на настройките за <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> не бе успешно"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Този метод за въвеждане може да събира целия въведен от вас текст, включително лични данни като пароли и номера на кредитни карти. Той произлиза от приложението <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Искате ли да го използвате?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Забележка: След рестартиране това приложение не може да се стартира, докато не отключите телефона си"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Състояние на регистрацията за незабавни съобщения"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Регистрирано"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не е регистрирано"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Няма данни"</string>
 </resources>

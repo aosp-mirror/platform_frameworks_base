@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> sozlamalarini ochmadi"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ushbu yozish usuli barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. Usul  <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ilovasi bilan o‘rnatiladi. Ushbu usuldan foydalanilsinmi?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Eslatma: O‘chirib-yoqilgandan so‘ng, bu ilova to telefoningiz qulfdan chiqarilmaguncha ishga tushmaydi"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS registratsiyasi holati"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Registratsiya qilingan"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Registratsiya qilinmagan"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Mavjud emas"</string>
 </resources>

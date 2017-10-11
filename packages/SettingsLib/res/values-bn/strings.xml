@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> জন্য সেটিংস খুলতে ব্যর্থ হয়েছে"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"এই ইনপুট পদ্ধতিটি হয়তো পাসওয়ার্ড এবং ক্রেডিট কার্ড নম্বর সহ আপনার টাইপ করা সমস্ত টেক্সট সংগ্রহ করতে সক্ষম হতে পারে। এটি <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> অ্যাপ থেকে এসেছে। এই ইনপুট পদ্ধতিটি ব্যবহার করবেন?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"দ্রষ্টব্য: পুনরায় চালু করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS রেজিস্ট্রেশনের স্থিতি"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"রেজিস্টার করা"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"রেজিস্টার করা নয়"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"অনুপলব্ধ"</string>
 </resources>
