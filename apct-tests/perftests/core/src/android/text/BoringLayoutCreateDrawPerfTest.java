@@ -46,7 +46,7 @@ public class BoringLayoutCreateDrawPerfTest {
     private static final float SPACING_ADD = 10f;
     private static final float SPACING_MULT = 1.5f;
 
-    @Parameterized.Parameters(name = "cached={3},{1} chars,{0}")
+    @Parameterized.Parameters(name = "cached={3},{1}chars,{0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {
