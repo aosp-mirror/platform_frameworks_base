@@ -65,6 +65,7 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
@@ -544,6 +545,8 @@ public class DeviceIdleController extends SystemService
         private static final String KEY_NOTIFICATION_WHITELIST_DURATION =
                 "notification_whitelist_duration";
 
+        private static final String KEY_WHITELISTED_PACKAGES = "whitelist_pkgs";
+
         /**
          * This is the time, after becoming inactive, that we go in to the first
          * light-weight idle mode.
@@ -761,18 +764,20 @@ public class DeviceIdleController extends SystemService
          */
         public long NOTIFICATION_WHITELIST_DURATION;
 
+        public String[] WHITELISTED_PACKAGES = new String[0];
+
         private final ContentResolver mResolver;
         private final boolean mHasWatch;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        private static final String SETTING = Settings.Global.DEVICE_IDLE_CONSTANTS + "_om";
 
         public Constants(Handler handler, ContentResolver resolver) {
             super(handler);
             mResolver = resolver;
             mHasWatch = getContext().getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_WATCH);
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
-                              : Settings.Global.DEVICE_IDLE_CONSTANTS),
+            mResolver.registerContentObserver(Settings.Global.getUriFor(SETTING),
                     false, this);
             updateConstants();
         }
@@ -784,14 +789,13 @@ public class DeviceIdleController extends SystemService
 
         private void updateConstants() {
             synchronized (DeviceIdleController.this) {
+                final String config = Settings.Global.getString(mResolver, SETTING);
                 try {
-                    mParser.setString(Settings.Global.getString(mResolver,
-                            mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
-                                      : Settings.Global.DEVICE_IDLE_CONSTANTS));
+                    mParser.setString(config);
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
-                    Slog.e(TAG, "Bad device idle settings", e);
+                    Slog.e(TAG, "Bad device idle settings: " + config, e);
                 }
 
                 LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getLong(
@@ -853,6 +857,32 @@ public class DeviceIdleController extends SystemService
                         KEY_SMS_TEMP_APP_WHITELIST_DURATION, 20 * 1000L);
                 NOTIFICATION_WHITELIST_DURATION = mParser.getLong(
                         KEY_NOTIFICATION_WHITELIST_DURATION, 30 * 1000L);
+
+
+                WHITELISTED_PACKAGES = mParser.getString(KEY_WHITELISTED_PACKAGES, "").split(",");
+
+                boolean changed = false;
+                for (String name : WHITELISTED_PACKAGES) {
+                    if (TextUtils.isEmpty(name)) {
+                        continue;
+                    }
+
+                    try {
+                        ApplicationInfo ai = getContext().getPackageManager()
+                                .getApplicationInfo(name, PackageManager.MATCH_ANY_USER);
+                        if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid))
+                                == null) {
+                            changed = true;
+                        }
+                    } catch (NameNotFoundException e) {
+                        // Ignore
+                    }
+                }
+                if (changed) {
+                    reportPowerSaveWhitelistChangedLocked();
+                    updateWhitelistAppIdsLocked();
+                    writeConfigFileLocked();
+                }
             }
         }
 
@@ -960,6 +990,9 @@ public class DeviceIdleController extends SystemService
             pw.print("    "); pw.print(KEY_NOTIFICATION_WHITELIST_DURATION); pw.print("=");
             TimeUtils.formatDuration(NOTIFICATION_WHITELIST_DURATION, pw);
             pw.println();
+
+            pw.print("    "); pw.print(KEY_WHITELISTED_PACKAGES); pw.print("=");
+            pw.println(Arrays.toString(WHITELISTED_PACKAGES));
         }
     }
 
@@ -1458,9 +1491,9 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
 
-                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
-                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
+                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
 
                 updateInteractivityLocked();
             }
@@ -2389,7 +2422,7 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting activity manager whitelist to "
                         + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
             }
-            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -2403,7 +2436,7 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting alarm whitelist to "
                         + Arrays.toString(mPowerSaveWhitelistUserAppIdArray));
             }
-            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
+            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray, mPowerSaveWhitelistAllAppIdArray);
         }
     }
 
