@@ -31,19 +31,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.system.Os;
-import android.test.AndroidTestCase;
+
 import com.android.server.IpSecService;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link IpSecManager}. */
 @SmallTest
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 public class IpSecManagerTest {
 
     private static final int TEST_UDP_ENCAP_PORT = 34567;
