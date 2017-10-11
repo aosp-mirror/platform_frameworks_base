@@ -7456,6 +7456,11 @@ public class WindowManagerService extends IWindowManager.Stub
         public void registerDragDropControllerCallback(IDragDropCallback callback) {
             mDragDropController.registerCallback(callback);
         }
+
+        @Override
+        public void lockNow() {
+            WindowManagerService.this.lockNow(null);
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

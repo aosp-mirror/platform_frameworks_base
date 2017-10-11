@@ -21,7 +21,11 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.Binder;
+import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -71,6 +75,9 @@ public class GlobalActionPerformer {
                 return true;
                 case AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN: {
                     return toggleSplitScreen();
+                }
+                case AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN: {
+                    return lockScreen();
                 }
             }
             return false;
@@ -151,6 +158,13 @@ public class GlobalActionPerformer {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+        return true;
+    }
+
+    private boolean lockScreen() {
+        mContext.getSystemService(PowerManager.class).goToSleep(SystemClock.uptimeMillis(),
+                PowerManager.GO_TO_SLEEP_REASON_ACCESSIBILITY, 0);
+        mWindowManagerService.lockNow();
         return true;
     }
 }

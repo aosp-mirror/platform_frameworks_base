@@ -381,4 +381,9 @@ public abstract class WindowManagerInternal {
      * Sets callback to DragDropController.
      */
     public abstract void registerDragDropControllerCallback(IDragDropCallback callback);
+
+    /**
+     * @see android.view.IWindowManager#lockNow
+     */
+    public abstract void lockNow();
 }
