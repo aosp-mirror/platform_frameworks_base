@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,36 +77,36 @@ import java.util.stream.Collectors;
 
 
 /**
- * IpManager
+ * IpClient
  *
  * This class provides the interface to IP-layer provisioning and maintenance
  * functionality that can be used by transport layers like Wi-Fi, Ethernet,
  * et cetera.
  *
  * [ Lifetime ]
- * IpManager is designed to be instantiated as soon as the interface name is
+ * IpClient is designed to be instantiated as soon as the interface name is
  * known and can be as long-lived as the class containing it (i.e. declaring
  * it "private final" is okay).
  *
  * @hide
  */
-public class IpManager extends StateMachine {
+public class IpClient extends StateMachine {
     private static final boolean DBG = false;
 
     // For message logging.
-    private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
+    private static final Class[] sMessageClasses = { IpClient.class, DhcpClient.class };
     private static final SparseArray<String> sWhatToString =
             MessageUtils.findMessageNames(sMessageClasses);
 
     /**
-     * Callbacks for handling IpManager events.
+     * Callbacks for handling IpClient events.
      */
     public static class Callback {
         // In order to receive onPreDhcpAction(), call #withPreDhcpAction()
         // when constructing a ProvisioningConfiguration.
         //
         // Implementations of onPreDhcpAction() must call
-        // IpManager#completedPreDhcpAction() to indicate that DHCP is clear
+        // IpClient#completedPreDhcpAction() to indicate that DHCP is clear
         // to proceed.
         public void onPreDhcpAction() {}
         public void onPostDhcpAction() {}
@@ -129,7 +129,7 @@ public class IpManager extends StateMachine {
         // detected the loss of a critical number of required neighbors.
         public void onReachabilityLost(String logMsg) {}
 
-        // Called when the IpManager state machine terminates.
+        // Called when the IpClient state machine terminates.
         public void onQuit() {}
 
         // Install an APF program to filter incoming packets.
@@ -144,41 +144,12 @@ public class IpManager extends StateMachine {
         public void setNeighborDiscoveryOffload(boolean enable) {}
     }
 
-    public static class WaitForProvisioningCallback extends Callback {
-        private LinkProperties mCallbackLinkProperties;
-
-        public LinkProperties waitForProvisioning() {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {}
-                return mCallbackLinkProperties;
-            }
-        }
-
-        @Override
-        public void onProvisioningSuccess(LinkProperties newLp) {
-            synchronized (this) {
-                mCallbackLinkProperties = newLp;
-                notify();
-            }
-        }
-
-        @Override
-        public void onProvisioningFailure(LinkProperties newLp) {
-            synchronized (this) {
-                mCallbackLinkProperties = null;
-                notify();
-            }
-        }
-    }
-
     // Use a wrapper class to log in order to ensure complete and detailed
     // logging. This method is lighter weight than annotations/reflection
     // and has the following benefits:
     //
     //     - No invoked method can be forgotten.
-    //       Any new method added to IpManager.Callback must be overridden
+    //       Any new method added to IpClient.Callback must be overridden
     //       here or it will never be called.
     //
     //     - No invoking call site can be forgotten.
@@ -261,23 +232,23 @@ public class IpManager extends StateMachine {
 
     /**
      * This class encapsulates parameters to be passed to
-     * IpManager#startProvisioning(). A defensive copy is made by IpManager
-     * and the values specified herein are in force until IpManager#stop()
+     * IpClient#startProvisioning(). A defensive copy is made by IpClient
+     * and the values specified herein are in force until IpClient#stop()
      * is called.
      *
      * Example use:
      *
      *     final ProvisioningConfiguration config =
-     *             mIpManager.buildProvisioningConfiguration()
+     *             mIpClient.buildProvisioningConfiguration()
      *                     .withPreDhcpAction()
      *                     .withProvisioningTimeoutMs(36 * 1000)
      *                     .build();
-     *     mIpManager.startProvisioning(config);
+     *     mIpClient.startProvisioning(config);
      *     ...
-     *     mIpManager.stop();
+     *     mIpClient.stop();
      *
      * The specified provisioning configuration will only be active until
-     * IpManager#stop() is called. Future calls to IpManager#startProvisioning()
+     * IpClient#stop() is called. Future calls to IpClient#startProvisioning()
      * must specify the configuration again.
      */
     public static class ProvisioningConfiguration {
@@ -537,7 +508,7 @@ public class IpManager extends StateMachine {
         }
     }
 
-    public static final String DUMP_ARG = "ipmanager";
+    public static final String DUMP_ARG = "ipclient";
     public static final String DUMP_ARG_CONFIRM = "confirm";
 
     private static final int CMD_TERMINATE_AFTER_STOP             = 1;
@@ -560,7 +531,7 @@ public class IpManager extends StateMachine {
     private static final boolean SEND_CALLBACKS = true;
 
     // This must match the interface prefix in clatd.c.
-    // TODO: Revert this hack once IpManager and Nat464Xlat work in concert.
+    // TODO: Revert this hack once IpClient and Nat464Xlat work in concert.
     private static final String CLAT_PREFIX = "v4-";
 
     private final State mStoppedState = new StoppedState();
@@ -601,7 +572,7 @@ public class IpManager extends StateMachine {
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
-    public IpManager(Context context, String ifName, Callback callback) {
+    public IpClient(Context context, String ifName, Callback callback) {
         this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
                 NetdService.getInstance());
@@ -609,17 +580,17 @@ public class IpManager extends StateMachine {
 
     /**
      * An expanded constructor, useful for dependency injection.
-     * TODO: migrate all test users to mock IpManager directly and remove this ctor.
+     * TODO: migrate all test users to mock IpClient directly and remove this ctor.
      */
-    public IpManager(Context context, String ifName, Callback callback,
+    public IpClient(Context context, String ifName, Callback callback,
             INetworkManagementService nwService) {
         this(context, ifName, callback, nwService, NetdService.getInstance());
     }
 
     @VisibleForTesting
-    IpManager(Context context, String ifName, Callback callback,
+    IpClient(Context context, String ifName, Callback callback,
             INetworkManagementService nwService, INetd netd) {
-        super(IpManager.class.getSimpleName() + "." + ifName);
+        super(IpClient.class.getSimpleName() + "." + ifName);
         mTag = getName();
 
         mContext = context;
@@ -661,7 +632,7 @@ public class IpManager extends StateMachine {
                 // TODO: Also observe mInterfaceName going down and take some
                 // kind of appropriate action.
                 if (mClatInterfaceName.equals(iface)) {
-                    // TODO: consider sending a message to the IpManager main
+                    // TODO: consider sending a message to the IpClient main
                     // StateMachine thread, in case "NDO enabled" state becomes
                     // tied to more things that 464xlat operation.
                     mCallback.setNeighborDiscoveryOffload(true);
@@ -735,7 +706,7 @@ public class IpManager extends StateMachine {
         mCallback.onQuit();
     }
 
-    // Shut down this IpManager instance altogether.
+    // Shut down this IpClient instance altogether.
     public void shutdown() {
         stop();
         sendMessage(CMD_TERMINATE_AFTER_STOP);
@@ -829,7 +800,7 @@ public class IpManager extends StateMachine {
         } else {
             pw.print("No active ApfFilter; ");
             if (provisioningConfig == null) {
-                pw.println("IpManager not yet started.");
+                pw.println("IpClient not yet started.");
             } else if (apfCapabilities == null || apfCapabilities.apfVersionSupported == 0) {
                 pw.println("Hardware does not support APF.");
             } else {
@@ -895,7 +866,7 @@ public class IpManager extends StateMachine {
     protected boolean recordLogRec(Message msg) {
         // Don't log EVENT_NETLINK_LINKPROPERTIES_CHANGED. They can be noisy,
         // and we already log any LinkProperties change that results in an
-        // invocation of IpManager.Callback#onLinkPropertiesChange().
+        // invocation of IpClient.Callback#onLinkPropertiesChange().
         final boolean shouldLog = (msg.what != EVENT_NETLINK_LINKPROPERTIES_CHANGED);
         if (!shouldLog) {
             mMsgStateLogger.reset();
@@ -1056,9 +1027,9 @@ public class IpManager extends StateMachine {
         }
     }
 
-    // Updates all IpManager-related state concerned with LinkProperties.
+    // Updates all IpClient-related state concerned with LinkProperties.
     // Returns a ProvisioningChange for possibly notifying other interested
-    // parties that are not fronted by IpManager.
+    // parties that are not fronted by IpClient.
     private ProvisioningChange setLinkProperties(LinkProperties newLp) {
         if (mApfFilter != null) {
             mApfFilter.setLinkProperties(newLp);
@@ -1092,7 +1063,7 @@ public class IpManager extends StateMachine {
         //
         // N.B.: this is fundamentally race-prone and should be fixed by
         // changing NetlinkTracker from a hybrid edge/level model to an
-        // edge-only model, or by giving IpManager its own netlink socket(s)
+        // edge-only model, or by giving IpClient its own netlink socket(s)
         // so as to track all required information directly.
         LinkProperties netlinkLinkProperties = mNetlinkTracker.getLinkProperties();
         newLp.setLinkAddresses(netlinkLinkProperties.getLinkAddresses());
@@ -1238,7 +1209,7 @@ public class IpManager extends StateMachine {
             }
         } else {
             // Start DHCPv4.
-            mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpManager.this, mInterfaceName);
+            mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpClient.this, mInterfaceName);
             mDhcpClient.registerForPreDhcpNotification();
             mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
         }
@@ -1405,7 +1376,7 @@ public class IpManager extends StateMachine {
             } else {
                 // Clear all IPv4 and IPv6 before proceeding to RunningState.
                 // Clean up any leftover state from an abnormal exit from
-                // tethering or during an IpManager restart.
+                // tethering or during an IpClient restart.
                 stopAllIP();
             }
         }
