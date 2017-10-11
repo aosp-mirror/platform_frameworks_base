@@ -14,12 +14,12 @@
 
 package com.android.systemui.globalactions;
 
+import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
+
 import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -32,12 +32,14 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.GradientDrawable;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
-public class GlobalActionsImpl implements GlobalActions {
+public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
 
@@ -45,15 +47,23 @@ public class GlobalActionsImpl implements GlobalActions {
     private final KeyguardMonitor mKeyguardMonitor;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private GlobalActionsDialog mGlobalActions;
+    private boolean mDisabled;
 
     public GlobalActionsImpl(Context context) {
         mContext = context;
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallbacks(this);
+    }
+
+    @Override
+    public void destroy() {
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
     }
 
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
+        if (mDisabled) return;
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActionsDialog(mContext, manager);
         }
@@ -106,5 +116,15 @@ public class GlobalActionsImpl implements GlobalActions {
         background.setScreenSize(displaySize.x, displaySize.y);
 
         d.show();
+    }
+
+    @Override
+    public void disable(int state1, int state2, boolean animate) {
+        final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
+        if (disabled == mDisabled) return;
+        mDisabled = disabled;
+        if (disabled && mGlobalActions != null) {
+            mGlobalActions.dismissDialog();
+        }
     }
 }
