@@ -2000,6 +2000,11 @@ public class AccountManagerService
 
                         Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
                         if (intent != null && notifyOnAuthFailure && !customTokens) {
+                            intent.setFlags(
+                                    intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
                             doNotification(mAccounts,
                                     account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
                                     intent, accounts.userId);
@@ -3087,6 +3092,11 @@ public class AccountManagerService
             }
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                intent.setFlags(
+                        intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
                 /*
                  * The Authenticator API allows third party authenticators to
                  * supply arbitrary intents to other apps that they can run,
