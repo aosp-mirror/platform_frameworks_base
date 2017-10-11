@@ -40,7 +40,7 @@ public class BoringLayoutIsBoringPerfTest {
 
     private static final boolean[] BOOLEANS = new boolean[]{false, true};
 
-    @Parameterized.Parameters(name = "cached={4},{1} chars,{0}")
+    @Parameterized.Parameters(name = "cached={4},{1}chars,{0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {

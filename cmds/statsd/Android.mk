@@ -42,24 +42,7 @@ LOCAL_MODULE := statsd
 LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
-    src/StatsService.cpp \
-    src/AnomalyMonitor.cpp \
-    src/LogEntryPrinter.cpp \
-    src/LogReader.cpp \
-    src/main.cpp \
-    src/DropboxWriter.cpp \
-    src/parse_util.cpp \
-    src/StatsLogProcessor.cpp \
-    src/stats_log.proto \
-    src/statsd_config.proto \
-    src/StatsPullerManager.cpp \
-    src/KernelWakelockPuller.cpp \
-    src/DropboxReader.cpp \
-    src/matchers/LogEntryMatcherManager.cpp \
-    src/metrics/CountMetricProducer.cpp \
-    src/metrics/ConditionTracker.cpp \
-    src/metrics/MetricsManager.cpp \
-    src/metrics/CountAnomalyTracker.cpp \
+    $(call all-cpp-files-under,src) \
 
 LOCAL_CFLAGS += \
     -Wall \
@@ -129,13 +112,20 @@ LOCAL_SRC_FILES := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/StatsService.cpp \
-    tests/indexed_priority_queue_test.cpp \
-    src/parse_util.cpp \
+    src/stats_util.cpp \
     src/LogEntryPrinter.cpp \
     src/LogReader.cpp \
-    src/matchers/LogEntryMatcherManager.cpp \
-    tests/LogReader_test.cpp \
-    tests/LogEntryMatcher_test.cpp \
+    src/matchers/matcher_util.cpp \
+    src/condition/SimpleConditionTracker.cpp \
+    src/condition/CombinationConditionTracker.cpp \
+    src/matchers/SimpleLogMatchingTracker.cpp \
+    src/matchers/CombinationLogMatchingTracker.cpp \
+    src/metrics/metrics_manager_util.cpp \
+    src/metrics/CountMetricProducer.cpp \
+    src/metrics/CountAnomalyTracker.cpp \
+    src/condition/condition_util.cpp \
+    src/UidMap.cpp \
+    $(call all-cpp-files-under, tests) \
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock \

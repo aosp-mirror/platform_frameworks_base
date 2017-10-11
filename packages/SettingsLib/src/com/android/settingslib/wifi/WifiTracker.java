@@ -291,15 +291,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Force a scan for wifi networks to happen now.
-     */
-    public void forceScan() {
-        if (mWifiManager.isWifiEnabled() && mScanner != null) {
-            mScanner.forceScan();
-        }
-    }
-
-    /**
      * Temporarily stop scanning for wifi networks.
      */
     public void pauseScanning() {
@@ -789,14 +780,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         }
     }
 
-    public static List<AccessPoint> getCurrentAccessPoints(Context context, boolean includeSaved,
-            boolean includeScans) {
-        WifiTracker tracker = new WifiTracker(context, null, includeSaved, includeScans);
-        tracker.forceUpdate();
-        tracker.copyAndNotifyListeners(false /*notifyListeners*/);
-        return tracker.getAccessPoints();
-    }
-
     @VisibleForTesting
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -984,11 +967,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             if (!hasMessages(MSG_SCAN)) {
                 sendEmptyMessage(MSG_SCAN);
             }
-        }
-
-        void forceScan() {
-            removeMessages(MSG_SCAN);
-            sendEmptyMessage(MSG_SCAN);
         }
 
         void pause() {

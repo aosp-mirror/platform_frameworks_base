@@ -102,6 +102,7 @@
     <!-- os storage test permissions -->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.ASEC_ACCESS" />
+    <uses-permission android:name="android.permission.ASEC_ACCESS" />
     <uses-permission android:name="android.permission.ASEC_CREATE" />
     <uses-permission android:name="android.permission.ASEC_DESTROY" />
     <uses-permission android:name="android.permission.ASEC_MOUNT_UNMOUNT" />
@@ -1345,10 +1346,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.print.PrintTestActivity"/>
+        <activity
+            android:name="android.print.test.PrintDocumentActivity"
+            android:theme="@style/Theme" />
 
         <service
-            android:name="android.print.mockservice.MockPrintService"
+            android:name="android.print.test.services.FirstPrintService"
             android:permission="android.permission.BIND_PRINT_SERVICE">
             <intent-filter>
                 <action android:name="android.printservice.PrintService" />
@@ -1360,9 +1363,10 @@
         </service>
 
         <activity
-            android:name="android.print.mockservice.SettingsActivity"
+            android:name="android.print.test.services.SettingsActivity"
             android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme">
         </activity>
 
         <activity

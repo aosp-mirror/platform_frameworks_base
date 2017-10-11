@@ -17,16 +17,16 @@
 #ifndef COUNT_METRIC_PRODUCER_H
 #define COUNT_METRIC_PRODUCER_H
 
-#include <mutex>
-#include <thread>
 #include <unordered_map>
-#include "../matchers/LogEntryMatcherManager.h"
+
 #include "CountAnomalyTracker.h"
-#include "ConditionTracker.h"
-#include "DropboxWriter.h"
+#include "../condition/ConditionTracker.h"
+#include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+
+using namespace std;
 
 namespace android {
 namespace os {
@@ -34,22 +34,23 @@ namespace statsd {
 
 class CountMetricProducer : public MetricProducer {
 public:
-    CountMetricProducer(const CountMetric& countMetric, const sp<ConditionTracker> condition);
-
-    CountMetricProducer(const CountMetric& countMetric);
+    CountMetricProducer(const CountMetric& countMetric, const bool hasCondition);
 
     virtual ~CountMetricProducer();
 
     void onMatchedLogEvent(const LogEventWrapper& event) override;
 
+    void onConditionChanged(const bool conditionMet) override;
+
     void finish() override;
 
     void onDumpReport() override;
 
+    // TODO: Implement this later.
+    virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override {};
+
 private:
     const CountMetric mMetric;
-
-    const sp<ConditionTracker> mConditionTracker;
 
     const time_t mStartTime;
     // TODO: Add dimensions.
@@ -61,6 +62,8 @@ private:
     long mBucketSize_sec;
 
     CountAnomalyTracker mAnomalyTracker;
+
+    bool mCondition;
 
     void flushCounterIfNeeded(const time_t& newEventTime);
 };

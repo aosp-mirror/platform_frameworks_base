@@ -18,20 +18,26 @@
 #define METRIC_PRODUCER_H
 
 #include <log/logprint.h>
-#include "../matchers/LogEntryMatcherManager.h"
+#include <utils/RefBase.h>
+#include "../matchers/matcher_util.h"
+#include "PackageInfoListener.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
-// writing the report to dropbox.
-class MetricProducer {
+// writing the report to dropbox. MetricProducers should respond to package changes as required in
+// PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
+// be a no-op.
+class MetricProducer : public virtual RefBase, public virtual PackageInfoListener {
 public:
     virtual ~MetricProducer(){};
 
-    // Consume the stats log if it's interesting to this metric.
+    // Consume the parsed stats log entry that already matched the "what" of the metric.
     virtual void onMatchedLogEvent(const LogEventWrapper& event) = 0;
+
+    virtual void onConditionChanged(const bool condition) = 0;
 
     // This is called when the metric collecting is done, e.g., when there is a new configuration
     // coming. MetricProducer should do the clean up, and dump existing data to dropbox.

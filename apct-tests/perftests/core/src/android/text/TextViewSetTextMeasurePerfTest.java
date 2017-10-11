@@ -40,7 +40,7 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
- * Performance test for multi line, single style {@link StaticLayout} creation/draw.
+ * Performance test for {@link TextView} measure/draw.
  */
 @LargeTest
 @RunWith(Parameterized.class)
@@ -51,7 +51,7 @@ public class TextViewSetTextMeasurePerfTest {
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "cached={3},{1} chars,{0}")
+    @Parameterized.Parameters(name = "cached={3},{1}chars,{0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {

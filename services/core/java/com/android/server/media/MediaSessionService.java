@@ -205,9 +205,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private List<MediaSessionRecord> getActiveSessionsLocked(int userId) {
-        List<MediaSessionRecord> records;
+        List<MediaSessionRecord> records = new ArrayList<>();
         if (userId == UserHandle.USER_ALL) {
-            records = new ArrayList<>();
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
                 records.addAll(mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(userId));
@@ -216,9 +215,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
                 Log.w(TAG, "getSessions failed. Unknown user " + userId);
-                return new ArrayList<>();
+                return records;
             }
-            records = user.mPriorityStack.getActiveSessions(userId);
+            records.addAll(user.mPriorityStack.getActiveSessions(userId));
         }
 
         // Return global priority session at the first whenever it's asked.

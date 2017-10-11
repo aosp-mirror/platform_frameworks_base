@@ -33,21 +33,27 @@ public abstract class AbstractLogdSizePreferenceController extends
             + "AbstractLogdSizePreferenceController.LOGD_SIZE_UPDATED";
     public static final String EXTRA_CURRENT_LOGD_VALUE = "CURRENT_LOGD_VALUE";
 
+    @VisibleForTesting
+    static final String LOW_RAM_CONFIG_PROPERTY_KEY = "ro.config.low_ram";
     private static final String SELECT_LOGD_SIZE_KEY = "select_logd_size";
     @VisibleForTesting
     static final String SELECT_LOGD_SIZE_PROPERTY = "persist.logd.size";
     static final String SELECT_LOGD_TAG_PROPERTY = "persist.log.tag";
     // Tricky, isLoggable only checks for first character, assumes silence
     static final String SELECT_LOGD_TAG_SILENCE = "Settings";
-    private static final String SELECT_LOGD_SNET_TAG_PROPERTY = "persist.log.tag.snet_event_log";
+    @VisibleForTesting
+    static final String SELECT_LOGD_SNET_TAG_PROPERTY = "persist.log.tag.snet_event_log";
     private static final String SELECT_LOGD_RUNTIME_SNET_TAG_PROPERTY = "log.tag.snet_event_log";
     private static final String SELECT_LOGD_DEFAULT_SIZE_PROPERTY = "ro.logd.size";
     @VisibleForTesting
     static final String SELECT_LOGD_DEFAULT_SIZE_VALUE = "262144";
     private static final String SELECT_LOGD_SVELTE_DEFAULT_SIZE_VALUE = "65536";
     // 32768 is merely a menu marker, 64K is our lowest log buffer size we replace it with.
-    private static final String SELECT_LOGD_MINIMUM_SIZE_VALUE = "65536";
+    @VisibleForTesting
+    static final String SELECT_LOGD_MINIMUM_SIZE_VALUE = "65536";
     static final String SELECT_LOGD_OFF_SIZE_MARKER_VALUE = "32768";
+    @VisibleForTesting
+    static final String DEFAULT_SNET_TAG = "I";
 
     private ListPreference mLogdSize;
 
@@ -154,7 +160,7 @@ public abstract class AbstractLogdSizePreferenceController extends
             if ((snetValue == null) || (snetValue.length() == 0)) {
                 snetValue = SystemProperties.get(SELECT_LOGD_RUNTIME_SNET_TAG_PROPERTY);
                 if ((snetValue == null) || (snetValue.length() == 0)) {
-                    SystemProperties.set(SELECT_LOGD_SNET_TAG_PROPERTY, "I");
+                    SystemProperties.set(SELECT_LOGD_SNET_TAG_PROPERTY, DEFAULT_SNET_TAG);
                 }
             }
             // Silence all log sources, security logs notwithstanding

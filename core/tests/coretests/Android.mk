@@ -36,7 +36,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     ub-uiautomator \
     platform-test-annotations \
     compatibility-device-util \
-    truth-prebuilt
+    truth-prebuilt \
+    print-test-util-lib
 
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests

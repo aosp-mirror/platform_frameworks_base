@@ -53,15 +53,15 @@ public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
     static void getIncludedResourcePaths(String packageName, List<ResourcePath> paths) {
         paths.add(new ResourcePath(
-                packageName,
+                null,
                 Fs.fileFromPath("./frameworks/base/packages/SettingsLib/res"),
                 null));
         paths.add(new ResourcePath(
-                packageName,
+                null,
                 Fs.fileFromPath("./frameworks/base/core/res/res"),
                 null));
         paths.add(new ResourcePath(
-                packageName,
+                null,
                 Fs.fileFromPath("./frameworks/support/v7/appcompat/res"),
                 null));
     }

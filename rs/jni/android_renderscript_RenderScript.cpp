@@ -1328,7 +1328,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
-                                                  ptr, bitmap.getSize(), usage);
+                                                  ptr, bitmap.computeByteSize(), usage);
     return id;
 }
 
@@ -1356,7 +1356,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
-                                                      ptr, bitmap.getSize(), usage);
+                                                      ptr, bitmap.computeByteSize(), usage);
     return id;
 }
 
@@ -1371,7 +1371,7 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData((RsContext)con, (RsAllocation)alloc, 0, 0,
                        0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
-                       w, h, ptr, bitmap.getSize(), 0);
+                       w, h, ptr, bitmap.computeByteSize(), 0);
 }
 
 static void
@@ -1381,7 +1381,7 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, job
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
     void* ptr = bitmap.getPixels();
-    rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.getSize());
+    rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.computeByteSize());
     bitmap.notifyPixelsChanged();
 }
 

@@ -20,7 +20,6 @@
 #include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
 #include <log/log_event_list.h>
 #include <metrics/CountMetricProducer.h>
-#include <parse_util.h>
 #include <utils/Errors.h>
 
 using namespace android;
@@ -32,35 +31,15 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsLogProcessor::StatsLogProcessor() : m_dropbox_writer("all-logs") {
+StatsLogProcessor::StatsLogProcessor(const sp<UidMap> &uidMap)
+        : m_dropbox_writer("all-logs"), m_UidMap(uidMap)
+{
     // hardcoded config
     // this should be called from StatsService when it receives a statsd_config
     UpdateConfig(0, buildFakeConfig());
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
-}
-
-StatsdConfig StatsLogProcessor::buildFakeConfig() {
-    // HACK: Hard code a test metric for counting screen on events...
-    StatsdConfig config;
-    config.set_config_id(12345L);
-
-    CountMetric* metric = config.add_count_metric();
-    metric->set_metric_id(20150717L);
-    metric->set_what("SCREEN_IS_ON");
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-
-    LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
-    eventMatcher->set_name("SCREEN_IS_ON");
-
-    SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()
-            ->set_key(1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleLogEntryMatcher->mutable_key_value_matcher(0)
-            ->set_eq_int(2/*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-    return config;
 }
 
 // TODO: what if statsd service restarts? How do we know what logs are already processed before?
@@ -83,7 +62,14 @@ void StatsLogProcessor::UpdateConfig(const int config_source, const StatsdConfig
 
     ALOGD("Updated configuration for source %i", config_source);
 
-    mMetricsManagers.insert({config_source, std::make_unique<MetricsManager>(config)});
+    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(config);
+    if (newMetricsManager->isConfigValid()) {
+        mMetricsManagers.insert({config_source, std::move(newMetricsManager)});
+        ALOGD("StatsdConfig valid");
+    } else {
+        // If there is any error in the config, don't use it.
+        ALOGD("StatsdConfig NOT valid");
+    }
 }
 
 }  // namespace statsd

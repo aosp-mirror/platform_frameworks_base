@@ -42,11 +42,12 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 # Include the testing libraries (JUnit4 + Robolectric libs).
 LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-robolectric-prebuilt \
+    platform-robolectric-android-all-stubs \
     truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := \
     junit \
-    platform-robolectric-prebuilt
+    platform-robolectric-3.4.2-prebuilt
 
 LOCAL_INSTRUMENTATION_FOR := SettingsLibShell
 LOCAL_MODULE := SettingsLibRoboTests
@@ -69,4 +70,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_TEST_PACKAGE := SettingsLibShell
 
-include prebuilts/misc/common/robolectric/run_robotests.mk
+LOCAL_ROBOTEST_TIMEOUT := 36000
+
+include prebuilts/misc/common/robolectric/3.4.2/run_robotests.mk

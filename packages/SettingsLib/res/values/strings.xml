@@ -983,4 +983,14 @@
     <!-- [CHAR LIMIT=NONE] Dialog body explaining that the app just selected by the user will not work after a reboot until until after the user enters their credentials, such as a PIN or password. -->
     <string name="direct_boot_unaware_dialog_message">Note: After a reboot, this app can\'t start until you unlock your phone</string>
 
+    <!--Label of IMS registration header -->
+    <string name="ims_reg_title">"IMS registration state"</string>
+    <!--Used when IMS registration state is registered -->
+    <string name="ims_reg_status_registered">"Registered"</string>
+    <!--Used when IMS registration state is not registered -->
+    <string name="ims_reg_status_not_registered">"Not registered"</string>
+
+    <!-- About phone, status item value if the actual value is not available. -->
+    <string name="status_unavailable">Unavailable</string>
+
 </resources>

@@ -20,8 +20,8 @@
 #include <cutils/log.h>
 #include <log/logprint.h>
 #include <unordered_map>
-#include "../matchers/LogEntryMatcherManager.h"
-#include "ConditionTracker.h"
+#include "../condition/ConditionTracker.h"
+#include "../matchers/LogMatchingTracker.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
@@ -36,25 +36,58 @@ public:
 
     ~MetricsManager();
 
-    // Consume the stats log if it's interesting to this metric.
+    // Return whether the configuration is valid.
+    bool isConfigValid() const;
+
     void onLogEvent(const log_msg& logMsg);
 
+    // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
 
 private:
-    const StatsdConfig mConfig;
-
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
 
-    // The matchers that my metrics share.
-    std::vector<LogEntryMatcher> mMatchers;
+    // We only store the sp of LogMatchingTracker, MetricProducer, and ConditionTracker in
+    // MetricManager. There are relationship between them, and the relationship are denoted by index
+    // instead of poiters. The reasons for this are: (1) the relationship between them are
+    // complicated, store index instead of pointers reduce the risk of A holds B's sp, and B holds
+    // A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get the
+    // related results from a cache using the index.
+    // TODO: using unique_ptr may be more appriopreate?
 
-    // The conditions that my metrics share.
-    std::vector<sp<ConditionTracker>> mConditionTracker;
+    // Hold all the log entry matchers from the config.
+    std::vector<sp<LogMatchingTracker>> mAllLogEntryMatchers;
 
-    // the map from LogEntryMatcher names to the metrics that use this matcher.
-    std::unordered_map<std::string, std::vector<std::unique_ptr<MetricProducer>>> mLogMatchers;
+    // Hold all the conditions from the config.
+    std::vector<sp<ConditionTracker>> mAllConditionTrackers;
+
+    // Hold all metrics from the config.
+    std::vector<sp<MetricProducer>> mAllMetricProducers;
+
+    // To make the log processing more efficient, we want to do as much filtering as possible
+    // before we go into individual trackers and conditions to match.
+
+    // 1st filter: check if the event tag id is in mTagIds.
+    // 2nd filter: if it is, we parse the event because there is at least one member is interested.
+    //             then pass to all LogMatchingTrackers (itself also filter events by ids).
+    // 3nd filter: for LogMatchingTrackers that matched this event, we pass this event to the
+    //             ConditionTrackers and MetricProducers that use this matcher.
+    // 4th filter: for ConditionTrackers that changed value due to this event, we pass
+    //             new conditions to  metrics that use this condition.
+
+    // The following map is initialized from the statsd_config.
+
+    // maps from the index of the LogMatchingTracker to index of MetricProducer.
+    std::unordered_map<int, std::vector<int>> mTrackerToMetricMap;
+
+    // maps from LogMatchingTracker to ConditionTracker
+    std::unordered_map<int, std::vector<int>> mTrackerToConditionMap;
+
+    // maps from ConditionTracker to MetricProducer
+    std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
+
+    bool mConfigValid;
 };
 
 }  // namespace statsd

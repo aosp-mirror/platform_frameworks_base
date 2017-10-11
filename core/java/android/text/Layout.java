@@ -319,8 +319,6 @@ public abstract class Layout {
 
     private float getJustifyWidth(int lineNum) {
         Alignment paraAlign = mAlignment;
-        TabStops tabStops = null;
-        boolean tabStopsIsInitialized = false;
 
         int left = 0;
         int right = mWidth;
@@ -369,10 +367,6 @@ public abstract class Layout {
                     }
                 }
             }
-        }
-
-        if (getLineContainsTab(lineNum)) {
-            tabStops = new TabStops(TAB_INCREMENT, spans);
         }
 
         final Alignment align;
@@ -1423,7 +1417,6 @@ public abstract class Layout {
         float dist = Math.abs(getHorizontal(max, primary) - horiz);
 
         if (dist <= bestdist) {
-            bestdist = dist;
             best = max;
         }
 
@@ -1570,7 +1563,7 @@ public abstract class Layout {
         // XXX: we don't care about tabs
         tl.set(mPaint, mText, lineStart, lineEnd, lineDir, directions, false, null);
         caret = lineStart + tl.getOffsetToLeftRightOf(caret - lineStart, toLeft);
-        tl = TextLine.recycle(tl);
+        TextLine.recycle(tl);
         return caret;
     }
 
@@ -1894,10 +1887,7 @@ public abstract class Layout {
 
         int margin = 0;
 
-        boolean isFirstParaLine = lineStart == 0 ||
-            spanned.charAt(lineStart - 1) == '\n';
-
-        boolean useFirstLineMargin = isFirstParaLine;
+        boolean useFirstLineMargin = lineStart == 0 || spanned.charAt(lineStart - 1) == '\n';
         for (int i = 0; i < spans.length; i++) {
             if (spans[i] instanceof LeadingMarginSpan2) {
                 int spStart = spanned.getSpanStart(spans[i]);

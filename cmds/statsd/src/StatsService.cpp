@@ -40,7 +40,8 @@ namespace os {
 namespace statsd {
 
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mAnomalyMonitor(new AnomalyMonitor(2)), mStatsPullerManager()  // TODO: Change this based on the config
+    :   mAnomalyMonitor(new AnomalyMonitor(2)),m_UidMap(new UidMap()), mStatsPullerManager()
+    // TODO: Change AnomalyMonitor initialization based on the config
 {
     ALOGD("stats service constructed");
 }
@@ -131,6 +132,9 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("config"))) {
             return doLoadConfig(in);
         }
+        if (!args[0].compare(String8("print-uid-map"))) {
+            return doPrintUidMap(out);
+        }
     }
 
     printCmdHelp(out);
@@ -151,6 +155,43 @@ status_t StatsService::doLoadConfig(FILE* in) {
         ALOGD("Config failed to be parsed");
         return UNKNOWN_ERROR;
     }
+}
+
+Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
+                                      const vector<String16>& app) {
+    if (DEBUG) ALOGD("StatsService::informAllUidData was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                                         "Only system uid can call informAllUidData");
+    }
+
+    m_UidMap->updateMap(uid, version, app);
+    if (DEBUG) ALOGD("StatsService::informAllUidData succeeded");
+
+    return Status::ok();
+}
+
+Status StatsService::informOnePackage(const String16& app, int32_t uid, int32_t version) {
+    if (DEBUG) ALOGD("StatsService::informOnePackage was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                                         "Only system uid can call informOnePackage");
+    }
+    m_UidMap->updateApp(app, uid, version);
+    return Status::ok();
+}
+
+Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
+    if (DEBUG) ALOGD("StatsService::informOnePackageRemoved was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(Status::EX_SECURITY,
+                                         "Only system uid can call informOnePackageRemoved");
+    }
+    m_UidMap->removeApp(app, uid);
+    return Status::ok();
 }
 
 Status StatsService::informAnomalyAlarmFired() {
@@ -261,9 +302,15 @@ status_t StatsService::doPrintStatsLog(FILE* out, const Vector<String8>& args) {
     return DropboxReader::readStatsLogs(out, args[1].string(), msec);
 }
 
+status_t StatsService::doPrintUidMap(FILE* out) {
+    m_UidMap->printUidMap(out);
+    return NO_ERROR;
+}
+
 void StatsService::printCmdHelp(FILE* out) {
     fprintf(out, "Usage:\n");
     fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
+    fprintf(out, "\t print-uid-map Prints the UID, app name, version mapping.\n");
     fprintf(out,
             "\t config\t Loads a new config from command-line (must be proto in wire-encoded "
             "format).\n");

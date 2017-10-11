@@ -17,7 +17,7 @@
 package com.android.settingslib;
 
 public class TestConfig {
-    public static final int SDK_VERSION = 23;
+    public static final int SDK_VERSION = 25;
     public static final String MANIFEST_PATH =
             "frameworks/base/packages/SettingsLib/tests/robotests/AndroidManifest.xml";
 }

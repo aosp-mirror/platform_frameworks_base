@@ -574,6 +574,25 @@ public class UserManager {
     public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
 
     /**
+     * Specifies that system error dialogs for crashed or unresponsive apps should not be shown.
+     * In this case, the system will force-stop the app as if the user chooses the "close app"
+     * option on the UI. No feedback report will be collected as there is no way for the user to
+     * provide explicit consent.
+     *
+     * When this user restriction is set by device owners, it's applied to all users; when it's set
+     * by profile owners, it's only applied to the relevant profiles.
+     * The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
+
+    /**
      * Specifies if what is copied in the clipboard of this profile can
      * be pasted in related profiles. Does not restrict if the clipboard of related profiles can be
      * pasted in this profile.

@@ -96,6 +96,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SMS,
             UserManager.DISALLOW_FUN,
             UserManager.DISALLOW_CREATE_WINDOWS,
+            UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE,
             UserManager.DISALLOW_OUTGOING_BEAM,
             UserManager.DISALLOW_WALLPAPER,
@@ -156,6 +157,7 @@ public class UserRestrictionsUtils {
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
             UserManager.DISALLOW_BLUETOOTH_SHARING,
+            UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE

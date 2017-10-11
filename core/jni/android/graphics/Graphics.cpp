@@ -645,7 +645,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     const int maxHeight = SkTMax(bitmap->height(), mRecycledBitmap->info().height());
     const SkImageInfo maxInfo = bitmap->info().makeWH(maxWidth, maxHeight);
     const size_t rowBytes = maxInfo.minRowBytes();
-    const size_t bytesNeeded = maxInfo.getSafeSize(rowBytes);
+    const size_t bytesNeeded = maxInfo.computeByteSize(rowBytes);
     if (bytesNeeded <= mRecycledBytes) {
         // Here we take advantage of reconfigure() to reset the rowBytes
         // of mRecycledBitmap.  It is very important that we pass in

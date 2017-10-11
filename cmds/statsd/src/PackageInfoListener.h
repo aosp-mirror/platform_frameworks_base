@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package android.print.mockservice;
+#ifndef STATSD_PACKAGE_INFO_LISTENER_H
+#define STATSD_PACKAGE_INFO_LISTENER_H
 
-import android.printservice.PrintJob;
-import android.printservice.PrintService;
+#include <utils/RefBase.h>
+#include <string>
 
-public abstract class PrintServiceCallbacks {
+namespace android {
+namespace os {
+namespace statsd {
 
-    private PrintService mService;
+class PackageInfoListener : public virtual android::RefBase {
+public:
+    // Uid map will notify this listener that the app with apk name and uid has been upgraded to
+    // the specified version.
+    virtual void notifyAppUpgrade(const std::string& apk, const int uid, const int version) = 0;
+};
 
-    public PrintService getService() {
-        return mService;
-    }
+}  // namespace statsd
+}  // namespace os
+}  // namespace android
 
-    public void setService(PrintService service) {
-        mService = service;
-    }
-
-    public abstract PrinterDiscoverySessionCallbacks onCreatePrinterDiscoverySessionCallbacks();
-
-    public abstract void onRequestCancelPrintJob(PrintJob printJob);
-
-    public abstract void onPrintJobQueued(PrintJob printJob);
-}
+#endif //STATSD_PACKAGE_INFO_LISTENER_H

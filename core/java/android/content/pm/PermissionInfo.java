@@ -353,6 +353,11 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return size;
     }
 
+    /** @hide */
+    public boolean isAppOp() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
+    }
+
     public static final Creator<PermissionInfo> CREATOR =
         new Creator<PermissionInfo>() {
         @Override

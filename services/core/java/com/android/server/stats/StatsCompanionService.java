@@ -20,15 +20,25 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
+import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
@@ -53,6 +63,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final PendingIntent mAnomalyAlarmIntent;
     private final PendingIntent mPollingAlarmIntent;
+    private final BroadcastReceiver mAppUpdateReceiver;
 
     public StatsCompanionService(Context context) {
         super();
@@ -63,7 +74,84 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 new Intent(mContext, AnomalyAlarmReceiver.class), 0);
         mPollingAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(mContext, PollingAlarmReceiver.class), 0);
+        mAppUpdateReceiver = new AppUpdateReceiver();
+        Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
     }
+
+    private final static int[] toIntArray(List<Integer> list){
+        int[] ret = new int[list.size()];
+        for(int i = 0;i < ret.length;i++) {
+            ret[i] = list.get(i);
+        }
+        return ret;
+    }
+
+    // Assumes that sStatsdLock is held.
+    private final void informAllUidsLocked(Context context) throws RemoteException {
+        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        PackageManager pm = context.getPackageManager();
+        final List<UserInfo> users = um.getUsers(true);
+        if (DEBUG) {
+            Slog.w(TAG, "Iterating over "+users.size() + " profiles.");
+        }
+
+        List<Integer> uids = new ArrayList();
+        List<Integer> versions = new ArrayList();
+        List<String> apps = new ArrayList();
+
+        // Add in all the apps for every user/profile.
+        for (UserInfo profile : users) {
+          List<PackageInfo> pi = pm.getInstalledPackagesAsUser(0, profile.id);
+          for (int j = 0; j < pi.size(); j++) {
+              if (pi.get(j).applicationInfo != null) {
+                  uids.add(pi.get(j).applicationInfo.uid);
+                  versions.add(pi.get(j).versionCode);
+                  apps.add(pi.get(j).packageName);
+              }
+          }
+        }
+        sStatsd.informAllUidData(toIntArray(uids), toIntArray(versions), apps.toArray(new
+            String[apps.size()]));
+        if (DEBUG) {
+            Slog.w(TAG, "Sent data for "+uids.size() +" apps");
+        }
+    }
+
+    public final static class AppUpdateReceiver extends BroadcastReceiver  {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
+            synchronized (sStatsdLock) {
+                if (sStatsd == null) {
+                    Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
+                    return;
+                }
+                try {
+                    if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
+                        Bundle b = intent.getExtras();
+                        int uid = b.getInt(Intent.EXTRA_UID);
+                        boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                        if (!replacing) {
+                            // Don't bother sending an update if we're right about to get another
+                            // intent for the new version that's added.
+                            PackageManager pm = context.getPackageManager();
+                            String app = intent.getData().getSchemeSpecificPart();
+                            sStatsd.informOnePackageRemoved(app, uid);
+                        }
+                    } else {
+                        PackageManager pm = context.getPackageManager();
+                        Bundle b = intent.getExtras();
+                        int uid = b.getInt(Intent.EXTRA_UID);
+                        String app = intent.getData().getSchemeSpecificPart();
+                        PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
+                        sStatsd.informOnePackage(app, uid, pi.versionCode);
+                    }
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to inform statsd of an app update", e);
+                }
+            }
+        }
+    };
 
     public final static class AnomalyAlarmReceiver extends BroadcastReceiver  {
         @Override
@@ -275,6 +363,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     Slog.e(TAG, "linkToDeath(StatsdDeathRecipient) failed", e);
                     forgetEverything();
                 }
+                // Setup broadcast receiver for updates
+                IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REPLACED);
+                filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+                filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+                filter.addDataScheme("package");
+                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter, null,
+                    null);
+                // Pull the latest state of UID->app name, version mapping when statsd starts.
+                informAllUidsLocked(mContext);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverything();
@@ -293,6 +390,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void forgetEverything() {
         synchronized (sStatsdLock) {
             sStatsd = null;
+            mContext.unregisterReceiver(mAppUpdateReceiver);
             cancelAnomalyAlarm();
             cancelPollingAlarms();
         }

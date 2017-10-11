@@ -20,8 +20,11 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -56,10 +59,10 @@ public class RestrictedLockUtilsTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RestrictedLockUtils.Proxy mProxy;
 
-    private static final int mUserId = 194;
-    private static final int mProfileId = 160;
-    private static final ComponentName mAdmin1 = new ComponentName("admin1", "admin1class");
-    private static final ComponentName mAdmin2 = new ComponentName("admin2", "admin2class");
+    private final int mUserId = 194;
+    private final int mProfileId = 160;
+    private final ComponentName mAdmin1 = new ComponentName("admin1", "admin1class");
+    private final ComponentName mAdmin2 = new ComponentName("admin2", "admin2class");
 
     @Before
     public void setUp() {

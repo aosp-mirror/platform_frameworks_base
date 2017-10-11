@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-#include "LogEntryMatcherManager.h"
+#include "matcher_util.h"
 #include <cutils/log.h>
 #include <log/event_tag_map.h>
 #include <log/log_event_list.h>
 #include <log/logprint.h>
 #include <utils/Errors.h>
 #include <unordered_map>
+#include "LogMatchingTracker.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "parse_util.h"
+#include "stats_util.h"
 
 using std::set;
 using std::string;
 using std::unordered_map;
+using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-LogEventWrapper LogEntryMatcherManager::parseLogEvent(log_msg msg) {
+LogEventWrapper parseLogEvent(log_msg msg) {
     LogEventWrapper wrapper;
     wrapper.timestamp_ns = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
     wrapper.tagId = getTagId(msg);
@@ -67,7 +69,9 @@ LogEventWrapper LogEntryMatcherManager::parseLogEvent(log_msg msg) {
                     break;
                 case EVENT_TYPE_STRING:
                     if (index % 2 == 1) {
-                        wrapper.strMap[key] = elem.data.string;
+                        // without explicit calling string() constructor, there will be an
+                        // additional 0 in the end of the string.
+                        wrapper.strMap[key] = string(elem.data.string);
                     }
                     index++;
                     break;
@@ -99,57 +103,56 @@ LogEventWrapper LogEntryMatcherManager::parseLogEvent(log_msg msg) {
     return wrapper;
 }
 
-bool LogEntryMatcherManager::matches(const LogEntryMatcher& matcher, const LogEventWrapper& event) {
-    const int tagId = event.tagId;
-    const unordered_map<int, long>& intMap = event.intMap;
-    const unordered_map<int, string>& strMap = event.strMap;
-    const unordered_map<int, float>& floatMap = event.floatMap;
-    const unordered_map<int, bool>& boolMap = event.boolMap;
-
-    if (matcher.has_combination()) {  // Need to evaluate composite matching
-        switch (matcher.combination().operation()) {
-            case LogicalOperation::AND:
-                for (auto nestedMatcher : matcher.combination().matcher()) {
-                    if (!matches(nestedMatcher, event)) {
-                        return false;  // return false if any nested matcher is false;
-                    }
+bool combinationMatch(const vector<int>& children, const LogicalOperation& operation,
+                      const vector<MatchingState>& matcherResults) {
+    bool matched;
+    switch (operation) {
+        case LogicalOperation::AND: {
+            matched = true;
+            for (const int childIndex : children) {
+                if (matcherResults[childIndex] != MatchingState::kMatched) {
+                    matched = false;
+                    break;
                 }
-                return true;  // Otherwise, return true.
-            case LogicalOperation::OR:
-                for (auto nestedMatcher : matcher.combination().matcher()) {
-                    if (matches(nestedMatcher, event)) {
-                        return true;  // return true if any nested matcher is true;
-                    }
-                }
-                return false;
-            case LogicalOperation::NOT:
-                return !matches(matcher.combination().matcher(0), event);
-
-            // Case NAND is just inverting the return statement of AND
-            case LogicalOperation::NAND:
-                for (auto nestedMatcher : matcher.combination().matcher()) {
-                    auto simple = nestedMatcher.simple_log_entry_matcher();
-                    if (!matches(nestedMatcher, event)) {
-                        return true;  // return false if any nested matcher is false;
-                    }
-                }
-                return false;  // Otherwise, return true.
-            case LogicalOperation::NOR:
-                for (auto nestedMatcher : matcher.combination().matcher()) {
-                    if (matches(nestedMatcher, event)) {
-                        return false;  // return true if any nested matcher is true;
-                    }
-                }
-                return true;
+            }
+            break;
         }
-        return false;
-    } else {
-        return matchesSimple(matcher.simple_log_entry_matcher(), event);
+        case LogicalOperation::OR: {
+            matched = false;
+            for (const int childIndex : children) {
+                if (matcherResults[childIndex] == MatchingState::kMatched) {
+                    matched = true;
+                    break;
+                }
+            }
+            break;
+        }
+        case LogicalOperation::NOT:
+            matched = matcherResults[children[0]] == MatchingState::kNotMatched;
+            break;
+        case LogicalOperation::NAND:
+            matched = false;
+            for (const int childIndex : children) {
+                if (matcherResults[childIndex] != MatchingState::kMatched) {
+                    matched = true;
+                    break;
+                }
+            }
+            break;
+        case LogicalOperation::NOR:
+            matched = true;
+            for (const int childIndex : children) {
+                if (matcherResults[childIndex] == MatchingState::kMatched) {
+                    matched = false;
+                    break;
+                }
+            }
+            break;
     }
+    return matched;
 }
 
-bool LogEntryMatcherManager::matchesSimple(const SimpleLogEntryMatcher& simpleMatcher,
-                                           const LogEventWrapper& event) {
+bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEventWrapper& event) {
     const int tagId = event.tagId;
     const unordered_map<int, long>& intMap = event.intMap;
     const unordered_map<int, string>& strMap = event.strMap;
@@ -247,26 +250,6 @@ bool LogEntryMatcherManager::matchesSimple(const SimpleLogEntryMatcher& simpleMa
         }
     }
     return false;
-}
-
-set<int> LogEntryMatcherManager::getTagIdsFromMatcher(const LogEntryMatcher& matcher) {
-    set<int> result;
-    switch (matcher.contents_case()) {
-        case LogEntryMatcher::kCombination:
-            for (auto sub_matcher : matcher.combination().matcher()) {
-                set<int> tagSet = getTagIdsFromMatcher(sub_matcher);
-                result.insert(tagSet.begin(), tagSet.end());
-            }
-            break;
-        case LogEntryMatcher::kSimpleLogEntryMatcher:
-            for (int i = 0; i < matcher.simple_log_entry_matcher().tag_size(); i++) {
-                result.insert(matcher.simple_log_entry_matcher().tag(i));
-            }
-            break;
-        case LogEntryMatcher::CONTENTS_NOT_SET:
-            break;
-    }
-    return result;
 }
 
 }  // namespace statsd
