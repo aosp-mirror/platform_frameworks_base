@@ -26,7 +26,6 @@
 #include <media/AudioTrack.h>
 #include <media/IMediaHTTPService.h>
 #include <media/mediaplayer.h>
-#include <media/stagefright/MediaExtractor.h>
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
 #include <media/AudioPolicyHelper.h>

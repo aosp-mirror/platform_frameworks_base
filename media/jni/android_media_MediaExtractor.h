@@ -18,8 +18,8 @@
 #define _ANDROID_MEDIA_MEDIAEXTRACTOR_H_
 
 #include <media/stagefright/foundation/ABase.h>
-#include <media/stagefright/MediaSource.h>
-#include <media/stagefright/DataSource.h>
+#include <media/MediaSource.h>
+#include <media/DataSource.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
