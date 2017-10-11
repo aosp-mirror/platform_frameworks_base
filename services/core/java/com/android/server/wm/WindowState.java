@@ -2361,7 +2361,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             // just in case they have the divider at an unstable position. Better
                             // also reset drag resizing state, because the owner can't do it
                             // anymore.
-                            final TaskStack stack = dc.getDockedStackIgnoringVisibility();
+                            final TaskStack stack =
+                                    dc.getSplitScreenPrimaryStackStackIgnoringVisibility();
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }

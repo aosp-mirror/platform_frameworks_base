@@ -101,7 +101,6 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityOptions;
@@ -3891,8 +3890,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = stacks.get(stackNdx);
                 pw.println();
                 pw.println("  Stack #" + stack.mStackId
-                        + ": type=" + activityTypeToString(getActivityType())
-                        + " mode=" + windowingModeToString(getWindowingMode()));
+                        + ": type=" + activityTypeToString(stack.getActivityType())
+                        + " mode=" + windowingModeToString(stack.getWindowingMode()));
                 pw.println("  mFullscreen=" + stack.mFullscreen);
                 pw.println("  isSleeping=" + stack.shouldSleepActivities());
                 pw.println("  mBounds=" + stack.mBounds);

@@ -411,17 +411,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
     }
 
-    TaskStack getStackById(int stackId) {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final DisplayContent dc = mChildren.get(i);
-            final TaskStack stack = dc.getStackById(stackId);
-            if (stack != null) {
-                return stack;
-            }
-        }
-        return null;
-    }
-
     TaskStack getStack(int windowingMode, int activityType) {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final DisplayContent dc = mChildren.get(i);
