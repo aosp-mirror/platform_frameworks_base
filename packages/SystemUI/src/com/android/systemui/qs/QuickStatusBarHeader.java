@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs;
 
+import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.app.StatusBarManager.DISABLE_NONE;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -30,13 +33,14 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
-
-public class QuickStatusBarHeader extends RelativeLayout {
+public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks {
 
     private ActivityStarter mActivityStarter;
 
@@ -44,6 +48,7 @@ public class QuickStatusBarHeader extends RelativeLayout {
 
     private boolean mExpanded;
     private boolean mListening;
+    private boolean mQsDisabled;
 
     protected QuickQSPanel mHeaderQsPanel;
     protected QSTileHost mHost;
@@ -119,9 +124,25 @@ public class QuickStatusBarHeader extends RelativeLayout {
     }
 
     @Override
+    public void disable(int state1, int state2, boolean animate) {
+        final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
+        if (disabled == mQsDisabled) return;
+        mQsDisabled = disabled;
+        mHeaderQsPanel.setDisabledByPolicy(disabled);
+        final int rawHeight = (int) getResources().getDimension(R.dimen.status_bar_header_height);
+        getLayoutParams().height = disabled ? (rawHeight - mHeaderQsPanel.getHeight()) : rawHeight;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+    }
+
+    @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
         super.onDetachedFromWindow();
     }
 

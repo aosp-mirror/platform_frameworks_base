@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_DATE;
 
 import android.app.ActivityManager;
@@ -37,7 +39,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,10 +52,11 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.R.id;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
-import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.TouchAnimator.ListenerAdapter;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
@@ -70,7 +72,7 @@ import com.android.systemui.tuner.TunerService;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter,
         NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
-        SignalCallback {
+        SignalCallback, CommandQueue.Callbacks {
     private static final float EXPAND_INDICATOR_THRESHOLD = .93f;
 
     private ActivityStarter mActivityStarter;
@@ -83,6 +85,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private View mAlarmStatusCollapsed;
     private View mDate;
 
+    private boolean mQsDisabled;
     private QSPanel mQsPanel;
 
     private boolean mExpanded;
@@ -278,9 +281,16 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+    }
+
+    @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
         super.onDetachedFromWindow();
     }
 
@@ -302,6 +312,14 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         return findViewById(R.id.expand_indicator);
     }
 
+    @Override
+    public void disable(int state1, int state2, boolean animate) {
+        final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
+        if (disabled == mQsDisabled) return;
+        mQsDisabled = disabled;
+        updateEverything();
+    }
+
     public void updateEverything() {
         post(() -> {
             updateVisibilities();
@@ -311,8 +329,13 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private void updateVisibilities() {
         updateAlarmVisibilities();
+
+        mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+
+        mExpandIndicator.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
 
         mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers() && !isDemo
