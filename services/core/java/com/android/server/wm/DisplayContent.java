@@ -119,6 +119,7 @@ import static com.android.server.wm.proto.DisplayProto.WINDOW_CONTAINER;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
+import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -3571,6 +3572,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             final int orientation = super.getOrientation();
+            boolean isCar = mService.mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE);
+            if (isCar) {
+                // In a car, you cannot physically rotate the screen, so it doesn't make sense to
+                // allow anything but the default orientation.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "Forcing UNSPECIFIED orientation in car. Ignoring " + orientation);
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+            }
+
             if (orientation != SCREEN_ORIENTATION_UNSET
                     && orientation != SCREEN_ORIENTATION_BEHIND) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
