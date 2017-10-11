@@ -365,6 +365,81 @@ import com.android.internal.os.SomeArgs;
  * <p><b>Note:</b> The autofill service could also whitelist well-known browser apps and skip the
  * verifications above, as long as the service can verify the authenticity of the browser app by
  * checking its signing certificate.
+ *
+ * <a name="MultipleStepsSave"></a>
+ * <h3>Saving when data is split in multiple screens</h3>
+ *
+ * Apps often split the user data in multiple screens in the same activity, specially in
+ * activities used to create a new user account. For example, the first screen asks for a username,
+ * and if the username is available, it moves to a second screen, which asks for a password.
+ *
+ * <p>It's tricky to handle save for autofill in these situations, because the autofill service must
+ * wait until the user enters both fields before the autofill save UI can be shown. But it can be
+ * done by following the steps below:
+ *
+ * <ol>
+ * <li>In the first
+ * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback) fill request}, the service
+ * adds a {@link FillResponse.Builder#setClientState(android.os.Bundle) client state bundle} in
+ * the response, containing the autofill ids of the partial fields present in the screen.
+ * <li>In the second
+ * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback) fill request}, the service
+ * retrieves the {@link FillRequest#getClientState() client state bundle}, gets the autofill ids
+ * set in the previous request from the client state, and adds these ids and the
+ * {@link SaveInfo#FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} to the {@link SaveInfo} used in the second
+ * response.
+ * <li>In the {@link #onSaveRequest(SaveRequest, SaveCallback) save request}, the service uses the
+ * proper {@link FillContext fill contexts} to get the value of each field (there is one fill
+ * context per fill request).
+ * </ol>
+ *
+ * <p>For example, in an app that uses 2 steps for the username and password fields, the workflow
+ * would be:
+ * <pre class="prettyprint">
+ *  // On first fill request
+ *  AutofillId usernameId = // parse from AssistStructure;
+ *  Bundle clientState = new Bundle();
+ *  clientState.putParcelable("usernameId", usernameId);
+ *  fillCallback.onSuccess(
+ *    new FillResponse.Builder()
+ *        .setClientState(clientState)
+ *        .setSaveInfo(new SaveInfo
+ *             .Builder(SaveInfo.SAVE_DATA_TYPE_USERNAME, new AutofillId[] {usernameId})
+ *             .build())
+ *        .build());
+ *
+ *  // On second fill request
+ *  Bundle clientState = fillRequest.getClientState();
+ *  AutofillId usernameId = clientState.getParcelable("usernameId");
+ *  AutofillId passwordId = // parse from AssistStructure
+ *  clientState.putParcelable("passwordId", passwordId);
+ *  fillCallback.onSuccess(
+ *    new FillResponse.Builder()
+ *        .setClientState(clientState)
+ *        .setSaveInfo(new SaveInfo
+ *             .Builder(SaveInfo.SAVE_DATA_TYPE_USERNAME | SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+ *                      new AutofillId[] {usernameId, passwordId})
+ *             .setFlags(SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE)
+ *             .build())
+ *        .build());
+ *
+ *  // On save request
+ *  Bundle clientState = saveRequest.getClientState();
+ *  AutofillId usernameId = clientState.getParcelable("usernameId");
+ *  AutofillId passwordId = clientState.getParcelable("passwordId");
+ *  List<FillContext> fillContexts = saveRequest.getFillContexts();
+ *
+ *  FillContext usernameContext = fillContexts.get(0);
+ *  ViewNode usernameNode = findNodeByAutofillId(usernameContext.getStructure(), usernameId);
+ *  AutofillValue username = usernameNode.getAutofillValue().getTextValue().toString();
+ *
+ *  FillContext passwordContext = fillContexts.get(1);
+ *  ViewNode passwordNode = findNodeByAutofillId(passwordContext.getStructure(), passwordId);
+ *  AutofillValue password = passwordNode.getAutofillValue().getTextValue().toString();
+ *
+ *  save(username, password);
+ *
+ * </pre>
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
