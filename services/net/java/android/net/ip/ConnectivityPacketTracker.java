@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LocalLog;
 
@@ -59,11 +60,14 @@ public class ConnectivityPacketTracker {
     private static final boolean DBG = false;
     private static final String MARK_START = "--- START ---";
     private static final String MARK_STOP = "--- STOP ---";
+    private static final String MARK_NAMED_START = "--- START (%s) ---";
+    private static final String MARK_NAMED_STOP = "--- STOP (%s) ---";
 
     private final String mTag;
     private final LocalLog mLog;
     private final BlockingSocketReader mPacketListener;
     private boolean mRunning;
+    private String mDisplayName;
 
     public ConnectivityPacketTracker(Handler h, NetworkInterface netif, LocalLog log) {
         final String ifname;
@@ -85,14 +89,16 @@ public class ConnectivityPacketTracker {
         mPacketListener = new PacketListener(h, ifindex, hwaddr, mtu);
     }
 
-    public void start() {
+    public void start(String displayName) {
         mRunning = true;
+        mDisplayName = displayName;
         mPacketListener.start();
     }
 
     public void stop() {
         mPacketListener.stop();
         mRunning = false;
+        mDisplayName = null;
     }
 
     private final class PacketListener extends BlockingSocketReader {
@@ -133,16 +139,19 @@ public class ConnectivityPacketTracker {
 
         @Override
         protected void onStart() {
-            mLog.log(MARK_START);
+            final String msg = TextUtils.isEmpty(mDisplayName)
+                    ? MARK_START
+                    : String.format(MARK_NAMED_START, mDisplayName);
+            mLog.log(msg);
         }
 
         @Override
         protected void onStop() {
-            if (mRunning) {
-                mLog.log(MARK_STOP);
-            } else {
-                mLog.log(MARK_STOP + " (packet listener stopped unexpectedly)");
-            }
+            String msg = TextUtils.isEmpty(mDisplayName)
+                    ? MARK_STOP
+                    : String.format(MARK_NAMED_STOP, mDisplayName);
+            if (!mRunning) msg += " (packet listener stopped unexpectedly)";
+            mLog.log(msg);
         }
 
         @Override
