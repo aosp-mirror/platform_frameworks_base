@@ -106,6 +106,10 @@ public class SharedLog {
         record(Category.NONE, msg);
     }
 
+    public void logf(String fmt, Object... args) {
+        log(String.format(fmt, args));
+    }
+
     public void mark(String msg) {
         record(Category.MARK, msg);
     }
