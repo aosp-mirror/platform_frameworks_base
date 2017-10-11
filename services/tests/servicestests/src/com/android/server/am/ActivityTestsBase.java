@@ -55,10 +55,6 @@ public class ActivityTestsBase {
     private final Context mContext = InstrumentationRegistry.getContext();
     private HandlerThread mHandlerThread;
 
-    // Grabbing an instance of {@link WindowManagerService} creates it if not present so this must
-    // be called at before any tests.
-    private final WindowManagerService mWms = WindowTestUtils.getWindowManagerService(mContext);
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -136,7 +132,7 @@ public class ActivityTestsBase {
             mSupportsSplitScreenMultiWindow = true;
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
-            mWindowManager = WindowTestUtils.getWindowManagerService(context);
+            mWindowManager = WindowTestUtils.getMockWindowManagerService();
         }
 
         @Override
