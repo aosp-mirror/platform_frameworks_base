@@ -200,25 +200,17 @@ public class SystemServicesProxy {
      */
     public ActivityManager.RunningTaskInfo getRunningTask() {
         // Note: The set of running tasks from the system is ordered by recency
-        List<ActivityManager.RunningTaskInfo> tasks = mAm.getRunningTasks(10);
-        if (tasks == null || tasks.isEmpty()) {
+        try {
+            List<ActivityManager.RunningTaskInfo> tasks = mIam.getFilteredTasks(1,
+                    ACTIVITY_TYPE_RECENTS /* ignoreActivityType */,
+                    WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
+            if (tasks.isEmpty()) {
+                return null;
+            }
+            return tasks.get(0);
+        } catch (RemoteException e) {
             return null;
         }
-
-        // Find the first task in a valid stack, we ignore everything from the Recents and PiP
-        // stacks
-        for (int i = 0; i < tasks.size(); i++) {
-            final ActivityManager.RunningTaskInfo task = tasks.get(i);
-            final WindowConfiguration winConfig = task.configuration.windowConfiguration;
-            if (winConfig.getActivityType() == ACTIVITY_TYPE_RECENTS) {
-                continue;
-            }
-            if (winConfig.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                continue;
-            }
-            return task;
-        }
-        return null;
     }
 
     /**

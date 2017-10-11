@@ -599,8 +599,8 @@ public class PipManager implements BasePipManager {
     private boolean isSettingsShown() {
         List<RunningTaskInfo> runningTasks;
         try {
-            runningTasks = mActivityManager.getTasks(1, 0);
-            if (runningTasks == null || runningTasks.size() == 0) {
+            runningTasks = mActivityManager.getTasks(1);
+            if (runningTasks.isEmpty()) {
                 return false;
             }
         } catch (RemoteException e) {

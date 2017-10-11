@@ -66,7 +66,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.TaskRecord.TaskActivitiesReport;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -75,7 +75,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -154,6 +153,8 @@ class RecentTasks {
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
+    private final TaskRecord.TaskActivitiesReport mTmpReport =
+            new TaskRecord.TaskActivitiesReport();
 
     @VisibleForTesting
     RecentTasks(ActivityManagerService service, TaskPersister taskPersister,
@@ -690,7 +691,7 @@ class RecentTasks {
                     continue;
                 }
 
-                ActivityManager.RecentTaskInfo rti = RecentTasks.createRecentTaskInfo(tr);
+                final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(tr);
                 if (!getDetailedTasks) {
                     rti.baseIntent.replaceExtras((Bundle)null);
                 }
@@ -1361,7 +1362,7 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
-    static ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
         // Update the task description to reflect any changes in the task stack
         tr.updateTaskDescription();
 
@@ -1387,24 +1388,10 @@ class RecentTasks {
         rti.resizeMode = tr.mResizeMode;
         rti.configuration.setTo(tr.getConfiguration());
 
-        ActivityRecord base = null;
-        ActivityRecord top = null;
-        ActivityRecord tmp;
-
-        for (int i = tr.mActivities.size() - 1; i >= 0; --i) {
-            tmp = tr.mActivities.get(i);
-            if (tmp.finishing) {
-                continue;
-            }
-            base = tmp;
-            if (top == null || (top.state == ActivityState.INITIALIZING)) {
-                top = base;
-            }
-            rti.numActivities++;
-        }
-
-        rti.baseActivity = (base != null) ? base.intent.getComponent() : null;
-        rti.topActivity = (top != null) ? top.intent.getComponent() : null;
+        tr.getNumRunningActivities(mTmpReport);
+        rti.numActivities = mTmpReport.numActivities;
+        rti.baseActivity = (mTmpReport.base != null) ? mTmpReport.base.intent.getComponent() : null;
+        rti.topActivity = (mTmpReport.top != null) ? mTmpReport.top.intent.getComponent() : null;
 
         return rti;
     }

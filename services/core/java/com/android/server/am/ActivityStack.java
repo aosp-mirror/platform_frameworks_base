@@ -99,6 +99,8 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.ResultInfo;
+import android.app.WindowConfiguration.ActivityType;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -4605,69 +4607,43 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return didSomething;
     }
 
-    void getTasksLocked(List<RunningTaskInfo> list, int callingUid, boolean allowed) {
+    /**
+     * @return The set of running tasks through {@param tasksOut} that are available to the caller.
+     *         If {@param ignoreActivityType} or {@param ignoreWindowingMode} are not undefined,
+     *         then skip running tasks that match those types.
+     */
+    void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
+            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed) {
         boolean focusedStack = mStackSupervisor.getFocusedStack() == this;
         boolean topTask = true;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.getTopActivity() == null) {
+                // Skip if there are no activities in the task
                 continue;
             }
-            ActivityRecord r = null;
-            ActivityRecord top = null;
-            ActivityRecord tmp;
-            int numActivities = 0;
-            int numRunning = 0;
-            final ArrayList<ActivityRecord> activities = task.mActivities;
             if (!allowed && !task.isActivityTypeHome() && task.effectiveUid != callingUid) {
+                // Skip if the caller can't fetch this task
                 continue;
             }
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                tmp = activities.get(activityNdx);
-                if (tmp.finishing) {
-                    continue;
-                }
-                r = tmp;
-
-                // Initialize state for next task if needed.
-                if (top == null || (top.state == ActivityState.INITIALIZING)) {
-                    top = r;
-                    numActivities = numRunning = 0;
-                }
-
-                // Add 'r' into the current task.
-                numActivities++;
-                if (r.app != null && r.app.thread != null) {
-                    numRunning++;
-                }
-
-                if (DEBUG_ALL) Slog.v(
-                    TAG, r.intent.getComponent().flattenToShortString()
-                    + ": task=" + r.getTask());
+            if (ignoreActivityType != ACTIVITY_TYPE_UNDEFINED
+                    && task.getActivityType() == ignoreActivityType) {
+                // Skip ignored activity type
+                continue;
             }
-
-            RunningTaskInfo ci = new RunningTaskInfo();
-            ci.id = task.taskId;
-            ci.stackId = mStackId;
-            ci.baseActivity = r.intent.getComponent();
-            ci.topActivity = top.intent.getComponent();
-            ci.lastActiveTime = task.lastActiveTime;
+            if (ignoreWindowingMode != WINDOWING_MODE_UNDEFINED
+                    && task.getWindowingMode() == ignoreWindowingMode) {
+                // Skip ignored windowing mode
+                continue;
+            }
             if (focusedStack && topTask) {
-                // Give the latest time to ensure foreground task can be sorted
-                // at the first, because lastActiveTime of creating task is 0.
-                ci.lastActiveTime = SystemClock.elapsedRealtime();
+                // For the focused stack top task, update the last stack active time so that it can
+                // be used to determine the order of the tasks (it may not be set for newly created
+                // tasks)
+                task.lastActiveTime = SystemClock.elapsedRealtime();
                 topTask = false;
             }
-
-            if (top.getTask() != null) {
-                ci.description = top.getTask().lastDescription;
-            }
-            ci.numActivities = numActivities;
-            ci.numRunning = numRunning;
-            ci.supportsSplitScreenMultiWindow = task.supportsSplitScreenWindowingMode();
-            ci.resizeMode = task.mResizeMode;
-            ci.configuration.setTo(task.getConfiguration());
-            list.add(ci);
+            tasksOut.add(task);
         }
     }
 

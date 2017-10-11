@@ -115,7 +115,9 @@ interface IActivityManager {
             in PersistableBundle persistentState, in CharSequence description);
     String getCallingPackage(in IBinder token);
     ComponentName getCallingActivity(in IBinder token);
-    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, int flags);
+    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
+    List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum, int ignoreActivityType,
+            int ignoreWindowingMode);
     void moveTaskToFront(int task, int flags, in Bundle options);
     void moveTaskBackwards(int task);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);

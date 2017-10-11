@@ -1900,7 +1900,7 @@ public class ActivityManager {
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
         try {
-            return getService().getTasks(maxNum, 0);
+            return getService().getTasks(maxNum);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

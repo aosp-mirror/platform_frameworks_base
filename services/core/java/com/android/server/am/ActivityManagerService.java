@@ -29,11 +29,13 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
@@ -227,6 +229,8 @@ import android.app.PictureInPictureParams;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
+import android.app.WindowConfiguration.ActivityType;
+import android.app.WindowConfiguration.WindowingMode;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -9770,19 +9774,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public List<RunningTaskInfo> getTasks(int maxNum, int flags) {
+    public List<RunningTaskInfo> getTasks(int maxNum) {
+       return getFilteredTasks(maxNum, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED);
+    }
+
+    @Override
+    public List<RunningTaskInfo> getFilteredTasks(int maxNum, @ActivityType int ignoreActivityType,
+            @WindowingMode int ignoreWindowingMode) {
         final int callingUid = Binder.getCallingUid();
-        ArrayList<RunningTaskInfo> list = new ArrayList<RunningTaskInfo>();
+        ArrayList<RunningTaskInfo> list = new ArrayList<>();
 
         synchronized(this) {
-            if (DEBUG_ALL) Slog.v(
-                TAG, "getTasks: max=" + maxNum + ", flags=" + flags);
+            if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
             final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
                     callingUid);
-
-            // TODO: Improve with MRU list from all ActivityStacks.
-            mStackSupervisor.getTasksLocked(maxNum, list, callingUid, allowed);
+            mStackSupervisor.getRunningTasks(maxNum, list, ignoreActivityType,
+                    ignoreWindowingMode, callingUid, allowed);
         }
 
         return list;
