@@ -4666,7 +4666,14 @@ message MetricsEvent {
     DIALOG_CLEAR_ADB_KEYS = 1223;
 
     // Open: Settings > Developer options > Quick setting tile config
+    // CATEGORY: SETTINGS
+    // OS: P
     DEVELOPMENT_QS_TILE_CONFIG = 1224;
+
+    // OPEN: Settings > Developer options > Store logger data persistently on device > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_LOG_PERSIST = 1225;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
