@@ -14712,6 +14712,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 sb.append("\n");
             }
+            if (process.info.isInstantApp()) {
+                sb.append("Instant-App: true\n");
+            }
         }
     }
 
