@@ -24,8 +24,8 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Slog;
-import android.view.Display;
 import android.view.Gravity;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 
@@ -75,31 +75,10 @@ class LaunchingTaskPositioner {
     private int mDefaultFreeformHeight;
     private int mDefaultFreeformStepHorizontal;
     private int mDefaultFreeformStepVertical;
-    private int mDisplayWidth;
-    private int mDisplayHeight;
+    private final Point mDisplaySize = new Point();
 
-    void setDisplay(Display display) {
-        Point size = new Point();
-        display.getSize(size);
-        mDisplayWidth = size.x;
-        mDisplayHeight = size.y;
-    }
-
-    void configure(Rect stackBounds) {
-        if (stackBounds == null) {
-            mAvailableRect.set(0, 0, mDisplayWidth, mDisplayHeight);
-        } else {
-            mAvailableRect.set(stackBounds);
-        }
-        int width = mAvailableRect.width();
-        int height = mAvailableRect.height();
-        mDefaultFreeformStartX = mAvailableRect.left + width / MARGIN_SIZE_DENOMINATOR;
-        mDefaultFreeformStartY = mAvailableRect.top + height / MARGIN_SIZE_DENOMINATOR;
-        mDefaultFreeformWidth = width / WINDOW_SIZE_DENOMINATOR;
-        mDefaultFreeformHeight = height / WINDOW_SIZE_DENOMINATOR;
-        mDefaultFreeformStepHorizontal = Math.max(width / STEP_DENOMINATOR, MINIMAL_STEP);
-        mDefaultFreeformStepVertical = Math.max(height / STEP_DENOMINATOR, MINIMAL_STEP);
-        mDefaultStartBoundsConfigurationSet = true;
+    void setDisplaySize(Point size) {
+        mDisplaySize.set(size.x, size.y);
     }
 
     /**
@@ -145,6 +124,54 @@ class LaunchingTaskPositioner {
             positionCenter(task, tasks, width, height);
         }
     }
+
+    void configure(Rect availableSpace) {
+        if (availableSpace == null) {
+            mAvailableRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
+        } else {
+            mAvailableRect.set(availableSpace);
+        }
+
+        mDefaultFreeformStartX = getFreeformStartLeft(mAvailableRect);
+        mDefaultFreeformStartY = getFreeformStartTop(mAvailableRect);
+        mDefaultFreeformWidth = getFreeformWidth(mAvailableRect);
+        mDefaultFreeformHeight = getFreeformHeight(mAvailableRect);
+        mDefaultFreeformStepHorizontal = getHorizontalStep(mAvailableRect);
+        mDefaultFreeformStepVertical = getVerticalStep(mAvailableRect);
+        mDefaultStartBoundsConfigurationSet = true;
+    }
+
+    @VisibleForTesting
+    static int getFreeformStartLeft(Rect bounds) {
+        return bounds.left + bounds.width() / MARGIN_SIZE_DENOMINATOR;
+    }
+
+    @VisibleForTesting
+    static int getFreeformStartTop(Rect bounds) {
+        return bounds.top + bounds.height() / MARGIN_SIZE_DENOMINATOR;
+    }
+
+    @VisibleForTesting
+    static int getFreeformWidth(Rect bounds) {
+        return bounds.width() / WINDOW_SIZE_DENOMINATOR;
+    }
+
+    @VisibleForTesting
+    static int getFreeformHeight(Rect bounds) {
+        return bounds.height() / WINDOW_SIZE_DENOMINATOR;
+    }
+
+    @VisibleForTesting
+    static int getHorizontalStep(Rect bounds) {
+        return Math.max(bounds.width() / STEP_DENOMINATOR, MINIMAL_STEP);
+    }
+
+    @VisibleForTesting
+    static int getVerticalStep(Rect bounds) {
+        return Math.max(bounds.height() / STEP_DENOMINATOR, MINIMAL_STEP);
+    }
+
+
 
     private int getFinalWidth(ActivityInfo.WindowLayout windowLayout) {
         int width = mDefaultFreeformWidth;
@@ -211,7 +238,7 @@ class LaunchingTaskPositioner {
             // Unfortunately there is already a task at that spot, so we need to look for some
             // other place.
             shiftStartingPoint(proposal, shiftPolicy);
-            if (shiftedToFar(proposal, shiftPolicy)) {
+            if (shiftedTooFar(proposal, shiftPolicy)) {
                 // We don't want the task to go outside of the stack, because it won't look
                 // nice. Depending on the starting point we either restart, or immediately give up.
                 if (!allowRestart) {
@@ -237,7 +264,7 @@ class LaunchingTaskPositioner {
         task.updateOverrideConfiguration(proposal);
     }
 
-    private boolean shiftedToFar(Rect start, int shiftPolicy) {
+    private boolean shiftedTooFar(Rect start, int shiftPolicy) {
         switch (shiftPolicy) {
             case SHIFT_POLICY_HORIZONTAL_LEFT:
                 return start.left < mAvailableRect.left;
