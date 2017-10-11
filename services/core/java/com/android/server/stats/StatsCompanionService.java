@@ -64,6 +64,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final PendingIntent mAnomalyAlarmIntent;
     private final PendingIntent mPollingAlarmIntent;
     private final BroadcastReceiver mAppUpdateReceiver;
+    private final BroadcastReceiver mUserUpdateReceiver;
 
     public StatsCompanionService(Context context) {
         super();
@@ -75,6 +76,26 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mPollingAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(mContext, PollingAlarmReceiver.class), 0);
         mAppUpdateReceiver = new AppUpdateReceiver();
+        mUserUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                synchronized (sStatsdLock) {
+                    sStatsd = fetchStatsdService();
+                    if (sStatsd == null) {
+                        Slog.w(TAG, "Could not access statsd");
+                        return;
+                    }
+                    try {
+                        // Pull the latest state of UID->app name, version mapping.
+                        // Needed since the new user basically has a version of every app.
+                        informAllUidsLocked(context);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
+                        forgetEverything();
+                    }
+                }
+            }
+        };
         Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
     }
 
@@ -121,6 +142,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
+            /**
+             * App updates actually consist of REMOVE, ADD, and then REPLACE broadcasts. To avoid
+             * waste, we ignore the REMOVE and ADD broadcasts that contain the replacing flag.
+             */
+            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) &&
+                intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                return; // Keep only replacing or normal add and remove.
+            }
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
@@ -370,6 +399,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addDataScheme("package");
                 mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter, null,
                     null);
+
+                // Setup receiver for user initialize (which happens once for a new user) and
+                // if a user is removed.
+                filter = new IntentFilter(Intent.ACTION_USER_INITIALIZE);
+                filter.addAction(Intent.ACTION_USER_REMOVED);
+                mContext.registerReceiverAsUser(mUserUpdateReceiver, UserHandle.ALL,
+                    filter, null, null);
+
                 // Pull the latest state of UID->app name, version mapping when statsd starts.
                 informAllUidsLocked(mContext);
             } catch (RemoteException e) {
@@ -391,6 +428,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         synchronized (sStatsdLock) {
             sStatsd = null;
             mContext.unregisterReceiver(mAppUpdateReceiver);
+            mContext.unregisterReceiver(mUserUpdateReceiver);
             cancelAnomalyAlarm();
             cancelPollingAlarms();
         }
