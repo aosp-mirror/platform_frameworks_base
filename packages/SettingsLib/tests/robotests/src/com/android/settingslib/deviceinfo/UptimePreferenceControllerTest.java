@@ -31,14 +31,13 @@ import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
-import org.robolectric.shadows.ShadowLooper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -73,7 +72,7 @@ public class UptimePreferenceControllerTest {
     @Test
     public void testUptimeTick() {
         final AbstractUptimePreferenceController uptimePreferenceController =
-                new ConcreteUptimePreferenceController(mContext, mLifecycle);
+                new ConcreteUptimePreferenceController(mContext, null /* lifecycle */);
 
         uptimePreferenceController.displayPreference(mScreen);
 
