@@ -83,7 +83,6 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
@@ -650,7 +649,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // In some cases the focused stack isn't the front stack. E.g. pinned stack.
             // Whenever we are moving the top activity from the front stack we want to make sure to
             // move the stack to the front.
-            final boolean wasFront = r != null && supervisor.isFrontStackOnDisplay(sourceStack)
+            final boolean wasFront = r != null && sourceStack.isTopStackOnDisplay()
                     && (sourceStack.topRunningActivityLocked() == r);
 
             // Adjust the position for the new parent stack as needed.
@@ -739,9 +738,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.
-        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenStack();
+        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenPrimaryStack();
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, toStack.mStackId);
+                DEFAULT_DISPLAY, toStack);
 
         boolean successful = (preferredStack == toStack);
         if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {

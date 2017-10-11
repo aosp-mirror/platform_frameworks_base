@@ -1558,7 +1558,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // On devices that support leanback only (Android TV), Recents activity can only be
             // visible if the home stack is the focused stack or we are in split-screen mode.
             final ActivityDisplay display = getDisplay();
-            boolean hasSplitScreenStack = display != null && display.hasSplitScreenStack();
+            boolean hasSplitScreenStack = display != null && display.hasSplitScreenPrimaryStack();
             isVisible = hasSplitScreenStack || mStackSupervisor.isFocusedStack(getStack());
         }
 

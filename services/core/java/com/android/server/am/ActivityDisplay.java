@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -45,13 +46,14 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.ConfigurationContainer;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
  * Exactly one of these classes per Display in the system. Capable of holding zero or more
  * attached {@link ActivityStack}s.
  */
-class ActivityDisplay extends ConfigurationContainer {
+class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityDisplay" : TAG_AM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -65,7 +67,7 @@ class ActivityDisplay extends ConfigurationContainer {
 
     /** All of the stacks on this display. Order matters, topmost stack is in front of all other
      * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
-    final ArrayList<ActivityStack> mStacks = new ArrayList<>();
+    private final ArrayList<ActivityStack> mStacks = new ArrayList<>();
 
     /** Array of all UIDs that are present on the display. */
     private IntArray mDisplayAccessUIDs = new IntArray();
@@ -76,6 +78,13 @@ class ActivityDisplay extends ConfigurationContainer {
     ActivityManagerInternal.SleepToken mOffToken;
 
     private boolean mSleeping;
+
+    // Cached reference to some special stacks we tend to get a lot so we don't need to loop
+    // through the list to find them.
+    private ActivityStack mHomeStack = null;
+    private ActivityStack mRecentsStack = null;
+    private ActivityStack mPinnedStack = null;
+    private ActivityStack mSplitScreenPrimaryStack = null;
 
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
         mSupervisor = supervisor;
@@ -95,6 +104,7 @@ class ActivityDisplay extends ConfigurationContainer {
         }
         if (DEBUG_STACK) Slog.v(TAG_STACK, "addChild: attaching " + stack
                 + " to displayId=" + mDisplayId + " position=" + position);
+        addStackReferenceIfNeeded(stack);
         positionChildAt(stack, position);
         mSupervisor.mService.updateSleepIfNeededLocked();
     }
@@ -103,6 +113,7 @@ class ActivityDisplay extends ConfigurationContainer {
         if (DEBUG_STACK) Slog.v(TAG_STACK, "removeChild: detaching " + stack
                 + " from displayId=" + mDisplayId);
         mStacks.remove(stack);
+        removeStackReferenceIfNeeded(stack);
         mSupervisor.mService.updateSleepIfNeededLocked();
     }
 
@@ -147,6 +158,16 @@ class ActivityDisplay extends ConfigurationContainer {
      * @see ConfigurationContainer#isCompatible(int, int)
      */
     <T extends ActivityStack> T getStack(int windowingMode, int activityType) {
+        if (activityType == ACTIVITY_TYPE_HOME) {
+            return (T) mHomeStack;
+        } else if (activityType == ACTIVITY_TYPE_RECENTS) {
+            return (T) mRecentsStack;
+        }
+        if (windowingMode == WINDOWING_MODE_PINNED) {
+            return (T) mPinnedStack;
+        } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            return (T) mSplitScreenPrimaryStack;
+        }
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack stack = mStacks.get(i);
             // TODO: Should undefined windowing and activity type be compatible with standard type?
@@ -217,7 +238,7 @@ class ActivityDisplay extends ConfigurationContainer {
             }
         }
 
-        final boolean inSplitScreenMode = hasSplitScreenStack();
+        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
         if (!inSplitScreenMode
                 && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
             // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
@@ -275,7 +296,7 @@ class ActivityDisplay extends ConfigurationContainer {
                 if (stack.getWindowingMode() != windowingMode) {
                     continue;
                 }
-                mSupervisor.removeStackLocked(stack.mStackId);
+                mSupervisor.removeStack(stack);
             }
         }
     }
@@ -290,9 +311,60 @@ class ActivityDisplay extends ConfigurationContainer {
             for (int i = mStacks.size() - 1; i >= 0; --i) {
                 final ActivityStack stack = mStacks.get(i);
                 if (stack.getActivityType() == activityType) {
-                    mSupervisor.removeStackLocked(stack.mStackId);
+                    mSupervisor.removeStack(stack);
                 }
             }
+        }
+    }
+
+    void onStackWindowingModeChanged(ActivityStack stack) {
+        removeStackReferenceIfNeeded(stack);
+        addStackReferenceIfNeeded(stack);
+    }
+
+    private void addStackReferenceIfNeeded(ActivityStack stack) {
+        final int activityType = stack.getActivityType();
+        final int windowingMode = stack.getWindowingMode();
+
+        if (activityType == ACTIVITY_TYPE_HOME) {
+            if (mHomeStack != null && mHomeStack != stack) {
+                throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
+                        + mHomeStack + " already exist on display=" + this + " stack=" + stack);
+            }
+            mHomeStack = stack;
+        } else if (activityType == ACTIVITY_TYPE_RECENTS) {
+            if (mRecentsStack != null && mRecentsStack != stack) {
+                throw new IllegalArgumentException("addStackReferenceIfNeeded: recents stack="
+                        + mRecentsStack + " already exist on display=" + this + " stack=" + stack);
+            }
+            mRecentsStack = stack;
+        }
+        if (windowingMode == WINDOWING_MODE_PINNED) {
+            if (mPinnedStack != null && mPinnedStack != stack) {
+                throw new IllegalArgumentException("addStackReferenceIfNeeded: pinned stack="
+                        + mPinnedStack + " already exist on display=" + this
+                        + " stack=" + stack);
+            }
+            mPinnedStack = stack;
+        } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            if (mSplitScreenPrimaryStack != null && mSplitScreenPrimaryStack != stack) {
+                throw new IllegalArgumentException("addStackReferenceIfNeeded:"
+                        + " split-screen-primary" + " stack=" + mSplitScreenPrimaryStack
+                        + " already exist on display=" + this + " stack=" + stack);
+            }
+            mSplitScreenPrimaryStack = stack;
+        }
+    }
+
+    private void removeStackReferenceIfNeeded(ActivityStack stack) {
+        if (stack == mHomeStack) {
+            mHomeStack = null;
+        } else if (stack == mRecentsStack) {
+            mRecentsStack = null;
+        } else if (stack == mPinnedStack) {
+            mPinnedStack = null;
+        } else if (stack == mSplitScreenPrimaryStack) {
+            mSplitScreenPrimaryStack = null;
         }
     }
 
@@ -310,20 +382,42 @@ class ActivityDisplay extends ConfigurationContainer {
         return ACTIVITY_TYPE_UNDEFINED;
     }
 
-    ActivityStack getSplitScreenStack() {
-        return getStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+    /**
+     * Get the topmost stack on the display. It may be different from focused stack, because
+     * focus may be on another display.
+     */
+    ActivityStack getTopStack() {
+        return mStacks.isEmpty() ? null : mStacks.get(mStacks.size() - 1);
     }
 
-    boolean hasSplitScreenStack() {
-        return getSplitScreenStack() != null;
+    boolean isTopStack(ActivityStack stack) {
+        return stack == getTopStack();
+    }
+
+    int getIndexOf(ActivityStack stack) {
+        return mStacks.indexOf(stack);
+    }
+
+    void onLockTaskPackagesUpdated() {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            mStacks.get(i).onLockTaskPackagesUpdated();
+        }
+    }
+
+    ActivityStack getSplitScreenPrimaryStack() {
+        return mSplitScreenPrimaryStack;
+    }
+
+    boolean hasSplitScreenPrimaryStack() {
+        return mSplitScreenPrimaryStack != null;
     }
 
     PinnedActivityStack getPinnedStack() {
-        return getStack(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+        return (PinnedActivityStack) mPinnedStack;
     }
 
     boolean hasPinnedStack() {
-        return getPinnedStack() != null;
+        return mPinnedStack != null;
     }
 
     @Override
@@ -337,7 +431,7 @@ class ActivityDisplay extends ConfigurationContainer {
     }
 
     @Override
-    protected ConfigurationContainer getChildAt(int index) {
+    protected ActivityStack getChildAt(int index) {
         return mStacks.get(index);
     }
 
@@ -383,6 +477,10 @@ class ActivityDisplay extends ConfigurationContainer {
 
     void setIsSleeping(boolean asleep) {
         mSleeping = asleep;
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "displayId=" + mDisplayId + " mStacks=" + mStacks);
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {

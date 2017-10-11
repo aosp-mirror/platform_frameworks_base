@@ -176,7 +176,6 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.am.proto.ActivityManagerServiceProto.ACTIVITIES;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
@@ -209,7 +208,6 @@ import android.app.ContentProviderHolder;
 import android.app.Dialog;
 import android.app.IActivityController;
 import android.app.IActivityManager;
-import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
@@ -10157,11 +10155,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 final ActivityStack stack = mStackSupervisor.getStack(stackId);
-                if (stack != null && !stack.isActivityTypeStandardOrUndefined()) {
+                if (stack == null) {
+                    return;
+                }
+                if (!stack.isActivityTypeStandardOrUndefined()) {
                     throw new IllegalArgumentException(
                             "Removing non-standard stack is not allowed.");
                 }
-                mStackSupervisor.removeStackLocked(stackId);
+                mStackSupervisor.removeStack(stack);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -10527,7 +10528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 final ActivityStack stack =
-                        mStackSupervisor.getDefaultDisplay().getSplitScreenStack();
+                        mStackSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
                 if (toTop) {
                     mStackSupervisor.resizeStackLocked(stack, null /* destBounds */,
                             null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
