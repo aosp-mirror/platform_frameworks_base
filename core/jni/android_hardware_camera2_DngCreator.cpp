@@ -23,13 +23,13 @@
 #include <vector>
 #include <cmath>
 
+#include <android-base/properties.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/StrongPointer.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
-#include <cutils/properties.h>
 #include <system/camera_metadata.h>
 #include <camera/CameraMetadata.h>
 #include <img_utils/DngUtils.h>
@@ -50,6 +50,7 @@
 
 using namespace android;
 using namespace img_utils;
+using android::base::GetProperty;
 
 #define BAIL_IF_INVALID_RET_BOOL(expr, jnienv, tagId, writer) \
     if ((expr) != OK) { \
@@ -1237,26 +1238,24 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // make
-        char manufacturer[PROPERTY_VALUE_MAX];
-
         // Use "" to represent unknown make as suggested in TIFF/EP spec.
-        property_get("ro.product.manufacturer", manufacturer, "");
-        uint32_t count = static_cast<uint32_t>(strlen(manufacturer)) + 1;
+        std::string manufacturer = GetProperty("ro.product.manufacturer", "");
+        uint32_t count = static_cast<uint32_t>(manufacturer.size()) + 1;
 
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_MAKE, count,
-                reinterpret_cast<uint8_t*>(manufacturer), TIFF_IFD_0), env, TAG_MAKE, writer);
+                reinterpret_cast<const uint8_t*>(manufacturer.c_str()), TIFF_IFD_0), env, TAG_MAKE,
+                writer);
     }
 
     {
         // model
-        char model[PROPERTY_VALUE_MAX];
-
         // Use "" to represent unknown model as suggested in TIFF/EP spec.
-        property_get("ro.product.model", model, "");
-        uint32_t count = static_cast<uint32_t>(strlen(model)) + 1;
+        std::string model = GetProperty("ro.product.model", "");
+        uint32_t count = static_cast<uint32_t>(model.size()) + 1;
 
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_MODEL, count,
-                reinterpret_cast<uint8_t*>(model), TIFF_IFD_0), env, TAG_MODEL, writer);
+                reinterpret_cast<const uint8_t*>(model.c_str()), TIFF_IFD_0), env, TAG_MODEL,
+                writer);
     }
 
     {
@@ -1277,11 +1276,11 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // software
-        char software[PROPERTY_VALUE_MAX];
-        property_get("ro.build.fingerprint", software, "");
-        uint32_t count = static_cast<uint32_t>(strlen(software)) + 1;
+        std::string software = GetProperty("ro.build.fingerprint", "");
+        uint32_t count = static_cast<uint32_t>(software.size()) + 1;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_SOFTWARE, count,
-                reinterpret_cast<uint8_t*>(software), TIFF_IFD_0), env, TAG_SOFTWARE, writer);
+                reinterpret_cast<const uint8_t*>(software.c_str()), TIFF_IFD_0), env, TAG_SOFTWARE,
+                writer);
     }
 
     if (nativeContext->hasCaptureTime()) {
@@ -1613,20 +1612,15 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Setup unique camera model tag
-        char model[PROPERTY_VALUE_MAX];
-        property_get("ro.product.model", model, "");
+        std::string model = GetProperty("ro.product.model", "");
+        std::string manufacturer = GetProperty("ro.product.manufacturer", "");
+        std::string brand = GetProperty("ro.product.brand", "");
 
-        char manufacturer[PROPERTY_VALUE_MAX];
-        property_get("ro.product.manufacturer", manufacturer, "");
-
-        char brand[PROPERTY_VALUE_MAX];
-        property_get("ro.product.brand", brand, "");
-
-        String8 cameraModel(model);
+        String8 cameraModel(model.c_str());
         cameraModel += "-";
-        cameraModel += manufacturer;
+        cameraModel += manufacturer.c_str();
         cameraModel += "-";
-        cameraModel += brand;
+        cameraModel += brand.c_str();
 
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_UNIQUECAMERAMODEL, cameraModel.size() + 1,
                 reinterpret_cast<const uint8_t*>(cameraModel.string()), TIFF_IFD_0), env,
