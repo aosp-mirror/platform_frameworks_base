@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>အတွက် ဆက်တင်းများဖွင့်ရန် မအောင်မြင်ပါ။"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ဤထည့်သွင်းမှုနည်းလမ်းမှာ သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကဒ်နံပါတ်စသည်တို့ကို ရယူသွားမည်ဖြစ်သည်။ <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>အပလီကေးရှင်းမှလာပါသည်။ ဤထည့်သွင်းမှုနည်းလမ်းကို အသုံးပြုမည်လား?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"မှတ်ချက် − ပြန်လည်စတင်ပြီးနောက် သင့်ဖုန်းကိုလော့ခ်မဖွင့်မချင်း ဤအက်ပ်ကို အသုံးပြု၍မရပါ"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS မှတ်ပုံတင်ခြင်း အခြေအနေ"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"မှတ်ပုံတင်ထားသည်"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"မှတ်ပုံတင်မထားပါ"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"မရရှိနိုင်ပါ။"</string>
 </resources>

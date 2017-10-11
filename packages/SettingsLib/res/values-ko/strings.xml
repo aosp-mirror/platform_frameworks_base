@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> 설정을 열지 못했음"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> 앱에서 지원하는 이 입력 방법을 사용하면 비밀번호 및 신용카드 번호와 같은 개인 정보를 비롯하여 입력한 모든 텍스트가 수집될 수 있습니다. 사용하시겠습니까?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"참고: 재부팅한 후 이 앱은 휴대전화를 잠금 해제해야 시작됩니다."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS 등록 상태"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"등록됨"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"등록되지 않음"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"사용할 수 없음"</string>
 </resources>

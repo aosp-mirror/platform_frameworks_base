@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"无法打开 <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> 的设置"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"此输入法可能会收集您输入的所有内容，包括密码和信用卡号等个人数据。它来自“<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>”应用。要使用此输入法吗？"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"注意：重新启动后，您必须将手机解锁才能运行此应用"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS 注册状态"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"已注册"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"未注册"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"无法获取"</string>
 </resources>

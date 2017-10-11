@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Échec de l\'ouverture des paramètres de l\'application <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ce mode de saisie est susceptible d\'enregistrer le texte que vous saisissez, y compris vos données personnelles, telles que les mots de passe et les numéros de carte de paiement. Il provient de l\'application <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Voulez-vous vraiment l\'activer ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Remarque : Après un redémarrage, vous ne pouvez pas lancer cette application tant que vous n\'avez pas déverrouillé votre téléphone."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"État de l\'enregistrement IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Enregistré"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non enregistré"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Non disponible"</string>
 </resources>
