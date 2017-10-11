@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"ખૂટતી વ્યવસ્થાપક ઍપ્લિકેશનને કારણે કાર્યાલયની પ્રોફાઇલ કાઢી નાખી"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"કાર્ય પ્રોફાઇલ વ્યવસ્થાપક ઍપ્લિકેશન ખૂટે છે અથવા તો દૂષિત છે. પરિણામે, તમારી કાર્યાલયની પ્રોફાઇલ અને તે સંબંધિત ડેટા કાઢી નાખવામાં આવ્યો છે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"આ ઉપકરણ પર તમારી કાર્યાલયની પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"પાસવર્ડના ઘણા વધુ પ્રયત્નો"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ઉપકરણ સંચાલિત છે"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"સિમ મંજૂર નથી"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ફોન મંજૂર નથી"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"પૉપઅપ વિંડો"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

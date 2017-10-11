@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"由于缺少管理应用，工作资料已被删除"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"工作资料管理应用缺失或损坏，因此系统已删除您的工作资料及相关数据。如需帮助，请与您的管理员联系。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"您的工作资料已不在此设备上"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"密码尝试次数过多"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"系统将清空您的设备"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"不受允许的 SIM 卡"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"不受允许的手机"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"弹出式窗口"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

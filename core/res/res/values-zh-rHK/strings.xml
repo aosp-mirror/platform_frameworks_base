@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"由於沒有管理員應用程式，工作設定檔已刪除"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"工作設定檔管理員應用程式已遺失或損毀。因此，您的工作設定檔和相關資料已刪除。請聯絡您的管理員以取得協助。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"您的工作設定檔無法再在此裝置上使用"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"密碼輸入錯誤的次數過多"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"裝置已受管理"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"您的機構會管理此裝置，並可能會監控網絡流量。輕按即可瞭解詳情。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置將被清除"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"不允許使用 SIM 卡"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"不允許使用手機"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"彈出式視窗"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

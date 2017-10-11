@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Το προφίλ εργασίας διαγράφηκε λόγω απουσίας της εφαρμογής διαχείρισης"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Η εφαρμογή διαχείρισης προφίλ εργασίας είτε λείπει είτε είναι κατεστραμμένη. Ως αποτέλεσμα, διαγράφηκε το προφίλ εργασίας και τα σχετικά δεδομένα. Επικοινωνήστε με τον διαχειριστή σας για βοήθεια."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Το προφίλ εργασίας σας δεν είναι πια διαθέσιμο σε αυτήν τη συσκευή"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Πάρα πολλές προσπάθειες εισαγωγής κωδικού πρόσβασης"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Η συσκευή είναι διαχειριζόμενη"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Ο οργανισμός σας διαχειρίζεται αυτήν τη συσκευή και ενδέχεται να παρακολουθεί την επισκεψιμότητα δικτύου. Πατήστε για λεπτομέρειες."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Η συσκευή σας θα διαγραφεί"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Η κάρτα SIM δεν επιτρέπεται"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Το τηλέφωνο δεν επιτρέπεται"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Αναδυόμενο παράθυρο"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

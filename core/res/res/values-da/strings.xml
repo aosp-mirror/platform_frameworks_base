@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Arbejdsprofilen blev slettet, fordi der mangler en administrationsapp"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Administrationsappen til arbejdsprofilen mangler eller er beskadiget. Derfor er din arbejdsprofil og dine relaterede data blevet slettet. Kontakt din administrator for at få hjælp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Din arbejdsprofil er ikke længere tilgængelig på denne enhed"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"For mange mislykkede adgangskodeforsøg"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Dette er en administreret enhed"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Din organisation administrerer denne enhed og kan overvåge netværkstrafik. Tryk for at se oplysninger."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheden slettes"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-kortet har ikke adgangstilladelse"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefonen har ikke adgangstilladelse"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop op-vindue"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

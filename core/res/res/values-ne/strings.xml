@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"प्रशासकीय अनुप्रयोग नभएकाले कार्य प्रोफाइल मेटाइयो"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"उक्त कार्य प्रोफाइलको प्रशासकीय अनुप्रयोग छैन वा बिग्रेको छ। त्यसले गर्दा, तपाईंको कार्य प्रोफाइल र सम्बन्धित डेटालाई मेटिएको छ। सहायताका लागि आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"तपाईंको कार्य प्रोफाइल अब उप्रान्त यस यन्त्रमा उपलब्ध छैन"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"पासवर्ड प्रविष्ट गर्ने अत्यधिक गलत प्रयासहरू भए"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"यन्त्र व्यवस्थित गरिएको छ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"तपाईंको संगठनले यस यन्त्रको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"तपाईंको यन्त्र मेटिनेछ"</string>
@@ -1796,4 +1795,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM लाई अनुमति छैन"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"फोनलाई अनुमति छैन"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"पपअप विन्डो"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

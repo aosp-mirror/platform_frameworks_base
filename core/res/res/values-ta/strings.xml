@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"நிர்வாகிப் பயன்பாடு இல்லாததால், பணி விவரம் நீக்கப்பட்டது"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"பணி விவர நிர்வாகிப் பயன்பாடு இல்லை அல்லது அது சிதைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி விவரமும் அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"இந்தச் சாதனத்தில் இனி பணி விவரம் கிடைக்காது"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"கடவுச்சொல்லை அதிக முறை தவறாக முயற்சித்துவிட்டீர்கள்"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"சிம் அனுமதிக்கப்படவில்லை"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ஃபோன் அனுமதிக்கப்படவில்லை"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"பாப்அப் சாளரம்"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

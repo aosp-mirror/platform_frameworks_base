@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"កម្រងព័ត៌មាន​ការងារ​ត្រូវបាន​លុប​ដោយសារ​បាត់​កម្មវិធី​អ្នកគ្រប់គ្រង"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"កម្មវិធី​អ្នកគ្រប់គ្រង​កម្រងព័ត៌មាន​ការងារនេះ​អាច​បាត់ ឬ​មាន​បញ្ហា។ ដូច្នេះហើយ​ទើប​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក និង​ទិន្នន័យ​ដែល​ពាក់ព័ន្ធត្រូវ​បានលុប។ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់អ្នក ដើម្បី​ទទួល​បាន​ជំនួយ។"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លែងមាន​នៅលើ​ឧបករណ៍​នេះទៀត​ហើយ"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ការព្យាយាមបញ្ចូលពាក្យសម្ងាត់ច្រើនដងពេកហើយ"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
@@ -1792,4 +1791,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"មិន​អនុញ្ញាត​ចំពោះសីុម​ទេ"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"មិន​អនុញ្ញាត​ចំពោះទូរសព្ទ​ទេ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"វិនដូលេចឡើង"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

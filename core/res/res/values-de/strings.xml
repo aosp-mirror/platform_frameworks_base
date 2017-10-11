@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Arbeitsprofil aufgrund fehlender Admin-App gelöscht"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Die Admin-App für das Arbeitsprofil fehlt oder ist beschädigt. Daher wurden dein Arbeitsprofil und alle zugehörigen Daten gelöscht. Bitte wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Dein Arbeitsprofil ist auf diesem Gerät nicht mehr verfügbar"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Zu viele falsche Passworteingaben"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Dies ist ein verwaltetes Gerät"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Deine Organisation verwaltet dieses Gerät und überprüft unter Umständen den Netzwerkverkehr. Tippe hier, um weitere Informationen zu erhalten."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Die Daten auf deinem Gerät werden gelöscht."</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-Karte nicht zulässig"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Smartphone nicht zulässig"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop-up-Fenster"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Profil professionnel supprimé en raison de l\'application d\'administration manquante"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Le profil professionnel de l\'application d\'administration est manquant ou corrompu. Votre profil professionnel et ses données connexes ont donc été supprimés. Communiquez avec votre administrateur pour obtenir de l\'assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Votre profil professionnel n\'est plus accessible sur cet appareil"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Trop de tentatives d\'entrée du mot de passe"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Touchez ici pour obtenir plus d\'information."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Le contenu de votre appareil sera effacé"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Carte SIM non autorisée"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Téléphone non autorisé"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre contextuelle"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

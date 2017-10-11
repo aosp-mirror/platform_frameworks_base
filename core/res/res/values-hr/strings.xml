@@ -174,8 +174,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Radni je profil izbrisan jer nedostaje administratorska aplikacija"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Vaš radni profil više nije dostupan na ovom uređaju"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Previše pokušaja unosa zaporke"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Uređaj je upravljan"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Vaša organizacija upravlja ovim uređajem i može nadzirati mrežni promet. Dodirnite za pojedinosti."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
@@ -1825,4 +1824,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM nije dopušten"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefon nije dopušten"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Skočni prozor"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

@@ -1789,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM no permitida"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Teléfono no permitido"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Ventana emergente"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>
