@@ -1371,6 +1371,7 @@ public class Tethering extends BaseNetworkObserver {
                     sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                 }
             }
+            mUpstreamNetworkMonitor.setCurrentUpstream((ns != null) ? ns.network : null);
             setUpstreamNetwork(ns);
         }
 
