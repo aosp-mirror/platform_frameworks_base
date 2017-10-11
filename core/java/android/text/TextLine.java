@@ -73,7 +73,7 @@ class TextLine {
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
 
     private final DecorationInfo mDecorationInfo = new DecorationInfo();
-    private final ArrayList<DecorationInfo> mDecorations = new ArrayList();
+    private final ArrayList<DecorationInfo> mDecorations = new ArrayList<>();
 
     private static final TextLine[] sCached = new TextLine[3];
 
@@ -340,14 +340,14 @@ class TextLine {
 
                     boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
                     if (inSegment && advance) {
-                        return h += measureRun(segstart, offset, j, runIsRtl, fmi);
+                        return h + measureRun(segstart, offset, j, runIsRtl, fmi);
                     }
 
                     float w = measureRun(segstart, j, j, runIsRtl, fmi);
                     h += advance ? w : -w;
 
                     if (inSegment) {
-                        return h += measureRun(segstart, offset, j, runIsRtl, null);
+                        return h + measureRun(segstart, offset, j, runIsRtl, null);
                     }
 
                     if (codept == '\t') {
@@ -828,14 +828,14 @@ class TextLine {
                     }
                     if (info.isUnderlineText) {
                         final float thickness =
-                                Math.max(((Paint) wp).getUnderlineThickness(), 1.0f);
+                                Math.max(wp.getUnderlineThickness(), 1.0f);
                         drawStroke(wp, c, wp.getColor(), wp.getUnderlinePosition(), thickness,
                                 decorationXLeft, decorationXRight, y);
                     }
 
                     if (info.isStrikeThruText) {
                         final float thickness =
-                                Math.max(((Paint) wp).getStrikeThruThickness(), 1.0f);
+                                Math.max(wp.getStrikeThruThickness(), 1.0f);
                         drawStroke(wp, c, wp.getColor(), wp.getStrikeThruPosition(), thickness,
                                 decorationXLeft, decorationXRight, y);
                     }
