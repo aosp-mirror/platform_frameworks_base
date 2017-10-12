@@ -495,7 +495,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             notifyUnavailableToClient(false);
         }
         synchronized (mLock) {
-            processResponseLocked(response, requestFlags);
+            processResponseLocked(response, null, requestFlags);
         }
 
         final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
@@ -762,13 +762,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
-        if (sDebug) Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result);
+        final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
+        if (sDebug) {
+            Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result
+                    + ", clientState=" + newClientState);
+        }
         if (result instanceof FillResponse) {
             writeLog(MetricsEvent.AUTOFILL_AUTHENTICATED);
-            replaceResponseLocked(authenticatedResponse, (FillResponse) result);
+            replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof Dataset) {
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
                 writeLog(MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
+                if (newClientState != null) {
+                    if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
+                    mClientState = newClientState;
+                }
                 final Dataset dataset = (Dataset) result;
                 authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 autoFill(requestId, datasetIdx, dataset, false);
@@ -1543,7 +1551,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void replaceResponseLocked(@NonNull FillResponse oldResponse,
-            @NonNull FillResponse newResponse) {
+            @NonNull FillResponse newResponse, @Nullable Bundle newClientState) {
         // Disassociate view states with the old response
         setViewStatesLocked(oldResponse, ViewState.STATE_INITIAL, true);
         // Move over the id
@@ -1551,7 +1559,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Replace the old response
         mResponses.put(newResponse.getRequestId(), newResponse);
         // Now process the new response
-        processResponseLocked(newResponse, 0);
+        processResponseLocked(newResponse, newClientState, 0);
     }
 
     private void processNullResponseLocked(int flags) {
@@ -1565,7 +1573,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         removeSelf();
     }
 
-    private void processResponseLocked(@NonNull FillResponse newResponse, int flags) {
+    private void processResponseLocked(@NonNull FillResponse newResponse,
+            @Nullable Bundle newClientState, int flags) {
         // Make sure we are hiding the UI which will be shown
         // only if handling the current response requires it.
         mUi.hideAll(this);
@@ -1573,14 +1582,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int requestId = newResponse.getRequestId();
         if (sVerbose) {
             Slog.v(TAG, "processResponseLocked(): mCurrentViewId=" + mCurrentViewId
-                    + ",flags=" + flags + ", reqId=" + requestId + ", resp=" + newResponse);
+                    + ",flags=" + flags + ", reqId=" + requestId + ", resp=" + newResponse
+                    + ",newClientState=" + newClientState);
         }
 
         if (mResponses == null) {
             mResponses = new SparseArray<>(4);
         }
         mResponses.put(requestId, newResponse);
-        mClientState = newResponse.getClientState();
+        mClientState = newClientState != null ? newClientState : newResponse.getClientState();
 
         setViewStatesLocked(newResponse, ViewState.STATE_FILLABLE, false);
         updateTrackedIdsLocked();
