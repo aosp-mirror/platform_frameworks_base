@@ -16,13 +16,17 @@
 
 package android.net;
 
-import static android.test.MoreAsserts.assertNotEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Network;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -32,13 +36,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Inet6Address;
 import java.net.SocketException;
+import java.util.Objects;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class NetworkTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetworkTest {
     final Network mNetwork = new Network(99);
 
-    @SmallTest
+    @Test
     public void testBindSocketOfInvalidFdThrows() throws Exception {
 
         final FileDescriptor fd = new FileDescriptor();
@@ -50,7 +58,7 @@ public class NetworkTest extends TestCase {
         } catch (SocketException expected) {}
     }
 
-    @SmallTest
+    @Test
     public void testBindSocketOfNonSocketFdThrows() throws Exception {
         final File devNull = new File("/dev/null");
         assertTrue(devNull.canRead());
@@ -65,7 +73,7 @@ public class NetworkTest extends TestCase {
         } catch (SocketException expected) {}
     }
 
-    @SmallTest
+    @Test
     public void testBindSocketOfConnectedDatagramSocketThrows() throws Exception {
         final DatagramSocket mDgramSocket = new DatagramSocket(0, (InetAddress) Inet6Address.ANY);
         mDgramSocket.connect((InetAddress) Inet6Address.LOOPBACK, 53);
@@ -77,7 +85,7 @@ public class NetworkTest extends TestCase {
         } catch (SocketException expected) {}
     }
 
-    @SmallTest
+    @Test
     public void testBindSocketOfLocalSocketThrows() throws Exception {
         final LocalSocket mLocalClient = new LocalSocket();
         mLocalClient.bind(new LocalSocketAddress("testClient"));
@@ -98,7 +106,7 @@ public class NetworkTest extends TestCase {
         } catch (SocketException expected) {}
     }
 
-    @SmallTest
+    @Test
     public void testZeroIsObviousForDebugging() {
         Network zero = new Network(0);
         assertEquals(0, zero.hashCode());
@@ -106,7 +114,7 @@ public class NetworkTest extends TestCase {
         assertEquals("0", zero.toString());
     }
 
-    @SmallTest
+    @Test
     public void testGetNetworkHandle() {
         Network one = new Network(1);
         Network two = new Network(2);
@@ -142,5 +150,9 @@ public class NetworkTest extends TestCase {
         assertEquals(4311403230L, one.getNetworkHandle());
         assertEquals(8606370526L, two.getNetworkHandle());
         assertEquals(12901337822L, three.getNetworkHandle());
+    }
+
+    private static <T> void assertNotEqual(T t1, T t2) {
+        assertFalse(Objects.equals(t1, t2));
     }
 }
