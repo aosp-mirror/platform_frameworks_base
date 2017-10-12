@@ -2653,7 +2653,11 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
-     * to launch the provided {@link PendingIntent}.
+     * to launch the provided {@link PendingIntent}. The source bounds
+     * ({@link Intent#getSourceBounds()}) of the intent will be set to the bounds of the clicked
+     * view in screen space.
+     * Note that any activity options associated with the pendingIntent may get overridden
+     * before starting the intent.
      *
      * When setting the on-click action of items within collections (eg. {@link ListView},
      * {@link StackView} etc.), this method will not work. Instead, use {@link
