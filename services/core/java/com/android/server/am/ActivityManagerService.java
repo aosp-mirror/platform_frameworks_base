@@ -50,6 +50,9 @@ import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.os.Build.VERSION_CODES.N;
+import static android.os.IServiceManager.DUMP_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_PRIORITY_HIGH;
+import static android.os.IServiceManager.DUMP_PRIORITY_NORMAL;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.FIRST_ISOLATED_UID;
@@ -731,9 +734,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 doDump(fd, pw, new String[] {"associations"});
             }
             doDump(fd, pw, new String[] {"processes"});
-            doDump(fd, pw, new String[] {"-v", "all"});
-            doDump(fd, pw, new String[] {"service", "all"});
-            doDump(fd, pw, new String[] {"provider", "all"});
         }
 
         @Override
@@ -2498,13 +2498,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void setSystemProcess() {
         try {
-            ServiceManager.addService(Context.ACTIVITY_SERVICE, this, true);
+            ServiceManager.addService(Context.ACTIVITY_SERVICE, this, /* allowIsolated= */ true,
+                    DUMP_PRIORITY_CRITICAL | DUMP_PRIORITY_NORMAL);
             ServiceManager.addService(ProcessStats.SERVICE_NAME, mProcessStats);
-            ServiceManager.addService("meminfo", new MemBinder(this));
+            ServiceManager.addService("meminfo", new MemBinder(this), /* allowIsolated= */ false,
+                    DUMP_PRIORITY_HIGH | DUMP_PRIORITY_NORMAL);
             ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
             ServiceManager.addService("dbinfo", new DbBinder(this));
             if (MONITOR_CPU_USAGE) {
-                ServiceManager.addService("cpuinfo", new CpuBinder(this));
+                ServiceManager.addService("cpuinfo", new CpuBinder(this),
+                        /* allowIsolated= */ false, DUMP_PRIORITY_CRITICAL);
             }
             ServiceManager.addService("permission", new PermissionController(this));
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
