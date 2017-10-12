@@ -3046,11 +3046,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean inKeyguardRestrictedInputMode() {
-        return mPolicy.inKeyguardRestrictedKeyInputMode();
-    }
-
-    @Override
     public boolean isKeyguardLocked() {
         return mPolicy.isKeyguardLocked();
     }

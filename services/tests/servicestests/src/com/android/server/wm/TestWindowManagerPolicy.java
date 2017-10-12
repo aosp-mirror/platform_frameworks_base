@@ -411,11 +411,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean inKeyguardRestrictedKeyInputMode() {
-        return false;
-    }
-
-    @Override
     public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback) {
     }
 

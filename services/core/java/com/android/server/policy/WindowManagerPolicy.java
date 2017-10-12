@@ -1357,17 +1357,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public boolean isKeyguardTrustedLw();
 
     /**
-     * inKeyguardRestrictedKeyInputMode
-     *
-     * if keyguard screen is showing or in restricted key input mode (i.e. in
-     * keyguard password emergency screen). When in such mode, certain keys,
-     * such as the Home key and the right soft keys, don't work.
-     *
-     * @return true if in keyguard restricted input mode.
-     */
-    public boolean inKeyguardRestrictedKeyInputMode();
-
-    /**
      * Ask the policy to dismiss the keyguard, if it is currently shown.
      *
      * @param callback Callback to be informed about the result.
