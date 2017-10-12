@@ -129,7 +129,6 @@ public class Hyphenator {
             final String patternFilename = "hyph-" + languageTag.toLowerCase(Locale.US) + ".hyb";
             final File patternFile = new File(SYSTEM_HYPHENATOR_LOCATION, patternFilename);
             if (!patternFile.canRead()) {
-                Log.e(TAG, "hyphenation patterns for " + patternFile + " not found or unreadable");
                 mDataAddress = 0;
             } else {
                 long address;
@@ -230,6 +229,11 @@ public class Hyphenator {
             loadData("tk", 2, 2); // Turkmen
             loadData("und-Ethi", 1, 1); // Any language in Ethiopic script
 
+            // Following two hyphenators do not have pattern files but there is some special logic
+            // based on language.
+            loadData("ca", 2, 2);  // Catalan
+            loadData("pl", 2, 2);  // Polish
+
             // English locales that fall back to en-US. The data is
             // from CLDR. It's all English locales, minus the locales whose
             // parent is en-001 (from supplementalData.xml, under <parentLocales>).
@@ -267,7 +271,7 @@ public class Hyphenator {
         }
     };
 
-    private static native long nBuildHyphenator(/* non-zero */ long dataAddress,
+    private static native long nBuildHyphenator(long dataAddress,
             @NonNull String langTag, @IntRange(from = 1) int minPrefix,
             @IntRange(from = 1) int minSuffix);
 }
