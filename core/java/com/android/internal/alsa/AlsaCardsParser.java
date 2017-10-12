@@ -37,6 +37,12 @@ public class AlsaCardsParser {
 
     private ArrayList<AlsaCardRecord> mCardRecords = new ArrayList<AlsaCardRecord>();
 
+    public static final int SCANSTATUS_NOTSCANNED = -1;
+    public static final int SCANSTATUS_SUCCESS = 0;
+    public static final int SCANSTATUS_FAIL = 1;
+    public static final int SCANSTATUS_EMPTY = 2;
+    private int mScanStatus = SCANSTATUS_NOTSCANNED;
+
     public class AlsaCardRecord {
         private static final String TAG = "AlsaCardRecord";
         private static final String kUsbCardKeyStr = "at usb-";
@@ -104,10 +110,11 @@ public class AlsaCardsParser {
 
     public AlsaCardsParser() {}
 
-    public void scan() {
+    public int scan() {
         if (DEBUG) {
-            Slog.i(TAG, "AlsaCardsParser.scan()");
+            Slog.i(TAG, "AlsaCardsParser.scan()....");
         }
+
         mCardRecords = new ArrayList<AlsaCardRecord>();
 
         File cardsFile = new File(kCardsFilePath);
@@ -134,11 +141,26 @@ public class AlsaCardsParser {
                 mCardRecords.add(cardRecord);
             }
             reader.close();
+            if (mCardRecords.size() > 0) {
+                mScanStatus = SCANSTATUS_SUCCESS;
+            } else {
+                mScanStatus = SCANSTATUS_EMPTY;
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            mScanStatus = SCANSTATUS_FAIL;
         } catch (IOException e) {
             e.printStackTrace();
+            mScanStatus = SCANSTATUS_FAIL;
         }
+        if (DEBUG) {
+            Slog.i(TAG, "  status:" + mScanStatus);
+        }
+        return mScanStatus;
+    }
+
+    public int getScanStatus() {
+        return mScanStatus;
     }
 
     public ArrayList<AlsaCardRecord> getScanRecords() {
@@ -182,7 +204,11 @@ public class AlsaCardsParser {
         }
 
         // get the new list of devices
-        scan();
+        if (scan() != SCANSTATUS_SUCCESS) {
+            Slog.e(TAG, "Error scanning Alsa cards file.");
+            return -1;
+        }
+
         if (DEBUG) {
             LogDevices("Current Devices:", mCardRecords);
         }
