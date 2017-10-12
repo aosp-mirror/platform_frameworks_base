@@ -784,6 +784,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mService.enforcePhoneStatePermission(pid, uid);
             }
             mFlags = flags;
+            if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mService.setGlobalPrioritySession(MediaSessionRecord.this);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
