@@ -33,8 +33,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean EnableTransitionThumbnailDebugMode = false;
         // This disables the bitmap and icon caches
         public static final boolean DisableBackgroundCache = false;
-        // Enables the task affiliations
-        public static final boolean EnableAffiliatedTaskGroups = false;
         // Enables the button above the stack
         public static final boolean EnableStackActionButton = true;
         // Overrides the Tuner flags and enables the timeout
@@ -50,10 +48,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final int MockTasksPackageCount = 3;
         // Defines the number of mock recents tasks to create
         public static final int MockTaskCount = 100;
-        // Enables the simulated task affiliations
-        public static final boolean EnableMockTaskGroups = false;
-        // Defines the number of mock task affiliations per group
-        public static final int MockTaskGroupsTaskCount = 12;
     }
 
     /**

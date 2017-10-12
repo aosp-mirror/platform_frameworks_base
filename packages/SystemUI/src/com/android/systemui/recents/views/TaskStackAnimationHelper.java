@@ -161,9 +161,6 @@ public class TaskStackAnimationHelper {
         for (int i = taskViews.size() - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = launchTargetTask != null &&
-                    launchTargetTask.group != null &&
-                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
             boolean hideTask = launchTargetTask != null &&
                     launchTargetTask.isFreeformTask() &&
                     task.isFreeformTask();
@@ -195,13 +192,6 @@ public class TaskStackAnimationHelper {
                     // com.android.server.wm.AppTransition#DEFAULT_APP_TRANSITION_DURATION}
                     mStackView.updateTaskViewToTransform(tv, mTmpTransform,
                             new AnimationProps(336, Interpolators.FAST_OUT_SLOW_IN));
-                } else if (currentTaskOccludesLaunchTarget) {
-                    // Move the task view slightly lower so we can animate it in
-                    mTmpTransform.rect.offset(0, taskViewAffiliateGroupEnterOffset);
-                    mTmpTransform.alpha = 0f;
-                    mStackView.updateTaskViewToTransform(tv, mTmpTransform,
-                            AnimationProps.IMMEDIATE);
-                    tv.setClipViewInStack(false);
                 }
             } else if (launchState.launchedFromHome) {
                 if (isLowRamDevice) {
@@ -266,9 +256,6 @@ public class TaskStackAnimationHelper {
             int taskIndexFromBack = i;
             final TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = launchTargetTask != null &&
-                    launchTargetTask.group != null &&
-                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
 
             // Get the current transform for the task, which will be updated to the final transform
             // to animate to depending on how recents was invoked
@@ -280,21 +267,6 @@ public class TaskStackAnimationHelper {
                     tv.onStartLaunchTargetEnterAnimation(mTmpTransform,
                             taskViewEnterFromAppDuration, mStackView.mScreenPinningEnabled,
                             postAnimationTrigger);
-                } else {
-                    // Animate the task up if it was occluding the launch target
-                    if (currentTaskOccludesLaunchTarget) {
-                        AnimationProps taskAnimation = new AnimationProps(
-                                taskViewEnterFromAffiliatedAppDuration, Interpolators.ALPHA_IN,
-                                new AnimatorListenerAdapter() {
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        postAnimationTrigger.decrement();
-                                        tv.setClipViewInStack(true);
-                                    }
-                                });
-                        postAnimationTrigger.increment();
-                        mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
-                    }
                 }
 
             } else if (launchState.launchedFromHome) {
@@ -423,9 +395,6 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = launchingTask != null &&
-                    launchingTask.group != null &&
-                    launchingTask.group.isTaskAboveTask(task, launchingTask);
 
             if (tv == launchingTaskView) {
                 tv.setClipViewInStack(false);
@@ -437,17 +406,6 @@ public class TaskStackAnimationHelper {
                 });
                 tv.onStartLaunchTargetLaunchAnimation(taskViewExitToAppDuration,
                         screenPinningRequested, postAnimationTrigger);
-            } else if (currentTaskOccludesLaunchTarget) {
-                // Animate this task out of view
-                AnimationProps taskAnimation = new AnimationProps(
-                        taskViewExitToAppDuration, Interpolators.ALPHA_OUT,
-                        postAnimationTrigger.decrementOnAnimationEnd());
-                postAnimationTrigger.increment();
-
-                mTmpTransform.fillIn(tv);
-                mTmpTransform.alpha = 0f;
-                mTmpTransform.rect.offset(0, taskViewAffiliateGroupEnterOffset);
-                mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
             }
         }
     }

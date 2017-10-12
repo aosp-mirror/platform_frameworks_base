@@ -140,7 +140,6 @@ public class SystemServicesProxy {
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
-    ComponentName mAssistComponent;
     private int mCurrentUserId;
 
     boolean mIsSafeMode;
@@ -338,9 +337,6 @@ public class SystemServicesProxy {
         mBgProtectionPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
         mBgProtectionPaint.setColor(0xFFffffff);
         mBgProtectionCanvas = new Canvas();
-
-        // Resolve the assist intent
-        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
         // Since SystemServicesProxy can be accessed from a per-SysUI process component, create a
         // per-process listener to keep track of the current user id to reduce the number of binder
@@ -608,7 +604,7 @@ public class SystemServicesProxy {
      */
     public boolean hasSoftNavigationBar() {
         try {
-            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
+            return mIwm.hasNavigationBar();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -677,7 +673,7 @@ public class SystemServicesProxy {
 
         ActivityManager.TaskSnapshot snapshot = null;
         try {
-            snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            snapshot = mIam.getTaskSnapshot(taskId, reducedResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve snapshot", e);
         }
@@ -895,22 +891,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns a logo used on TV for the specified Activity.
-     */
-    public Drawable getActivityLogo(ActivityInfo info) {
-        if (mPm == null) return null;
-
-        // If we are mocking, then return a mock logo
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
-
-        Drawable logo = info.loadLogo(mPm);
-        return logo;
-    }
-
-
-    /**
      * Returns the given label for a user, badging if necessary.
      */
     private String getBadgedLabel(String label, int userId) {
@@ -928,24 +908,6 @@ public class SystemServicesProxy {
             return false;
         }
         return mKgm.isDeviceLocked(userId);
-    }
-
-    /** Returns the package name of the home activity. */
-    public String getHomeActivityPackageName() {
-        if (mPm == null) return null;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return null;
-
-        ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
-        ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);
-        if (defaultHomeActivity != null) {
-            return defaultHomeActivity.getPackageName();
-        } else if (homeActivities.size() == 1) {
-            ResolveInfo info = homeActivities.get(0);
-            if (info.activityInfo != null) {
-                return info.activityInfo.packageName;
-            }
-        }
-        return null;
     }
 
     /**
@@ -1157,7 +1119,7 @@ public class SystemServicesProxy {
             return;
         }
         try {
-            WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
+            mIwm.endProlongedAnimations();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1167,7 +1129,7 @@ public class SystemServicesProxy {
         if (mWm == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(listener);
+            mIwm.registerDockedStackListener(listener);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1194,8 +1156,7 @@ public class SystemServicesProxy {
         if (mWm == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().getStableInsets(Display.DEFAULT_DISPLAY,
-                    outStableInsets);
+            mIwm.getStableInsets(Display.DEFAULT_DISPLAY, outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1205,9 +1166,7 @@ public class SystemServicesProxy {
             IAppTransitionAnimationSpecsFuture future, IRemoteCallback animStartedListener,
             boolean scaleUp) {
         try {
-            WindowManagerGlobal.getWindowManagerService()
-                    .overridePendingAppTransitionMultiThumbFuture(future, animStartedListener,
-                            scaleUp);
+            mIwm.overridePendingAppTransitionMultiThumbFuture(future, animStartedListener, scaleUp);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
