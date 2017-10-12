@@ -3731,266 +3731,273 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case MSG_INVALIDATE:
-                ((View) msg.obj).invalidate();
-                break;
-            case MSG_INVALIDATE_RECT:
-                final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
-                info.target.invalidate(info.left, info.top, info.right, info.bottom);
-                info.recycle();
-                break;
-            case MSG_PROCESS_INPUT_EVENTS:
-                mProcessInputEventsScheduled = false;
-                doProcessInputEvents();
-                break;
-            case MSG_DISPATCH_APP_VISIBILITY:
-                handleAppVisibility(msg.arg1 != 0);
-                break;
-            case MSG_DISPATCH_GET_NEW_SURFACE:
-                handleGetNewSurface();
-                break;
-            case MSG_RESIZED: {
-                // Recycled in the fall through...
-                SomeArgs args = (SomeArgs) msg.obj;
-                if (mWinFrame.equals(args.arg1)
-                        && mPendingOverscanInsets.equals(args.arg5)
-                        && mPendingContentInsets.equals(args.arg2)
-                        && mPendingStableInsets.equals(args.arg6)
-                        && mPendingVisibleInsets.equals(args.arg3)
-                        && mPendingOutsets.equals(args.arg7)
-                        && mPendingBackDropFrame.equals(args.arg8)
-                        && args.arg4 == null
-                        && args.argi1 == 0
-                        && mDisplay.getDisplayId() == args.argi3) {
+                case MSG_INVALIDATE:
+                    ((View) msg.obj).invalidate();
                     break;
-                }
-                } // fall through...
-            case MSG_RESIZED_REPORT:
-                if (mAdded) {
+                case MSG_INVALIDATE_RECT:
+                    final View.AttachInfo.InvalidateInfo info =
+                            (View.AttachInfo.InvalidateInfo) msg.obj;
+                    info.target.invalidate(info.left, info.top, info.right, info.bottom);
+                    info.recycle();
+                break;
+                case MSG_PROCESS_INPUT_EVENTS:
+                    mProcessInputEventsScheduled = false;
+                    doProcessInputEvents();
+                    break;
+                case MSG_DISPATCH_APP_VISIBILITY:
+                    handleAppVisibility(msg.arg1 != 0);
+                    break;
+                case MSG_DISPATCH_GET_NEW_SURFACE:
+                    handleGetNewSurface();
+                    break;
+                case MSG_RESIZED: {
+                    // Recycled in the fall through...
                     SomeArgs args = (SomeArgs) msg.obj;
-
-                    final int displayId = args.argi3;
-                    MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg4;
-                    final boolean displayChanged = mDisplay.getDisplayId() != displayId;
-
-                    if (!mLastReportedMergedConfiguration.equals(mergedConfiguration)) {
-                        // If configuration changed - notify about that and, maybe, about move to
-                        // display.
-                        performConfigurationChange(mergedConfiguration, false /* force */,
-                                displayChanged ? displayId : INVALID_DISPLAY /* same display */);
-                    } else if (displayChanged) {
-                        // Moved to display without config change - report last applied one.
-                        onMovedToDisplay(displayId, mLastConfigurationFromResources);
+                    if (mWinFrame.equals(args.arg1)
+                            && mPendingOverscanInsets.equals(args.arg5)
+                            && mPendingContentInsets.equals(args.arg2)
+                            && mPendingStableInsets.equals(args.arg6)
+                            && mPendingVisibleInsets.equals(args.arg3)
+                            && mPendingOutsets.equals(args.arg7)
+                            && mPendingBackDropFrame.equals(args.arg8)
+                            && args.arg4 == null
+                            && args.argi1 == 0
+                            && mDisplay.getDisplayId() == args.argi3) {
+                        break;
                     }
+                } // fall through...
+                case MSG_RESIZED_REPORT:
+                    if (mAdded) {
+                        SomeArgs args = (SomeArgs) msg.obj;
 
-                    final boolean framesChanged = !mWinFrame.equals(args.arg1)
-                            || !mPendingOverscanInsets.equals(args.arg5)
-                            || !mPendingContentInsets.equals(args.arg2)
-                            || !mPendingStableInsets.equals(args.arg6)
-                            || !mPendingVisibleInsets.equals(args.arg3)
-                            || !mPendingOutsets.equals(args.arg7);
+                        final int displayId = args.argi3;
+                        MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg4;
+                        final boolean displayChanged = mDisplay.getDisplayId() != displayId;
 
-                    mWinFrame.set((Rect) args.arg1);
-                    mPendingOverscanInsets.set((Rect) args.arg5);
-                    mPendingContentInsets.set((Rect) args.arg2);
-                    mPendingStableInsets.set((Rect) args.arg6);
-                    mPendingVisibleInsets.set((Rect) args.arg3);
-                    mPendingOutsets.set((Rect) args.arg7);
-                    mPendingBackDropFrame.set((Rect) args.arg8);
-                    mForceNextWindowRelayout = args.argi1 != 0;
-                    mPendingAlwaysConsumeNavBar = args.argi2 != 0;
+                        if (!mLastReportedMergedConfiguration.equals(mergedConfiguration)) {
+                            // If configuration changed - notify about that and, maybe,
+                            // about move to display.
+                            performConfigurationChange(mergedConfiguration, false /* force */,
+                                    displayChanged
+                                            ? displayId : INVALID_DISPLAY /* same display */);
+                        } else if (displayChanged) {
+                            // Moved to display without config change - report last applied one.
+                            onMovedToDisplay(displayId, mLastConfigurationFromResources);
+                        }
 
-                    args.recycle();
+                        final boolean framesChanged = !mWinFrame.equals(args.arg1)
+                                || !mPendingOverscanInsets.equals(args.arg5)
+                                || !mPendingContentInsets.equals(args.arg2)
+                                || !mPendingStableInsets.equals(args.arg6)
+                                || !mPendingVisibleInsets.equals(args.arg3)
+                                || !mPendingOutsets.equals(args.arg7);
 
-                    if (msg.what == MSG_RESIZED_REPORT) {
-                        reportNextDraw();
+                        mWinFrame.set((Rect) args.arg1);
+                        mPendingOverscanInsets.set((Rect) args.arg5);
+                        mPendingContentInsets.set((Rect) args.arg2);
+                        mPendingStableInsets.set((Rect) args.arg6);
+                        mPendingVisibleInsets.set((Rect) args.arg3);
+                        mPendingOutsets.set((Rect) args.arg7);
+                        mPendingBackDropFrame.set((Rect) args.arg8);
+                        mForceNextWindowRelayout = args.argi1 != 0;
+                        mPendingAlwaysConsumeNavBar = args.argi2 != 0;
+
+                        args.recycle();
+
+                        if (msg.what == MSG_RESIZED_REPORT) {
+                            reportNextDraw();
+                        }
+
+                        if (mView != null && framesChanged) {
+                            forceLayout(mView);
+                        }
+                        requestLayout();
                     }
+                    break;
+                case MSG_WINDOW_MOVED:
+                    if (mAdded) {
+                        final int w = mWinFrame.width();
+                        final int h = mWinFrame.height();
+                        final int l = msg.arg1;
+                        final int t = msg.arg2;
+                        mWinFrame.left = l;
+                        mWinFrame.right = l + w;
+                        mWinFrame.top = t;
+                        mWinFrame.bottom = t + h;
 
-                    if (mView != null && framesChanged) {
-                        forceLayout(mView);
+                        mPendingBackDropFrame.set(mWinFrame);
+                        maybeHandleWindowMove(mWinFrame);
                     }
-                    requestLayout();
-                }
-                break;
-            case MSG_WINDOW_MOVED:
-                if (mAdded) {
-                    final int w = mWinFrame.width();
-                    final int h = mWinFrame.height();
-                    final int l = msg.arg1;
-                    final int t = msg.arg2;
-                    mWinFrame.left = l;
-                    mWinFrame.right = l + w;
-                    mWinFrame.top = t;
-                    mWinFrame.bottom = t + h;
+                    break;
+                case MSG_WINDOW_FOCUS_CHANGED: {
+                    if (mAdded) {
+                        boolean hasWindowFocus = msg.arg1 != 0;
+                        mAttachInfo.mHasWindowFocus = hasWindowFocus;
 
-                    mPendingBackDropFrame.set(mWinFrame);
-                    maybeHandleWindowMove(mWinFrame);
-                }
-                break;
-            case MSG_WINDOW_FOCUS_CHANGED: {
-                if (mAdded) {
-                    boolean hasWindowFocus = msg.arg1 != 0;
-                    mAttachInfo.mHasWindowFocus = hasWindowFocus;
+                        profileRendering(hasWindowFocus);
 
-                    profileRendering(hasWindowFocus);
+                        if (hasWindowFocus) {
+                            boolean inTouchMode = msg.arg2 != 0;
+                            ensureTouchModeLocally(inTouchMode);
 
-                    if (hasWindowFocus) {
-                        boolean inTouchMode = msg.arg2 != 0;
-                        ensureTouchModeLocally(inTouchMode);
-
-                        if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()){
-                            mFullRedrawNeeded = true;
-                            try {
-                                final WindowManager.LayoutParams lp = mWindowAttributes;
-                                final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
-                                mAttachInfo.mThreadedRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
-                            } catch (OutOfResourcesException e) {
-                                Log.e(mTag, "OutOfResourcesException locking surface", e);
+                            if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
+                                mFullRedrawNeeded = true;
                                 try {
-                                    if (!mWindowSession.outOfMemory(mWindow)) {
-                                        Slog.w(mTag, "No processes killed for memory; killing self");
-                                        Process.killProcess(Process.myPid());
+                                    final WindowManager.LayoutParams lp = mWindowAttributes;
+                                    final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
+                                    mAttachInfo.mThreadedRenderer.initializeIfNeeded(
+                                            mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
+                                } catch (OutOfResourcesException e) {
+                                    Log.e(mTag, "OutOfResourcesException locking surface", e);
+                                    try {
+                                        if (!mWindowSession.outOfMemory(mWindow)) {
+                                            Slog.w(mTag,
+                                                    "No processes killed for memory; killing self");
+                                            Process.killProcess(Process.myPid());
+                                        }
+                                    } catch (RemoteException ex) {
                                     }
-                                } catch (RemoteException ex) {
+                                    // Retry in a bit.
+                                    sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2),
+                                            500);
+                                    return;
                                 }
-                                // Retry in a bit.
-                                sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
-                                return;
+                            }
+                        }
+
+                        mLastWasImTarget = WindowManager.LayoutParams
+                                .mayUseInputMethod(mWindowAttributes.flags);
+
+                        InputMethodManager imm = InputMethodManager.peekInstance();
+                        if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
+                            imm.onPreWindowFocus(mView, hasWindowFocus);
+                        }
+                        if (mView != null) {
+                            mAttachInfo.mKeyDispatchState.reset();
+                            mView.dispatchWindowFocusChanged(hasWindowFocus);
+                            mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
+
+                            if (mAttachInfo.mTooltipHost != null) {
+                                mAttachInfo.mTooltipHost.hideTooltip();
+                            }
+                        }
+
+                        // Note: must be done after the focus change callbacks,
+                        // so all of the view state is set up correctly.
+                        if (hasWindowFocus) {
+                            if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
+                                imm.onPostWindowFocus(mView, mView.findFocus(),
+                                        mWindowAttributes.softInputMode,
+                                        !mHasHadWindowFocus, mWindowAttributes.flags);
+                            }
+                            // Clear the forward bit.  We can just do this directly, since
+                            // the window manager doesn't care about it.
+                            mWindowAttributes.softInputMode &=
+                                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                            ((WindowManager.LayoutParams) mView.getLayoutParams())
+                                    .softInputMode &=
+                                        ~WindowManager.LayoutParams
+                                                .SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                            mHasHadWindowFocus = true;
+                        } else {
+                            if (mPointerCapture) {
+                                handlePointerCaptureChanged(false);
                             }
                         }
                     }
-
-                    mLastWasImTarget = WindowManager.LayoutParams
-                            .mayUseInputMethod(mWindowAttributes.flags);
-
+                } break;
+                case MSG_DIE:
+                    doDie();
+                    break;
+                case MSG_DISPATCH_INPUT_EVENT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    InputEvent event = (InputEvent) args.arg1;
+                    InputEventReceiver receiver = (InputEventReceiver) args.arg2;
+                    enqueueInputEvent(event, receiver, 0, true);
+                    args.recycle();
+                } break;
+                case MSG_SYNTHESIZE_INPUT_EVENT: {
+                    InputEvent event = (InputEvent) msg.obj;
+                    enqueueInputEvent(event, null, QueuedInputEvent.FLAG_UNHANDLED, true);
+                } break;
+                case MSG_DISPATCH_KEY_FROM_IME: {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "Dispatching key " + msg.obj + " from IME to " + mView);
+                    }
+                    KeyEvent event = (KeyEvent) msg.obj;
+                    if ((event.getFlags() & KeyEvent.FLAG_FROM_SYSTEM) != 0) {
+                        // The IME is trying to say this event is from the
+                        // system!  Bad bad bad!
+                        //noinspection UnusedAssignment
+                        event = KeyEvent.changeFlags(event, event.getFlags()
+                                & ~KeyEvent.FLAG_FROM_SYSTEM);
+                    }
+                    enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
+                } break;
+                case MSG_CHECK_FOCUS: {
                     InputMethodManager imm = InputMethodManager.peekInstance();
-                    if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                        imm.onPreWindowFocus(mView, hasWindowFocus);
+                    if (imm != null) {
+                        imm.checkFocus();
                     }
+                } break;
+                case MSG_CLOSE_SYSTEM_DIALOGS: {
                     if (mView != null) {
-                        mAttachInfo.mKeyDispatchState.reset();
-                        mView.dispatchWindowFocusChanged(hasWindowFocus);
-                        mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
-
-                        if (mAttachInfo.mTooltipHost != null) {
-                            mAttachInfo.mTooltipHost.hideTooltip();
-                        }
+                        mView.onCloseSystemDialogs((String) msg.obj);
+                    }
+                } break;
+                case MSG_DISPATCH_DRAG_EVENT: {
+                } // fall through
+                case MSG_DISPATCH_DRAG_LOCATION_EVENT: {
+                    DragEvent event = (DragEvent) msg.obj;
+                    // only present when this app called startDrag()
+                    event.mLocalState = mLocalDragState;
+                    handleDragEvent(event);
+                } break;
+                case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
+                    handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo) msg.obj);
+                } break;
+                case MSG_UPDATE_CONFIGURATION: {
+                    Configuration config = (Configuration) msg.obj;
+                    if (config.isOtherSeqNewer(
+                            mLastReportedMergedConfiguration.getMergedConfiguration())) {
+                        // If we already have a newer merged config applied - use its global part.
+                        config = mLastReportedMergedConfiguration.getGlobalConfiguration();
                     }
 
-                    // Note: must be done after the focus change callbacks,
-                    // so all of the view state is set up correctly.
-                    if (hasWindowFocus) {
-                        if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                            imm.onPostWindowFocus(mView, mView.findFocus(),
-                                    mWindowAttributes.softInputMode,
-                                    !mHasHadWindowFocus, mWindowAttributes.flags);
-                        }
-                        // Clear the forward bit.  We can just do this directly, since
-                        // the window manager doesn't care about it.
-                        mWindowAttributes.softInputMode &=
-                                ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                        ((WindowManager.LayoutParams)mView.getLayoutParams())
-                                .softInputMode &=
-                                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                        mHasHadWindowFocus = true;
-                    } else {
-                        if (mPointerCapture) {
-                            handlePointerCaptureChanged(false);
-                        }
+                    // Use the newer global config and last reported override config.
+                    mPendingMergedConfiguration.setConfiguration(config,
+                            mLastReportedMergedConfiguration.getOverrideConfiguration());
+
+                    performConfigurationChange(mPendingMergedConfiguration, false /* force */,
+                            INVALID_DISPLAY /* same display */);
+                } break;
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
+                    setAccessibilityFocus(null, null);
+                } break;
+                case MSG_INVALIDATE_WORLD: {
+                    if (mView != null) {
+                        invalidateWorld(mView);
                     }
-                }
-            } break;
-            case MSG_DIE:
-                doDie();
-                break;
-            case MSG_DISPATCH_INPUT_EVENT: {
-                SomeArgs args = (SomeArgs)msg.obj;
-                InputEvent event = (InputEvent)args.arg1;
-                InputEventReceiver receiver = (InputEventReceiver)args.arg2;
-                enqueueInputEvent(event, receiver, 0, true);
-                args.recycle();
-            } break;
-            case MSG_SYNTHESIZE_INPUT_EVENT: {
-                InputEvent event = (InputEvent)msg.obj;
-                enqueueInputEvent(event, null, QueuedInputEvent.FLAG_UNHANDLED, true);
-            } break;
-            case MSG_DISPATCH_KEY_FROM_IME: {
-                if (LOCAL_LOGV) Log.v(
-                    TAG, "Dispatching key "
-                    + msg.obj + " from IME to " + mView);
-                KeyEvent event = (KeyEvent)msg.obj;
-                if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
-                    // The IME is trying to say this event is from the
-                    // system!  Bad bad bad!
-                    //noinspection UnusedAssignment
-                    event = KeyEvent.changeFlags(event, event.getFlags() &
-                            ~KeyEvent.FLAG_FROM_SYSTEM);
-                }
-                enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
-            } break;
-            case MSG_CHECK_FOCUS: {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    imm.checkFocus();
-                }
-            } break;
-            case MSG_CLOSE_SYSTEM_DIALOGS: {
-                if (mView != null) {
-                    mView.onCloseSystemDialogs((String)msg.obj);
-                }
-            } break;
-            case MSG_DISPATCH_DRAG_EVENT:
-            case MSG_DISPATCH_DRAG_LOCATION_EVENT: {
-                DragEvent event = (DragEvent)msg.obj;
-                event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
-                handleDragEvent(event);
-            } break;
-            case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
-                handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo) msg.obj);
-            } break;
-            case MSG_UPDATE_CONFIGURATION: {
-                Configuration config = (Configuration) msg.obj;
-                if (config.isOtherSeqNewer(
-                        mLastReportedMergedConfiguration.getMergedConfiguration())) {
-                    // If we already have a newer merged config applied - use its global part.
-                    config = mLastReportedMergedConfiguration.getGlobalConfiguration();
-                }
-
-                // Use the newer global config and last reported override config.
-                mPendingMergedConfiguration.setConfiguration(config,
-                        mLastReportedMergedConfiguration.getOverrideConfiguration());
-
-                performConfigurationChange(mPendingMergedConfiguration, false /* force */,
-                        INVALID_DISPLAY /* same display */);
-            } break;
-            case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
-                setAccessibilityFocus(null, null);
-            } break;
-            case MSG_INVALIDATE_WORLD: {
-                if (mView != null) {
-                    invalidateWorld(mView);
-                }
-            } break;
-            case MSG_DISPATCH_WINDOW_SHOWN: {
-                handleDispatchWindowShown();
-            } break;
-            case MSG_REQUEST_KEYBOARD_SHORTCUTS: {
-                final IResultReceiver receiver = (IResultReceiver) msg.obj;
-                final int deviceId = msg.arg1;
-                handleRequestKeyboardShortcuts(receiver, deviceId);
-            } break;
-            case MSG_UPDATE_POINTER_ICON: {
-                MotionEvent event = (MotionEvent) msg.obj;
-                resetPointerIcon(event);
-            } break;
-            case MSG_POINTER_CAPTURE_CHANGED: {
-                final boolean hasCapture = msg.arg1 != 0;
-                handlePointerCaptureChanged(hasCapture);
-            } break;
-            case MSG_DRAW_FINISHED: {
-                pendingDrawFinished();
-            } break;
+                } break;
+                case MSG_DISPATCH_WINDOW_SHOWN: {
+                    handleDispatchWindowShown();
+                } break;
+                case MSG_REQUEST_KEYBOARD_SHORTCUTS: {
+                    final IResultReceiver receiver = (IResultReceiver) msg.obj;
+                    final int deviceId = msg.arg1;
+                    handleRequestKeyboardShortcuts(receiver, deviceId);
+                } break;
+                case MSG_UPDATE_POINTER_ICON: {
+                    MotionEvent event = (MotionEvent) msg.obj;
+                    resetPointerIcon(event);
+                } break;
+                case MSG_POINTER_CAPTURE_CHANGED: {
+                    final boolean hasCapture = msg.arg1 != 0;
+                    handlePointerCaptureChanged(hasCapture);
+                } break;
+                case MSG_DRAW_FINISHED: {
+                    pendingDrawFinished();
+                } break;
             }
         }
     }
