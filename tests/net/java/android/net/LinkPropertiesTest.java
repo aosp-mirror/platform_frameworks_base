@@ -16,18 +16,21 @@
 
 package android.net;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.ArraySet;
-
-import junit.framework.TestCase;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -37,8 +40,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class LinkPropertiesTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class LinkPropertiesTest {
     private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
     private static InetAddress ADDRV6 = NetworkUtils.numericToInetAddress(
             "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
@@ -92,7 +99,7 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(source.hashCode(), target.hashCode());
     }
 
-    @SmallTest
+    @Test
     public void testEqualsNull() {
         LinkProperties source = new LinkProperties();
         LinkProperties target = new LinkProperties();
@@ -101,155 +108,141 @@ public class LinkPropertiesTest extends TestCase {
         assertLinkPropertiesEqual(source, target);
     }
 
-    @SmallTest
-    public void testEqualsSameOrder() {
-        try {
-            LinkProperties source = new LinkProperties();
-            source.setInterfaceName(NAME);
-            // set 2 link addresses
-            source.addLinkAddress(LINKADDRV4);
-            source.addLinkAddress(LINKADDRV6);
-            // set 2 dnses
-            source.addDnsServer(DNS1);
-            source.addDnsServer(DNS2);
-            // set 2 gateways
-            source.addRoute(new RouteInfo(GATEWAY1));
-            source.addRoute(new RouteInfo(GATEWAY2));
-            source.setMtu(MTU);
+    @Test
+    public void testEqualsSameOrder() throws Exception {
+        LinkProperties source = new LinkProperties();
+        source.setInterfaceName(NAME);
+        // set 2 link addresses
+        source.addLinkAddress(LINKADDRV4);
+        source.addLinkAddress(LINKADDRV6);
+        // set 2 dnses
+        source.addDnsServer(DNS1);
+        source.addDnsServer(DNS2);
+        // set 2 gateways
+        source.addRoute(new RouteInfo(GATEWAY1));
+        source.addRoute(new RouteInfo(GATEWAY2));
+        source.setMtu(MTU);
 
-            LinkProperties target = new LinkProperties();
+        LinkProperties target = new LinkProperties();
 
-            // All fields are same
-            target.setInterfaceName(NAME);
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            target.addDnsServer(DNS1);
-            target.addDnsServer(DNS2);
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.setMtu(MTU);
+        // All fields are same
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(DNS1);
+        target.addDnsServer(DNS2);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
 
-            assertLinkPropertiesEqual(source, target);
+        assertLinkPropertiesEqual(source, target);
 
-            target.clear();
-            // change Interface Name
-            target.setInterfaceName("qmi1");
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            target.addDnsServer(DNS1);
-            target.addDnsServer(DNS2);
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.setMtu(MTU);
-            assertFalse(source.equals(target));
+        target.clear();
+        // change Interface Name
+        target.setInterfaceName("qmi1");
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(DNS1);
+        target.addDnsServer(DNS2);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
+        assertFalse(source.equals(target));
 
-            target.clear();
-            target.setInterfaceName(NAME);
-            // change link addresses
-            target.addLinkAddress(new LinkAddress(
-                    NetworkUtils.numericToInetAddress("75.208.6.2"), 32));
-            target.addLinkAddress(LINKADDRV6);
-            target.addDnsServer(DNS1);
-            target.addDnsServer(DNS2);
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.setMtu(MTU);
-            assertFalse(source.equals(target));
+        target.clear();
+        target.setInterfaceName(NAME);
+        // change link addresses
+        target.addLinkAddress(new LinkAddress(
+                NetworkUtils.numericToInetAddress("75.208.6.2"), 32));
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(DNS1);
+        target.addDnsServer(DNS2);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
+        assertFalse(source.equals(target));
 
-            target.clear();
-            target.setInterfaceName(NAME);
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            // change dnses
-            target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
-            target.addDnsServer(DNS2);
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.setMtu(MTU);
-            assertFalse(source.equals(target));
+        target.clear();
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        // change dnses
+        target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
+        target.addDnsServer(DNS2);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
+        assertFalse(source.equals(target));
 
-            target.clear();
-            target.setInterfaceName(NAME);
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            target.addDnsServer(DNS1);
-            target.addDnsServer(DNS2);
-            // change gateway
-            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress("75.208.8.2")));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.setMtu(MTU);
-            assertFalse(source.equals(target));
+        target.clear();
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(DNS1);
+        target.addDnsServer(DNS2);
+        // change gateway
+        target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress("75.208.8.2")));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.setMtu(MTU);
+        assertFalse(source.equals(target));
 
-            target.clear();
-            target.setInterfaceName(NAME);
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            target.addDnsServer(DNS1);
-            target.addDnsServer(DNS2);
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.addRoute(new RouteInfo(GATEWAY2));
-            // change mtu
-            target.setMtu(1440);
-            assertFalse(source.equals(target));
-
-        } catch (Exception e) {
-            throw new RuntimeException(e.toString());
-            //fail();
-        }
+        target.clear();
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addDnsServer(DNS1);
+        target.addDnsServer(DNS2);
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(GATEWAY2));
+        // change mtu
+        target.setMtu(1440);
+        assertFalse(source.equals(target));
     }
 
-    @SmallTest
-    public void testEqualsDifferentOrder() {
-        try {
-            LinkProperties source = new LinkProperties();
-            source.setInterfaceName(NAME);
-            // set 2 link addresses
-            source.addLinkAddress(LINKADDRV4);
-            source.addLinkAddress(LINKADDRV6);
-            // set 2 dnses
-            source.addDnsServer(DNS1);
-            source.addDnsServer(DNS2);
-            // set 2 gateways
-            source.addRoute(new RouteInfo(GATEWAY1));
-            source.addRoute(new RouteInfo(GATEWAY2));
-            source.setMtu(MTU);
+    @Test
+    public void testEqualsDifferentOrder() throws Exception {
+        LinkProperties source = new LinkProperties();
+        source.setInterfaceName(NAME);
+        // set 2 link addresses
+        source.addLinkAddress(LINKADDRV4);
+        source.addLinkAddress(LINKADDRV6);
+        // set 2 dnses
+        source.addDnsServer(DNS1);
+        source.addDnsServer(DNS2);
+        // set 2 gateways
+        source.addRoute(new RouteInfo(GATEWAY1));
+        source.addRoute(new RouteInfo(GATEWAY2));
+        source.setMtu(MTU);
 
-            LinkProperties target = new LinkProperties();
-            // Exchange order
-            target.setInterfaceName(NAME);
-            target.addLinkAddress(LINKADDRV6);
-            target.addLinkAddress(LINKADDRV4);
-            target.addDnsServer(DNS2);
-            target.addDnsServer(DNS1);
-            target.addRoute(new RouteInfo(GATEWAY2));
-            target.addRoute(new RouteInfo(GATEWAY1));
-            target.setMtu(MTU);
+        LinkProperties target = new LinkProperties();
+        // Exchange order
+        target.setInterfaceName(NAME);
+        target.addLinkAddress(LINKADDRV6);
+        target.addLinkAddress(LINKADDRV4);
+        target.addDnsServer(DNS2);
+        target.addDnsServer(DNS1);
+        target.addRoute(new RouteInfo(GATEWAY2));
+        target.addRoute(new RouteInfo(GATEWAY1));
+        target.setMtu(MTU);
 
-            assertLinkPropertiesEqual(source, target);
-        } catch (Exception e) {
-            fail();
-        }
+        assertLinkPropertiesEqual(source, target);
     }
 
-    @SmallTest
-    public void testEqualsDuplicated() {
-        try {
-            LinkProperties source = new LinkProperties();
-            // set 3 link addresses, eg, [A, A, B]
-            source.addLinkAddress(LINKADDRV4);
-            source.addLinkAddress(LINKADDRV4);
-            source.addLinkAddress(LINKADDRV6);
+    @Test
+    public void testEqualsDuplicated() throws Exception {
+        LinkProperties source = new LinkProperties();
+        // set 3 link addresses, eg, [A, A, B]
+        source.addLinkAddress(LINKADDRV4);
+        source.addLinkAddress(LINKADDRV4);
+        source.addLinkAddress(LINKADDRV6);
 
-            LinkProperties target = new LinkProperties();
-            // set 3 link addresses, eg, [A, B, B]
-            target.addLinkAddress(LINKADDRV4);
-            target.addLinkAddress(LINKADDRV6);
-            target.addLinkAddress(LINKADDRV6);
+        LinkProperties target = new LinkProperties();
+        // set 3 link addresses, eg, [A, B, B]
+        target.addLinkAddress(LINKADDRV4);
+        target.addLinkAddress(LINKADDRV6);
+        target.addLinkAddress(LINKADDRV6);
 
-            assertLinkPropertiesEqual(source, target);
-        } catch (Exception e) {
-            fail();
-        }
+        assertLinkPropertiesEqual(source, target);
     }
 
     private void assertAllRoutesHaveInterface(String iface, LinkProperties lp) {
@@ -258,7 +251,7 @@ public class LinkPropertiesTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testRouteInterfaces() {
         LinkAddress prefix = new LinkAddress(
             NetworkUtils.numericToInetAddress("2001:db8::"), 32);
@@ -317,7 +310,7 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
     }
 
-    @SmallTest
+    @Test
     public void testStackedInterfaces() {
         LinkProperties rmnet0 = new LinkProperties();
         rmnet0.setInterfaceName("rmnet0");
@@ -373,7 +366,7 @@ public class LinkPropertiesTest extends TestCase {
         return lp.getLinkAddresses().iterator().next();
     }
 
-    @SmallTest
+    @Test
     public void testAddressMethods() {
         LinkProperties lp = new LinkProperties();
 
@@ -460,7 +453,7 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(0, lp.getLinkAddresses().size());
     }
 
-    @SmallTest
+    @Test
     public void testSetLinkAddresses() {
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(LINKADDRV4);
@@ -475,7 +468,7 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(lp.equals(lp));
     }
 
-    @SmallTest
+    @Test
     public void testIsProvisioned() {
         LinkProperties lp4 = new LinkProperties();
         assertFalse("v4only:empty", lp4.isProvisioned());
@@ -529,7 +522,7 @@ public class LinkPropertiesTest extends TestCase {
         assertFalse("mixed:addr6+route6+dns4", mixed.isProvisioned());
     }
 
-    @SmallTest
+    @Test
     public void testCompareProvisioning() {
         LinkProperties v4lp = new LinkProperties();
         v4lp.addLinkAddress(LINKADDRV4);
@@ -589,8 +582,7 @@ public class LinkPropertiesTest extends TestCase {
                 LinkProperties.compareProvisioning(v6lp, v6lp2));
     }
 
-    @SmallTest
-    @Suppress  // Failing.
+    @Test
     public void testIsReachable() {
         final LinkProperties v4lp = new LinkProperties();
         assertFalse(v4lp.isReachable(DNS1));
@@ -687,7 +679,7 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(v6lp.isReachable(DNS1));
     }
 
-    @SmallTest
+    @Test
     public void testLinkPropertiesEnsureDirectlyConnectedRoutes() {
         // IPv4 case: no route added initially
         LinkProperties rmnet0 = new LinkProperties();
@@ -750,25 +742,25 @@ public class LinkPropertiesTest extends TestCase {
 
     }
 
-    @SmallTest
+    @Test
     public void testCompareResult() {
         // Either adding or removing items
-        testCompareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
+        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
                 Arrays.asList(2, 3, 4), new ArrayList<>());
-        testCompareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
+        compareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
                 new ArrayList<>(), Arrays.asList(3, 4));
 
 
         // adding and removing items at the same time
-        testCompareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(2, 3, 4, 5),
+        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(2, 3, 4, 5),
                 Arrays.asList(1), Arrays.asList(5));
-        testCompareResult(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
+        compareResult(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
                 Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6));
 
         // null cases
-        testCompareResult(Arrays.asList(1, 2, 3), null, Arrays.asList(1, 2, 3), new ArrayList<>());
-        testCompareResult(null, Arrays.asList(3, 2, 1), new ArrayList<>(), Arrays.asList(1, 2, 3));
-        testCompareResult(null, null, new ArrayList<>(), new ArrayList<>());
+        compareResult(Arrays.asList(1, 2, 3), null, Arrays.asList(1, 2, 3), new ArrayList<>());
+        compareResult(null, Arrays.asList(3, 2, 1), new ArrayList<>(), Arrays.asList(1, 2, 3));
+        compareResult(null, null, new ArrayList<>(), new ArrayList<>());
     }
 
     private void assertEqualRoutes(Collection<RouteInfo> expected, Collection<RouteInfo> actual) {
@@ -780,7 +772,7 @@ public class LinkPropertiesTest extends TestCase {
         assertEquals(expectedSet, actualSet);
     }
 
-    private <T> void testCompareResult(List<T> oldItems, List<T> newItems, List<T> expectRemoved,
+    private <T> void compareResult(List<T> oldItems, List<T> newItems, List<T> expectRemoved,
             List<T> expectAdded) {
         CompareResult<T> result = new CompareResult<>(oldItems, newItems);
         assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
