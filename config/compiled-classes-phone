@@ -3269,6 +3269,7 @@ android.os.OperationCanceledException
 android.os.Parcel
 android.os.Parcel$1
 android.os.Parcel$2
+android.os.Parcel$ReadWriteHelper
 android.os.ParcelFileDescriptor
 android.os.ParcelFileDescriptor$1
 android.os.ParcelFileDescriptor$2
