@@ -16,6 +16,8 @@
 
 #include "ProfileDataContainer.h"
 
+#include <errno.h>
+
 #include <log/log.h>
 #include <cutils/ashmem.h>
 
