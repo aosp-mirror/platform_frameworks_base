@@ -21,14 +21,21 @@ import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 
 import dalvik.system.CloseGuard;
+
+import java.io.Closeable;
+
+import libcore.util.NativeAllocationRegistry;
 
 /**
  * SurfaceControl
@@ -54,25 +61,34 @@ public class SurfaceControl {
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
 
-    private static native void nativeOpenTransaction();
-    private static native void nativeCloseTransaction(boolean sync);
-    private static native void nativeSetAnimationTransaction();
+    private static native long nativeCreateTransaction();
+    private static native long nativeGetNativeTransactionFinalizer();
+    private static native void nativeApplyTransaction(long transactionObj, boolean sync);
+    private static native void nativeSetAnimationTransaction(long transactionObj);
 
-    private static native void nativeSetLayer(long nativeObject, int zorder);
-    private static native void nativeSetRelativeLayer(long nativeObject, IBinder relativeTo,
-            int zorder);
-    private static native void nativeSetPosition(long nativeObject, float x, float y);
-    private static native void nativeSetGeometryAppliesWithResize(long nativeObject);
-    private static native void nativeSetSize(long nativeObject, int w, int h);
-    private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
-    private static native void nativeSetAlpha(long nativeObject, float alpha);
-    private static native void nativeSetColor(long nativeObject, float[] color);
-    private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx,
+    private static native void nativeSetLayer(long transactionObj, long nativeObject, int zorder);
+    private static native void nativeSetRelativeLayer(long transactionObj, long nativeObject,
+            IBinder relativeTo, int zorder);
+    private static native void nativeSetPosition(long transactionObj, long nativeObject,
+            float x, float y);
+    private static native void nativeSetGeometryAppliesWithResize(long transactionObj,
+            long nativeObject);
+    private static native void nativeSetSize(long transactionObj, long nativeObject, int w, int h);
+    private static native void nativeSetTransparentRegionHint(long transactionObj,
+            long nativeObject, Region region);
+    private static native void nativeSetAlpha(long transactionObj, long nativeObject, float alpha);
+    private static native void nativeSetMatrix(long transactionObj, long nativeObject,
+            float dsdx, float dtdx,
             float dtdy, float dsdy);
-    private static native void nativeSetFlags(long nativeObject, int flags, int mask);
-    private static native void nativeSetWindowCrop(long nativeObject, int l, int t, int r, int b);
-    private static native void nativeSetFinalCrop(long nativeObject, int l, int t, int r, int b);
-    private static native void nativeSetLayerStack(long nativeObject, int layerStack);
+    private static native void nativeSetColor(long transactionObj, long nativeObject, float[] color);
+    private static native void nativeSetFlags(long transactionObj, long nativeObject,
+            int flags, int mask);
+    private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
+            int l, int t, int r, int b);
+    private static native void nativeSetFinalCrop(long transactionObj, long nativeObject,
+            int l, int t, int r, int b);
+    private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
+            int layerStack);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -82,15 +98,16 @@ public class SurfaceControl {
     private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
-    private static native void nativeSetDisplaySurface(
+    private static native void nativeSetDisplaySurface(long transactionObj,
             IBinder displayToken, long nativeSurfaceObject);
-    private static native void nativeSetDisplayLayerStack(
+    private static native void nativeSetDisplayLayerStack(long transactionObj,
             IBinder displayToken, int layerStack);
-    private static native void nativeSetDisplayProjection(
+    private static native void nativeSetDisplayProjection(long transactionObj,
             IBinder displayToken, int orientation,
             int l, int t, int r, int b,
             int L, int T, int R, int B);
-    private static native void nativeSetDisplaySize(IBinder displayToken, int width, int height);
+    private static native void nativeSetDisplaySize(long transactionObj, IBinder displayToken,
+            int width, int height);
     private static native SurfaceControl.PhysicalDisplayInfo[] nativeGetDisplayConfigs(
             IBinder displayToken);
     private static native int nativeGetActiveConfig(IBinder displayToken);
@@ -101,16 +118,17 @@ public class SurfaceControl {
             int colorMode);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
-    private static native void nativeDeferTransactionUntil(long nativeObject,
+    private static native void nativeDeferTransactionUntil(long transactionObj, long nativeObject,
             IBinder handle, long frame);
-    private static native void nativeDeferTransactionUntilSurface(long nativeObject,
+    private static native void nativeDeferTransactionUntilSurface(long transactionObj,
+            long nativeObject,
             long surfaceObject, long frame);
-    private static native void nativeReparentChildren(long nativeObject,
+    private static native void nativeReparentChildren(long transactionObj, long nativeObject,
             IBinder handle);
-    private static native void nativeReparent(long nativeObject,
+    private static native void nativeReparent(long transactionObj, long nativeObject,
             IBinder parentHandle);
-    private static native void nativeSeverChildren(long nativeObject);
-    private static native void nativeSetOverrideScalingMode(long nativeObject,
+    private static native void nativeSeverChildren(long transactionObj, long nativeObject);
+    private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
     private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
@@ -121,6 +139,9 @@ public class SurfaceControl {
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final String mName;
     long mNativeObject; // package visibility only for Surface.java access
+
+    static Transaction sGlobalTransaction;
+    static long sTransactionNestCount = 0;
 
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
@@ -377,11 +398,6 @@ public class SurfaceControl {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Surface(name=" + mName + ")";
-    }
-
     /**
      * Release the local reference to the server-side surface.
      * Always call release() when you're done with a Surface.
@@ -429,102 +445,141 @@ public class SurfaceControl {
 
     /** start a transaction */
     public static void openTransaction() {
-        nativeOpenTransaction();
+        synchronized (SurfaceControl.class) {
+            if (sGlobalTransaction == null) {
+                sGlobalTransaction = new Transaction();
+            }
+            synchronized(SurfaceControl.class) {
+                sTransactionNestCount++;
+            }
+        }
+    }
+
+    private static void closeTransaction(boolean sync) {
+        synchronized(SurfaceControl.class) {
+            if (sTransactionNestCount == 0) {
+                Log.e(TAG, "Call to SurfaceControl.closeTransaction without matching openTransaction");
+            } else if (--sTransactionNestCount > 0) {
+                return;
+            }
+            sGlobalTransaction.apply(sync);
+        }
     }
 
     /** end a transaction */
     public static void closeTransaction() {
-        nativeCloseTransaction(false);
+        closeTransaction(false);
     }
 
     public static void closeTransactionSync() {
-        nativeCloseTransaction(true);
+        closeTransaction(true);
     }
 
     public void deferTransactionUntil(IBinder handle, long frame) {
         if (frame > 0) {
-            nativeDeferTransactionUntil(mNativeObject, handle, frame);
+            synchronized(SurfaceControl.class) {
+                sGlobalTransaction.deferTransactionUntil(this, handle, frame);
+            }
         }
     }
 
     public void deferTransactionUntil(Surface barrier, long frame) {
         if (frame > 0) {
-            nativeDeferTransactionUntilSurface(mNativeObject, barrier.mNativeObject, frame);
+            synchronized(SurfaceControl.class) {
+                sGlobalTransaction.deferTransactionUntilSurface(this, barrier, frame);
+            }
         }
     }
 
     public void reparentChildren(IBinder newParentHandle) {
-        nativeReparentChildren(mNativeObject, newParentHandle);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.reparentChildren(this, newParentHandle);
+        }
     }
 
-    /** Re-parents this layer to a new parent. */
     public void reparent(IBinder newParentHandle) {
-        nativeReparent(mNativeObject, newParentHandle);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.reparent(this, newParentHandle);
+        }
     }
 
     public void detachChildren() {
-        nativeSeverChildren(mNativeObject);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.detachChildren(this);
+        }
     }
 
     public void setOverrideScalingMode(int scalingMode) {
         checkNotReleased();
-        nativeSetOverrideScalingMode(mNativeObject, scalingMode);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setOverrideScalingMode(this, scalingMode);
+        }
     }
 
     public IBinder getHandle() {
         return nativeGetHandle(mNativeObject);
     }
 
-    /** flag the transaction as an animation */
     public static void setAnimationTransaction() {
-        nativeSetAnimationTransaction();
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setAnimationTransaction();
+        }
     }
 
     public void setLayer(int zorder) {
         checkNotReleased();
-        nativeSetLayer(mNativeObject, zorder);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setLayer(this, zorder);
+        }
     }
 
     public void setRelativeLayer(IBinder relativeTo, int zorder) {
         checkNotReleased();
-        nativeSetRelativeLayer(mNativeObject, relativeTo, zorder);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setRelativeLayer(this, relativeTo, zorder);
+        }
     }
 
     public void setPosition(float x, float y) {
         checkNotReleased();
-        nativeSetPosition(mNativeObject, x, y);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setPosition(this, x, y);
+        }
     }
 
-    /**
-     * If the buffer size changes in this transaction, position and crop updates specified
-     * in this transaction will not complete until a buffer of the new size
-     * arrives. As transform matrix and size are already frozen in this fashion,
-     * this enables totally freezing the surface until the resize has completed
-     * (at which point the geometry influencing aspects of this transaction will then occur)
-     */
     public void setGeometryAppliesWithResize() {
         checkNotReleased();
-        nativeSetGeometryAppliesWithResize(mNativeObject);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setGeometryAppliesWithResize(this);
+        }
     }
 
     public void setSize(int w, int h) {
         checkNotReleased();
-        nativeSetSize(mNativeObject, w, h);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setSize(this, w, h);
+        }
     }
 
     public void hide() {
         checkNotReleased();
-        nativeSetFlags(mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.hide(this);
+        }
     }
 
     public void show() {
         checkNotReleased();
-        nativeSetFlags(mNativeObject, 0, SURFACE_HIDDEN);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.show(this);
+        }
     }
 
     public void setTransparentRegionHint(Region region) {
         checkNotReleased();
-        nativeSetTransparentRegionHint(mNativeObject, region);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setTransparentRegionHint(this, region);
+        }
     }
 
     public boolean clearContentFrameStats() {
@@ -545,78 +600,68 @@ public class SurfaceControl {
         return nativeGetAnimationFrameStats(outStats);
     }
 
-    /**
-     * Sets an alpha value for the entire Surface.  This value is combined with the
-     * per-pixel alpha.  It may be used with opaque Surfaces.
-     */
     public void setAlpha(float alpha) {
         checkNotReleased();
-        nativeSetAlpha(mNativeObject, alpha);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setAlpha(this, alpha);
+        }
     }
 
-    /**
-     * Sets a color for the Surface.
-     * @param color A float array with three values to represent r, g, b in range [0..1]
-     */
     public void setColor(@Size(3) float[] color) {
         checkNotReleased();
-        nativeSetColor(mNativeObject, color);
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setColor(this, color);
+        }
     }
 
     public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
         checkNotReleased();
-        nativeSetMatrix(mNativeObject, dsdx, dtdx, dtdy, dsdy);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setMatrix(this, dsdx, dtdx, dtdy, dsdy);
+        }
     }
 
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
-        if (crop != null) {
-            nativeSetWindowCrop(mNativeObject,
-                crop.left, crop.top, crop.right, crop.bottom);
-        } else {
-            nativeSetWindowCrop(mNativeObject, 0, 0, 0, 0);
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setWindowCrop(this, crop);
         }
     }
 
     public void setFinalCrop(Rect crop) {
         checkNotReleased();
-        if (crop != null) {
-            nativeSetFinalCrop(mNativeObject,
-                crop.left, crop.top, crop.right, crop.bottom);
-        } else {
-            nativeSetFinalCrop(mNativeObject, 0, 0, 0, 0);
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setFinalCrop(this, crop);
         }
     }
 
     public void setLayerStack(int layerStack) {
         checkNotReleased();
-        nativeSetLayerStack(mNativeObject, layerStack);
+        synchronized(SurfaceControl.class) {
+            sGlobalTransaction.setLayerStack(this, layerStack);
+        }
     }
 
-    /**
-     * Sets the opacity of the surface.  Setting the flag is equivalent to creating the
-     * Surface with the {@link #OPAQUE} flag.
-     */
     public void setOpaque(boolean isOpaque) {
         checkNotReleased();
-        if (isOpaque) {
-            nativeSetFlags(mNativeObject, SURFACE_OPAQUE, SURFACE_OPAQUE);
-        } else {
-            nativeSetFlags(mNativeObject, 0, SURFACE_OPAQUE);
+
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setOpaque(this, isOpaque);
         }
     }
 
-    /**
-     * Sets the security of the surface.  Setting the flag is equivalent to creating the
-     * Surface with the {@link #SECURE} flag.
-     */
     public void setSecure(boolean isSecure) {
         checkNotReleased();
-        if (isSecure) {
-            nativeSetFlags(mNativeObject, SECURE, SECURE);
-        } else {
-            nativeSetFlags(mNativeObject, 0, SECURE);
+
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setSecure(this, isSecure);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Surface(name=" + mName + ")/@0x" +
+                Integer.toHexString(System.identityHashCode(this));
     }
 
     /*
@@ -741,50 +786,28 @@ public class SurfaceControl {
 
     public static void setDisplayProjection(IBinder displayToken,
             int orientation, Rect layerStackRect, Rect displayRect) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setDisplayProjection(displayToken, orientation,
+                    layerStackRect, displayRect);
         }
-        if (layerStackRect == null) {
-            throw new IllegalArgumentException("layerStackRect must not be null");
-        }
-        if (displayRect == null) {
-            throw new IllegalArgumentException("displayRect must not be null");
-        }
-        nativeSetDisplayProjection(displayToken, orientation,
-                layerStackRect.left, layerStackRect.top, layerStackRect.right, layerStackRect.bottom,
-                displayRect.left, displayRect.top, displayRect.right, displayRect.bottom);
     }
 
     public static void setDisplayLayerStack(IBinder displayToken, int layerStack) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setDisplayLayerStack(displayToken, layerStack);
         }
-        nativeSetDisplayLayerStack(displayToken, layerStack);
     }
 
     public static void setDisplaySurface(IBinder displayToken, Surface surface) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-
-        if (surface != null) {
-            synchronized (surface.mLock) {
-                nativeSetDisplaySurface(displayToken, surface.mNativeObject);
-            }
-        } else {
-            nativeSetDisplaySurface(displayToken, 0);
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setDisplaySurface(displayToken, surface);
         }
     }
 
     public static void setDisplaySize(IBinder displayToken, int width, int height) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setDisplaySize(displayToken, width, height);
         }
-        if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("width and height must be positive");
-        }
-
-        nativeSetDisplaySize(displayToken, width, height);
     }
 
     public static Display.HdrCapabilities getHdrCapabilities(IBinder displayToken) {
@@ -945,5 +968,262 @@ public class SurfaceControl {
         }
         nativeScreenshot(display, consumer, sourceCrop, width, height,
                 minLayer, maxLayer, allLayers, useIdentityTransform);
+    }
+
+    public static class Transaction implements Closeable {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                Transaction.class.getClassLoader(),
+                nativeGetNativeTransactionFinalizer(), 512);
+        private long mNativeObject;
+
+        Runnable mFreeNativeResources;
+
+        public Transaction() {
+            mNativeObject = nativeCreateTransaction();
+            mFreeNativeResources
+                = sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
+        /**
+         * Apply the transaction, clearing it's state, and making it usable
+         * as a new transaction.
+         */
+        public void apply() {
+            apply(false);
+        }
+
+        /**
+         * Close the transaction, if the transaction was not already applied this will cancel the
+         * transaction.
+         */
+        @Override
+        public void close() {
+            mFreeNativeResources.run();
+            mNativeObject = 0;
+        }
+
+        /**
+         * Jankier version of apply. Avoid use (b/28068298).
+         */
+        public void apply(boolean sync) {
+            nativeApplyTransaction(mNativeObject, sync);
+        }
+
+        public Transaction show(SurfaceControl sc) {
+            nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SURFACE_HIDDEN);
+            return this;
+        }
+
+        public Transaction hide(SurfaceControl sc) {
+            nativeSetFlags(mNativeObject, sc.mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
+            return this;
+        }
+
+        public Transaction setPosition(SurfaceControl sc, float x, float y) {
+            nativeSetPosition(mNativeObject, sc.mNativeObject, x, y);
+            return this;
+        }
+
+        public Transaction setSize(SurfaceControl sc, int w, int h) {
+            nativeSetSize(mNativeObject, sc.mNativeObject,
+                    w, h);
+            return this;
+        }
+
+        public Transaction setLayer(SurfaceControl sc, int z) {
+            nativeSetLayer(mNativeObject, sc.mNativeObject, z);
+            return this;
+        }
+
+        public Transaction setRelativeLayer(SurfaceControl sc, IBinder relativeTo, int z) {
+            nativeSetRelativeLayer(mNativeObject, sc.mNativeObject,
+                    relativeTo, z);
+            return this;
+        }
+
+        public Transaction setTransparentRegionHint(SurfaceControl sc, Region transparentRegion) {
+            nativeSetTransparentRegionHint(mNativeObject,
+                    sc.mNativeObject, transparentRegion);
+            return this;
+        }
+
+        public Transaction setAlpha(SurfaceControl sc, float alpha) {
+            nativeSetAlpha(mNativeObject, sc.mNativeObject, alpha);
+            return this;
+        }
+
+        public Transaction setMatrix(SurfaceControl sc,
+                float dsdx, float dtdx, float dtdy, float dsdy) {
+            nativeSetMatrix(mNativeObject, sc.mNativeObject,
+                    dsdx, dtdx, dtdy, dsdy);
+            return this;
+        }
+
+        public Transaction setWindowCrop(SurfaceControl sc, Rect crop) {
+            if (crop != null) {
+                nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
+                        crop.left, crop.top, crop.right, crop.bottom);
+            } else {
+                nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, 0, 0);
+            }
+
+            return this;
+        }
+
+        public Transaction setFinalCrop(SurfaceControl sc, Rect crop) {
+            if (crop != null) {
+                nativeSetFinalCrop(mNativeObject, sc.mNativeObject,
+                        crop.left, crop.top, crop.right, crop.bottom);
+            } else {
+                nativeSetFinalCrop(mNativeObject, sc.mNativeObject, 0, 0, 0, 0);
+            }
+
+            return this;
+        }
+
+        public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
+            nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);
+            return this;
+        }
+
+        public Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle, long frameNumber) {
+            nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, handle, frameNumber);
+            return this;
+        }
+
+        public Transaction deferTransactionUntilSurface(SurfaceControl sc, Surface barrierSurface,
+                long frameNumber) {
+            nativeDeferTransactionUntilSurface(mNativeObject, sc.mNativeObject,
+                    barrierSurface.mNativeObject, frameNumber);
+            return this;
+        }
+
+        public Transaction reparentChildren(SurfaceControl sc, IBinder newParentHandle) {
+            nativeReparentChildren(mNativeObject, sc.mNativeObject, newParentHandle);
+            return this;
+        }
+
+        /** Re-parents a specific child layer to a new parent */
+        public Transaction reparent(SurfaceControl sc, IBinder newParentHandle) {
+            nativeReparent(mNativeObject, sc.mNativeObject,
+                    newParentHandle);
+            return this;
+        }
+
+        public Transaction detachChildren(SurfaceControl sc) {
+            nativeSeverChildren(mNativeObject, sc.mNativeObject);
+            return this;
+        }
+
+        public Transaction setOverrideScalingMode(SurfaceControl sc, int overrideScalingMode) {
+            nativeSetOverrideScalingMode(mNativeObject, sc.mNativeObject,
+                    overrideScalingMode);
+            return this;
+        }
+
+        /**
+         * Sets a color for the Surface.
+         * @param color A float array with three values to represent r, g, b in range [0..1]
+         */
+        public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
+            nativeSetColor(mNativeObject, sc.mNativeObject, color);
+            return this;
+        }
+
+        /**
+         * If the buffer size changes in this transaction, position and crop updates specified
+         * in this transaction will not complete until a buffer of the new size
+         * arrives. As transform matrix and size are already frozen in this fashion,
+         * this enables totally freezing the surface until the resize has completed
+         * (at which point the geometry influencing aspects of this transaction will then occur)
+         */
+        public Transaction setGeometryAppliesWithResize(SurfaceControl sc) {
+            nativeSetGeometryAppliesWithResize(mNativeObject, sc.mNativeObject);
+            return this;
+        }
+
+        /**
+         * Sets the security of the surface.  Setting the flag is equivalent to creating the
+         * Surface with the {@link #SECURE} flag.
+         */
+        Transaction setSecure(SurfaceControl sc, boolean isSecure) {
+            if (isSecure) {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, SECURE, SECURE);
+            } else {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SECURE);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the opacity of the surface.  Setting the flag is equivalent to creating the
+         * Surface with the {@link #OPAQUE} flag.
+         */
+        public Transaction setOpaque(SurfaceControl sc, boolean isOpaque) {
+            if (isOpaque) {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, OPAQUE, OPAQUE);
+            } else {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, 0, OPAQUE);
+            }
+            return this;
+        }
+
+        public Transaction setDisplaySurface(IBinder displayToken, Surface surface) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+
+            if (surface != null) {
+                synchronized (surface.mLock) {
+                    nativeSetDisplaySurface(mNativeObject, displayToken, surface.mNativeObject);
+                }
+            } else {
+                nativeSetDisplaySurface(mNativeObject, displayToken, 0);
+            }
+            return this;
+        }
+
+        public Transaction setDisplayLayerStack(IBinder displayToken, int layerStack) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+            nativeSetDisplayLayerStack(mNativeObject, displayToken, layerStack);
+            return this;
+        }
+
+        public Transaction setDisplayProjection(IBinder displayToken,
+                int orientation, Rect layerStackRect, Rect displayRect) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+            if (layerStackRect == null) {
+                throw new IllegalArgumentException("layerStackRect must not be null");
+            }
+            if (displayRect == null) {
+                throw new IllegalArgumentException("displayRect must not be null");
+            }
+            nativeSetDisplayProjection(mNativeObject, displayToken, orientation,
+                    layerStackRect.left, layerStackRect.top, layerStackRect.right, layerStackRect.bottom,
+                    displayRect.left, displayRect.top, displayRect.right, displayRect.bottom);
+            return this;
+        }
+
+        public Transaction setDisplaySize(IBinder displayToken, int width, int height) {
+            if (displayToken == null) {
+                throw new IllegalArgumentException("displayToken must not be null");
+            }
+            if (width <= 0 || height <= 0) {
+                throw new IllegalArgumentException("width and height must be positive");
+            }
+
+            nativeSetDisplaySize(mNativeObject, displayToken, width, height);
+            return this;
+        }
+
+        /** flag the transaction as an animation */
+        public Transaction setAnimationTransaction() {
+            nativeSetAnimationTransaction(mNativeObject);
+            return this;
+        }
     }
 }

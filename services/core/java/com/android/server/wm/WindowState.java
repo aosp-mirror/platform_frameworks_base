@@ -80,7 +80,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -1206,7 +1205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // application when it has finished drawing.
             if (getOrientationChanging() || dragResizingChanged
                     || isResizedWhileNotDragResizing()) {
-                if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
+                if (DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                     Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
                             + ", surfaceController " + winAnimator.mSurfaceController);
@@ -3679,7 +3678,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Force the show in the next prepareSurfaceLocked() call.
         mWinAnimator.mLastAlpha = -1;
-        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) Slog.v(TAG,
+        if (DEBUG_ANIM) Slog.v(TAG,
                 "performShowLocked: mDrawState=HAS_DRAWN in " + this);
         mWinAnimator.mDrawState = HAS_DRAWN;
         mService.scheduleAnimationLocked();
