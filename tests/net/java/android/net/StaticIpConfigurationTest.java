@@ -16,22 +16,26 @@
 
 package android.net;
 
-import android.net.IpPrefix;
-import android.net.LinkAddress;
-import android.net.RouteInfo;
-import android.net.StaticIpConfiguration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.Parcel;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.Objects;
 
-import junit.framework.TestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
-
-
-public class StaticIpConfigurationTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class StaticIpConfigurationTest {
 
     private static final String ADDRSTR = "192.0.2.2/25";
     private static final LinkAddress ADDR = new LinkAddress(ADDRSTR);
@@ -53,16 +57,8 @@ public class StaticIpConfigurationTest extends TestCase {
         assertEquals(0, s.dnsServers.size());
     }
 
-    private boolean isEqual(StaticIpConfiguration s1, StaticIpConfiguration s2) {
-        return s1.equals(s2);
-    }
-
-    private void assertEquals(StaticIpConfiguration s1, StaticIpConfiguration s2) {
-        assertTrue(isEqual(s1, s2));
-    }
-
-    private void assertNotEquals(StaticIpConfiguration s1, StaticIpConfiguration s2) {
-        assertFalse(isEqual(s1, s2));
+    private static <T> void assertNotEquals(T t1, T t2) {
+        assertFalse(Objects.equals(t1, t2));
     }
 
     private StaticIpConfiguration makeTestObject() {
@@ -76,13 +72,13 @@ public class StaticIpConfigurationTest extends TestCase {
         return s;
     }
 
-    @SmallTest
+    @Test
     public void testConstructor() {
         StaticIpConfiguration s = new StaticIpConfiguration();
         checkEmpty(s);
     }
 
-    @SmallTest
+    @Test
     public void testCopyAndClear() {
         StaticIpConfiguration empty = new StaticIpConfiguration((StaticIpConfiguration) null);
         checkEmpty(empty);
@@ -94,7 +90,7 @@ public class StaticIpConfigurationTest extends TestCase {
         assertEquals(empty, s2);
     }
 
-    @SmallTest
+    @Test
     public void testHashCodeAndEquals() {
         HashSet<Integer> hashCodes = new HashSet();
         hashCodes.add(0);
@@ -143,7 +139,7 @@ public class StaticIpConfigurationTest extends TestCase {
         assertNotEquals(s, s2);
     }
 
-    @SmallTest
+    @Test
     public void testToLinkProperties() {
         LinkProperties expected = new LinkProperties();
         expected.setInterfaceName(IFACE);
@@ -215,11 +211,10 @@ public class StaticIpConfigurationTest extends TestCase {
         return s2;
     }
 
-    @SmallTest
+    @Test
     public void testParceling() {
         StaticIpConfiguration s = makeTestObject();
         StaticIpConfiguration s2 = passThroughParcel(s);
         assertEquals(s, s2);
     }
 }
-
