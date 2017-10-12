@@ -77,7 +77,6 @@ public class AccessibilityCacheTest {
         mAccessibilityCache.clear();
         AccessibilityInteractionClient.getInstance().clearCache();
         assertEquals(0, numA11yWinInfosInUse.get());
-        assertEquals(0, numA11yNodeInfosInUse.get());
     }
 
     @Test
