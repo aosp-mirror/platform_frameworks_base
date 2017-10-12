@@ -24,12 +24,15 @@ import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import android.content.res.Resources;
 import android.net.NetworkStats;
 import android.net.TrafficStats;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.tests.net.R;
 
@@ -42,19 +45,23 @@ import java.io.OutputStream;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
+import org.junit.runner.RunWith;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 /**
  * Tests for {@link NetworkStatsFactory}.
  */
+@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NetworkStatsFactoryTest extends AndroidTestCase {
+public class NetworkStatsFactoryTest {
     private File mTestProc;
     private NetworkStatsFactory mFactory;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        mTestProc = new File(getContext().getFilesDir(), "proc");
+        mTestProc = new File(InstrumentationRegistry.getContext().getFilesDir(), "proc");
         if (mTestProc.exists()) {
             IoUtils.deleteContents(mTestProc);
         }
@@ -62,17 +69,16 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         mFactory = new NetworkStatsFactory(mTestProc);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         mFactory = null;
 
         if (mTestProc.exists()) {
             IoUtils.deleteContents(mTestProc);
         }
-
-        super.tearDown();
     }
 
+    @Test
     public void testNetworkStatsDetail() throws Exception {
         final NetworkStats stats = parseDetailedStats(R.raw.xt_qtaguid_typical);
 
@@ -84,6 +90,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertStatsEntry(stats, "rmnet2", 10001, SET_DEFAULT, 0x0, 1125899906842624L, 984L);
     }
 
+    @Test
     public void testKernelTags() throws Exception {
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(0x32, kernelToTag("0x0000003200000000"));
@@ -98,6 +105,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertEquals(TrafficStats.TAG_SYSTEM_DOWNLOAD, kernelToTag("0xffffff0100000000"));
     }
 
+    @Test
     public void testNetworkStatsWithSet() throws Exception {
         final NetworkStats stats = parseDetailedStats(R.raw.xt_qtaguid_typical);
         assertEquals(70, stats.size());
@@ -106,6 +114,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertStatsEntry(stats, "rmnet1", 10021, SET_FOREGROUND, 0x30100000, 742L, 3L, 1265L, 3L);
     }
 
+    @Test
     public void testNetworkStatsSingle() throws Exception {
         stageFile(R.raw.xt_qtaguid_iface_typical, file("net/xt_qtaguid/iface_stat_all"));
 
@@ -116,6 +125,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertStatsEntry(stats, "test2", UID_ALL, SET_ALL, TAG_NONE, 1L, 2L, 3L, 4L);
     }
 
+    @Test
     public void testNetworkStatsXt() throws Exception {
         stageFile(R.raw.xt_qtaguid_iface_fmt_typical, file("net/xt_qtaguid/iface_stat_fmt"));
 
@@ -127,6 +137,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertStatsEntry(stats, "rmnet2", UID_ALL, SET_ALL, TAG_NONE, 4968L, 35L, 3081L, 39L);
     }
 
+    @Test
     public void testDoubleClatAccounting() throws Exception {
         NetworkStatsFactory.noteStackedIface("v4-wlan0", "wlan0");
 
@@ -161,6 +172,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         NetworkStatsFactory.noteStackedIface("v4-wlan0", null);
     }
 
+    @Test
     public void testDoubleClatAccounting100MBDownload() throws Exception {
         // Downloading 100mb from an ipv4 only destination in a foreground activity
 
@@ -197,7 +209,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = getContext().getResources().openRawResource(rawId);
+            in = InstrumentationRegistry.getContext().getResources().openRawResource(rawId);
             out = new FileOutputStream(file);
             Streams.copy(in, out);
         } finally {
@@ -251,5 +263,4 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
         assertEquals("unexpected txPackets", txPackets, entry.txPackets);
     }
-
 }

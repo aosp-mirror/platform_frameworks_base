@@ -16,23 +16,36 @@
 
 package android.net.dhcp;
 
+import static android.net.dhcp.DhcpPacket.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.metrics.DhcpErrorEvent;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.system.OsConstants;
-import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.internal.util.HexDump;
+
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import junit.framework.TestCase;
 
-import static android.net.dhcp.DhcpPacket.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class DhcpPacketTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class DhcpPacketTest {
 
     private static Inet4Address SERVER_ADDR = v4Address("192.0.2.1");
     private static Inet4Address CLIENT_ADDR = v4Address("192.0.2.234");
@@ -46,6 +59,7 @@ public class DhcpPacketTest extends TestCase {
         return (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
     }
 
+    @Before
     public void setUp() {
         DhcpPacket.testOverrideVendorId = "android-dhcp-???";
         DhcpPacket.testOverrideHostname = "android-01234567890abcde";
@@ -131,7 +145,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(expectedVendorInfo, offerPacket.mVendorInfo);
     }
 
-    @SmallTest
+    @Test
     public void testDomainName() throws Exception {
         byte[] nullByte = new byte[] { 0x00 };
         byte[] twoNullBytes = new byte[] { 0x00, 0x00 };
@@ -186,7 +200,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(leaseTimeMillis, offerPacket.getLeaseTimeMillis());
     }
 
-    @SmallTest
+    @Test
     public void testLeaseTime() throws Exception {
         byte[] noLease = null;
         byte[] tooShortLease = new byte[] { 0x00, 0x00 };
@@ -234,7 +248,7 @@ public class DhcpPacketTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testIpAddress() throws Exception {
         byte[] slash11Netmask = new byte[] { (byte) 0xff, (byte) 0xe0, 0x00, 0x00 };
         byte[] slash24Netmask = new byte[] { (byte) 0xff, (byte) 0xff, (byte) 0xff, 0x00 };
@@ -278,11 +292,11 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(mtu, dhcpResults.mtu);
     }
 
-    @SmallTest
+    @Test
     public void testOffer1() throws Exception {
-        // TODO: Turn all of these into golden files. This will probably require modifying
-        // Android.mk appropriately, making this into an AndroidTestCase, and adding code to read
-        // the golden files from the test APK's assets via mContext.getAssets().
+        // TODO: Turn all of these into golden files. This will probably require using
+        // android.support.test.InstrumentationRegistry for obtaining a Context object
+        // to read such golden files, along with an appropriate Android.mk.
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "451001480000000080118849c0a89003c0a89ff7" +
@@ -311,7 +325,7 @@ public class DhcpPacketTest extends TestCase {
                 null, "192.168.144.3", null, 7200, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testOffer2() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
@@ -343,7 +357,7 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(dhcpResults.hasMeteredHint());
     }
 
-    @SmallTest
+    @Test
     public void testBadIpPacket() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -358,7 +372,7 @@ public class DhcpPacketTest extends TestCase {
         fail("Dhcp packet parsing should have failed");
     }
 
-    @SmallTest
+    @Test
     public void testBadDhcpPacket() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -377,7 +391,7 @@ public class DhcpPacketTest extends TestCase {
         fail("Dhcp packet parsing should have failed");
     }
 
-    @SmallTest
+    @Test
     public void testBadTruncatedOffer() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -406,7 +420,7 @@ public class DhcpPacketTest extends TestCase {
         fail("Dhcp packet parsing should have failed");
     }
 
-    @SmallTest
+    @Test
     public void testBadOfferWithoutACookie() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -437,7 +451,7 @@ public class DhcpPacketTest extends TestCase {
         fail("Dhcp packet parsing should have failed");
     }
 
-    @SmallTest
+    @Test
     public void testOfferWithBadCookie() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -473,7 +487,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(Integer.toHexString(expected), Integer.toHexString(got));
     }
 
-    @SmallTest
+    @Test
     public void testTruncatedOfferPackets() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -507,7 +521,7 @@ public class DhcpPacketTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testRandomPackets() throws Exception {
         final int maxRandomPacketSize = 512;
         final Random r = new Random();
@@ -547,7 +561,7 @@ public class DhcpPacketTest extends TestCase {
                 null, "192.168.144.3", null, 7200, false, expectedMtu, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testMtu() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
@@ -583,7 +597,7 @@ public class DhcpPacketTest extends TestCase {
         checkMtu(packet, 0, mtuBytes(-1));
     }
 
-    @SmallTest
+    @Test
     public void testBadHwaddrLength() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
@@ -652,7 +666,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(expectedClientMac, HexDump.toHexString(offerPacket.getClientMac()));
     }
 
-    @SmallTest
+    @Test
     public void testPadAndOverloadedOptionsOffer() throws Exception {
         // A packet observed in the real world that is interesting for two reasons:
         //
@@ -691,7 +705,7 @@ public class DhcpPacketTest extends TestCase {
                 null, "1.1.1.1", null, 43200, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testBug2111() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
@@ -721,7 +735,7 @@ public class DhcpPacketTest extends TestCase {
                 "domain123.co.uk", "192.0.2.254", null, 49094, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testBug2136() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
@@ -754,7 +768,7 @@ public class DhcpPacketTest extends TestCase {
                 "lancs.ac.uk", "10.32.255.128", null, 7200, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testUdpServerAnySourcePort() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
@@ -789,7 +803,7 @@ public class DhcpPacketTest extends TestCase {
                 "wvm.edu", "10.1.105.252", null, 86400, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testUdpInvalidDstPort() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
@@ -821,7 +835,7 @@ public class DhcpPacketTest extends TestCase {
         } catch (ParseException expected) {}
     }
 
-    @SmallTest
+    @Test
     public void testMultipleRouters() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
@@ -854,7 +868,7 @@ public class DhcpPacketTest extends TestCase {
                 null, "192.171.189.2", null, 28800, false, 0, dhcpResults);
     }
 
-    @SmallTest
+    @Test
     public void testDiscoverPacket() throws Exception {
         short secs = 7;
         int transactionId = 0xdeadbeef;

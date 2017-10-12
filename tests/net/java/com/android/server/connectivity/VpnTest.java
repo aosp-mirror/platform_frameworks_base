@@ -20,6 +20,9 @@ import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -42,14 +45,17 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -61,13 +67,16 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+
 /**
  * Tests for {@link Vpn}.
  *
  * Build, install and run with:
- *  runtest --path java/com/android/server/connectivity/VpnTest.java
+ *  runtest frameworks-net -c com.android.server.connectivity.VpnTest
  */
-public class VpnTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class VpnTest {
     private static final String TAG = "VpnTest";
 
     // Mock users
@@ -106,7 +115,7 @@ public class VpnTest extends AndroidTestCase {
     @Mock private NotificationManager mNotificationManager;
     @Mock private Vpn.SystemServices mSystemServices;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
@@ -130,7 +139,7 @@ public class VpnTest extends AndroidTestCase {
         doNothing().when(mNetService).registerObserver(any());
     }
 
-    @SmallTest
+    @Test
     public void testRestrictedProfilesAreAddedToVpn() {
         setMockedUsers(primaryUser, secondaryUser, restrictedProfileA, restrictedProfileB);
 
@@ -144,7 +153,7 @@ public class VpnTest extends AndroidTestCase {
         })), ranges);
     }
 
-    @SmallTest
+    @Test
     public void testManagedProfilesAreNotAddedToVpn() {
         setMockedUsers(primaryUser, managedProfileA);
 
@@ -157,7 +166,7 @@ public class VpnTest extends AndroidTestCase {
         })), ranges);
     }
 
-    @SmallTest
+    @Test
     public void testAddUserToVpnOnlyAddsOneUser() {
         setMockedUsers(primaryUser, restrictedProfileA, managedProfileA);
 
@@ -170,7 +179,7 @@ public class VpnTest extends AndroidTestCase {
         })), ranges);
     }
 
-    @SmallTest
+    @Test
     public void testUidWhiteAndBlacklist() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
@@ -195,7 +204,7 @@ public class VpnTest extends AndroidTestCase {
         })), disallow);
     }
 
-    @SmallTest
+    @Test
     public void testLockdownChangingPackage() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
@@ -230,7 +239,7 @@ public class VpnTest extends AndroidTestCase {
         assertUnblocked(vpn, user.start + PKG_UIDS[3]);
     }
 
-    @SmallTest
+    @Test
     public void testLockdownAddingAProfile() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
@@ -270,7 +279,7 @@ public class VpnTest extends AndroidTestCase {
         }));
     }
 
-    @SmallTest
+    @Test
     public void testLockdownRuleRepeatability() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
 
@@ -293,7 +302,7 @@ public class VpnTest extends AndroidTestCase {
         verify(mNetService, times(2)).setAllowOnlyVpnForUids(anyBoolean(), any(UidRange[].class));
     }
 
-    @SmallTest
+    @Test
     public void testLockdownRuleReversibility() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
 
@@ -322,7 +331,7 @@ public class VpnTest extends AndroidTestCase {
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
     }
 
-    @SmallTest
+    @Test
     public void testIsAlwaysOnPackageSupported() throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
 
@@ -356,7 +365,7 @@ public class VpnTest extends AndroidTestCase {
         assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
     }
 
-    @SmallTest
+    @Test
     public void testNotificationShownForAlwaysOnApp() {
         final UserHandle userHandle = UserHandle.of(primaryUser.id);
         final Vpn vpn = createVpn(primaryUser.id);

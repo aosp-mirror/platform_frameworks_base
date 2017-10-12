@@ -34,20 +34,29 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
+
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
+
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class NetworkNotificationManagerTest extends TestCase {
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetworkNotificationManagerTest {
 
     static final NetworkCapabilities CELL_CAPABILITIES = new NetworkCapabilities();
     static final NetworkCapabilities WIFI_CAPABILITIES = new NetworkCapabilities();
@@ -71,6 +80,7 @@ public class NetworkNotificationManagerTest extends TestCase {
 
     NetworkNotificationManager mManager;
 
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mCaptor = ArgumentCaptor.forClass(Notification.class);
@@ -87,7 +97,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         mManager = new NetworkNotificationManager(mCtx, mTelephonyManager, mNotificationManager);
     }
 
-    @SmallTest
+    @Test
     public void testNotificationsShownAndCleared() {
         final int NETWORK_ID_BASE = 100;
         List<NotificationType> types = Arrays.asList(NotificationType.values());
@@ -117,7 +127,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testNoInternetNotificationsNotShownForCellular() {
         mManager.showNotification(100, NO_INTERNET, mCellNai, mWifiNai, null, false);
         mManager.showNotification(101, LOST_INTERNET, mCellNai, mWifiNai, null, false);
@@ -131,7 +141,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         verify(mNotificationManager, times(1)).notifyAsUser(eq(tag), eq(eventId), any(), any());
     }
 
-    @SmallTest
+    @Test
     public void testNotificationsNotShownIfNoInternetCapability() {
         mWifiNai.networkCapabilities = new NetworkCapabilities();
         mWifiNai.networkCapabilities .addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
@@ -142,7 +152,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         verify(mNotificationManager, never()).notifyAsUser(any(), anyInt(), any(), any());
     }
 
-    @SmallTest
+    @Test
     public void testDuplicatedNotificationsNoInternetThenSignIn() {
         final int id = 101;
         final String tag = NetworkNotificationManager.tagFor(id);
@@ -164,7 +174,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         verify(mNotificationManager, times(1)).cancelAsUser(eq(tag), eq(SIGN_IN.eventId), any());
     }
 
-    @SmallTest
+    @Test
     public void testDuplicatedNotificationsSignInThenNoInternet() {
         final int id = 101;
         final String tag = NetworkNotificationManager.tagFor(id);

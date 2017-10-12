@@ -16,25 +16,35 @@
 
 package android.net.netlink;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.OsConstants;
 import android.util.Log;
+
 import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import junit.framework.TestCase;
+
+import org.junit.runner.RunWith;
+import org.junit.Test;
 
 
-public class NetlinkSocketTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetlinkSocketTest {
     private final String TAG = "NetlinkSocketTest";
 
-    @SmallTest
+    @Test
     public void testBasicWorkingGetNeighborsQuery() throws Exception {
         NetlinkSocket s = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
         assertNotNull(s);
@@ -93,7 +103,7 @@ public class NetlinkSocketTest extends TestCase {
         s.close();
     }
 
-    @SmallTest
+    @Test
     public void testRepeatedCloseCallsAreQuiet() throws Exception {
         // Create a working NetlinkSocket.
         NetlinkSocket s = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
