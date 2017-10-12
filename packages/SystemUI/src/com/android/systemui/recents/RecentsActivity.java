@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.app.WallpaperManager;
@@ -29,10 +28,10 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -42,6 +41,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.LatencyTracker;
@@ -63,6 +63,7 @@ import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
@@ -85,7 +86,6 @@ import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -96,7 +96,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * The main Recents activity that is started from RecentsComponent.
@@ -110,7 +109,23 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
     public final static int INCOMPATIBLE_APP_ALPHA_DURATION = 150;
 
-    private RecentsPackageMonitor mPackageMonitor;
+    private PackageMonitor mPackageMonitor = new PackageMonitor() {
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                RecentsActivity.this.onPackageChanged(packageName, getChangingUserId());
+            }
+
+            @Override
+            public boolean onPackageChanged(String packageName, int uid, String[] components) {
+                RecentsActivity.this.onPackageChanged(packageName, getChangingUserId());
+                return true;
+            }
+
+            @Override
+            public void onPackageModified(String packageName) {
+                RecentsActivity.this.onPackageChanged(packageName, getChangingUserId());
+            }
+        };
     private Handler mHandler = new Handler();
     private long mLastTabKeyEventTime;
     private boolean mFinishedOnStartup;
@@ -300,8 +315,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
         // Initialize the package monitor
-        mPackageMonitor = new RecentsPackageMonitor();
-        mPackageMonitor.register(this);
+        mPackageMonitor.register(this, Looper.getMainLooper(), UserHandle.ALL,
+                true /* externalStorage */);
 
         // Select theme based on wallpaper colors
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
@@ -833,6 +848,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         });
         return true;
+    }
+
+    public void onPackageChanged(String packageName, int userId) {
+        Recents.getTaskLoader().onPackageChanged(packageName);
+        EventBus.getDefault().send(new PackagesChangedEvent(packageName, userId));
     }
 
     @Override
