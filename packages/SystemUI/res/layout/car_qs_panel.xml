@@ -16,6 +16,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/quick_settings_container"
+    android:clipChildren="false"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/car_qs_background_primary"
@@ -49,6 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/car_page_indicator_dot_diameter"
             android:layout_marginBottom="@dimen/car_page_indicator_margin_bottom"
+            android:alpha="0"
             android:layout_alignParentBottom="true" />
 
     </RelativeLayout>

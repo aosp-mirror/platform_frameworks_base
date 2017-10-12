@@ -54,6 +54,7 @@ public class CarQSFragment extends Fragment implements QS {
     private UserGridView mUserGridView;
     private PageIndicator mPageIndicator;
     private AnimatorSet mAnimatorSet;
+    private UserSwitchCallback mUserSwitchCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -80,7 +81,9 @@ public class CarQSFragment extends Fragment implements QS {
         mPageIndicator = view.findViewById(R.id.user_switcher_page_indicator);
         mPageIndicator.setupWithViewPager(mUserGridView);
 
-        mFooter.setUserSwitchCallback(new UserSwitchCallback());
+        mUserSwitchCallback = new UserSwitchCallback();
+        mFooter.setUserSwitchCallback(mUserSwitchCallback);
+        mUserGridView.setUserSwitchCallback(mUserSwitchCallback);
     }
 
     @Override
@@ -107,11 +110,13 @@ public class CarQSFragment extends Fragment implements QS {
     @Override
     public void setHeaderListening(boolean listening) {
         mFooter.setListening(listening);
+        mUserGridView.setListening(listening);
     }
 
     @Override
     public void setListening(boolean listening) {
         mFooter.setListening(listening);
+        mUserGridView.setListening(listening);
     }
 
     @Override
@@ -213,6 +218,19 @@ public class CarQSFragment extends Fragment implements QS {
             mShowing = false;
             animateHeightChange(false /* opening */);
         }
+
+        public void resetShowing() {
+            if (mShowing) {
+                for (int i = 0; i < mUserGridView.getChildCount(); i++) {
+                    ViewGroup podContainer = (ViewGroup) mUserGridView.getChildAt(i);
+                    // Need to bring the last child to the front to maintain the order in the pod
+                    // container. Why? ¯\_(ツ)_/¯
+                    if (podContainer.getChildCount() > 0) {
+                        podContainer.getChildAt(podContainer.getChildCount() - 1).bringToFront();
+                    }
+                }
+            }
+        }
     }
 
     private void updateUserSwitcherHeight(int height) {
@@ -287,9 +305,6 @@ public class CarQSFragment extends Fragment implements QS {
         // Setup all values to the start values in the animations, since there are delays, but need
         // to have all values start at the beginning.
         setupInitialValues(mAnimatorSet);
-
-        // The animation comes from above areas normally occupied by the rest of the QS panel.
-        mPanel.setClipChildren(false);
 
         mAnimatorSet.start();
     }

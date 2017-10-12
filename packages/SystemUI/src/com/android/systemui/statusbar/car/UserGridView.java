@@ -33,19 +33,31 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
 
 /**
  * Displays a ViewPager with icons for the users in the system to allow switching between users.
  * One of the uses of this is for the lock screen in auto.
  */
-public class UserGridView extends ViewPager {
+public class UserGridView extends ViewPager implements
+        UserInfoController.OnUserInfoChangedListener {
     private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
     private UserSelectionListener mUserSelectionListener;
+    private UserInfoController mUserInfoController;
+    private Vector mUserContainers;
+    private CarQSFragment.UserSwitchCallback mUserSwitchCallback;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,8 +67,51 @@ public class UserGridView extends ViewPager {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);
+        mUserInfoController = Dependency.get(UserInfoController.class);
+        refreshContainers();
+    }
+
+    private void refreshContainers() {
+        mUserContainers = new Vector();
+
+        Context context = getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            ViewGroup pods = (ViewGroup) inflater.inflate(
+                    R.layout.car_fullscreen_user_pod_container, null);
+
+            int iconsPerPage = mAdapter.getIconsPerPage();
+            int limit = Math.min(mUserSwitcherController.getUsers().size(), (i + 1) * iconsPerPage);
+            for (int j = i * iconsPerPage; j < limit; j++) {
+                View v = mAdapter.makeUserPod(inflater, context, j, pods);
+                pods.addView(v);
+                // This is hacky, but the dividers on the pod container LinearLayout don't seem
+                // to work for whatever reason.  Instead, set a right margin on the pod if it's not
+                // the right-most pod and there is more than one pod in the container.
+                if (i < limit - 1 && limit > 1) {
+                    ViewGroup.MarginLayoutParams params =
+                            (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    params.setMargins(0, 0, getResources().getDimensionPixelSize(
+                            R.dimen.car_fullscreen_user_pod_margin_between), 0);
+                    v.setLayoutParams(params);
+                }
+            }
+            mUserContainers.add(pods);
+        }
+
+        mAdapter = new Adapter(mUserSwitcherController);
         addOnLayoutChangeListener(mAdapter);
         setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+        refreshContainers();
+    }
+
+    public void setUserSwitchCallback(CarQSFragment.UserSwitchCallback callback) {
+        mUserSwitchCallback = callback;
     }
 
     public void onUserSwitched(int newUserId) {
@@ -66,6 +121,14 @@ public class UserGridView extends ViewPager {
 
     public void setUserSelectionListener(UserSelectionListener userSelectionListener) {
         mUserSelectionListener = userSelectionListener;
+    }
+
+    public void setListening(boolean listening) {
+        if (listening) {
+            mUserInfoController.addCallback(this);
+        } else {
+            mUserInfoController.removeCallback(this);
+        }
     }
 
     void showOfflineAuthUi() {
@@ -142,30 +205,20 @@ public class UserGridView extends ViewPager {
         }
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Context context = getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-
-            ViewGroup pods = (ViewGroup) inflater.inflate(
-                    R.layout.car_fullscreen_user_pod_container, null);
-
-            int iconsPerPage = getIconsPerPage();
-            int limit = Math.min(mUserAdapter.getCount(), (position + 1) * iconsPerPage);
-            for (int i = position * iconsPerPage; i < limit; i++) {
-                View v = makeUserPod(inflater, context, i, pods);
-                pods.addView(v);
-                // This is hacky, but the dividers on the pod container LinearLayout don't seem
-                // to work for whatever reason.  Instead, set a right margin on the pod if it's not
-                // the right-most pod and there is more than one pod in the container.
-                if (i < limit - 1 && limit > 1) {
-                    ViewGroup.MarginLayoutParams params =
-                            (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                    params.setMargins(0, 0, mPodMarginBetween, 0);
-                    v.setLayoutParams(params);
-                }
+        public void finishUpdate(ViewGroup container) {
+            if (mUserSwitchCallback != null) {
+                mUserSwitchCallback.resetShowing();
             }
-            container.addView(pods);
-            return pods;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            if (position < mUserContainers.size()) {
+                container.addView((View) mUserContainers.get(position));
+                return mUserContainers.get(position);
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -276,7 +329,7 @@ public class UserGridView extends ViewPager {
     }
 
     private final class WrappedBaseUserAdapter extends UserSwitcherController.BaseUserAdapter {
-        private Adapter mContainer;
+        private final Adapter mContainer;
 
         public WrappedBaseUserAdapter(UserSwitcherController controller, Adapter container) {
             super(controller);
