@@ -70,9 +70,8 @@ const uint64_t FIELD_COUNT_SINGLE = 1ULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_REPEATED = 2ULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_PACKED = 4ULL << FIELD_COUNT_SHIFT;
 
-ProtoOutputStream::ProtoOutputStream(int fd)
+ProtoOutputStream::ProtoOutputStream()
         :mBuffer(),
-         mFd(fd),
          mCopyBegin(0),
          mCompact(false),
          mDepth(0),
@@ -483,6 +482,13 @@ ProtoOutputStream::compactSize(size_t rawSize)
     return true;
 }
 
+size_t
+ProtoOutputStream::size()
+{
+    compact();
+    return mBuffer.size();
+}
+
 static bool write_all(int fd, uint8_t const* buf, size_t size)
 {
     while (size > 0) {
@@ -497,17 +503,45 @@ static bool write_all(int fd, uint8_t const* buf, size_t size)
 }
 
 bool
-ProtoOutputStream::flush()
+ProtoOutputStream::flush(int fd)
 {
-    if (mFd < 0) return false;
+    if (fd < 0) return false;
     if (!compact()) return false;
 
     EncodedBuffer::iterator it = mBuffer.begin();
     while (it.readBuffer() != NULL) {
-        if (!write_all(mFd, it.readBuffer(), it.currentToRead())) return false;
+        if (!write_all(fd, it.readBuffer(), it.currentToRead())) return false;
         it.rp()->move(it.currentToRead());
     }
     return true;
+}
+
+EncodedBuffer::iterator
+ProtoOutputStream::data()
+{
+    compact();
+    return mBuffer.begin();
+}
+
+void
+ProtoOutputStream::writeRawVarint(uint64_t varint)
+{
+    mBuffer.writeRawVarint64(varint);
+}
+
+void
+ProtoOutputStream::writeLengthDelimitedHeader(uint32_t id, size_t size)
+{
+    mBuffer.writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
+    // reserves 64 bits for length delimited fields, if first field is negative, compact it.
+    mBuffer.writeRawFixed32(size);
+    mBuffer.writeRawFixed32(size);
+}
+
+void
+ProtoOutputStream::writeRawByte(uint8_t byte)
+{
+    mBuffer.writeRawByte(byte);
 }
 
 
@@ -639,9 +673,7 @@ inline void
 ProtoOutputStream::writeUtf8StringImpl(uint32_t id, const char* val, size_t size)
 {
     if (val == NULL || size == 0) return;
-    mBuffer.writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
-    mBuffer.writeRawFixed32(size);
-    mBuffer.writeRawFixed32(size);
+    writeLengthDelimitedHeader(id, size);
     for (size_t i=0; i<size; i++) {
         mBuffer.writeRawByte((uint8_t)val[i]);
     }

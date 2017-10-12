@@ -30,6 +30,9 @@ const uint8_t TYPE_MESSAGE = 11;
 bool
 Privacy::IsMessageType() const { return type == TYPE_MESSAGE; }
 
+uint64_t
+Privacy::EncodedFieldId() const { return (uint64_t)type << 32 | field_id; }
+
 bool
 Privacy::IsStringType() const { return type == TYPE_STRING; }
 
