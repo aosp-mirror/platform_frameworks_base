@@ -293,6 +293,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
+    LaunchingTaskPositioner mTaskPositioner = new LaunchingTaskPositioner();
+
     /** Counter for next free stack ID to use for dynamic activity stacks. */
     private int mNextFreeStackId = 0;
 
@@ -2136,6 +2138,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return (mService.mSupportsPictureInPicture
                 && options.getLaunchWindowingMode() == WINDOWING_MODE_PINNED)
                 || mService.mSupportsFreeformWindowManagement;
+    }
+
+    LaunchingTaskPositioner getLaunchingTaskPositioner() {
+        return mTaskPositioner;
     }
 
     protected <T extends ActivityStack> T getStack(int stackId) {
