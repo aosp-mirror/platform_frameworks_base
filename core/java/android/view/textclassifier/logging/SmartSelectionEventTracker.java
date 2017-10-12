@@ -43,7 +43,7 @@ import java.util.UUID;
 public final class SmartSelectionEventTracker {
 
     private static final String LOG_TAG = "SmartSelectEventTracker";
-    private static final boolean DEBUG_LOG_ENABLED = true;
+    private static final boolean DEBUG_LOG_ENABLED = false;
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
     private static final int PREV_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_PREVIOUS;
