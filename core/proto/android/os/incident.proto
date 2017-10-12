@@ -100,7 +100,11 @@ message IncidentProto {
         (section).args = "diskstats --proto"
     ];
 
-    optional android.service.pm.PackageServiceDumpProto package = 3008;
+    optional android.service.pm.PackageServiceDumpProto package = 3008 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "package --proto"
+    ];
+
     optional android.service.power.PowerServiceDumpProto power = 3009;
     optional android.service.print.PrintServiceDumpProto print = 3010;
 

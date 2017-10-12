@@ -4929,11 +4929,7 @@ public final class Settings {
     void dumpSharedUsersProto(ProtoOutputStream proto) {
         final int count = mSharedUsers.size();
         for (int i = 0; i < count; i++) {
-            final SharedUserSetting su = mSharedUsers.valueAt(i);
-            final long sharedUserToken = proto.start(PackageServiceDumpProto.SHARED_USERS);
-            proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, su.userId);
-            proto.write(PackageServiceDumpProto.SharedUserProto.NAME, su.name);
-            proto.end(sharedUserToken);
+            mSharedUsers.valueAt(i).writeToProto(proto, PackageServiceDumpProto.SHARED_USERS);
         }
     }
 
