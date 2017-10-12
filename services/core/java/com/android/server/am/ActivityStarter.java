@@ -1239,8 +1239,8 @@ class ActivityStarter {
                 mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
                         mOptions);
             }
-        } else {
-            mSupervisor.addRecentActivity(mStartActivity);
+        } else if (mStartActivity != null) {
+            mSupervisor.mRecentTasks.add(mStartActivity.getTask());
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 

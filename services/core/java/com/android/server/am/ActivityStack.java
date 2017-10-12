@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -34,8 +33,8 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
-
 import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityDisplay.POSITION_TOP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -99,12 +98,13 @@ import static java.lang.Integer.MAX_VALUE;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.ResultInfo;
 import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.ActivityType;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -192,10 +192,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
     private static final int DESTROY_TIMEOUT = 10 * 1000;
-
-    // How long until we reset a task when the user returns to it.  Currently
-    // disabled.
-    private static final long ACTIVITY_INACTIVE_RESET_TIME = 0;
 
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
@@ -2169,7 +2165,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mResumedActivity = r;
         r.state = ActivityState.RESUMED;
         mService.setResumedActivityUncheckLocked(r, reason);
-        mStackSupervisor.addRecentActivity(r);
+        mStackSupervisor.mRecentTasks.add(r.getTask());
     }
 
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
@@ -3189,15 +3185,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
             ActivityRecord newActivity) {
-        boolean forceReset =
+        final boolean forceReset =
                 (newActivity.info.flags & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
-        if (ACTIVITY_INACTIVE_RESET_TIME > 0
-                && taskTop.getTask().getInactiveDuration() > ACTIVITY_INACTIVE_RESET_TIME) {
-            if ((newActivity.info.flags & ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) == 0) {
-                forceReset = true;
-            }
-        }
-
         final TaskRecord task = taskTop.getTask();
 
         /** False until we evaluate the TaskRecord associated with taskTop. Switches to true
@@ -4467,7 +4456,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Don't refocus if invisible to current user
         final ActivityRecord top = tr.getTopActivity();
         if (top == null || !top.okToShowLocked()) {
-            mStackSupervisor.addRecentActivity(top);
+            if (top != null) {
+                mStackSupervisor.mRecentTasks.add(top.getTask());
+            }
             ActivityOptions.abort(options);
             return;
         }
@@ -4892,7 +4883,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (focusedStack && topTask) {
                 // Give the latest time to ensure foreground task can be sorted
                 // at the first, because lastActiveTime of creating task is 0.
-                ci.lastActiveTime = System.currentTimeMillis();
+                ci.lastActiveTime = SystemClock.elapsedRealtime();
                 topTask = false;
             }
 
@@ -5072,7 +5063,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (task.autoRemoveFromRecents() || isVoiceSession) {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
-                mStackSupervisor.removeTaskFromRecents(task);
+                mStackSupervisor.mRecentTasks.remove(task);
             }
 
             task.removeWindowContainer();

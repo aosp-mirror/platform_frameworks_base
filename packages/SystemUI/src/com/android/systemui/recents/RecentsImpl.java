@@ -142,7 +142,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+                loader.preloadTasks(plan, -1);
                 TaskStack stack = plan.getTaskStack();
                 RecentsActivityLaunchState launchState = new RecentsActivityLaunchState();
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
@@ -283,7 +283,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
@@ -473,8 +473,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
-            MutableBoolean isHomeStackVisible = new MutableBoolean(true);
-            if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+            if (!ssp.isRecentsActivityVisible(null)) {
                 ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
                 if (runningTask == null) {
                     return;
@@ -482,7 +481,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 sInstanceLoadPlan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible.value);
+                loader.preloadTasks(sInstanceLoadPlan, runningTask.id);
                 TaskStack stack = sInstanceLoadPlan.getTaskStack();
                 if (stack.getTaskCount() > 0) {
                     // Only preload the icon (but not the thumbnail since it may not have been taken
@@ -522,7 +521,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -577,7 +576,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -1012,7 +1011,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, runningTaskId, !isHomeStackVisible);
+            loader.preloadTasks(sInstanceLoadPlan, runningTaskId);
         }
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();

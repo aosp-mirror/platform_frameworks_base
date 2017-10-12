@@ -57,10 +57,6 @@ import java.util.List;
  */
 public class RecentsTaskLoadPlan {
 
-    private static int MIN_NUM_TASKS = 5;
-    private static int SESSION_BEGIN_TIME = 1000 /* ms/s */ * 60 /* s/min */ * 60 /* min/hr */ *
-            6 /* hrs */;
-
     /** The set of conditions to load tasks. */
     public static class Options {
         public int runningTaskId = -1;
@@ -74,29 +70,12 @@ public class RecentsTaskLoadPlan {
 
     Context mContext;
 
-    int mPreloadedUserId;
     List<ActivityManager.RecentTaskInfo> mRawTasks;
     TaskStack mStack;
-    ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
 
     /** Package level ctor */
     RecentsTaskLoadPlan(Context context) {
         mContext = context;
-    }
-
-    private void updateCurrentQuietProfilesCache(int currentUserId) {
-        mCurrentQuietProfiles.clear();
-
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> profiles = userManager.getProfiles(currentUserId);
-        if (profiles != null) {
-            for (int i = 0; i < profiles.size(); i++) {
-                UserInfo user  = profiles.get(i);
-                if (user.isManagedProfile() && user.isQuietModeEnabled()) {
-                    mCurrentQuietProfiles.add(user.id);
-                }
-            }
-        }
     }
 
     /**
@@ -105,13 +84,10 @@ public class RecentsTaskLoadPlan {
      *
      * Note: Do not lock, callers should synchronize on the loader before making this call.
      */
-    void preloadRawTasks(boolean includeFrontMostExcludedTask) {
+    void preloadRawTasks() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         int currentUserId = ssp.getCurrentUser();
-        updateCurrentQuietProfilesCache(currentUserId);
-        mPreloadedUserId = currentUserId;
-        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(), currentUserId);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -129,12 +105,11 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, since this can be calling back to the loader, which separately also drives
      * this call (callers should synchronize on the loader before making this call).
      */
-    void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
-            boolean includeFrontMostExcludedTask) {
+    void preloadPlan(RecentsTaskLoader loader, int runningTaskId) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks(includeFrontMostExcludedTask);
+            preloadRawTasks();
         }
 
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
@@ -144,14 +119,6 @@ public class RecentsTaskLoadPlan {
                 R.string.accessibility_recents_item_will_be_dismissed);
         String appInfoDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_open_app_info);
-        int currentUserId = mPreloadedUserId;
-        long legacyLastStackActiveTime = migrateLegacyLastStackActiveTime(currentUserId);
-        long lastStackActiveTime = Settings.Secure.getLongForUser(mContext.getContentResolver(),
-                Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, legacyLastStackActiveTime, currentUserId);
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            lastStackActiveTime = 0;
-        }
-        long newLastStackActiveTime = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
@@ -159,34 +126,11 @@ public class RecentsTaskLoadPlan {
             // Compose the task key
             final int windowingMode = t.configuration.windowConfiguration.getWindowingMode();
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, windowingMode, t.baseIntent,
-                    t.userId, t.firstActiveTime, t.lastActiveTime);
+                    t.userId, t.lastActiveTime);
 
-            // This task is only shown in the stack if it satisfies the historical time or min
-            // number of tasks constraints. Freeform tasks are also always shown.
             boolean isFreeformTask = windowingMode == WINDOWING_MODE_FREEFORM;
-            boolean isStackTask;
-            if (Recents.getConfiguration().isGridEnabled) {
-                // When grid layout is enabled, we only show the first
-                // TaskGridLayoutAlgorithm.MAX_LAYOUT_FROM_HOME_TASK_COUNT} tasks.
-                isStackTask = t.lastActiveTime >= lastStackActiveTime &&
-                    i >= taskCount - TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT;
-            } else if (Recents.getConfiguration().isLowRamDevice) {
-                // Show a max of 3 items
-                isStackTask = t.lastActiveTime >= lastStackActiveTime &&
-                        i >= taskCount - TaskStackLowRamLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT;
-            } else {
-                isStackTask = isFreeformTask || !isHistoricalTask(t) ||
-                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
-            }
+            boolean isStackTask = !isFreeformTask;
             boolean isLaunchTarget = taskKey.id == runningTaskId;
-
-            // The last stack active time is the baseline for which we show visible tasks.  Since
-            // the system will store all the tasks, we don't want to show the tasks prior to the
-            // last visible ones, otherwise, as you dismiss them, the previous tasks may satisfy
-            // the other stack-task constraints.
-            if (isStackTask && newLastStackActiveTime < 0) {
-                newLastStackActiveTime = t.lastActiveTime;
-            }
 
             // Load the title, icon, and color
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
@@ -213,16 +157,12 @@ public class RecentsTaskLoadPlan {
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
                     activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
-                    t.supportsSplitScreenMultiWindow, t.bounds, t.taskDescription, t.resizeMode, t.topActivity,
-                    isLocked);
+                    t.supportsSplitScreenMultiWindow, t.bounds, t.taskDescription, t.resizeMode,
+                    t.topActivity, isLocked);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
             affiliatedTasks.put(taskKey.id, taskKey);
-        }
-        if (newLastStackActiveTime != -1) {
-            Recents.getSystemServices().updateOverviewLastStackActiveTimeAsync(
-                    newLastStackActiveTime, currentUserId);
         }
 
         // Initialize the stacks
@@ -288,43 +228,5 @@ public class RecentsTaskLoadPlan {
             return mStack.getTaskCount() > 0;
         }
         return false;
-    }
-
-    /**
-     * Returns whether this task is too old to be shown.
-     */
-    private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
-        return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
-    }
-
-
-    /**
-     * Migrate the last active time from the prefs to the secure settings.
-     *
-     * The first time this runs, it will:
-     * 1) fetch the last stack active time from the prefs
-     * 2) set the prefs to the last stack active time for all users
-     * 3) clear the pref
-     * 4) return the last stack active time
-     *
-     * Subsequent calls to this will return zero.
-     */
-    private long migrateLegacyLastStackActiveTime(int currentUserId) {
-        long legacyLastStackActiveTime = Prefs.getLong(mContext,
-                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
-        if (legacyLastStackActiveTime != -1) {
-            Prefs.remove(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME);
-            UserManager userMgr = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            List<UserInfo> users = userMgr.getUsers();
-            for (int i = 0; i < users.size(); i++) {
-                int userId = users.get(i).id;
-                if (userId != currentUserId) {
-                    Recents.getSystemServices().updateOverviewLastStackActiveTimeAsync(
-                            legacyLastStackActiveTime, userId);
-                }
-            }
-            return legacyLastStackActiveTime;
-        }
-        return 0;
     }
 }

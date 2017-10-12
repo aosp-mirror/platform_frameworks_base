@@ -188,41 +188,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // When switching users, dismiss Recents to Home similar to screen off
                 finish();
-            } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
-                // If the time shifts but the currentTime >= lastStackActiveTime, then that boundary
-                // is still valid.  Otherwise, we need to reset the lastStackactiveTime to the
-                // currentTime and remove the old tasks in between which would not be previously
-                // visible, but currently would be in the new currentTime
-                int currentUser = SystemServicesProxy.getInstance(RecentsActivity.this)
-                        .getCurrentUser();
-                long oldLastStackActiveTime = Settings.Secure.getLongForUser(getContentResolver(),
-                        Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, -1, currentUser);
-                if (oldLastStackActiveTime != -1) {
-                    long currentTime = System.currentTimeMillis();
-                    if (currentTime < oldLastStackActiveTime) {
-                        // We are only removing tasks that are between the new current time
-                        // and the old last stack active time, they were not visible and in the
-                        // TaskStack so we don't need to remove any associated TaskViews but we do
-                        // need to load the task id's from the system
-                        RecentsTaskLoader loader = Recents.getTaskLoader();
-                        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(ctx);
-                        loader.preloadRawTasks(loadPlan, false /* includeFrontMostExcludedTask */);
-                        List<ActivityManager.RecentTaskInfo> tasks = loadPlan.getRawTasks();
-                        for (int i = tasks.size() - 1; i >= 0; i--) {
-                            ActivityManager.RecentTaskInfo task = tasks.get(i);
-                            if (currentTime <= task.lastActiveTime && task.lastActiveTime <
-                                    oldLastStackActiveTime) {
-                                Recents.getSystemServices().removeTask(task.persistentId);
-                            }
-                        }
-                        Recents.getSystemServices().updateOverviewLastStackActiveTimeAsync(
-                                currentTime, currentUser);
-
-                        // Clear the last PiP task time, it's an edge case and we'd rather it
-                        // not relaunch the PiP task if the user double taps
-                        RecentsImpl.clearLastPipTime();
-                    }
-                }
             }
         }
     };
@@ -383,7 +348,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
@@ -467,8 +431,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!loadPlan.hasTasks()) {
-            loader.preloadTasks(loadPlan, launchState.launchedToTaskId,
-                    !launchState.launchedFromHome && !launchState.launchedViaDockGesture);
+            loader.preloadTasks(loadPlan, launchState.launchedToTaskId);
         }
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -889,8 +852,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsActivityLaunchState launchState = config.getLaunchState();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-        loader.preloadTasks(loadPlan, -1 /* runningTaskId */,
-                false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(loadPlan, -1 /* runningTaskId */);
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
@@ -931,13 +893,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         Recents.getTaskLoader().dump(prefix, writer);
 
         String id = Integer.toHexString(System.identityHashCode(this));
-        long lastStackActiveTime = Settings.Secure.getLongForUser(getContentResolver(),
-                Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, -1,
-                SystemServicesProxy.getInstance(this).getCurrentUser());
 
         writer.print(prefix); writer.print(TAG);
         writer.print(" visible="); writer.print(mIsVisible ? "Y" : "N");
-        writer.print(" lastStackTaskActiveTime="); writer.print(lastStackActiveTime);
         writer.print(" currentTime="); writer.print(System.currentTimeMillis());
         writer.print(" [0x"); writer.print(id); writer.print("]");
         writer.println();

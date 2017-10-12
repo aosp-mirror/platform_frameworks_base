@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.misc;
 
+import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -68,7 +69,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.ArraySet;
@@ -385,20 +385,15 @@ public class SystemServicesProxy {
 
     /**
      * Returns a list of the recents tasks.
-     *
-     * @param includeFrontMostExcludedTask if set, will ensure that the front most excluded task
-     *                                     will be visible, otherwise no excluded tasks will be
-     *                                     visible.
      */
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean includeFrontMostExcludedTask, ArraySet<Integer> quietProfileIds) {
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
         if (RecentsDebugFlags.Static.EnableMockTasks) {
             ArrayList<ActivityManager.RecentTaskInfo> tasks =
                     new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numLatestTasks, RecentsDebugFlags.Static.MockTaskCount);
+            int count = Math.min(numTasks, RecentsDebugFlags.Static.MockTaskCount);
             for (int i = 0; i < count; i++) {
                 // Create a dummy component name
                 int packageIndex = i % RecentsDebugFlags.Static.MockTasksPackageCount;
@@ -412,7 +407,7 @@ public class SystemServicesProxy {
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
-                rti.firstActiveTime = rti.lastActiveTime = i;
+                rti.lastActiveTime = i;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
                             Bitmap.createBitmap(mDummyIcon), null,
@@ -427,57 +422,24 @@ public class SystemServicesProxy {
             return tasks;
         }
 
-        // Remove home/recents/excluded tasks
-        int minNumTasksToQuery = 10;
-        int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
-        int flags = ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS |
-                ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK |
-                ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES;
-        if (includeFrontMostExcludedTask) {
-            flags |= ActivityManager.RECENT_WITH_EXCLUDED;
-        }
-        List<ActivityManager.RecentTaskInfo> tasks = null;
         try {
-            tasks = mAm.getRecentTasksForUser(numTasksToQuery, flags, userId);
+            List<ActivityManager.RecentTaskInfo> tasks = mIam.getRecentTasks(numTasks,
+                    RECENT_IGNORE_UNAVAILABLE, userId).getList();
+            Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+            while (iter.hasNext()) {
+                ActivityManager.RecentTaskInfo t = iter.next();
+
+                // Remove the task if it or it's package are blacklsited
+                if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
+                        sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
+                    iter.remove();
+                }
+            }
+            return tasks;
         } catch (Exception e) {
             Log.e(TAG, "Failed to get recent tasks", e);
-        }
-
-        // Break early if we can't get a valid set of tasks
-        if (tasks == null) {
             return new ArrayList<>();
         }
-
-        boolean isFirstValidTask = true;
-        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            ActivityManager.RecentTaskInfo t = iter.next();
-
-            // NOTE: The order of these checks happens in the expected order of the traversal of the
-            // tasks
-
-            // Remove the task if it or it's package are blacklsited
-            if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
-                    sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
-                iter.remove();
-                continue;
-            }
-
-            // Remove the task if it is marked as excluded, unless it is the first most task and we
-            // are requested to include it
-            boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                    == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-            isExcluded |= quietProfileIds.contains(t.userId);
-            if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
-                iter.remove();
-            }
-
-            isFirstValidTask = false;
-        }
-
-        return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));
     }
 
     /**
@@ -1289,14 +1251,6 @@ public class SystemServicesProxy {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-        });
-    }
-
-    public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
-            int currentUserId) {
-        mUiOffloadThread.submit(() -> {
-            Settings.Secure.putLongForUser(mContext.getContentResolver(),
-                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
         });
     }
 
