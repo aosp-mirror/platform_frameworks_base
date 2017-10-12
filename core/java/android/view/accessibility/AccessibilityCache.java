@@ -329,8 +329,6 @@ public final class AccessibilityCache {
                 final long oldParentId = oldInfo.getParentNodeId();
                 if (info.getParentNodeId() != oldParentId) {
                     clearSubTreeLocked(windowId, oldParentId);
-                } else {
-                    oldInfo.recycle();
                 }
            }
 
