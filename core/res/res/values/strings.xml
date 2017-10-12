@@ -4735,4 +4735,28 @@
 
     <!-- Format string for indicating there is more content in a slice view -->
     <string name="slice_more_content">+ <xliff:g id="number" example="5">%1$d</xliff:g></string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by a newer version of the app.
+    -->
+    <string name="shortcut_restored_on_lower_version">This shortcut requires latest app</string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by an app that doesn't support backup
+    and restore.
+    -->
+    <string name="shortcut_restore_not_supported">Couldn\u2019t restore shortcut because app doesn\u2019t support backup and restore</string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by an app with a different signature.
+    -->
+    <string name="shortcut_restore_signature_mismatch">Couldn\u2019t restore shortcut because of app signature mismatch</string>
+
+    <!--
+    A toast message shown when an app shortcut that wasn't restored due to an unknown issue is clicked,
+    -->
+    <string name="shortcut_restore_unknown_issue">Couldn\u2019t restore shortcut</string>
 </resources>

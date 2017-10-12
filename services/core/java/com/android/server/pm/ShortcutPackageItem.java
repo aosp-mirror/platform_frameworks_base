@@ -123,7 +123,7 @@ abstract class ShortcutPackageItem {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, String.format("Restoring package: %s/u%d (version=%d) %s for u%d",
                     mPackageName, mPackageUserId, currentVersionCode,
-                    ShortcutInfo.getDisabledReasonLabel(restoreBlockReason),
+                    ShortcutInfo.getDisabledReasonDebugString(restoreBlockReason),
                     getOwnerUserId()));
         }
 

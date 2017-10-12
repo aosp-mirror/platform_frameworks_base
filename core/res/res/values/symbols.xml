@@ -3116,4 +3116,9 @@
   <java-symbol type="dimen" name="slice_icon_size" />
   <java-symbol type="dimen" name="slice_padding" />
   <java-symbol type="string" name="slice_more_content" />
+
+  <java-symbol type="string" name="shortcut_restored_on_lower_version" />
+  <java-symbol type="string" name="shortcut_restore_not_supported" />
+  <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
+  <java-symbol type="string" name="shortcut_restore_unknown_issue" />
 </resources>
