@@ -387,8 +387,6 @@ public class KeyguardManager {
      * such as the Home key and the right soft keys, don't work.
      *
      * @return true if in keyguard restricted input mode.
-     *
-     * @see android.view.WindowManagerPolicy#inKeyguardRestrictedKeyInputMode
      */
     public boolean inKeyguardRestrictedInputMode() {
         try {

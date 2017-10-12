@@ -553,7 +553,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
-    boolean mAccelerometerDefault;
 
     boolean mSupportAutoRotation;
     int mAllowAllRotations = -1;
@@ -708,7 +707,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mVrHeadsetHomeIntent;
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
-    boolean mAssistKeyLongPressed;
     boolean mPendingMetaAction;
     boolean mPendingCapsLockToggle;
     int mMetaState;
@@ -839,6 +837,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
     private static final int MSG_SYSTEM_KEY_PRESS = 25;
     private static final int MSG_HANDLE_ALL_APPS = 26;
+    private static final int MSG_LAUNCH_ASSIST = 27;
+    private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 28;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -880,8 +880,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_HIDE_BOOT_MESSAGE:
                     handleHideBootMessage();
                     break;
+                case MSG_LAUNCH_ASSIST:
+                    final int deviceId = msg.arg1;
+                    final String hint = (String) msg.obj;
+                    launchAssistAction(hint, deviceId);
+                    break;
+                case MSG_LAUNCH_ASSIST_LONG_PRESS:
+                    launchAssistLongPressAction();
+                    break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
-                    launchVoiceAssistWithWakeLock(msg.arg1 != 0);
+                    launchVoiceAssistWithWakeLock();
                     break;
                 case MSG_POWER_DELAYED_PRESS:
                     powerPress((Long)msg.obj, msg.arg1 != 0, msg.arg2);
@@ -911,7 +919,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     disposeInputConsumer((InputConsumer) msg.obj);
                     break;
                 case MSG_BACK_DELAYED_PRESS:
-                    backMultiPressAction((Long) msg.obj, msg.arg1);
+                    backMultiPressAction(msg.arg1);
                     finishBackKeyPress();
                     break;
                 case MSG_ACCESSIBILITY_SHORTCUT:
@@ -1415,7 +1423,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void backMultiPressAction(long eventTime, int count) {
+    private void backMultiPressAction(int count) {
         if (count >= PANIC_PRESS_BACK_COUNT) {
             switch (mPanicPressOnBackBehavior) {
                 case PANIC_PRESS_BACK_NOTHING:
@@ -1584,7 +1592,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void sleepPress(long eventTime) {
+    private void sleepPress() {
         if (mShortPressOnSleepBehavior == SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME) {
             launchHomeFromHotKey(false /* awakenDreams */, true /*respectKeyguard*/);
         }
@@ -3542,44 +3550,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 toggleKeyboardShortcutsMenu(event.getDeviceId());
             }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
-            if (down) {
-                if (repeatCount == 0) {
-                    mAssistKeyLongPressed = false;
-                } else if (repeatCount == 1) {
-                    mAssistKeyLongPressed = true;
-                    if (!keyguardOn) {
-                         launchAssistLongPressAction();
-                    }
-                }
-            } else {
-                if (mAssistKeyLongPressed) {
-                    mAssistKeyLongPressed = false;
-                } else {
-                    if (!keyguardOn) {
-                        launchAssistAction(null, event.getDeviceId());
-                    }
-                }
-            }
+            Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
-            if (!down) {
-                Intent voiceIntent;
-                if (!keyguardOn) {
-                    voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-                } else {
-                    IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
-                            ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-                    if (dic != null) {
-                        try {
-                            dic.exitIdle("voice-search");
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
-                    voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);
-                }
-                startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
-            }
+            Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in interceptKeyBeforeQueueing");
+            return -1;
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
                 mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
@@ -6200,7 +6175,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     useHapticFeedback = false; // suppress feedback if already non-interactive
                 }
                 if (down) {
-                    sleepPress(event.getEventTime());
+                    sleepPress();
                 } else {
                     sleepRelease(event.getEventTime());
                 }
@@ -6271,18 +6246,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
-            case KeyEvent.KEYCODE_VOICE_ASSIST: {
-                // Only do this if we would otherwise not pass it to the user. In that case,
-                // interceptKeyBeforeDispatching would apply a similar but different policy in
-                // order to invoke voice assist actions. Note that we need to make a copy of the
-                // key event here because the original key event will be recycled when we return.
-                if ((result & ACTION_PASS_TO_USER) == 0 && !down) {
-                    mBroadcastWakeLock.acquire();
-                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK,
-                            keyguardActive ? 1 : 0, 0);
+            case KeyEvent.KEYCODE_ASSIST: {
+                final boolean longPressed = event.getRepeatCount() > 0;
+                if (down && longPressed) {
+                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST_LONG_PRESS);
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
+                if (!down && !longPressed) {
+                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST, event.getDeviceId(),
+                            0 /* unused */, null /* hint */);
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
+                }
+                result &= ~ACTION_PASS_TO_USER;
+                break;
+            }
+            case KeyEvent.KEYCODE_VOICE_ASSIST: {
+                if (!down) {
+                    mBroadcastWakeLock.acquire();
+                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK);
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
+                }
+                result &= ~ACTION_PASS_TO_USER;
                 break;
             }
             case KeyEvent.KEYCODE_WINDOW: {
@@ -6551,18 +6538,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    void launchVoiceAssistWithWakeLock(boolean keyguardActive) {
-        IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-        if (dic != null) {
-            try {
-                dic.exitIdle("voice-search");
-            } catch (RemoteException e) {
+    void launchVoiceAssistWithWakeLock() {
+        final Intent voiceIntent;
+        if (!keyguardOn()) {
+            voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        } else {
+            IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
+                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+            if (dic != null) {
+                try {
+                    dic.exitIdle("voice-search");
+                } catch (RemoteException e) {
+                }
             }
+            voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
+            voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);
         }
-        Intent voiceIntent =
-            new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
-        voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardActive);
         startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
         mBroadcastWakeLock.release();
     }
