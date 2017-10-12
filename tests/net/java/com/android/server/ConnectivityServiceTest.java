@@ -26,8 +26,13 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.*;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
-
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
@@ -87,9 +92,10 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -105,7 +111,11 @@ import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -123,13 +133,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+
 /**
  * Tests for {@link ConnectivityService}.
  *
  * Build, install and run with:
  *  runtest frameworks-net -c com.android.server.ConnectivityServiceTest
  */
-public class ConnectivityServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class ConnectivityServiceTest {
     private static final String TAG = "ConnectivityServiceTest";
 
     private static final int TIMEOUT_MS = 500;
@@ -141,6 +154,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private MockNetworkAgent mWiFiNetworkAgent;
     private MockNetworkAgent mCellNetworkAgent;
     private MockNetworkAgent mEthernetNetworkAgent;
+    private Context mContext;
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -242,7 +256,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         waitForIdle(TIMEOUT_MS);
     }
 
-    @SmallTest
+    @Test
     public void testWaitForIdle() {
         final int attempts = 50;  // Causes the test to take about 200ms on bullhead-eng.
 
@@ -743,7 +757,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
                 // Don't overlap test NetIDs with real NetIDs as binding sockets to real networks
                 // can have odd side-effects, like network validations succeeding.
-                final Network[] networks = ConnectivityManager.from(getContext()).getAllNetworks();
+                Context context = InstrumentationRegistry.getContext();
+                final Network[] networks = ConnectivityManager.from(context).getAllNetworks();
                 boolean overlaps = false;
                 for (Network network : networks) {
                     if (netId == network.netId) {
@@ -814,9 +829,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         fail("ConditionVariable was blocked for more than " + TIMEOUT_MS + "ms");
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
+        mContext = InstrumentationRegistry.getContext();
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
         // http://b/25897652 .
@@ -824,7 +839,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             Looper.prepare();
         }
 
-        mServiceContext = new MockContext(getContext());
+        mServiceContext = new MockContext(InstrumentationRegistry.getContext());
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(
                 NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
@@ -835,7 +850,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 mock(IpConnectivityLog.class));
 
         mService.systemReady();
-        mCm = new WrappedConnectivityManager(getContext(), mService);
+        mCm = new WrappedConnectivityManager(InstrumentationRegistry.getContext(), mService);
         mCm.bindProcessToNetwork(null);
 
         // Ensure that the default setting for Captive Portals is used for most tests
@@ -843,6 +858,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         setMobileDataAlwaysOn(false);
     }
 
+    @After
     public void tearDown() throws Exception {
         setMobileDataAlwaysOn(false);
         if (mCellNetworkAgent != null) {
@@ -857,7 +873,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mEthernetNetworkAgent.disconnect();
             mEthernetNetworkAgent = null;
         }
-        super.tearDown();
     }
 
     private static int transportToLegacyType(int transport) {
@@ -931,6 +946,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         return cv;
     }
 
+    @Test
     public void testNetworkTypes() {
         // Ensure that our mocks for the networkAttributes config variable work as expected. If they
         // don't, then tests that depend on CONNECTIVITY_ACTION broadcasts for these network types
@@ -946,7 +962,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(mCm.isNetworkSupported(TYPE_ETHERNET));
     }
 
-    @SmallTest
+    @Test
     public void testLingering() throws Exception {
         verifyNoNetwork();
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -987,7 +1003,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyNoNetwork();
     }
 
-    @SmallTest
+    @Test
     public void testValidatedCellularOutscoresUnvalidatedWiFi() throws Exception {
         // Test bringing up unvalidated WiFi
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -1022,7 +1038,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyNoNetwork();
     }
 
-    @SmallTest
+    @Test
     public void testUnvalidatedWifiOutscoresUnvalidatedCellular() throws Exception {
         // Test bringing up unvalidated cellular.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -1048,7 +1064,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyNoNetwork();
     }
 
-    @SmallTest
+    @Test
     public void testUnlingeringDoesNotValidate() throws Exception {
         // Test bringing up unvalidated WiFi.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -1076,7 +1092,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 NET_CAPABILITY_VALIDATED));
     }
 
-    @SmallTest
+    @Test
     public void testCellularOutscoresWeakWifi() throws Exception {
         // Test bringing up validated cellular.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -1102,7 +1118,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyActiveNetwork(TRANSPORT_WIFI);
     }
 
-    @SmallTest
+    @Test
     public void testReapingNetwork() throws Exception {
         // Test bringing up WiFi without NET_CAPABILITY_INTERNET.
         // Expect it to be torn down immediately because it satisfies no requests.
@@ -1135,7 +1151,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         waitFor(cv);
     }
 
-    @SmallTest
+    @Test
     public void testCellularFallback() throws Exception {
         // Test bringing up validated cellular.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -1173,7 +1189,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyActiveNetwork(TRANSPORT_WIFI);
     }
 
-    @SmallTest
+    @Test
     public void testWiFiFallback() throws Exception {
         // Test bringing up unvalidated WiFi.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -1387,7 +1403,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testStateChangeNetworkCallbacks() throws Exception {
         final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
@@ -1477,7 +1493,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertNoCallbacks(genericNetworkCallback, wifiNetworkCallback, cellNetworkCallback);
     }
 
-    @SmallTest
+    @Test
     public void testMultipleLingering() {
         NetworkRequest request = new NetworkRequest.Builder()
                 .clearCapabilities().addCapability(NET_CAPABILITY_NOT_METERED)
@@ -1705,7 +1721,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(trackDefaultCallback);
     }
 
-    @SmallTest
+    @Test
     public void testExplicitlySelected() {
         NetworkRequest request = new NetworkRequest.Builder()
                 .clearCapabilities().addCapability(NET_CAPABILITY_INTERNET)
@@ -1872,7 +1888,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         handlerThread.quit();
     }
 
-    @SmallTest
+    @Test
     public void testNetworkFactoryRequests() throws Exception {
         tryNetworkFactoryRequests(NET_CAPABILITY_MMS);
         tryNetworkFactoryRequests(NET_CAPABILITY_SUPL);
@@ -1892,7 +1908,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Skipping VALIDATED and CAPTIVE_PORTAL as they're disallowed.
     }
 
-    @SmallTest
+    @Test
     public void testNoMutableNetworkRequests() throws Exception {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
         NetworkRequest request1 = new NetworkRequest.Builder()
@@ -1909,7 +1925,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertException(() -> { mCm.requestNetwork(request2, pendingIntent); }, expected);
     }
 
-    @SmallTest
+    @Test
     public void testMMSonWiFi() throws Exception {
         // Test bringing up cellular without MMS NetworkRequest gets reaped
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -1948,7 +1964,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyActiveNetwork(TRANSPORT_WIFI);
     }
 
-    @SmallTest
+    @Test
     public void testMMSonCell() throws Exception {
         // Test bringing up cellular without MMS
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
@@ -1977,7 +1993,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    @SmallTest
+    @Test
     public void testCaptivePortal() {
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -2028,7 +2044,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         validatedCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
     }
 
-    @SmallTest
+    @Test
     public void testCaptivePortalApp() {
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -2074,7 +2090,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(captivePortalCallback);
     }
 
-    @SmallTest
+    @Test
     public void testAvoidOrIgnoreCaptivePortals() {
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -2119,7 +2135,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         return new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI);
     }
 
-    @SmallTest
+    @Test
     public void testNetworkSpecifier() {
         NetworkRequest rEmpty1 = newWifiRequestBuilder().build();
         NetworkRequest rEmpty2 = newWifiRequestBuilder().setNetworkSpecifier((String) null).build();
@@ -2180,7 +2196,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cFoo, cBar);
     }
 
-    @SmallTest
+    @Test
     public void testInvalidNetworkSpecifier() {
         try {
             NetworkRequest.Builder builder = new NetworkRequest.Builder();
@@ -2241,7 +2257,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testNetworkSpecifierUidSpoofSecurityException() {
         class UidAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
             @Override
@@ -2275,7 +2291,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testRegisterDefaultNetworkCallback() throws Exception {
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
@@ -2324,7 +2340,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         defaultNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
     }
 
-    @SmallTest
+    @Test
     public void testAdditionalStateCallbacks() throws Exception {
         // File a network request for mobile.
         final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
@@ -2385,7 +2401,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         return nc.hasCapability(NET_CAPABILITY_FOREGROUND);
     }
 
-    @SmallTest
+    @Test
     public void testBackgroundNetworks() throws Exception {
         // Create a background request. We can't do this ourselves because ConnectivityService
         // doesn't have an API for it. So just turn on mobile data always on.
@@ -2554,7 +2570,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         return false;
     }
 
-    @SmallTest
+    @Test
     public void testMobileDataAlwaysOn() throws Exception {
         final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
         final NetworkRequest cellRequest = new NetworkRequest.Builder()
@@ -2619,7 +2635,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         handlerThread.quit();
     }
 
-    @SmallTest
+    @Test
     public void testAvoidBadWifiSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
         final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
@@ -2657,7 +2673,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(tracker.shouldNotifyWifiUnvalidated());
     }
 
-    @SmallTest
+    @Test
     public void testAvoidBadWifi() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
         final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
@@ -2784,7 +2800,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(defaultCallback);
     }
 
-    @SmallTest
+    @Test
     public void testMeteredMultipathPreferenceSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
         final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
@@ -2808,7 +2824,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * Validate that a satisfied network request does not trigger onUnavailable() once the
      * time-out period expires.
      */
-    @SmallTest
+    @Test
     public void testSatisfiedNetworkRequestDoesNotTriggerOnUnavailable() {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
@@ -2828,7 +2844,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * Validate that a satisfied network request followed by a disconnected (lost) network does
      * not trigger onUnavailable() once the time-out period expires.
      */
-    @SmallTest
+    @Test
     public void testSatisfiedThenLostNetworkRequestDoesNotTriggerOnUnavailable() {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
@@ -2852,7 +2868,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * callback is called when time-out expires. Then validate that if network request is
      * (somehow) satisfied - the callback isn't called later.
      */
-    @SmallTest
+    @Test
     public void testTimedoutNetworkRequest() {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
@@ -2873,7 +2889,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * Validate that when a network request is unregistered (cancelled), no posterior event can
      * trigger the callback.
      */
-    @SmallTest
+    @Test
     public void testNoCallbackAfterUnregisteredNetworkRequest() {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
@@ -2981,7 +2997,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         return mWiFiNetworkAgent.getNetwork();
     }
 
-    @SmallTest
+    @Test
     public void testPacketKeepalives() throws Exception {
         InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
@@ -3105,7 +3121,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         callback3.expectStopped();
     }
 
-    @SmallTest
+    @Test
     public void testGetCaptivePortalServerUrl() throws Exception {
         String url = mCm.getCaptivePortalServerUrl();
         assertEquals("http://connectivitycheck.gstatic.com/generate_204", url);
@@ -3150,7 +3166,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
     }
 
-    @SmallTest
+    @Test
     public void testNetworkPinner() {
         NetworkRequest wifiRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_WIFI)
@@ -3210,7 +3226,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertPinnedToWifiWithCellDefault();
     }
 
-    @SmallTest
+    @Test
     public void testNetworkCallbackMaximum() {
         final int MAX_REQUESTS = 100;
         final int CALLBACKS = 90;
@@ -3302,7 +3318,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testNetworkInfoOfTypeNone() {
         ConditionVariable broadcastCV = waitForConnectivityBroadcasts(1);
 
@@ -3342,7 +3358,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testDeprecatedAndUnsupportedOperations() throws Exception {
         final int TYPE_NONE = ConnectivityManager.TYPE_NONE;
         assertNull(mCm.getNetworkInfo(TYPE_NONE));
@@ -3363,7 +3379,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertException(() -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); }, unsupported);
     }
 
-    @SmallTest
+    @Test
     public void testLinkPropertiesEnsuresDirectlyConnectedRoutes() {
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_WIFI).build();
