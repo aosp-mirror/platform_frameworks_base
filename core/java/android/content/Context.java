@@ -4071,6 +4071,14 @@ public abstract class Context {
     public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.content.pm.crossprofile.CrossProfileApps} for cross profile operations.
+     *
+     * @see #getSystemService
+     */
+    public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

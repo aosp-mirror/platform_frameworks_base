@@ -41,6 +41,8 @@ import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.content.pm.crossprofile.CrossProfileApps;
+import android.content.pm.crossprofile.ICrossProfileApps;
 import android.content.res.Resources;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
@@ -909,6 +911,18 @@ final class SystemServiceRegistry {
             public RulesManager createService(ContextImpl ctx) {
                 return new RulesManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.CROSS_PROFILE_APPS_SERVICE, CrossProfileApps.class,
+                new CachedServiceFetcher<CrossProfileApps>() {
+                    @Override
+                    public CrossProfileApps createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.CROSS_PROFILE_APPS_SERVICE);
+                        return new CrossProfileApps(ctx.getOuterContext(),
+                                ICrossProfileApps.Stub.asInterface(b));
+                    }
+                });
     }
 
     /**

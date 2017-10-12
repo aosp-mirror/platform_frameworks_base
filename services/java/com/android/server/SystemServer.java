@@ -95,6 +95,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.crossprofile.CrossProfileAppsService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
@@ -1516,6 +1517,10 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartLauncherAppsService");
             mSystemServiceManager.startService(LauncherAppsService.class);
+            traceEnd();
+
+            traceBeginAndSlog("StartCrossProfileAppsService");
+            mSystemServiceManager.startService(CrossProfileAppsService.class);
             traceEnd();
         }
 

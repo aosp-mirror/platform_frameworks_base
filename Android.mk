@@ -158,6 +158,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncServiceAdapter.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/om/IOverlayManager.aidl \
+	core/java/android/content/pm/crossprofile/ICrossProfileApps.aidl \
 	core/java/android/content/pm/IDexModuleRegisterCallback.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
