@@ -178,17 +178,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                if (mGlobalPrioritySession != record) {
-                    Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
-                            + " to " + record);
-                    mGlobalPrioritySession = record;
-                    if (user != null && user.mPriorityStack.contains(record)) {
-                        // Handle the global priority session separately.
-                        // Otherwise, it will be the media button session even after it becomes
-                        // inactive because it has been the lastly played media app.
-                        user.mPriorityStack.removeSession(record);
-                    }
-                }
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
                 }
@@ -201,6 +190,24 @@ public class MediaSessionService extends SystemService implements Monitor {
                 user.mPriorityStack.onSessionStateChange(record);
             }
             mHandler.postSessionsChanged(record.getUserId());
+        }
+    }
+
+    public void setGlobalPrioritySession(MediaSessionRecord record) {
+        synchronized (mLock) {
+            FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+            if (mGlobalPrioritySession != record) {
+                Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
+                        + " to " + record);
+                mGlobalPrioritySession = record;
+                if (user != null && user.mPriorityStack.contains(record)) {
+                    // Handle the global priority session separately.
+                    // Otherwise, it can be the media button session regardless of the active state
+                    // because it or other system components might have been the lastly played media
+                    // app.
+                    user.mPriorityStack.removeSession(record);
+                }
+            }
         }
     }
 
