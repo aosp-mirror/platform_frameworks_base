@@ -19,6 +19,8 @@
 #define LOG_NDEBUG 1
 
 #include <android_runtime/AndroidRuntime.h>
+
+#include <android-base/properties.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -47,8 +49,8 @@
 #include <string>
 #include <vector>
 
-
 using namespace android;
+using android::base::GetProperty;
 
 extern int register_android_os_Binder(JNIEnv* env);
 extern int register_android_os_Process(JNIEnv* env);
@@ -392,17 +394,6 @@ static bool hasFile(const char* file) {
     return false;
 }
 
-// Convenience wrapper over the property API that returns an
-// std::string.
-std::string getProperty(const char* key, const char* defaultValue) {
-    std::vector<char> temp(PROPERTY_VALUE_MAX);
-    const int len = property_get(key, &temp[0], defaultValue);
-    if (len < 0) {
-        return "";
-    }
-    return std::string(&temp[0], len);
-}
-
 /*
  * Read the persistent locale. Inspects the following system properties
  * (in order) and returns the first non-empty property in the list :
@@ -419,15 +410,15 @@ std::string getProperty(const char* key, const char* defaultValue) {
  */
 const std::string readLocale()
 {
-    const std::string locale = getProperty("persist.sys.locale", "");
+    const std::string locale = GetProperty("persist.sys.locale", "");
     if (!locale.empty()) {
         return locale;
     }
 
-    const std::string language = getProperty("persist.sys.language", "");
+    const std::string language = GetProperty("persist.sys.language", "");
     if (!language.empty()) {
-        const std::string country = getProperty("persist.sys.country", "");
-        const std::string variant = getProperty("persist.sys.localevar", "");
+        const std::string country = GetProperty("persist.sys.country", "");
+        const std::string variant = GetProperty("persist.sys.localevar", "");
 
         std::string out = language;
         if (!country.empty()) {
@@ -441,15 +432,15 @@ const std::string readLocale()
         return out;
     }
 
-    const std::string productLocale = getProperty("ro.product.locale", "");
+    const std::string productLocale = GetProperty("ro.product.locale", "");
     if (!productLocale.empty()) {
         return productLocale;
     }
 
     // If persist.sys.locale and ro.product.locale are missing,
     // construct a locale value from the individual locale components.
-    const std::string productLanguage = getProperty("ro.product.locale.language", "en");
-    const std::string productRegion = getProperty("ro.product.locale.region", "US");
+    const std::string productLanguage = GetProperty("ro.product.locale.language", "en");
+    const std::string productRegion = GetProperty("ro.product.locale.region", "US");
 
     return productLanguage + "-" + productRegion;
 }
@@ -649,7 +640,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
-    char fingerprintBuf[sizeof("-Xfingerprint:") + PROPERTY_VALUE_MAX];
+    std::string fingerprintBuf;
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -964,8 +955,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     /*
      * Retrieve the build fingerprint and provide it to the runtime. That way, ANR dumps will
      * contain the fingerprint and can be parsed.
+     * Fingerprints are potentially longer than PROPERTY_VALUE_MAX, so parseRuntimeOption() cannot
+     * be used here.
+     * Do not ever re-assign fingerprintBuf as its c_str() value is stored in mOptions.
      */
-    parseRuntimeOption("ro.build.fingerprint", fingerprintBuf, "-Xfingerprint:");
+    std::string fingerprint = GetProperty("ro.build.fingerprint", "");
+    if (!fingerprint.empty()) {
+        fingerprintBuf = "-Xfingerprint:" + fingerprint;
+        addOption(fingerprintBuf.c_str());
+    }
 
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
