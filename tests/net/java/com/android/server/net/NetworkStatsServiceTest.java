@@ -93,8 +93,8 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.TrustedTime;
 
@@ -216,7 +216,6 @@ public class NetworkStatsServiceTest {
               ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
         verify(mNetManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
-
     }
 
     @After
