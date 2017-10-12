@@ -491,7 +491,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return Collections.emptyList();
         }
         synchronized (this) {
-            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false);
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false /* edit */,
+                    false /* uidMismatchExpected */);
             if (pkgOps == null) {
                 return null;
             }
@@ -530,7 +531,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void pruneOp(Op op, int uid, String packageName) {
         if (op.time == 0 && op.rejectTime == 0) {
-            Ops ops = getOpsRawLocked(uid, packageName, false);
+            Ops ops = getOpsRawLocked(uid, packageName, false /* edit */,
+                    false /* uidMismatchExpected */);
             if (ops != null) {
                 ops.remove(op.op);
                 if (ops.size() <= 0) {
@@ -1046,7 +1048,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkPackage(int uid, String packageName) {
         Preconditions.checkNotNull(packageName);
         synchronized (this) {
-            if (getOpsRawLocked(uid, packageName, true) != null) {
+            Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
+                    true /* uidMismatchExpected */);
+            if (ops != null) {
                 return AppOpsManager.MODE_ALLOWED;
             } else {
                 return AppOpsManager.MODE_ERRORED;
@@ -1090,7 +1094,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int noteOperationUnchecked(int code, int uid, String packageName,
             int proxyUid, String proxyPackageName) {
         synchronized (this) {
-            Ops ops = getOpsRawLocked(uid, packageName, true);
+            Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
+                    false /* uidMismatchExpected */);
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
@@ -1148,7 +1153,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         ClientState client = (ClientState)token;
         synchronized (this) {
-            Ops ops = getOpsRawLocked(uid, resolvedPackageName, true);
+            Ops ops = getOpsRawLocked(uid, resolvedPackageName, true /* edit */,
+                    false /* uidMismatchExpected */);
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + resolvedPackageName);
@@ -1274,7 +1280,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         return uidState;
     }
 
-    private Ops getOpsRawLocked(int uid, String packageName, boolean edit) {
+    private Ops getOpsRawLocked(int uid, String packageName, boolean edit,
+            boolean uidMismatchExpected) {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
@@ -1326,10 +1333,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (pkgUid != uid) {
                         // Oops!  The package name is not valid for the uid they are calling
                         // under.  Abort.
-                        RuntimeException ex = new RuntimeException("here");
-                        ex.fillInStackTrace();
-                        Slog.w(TAG, "Bad call: specified package " + packageName
-                                + " under uid " + uid + " but it is really " + pkgUid, ex);
+                        if (!uidMismatchExpected) {
+                            RuntimeException ex = new RuntimeException("here");
+                            ex.fillInStackTrace();
+                            Slog.w(TAG, "Bad call: specified package " + packageName
+                                    + " under uid " + uid + " but it is really " + pkgUid, ex);
+                        }
                         return null;
                     }
                 } finally {
@@ -1359,7 +1368,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
-        Ops ops = getOpsRawLocked(uid, packageName, edit);
+        Ops ops = getOpsRawLocked(uid, packageName, edit,
+                false /* uidMismatchExpected */);
         if (ops == null) {
             return null;
         }
@@ -1393,7 +1403,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
                     // If we are the system, bypass user restrictions for certain codes
                     synchronized (this) {
-                        Ops ops = getOpsRawLocked(uid, packageName, true);
+                        Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
+                                false /* uidMismatchExpected */);
                         if ((ops != null) && ops.isPrivileged) {
                             return false;
                         }
@@ -1713,7 +1724,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(pkg.getUid()));
                         synchronized (this) {
-                            Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(), false);
+                            Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(),
+                                    false /* edit */, false /* uidMismatchExpected */);
                             // Should always be present as the list of PackageOps is generated
                             // from Ops.
                             if (ops != null) {
