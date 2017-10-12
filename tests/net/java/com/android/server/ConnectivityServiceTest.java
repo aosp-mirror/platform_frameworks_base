@@ -3296,12 +3296,14 @@ public class ConnectivityServiceTest {
             mCm.requestNetwork(networkRequest, networkCallback);
             mCm.unregisterNetworkCallback(networkCallback);
         }
+        waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
             NetworkCallback networkCallback = new NetworkCallback();
             mCm.registerNetworkCallback(networkRequest, networkCallback);
             mCm.unregisterNetworkCallback(networkCallback);
         }
+        waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
             PendingIntent pendingIntent =
@@ -3309,6 +3311,7 @@ public class ConnectivityServiceTest {
             mCm.requestNetwork(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
+        waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
             PendingIntent pendingIntent =
