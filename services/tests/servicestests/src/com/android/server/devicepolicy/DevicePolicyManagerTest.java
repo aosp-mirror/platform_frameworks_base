@@ -3090,6 +3090,47 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
+    public void testSetTime() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setTime(admin1, 0);
+        verify(getServices().alarmManager).setTime(0);
+    }
+
+    public void testSetTimeFailWithPO() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null, () -> dpm.setTime(admin1, 0));
+    }
+
+    public void testSetTimeWithAutoTimeOn() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(getServices().settings.settingsGlobalGetInt(Settings.Global.AUTO_TIME, 0))
+                .thenReturn(1);
+        assertFalse(dpm.setTime(admin1, 0));
+    }
+
+    public void testSetTimeZone() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setTimeZone(admin1, "Asia/Shanghai");
+        verify(getServices().alarmManager).setTimeZone("Asia/Shanghai");
+    }
+
+    public void testSetTimeZoneFailWithPO() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setTimeZone(admin1, "Asia/Shanghai"));
+    }
+
+    public void testSetTimeZoneWithAutoTimeZoneOn() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(getServices().settings.settingsGlobalGetInt(Settings.Global.AUTO_TIME_ZONE, 0))
+                .thenReturn(1);
+        assertFalse(dpm.setTimeZone(admin1, "Asia/Shanghai"));
+    }
+
     public void testGetLastBugReportRequestTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
