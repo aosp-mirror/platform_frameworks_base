@@ -1499,8 +1499,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         ArraySet<AutofillId> trackedViews = null;
         boolean saveOnAllViewsInvisible = false;
+        boolean saveOnFinish = true;
         final SaveInfo saveInfo = response.getSaveInfo();
+        final AutofillId saveTriggerId;
         if (saveInfo != null) {
+            saveTriggerId = saveInfo.getTriggerId();
+            if (saveTriggerId != null) {
+                writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
+            }
             saveOnAllViewsInvisible =
                     (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
@@ -1517,6 +1523,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Collections.addAll(trackedViews, saveInfo.getOptionalIds());
                 }
             }
+            if ((saveInfo.getFlags() & SaveInfo.FLAG_DONT_SAVE_ON_FINISH) != 0) {
+                saveOnFinish = false;
+            }
+
+        } else {
+            saveTriggerId = null;
         }
 
         // Must also track that are part of datasets, otherwise the FillUI won't be hidden when
@@ -1541,10 +1553,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         try {
             if (sVerbose) {
-                Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds);
+                Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
+                        + " (triggering on " + saveTriggerId + ")");
             }
             mClient.setTrackedViews(id, toArray(trackedViews), saveOnAllViewsInvisible,
-                    toArray(fillableIds));
+                    saveOnFinish, toArray(fillableIds), saveTriggerId);
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
         }
