@@ -30,23 +30,30 @@ import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 
 import com.google.android.collect.Sets;
 
-import junit.framework.TestCase;
-
 import java.util.HashSet;
 
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
+@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NetworkStatsTest extends TestCase {
+public class NetworkStatsTest {
 
     private static final String TEST_IFACE = "test0";
     private static final String TEST_IFACE2 = "test2";
     private static final int TEST_UID = 1001;
     private static final long TEST_START = 1194220800000L;
 
+    @Test
     public void testFindIndex() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 5)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
@@ -74,6 +81,7 @@ public class NetworkStatsTest extends TestCase {
                 ROAMING_NO));
     }
 
+    @Test
     public void testFindIndexHinted() {
         final NetworkStats stats = new NetworkStats(TEST_START, 3)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
@@ -116,6 +124,7 @@ public class NetworkStatsTest extends TestCase {
         }
     }
 
+    @Test
     public void testAddEntryGrow() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 4);
 
@@ -168,6 +177,7 @@ public class NetworkStatsTest extends TestCase {
                 ROAMING_YES, 7L, 70L, 5L, 50L, 11);
     }
 
+    @Test
     public void testCombineExisting() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 10);
 
@@ -190,6 +200,7 @@ public class NetworkStatsTest extends TestCase {
                 256L, 2L, 256L, 2L, 6);
     }
 
+    @Test
     public void testSubtractIdenticalData() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 1024L, 8L, 0L, 0L, 11)
@@ -208,6 +219,7 @@ public class NetworkStatsTest extends TestCase {
                 0L, 0L, 0L, 0);
     }
 
+    @Test
     public void testSubtractIdenticalRows() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 1024L, 8L, 0L, 0L, 11)
@@ -226,6 +238,7 @@ public class NetworkStatsTest extends TestCase {
                 1L, 4L, 1L, 8);
     }
 
+    @Test
     public void testSubtractNewRows() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 1024L, 8L, 0L, 0L, 11)
@@ -247,6 +260,7 @@ public class NetworkStatsTest extends TestCase {
                 1024L, 8L, 1024L, 8L, 20);
     }
 
+    @Test
     public void testSubtractMissingRows() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addValues(TEST_IFACE, UID_ALL, SET_DEFAULT, TAG_NONE, 1024L, 0L, 0L, 0L, 0)
@@ -264,6 +278,7 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(4L, result.getTotalBytes());
     }
 
+    @Test
     public void testTotalBytes() throws Exception {
         final NetworkStats iface = new NetworkStats(TEST_START, 2)
                 .addValues(TEST_IFACE, UID_ALL, SET_DEFAULT, TAG_NONE, 128L, 0L, 0L, 0L, 0L)
@@ -304,6 +319,7 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(96L, uidRoaming.getTotalBytes());
     }
 
+    @Test
     public void testGroupedByIfaceEmpty() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 3);
         final NetworkStats grouped = uidStats.groupedByIface();
@@ -312,6 +328,7 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(0, grouped.size());
     }
 
+    @Test
     public void testGroupedByIfaceAll() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 3)
                 .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L, 0L,
@@ -329,6 +346,7 @@ public class NetworkStatsTest extends TestCase {
                 384L, 24L, 0L, 6L, 0L);
     }
 
+    @Test
     public void testGroupedByIface() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 7)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L,
@@ -357,6 +375,7 @@ public class NetworkStatsTest extends TestCase {
                 1024L, 64L, 0L, 0L, 0L);
     }
 
+    @Test
     public void testAddAllValues() {
         final NetworkStats first = new NetworkStats(TEST_START, 5)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
@@ -387,6 +406,7 @@ public class NetworkStatsTest extends TestCase {
                 32L, 0L, 0L, 0L, 0L);
     }
 
+    @Test
     public void testGetTotal() {
         final NetworkStats stats = new NetworkStats(TEST_START, 7)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L,
@@ -415,6 +435,7 @@ public class NetworkStatsTest extends TestCase {
         assertValues(stats.getTotal(null, ifaces), 1024L, 64L, 0L, 0L, 0L);
     }
 
+    @Test
     public void testWithoutUid() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 3)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
@@ -433,6 +454,7 @@ public class NetworkStatsTest extends TestCase {
                 8L, 0L, 0L, 0L);
     }
 
+    @Test
     public void testClone() throws Exception {
         final NetworkStats original = new NetworkStats(TEST_START, 5)
                 .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, 128L, 8L, 0L, 2L, 20L)
@@ -449,6 +471,7 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(128L + 512L, clone.getTotalBytes());
     }
 
+    @Test
     public void testAddWhenEmpty() throws Exception {
         final NetworkStats red = new NetworkStats(TEST_START, -1);
         final NetworkStats blue = new NetworkStats(TEST_START, 5)
@@ -459,6 +482,7 @@ public class NetworkStatsTest extends TestCase {
         red.combineAllValues(blue);
     }
 
+    @Test
     public void testMigrateTun() throws Exception {
         final int tunUid = 10030;
         final String tunIface = "tun0";
@@ -556,6 +580,7 @@ public class NetworkStatsTest extends TestCase {
     // interface by the vpn app before it's sent out of the underlying interface. The VPN app should
     // not be charged for the echoed data but it should still be charged for any extra data it sends
     // via the underlying interface.
+    @Test
     public void testMigrateTun_VpnAsLoopback() {
         final int tunUid = 10030;
         final String tunIface = "tun0";

@@ -19,20 +19,30 @@ package android.net.netlink;
 import static android.net.netlink.StructNlMsgHdr.NLM_F_REQUEST;
 import static android.net.netlink.StructNlMsgHdr.NLM_F_ACK;
 import static android.net.netlink.StructNlMsgHdr.NLM_F_REPLACE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.StructNlMsgErr;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import junit.framework.TestCase;
+
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
 import libcore.util.HexEncoding;
 
 
-public class NetlinkErrorMessageTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetlinkErrorMessageTest {
     private final String TAG = "NetlinkErrorMessageTest";
 
     // Hexadecimal representation of packet capture.
@@ -54,7 +64,7 @@ public class NetlinkErrorMessageTest extends TestCase {
     public static final byte[] NLM_ERROR_OK =
             HexEncoding.decode(NLM_ERROR_OK_HEX.toCharArray(), false);
 
-    @SmallTest
+    @Test
     public void testParseNlmErrorOk() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(NLM_ERROR_OK);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.

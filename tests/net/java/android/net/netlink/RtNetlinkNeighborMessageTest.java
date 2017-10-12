@@ -16,15 +16,19 @@
 
 package android.net.netlink;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
 import android.system.OsConstants;
 import android.util.Log;
-import libcore.util.HexEncoding;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -32,10 +36,15 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import junit.framework.TestCase;
 
+import org.junit.runner.RunWith;
+import org.junit.Test;
 
-public class RtNetlinkNeighborMessageTest extends TestCase {
+import libcore.util.HexEncoding;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class RtNetlinkNeighborMessageTest {
     private final String TAG = "RtNetlinkNeighborMessageTest";
 
     // Hexadecimal representation of packet capture.
@@ -136,7 +145,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
     public static final byte[] RTM_GETNEIGH_RESPONSE =
             HexEncoding.decode(RTM_GETNEIGH_RESPONSE_HEX.replaceAll(" ", "").toCharArray(), false);
 
-    @SmallTest
+    @Test
     public void testParseRtmDelNeigh() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_DELNEIGH);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
@@ -163,7 +172,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         assertEquals(InetAddress.parseNumericAddress("192.168.159.254"), destination);
     }
 
-    @SmallTest
+    @Test
     public void testParseRtmNewNeigh() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_NEWNEIGH);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
@@ -190,7 +199,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         assertEquals(InetAddress.parseNumericAddress("fe80::86c9:b2ff:fe6a:ed4b"), destination);
     }
 
-    @SmallTest
+    @Test
     public void testParseRtmGetNeighResponse() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_GETNEIGH_RESPONSE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
@@ -215,7 +224,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         assertEquals(14, messageCount);
     }
 
-    @SmallTest
+    @Test
     public void testCreateRtmNewNeighMessage() {
         final int seqNo = 2635;
         final int ifIndex = 14;

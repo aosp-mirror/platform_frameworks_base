@@ -16,14 +16,20 @@
 
 package android.net;
 
-import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import junit.framework.TestCase;
-
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public class UidRangeTest extends TestCase {
+import android.os.Parcel;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.SmallTest;
+
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class UidRangeTest {
 
     static {
         System.loadLibrary("frameworksnettestsjni");
@@ -33,7 +39,7 @@ public class UidRangeTest extends TestCase {
     private static native int getStart(byte[] inParcel);
     private static native int getStop(byte[] inParcel);
 
-    @SmallTest
+    @Test
     public void testNativeParcelUnparcel() {
         UidRange original = new UidRange(1234, Integer.MAX_VALUE);
 
@@ -45,7 +51,7 @@ public class UidRangeTest extends TestCase {
         assertArrayEquals(inParcel, outParcel);
     }
 
-    @SmallTest
+    @Test
     public void testIndividualNativeFields() {
         UidRange original = new UidRange(0x11115678, 0x22224321);
         byte[] originalBytes = marshall(original);
@@ -54,14 +60,14 @@ public class UidRangeTest extends TestCase {
         assertEquals(original.stop, getStop(originalBytes));
     }
 
-    @SmallTest
+    @Test
     public void testSingleItemUidRangeAllowed() {
         new UidRange(123, 123);
         new UidRange(0, 0);
         new UidRange(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
-    @SmallTest
+    @Test
     public void testNegativeUidsDisallowed() {
         try {
             new UidRange(-2, 100);
@@ -76,7 +82,7 @@ public class UidRangeTest extends TestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testStopLessThanStartDisallowed() {
         final int x = 4195000;
         try {
