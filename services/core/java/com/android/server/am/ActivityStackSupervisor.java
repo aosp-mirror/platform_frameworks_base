@@ -1611,6 +1611,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
+            // Check if someone tries to launch an unwhitelisted activity into LockTask mode.
+            final boolean lockTaskMode = options.getLockTaskMode();
+            if (lockTaskMode && !mService.mLockTaskController.isPackageWhitelisted(
+                    UserHandle.getUserId(callingUid), aInfo.packageName)) {
+                final String msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with lockTaskMode=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
         }
 
         return true;
