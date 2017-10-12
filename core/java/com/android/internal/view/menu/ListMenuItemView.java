@@ -319,13 +319,15 @@ public class ListMenuItemView extends LinearLayout
     public void setGroupDividerEnabled(boolean groupDividerEnabled) {
         // If mHasListDivider is true, disabling the groupDivider.
         // Otherwise, checking enbling it according to groupDividerEnabled flag.
-        mGroupDivider.setVisibility(!mHasListDivider
-                && groupDividerEnabled ? View.VISIBLE : View.GONE);
+        if (mGroupDivider != null) {
+            mGroupDivider.setVisibility(!mHasListDivider
+                    && groupDividerEnabled ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
     public void adjustListItemSelectionBounds(Rect rect) {
-        if (mGroupDivider.getVisibility() == View.VISIBLE) {
+        if (mGroupDivider != null && mGroupDivider.getVisibility() == View.VISIBLE) {
             // groupDivider is a part of MenuItemListView.
             // If ListMenuItem with divider enabled is hovered/clicked, divider also gets selected.
             // Clipping the selector bounds from the top divider portion when divider is enabled,
