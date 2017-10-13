@@ -705,6 +705,8 @@ enum {
     MEMINFO_CACHED,
     MEMINFO_SHMEM,
     MEMINFO_SLAB,
+    MEMINFO_SLAB_RECLAIMABLE,
+    MEMINFO_SLAB_UNRECLAIMABLE,
     MEMINFO_SWAP_TOTAL,
     MEMINFO_SWAP_FREE,
     MEMINFO_ZRAM_TOTAL,
@@ -776,6 +778,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             "Cached:",
             "Shmem:",
             "Slab:",
+            "SReclaimable:",
+            "SUnreclaim:",
             "SwapTotal:",
             "SwapFree:",
             "ZRam:",
@@ -792,6 +796,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             7,
             6,
             5,
+            13,
+            11,
             10,
             9,
             5,
@@ -801,7 +807,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             12,
             0
     };
-    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     char* p = buffer;
     while (*p && numFound < (sizeof(tagsLen) / sizeof(tagsLen[0]))) {
