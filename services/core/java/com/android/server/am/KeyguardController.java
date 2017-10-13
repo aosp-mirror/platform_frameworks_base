@@ -46,7 +46,6 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Controls Keyguard occluding, dismissing and transitions depending on what kind of activities are
@@ -237,9 +236,9 @@ class KeyguardController {
         final ActivityRecord lastDismissingKeyguardActivity = mDismissingKeyguardActivity;
         mOccluded = false;
         mDismissingKeyguardActivity = null;
-        final ArrayList<ActivityStack> stacks = mStackSupervisor.getStacksOnDefaultDisplay();
-        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = stacks.get(stackNdx);
+        final ActivityDisplay display = mStackSupervisor.getDefaultDisplay();
+        for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = display.getChildAt(stackNdx);
 
             // Only the focused stack top activity may control occluded state
             if (mStackSupervisor.isFocusedStack(stack)) {
@@ -341,7 +340,7 @@ class KeyguardController {
             // show on top of the lock screen. In this can we want to dismiss the docked
             // stack since it will be complicated/risky to try to put the activity on top
             // of the lock screen in the right fullscreen configuration.
-            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getSplitScreenStack();
+            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
             if (stack == null) {
                 return;
             }

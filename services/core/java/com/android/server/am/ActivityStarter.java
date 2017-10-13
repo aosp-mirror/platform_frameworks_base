@@ -29,7 +29,6 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -618,8 +617,7 @@ class ActivityStarter {
         }
 
         if (startedActivityStack.inSplitScreenPrimaryWindowingMode()) {
-            final ActivityStack homeStack = mSupervisor.getDefaultDisplay().getStack(
-                            WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME);
+            final ActivityStack homeStack = mSupervisor.mHomeStack;
             final boolean homeStackVisible = homeStack != null && homeStack.isVisible();
             if (homeStackVisible) {
                 // We launch an activity while being in home stack, which means either launcher or
@@ -1163,7 +1161,7 @@ class ActivityStarter {
             // Don't use mStartActivity.task to show the toast. We're not starting a new activity
             // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
             mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredWindowingMode,
-                    preferredLaunchDisplayId, topStack.mStackId);
+                    preferredLaunchDisplayId, topStack);
 
             return START_DELIVERED_TO_TOP;
         }
@@ -1245,7 +1243,7 @@ class ActivityStarter {
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
         mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredWindowingMode,
-                preferredLaunchDisplayId, mTargetStack.mStackId);
+                preferredLaunchDisplayId, mTargetStack);
 
         return START_SUCCESS;
     }
@@ -1666,7 +1664,7 @@ class ActivityStarter {
         }
 
         mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(),
-                WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack.mStackId);
+                WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack);
 
         // If the caller has requested that the target task be reset, then do so.
         if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
@@ -2114,10 +2112,9 @@ class ActivityStarter {
         }
         if (stack == null) {
             // We first try to put the task in the first dynamic stack on home display.
-            final ArrayList<ActivityStack> homeDisplayStacks =
-                    mSupervisor.getStacksOnDefaultDisplay();
-            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                stack = homeDisplayStacks.get(stackNdx);
+            final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                stack = display.getChildAt(stackNdx);
                 if (!stack.isOnHomeDisplay()) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                             "computeStackFocus: Setting focused stack=" + stack);
@@ -2213,8 +2210,8 @@ class ActivityStarter {
                 // If the parent is not in the docked stack, we check if there is docked window
                 // and if yes, we will launch into that stack. If not, we just put the new
                 // activity into parent's stack, because we can't find a better place.
-                final ActivityStack dockedStack = mSupervisor.getDefaultDisplay().getStack(
-                                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+                final ActivityStack dockedStack =
+                        mSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
                 if (dockedStack != null && !dockedStack.shouldBeVisible(r)) {
                     // There is a docked stack, but it isn't visible, so we can't launch into that.
                     return null;
