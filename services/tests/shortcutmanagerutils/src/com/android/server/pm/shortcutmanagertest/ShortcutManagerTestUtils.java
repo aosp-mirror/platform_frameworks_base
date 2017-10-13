@@ -975,10 +975,10 @@ public class ShortcutManagerTestUtils {
         public ShortcutListAsserter areAllWithDisabledReason(int disabledReason) {
             forAllShortcuts(s -> assertEquals("id=" + s.getId(),
                     disabledReason, s.getDisabledReason()));
-            if (disabledReason == ShortcutInfo.DISABLED_REASON_NOT_DISABLED) {
-                areAllVisibleToPublisher();
-            } else {
+            if (disabledReason >= ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
                 areAllNotVisibleToPublisher();
+            } else {
+                areAllVisibleToPublisher();
             }
             return this;
         }
