@@ -55,7 +55,8 @@ import java.util.List;
  *
  * @hide
  */
-class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDetector.Listener {
+class TouchExplorer extends BaseEventStreamTransformation
+        implements AccessibilityGestureDetector.Listener {
 
     private static final boolean DEBUG = false;
 
@@ -131,9 +132,6 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     // the two dragging pointers as opposed to use the location of the primary one.
     private final int mScaledMinPointerDistanceToUseMiddleLocation;
 
-    // The handler to which to delegate events.
-    private EventStreamTransformation mNext;
-
     // Helper class to track received pointers.
     private final ReceivedPointerTracker mReceivedPointerTracker;
 
@@ -198,9 +196,7 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
         if (inputSource == InputDevice.SOURCE_TOUCHSCREEN) {
             clear();
         }
-        if (mNext != null) {
-            mNext.clearEvents(inputSource);
-        }
+        super.clearEvents(inputSource);
     }
 
     @Override
@@ -258,16 +254,9 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
-    public void setNext(EventStreamTransformation next) {
-        mNext = next;
-    }
-
-    @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
-            if (mNext != null) {
-                mNext.onMotionEvent(event, rawEvent, policyFlags);
-            }
+            super.onMotionEvent(event, rawEvent, policyFlags);
             return;
         }
 
@@ -311,13 +300,6 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
-    public void onKeyEvent(KeyEvent event, int policyFlags) {
-        if (mNext != null) {
-            mNext.onKeyEvent(event, policyFlags);
-        }
-    }
-
-    @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         final int eventType = event.getEventType();
 
@@ -353,9 +335,7 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
                 mLastTouchedWindowId = event.getWindowId();
             } break;
         }
-        if (mNext != null) {
-            mNext.onAccessibilityEvent(event);
-        }
+        super.onAccessibilityEvent(event);
     }
 
     @Override
@@ -969,12 +949,10 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
 
         // Make sure that the user will see the event.
         policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
-        if (mNext != null) {
-            // TODO: For now pass null for the raw event since the touch
-            //       explorer is the last event transformation and it does
-            //       not care about the raw event.
-            mNext.onMotionEvent(event, null, policyFlags);
-        }
+        // TODO: For now pass null for the raw event since the touch
+        //       explorer is the last event transformation and it does
+        //       not care about the raw event.
+        super.onMotionEvent(event, null, policyFlags);
 
         mInjectedPointerTracker.onMotionEvent(event);
 
