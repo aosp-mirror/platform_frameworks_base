@@ -72,6 +72,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
@@ -1668,8 +1669,6 @@ public final class ViewRootImpl implements ViewParent,
             host.dispatchAttachedToWindow(mAttachInfo, 0);
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             dispatchApplyInsets(host);
-            //Log.i(mTag, "Screen on initialized: " + attachInfo.mKeepScreenOn);
-
         } else {
             desiredWindowWidth = frame.width();
             desiredWindowHeight = frame.height();
@@ -2827,7 +2826,7 @@ public final class ViewRootImpl implements ViewParent,
                 try {
                     mWindowDrawCountDown.await();
                 } catch (InterruptedException e) {
-                    Log.e(mTag, "Window redraw count down interruped!");
+                    Log.e(mTag, "Window redraw count down interrupted!");
                 }
                 mWindowDrawCountDown = null;
             }
@@ -2896,8 +2895,6 @@ public final class ViewRootImpl implements ViewParent,
 
         final float appScale = mAttachInfo.mApplicationScale;
         final boolean scalingRequired = mAttachInfo.mScalingRequired;
-
-        int resizeAlpha = 0;
 
         final Rect dirty = mDirty;
         if (mSurfaceHolder != null) {
@@ -3469,6 +3466,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void dispatchDetachedFromWindow() {
+        mFirstInputStage.onDetachedFromWindow();
         if (mView != null && mView.mAttachInfo != null) {
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(false);
             mView.dispatchDetachedFromWindow();
@@ -3739,7 +3737,7 @@ public final class ViewRootImpl implements ViewParent,
                             (View.AttachInfo.InvalidateInfo) msg.obj;
                     info.target.invalidate(info.left, info.top, info.right, info.bottom);
                     info.recycle();
-                break;
+                    break;
                 case MSG_PROCESS_INPUT_EVENTS:
                     mProcessInputEventsScheduled = false;
                     doProcessInputEvents();
@@ -3830,8 +3828,8 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     break;
                 case MSG_WINDOW_FOCUS_CHANGED: {
+                    final boolean hasWindowFocus = msg.arg1 != 0;
                     if (mAdded) {
-                        boolean hasWindowFocus = msg.arg1 != 0;
                         mAttachInfo.mHasWindowFocus = hasWindowFocus;
 
                         profileRendering(hasWindowFocus);
@@ -3839,7 +3837,6 @@ public final class ViewRootImpl implements ViewParent,
                         if (hasWindowFocus) {
                             boolean inTouchMode = msg.arg2 != 0;
                             ensureTouchModeLocally(inTouchMode);
-
                             if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
                                 mFullRedrawNeeded = true;
                                 try {
@@ -3851,8 +3848,8 @@ public final class ViewRootImpl implements ViewParent,
                                     Log.e(mTag, "OutOfResourcesException locking surface", e);
                                     try {
                                         if (!mWindowSession.outOfMemory(mWindow)) {
-                                            Slog.w(mTag,
-                                                    "No processes killed for memory; killing self");
+                                            Slog.w(mTag, "No processes killed for memory;"
+                                                    + " killing self");
                                             Process.killProcess(Process.myPid());
                                         }
                                     } catch (RemoteException ex) {
@@ -3905,6 +3902,7 @@ public final class ViewRootImpl implements ViewParent,
                             }
                         }
                     }
+                    mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
                 } break;
                 case MSG_DIE:
                     doDie();
@@ -3929,8 +3927,8 @@ public final class ViewRootImpl implements ViewParent,
                         // The IME is trying to say this event is from the
                         // system!  Bad bad bad!
                         //noinspection UnusedAssignment
-                        event = KeyEvent.changeFlags(event, event.getFlags()
-                                & ~KeyEvent.FLAG_FROM_SYSTEM);
+                        event = KeyEvent.changeFlags(event,
+                                event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
                     }
                     enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
                 } break;
@@ -4207,6 +4205,18 @@ public final class ViewRootImpl implements ViewParent,
                 mNext.deliver(q);
             } else {
                 finishInputEvent(q);
+            }
+        }
+
+        protected void onWindowFocusChanged(boolean hasWindowFocus) {
+            if (mNext != null) {
+                mNext.onWindowFocusChanged(hasWindowFocus);
+            }
+        }
+
+        protected void onDetachedFromWindow() {
+            if (mNext != null) {
+                mNext.onDetachedFromWindow();
             }
         }
 
@@ -4963,9 +4973,9 @@ public final class ViewRootImpl implements ViewParent,
                     final MotionEvent event = (MotionEvent)q.mEvent;
                     final int source = event.getSource();
                     if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                        mTrackball.cancel(event);
+                        mTrackball.cancel();
                     } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-                        mJoystick.cancel(event);
+                        mJoystick.cancel();
                     } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
                             == InputDevice.SOURCE_TOUCH_NAVIGATION) {
                         mTouchNavigation.cancel(event);
@@ -4973,6 +4983,18 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             super.onDeliverToNext(q);
+        }
+
+        @Override
+        protected void onWindowFocusChanged(boolean hasWindowFocus) {
+            if (!hasWindowFocus) {
+                mJoystick.cancel();
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            mJoystick.cancel();
         }
     }
 
@@ -5086,7 +5108,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        public void cancel(MotionEvent event) {
+        public void cancel() {
             mLastTime = Integer.MIN_VALUE;
 
             // If we reach this, we consumed a trackball event.
@@ -5270,14 +5292,11 @@ public final class ViewRootImpl implements ViewParent,
      * Creates dpad events from unhandled joystick movements.
      */
     final class SyntheticJoystickHandler extends Handler {
-        private final static String TAG = "SyntheticJoystickHandler";
         private final static int MSG_ENQUEUE_X_AXIS_KEY_REPEAT = 1;
         private final static int MSG_ENQUEUE_Y_AXIS_KEY_REPEAT = 2;
 
-        private int mLastXDirection;
-        private int mLastYDirection;
-        private int mLastXKeyCode;
-        private int mLastYKeyCode;
+        private final JoystickAxesState mJoystickAxesState = new JoystickAxesState();
+        private final SparseArray<KeyEvent> mDeviceKeyEvents = new SparseArray<>();
 
         public SyntheticJoystickHandler() {
             super(true);
@@ -5288,11 +5307,10 @@ public final class ViewRootImpl implements ViewParent,
             switch (msg.what) {
                 case MSG_ENQUEUE_X_AXIS_KEY_REPEAT:
                 case MSG_ENQUEUE_Y_AXIS_KEY_REPEAT: {
-                    KeyEvent oldEvent = (KeyEvent)msg.obj;
-                    KeyEvent e = KeyEvent.changeTimeRepeat(oldEvent,
-                            SystemClock.uptimeMillis(),
-                            oldEvent.getRepeatCount() + 1);
                     if (mAttachInfo.mHasWindowFocus) {
+                        KeyEvent oldEvent = (KeyEvent) msg.obj;
+                        KeyEvent e = KeyEvent.changeTimeRepeat(oldEvent,
+                                SystemClock.uptimeMillis(), oldEvent.getRepeatCount() + 1);
                         enqueueInputEvent(e);
                         Message m = obtainMessage(msg.what, e);
                         m.setAsynchronous(true);
@@ -5304,97 +5322,176 @@ public final class ViewRootImpl implements ViewParent,
 
         public void process(MotionEvent event) {
             switch(event.getActionMasked()) {
-            case MotionEvent.ACTION_CANCEL:
-                cancel(event);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                update(event, true);
-                break;
-            default:
-                Log.w(mTag, "Unexpected action: " + event.getActionMasked());
+                case MotionEvent.ACTION_CANCEL:
+                    cancel();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    update(event);
+                    break;
+                default:
+                    Log.w(mTag, "Unexpected action: " + event.getActionMasked());
             }
         }
 
-        private void cancel(MotionEvent event) {
+        private void cancel() {
             removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
             removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
-            update(event, false);
+            for (int i = 0; i < mDeviceKeyEvents.size(); i++) {
+                final KeyEvent keyEvent = mDeviceKeyEvents.valueAt(i);
+                if (keyEvent != null) {
+                    enqueueInputEvent(KeyEvent.changeTimeRepeat(keyEvent,
+                            SystemClock.uptimeMillis(), 0));
+                }
+            }
+            mDeviceKeyEvents.clear();
+            mJoystickAxesState.resetState();
         }
 
-        private void update(MotionEvent event, boolean synthesizeNewKeys) {
+        private void update(MotionEvent event) {
+            final int historySize = event.getHistorySize();
+            for (int h = 0; h < historySize; h++) {
+                final long time = event.getHistoricalEventTime(h);
+                mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_X,
+                        event.getHistoricalAxisValue(MotionEvent.AXIS_X, 0, h));
+                mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_Y,
+                        event.getHistoricalAxisValue(MotionEvent.AXIS_Y, 0, h));
+                mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_HAT_X,
+                        event.getHistoricalAxisValue(MotionEvent.AXIS_HAT_X, 0, h));
+                mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_HAT_Y,
+                        event.getHistoricalAxisValue(MotionEvent.AXIS_HAT_Y, 0, h));
+            }
             final long time = event.getEventTime();
-            final int metaState = event.getMetaState();
-            final int deviceId = event.getDeviceId();
-            final int source = event.getSource();
-
-            int xDirection = joystickAxisValueToDirection(
+            mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_X,
+                    event.getAxisValue(MotionEvent.AXIS_X));
+            mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_Y,
+                    event.getAxisValue(MotionEvent.AXIS_Y));
+            mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_HAT_X,
                     event.getAxisValue(MotionEvent.AXIS_HAT_X));
-            if (xDirection == 0) {
-                xDirection = joystickAxisValueToDirection(event.getX());
-            }
-
-            int yDirection = joystickAxisValueToDirection(
+            mJoystickAxesState.updateStateForAxis(event, time, MotionEvent.AXIS_HAT_Y,
                     event.getAxisValue(MotionEvent.AXIS_HAT_Y));
-            if (yDirection == 0) {
-                yDirection = joystickAxisValueToDirection(event.getY());
-            }
-
-            if (xDirection != mLastXDirection) {
-                if (mLastXKeyCode != 0) {
-                    removeMessages(MSG_ENQUEUE_X_AXIS_KEY_REPEAT);
-                    enqueueInputEvent(new KeyEvent(time, time,
-                            KeyEvent.ACTION_UP, mLastXKeyCode, 0, metaState,
-                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                    mLastXKeyCode = 0;
-                }
-
-                mLastXDirection = xDirection;
-
-                if (xDirection != 0 && synthesizeNewKeys) {
-                    mLastXKeyCode = xDirection > 0
-                            ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-                    final KeyEvent e = new KeyEvent(time, time,
-                            KeyEvent.ACTION_DOWN, mLastXKeyCode, 0, metaState,
-                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
-                    enqueueInputEvent(e);
-                    Message m = obtainMessage(MSG_ENQUEUE_X_AXIS_KEY_REPEAT, e);
-                    m.setAsynchronous(true);
-                    sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
-                }
-            }
-
-            if (yDirection != mLastYDirection) {
-                if (mLastYKeyCode != 0) {
-                    removeMessages(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT);
-                    enqueueInputEvent(new KeyEvent(time, time,
-                            KeyEvent.ACTION_UP, mLastYKeyCode, 0, metaState,
-                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
-                    mLastYKeyCode = 0;
-                }
-
-                mLastYDirection = yDirection;
-
-                if (yDirection != 0 && synthesizeNewKeys) {
-                    mLastYKeyCode = yDirection > 0
-                            ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-                    final KeyEvent e = new KeyEvent(time, time,
-                            KeyEvent.ACTION_DOWN, mLastYKeyCode, 0, metaState,
-                            deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
-                    enqueueInputEvent(e);
-                    Message m = obtainMessage(MSG_ENQUEUE_Y_AXIS_KEY_REPEAT, e);
-                    m.setAsynchronous(true);
-                    sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
-                }
-            }
         }
 
-        private int joystickAxisValueToDirection(float value) {
-            if (value >= 0.5f) {
-                return 1;
-            } else if (value <= -0.5f) {
-                return -1;
-            } else {
-                return 0;
+        final class JoystickAxesState {
+            // State machine: from neutral state (no button press) can go into
+            // button STATE_UP_OR_LEFT or STATE_DOWN_OR_RIGHT state, emitting an ACTION_DOWN event.
+            // From STATE_UP_OR_LEFT or STATE_DOWN_OR_RIGHT state can go into neutral state,
+            // emitting an ACTION_UP event.
+            private static final int STATE_UP_OR_LEFT = -1;
+            private static final int STATE_NEUTRAL = 0;
+            private static final int STATE_DOWN_OR_RIGHT = 1;
+
+            final int[] mAxisStatesHat = {STATE_NEUTRAL, STATE_NEUTRAL}; // {AXIS_HAT_X, AXIS_HAT_Y}
+            final int[] mAxisStatesStick = {STATE_NEUTRAL, STATE_NEUTRAL}; // {AXIS_X, AXIS_Y}
+
+            void resetState() {
+                mAxisStatesHat[0] = STATE_NEUTRAL;
+                mAxisStatesHat[1] = STATE_NEUTRAL;
+                mAxisStatesStick[0] = STATE_NEUTRAL;
+                mAxisStatesStick[1] = STATE_NEUTRAL;
+            }
+
+            void updateStateForAxis(MotionEvent event, long time, int axis, float value) {
+                // Emit KeyEvent if necessary
+                // axis can be AXIS_X, AXIS_Y, AXIS_HAT_X, AXIS_HAT_Y
+                final int axisStateIndex;
+                final int repeatMessage;
+                if (isXAxis(axis)) {
+                    axisStateIndex = 0;
+                    repeatMessage = MSG_ENQUEUE_X_AXIS_KEY_REPEAT;
+                } else if (isYAxis(axis)) {
+                    axisStateIndex = 1;
+                    repeatMessage = MSG_ENQUEUE_Y_AXIS_KEY_REPEAT;
+                } else {
+                    Log.e(mTag, "Unexpected axis " + axis + " in updateStateForAxis!");
+                    return;
+                }
+                final int newState = joystickAxisValueToState(value);
+
+                final int currentState;
+                if (axis == MotionEvent.AXIS_X || axis == MotionEvent.AXIS_Y) {
+                    currentState = mAxisStatesStick[axisStateIndex];
+                } else {
+                    currentState = mAxisStatesHat[axisStateIndex];
+                }
+
+                if (currentState == newState) {
+                    return;
+                }
+
+                final int metaState = event.getMetaState();
+                final int deviceId = event.getDeviceId();
+                final int source = event.getSource();
+
+                if (currentState == STATE_DOWN_OR_RIGHT || currentState == STATE_UP_OR_LEFT) {
+                    // send a button release event
+                    final int keyCode = joystickAxisAndStateToKeycode(axis, currentState);
+                    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                        enqueueInputEvent(new KeyEvent(time, time, KeyEvent.ACTION_UP, keyCode,
+                                0, metaState, deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
+                        // remove the corresponding pending UP event if focus lost/view detached
+                        mDeviceKeyEvents.put(deviceId, null);
+                    }
+                    removeMessages(repeatMessage);
+                }
+
+                if (newState == STATE_DOWN_OR_RIGHT || newState == STATE_UP_OR_LEFT) {
+                    // send a button down event
+                    final int keyCode = joystickAxisAndStateToKeycode(axis, newState);
+                    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                        KeyEvent keyEvent = new KeyEvent(time, time, KeyEvent.ACTION_DOWN, keyCode,
+                                0, metaState, deviceId, 0, KeyEvent.FLAG_FALLBACK, source);
+                        enqueueInputEvent(keyEvent);
+                        Message m = obtainMessage(repeatMessage, keyEvent);
+                        m.setAsynchronous(true);
+                        sendMessageDelayed(m, ViewConfiguration.getKeyRepeatTimeout());
+                        // store the corresponding ACTION_UP event so that it can be sent
+                        // if focus is lost or root view is removed
+                        mDeviceKeyEvents.put(deviceId,
+                                new KeyEvent(time, time, KeyEvent.ACTION_UP, keyCode,
+                                        0, metaState, deviceId, 0,
+                                        KeyEvent.FLAG_FALLBACK | KeyEvent.FLAG_CANCELED,
+                                        source));
+                    }
+                }
+                if (axis == MotionEvent.AXIS_X || axis == MotionEvent.AXIS_Y) {
+                    mAxisStatesStick[axisStateIndex] = newState;
+                } else {
+                    mAxisStatesHat[axisStateIndex] = newState;
+                }
+            }
+
+            private boolean isXAxis(int axis) {
+                return axis == MotionEvent.AXIS_X || axis == MotionEvent.AXIS_HAT_X;
+            }
+            private boolean isYAxis(int axis) {
+                return axis == MotionEvent.AXIS_Y || axis == MotionEvent.AXIS_HAT_Y;
+            }
+
+            private int joystickAxisAndStateToKeycode(int axis, int state) {
+                if (isXAxis(axis) && state == STATE_UP_OR_LEFT) {
+                    return KeyEvent.KEYCODE_DPAD_LEFT;
+                }
+                if (isXAxis(axis) && state == STATE_DOWN_OR_RIGHT) {
+                    return KeyEvent.KEYCODE_DPAD_RIGHT;
+                }
+                if (isYAxis(axis) && state == STATE_UP_OR_LEFT) {
+                    return KeyEvent.KEYCODE_DPAD_UP;
+                }
+                if (isYAxis(axis) && state == STATE_DOWN_OR_RIGHT) {
+                    return KeyEvent.KEYCODE_DPAD_DOWN;
+                }
+                Log.e(mTag, "Unknown axis " + axis + " or direction " + state);
+                return KeyEvent.KEYCODE_UNKNOWN; // should never happen
+            }
+
+            private int joystickAxisValueToState(float value) {
+                if (value >= 0.5f) {
+                    return STATE_DOWN_OR_RIGHT;
+                } else if (value <= -0.5f) {
+                    return STATE_UP_OR_LEFT;
+                } else {
+                    return STATE_NEUTRAL;
+                }
             }
         }
     }
@@ -6115,7 +6212,6 @@ public final class ViewRootImpl implements ViewParent,
             if (DBG) Log.d(mTag, "WindowLayout in layoutWindow:" + params);
         }
 
-        //Log.d(mTag, ">>>>>> CALLING relayout");
         if (params != null && mOrigWindowType != params.type) {
             // For compatibility with old apps, don't crash here.
             if (mTargetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -6136,7 +6232,6 @@ public final class ViewRootImpl implements ViewParent,
         mPendingAlwaysConsumeNavBar =
                 (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
 
-        //Log.d(mTag, "<<<<<< BACK FROM relayout");
         if (restore) {
             params.restore();
         }
