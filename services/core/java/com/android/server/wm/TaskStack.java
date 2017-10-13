@@ -294,7 +294,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (mFillsParent
                 || !inSplitScreenSecondaryWindowingMode()
                 || mDisplayContent == null
-                || mDisplayContent.getDockedStackLocked() != null) {
+                || mDisplayContent.getSplitScreenPrimaryStackStack() != null) {
             return true;
         }
         return false;
@@ -673,6 +673,16 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        final int prevWindowingMode = getWindowingMode();
+        super.onConfigurationChanged(newParentConfig);
+        if (mDisplayContent != null && prevWindowingMode != getWindowingMode()) {
+            mDisplayContent.onStackWindowingModeChanged(this);
+        }
+    }
+
+    @Override
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null) {
             throw new IllegalStateException("onDisplayChanged: Already attached");
@@ -683,7 +693,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 "animation background stackId=" + mStackId);
 
         Rect bounds = null;
-        final TaskStack dockedStack = dc.getDockedStackIgnoringVisibility();
+        final TaskStack dockedStack = dc.getSplitScreenPrimaryStackStackIgnoringVisibility();
         if (inSplitScreenPrimaryWindowingMode()
                 || (dockedStack != null && inSplitScreenSecondaryWindowingMode()
                         && !dockedStack.fillsParent())) {
@@ -762,7 +772,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return;
         }
 
-        final TaskStack dockedStack = mDisplayContent.getDockedStackIgnoringVisibility();
+        final TaskStack dockedStack =
+                mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
         if (dockedStack == null) {
             // Not sure why you are calling this method when there is no docked stack...
             throw new IllegalStateException(
@@ -889,17 +900,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override
-    void removeImmediately() {
-        super.removeImmediately();
+    void onParentSet() {
+        if (getParent() != null || mDisplayContent == null) {
+            return;
+        }
 
-        onRemovedFromDisplay();
-    }
-
-    /**
-     * Removes the stack it from its current parent, so it can be either destroyed completely or
-     * re-parented.
-     */
-    void onRemovedFromDisplay() {
+        // Looks like the stack was removed from the display. Go ahead and clean things up.
         mDisplayContent.mDimLayerController.removeDimLayerUser(this);
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 

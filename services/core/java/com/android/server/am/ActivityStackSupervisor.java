@@ -3901,8 +3901,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = stacks.get(stackNdx);
                 pw.println();
                 pw.println("  Stack #" + stack.mStackId
-                        + ": type=" + activityTypeToString(getActivityType())
-                        + " mode=" + windowingModeToString(getWindowingMode()));
+                        + ": type=" + activityTypeToString(stack.getActivityType())
+                        + " mode=" + windowingModeToString(stack.getWindowingMode()));
                 pw.println("  mFullscreen=" + stack.mFullscreen);
                 pw.println("  isSleeping=" + stack.shouldSleepActivities());
                 pw.println("  mBounds=" + stack.mBounds);
