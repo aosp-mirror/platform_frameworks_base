@@ -15,13 +15,13 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.test.split.feature"
+    package="com.android.test.split.feature.one"
     featureSplit="feature1">
 
     <uses-sdk android:minSdkVersion="21" />
 
     <application>
-        <activity android:name=".one.One" android:label="Feature One">
+        <activity android:name=".One" android:label="Feature One">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
