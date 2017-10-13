@@ -52,6 +52,7 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
@@ -338,6 +339,8 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
+        session.logContextCommittedLocked();
+
         final boolean finished = session.showSaveLocked();
         if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
 
@@ -563,8 +566,9 @@ final class AutofillManagerServiceImpl {
     void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
-                mEventHistory
-                        .addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState));
+                mEventHistory.addEvent(
+                        new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
+                                null, null, null, null));
             }
         }
     }
@@ -578,7 +582,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                                clientState));
+                                clientState, null, null, null, null, null, null));
             }
         }
     }
@@ -589,7 +593,8 @@ final class AutofillManagerServiceImpl {
     void logSaveShown(int sessionId, @Nullable Bundle clientState) {
         synchronized (mLock) {
             if (isValidEventLocked("logSaveShown()", sessionId)) {
-                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState));
+                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
+                        null, null, null, null, null));
             }
         }
     }
@@ -602,7 +607,28 @@ final class AutofillManagerServiceImpl {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
-                        new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState));
+                        new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
+                                null, null, null, null, null));
+            }
+        }
+    }
+
+    /**
+     * Updates the last fill response when an autofill context is committed.
+     */
+    void logContextCommitted(int sessionId, @Nullable Bundle clientState,
+            @Nullable ArrayList<String> selectedDatasets,
+            @Nullable ArraySet<String> ignoredDatasets,
+            @Nullable ArrayList<AutofillId> changedFieldIds,
+            @Nullable ArrayList<String> changedDatasetIds,
+            @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
+            @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds) {
+        synchronized (mLock) {
+            if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+                mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
+                        clientState, selectedDatasets, ignoredDatasets,
+                        changedFieldIds, changedDatasetIds,
+                        manuallyFilledFieldIds, manuallyFilledDatasetIds));
             }
         }
     }

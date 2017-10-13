@@ -78,6 +78,7 @@ final class ViewState {
     private AutofillValue mAutofilledValue;
     private Rect mVirtualBounds;
     private int mState;
+    private String mDatasetId;
 
     ViewState(Session session, AutofillId id, Listener listener, int state) {
         mSession = session;
@@ -148,6 +149,15 @@ final class ViewState {
         mState &= ~state;
     }
 
+    @Nullable
+    String getDatasetId() {
+        return mDatasetId;
+    }
+
+    void setDatasetId(String datasetId) {
+        mDatasetId = datasetId;
+    }
+
     // TODO: refactor / rename / document this method (and maybeCallOnFillReady) to make it clear
     // that it can change the value and update the UI; similarly, should replace code that
     // directly sets mAutofillValue to use encapsulation.
@@ -182,13 +192,15 @@ final class ViewState {
 
     @Override
     public String toString() {
-        return "ViewState: [id=" + id + ", currentValue=" + mCurrentValue
+        return "ViewState: [id=" + id + ", datasetId=" + mDatasetId
+                + ", currentValue=" + mCurrentValue
                 + ", autofilledValue=" + mAutofilledValue
                 + ", bounds=" + mVirtualBounds + ", state=" + getStateAsString() + "]";
     }
 
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("id:" ); pw.println(this.id);
+        pw.print(prefix); pw.print("datasetId:" ); pw.println(this.mDatasetId);
         pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
         pw.print(prefix); pw.print("response:");
         if (mResponse == null) {
