@@ -41,6 +41,8 @@ import com.android.internal.util.Preconditions;
  */
 public final class Magnifier {
     private static final String LOG_TAG = "magnifier";
+    private static final int MINIMUM_MAGNIFIER_SCALE = 1;
+    private static final int MAXIMUM_MAGNIFIER_SCALE = 4;
     // The view for which this magnifier is attached.
     private final View mView;
     // The window containing the magnifier.
@@ -94,7 +96,23 @@ public final class Magnifier {
      */
     public void show(@FloatRange(from=0) float centerXOnScreen,
             @FloatRange(from=0) float centerYOnScreen,
-            @FloatRange(from=1, to=10) float scale) {
+            @FloatRange(from=MINIMUM_MAGNIFIER_SCALE, to=MAXIMUM_MAGNIFIER_SCALE) float scale) {
+        if (scale > MAXIMUM_MAGNIFIER_SCALE) {
+            scale = MAXIMUM_MAGNIFIER_SCALE;
+        }
+
+        if (scale < MINIMUM_MAGNIFIER_SCALE) {
+            scale = MINIMUM_MAGNIFIER_SCALE;
+        }
+
+        if (centerXOnScreen < 0) {
+            centerXOnScreen = 0;
+        }
+
+        if (centerYOnScreen < 0) {
+            centerYOnScreen = 0;
+        }
+
         maybeResizeBitmap(scale);
         configureCoordinates(centerXOnScreen, centerYOnScreen);
         performPixelCopy();
@@ -144,12 +162,8 @@ public final class Magnifier {
 
         final int verticalMagnifierOffset = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.magnifier_offset);
-        final int availableTopSpace = (mCenterZoomCoords.y - mWindowHeight / 2)
-                - verticalMagnifierOffset - (mBitmap.getHeight() / 2);
-
         mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
-        mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2
-                + verticalMagnifierOffset * (availableTopSpace > 0 ? -1 : 1);
+        mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalMagnifierOffset;
     }
 
     private void performPixelCopy() {
