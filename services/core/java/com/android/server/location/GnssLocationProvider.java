@@ -417,7 +417,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // stops output right at 600m/s, depriving this of the information of a device that reaches
     // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
     private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
-    private boolean mItarSpeedLimitExceeded = false;
+
+    // TODO: improve comment
+    // Volatile to ensure that potentially near-concurrent outputs from HAL
+    // react to this value change promptly
+    private volatile boolean mItarSpeedLimitExceeded = false;
 
     // GNSS Metrics
     private GnssMetrics mGnssMetrics;
