@@ -757,18 +757,19 @@ int doDump(Bundle* bundle)
 
     AssetManager assets;
     int32_t assetsCookie;
-    if (!assets.addAssetPath(String8(filename), &assetsCookie)) {
-        fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
-        return 1;
-    }
 
-    // Now add any dependencies passed in.
+    // Add any dependencies passed in.
     for (size_t i = 0; i < bundle->getPackageIncludes().size(); i++) {
       const String8& assetPath = bundle->getPackageIncludes()[i];
       if (!assets.addAssetPath(assetPath, NULL)) {
         fprintf(stderr, "ERROR: included asset path %s could not be loaded\n", assetPath.string());
         return 1;
       }
+    }
+
+    if (!assets.addAssetPath(String8(filename), &assetsCookie)) {
+        fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
+        return 1;
     }
 
     // Make a dummy config for retrieving resources...  we need to supply
