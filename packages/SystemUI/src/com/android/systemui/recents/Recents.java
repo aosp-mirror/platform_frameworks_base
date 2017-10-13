@@ -191,7 +191,7 @@ public class Recents extends SystemUI
 
     @Override
     public void start() {
-        sDebugFlags = new RecentsDebugFlags(mContext);
+        sDebugFlags = new RecentsDebugFlags();
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         sTaskLoader = new RecentsTaskLoader(mContext);

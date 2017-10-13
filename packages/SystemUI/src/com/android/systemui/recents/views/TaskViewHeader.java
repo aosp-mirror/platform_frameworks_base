@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
@@ -164,8 +163,6 @@ public class TaskViewHeader extends FrameLayout
     float mDimAlpha;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
-    Drawable mLightFreeformIcon;
-    Drawable mDarkFreeformIcon;
     Drawable mLightFullscreenIcon;
     Drawable mDarkFullscreenIcon;
     Drawable mLightInfoIcon;
@@ -215,8 +212,6 @@ public class TaskViewHeader extends FrameLayout
         mHighlightHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         mTaskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
         mTaskBarViewDarkTextColor = context.getColor(R.color.recents_task_bar_dark_text_color);
-        mLightFreeformIcon = context.getDrawable(R.drawable.recents_move_task_freeform_light);
-        mDarkFreeformIcon = context.getDrawable(R.drawable.recents_move_task_freeform_dark);
         mLightFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_light);
         mDarkFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_dark);
         mLightInfoIcon = context.getDrawable(R.drawable.recents_info_light);
@@ -249,9 +244,6 @@ public class TaskViewHeader extends FrameLayout
         mIconView.setOnLongClickListener(this);
         mTitleView = findViewById(R.id.title);
         mDismissButton = findViewById(R.id.dismiss_task);
-        if (ssp.hasFreeformWorkspaceSupport()) {
-            mMoveTaskButton = findViewById(R.id.move_task);
-        }
 
         onConfigurationChanged();
     }
@@ -340,20 +332,6 @@ public class TaskViewHeader extends FrameLayout
         boolean showMoveIcon = true;
         boolean showDismissIcon = true;
         int rightInset = width - getMeasuredWidth();
-
-        if (mTask != null && mTask.isFreeformTask()) {
-            // For freeform tasks, we always show the app icon, and only show the title, move-task
-            // icon, and the dismiss icon if there is room
-            int appIconWidth = mIconView.getMeasuredWidth();
-            int titleWidth = (int) mTitleView.getPaint().measureText(mTask.title);
-            int dismissWidth = mDismissButton.getMeasuredWidth();
-            int moveTaskWidth = mMoveTaskButton != null
-                    ? mMoveTaskButton.getMeasuredWidth()
-                    : 0;
-            showTitle = width >= (appIconWidth + dismissWidth + moveTaskWidth + titleWidth);
-            showMoveIcon = width >= (appIconWidth + dismissWidth + moveTaskWidth);
-            showDismissIcon = width >= (appIconWidth + dismissWidth);
-        }
 
         mTitleView.setVisibility(showTitle ? View.VISIBLE : View.INVISIBLE);
         if (mMoveTaskButton != null) {
@@ -481,25 +459,6 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setOnClickListener(this);
         mDismissButton.setClickable(false);
         ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
-
-        // When freeform workspaces are enabled, then update the move-task button depending on the
-        // current task
-        if (mMoveTaskButton != null) {
-            if (t.isFreeformTask()) {
-                mTaskWindowingMode = WINDOWING_MODE_FULLSCREEN;
-                mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
-                        ? mLightFullscreenIcon
-                        : mDarkFullscreenIcon);
-            } else {
-                mTaskWindowingMode = WINDOWING_MODE_FREEFORM;
-                mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
-                        ? mLightFreeformIcon
-                        : mDarkFreeformIcon);
-            }
-            mMoveTaskButton.setOnClickListener(this);
-            mMoveTaskButton.setClickable(false);
-            ((RippleDrawable) mMoveTaskButton.getBackground()).setForceSoftware(true);
-        }
 
         if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
             if (mFocusTimerIndicator == null) {

@@ -18,8 +18,6 @@ package com.android.systemui.recents.model;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -62,8 +60,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -106,25 +102,6 @@ class FilteredTaskList {
     /** Adds a new task to the task list */
     void add(Task t) {
         mTasks.add(t);
-        updateFilteredTasks();
-    }
-
-    /**
-     * Moves the given task.
-     */
-    public void setTaskWindowingMode(Task task, int insertIndex, int windowingMode) {
-        int taskIndex = indexOf(task);
-        if (taskIndex != insertIndex) {
-            mTasks.remove(taskIndex);
-            if (taskIndex < insertIndex) {
-                insertIndex--;
-            }
-            mTasks.add(insertIndex, task);
-        }
-
-        // Update the stack id now, after we've moved the task, and before we update the
-        // filtered tasks
-        task.setWindowingMode(windowingMode);
         updateFilteredTasks();
     }
 
@@ -533,19 +510,6 @@ public class TaskStack {
         }
     }
 
-    // A comparator that sorts tasks by their freeform state
-    private Comparator<Task> FREEFORM_COMPARATOR = new Comparator<Task>() {
-        @Override
-        public int compare(Task o1, Task o2) {
-            if (o1.isFreeformTask() && !o2.isFreeformTask()) {
-                return 1;
-            } else if (o2.isFreeformTask() && !o1.isFreeformTask()) {
-                return -1;
-            }
-            return Long.compare(o1.temporarySortIndexInStack, o2.temporarySortIndexInStack);
-        }
-    };
-
     ArrayList<Task> mRawTaskList = new ArrayList<>();
     FilteredTaskList mStackTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
@@ -565,27 +529,6 @@ public class TaskStack {
         mCb = cb;
     }
 
-    /** Sets the windowing mode for a given task. */
-    public void setTaskWindowingMode(Task task, int windowingMode) {
-        // Find the index to insert into
-        ArrayList<Task> taskList = mStackTaskList.getTasks();
-        int taskCount = taskList.size();
-        if (!task.isFreeformTask() && (windowingMode == WINDOWING_MODE_FREEFORM)) {
-            // Insert freeform tasks at the front
-            mStackTaskList.setTaskWindowingMode(task, taskCount, windowingMode);
-        } else if (task.isFreeformTask() && (windowingMode == WINDOWING_MODE_FULLSCREEN)) {
-            // Insert after the first stacked task
-            int insertIndex = 0;
-            for (int i = taskCount - 1; i >= 0; i--) {
-                if (!taskList.get(i).isFreeformTask()) {
-                    insertIndex = i + 1;
-                    break;
-                }
-            }
-            mStackTaskList.setTaskWindowingMode(task, insertIndex, windowingMode);
-        }
-    }
-
     /**
      * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
      * how they should update themselves.
@@ -602,7 +545,7 @@ public class TaskStack {
             boolean dismissRecentsIfAllRemoved) {
         if (mStackTaskList.contains(t)) {
             mStackTaskList.remove(t);
-            Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
+            Task newFrontMostTask = getStackFrontMostTask();
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, newFrontMostTask, animation,
@@ -686,14 +629,13 @@ public class TaskStack {
         for (int i = allTasks.size() - 1; i >= 0; i--) {
             allTasks.get(i).temporarySortIndexInStack = i;
         }
-        Collections.sort(allTasks, FREEFORM_COMPARATOR);
 
         mStackTaskList.set(allTasks);
         mRawTaskList = allTasks;
 
         // Only callback for the removed tasks after the stack has updated
         int removedTaskCount = removedTasks.size();
-        Task newFrontMostTask = getStackFrontMostTask(false);
+        Task newFrontMostTask = getStackFrontMostTask();
         for (int i = 0; i < removedTaskCount; i++) {
             mCb.onStackTaskRemoved(this, removedTasks.get(i), newFrontMostTask,
                     AnimationProps.IMMEDIATE, false /* fromDockGesture */,
@@ -715,18 +657,12 @@ public class TaskStack {
     /**
      * Gets the front-most task in the stack.
      */
-    public Task getStackFrontMostTask(boolean includeFreeformTasks) {
+    public Task getStackFrontMostTask() {
         ArrayList<Task> stackTasks = mStackTaskList.getTasks();
         if (stackTasks.isEmpty()) {
             return null;
         }
-        for (int i = stackTasks.size() - 1; i >= 0; i--) {
-            Task task = stackTasks.get(i);
-            if (!task.isFreeformTask() || includeFreeformTasks) {
-                return task;
-            }
-        }
-        return null;
+        return stackTasks.get(stackTasks.size() - 1);
     }
 
     /** Gets the task keys */
@@ -749,22 +685,6 @@ public class TaskStack {
     }
 
     /**
-     * Returns the set of "freeform" tasks in the stack.
-     */
-    public ArrayList<Task> getFreeformTasks() {
-        ArrayList<Task> freeformTasks = new ArrayList<>();
-        ArrayList<Task> tasks = mStackTaskList.getTasks();
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
-            if (task.isFreeformTask()) {
-                freeformTasks.add(task);
-            }
-        }
-        return freeformTasks;
-    }
-
-    /**
      * Computes a set of all the active and historical tasks.
      */
     public ArrayList<Task> computeAllTasksList() {
@@ -774,7 +694,7 @@ public class TaskStack {
     }
 
     /**
-     * Returns the number of stack and freeform tasks.
+     * Returns the number of stacktasks.
      */
     public int getTaskCount() {
         return mStackTaskList.size();
@@ -784,32 +704,7 @@ public class TaskStack {
      * Returns the number of stack tasks.
      */
     public int getStackTaskCount() {
-        ArrayList<Task> tasks = mStackTaskList.getTasks();
-        int stackCount = 0;
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
-            if (!task.isFreeformTask()) {
-                stackCount++;
-            }
-        }
-        return stackCount;
-    }
-
-    /**
-     * Returns the number of freeform tasks.
-     */
-    public int getFreeformTaskCount() {
-        ArrayList<Task> tasks = mStackTaskList.getTasks();
-        int freeformCount = 0;
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
-            if (task.isFreeformTask()) {
-                freeformCount++;
-            }
-        }
-        return freeformCount;
+        return mStackTaskList.size();
     }
 
     /**

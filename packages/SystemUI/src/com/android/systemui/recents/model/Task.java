@@ -145,12 +145,6 @@ public class Task {
     public boolean useLightOnPrimaryColor;
 
     /**
-     * The bounds of the task, used only if it is a freeform task.
-     */
-    @ViewDebug.ExportedProperty(category="recents")
-    public Rect bounds;
-
-    /**
      * The task description for this task, only used to reload task icons.
      */
     public TaskDescription taskDescription;
@@ -188,7 +182,7 @@ public class Task {
     public Task(TaskKey key, Drawable icon, ThumbnailData thumbnail, String title,
             String titleDescription, String dismissDescription, String appInfoDescription,
             int colorPrimary, int colorBackground, boolean isLaunchTarget, boolean isStackTask,
-            boolean isSystemApp, boolean isDockable, Rect bounds, TaskDescription taskDescription,
+            boolean isSystemApp, boolean isDockable, TaskDescription taskDescription,
             int resizeMode, ComponentName topActivity, boolean isLocked) {
         this.key = key;
         this.icon = icon;
@@ -201,7 +195,6 @@ public class Task {
         this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
-        this.bounds = bounds;
         this.taskDescription = taskDescription;
         this.isLaunchTarget = isLaunchTarget;
         this.isStackTask = isStackTask;
@@ -226,7 +219,6 @@ public class Task {
         this.colorPrimary = o.colorPrimary;
         this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
-        this.bounds = o.bounds;
         this.taskDescription = o.taskDescription;
         this.isLaunchTarget = o.isLaunchTarget;
         this.isStackTask = o.isStackTask;
@@ -260,14 +252,6 @@ public class Task {
         for (int i = 0; i < callbackCount; i++) {
             mCallbacks.get(i).onTaskWindowingModeChanged();
         }
-    }
-
-    /**
-     * Returns whether this task is on the freeform task stack.
-     */
-    public boolean isFreeformTask() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        return ssp.hasFreeformWorkspaceSupport() && key.windowingMode == WINDOWING_MODE_FREEFORM;
     }
 
     /** Notifies the callback listeners that this task has been loaded */
@@ -317,9 +301,6 @@ public class Task {
         }
         if (isLaunchTarget) {
             writer.print(" launchTarget=Y");
-        }
-        if (isFreeformTask()) {
-            writer.print(" freeform=Y");
         }
         if (isLocked) {
             writer.print(" locked=Y");

@@ -26,7 +26,7 @@ import com.android.systemui.tuner.TunerService;
 /**
  * Tunable debug flags
  */
-public class RecentsDebugFlags implements TunerService.Tunable {
+public class RecentsDebugFlags {
 
     public static class Static {
         // Enables debug drawing for the transition thumbnail
@@ -51,20 +51,11 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     }
 
     /**
-     * We read the prefs once when we start the activity, then update them as the tuner changes
-     * the flags.
-     */
-    public RecentsDebugFlags(Context context) {
-        // Register all our flags, this will also call onTuningChanged() for each key, which will
-        // initialize the current state of each flag
-    }
-
-    /**
      * @return whether we are enabling fast toggling.
      */
     public boolean isFastToggleRecentsEnabled() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.hasFreeformWorkspaceSupport() || ssp.isTouchExplorationEnabled()) {
+        if (ssp.isTouchExplorationEnabled()) {
             return false;
         }
         return Static.EnableFastToggleTimeout;
@@ -75,10 +66,5 @@ public class RecentsDebugFlags implements TunerService.Tunable {
      */
     public boolean isPagingEnabled() {
         return Static.EnablePaging;
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        EventBus.getDefault().send(new DebugFlagsChangedEvent());
     }
 }

@@ -161,17 +161,12 @@ public class TaskStackAnimationHelper {
         for (int i = taskViews.size() - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean hideTask = launchTargetTask != null &&
-                    launchTargetTask.isFreeformTask() &&
-                    task.isFreeformTask();
 
             // Get the current transform for the task, which will be used to position it offscreen
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
 
-            if (hideTask) {
-                tv.setVisibility(View.INVISIBLE);
-            } else if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
+            if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
                 } else if (isLowRamDevice && i >= taskViews.size() -
@@ -569,7 +564,7 @@ public class TaskStackAnimationHelper {
                 false /* ignoreTaskOverrides */, mTmpFinalTaskTransforms);
 
         // Hide the front most task view until the scroll is complete
-        Task frontMostTask = newStack.getStackFrontMostTask(false /* includeFreeform */);
+        Task frontMostTask = newStack.getStackFrontMostTask();
         final TaskView frontMostTaskView = mStackView.getChildViewForTask(frontMostTask);
         final TaskViewTransform frontMostTransform = mTmpFinalTaskTransforms.get(
                 stackTasks.indexOf(frontMostTask));

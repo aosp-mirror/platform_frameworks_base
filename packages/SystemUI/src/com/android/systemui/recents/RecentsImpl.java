@@ -746,8 +746,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
                     systemInsets.left, systemInsets.right, mTmpBounds);
             stackLayout.reset();
-            stackLayout.initialize(displayRect, windowRect, mTmpBounds,
-                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
+            stackLayout.initialize(displayRect, windowRect, mTmpBounds);
         }
     }
 
@@ -866,61 +865,29 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo runningTask,
                     Rect windowOverrideRect) {
         final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
-        if (runningTask != null
-                && runningTask.configuration.windowConfiguration.getWindowingMode()
-                == WINDOWING_MODE_FREEFORM) {
-            ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
-            ArrayList<Task> tasks = mDummyStackView.getStack().getStackTasks();
-            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-            TaskStackViewScroller stackScroller = mDummyStackView.getScroller();
 
-            mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */);
-            mDummyStackView.updateToInitialState();
+        // Update the destination rect
+        Task toTask = new Task();
+        TaskViewTransform toTransform = getThumbnailTransitionTransform(mDummyStackView, toTask,
+                windowOverrideRect);
 
-            for (int i = tasks.size() - 1; i >= 0; i--) {
-                Task task = tasks.get(i);
-                if (task.isFreeformTask()) {
-                    mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
-                            stackScroller.getStackScroll(), mTmpTransform, null,
-                            windowOverrideRect);
-                    GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform);
-                    Rect toTaskRect = new Rect();
-                    mTmpTransform.rect.round(toTaskRect);
-                    specs.add(new AppTransitionAnimationSpec(task.key.id, thumbnail, toTaskRect));
-                }
-            }
-            AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
-            specs.toArray(specsArray);
+        RectF toTaskRect = toTransform.rect;
+        AppTransitionAnimationSpecsFuture future =
+                new RecentsTransitionHelper(mContext).getAppTransitionFuture(
+                        () -> {
+                    Rect rect = new Rect();
+                    toTaskRect.round(rect);
+                    GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask,
+                            toTransform);
+                    return Lists.newArrayList(new AppTransitionAnimationSpec(
+                            toTask.key.id, thumbnail, rect));
+                });
 
-            // For low end ram devices, wait for transition flag is reset when Recents entrance
-            // animation is complete instead of when the transition animation starts
-            return new Pair<>(ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, isLowRamDevice ? null : mResetToggleFlagListener, this),
-                    null);
-        } else {
-            // Update the destination rect
-            Task toTask = new Task();
-            TaskViewTransform toTransform = getThumbnailTransitionTransform(mDummyStackView, toTask,
-                    windowOverrideRect);
-
-            RectF toTaskRect = toTransform.rect;
-            AppTransitionAnimationSpecsFuture future =
-                    new RecentsTransitionHelper(mContext).getAppTransitionFuture(
-                            () -> {
-                        Rect rect = new Rect();
-                        toTaskRect.round(rect);
-                        GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask,
-                                toTransform);
-                        return Lists.newArrayList(new AppTransitionAnimationSpec(
-                                toTask.key.id, thumbnail, rect));
-                    });
-
-            // For low end ram devices, wait for transition flag is reset when Recents entrance
-            // animation is complete instead of when the transition animation starts
-            return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
-                    mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
-                    false /* scaleUp */), future);
-        }
+        // For low end ram devices, wait for transition flag is reset when Recents entrance
+        // animation is complete instead of when the transition animation starts
+        return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
+                mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
+                false /* scaleUp */), future);
     }
 
     /**
@@ -935,7 +902,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             runningTaskOut.copyFrom(launchTask);
         } else {
             // If no task is specified or we can not find the task just use the front most one
-            launchTask = stack.getStackFrontMostTask(true /* includeFreeform */);
+            launchTask = stack.getStackFrontMostTask();
             runningTaskOut.copyFrom(launchTask);
         }
 
