@@ -23,6 +23,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -158,6 +159,12 @@ public class ActivityOptions {
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
 
     /**
+     * Whether the activity should be launched into LockTask mode.
+     * @see #setLockTaskMode(boolean)
+     */
+    private static final String KEY_LOCK_TASK_MODE = "android:activity.lockTaskMode";
+
+    /**
      * The display id the activity should be launched into.
      * @see #setLaunchDisplayId(int)
      * @hide
@@ -278,6 +285,7 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private boolean mLockTaskMode = false;
     private int mLaunchDisplayId = INVALID_DISPLAY;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
@@ -869,6 +877,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
@@ -1052,6 +1061,37 @@ public class ActivityOptions {
         if (options != null) {
             options.abort();
         }
+    }
+
+    /**
+     * Gets whether the activity is to be launched into LockTask mode.
+     * @return {@code true} if the activity is to be launched into LockTask mode.
+     * @see Activity#startLockTask()
+     * @see android.app.admin.DevicePolicyManager#setLockTaskPackages(ComponentName, String[])
+     */
+    public boolean getLockTaskMode() {
+        return mLockTaskMode;
+    }
+
+    /**
+     * Sets whether the activity is to be launched into LockTask mode.
+     *
+     * Use this option to start an activity in LockTask mode. Note that only apps permitted by
+     * {@link android.app.admin.DevicePolicyManager} can run in LockTask mode. Therefore, if
+     * {@link android.app.admin.DevicePolicyManager#isLockTaskPermitted(String)} returns
+     * {@code false} for the package of the target activity, a {@link SecurityException} will be
+     * thrown during {@link Context#startActivity(Intent, Bundle)}.
+     *
+     * Defaults to {@code false} if not set.
+     *
+     * @param lockTaskMode {@code true} if the activity is to be launched into LockTask mode.
+     * @return {@code this} {@link ActivityOptions} instance.
+     * @see Activity#startLockTask()
+     * @see android.app.admin.DevicePolicyManager#setLockTaskPackages(ComponentName, String[])
+     */
+    public ActivityOptions setLockTaskMode(boolean lockTaskMode) {
+        mLockTaskMode = lockTaskMode;
+        return this;
     }
 
     /**
@@ -1247,6 +1287,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
+        mLockTaskMode = otherOptions.mLockTaskMode;
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
@@ -1321,6 +1362,7 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
         b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
         b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
         b.putInt(KEY_LAUNCH_ACTIVITY_TYPE, mLaunchActivityType);

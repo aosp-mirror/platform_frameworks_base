@@ -58,6 +58,10 @@ import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.PERSIST_ACROSS_REBOOTS;
 import static android.content.pm.ActivityInfo.PERSIST_ROOT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
@@ -282,6 +286,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     int configChangeFlags;  // which config values have changed
     private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
+    int lockTaskLaunchMode; // the lockTaskMode manifest attribute, subject to override
     boolean visible;        // does this activity's window need to be shown?
     boolean visibleIgnoringKeyguard; // is this activity visible, ignoring the fact that Keyguard
                                      // might hide this activity?
@@ -824,23 +829,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
 
-        mRotationAnimationHint = aInfo.rotationAnimation;
-
-        if (options != null) {
-            pendingOptions = options;
-            mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
-
-            final int rotationAnimation = pendingOptions.getRotationAnimationHint();
-            // Only override manifest supplied option if set.
-            if (rotationAnimation >= 0) {
-                mRotationAnimationHint = rotationAnimation;
-            }
-            PendingIntent usageReport = pendingOptions.getUsageTimeReport();
-            if (usageReport != null) {
-                appTimeTracker = new AppTimeTracker(usageReport);
-            }
-        }
-
         // This starts out true, since the initial state of an activity is that we have everything,
         // and we shouldn't never consider it lacking in state to be removed if it dies.
         haveState = true;
@@ -907,6 +895,32 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         mShowWhenLocked = (aInfo.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
         mTurnScreenOn = (aInfo.flags & FLAG_TURN_SCREEN_ON) != 0;
+
+        mRotationAnimationHint = aInfo.rotationAnimation;
+        lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
+        if (appInfo.isPrivilegedApp() && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
+                || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
+            lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        }
+
+        if (options != null) {
+            pendingOptions = options;
+            mLaunchTaskBehind = options.getLaunchTaskBehind();
+
+            final int rotationAnimation = pendingOptions.getRotationAnimationHint();
+            // Only override manifest supplied option if set.
+            if (rotationAnimation >= 0) {
+                mRotationAnimationHint = rotationAnimation;
+            }
+            final PendingIntent usageReport = pendingOptions.getUsageTimeReport();
+            if (usageReport != null) {
+                appTimeTracker = new AppTimeTracker(usageReport);
+            }
+            final boolean useLockTask = pendingOptions.getLockTaskMode();
+            if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
+                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+            }
+        }
     }
 
     AppWindowContainerController getWindowContainerController() {
