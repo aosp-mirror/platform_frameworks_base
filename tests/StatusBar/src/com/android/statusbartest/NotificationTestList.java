@@ -296,6 +296,7 @@ public class NotificationTestList extends TestActivity
                     Notification n = new Notification.Builder(NotificationTestList.this, "min")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Min priority")
+                            .setTicker("Min priority")
                             .build();
                     mNM.notify("min", 7000, n);
                 }
@@ -306,6 +307,7 @@ public class NotificationTestList extends TestActivity
                     Notification n = new Notification.Builder(NotificationTestList.this, "low")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Low priority")
+                            .setTicker("Low priority")
                             .build();
                     mNM.notify("low", 7002, n);
                 }
@@ -326,6 +328,7 @@ public class NotificationTestList extends TestActivity
                     Notification n = new Notification.Builder(NotificationTestList.this, "high")
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("High priority")
+                            .setTicker("High priority")
                             .build();
                     mNM.notify("high", 7006, n);
                 }

@@ -319,7 +319,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     boolean mProvisioned;
     boolean mAutoRestore;
     PowerManager.WakeLock mWakelock;
-    HandlerThread mHandlerThread;
     BackupHandler mBackupHandler;
     PendingIntent mRunBackupIntent, mRunInitIntent;
     BroadcastReceiver mRunBackupReceiver, mRunInitReceiver;
@@ -409,43 +408,37 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Called through the trampoline from onUnlockUser(), then we buck the work
     // off to the background thread to keep the unlock time down.
     public void unlockSystemUser() {
-        mBackupHandler.post(() -> {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
-            sInstance.initialize(UserHandle.USER_SYSTEM);
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-            // Migrate legacy setting
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
-            if (!backupSettingMigrated(UserHandle.USER_SYSTEM)) {
+        // Migrate legacy setting
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup migrate");
+        if (!backupSettingMigrated(UserHandle.USER_SYSTEM)) {
+            if (DEBUG) {
+                Slog.i(TAG, "Backup enable apparently not migrated");
+            }
+            final ContentResolver r = sInstance.mContext.getContentResolver();
+            final int enableState = Settings.Secure.getIntForUser(r,
+                    Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
+            if (enableState >= 0) {
                 if (DEBUG) {
-                    Slog.i(TAG, "Backup enable apparently not migrated");
+                    Slog.i(TAG, "Migrating enable state " + (enableState != 0));
                 }
-                final ContentResolver r = sInstance.mContext.getContentResolver();
-                final int enableState = Settings.Secure.getIntForUser(r,
-                        Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
-                if (enableState >= 0) {
-                    if (DEBUG) {
-                        Slog.i(TAG, "Migrating enable state " + (enableState != 0));
-                    }
-                    writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
-                    Settings.Secure.putStringForUser(r,
-                            Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
-                } else {
-                    if (DEBUG) {
-                        Slog.i(TAG, "Backup not yet configured; retaining null enable state");
-                    }
+                writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
+                Settings.Secure.putStringForUser(r,
+                        Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
+            } else {
+                if (DEBUG) {
+                    Slog.i(TAG, "Backup not yet configured; retaining null enable state");
                 }
             }
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
-            try {
-                sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
-            } catch (RemoteException e) {
-                // can't happen; it's a local object
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-        });
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup enable");
+        try {
+            sInstance.setBackupEnabled(readBackupEnableState(UserHandle.USER_SYSTEM));
+        } catch (RemoteException e) {
+            // can't happen; it's a local object
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     class ProvisionedObserver extends ContentObserver {
@@ -1220,7 +1213,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // ----- Main service implementation -----
 
-    public BackupManagerService(Context context, Trampoline parent) {
+    public BackupManagerService(Context context, Trampoline parent, HandlerThread backupThread) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
@@ -1233,9 +1226,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
 
         // spin up the backup/restore handler thread
-        mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
-        mBackupHandler = new BackupHandler(mHandlerThread.getLooper());
+        mBackupHandler = new BackupHandler(backupThread.getLooper());
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
@@ -1360,7 +1351,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         if (DEBUG) Slog.v(TAG, "Starting with transport " + currentTransport);
 
         mTransportManager = new TransportManager(context, transportWhitelist, currentTransport,
-                mTransportBoundListener, mHandlerThread.getLooper());
+                mTransportBoundListener, backupThread.getLooper());
         mTransportManager.registerAllTransports();
 
         // Now that we know about valid backup participants, parse any
