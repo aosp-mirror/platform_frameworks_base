@@ -23,7 +23,6 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "BenchmarkHelpers.h"
-#include "TestHelpers.h"
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
