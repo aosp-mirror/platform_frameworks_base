@@ -28,8 +28,14 @@ import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.HardwarePropertiesManager;
+import android.os.IBinder;
+import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Temperature;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -75,6 +81,7 @@ public class PowerUI extends SystemUI {
     private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
     private int mNumTemps;
     private long mNextLogTime;
+    private IThermalService mThermalService;
 
     // We create a method reference here so that we are guaranteed that we can remove a callback
     // by using the same instance (method references are not guaranteed to be the same object
@@ -263,7 +270,7 @@ public class PowerUI extends SystemUI {
                 resources.getInteger(R.integer.config_warningTemperature));
 
         if (mThresholdTemp < 0f) {
-            // Get the throttling temperature. No need to check if we're not throttling.
+            // Get the shutdown temperature, adjust for warning tolerance.
             float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
                     HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
                     HardwarePropertiesManager.TEMPERATURE_SHUTDOWN);
@@ -274,6 +281,25 @@ public class PowerUI extends SystemUI {
             }
             mThresholdTemp = throttlingTemps[0] -
                     resources.getInteger(R.integer.config_warningTemperatureTolerance);
+        }
+
+        if (mThermalService == null) {
+            // Enable push notifications of throttling from vendor thermal
+            // management subsystem via thermalservice, in addition to our
+            // usual polling, to react to temperature jumps more quickly.
+            IBinder b = ServiceManager.getService("thermalservice");
+
+            if (b != null) {
+                mThermalService = IThermalService.Stub.asInterface(b);
+                try {
+                    mThermalService.registerThermalEventListener(
+                        new ThermalEventListener());
+                } catch (RemoteException e) {
+                    // Should never happen.
+                }
+            } else {
+                Slog.w(TAG, "cannot find thermalservice, no throttling push notifications");
+            }
         }
 
         setNextLogTime();
@@ -414,5 +440,15 @@ public class PowerUI extends SystemUI {
         void dump(PrintWriter pw);
         void userSwitched();
     }
-}
 
+    // Thermal event received from vendor thermal management subsystem
+    private final class ThermalEventListener extends IThermalEventListener.Stub {
+        @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
+            // Trigger an update of the temperature warning.  Only one
+            // callback can be enabled at a time, so remove any existing
+            // callback; updateTemperatureWarning will schedule another one.
+            mHandler.removeCallbacks(mUpdateTempCallback);
+            updateTemperatureWarning();
+        }
+    }
+}
