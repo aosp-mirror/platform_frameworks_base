@@ -460,17 +460,6 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setClickable(false);
         ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
 
-        if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
-            if (mFocusTimerIndicator == null) {
-                mFocusTimerIndicator = (ProgressBar) Utilities.findViewStubById(this,
-                        R.id.focus_timer_indicator_stub).inflate();
-            }
-            mFocusTimerIndicator.getProgressDrawable()
-                    .setColorFilter(
-                            getSecondaryColor(t.colorPrimary, t.useLightOnPrimaryColor),
-                            PorterDuff.Mode.SRC_IN);
-        }
-
         // In accessibility, a single click on the focused app info button will show it
         if (touchExplorationEnabled) {
             mIconView.setContentDescription(t.appInfoDescription);

@@ -256,7 +256,7 @@ public class RecentsTaskLoader {
     // This activity info LruCache is useful because it can be expensive to retrieve ActivityInfos
     // for many tasks, which we use to get the activity labels and icons.  Unlike the other caches
     // below, this is per-package so we can't invalidate the items in the cache based on the last
-    // active time.  Instead, we rely on the RecentsPackageMonitor to keep us informed whenever a
+    // active time.  Instead, we rely on the PackageMonitor to keep us informed whenever a
     // package in the cache has been updated, so that we may remove it.
     private final LruCache<ComponentName, ActivityInfo> mActivityInfoCache;
     private final TaskKeyLruCache<Drawable> mIconCache;
@@ -295,8 +295,6 @@ public class RecentsTaskLoader {
                 context.getColor(R.color.recents_task_view_default_background_color);
         mMaxThumbnailCacheSize = res.getInteger(R.integer.config_recents_max_thumbnail_count);
         mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
-        int iconCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
-                mMaxIconCacheSize;
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
@@ -308,7 +306,7 @@ public class RecentsTaskLoader {
         mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
                 Looper.getMainLooper(), Recents.getConfiguration().isLowRamDevice);
         mLoadQueue = new TaskResourceLoadQueue();
-        mIconCache = new TaskKeyLruCache<>(iconCacheSize, mClearActivityInfoOnEviction);
+        mIconCache = new TaskKeyLruCache<>(mMaxIconCacheSize, mClearActivityInfoOnEviction);
         mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);
@@ -434,6 +432,21 @@ public class RecentsTaskLoader {
                 break;
             default:
                 break;
+        }
+    }
+
+    public void onPackageChanged(String packageName) {
+        // Remove all the cached activity infos for this package.  The other caches do not need to
+        // be pruned at this time, as the TaskKey expiration checks will flush them next time their
+        // cached contents are requested
+        Map<ComponentName, ActivityInfo> activityInfoCache = mActivityInfoCache.snapshot();
+        for (ComponentName cn : activityInfoCache.keySet()) {
+            if (cn.getPackageName().equals(packageName)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Removing activity info from cache: " + cn);
+                }
+                mActivityInfoCache.remove(cn);
+            }
         }
     }
 
@@ -623,23 +636,6 @@ public class RecentsTaskLoader {
     private void stopLoader() {
         mLoader.stop();
         mLoadQueue.clearTasks();
-    }
-
-    /**** Event Bus Events ****/
-
-    public final void onBusEvent(PackagesChangedEvent event) {
-        // Remove all the cached activity infos for this package.  The other caches do not need to
-        // be pruned at this time, as the TaskKey expiration checks will flush them next time their
-        // cached contents are requested
-        Map<ComponentName, ActivityInfo> activityInfoCache = mActivityInfoCache.snapshot();
-        for (ComponentName cn : activityInfoCache.keySet()) {
-            if (cn.getPackageName().equals(event.packageName)) {
-                if (DEBUG) {
-                    Log.d(TAG, "Removing activity info from cache: " + cn);
-                }
-                mActivityInfoCache.remove(cn);
-            }
-        }
     }
 
     public synchronized void dump(String prefix, PrintWriter writer) {
