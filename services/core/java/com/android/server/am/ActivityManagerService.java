@@ -397,6 +397,9 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.proto.ActivityManagerServiceProto;
+import com.android.server.am.proto.BroadcastProto;
+import com.android.server.am.proto.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -14869,10 +14872,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         if (useProto) {
-            //TODO: Options when dumping proto
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
-            synchronized (this) {
-                writeActivitiesToProtoLocked(proto);
+            String cmd = opti < args.length ? args[opti] : "";
+            opti++;
+
+            if ("activities".equals(cmd) || "a".equals(cmd)) {
+                // output proto is ActivityStackSupervisorProto
+                synchronized (this) {
+                    writeActivitiesToProtoLocked(proto);
+                }
+            } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
+                // output proto is BroadcastProto
+                synchronized (this) {
+                    writeBroadcastsToProtoLocked(proto);
+                }
+            } else {
+                // default option, dump everything, output is ActivityManagerServiceProto
+                synchronized (this) {
+                    long activityToken = proto.start(ActivityManagerServiceProto.ACTIVITIES);
+                    writeActivitiesToProtoLocked(proto);
+                    proto.end(activityToken);
+
+                    long broadcastToken = proto.start(ActivityManagerServiceProto.BROADCASTS);
+                    writeBroadcastsToProtoLocked(proto);
+                    proto.end(broadcastToken);
+                }
             }
             proto.flush();
             Binder.restoreCallingIdentity(origId);
@@ -15229,7 +15253,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void writeActivitiesToProtoLocked(ProtoOutputStream proto) {
-        mStackSupervisor.writeToProto(proto, ACTIVITIES);
+        // The output proto of "activity --proto activities" is ActivityStackSupervisorProto
+        mStackSupervisor.writeToProto(proto);
     }
 
     private void dumpLastANRLocked(PrintWriter pw) {
@@ -16105,6 +16130,40 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
             }
         }
+    }
+
+    void writeBroadcastsToProtoLocked(ProtoOutputStream proto) {
+        if (mRegisteredReceivers.size() > 0) {
+            Iterator it = mRegisteredReceivers.values().iterator();
+            while (it.hasNext()) {
+                ReceiverList r = (ReceiverList)it.next();
+                r.writeToProto(proto, BroadcastProto.RECEIVER_LIST);
+            }
+        }
+        mReceiverResolver.writeToProto(proto, BroadcastProto.RECEIVER_RESOLVER);
+        for (BroadcastQueue q : mBroadcastQueues) {
+            q.writeToProto(proto, BroadcastProto.BROADCAST_QUEUE);
+        }
+        for (int user=0; user<mStickyBroadcasts.size(); user++) {
+            long token = proto.start(BroadcastProto.STICKY_BROADCASTS);
+            proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
+            for (Map.Entry<String, ArrayList<Intent>> ent
+                    : mStickyBroadcasts.valueAt(user).entrySet()) {
+                long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
+                proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
+                for (Intent intent : ent.getValue()) {
+                    intent.writeToProto(proto, StickyBroadcastProto.StickyAction.INTENTS,
+                            false, true, true, false);
+                }
+                proto.end(actionToken);
+            }
+            proto.end(token);
+        }
+
+        long handlerToken = proto.start(BroadcastProto.HANDLER);
+        proto.write(BroadcastProto.MainHandler.HANDLER, mHandler.toString());
+        mHandler.getLooper().writeToProto(proto, BroadcastProto.MainHandler.LOOPER);
+        proto.end(handlerToken);
     }
 
     void dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,

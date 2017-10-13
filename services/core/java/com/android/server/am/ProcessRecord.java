@@ -27,6 +27,7 @@ import android.util.Slog;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.am.proto.ProcessRecordProto;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -44,6 +45,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -619,6 +621,22 @@ final class ProcessRecord {
             }
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(ProcessRecordProto.PID, pid);
+        proto.write(ProcessRecordProto.PROCESS_NAME, processName);
+        if (info.uid < Process.FIRST_APPLICATION_UID) {
+            proto.write(ProcessRecordProto.UID, uid);
+        } else {
+            proto.write(ProcessRecordProto.USER_ID, userId);
+            proto.write(ProcessRecordProto.APP_ID, UserHandle.getAppId(info.uid));
+            if (uid != info.uid) {
+                proto.write(ProcessRecordProto.ISOLATED_APP_ID, UserHandle.getAppId(uid));
+            }
+        }
+        proto.end(token);
     }
 
     public String toShortString() {

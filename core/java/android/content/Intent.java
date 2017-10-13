@@ -53,6 +53,7 @@ import android.provider.OpenableColumns;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
 
@@ -9369,6 +9370,57 @@ public class Intent implements Parcelable, Cloneable {
             mSelector.toShortString(b, secure, comp, extras, clip);
             b.append("}");
         }
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
+            boolean extras, boolean clip) {
+        long token = proto.start(fieldId);
+        if (mAction != null) {
+            proto.write(IntentProto.ACTION, mAction);
+        }
+        if (mCategories != null)  {
+            for (String category : mCategories) {
+                proto.write(IntentProto.CATEGORIES, category);
+            }
+        }
+        if (mData != null) {
+            proto.write(IntentProto.DATA, secure ? mData.toSafeString() : mData.toString());
+        }
+        if (mType != null) {
+            proto.write(IntentProto.TYPE, mType);
+        }
+        if (mFlags != 0) {
+            proto.write(IntentProto.FLAG, "0x" + Integer.toHexString(mFlags));
+        }
+        if (mPackage != null) {
+            proto.write(IntentProto.PACKAGE, mPackage);
+        }
+        if (comp && mComponent != null) {
+            proto.write(IntentProto.COMPONENT, mComponent.flattenToShortString());
+        }
+        if (mSourceBounds != null) {
+            proto.write(IntentProto.SOURCE_BOUNDS, mSourceBounds.toShortString());
+        }
+        if (mClipData != null) {
+            StringBuilder b = new StringBuilder();
+            if (clip) {
+                mClipData.toShortString(b);
+            } else {
+                mClipData.toShortStringShortItems(b, false);
+            }
+            proto.write(IntentProto.CLIP_DATA, b.toString());
+        }
+        if (extras && mExtras != null) {
+            proto.write(IntentProto.EXTRAS, mExtras.toShortString());
+        }
+        if (mContentUserHint != 0) {
+            proto.write(IntentProto.CONTENT_USER_HINT, mContentUserHint);
+        }
+        if (mSelector != null) {
+            proto.write(IntentProto.SELECTOR, mSelector.toShortString(secure, comp, extras, clip));
+        }
+        proto.end(token);
     }
 
     /**

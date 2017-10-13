@@ -21,6 +21,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
+import com.android.server.am.proto.ReceiverListProto;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
     boolean linkedToDeath = false;
 
     String stringName;
-    
+
     ReceiverList(ActivityManagerService _owner, ProcessRecord _app,
             int _pid, int _uid, int _userId, IIntentReceiver _receiver) {
         owner = _owner;
@@ -59,12 +61,31 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
     public int hashCode() {
         return System.identityHashCode(this);
     }
-    
+
     public void binderDied() {
         linkedToDeath = false;
         owner.unregisterReceiver(receiver);
     }
-    
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        app.writeToProto(proto, ReceiverListProto.APP);
+        proto.write(ReceiverListProto.PID, pid);
+        proto.write(ReceiverListProto.UID, uid);
+        proto.write(ReceiverListProto.USER, userId);
+        if (curBroadcast != null) {
+            curBroadcast.writeToProto(proto, ReceiverListProto.CURRENT);
+        }
+        proto.write(ReceiverListProto.LINKED_TO_DEATH, linkedToDeath);
+        final int N = size();
+        for (int i=0; i<N; i++) {
+            BroadcastFilter bf = get(i);
+            bf.writeToProto(proto, ReceiverListProto.FILTERS);
+        }
+        proto.write(ReceiverListProto.HEX_HASH, Integer.toHexString(System.identityHashCode(this)));
+        proto.end(token);
+    }
+
     void dumpLocal(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("app="); pw.print(app != null ? app.toShortString() : null);
             pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
@@ -74,7 +95,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
                 pw.print(" linkedToDeath="); pw.println(linkedToDeath);
         }
     }
-    
+
     void dump(PrintWriter pw, String prefix) {
         Printer pr = new PrintWriterPrinter(pw);
         dumpLocal(pw, prefix);
@@ -89,7 +110,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
             bf.dumpInReceiverList(pw, pr, p2);
         }
     }
-    
+
     public String toString() {
         if (stringName != null) {
             return stringName;
