@@ -71,6 +71,14 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+constexpr static const char kApkResourceTablePath[] = "resources.arsc";
+constexpr static const char kProtoResourceTablePath[] = "resources.pb";
+
+enum class OutputFormat {
+  kApk,
+  kProto,
+};
+
 struct LinkOptions {
   std::string output_path;
   std::string manifest_path;
@@ -79,6 +87,7 @@ struct LinkOptions {
   std::vector<std::string> assets_dirs;
   bool output_to_directory = false;
   bool auto_add_overlay = false;
+  OutputFormat output_format = OutputFormat::kApk;
 
   // Java/Proguard options.
   Maybe<std::string> generate_java_class_path;
@@ -253,26 +262,39 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
   IAaptContext* context_;
 };
 
-static bool FlattenXml(IAaptContext* context, xml::XmlResource* xml_res, const StringPiece& path,
-                       bool keep_raw_values, bool utf16, IArchiveWriter* writer) {
-  BigBuffer buffer(1024);
-  XmlFlattenerOptions options = {};
-  options.keep_raw_values = keep_raw_values;
-  options.use_utf16 = utf16;
-  XmlFlattener flattener(&buffer, options);
-  if (!flattener.Consume(context, xml_res)) {
-    return false;
-  }
-
+static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
+                       const StringPiece& path, bool keep_raw_values, bool utf16,
+                       OutputFormat format, IArchiveWriter* writer) {
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path) << "writing to archive (keep_raw_values="
                                                       << (keep_raw_values ? "true" : "false")
                                                       << ")");
   }
 
-  io::BigBufferInputStream input_stream(&buffer);
-  return io::CopyInputStreamToArchive(context, &input_stream, path.to_string(),
-                                      ArchiveEntry::kCompress, writer);
+  switch (format) {
+    case OutputFormat::kApk: {
+      BigBuffer buffer(1024);
+      XmlFlattenerOptions options = {};
+      options.keep_raw_values = keep_raw_values;
+      options.use_utf16 = utf16;
+      XmlFlattener flattener(&buffer, options);
+      if (!flattener.Consume(context, &xml_res)) {
+        return false;
+      }
+
+      io::BigBufferInputStream input_stream(&buffer);
+      return io::CopyInputStreamToArchive(context, &input_stream, path.to_string(),
+                                          ArchiveEntry::kCompress, writer);
+    } break;
+
+    case OutputFormat::kProto: {
+      pb::XmlNode pb_node;
+      SerializeXmlResourceToPb(xml_res, &pb_node);
+      return io::CopyProtoToArchive(context, &pb_node, path.to_string(), ArchiveEntry::kCompress,
+                                    writer);
+    } break;
+  }
+  return false;
 }
 
 static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, const void* data,
@@ -310,6 +332,7 @@ struct ResourceFileFlattenerOptions {
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
   bool update_proguard_spec = false;
+  OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
 };
 
@@ -627,8 +650,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
                 return false;
               }
             }
-            error |= !FlattenXml(context_, doc.get(), dst_path, options_.keep_raw_values,
-                                 false /*utf16*/, archive_writer);
+
+            error |= !FlattenXml(context_, *doc, dst_path, options_.keep_raw_values,
+                                 false /*utf16*/, options_.output_format, archive_writer);
           }
         } else {
           error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
@@ -927,23 +951,29 @@ class LinkCommand {
     }
   }
 
-  bool FlattenTable(ResourceTable* table, IArchiveWriter* writer) {
-    BigBuffer buffer(1024);
-    TableFlattener flattener(options_.table_flattener_options, &buffer);
-    if (!flattener.Consume(context_, table)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
-      return false;
+  bool FlattenTable(ResourceTable* table, OutputFormat format, IArchiveWriter* writer) {
+    switch (format) {
+      case OutputFormat::kApk: {
+        BigBuffer buffer(1024);
+        TableFlattener flattener(options_.table_flattener_options, &buffer);
+        if (!flattener.Consume(context_, table)) {
+          context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
+          return false;
+        }
+
+        io::BigBufferInputStream input_stream(&buffer);
+        return io::CopyInputStreamToArchive(context_, &input_stream, kApkResourceTablePath,
+                                            ArchiveEntry::kAlign, writer);
+      } break;
+
+      case OutputFormat::kProto: {
+        pb::ResourceTable pb_table;
+        SerializeTableToPb(*table, &pb_table);
+        return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
+                                      ArchiveEntry::kCompress, writer);
+      } break;
     }
-
-    io::BigBufferInputStream input_stream(&buffer);
-    return io::CopyInputStreamToArchive(context_, &input_stream, "resources.arsc",
-                                        ArchiveEntry::kAlign, writer);
-  }
-
-  bool FlattenTableToPb(ResourceTable* table, IArchiveWriter* writer) {
-    pb::ResourceTable pb_table;
-    SerializeTableToPb(*table, &pb_table);
-    return io::CopyProtoToArchive(context_, &pb_table, "resources.arsc.flat", 0, writer);
+    return false;
   }
 
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
@@ -1172,7 +1202,7 @@ class LinkCommand {
   }
 
   std::unique_ptr<ResourceTable> LoadTablePbFromCollection(io::IFileCollection* collection) {
-    io::IFile* file = collection->FindFile("resources.arsc.flat");
+    io::IFile* file = collection->FindFile(kProtoResourceTablePath);
     if (!file) {
       return {};
     }
@@ -1466,15 +1496,13 @@ class LinkCommand {
     return true;
   }
 
-  /**
-   * Writes the AndroidManifest, ResourceTable, and all XML files referenced by
-   * the ResourceTable to the IArchiveWriter.
-   */
+  // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
+  // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
-    bool result = FlattenXml(context_, manifest, "AndroidManifest.xml", keep_raw_values,
-                             true /*utf16*/, writer);
+    bool result = FlattenXml(context_, *manifest, "AndroidManifest.xml", keep_raw_values,
+                             true /*utf16*/, options_.output_format, writer);
     if (!result) {
       return false;
     }
@@ -1489,6 +1517,7 @@ class LinkCommand {
     file_flattener_options.no_xml_namespaces = options_.no_xml_namespaces;
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
+    file_flattener_options.output_format = options_.output_format;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
 
@@ -1497,15 +1526,9 @@ class LinkCommand {
       return false;
     }
 
-    if (context_->GetPackageType() == PackageType::kStaticLib) {
-      if (!FlattenTableToPb(table, writer)) {
-        return false;
-      }
-    } else {
-      if (!FlattenTable(table, writer)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc");
-        return false;
-      }
+    if (!FlattenTable(table, options_.output_format, writer)) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resource table");
+      return false;
     }
     return true;
   }
@@ -1869,6 +1892,7 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   bool verbose = false;
   bool shared_lib = false;
   bool static_lib = false;
+  bool proto_format = false;
   Maybe<std::string> stable_id_file_path;
   std::vector<std::string> split_args;
   Flags flags =
@@ -1949,6 +1973,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
                           &shared_lib)
           .OptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib)
+          .OptionalSwitch("--proto-format",
+                          "Generates compiled resources in Protobuf format.\n"
+                          "Suitable as input to the bundle tool for generating an App Bundle.",
+                          &proto_format)
           .OptionalSwitch("--no-static-lib-packages",
                           "Merge all library resources under the app's package.",
                           &options.no_static_lib_packages)
@@ -2035,21 +2063,25 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     context.SetVerbose(verbose);
   }
 
-  if (shared_lib && static_lib) {
-    context.GetDiagnostics()->Error(DiagMessage()
-                                    << "only one of --shared-lib and --static-lib can be defined");
+  if (int{shared_lib} + int{static_lib} + int{proto_format} > 1) {
+    context.GetDiagnostics()->Error(
+        DiagMessage()
+        << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
     return 1;
   }
+
+  // The default build type.
+  context.SetPackageType(PackageType::kApp);
+  context.SetPackageId(kAppPackageId);
 
   if (shared_lib) {
     context.SetPackageType(PackageType::kSharedLib);
     context.SetPackageId(0x00);
   } else if (static_lib) {
     context.SetPackageType(PackageType::kStaticLib);
-    context.SetPackageId(kAppPackageId);
-  } else {
-    context.SetPackageType(PackageType::kApp);
-    context.SetPackageId(kAppPackageId);
+    options.output_format = OutputFormat::kProto;
+  } else if (proto_format) {
+    options.output_format = OutputFormat::kProto;
   }
 
   if (package_id) {

@@ -43,7 +43,7 @@ TEST(ContainerTest, SerializeCompiledFile) {
 
     pb::internal::CompiledFile pb_compiled_file;
     pb_compiled_file.set_resource_name("android:layout/main.xml");
-    pb_compiled_file.set_type(pb::internal::CompiledFile::Type::CompiledFile_Type_PROTO_XML);
+    pb_compiled_file.set_type(pb::FileReference::PROTO_XML);
     pb_compiled_file.set_source_path("res/layout/main.xml");
     io::StringInputStream data(expected_data);
     ASSERT_TRUE(writer.AddResFileEntry(pb_compiled_file, &data));

@@ -41,14 +41,8 @@ message CompiledFile {
   // The configuration for which the resource is defined.
   aapt.pb.Configuration config = 2;
 
-  enum Type {
-    UNKNOWN = 0;
-    PNG = 1;
-    BINARY_XML = 2;
-    PROTO_XML = 3;
-  }
-
-  Type type = 3;
+  // The type of the file.
+  aapt.pb.FileReference.Type type = 3;
 
   // The filesystem path to where the source file originated.
   // Mainly used to display helpful error messages.
@@ -56,7 +50,4 @@ message CompiledFile {
 
   // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
   repeated Symbol exported_symbol = 5;
-
-  // If this is a compiled XML file, this is the root node.
-  aapt.pb.XmlNode xml_root = 6;
 }

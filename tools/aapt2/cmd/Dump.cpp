@@ -65,21 +65,19 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
     ResourceTable table;
-    if (io::IFile* file = zip->FindFile("resources.arsc.flat")) {
+    if (io::IFile* file = zip->FindFile("resources.pb")) {
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (data == nullptr) {
-        context->GetDiagnostics()->Error(DiagMessage(file_path)
-                                         << "failed to open resources.arsc.flat");
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "failed to open resources.pb");
         return false;
       }
 
       pb::ResourceTable pb_table;
       if (!pb_table.ParseFromArray(data->data(), data->size())) {
-        context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.arsc.flat");
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.pb");
         return false;
       }
 
-      ResourceTable table;
       if (!DeserializeTableFromPb(pb_table, &table, &err)) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to parse table: " << err);
@@ -98,7 +96,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
       }
     }
 
-    Debug::PrintTable(&table, print_options);
+    Debug::PrintTable(table, print_options);
     return true;
   }
 
@@ -137,7 +135,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
         continue;
       }
 
-      Debug::PrintTable(&table, print_options);
+      Debug::PrintTable(table, print_options);
     } else if (entry->Type() == ContainerEntryType::kResFile) {
       pb::internal::CompiledFile pb_compiled_file;
       off64_t offset;

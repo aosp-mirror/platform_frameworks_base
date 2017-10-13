@@ -361,6 +361,19 @@ static pb::Plural_Arity SerializePluralEnumToPb(size_t plural_idx) {
   return pb::Plural_Arity_OTHER;
 }
 
+static pb::FileReference::Type SerializeFileReferenceTypeToPb(const ResourceFile::Type& type) {
+  switch (type) {
+    case ResourceFile::Type::kBinaryXml:
+      return pb::FileReference::BINARY_XML;
+    case ResourceFile::Type::kProtoXml:
+      return pb::FileReference::PROTO_XML;
+    case ResourceFile::Type::kPng:
+      return pb::FileReference::PNG;
+    default:
+      return pb::FileReference::UNKNOWN;
+  }
+}
+
 namespace {
 
 class ValueSerializer : public ConstValueVisitor {
@@ -395,7 +408,9 @@ class ValueSerializer : public ConstValueVisitor {
   }
 
   void Visit(const FileReference* file) override {
-    out_value_->mutable_item()->mutable_file()->set_path(*file->path);
+    pb::FileReference* pb_file = out_value_->mutable_item()->mutable_file();
+    pb_file->set_path(*file->path);
+    pb_file->set_type(SerializeFileReferenceTypeToPb(file->type));
   }
 
   void Visit(const Id* /*id*/) override {
@@ -507,23 +522,10 @@ void SerializeItemToPb(const Item& item, pb::Item* out_item) {
   out_item->MergeFrom(value.item());
 }
 
-static pb::internal::CompiledFile::Type SerializeCompiledFileType(const ResourceFile::Type& type) {
-  switch (type) {
-    case ResourceFile::Type::kPng:
-      return pb::internal::CompiledFile::Type::CompiledFile_Type_PNG;
-    case ResourceFile::Type::kBinaryXml:
-      return pb::internal::CompiledFile::Type::CompiledFile_Type_BINARY_XML;
-    case ResourceFile::Type::kProtoXml:
-      return pb::internal::CompiledFile::Type::CompiledFile_Type_PROTO_XML;
-    default:
-      return pb::internal::CompiledFile::Type::CompiledFile_Type_UNKNOWN;
-  }
-}
-
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file) {
   out_file->set_resource_name(file.name.ToString());
   out_file->set_source_path(file.source.path);
-  out_file->set_type(SerializeCompiledFileType(file.type));
+  out_file->set_type(SerializeFileReferenceTypeToPb(file.type));
   SerializeConfig(file.config, out_file->mutable_config());
 
   for (const SourcedResourceName& exported : file.exported_symbols) {

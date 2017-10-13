@@ -31,13 +31,11 @@ struct DebugPrintTableOptions {
 };
 
 struct Debug {
-  static void PrintTable(ResourceTable* table,
-                         const DebugPrintTableOptions& options = {});
+  static void PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options = {});
   static void PrintStyleGraph(ResourceTable* table,
                               const ResourceName& target_style);
   static void DumpHex(const void* data, size_t len);
-  static void DumpXml(xml::XmlResource* doc);
-  static std::string ToString(xml::XmlResource* doc);
+  static void DumpXml(const xml::XmlResource& doc);
 };
 
 }  // namespace aapt
