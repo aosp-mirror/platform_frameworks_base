@@ -446,7 +446,7 @@ static bool IsTransitionElement(const std::string& name) {
 
 static bool IsVectorElement(const std::string& name) {
   return name == "vector" || name == "animated-vector" || name == "pathInterpolator" ||
-         name == "objectAnimator";
+         name == "objectAnimator" || name == "gradient";
 }
 
 template <typename T>
