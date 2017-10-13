@@ -34,6 +34,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     time_zone_distro \
     time_zone_distro_installer \
     android.hidl.base-V1.0-java \
+    android.hardware.health-V1.0-java \
+    android.hardware.health-V2.0-java \
     android.hardware.weaver-V1.0-java \
     android.hardware.biometrics.fingerprint-V2.1-java \
     android.hardware.oemlock-V1.0-java \
