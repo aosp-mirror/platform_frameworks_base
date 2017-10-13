@@ -152,4 +152,12 @@ public interface TextClassifier {
      */
     @WorkerThread
     default void logEvent(String source, String event) {}
+
+    /**
+     * Returns this TextClassifier's settings.
+     * @hide
+     */
+    default TextClassifierConstants getSettings() {
+        return TextClassifierConstants.DEFAULT;
+    }
 }
