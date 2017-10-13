@@ -20,7 +20,6 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -649,7 +648,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
      * shouldn't be shown.
      */
     private int getDimSide(int x) {
-        if (mTask.mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
+        if (!mTask.mStack.inFreeformWindowingMode()
                 || !mTask.mStack.fillsParent()
                 || mTask.mStack.getConfiguration().orientation != ORIENTATION_LANDSCAPE) {
             return CTRL_NONE;

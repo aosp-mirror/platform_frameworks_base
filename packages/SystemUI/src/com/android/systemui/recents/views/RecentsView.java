@@ -16,10 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityOptions.OnAnimationStartedListener;
@@ -114,7 +110,6 @@ public class RecentsView extends FrameLayout {
     private final int mStackButtonShadowColor;
 
     private boolean mAwaitingFirstLayout = true;
-    private boolean mLastTaskLaunchedWasFreeform;
 
     @ViewDebug.ExportedProperty(category="recents")
     Rect mSystemInsets = new Rect();
@@ -232,7 +227,6 @@ public class RecentsView extends FrameLayout {
 
         // Reset the state
         mAwaitingFirstLayout = !isResumingFromVisible;
-        mLastTaskLaunchedWasFreeform = false;
 
         // Update the stack
         mTaskStackView.onReload(isResumingFromVisible);
@@ -317,13 +311,6 @@ public class RecentsView extends FrameLayout {
             mMultiWindowBackgroundScrim.setCallback(null);
             window.setBackgroundDrawable(mBackgroundScrim);
         }
-    }
-
-    /**
-     * Returns whether the last task launched was in the freeform stack or not.
-     */
-    public boolean isLastTaskLaunchedFreeform() {
-        return mLastTaskLaunchedWasFreeform;
     }
 
     /** Launches the focused task from the first stack if possible */
@@ -542,7 +529,6 @@ public class RecentsView extends FrameLayout {
     /**** EventBus Events ****/
 
     public final void onBusEvent(LaunchTaskEvent event) {
-        mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
                 event.taskView, event.screenPinningRequested, event.targetWindowingMode,
                 event.targetActivityType);

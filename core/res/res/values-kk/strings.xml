@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Әкімші қолданбасы болмағандықтан жұмыс профилі жойылды"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Жұмыс профилінің әкімші қолданбасы жоқ немесе бүлінген. Нәтижесінде жұмыс профиліңіз және қатысты деректер жойылды. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Жұмыс профиліңіз осы құрылғыда енді қолжетімді емес"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Тым көп құпия сөз енгізу әрекеті жасалды"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Құрылғы басқарылады"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Ұйымыңыз осы құрылғыны басқарады және желі трафигін бақылауы мүмкін. Мәліметтер алу үшін түртіңіз."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Құрылғыңыздағы деректер өшіріледі"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM картасына рұқсат етілмеген"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Телефонға рұқсат етілмеген"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Қалқымалы терезе"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

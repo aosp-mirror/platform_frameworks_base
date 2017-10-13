@@ -33,18 +33,18 @@ write_field_or_skip(EncodedBuffer::iterator* iter, EncodedBuffer* buf, uint8_t w
 {
     EncodedBuffer::Pointer snapshot = iter->rp()->copy();
     size_t bytesToWrite = 0;
-    uint32_t varint = 0;
+    uint64_t varint = 0;
     switch (wireType) {
         case WIRE_TYPE_VARINT:
             varint = iter->readRawVarint();
-            if(!skip) return buf->writeRawVarint(varint);
+            if(!skip) return buf->writeRawVarint64(varint);
             break;
         case WIRE_TYPE_FIXED64:
             bytesToWrite = 8;
             break;
         case WIRE_TYPE_LENGTH_DELIMITED:
             bytesToWrite = iter->readRawVarint();
-            if(!skip) buf->writeRawVarint(bytesToWrite);
+            if(!skip) buf->writeRawVarint32(bytesToWrite);
             break;
         case WIRE_TYPE_FIXED32:
             bytesToWrite = 4;
@@ -76,7 +76,6 @@ stripField(EncodedBuffer::iterator* iter, EncodedBuffer* buf, const Privacy* par
     uint8_t wireType = read_wire_type(varint);
     uint32_t fieldId = read_field_id(varint);
     const Privacy* policy = parentPolicy->lookup(fieldId);
-
     if (policy == NULL || !policy->IsMessageType() || !policy->HasChildren()) {
         bool skip = !spec.CheckPremission(policy);
         size_t amt = buf->size();
@@ -99,7 +98,7 @@ stripField(EncodedBuffer::iterator* iter, EncodedBuffer* buf, const Privacy* par
     }
 
     buf->writeHeader(fieldId, wireType);
-    buf->writeRawVarint(finalSize);
+    buf->writeRawVarint32(finalSize);
     while (!q.empty()) {
         EncodedBuffer* subField = q.front();
         EncodedBuffer::iterator it = subField->begin();

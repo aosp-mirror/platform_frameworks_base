@@ -21,12 +21,14 @@
 #include <indexed_priority_queue.h>
 #include <utils/RefBase.h>
 
+#include <unordered_set>
 #include <queue>
 #include <vector>
 
 using namespace android;
 
 using android::os::IStatsCompanionService;
+using std::unordered_set;
 
 namespace android {
 namespace os {
@@ -84,6 +86,13 @@ public:
      * with the same timestampSec, that alarm will still remain in the queue.
      */
     void remove(sp<const AnomalyAlarm> alarm);
+
+    /**
+     * Returns and removes all alarms whose timestamp <= the given timestampSec.
+     * Always updates the registered alarm if return is non-empty.
+     */
+    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>
+                    popSoonerThan(uint32_t timestampSec);
 
     /**
      * Returns the projected alarm timestamp that is registered with

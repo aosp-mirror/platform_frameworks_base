@@ -22,15 +22,15 @@ LOCAL_CFLAGS := \
         -Wall -Werror -Wno-missing-field-initializers -Wno-unused-variable -Wunused-parameter
 
 LOCAL_SHARED_LIBRARIES := \
-        libbinder \
+        libcutils \
         liblog \
-        libutils
 
 LOCAL_C_INCLUDES := \
         $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := \
         src/EncodedBuffer.cpp \
+        src/ProtoOutputStream.cpp \
         src/protobuf.cpp \
 
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include

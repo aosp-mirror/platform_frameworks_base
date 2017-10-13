@@ -36,6 +36,7 @@ import android.net.IpSecUdpEncapResponse;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -48,11 +49,10 @@ import java.net.UnknownHostException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link IpSecService}. */
 @SmallTest
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 public class IpSecServiceTest {
 
     private static final int DROID_SPI = 0xD1201D;

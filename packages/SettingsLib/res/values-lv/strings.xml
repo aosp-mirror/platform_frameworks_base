@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Neizdevās atvērt lietotnes <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> iestatījumus."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Izmantojot šo ievades metodi, var tikt vākta informācija par visu ierakstīto tekstu, tostarp personiskiem datiem, piemēram, parolēm un kredītkaršu numuriem. Šī metode ir saistīta ar lietotni <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Vai lietot šo ievades metodi?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Piezīme. Šo lietotni pēc atkārtotas palaišanas nevarēs startēt, kamēr netiks atbloķēts tālrunis."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS reģistrācijas statuss"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Reģistrēts"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nav reģistrēts"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Nepieejams"</string>
 </resources>

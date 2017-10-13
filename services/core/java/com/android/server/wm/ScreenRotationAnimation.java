@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -24,7 +23,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
-import static com.android.server.wm.WindowSurfaceController.SurfaceTrace;
 import static com.android.server.wm.proto.ScreenRotationAnimationProto.ANIMATION_RUNNING;
 import static com.android.server.wm.proto.ScreenRotationAnimationProto.STARTED;
 
@@ -276,17 +274,10 @@ class ScreenRotationAnimation {
                     flags |= SurfaceControl.SECURE;
                 }
 
-                if (DEBUG_SURFACE_TRACE) {
-                    mSurfaceControl = new SurfaceTrace(session, "ScreenshotSurface",
-                            mWidth, mHeight,
-                            PixelFormat.OPAQUE, flags);
-                    Slog.w(TAG, "ScreenRotationAnimation ctor: displayOffset="
-                            + mOriginalDisplayRect.toShortString());
-                } else {
-                    mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
-                            mWidth, mHeight,
-                            PixelFormat.OPAQUE, flags);
-                }
+                mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
+                        mWidth, mHeight,
+                        PixelFormat.OPAQUE, flags);
+
                 // capture a screenshot into the surface we just created
                 Surface sur = new Surface();
                 sur.copyFrom(mSurfaceControl);

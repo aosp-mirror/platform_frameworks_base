@@ -591,6 +591,11 @@
     <!-- Text shown when viewing channel settings for notifications related to a usb connection -->
     <string name="notification_channel_usb">USB connection</string>
 
+    <!-- Text shown when viewing channel settings for notification about a heavy-weight app
+         currently running.
+         [CHAR_LIMIT=NONE] -->
+    <string name="notification_channel_heavy_weight_app">App running</string>
+
     <!-- This is the label for the notification channel settings that controls the behavior
         of the notification about applications that are running in the background (that is,
         perhaps confusingly, running foreground services but not the foreground UI on the screen).
@@ -2678,19 +2683,19 @@
     <string name="email">Email</string>
 
     <!-- Label for item in the text selection menu to trigger a Dialer app [CHAR LIMIT=20] -->
-    <string name="dial">Phone</string>
+    <string name="dial">Call</string>
 
     <!-- Label for item in the text selection menu to trigger a Map app [CHAR LIMIT=20] -->
-    <string name="map">Maps</string>
+    <string name="map">Locate</string>
 
     <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
-    <string name="browse">Browser</string>
+    <string name="browse">Open</string>
 
     <!-- Label for item in the text selection menu to trigger an SMS app [CHAR LIMIT=20] -->
-    <string name="sms">SMS</string>
+    <string name="sms">Message</string>
 
     <!-- Label for item in the text selection menu to trigger adding a contact [CHAR LIMIT=20] -->
-    <string name="add_contact">Contact</string>
+    <string name="add_contact">Add</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>

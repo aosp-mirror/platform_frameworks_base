@@ -53,7 +53,8 @@ oneway interface IAutoFillManagerClient {
       * the session is finished automatically.
       */
     void setTrackedViews(int sessionId, in @nullable AutofillId[] savableIds,
-            boolean saveOnAllViewsInvisible, in @nullable AutofillId[] fillableIds);
+            boolean saveOnAllViewsInvisible, boolean saveOnFinish,
+            in @nullable AutofillId[] fillableIds, in AutofillId saveTriggerId);
 
     /**
      * Requests showing the fill UI.

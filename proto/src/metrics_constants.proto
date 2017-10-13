@@ -4666,7 +4666,38 @@ message MetricsEvent {
     DIALOG_CLEAR_ADB_KEYS = 1223;
 
     // Open: Settings > Developer options > Quick setting tile config
+    // CATEGORY: SETTINGS
+    // OS: P
     DEVELOPMENT_QS_TILE_CONFIG = 1224;
+
+    // OPEN: Settings > Developer options > Store logger data persistently on device > Info dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_LOG_PERSIST = 1225;
+
+    // ACTION: DND Settings > Priority only allows > Alarms toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_ALARMS = 1226;
+
+    // ACTION: DND Settings > Priority only allows > Media toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_MEDIA = 1227;
+
+    // An autofill service explicitly defined which view should commit the autofill context
+    // Package: Package of app that is autofilled
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION = 1228;
+
+    // The autofill context was commited when the user clicked a view explicitly marked by the
+    // service as committing it
+    // Package: Package of app that is autofilled
+    // OS: P
+    AUTOFILL_SAVE_EXPLICITLY_TRIGGERED = 1229;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

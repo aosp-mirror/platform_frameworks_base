@@ -823,7 +823,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         // For freeform windows, we can't freeze the bounds at the moment because this would make
         // the resizing unresponsive.
-        if (task == null || task.inFreeformWorkspace()) {
+        if (task == null || task.inFreeformWindowingMode()) {
             return false;
         }
 

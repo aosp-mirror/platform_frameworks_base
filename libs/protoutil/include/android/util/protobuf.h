@@ -24,6 +24,9 @@ namespace util {
 
 using namespace std;
 
+const int FIELD_ID_SHIFT = 3;
+const uint8_t WIRE_TYPE_MASK = (1 << FIELD_ID_SHIFT) - 1;
+
 const uint8_t WIRE_TYPE_VARINT = 0;
 const uint8_t WIRE_TYPE_FIXED64 = 1;
 const uint8_t WIRE_TYPE_LENGTH_DELIMITED = 2;
@@ -35,16 +38,20 @@ const uint8_t WIRE_TYPE_FIXED32 = 5;
 uint8_t read_wire_type(uint32_t varint);
 
 /**
- * read field id from varint, it is varint >> 3;
+ * Read field id from varint, it is varint >> 3;
  */
 uint32_t read_field_id(uint32_t varint);
 
 /**
- * Write a varint into the buffer. Return the next position to write at.
- * There must be 10 bytes in the buffer. The same as
- * EncodedBuffer.writeRawVarint32
+ * Get the size of a varint.
  */
-uint8_t* write_raw_varint(uint8_t* buf, uint32_t val);
+size_t get_varint_size(uint64_t varint);
+
+/**
+ * Write a varint into the buffer. Return the next position to write at.
+ * There must be 10 bytes in the buffer.
+ */
+uint8_t* write_raw_varint(uint8_t* buf, uint64_t val);
 
 /**
  * Write a protobuf WIRE_TYPE_LENGTH_DELIMITED header. Return the next position

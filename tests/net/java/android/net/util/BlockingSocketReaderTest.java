@@ -18,14 +18,18 @@ package android.net.util;
 
 import static android.net.util.BlockingSocketReader.DEFAULT_RECV_BUF_SIZE;
 import static android.system.OsConstants.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructTimeval;
-
-import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -41,15 +45,21 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
+import libcore.io.IoBridge;
 
 /**
  * Tests for BlockingSocketReader.
  *
  * @hide
  */
-public class BlockingSocketReaderTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class BlockingSocketReaderTest {
     static final InetAddress LOOPBACK6 = Inet6Address.getLoopbackAddress();
     static final StructTimeval TIMEO = StructTimeval.fromMillis(500);
 
@@ -103,7 +113,7 @@ public class BlockingSocketReaderTest extends TestCase {
         }
     };
 
-    @Override
+    @Before
     public void setUp() {
         resetLatch();
         mLocalSocket = null;
@@ -115,7 +125,7 @@ public class BlockingSocketReaderTest extends TestCase {
         mHandlerThread.start();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (mReceiver != null) {
             mHandlerThread.getThreadHandler().post(() -> { mReceiver.stop(); });
@@ -143,6 +153,7 @@ public class BlockingSocketReaderTest extends TestCase {
         sender.close();
     }
 
+    @Test
     public void testBasicWorking() throws Exception {
         final Handler h = mHandlerThread.getThreadHandler();
         mReceiver = new UdpLoopbackReader(h);
@@ -186,6 +197,7 @@ public class BlockingSocketReaderTest extends TestCase {
         public FileDescriptor createFd() { return null; }
     }
 
+    @Test
     public void testMinimalRecvBufSize() throws Exception {
         final Handler h = mHandlerThread.getThreadHandler();
 

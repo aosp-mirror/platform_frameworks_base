@@ -16,6 +16,10 @@
 
 package com.android.systemui.shortcut;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.os.UserHandle.USER_CURRENT;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -102,11 +106,10 @@ public class ShortcutKeyDispatcher extends SystemUI
                 // If there is no window docked, we dock the top-most window.
                 Recents recents = getComponent(Recents.class);
                 int dockMode = (shortcutCode == SC_DOCK_LEFT)
-                        ? ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                        : ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                        ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                        : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 List<ActivityManager.RecentTaskInfo> taskList =
-                        SystemServicesProxy.getInstance(mContext).getRecentTasks(1,
-                                UserHandle.USER_CURRENT, false, new ArraySet<>());
+                        SystemServicesProxy.getInstance(mContext).getRecentTasks(1, USER_CURRENT);
                 recents.showRecentApps(
                         false /* triggeredFromAltTab */,
                         false /* fromHome */);

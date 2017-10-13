@@ -16,13 +16,6 @@
 
 package android.app;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -670,138 +663,6 @@ public class ActivityManager {
         /** Invalid stack ID. */
         public static final int INVALID_STACK_ID = -1;
 
-        /** First static stack ID.
-         * @hide */
-        private  static final int FIRST_STATIC_STACK_ID = 0;
-
-        /** ID of stack where fullscreen activities are normally launched into.
-         * @hide */
-        public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
-
-        /** ID of stack where freeform/resized activities are normally launched into.
-         * @hide */
-        public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
-
-        /** ID of stack that occupies a dedicated region of the screen.
-         * @hide */
-        public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
-
-        /** ID of stack that always on top (always visible) when it exist.
-         * @hide */
-        public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
-
-        /** Last static stack stack ID.
-         * @hide */
-        private static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
-
-        /** Start of ID range used by stacks that are created dynamically.
-         * @hide */
-        public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
-
-        // TODO: Figure-out a way to remove this.
-        /** @hide */
-        public static boolean isStaticStack(int stackId) {
-            return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
-        }
-
-        // TODO: It seems this mostly means a stack on a secondary display now. Need to see if
-        // there are other meanings. If not why not just use information from the display?
-        /** @hide */
-        public static boolean isDynamicStack(int stackId) {
-            return stackId >= FIRST_DYNAMIC_STACK_ID;
-        }
-
-        /**
-         * Returns true if we try to maintain focus in the current stack when the top activity
-         * finishes.
-         * @hide
-         */
-        // TODO: Figure-out a way to remove. Probably isn't needed in the new world...
-        public static boolean keepFocusInStackIfPossible(int stackId) {
-            return stackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if the windows of tasks being moved to the target stack from the source
-         * stack should be replaced, meaning that window manager will keep the old window around
-         * until the new is ready.
-         * @hide
-         */
-        public static boolean replaceWindowsOnTaskMove(int sourceStackId, int targetStackId) {
-            return sourceStackId == FREEFORM_WORKSPACE_STACK_ID
-                    || targetStackId == FREEFORM_WORKSPACE_STACK_ID;
-        }
-
-        /**
-         * Returns true if the top task in the task is allowed to return home when finished and
-         * there are other tasks in the stack.
-         * @hide
-         */
-        public static boolean allowTopTaskToReturnHome(int stackId) {
-            return stackId != PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if the stack should be resized to match the bounds specified by
-         * {@link ActivityOptions#setLaunchBounds} when launching an activity into the stack.
-         * @hide
-         */
-        public static boolean resizeStackWithLaunchBounds(int stackId) {
-            return stackId == PINNED_STACK_ID;
-        }
-
-        /**
-         * Returns true if a window from the specified stack with {@param stackId} are normally
-         * fullscreen, i. e. they can become the top opaque fullscreen window, meaning that it
-         * controls system bars, lockscreen occluded/dismissing state, screen rotation animation,
-         * etc.
-         * @hide
-         */
-        // TODO: What about the other side of docked stack if we move this to WindowConfiguration?
-        public static boolean normallyFullscreenWindows(int stackId) {
-            return stackId != PINNED_STACK_ID && stackId != FREEFORM_WORKSPACE_STACK_ID
-                    && stackId != DOCKED_STACK_ID;
-        }
-
-        /** Returns the stack id for the input windowing mode.
-         * @hide */
-        // TODO: To be removed once we are not using stack id for stuff...
-        public static int getStackIdForWindowingMode(int windowingMode) {
-            switch (windowingMode) {
-                case WINDOWING_MODE_PINNED: return PINNED_STACK_ID;
-                case WINDOWING_MODE_FREEFORM: return FREEFORM_WORKSPACE_STACK_ID;
-                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return DOCKED_STACK_ID;
-                case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY: return FULLSCREEN_WORKSPACE_STACK_ID;
-                case WINDOWING_MODE_FULLSCREEN: return FULLSCREEN_WORKSPACE_STACK_ID;
-                default: return INVALID_STACK_ID;
-            }
-        }
-
-        /** Returns the windowing mode that should be used for this input stack id.
-         * @hide */
-        // TODO: To be removed once we are not using stack id for stuff...
-        public static int getWindowingModeForStackId(int stackId, boolean inSplitScreenMode) {
-            final int windowingMode;
-            switch (stackId) {
-                case FULLSCREEN_WORKSPACE_STACK_ID:
-                    windowingMode = inSplitScreenMode
-                            ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY : WINDOWING_MODE_FULLSCREEN;
-                    break;
-                case PINNED_STACK_ID:
-                    windowingMode = WINDOWING_MODE_PINNED;
-                    break;
-                case DOCKED_STACK_ID:
-                    windowingMode = WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-                    break;
-                case FREEFORM_WORKSPACE_STACK_ID:
-                    windowingMode = WINDOWING_MODE_FREEFORM;
-                    break;
-                default :
-                    windowingMode = WINDOWING_MODE_UNDEFINED;
-            }
-            return windowingMode;
-        }
     }
 
     /**
@@ -1571,7 +1432,6 @@ public class ActivityManager {
             }
             dest.writeInt(stackId);
             dest.writeInt(userId);
-            dest.writeLong(firstActiveTime);
             dest.writeLong(lastActiveTime);
             dest.writeInt(affiliatedTaskId);
             dest.writeInt(affiliatedTaskColor);
@@ -1600,7 +1460,6 @@ public class ActivityManager {
                     TaskDescription.CREATOR.createFromParcel(source) : null;
             stackId = source.readInt();
             userId = source.readInt();
-            firstActiveTime = source.readLong();
             lastActiveTime = source.readLong();
             affiliatedTaskId = source.readInt();
             affiliatedTaskColor = source.readInt();
@@ -1643,31 +1502,6 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-     * Provides a list that contains recent tasks for all
-     * profiles of a user.
-     * @hide
-     */
-    public static final int RECENT_INCLUDE_PROFILES = 0x0004;
-
-    /**
-     * Ignores all tasks that are on the home stack.
-     * @hide
-     */
-    public static final int RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS = 0x0008;
-
-    /**
-     * Ignores the top task in the docked stack.
-     * @hide
-     */
-    public static final int RECENT_INGORE_DOCKED_STACK_TOP_TASK = 0x0010;
-
-    /**
-     * Ignores all tasks that are on the pinned stack.
-     * @hide
-     */
-    public static final int RECENT_INGORE_PINNED_STACK_TASKS = 0x0020;
-
-    /**
      * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
@@ -1702,33 +1536,7 @@ public class ActivityManager {
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
-            return getService().getRecentTasks(maxNum,
-                    flags, UserHandle.myUserId()).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Same as {@link #getRecentTasks(int, int)} but returns the recent tasks for a
-     * specific user. It requires holding
-     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
-     * @param maxNum The maximum number of entries to return in the list.  The
-     * actual number returned may be smaller, depending on how many tasks the
-     * user has started and the maximum number the system can remember.
-     * @param flags Information about what to return.  May be any combination
-     * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
-     *
-     * @return Returns a list of RecentTaskInfo records describing each of
-     * the recent tasks. Most recently activated tasks go first.
-     *
-     * @hide
-     */
-    public List<RecentTaskInfo> getRecentTasksForUser(int maxNum, int flags, int userId)
-            throws SecurityException {
-        try {
-            return getService().getRecentTasks(maxNum,
-                    flags, userId).getList();
+            return getService().getRecentTasks(maxNum, flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

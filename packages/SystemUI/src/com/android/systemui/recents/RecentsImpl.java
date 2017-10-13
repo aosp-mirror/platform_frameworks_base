@@ -77,7 +77,6 @@ import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.Task.TaskKey;
-import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.views.RecentsTransitionHelper;
@@ -142,7 +141,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+                loader.preloadTasks(plan, -1);
                 TaskStack stack = plan.getTaskStack();
                 RecentsActivityLaunchState launchState = new RecentsActivityLaunchState();
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
@@ -283,7 +282,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
@@ -473,8 +472,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
-            MutableBoolean isHomeStackVisible = new MutableBoolean(true);
-            if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+            if (!ssp.isRecentsActivityVisible(null)) {
                 ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
                 if (runningTask == null) {
                     return;
@@ -482,7 +480,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 sInstanceLoadPlan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible.value);
+                loader.preloadTasks(sInstanceLoadPlan, runningTask.id);
                 TaskStack stack = sInstanceLoadPlan.getTaskStack();
                 if (stack.getTaskCount() > 0) {
                     // Only preload the icon (but not the thumbnail since it may not have been taken
@@ -522,7 +520,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -577,7 +575,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+        loader.preloadTasks(plan, -1);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -595,43 +593,38 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
-        int numAffiliatedTasks = 0;
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
             if (task.key.id == runningTask.id) {
-                TaskGrouping group = task.group;
-                Task.TaskKey toTaskKey;
                 if (showNextTask) {
-                    toTaskKey = group.getNextTaskInGroup(task);
-                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_next_affiliated_task_target,
-                            R.anim.recents_launch_next_affiliated_task_source);
+                    if ((i + 1) < taskCount) {
+                        toTask = tasks.get(i + 1);
+                        launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                                R.anim.recents_launch_next_affiliated_task_target,
+                                R.anim.recents_launch_next_affiliated_task_source);
+                    }
                 } else {
-                    toTaskKey = group.getPrevTaskInGroup(task);
-                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_prev_affiliated_task_target,
-                            R.anim.recents_launch_prev_affiliated_task_source);
+                    if ((i - 1) >= 0) {
+                        toTask = tasks.get(i - 1);
+                        launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                                R.anim.recents_launch_prev_affiliated_task_target,
+                                R.anim.recents_launch_prev_affiliated_task_source);
+                    }
                 }
-                if (toTaskKey != null) {
-                    toTask = focusedStack.findTaskWithId(toTaskKey.id);
-                }
-                numAffiliatedTasks = group.getTaskCount();
                 break;
             }
         }
 
         // Return early if there is no next task
         if (toTask == null) {
-            if (numAffiliatedTasks > 1) {
-                if (showNextTask) {
-                    ssp.startInPlaceAnimationOnFrontMostApplication(
-                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
-                                    R.anim.recents_launch_next_affiliated_task_bounce));
-                } else {
-                    ssp.startInPlaceAnimationOnFrontMostApplication(
-                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
-                                    R.anim.recents_launch_prev_affiliated_task_bounce));
-                }
+            if (showNextTask) {
+                ssp.startInPlaceAnimationOnFrontMostApplication(
+                        ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                R.anim.recents_launch_next_affiliated_task_bounce));
+            } else {
+                ssp.startInPlaceAnimationOnFrontMostApplication(
+                        ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                R.anim.recents_launch_prev_affiliated_task_bounce));
             }
             return;
         }
@@ -753,8 +746,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
                     systemInsets.left, systemInsets.right, mTmpBounds);
             stackLayout.reset();
-            stackLayout.initialize(displayRect, windowRect, mTmpBounds,
-                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
+            stackLayout.initialize(displayRect, windowRect, mTmpBounds);
         }
     }
 
@@ -873,61 +865,29 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo runningTask,
                     Rect windowOverrideRect) {
         final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
-        if (runningTask != null
-                && runningTask.configuration.windowConfiguration.getWindowingMode()
-                == WINDOWING_MODE_FREEFORM) {
-            ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
-            ArrayList<Task> tasks = mDummyStackView.getStack().getStackTasks();
-            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-            TaskStackViewScroller stackScroller = mDummyStackView.getScroller();
 
-            mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */);
-            mDummyStackView.updateToInitialState();
+        // Update the destination rect
+        Task toTask = new Task();
+        TaskViewTransform toTransform = getThumbnailTransitionTransform(mDummyStackView, toTask,
+                windowOverrideRect);
 
-            for (int i = tasks.size() - 1; i >= 0; i--) {
-                Task task = tasks.get(i);
-                if (task.isFreeformTask()) {
-                    mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
-                            stackScroller.getStackScroll(), mTmpTransform, null,
-                            windowOverrideRect);
-                    GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform);
-                    Rect toTaskRect = new Rect();
-                    mTmpTransform.rect.round(toTaskRect);
-                    specs.add(new AppTransitionAnimationSpec(task.key.id, thumbnail, toTaskRect));
-                }
-            }
-            AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
-            specs.toArray(specsArray);
+        RectF toTaskRect = toTransform.rect;
+        AppTransitionAnimationSpecsFuture future =
+                new RecentsTransitionHelper(mContext).getAppTransitionFuture(
+                        () -> {
+                    Rect rect = new Rect();
+                    toTaskRect.round(rect);
+                    GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask,
+                            toTransform);
+                    return Lists.newArrayList(new AppTransitionAnimationSpec(
+                            toTask.key.id, thumbnail, rect));
+                });
 
-            // For low end ram devices, wait for transition flag is reset when Recents entrance
-            // animation is complete instead of when the transition animation starts
-            return new Pair<>(ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, isLowRamDevice ? null : mResetToggleFlagListener, this),
-                    null);
-        } else {
-            // Update the destination rect
-            Task toTask = new Task();
-            TaskViewTransform toTransform = getThumbnailTransitionTransform(mDummyStackView, toTask,
-                    windowOverrideRect);
-
-            RectF toTaskRect = toTransform.rect;
-            AppTransitionAnimationSpecsFuture future =
-                    new RecentsTransitionHelper(mContext).getAppTransitionFuture(
-                            () -> {
-                        Rect rect = new Rect();
-                        toTaskRect.round(rect);
-                        GraphicBuffer thumbnail = drawThumbnailTransitionBitmap(toTask,
-                                toTransform);
-                        return Lists.newArrayList(new AppTransitionAnimationSpec(
-                                toTask.key.id, thumbnail, rect));
-                    });
-
-            // For low end ram devices, wait for transition flag is reset when Recents entrance
-            // animation is complete instead of when the transition animation starts
-            return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
-                    mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
-                    false /* scaleUp */), future);
-        }
+        // For low end ram devices, wait for transition flag is reset when Recents entrance
+        // animation is complete instead of when the transition animation starts
+        return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
+                mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
+                false /* scaleUp */), future);
     }
 
     /**
@@ -942,7 +902,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             runningTaskOut.copyFrom(launchTask);
         } else {
             // If no task is specified or we can not find the task just use the front most one
-            launchTask = stack.getStackFrontMostTask(true /* includeFreeform */);
+            launchTask = stack.getStackFrontMostTask();
             runningTaskOut.copyFrom(launchTask);
         }
 
@@ -1012,7 +972,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, runningTaskId, !isHomeStackVisible);
+            loader.preloadTasks(sInstanceLoadPlan, runningTaskId);
         }
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();

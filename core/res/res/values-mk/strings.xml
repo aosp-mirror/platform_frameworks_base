@@ -1791,4 +1791,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Не е дозволена SIM-картичка"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Не е дозволен телефон"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Појавен прозорец"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

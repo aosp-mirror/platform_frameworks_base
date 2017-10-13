@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -196,9 +194,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Called from RecentsActivity when it is relaunched.
      */
     void onReload(boolean isResumingFromVisible) {
-        if (!Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
-            resetNoUserInteractionState();
-        }
+        resetNoUserInteractionState();
         if (!isResumingFromVisible) {
             resetViewProperties();
         }
@@ -415,9 +411,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * view.
      */
     boolean shouldClipViewInStack() {
-        // Never clip for freeform tasks or if invisible
-        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE ||
-                Recents.getConfiguration().isLowRamDevice) {
+        if (getVisibility() != View.VISIBLE || Recents.getConfiguration().isLowRamDevice) {
             return false;
         }
         return mClipViewInStack;

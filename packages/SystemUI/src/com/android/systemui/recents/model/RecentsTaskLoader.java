@@ -337,18 +337,11 @@ public class RecentsTaskLoader {
         return plan;
     }
 
-    /** Preloads raw recents tasks using the specified plan to store the output. */
-    public synchronized void preloadRawTasks(RecentsTaskLoadPlan plan,
-            boolean includeFrontMostExcludedTask) {
-        plan.preloadRawTasks(includeFrontMostExcludedTask);
-    }
-
     /** Preloads recents tasks using the specified plan to store the output. */
-    public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
-            boolean includeFrontMostExcludedTask) {
+    public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId) {
         try {
             Trace.beginSection("preloadPlan");
-            plan.preloadPlan(this, runningTaskId, includeFrontMostExcludedTask);
+            plan.preloadPlan(this, runningTaskId);
         } finally {
             Trace.endSection();
         }

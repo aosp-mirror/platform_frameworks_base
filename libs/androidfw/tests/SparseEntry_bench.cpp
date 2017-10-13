@@ -18,7 +18,6 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "BenchmarkHelpers.h"
-#include "TestHelpers.h"
 #include "data/sparse/R.h"
 
 namespace sparse = com::android::sparse;

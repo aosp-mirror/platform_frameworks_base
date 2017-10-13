@@ -73,10 +73,8 @@ import java.util.List;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -85,15 +83,6 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
-
-    // Is the object moving in a positive direction?
-    private static final boolean MOVING_FORWARD = true;
-    // Is the object moving in the horizontal plan?
-    private static final boolean MOVING_HORIZONTALLY = true;
-    // Is the object current point great then its target point?
-    private static final boolean GREATER_THAN_TARGET = true;
-    // Amount we reduce the stack size by when testing a task re-size.
-    private static final int STACK_BOUNDS_INSET = 10;
 
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
@@ -1944,8 +1933,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return runStackInfo(pw);
             case "move-top-activity-to-pinned-stack":
                 return runMoveTopActivityToPinnedStack(pw);
-            case "size-docked-stack-test":
-                return runStackSizeDockedStackTest(pw);
             case "remove":
                 return runStackRemove(pw);
             default:
@@ -2139,89 +2126,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (!mInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
             getErrPrintWriter().println("Didn't move top activity to pinned stack.");
             return -1;
-        }
-        return 0;
-    }
-
-    int runStackSizeDockedStackTest(PrintWriter pw) throws RemoteException {
-        final PrintWriter err = getErrPrintWriter();
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String side = getNextArgRequired();
-        final String delayStr = getNextArg();
-        final int delayMs = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-
-        ActivityManager.StackInfo info = mInterface.getStackInfo(
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
-        if (info == null) {
-            err.println("Docked stack doesn't exist");
-            return -1;
-        }
-        if (info.bounds == null) {
-            err.println("Docked stack doesn't have a bounds");
-            return -1;
-        }
-        Rect bounds = info.bounds;
-
-        final boolean horizontalGrowth = "l".equals(side) || "r".equals(side);
-        final int changeSize = (horizontalGrowth ? bounds.width() : bounds.height()) / 2;
-        int currentPoint;
-        switch (side) {
-            case "l":
-                currentPoint = bounds.left;
-                break;
-            case "r":
-                currentPoint = bounds.right;
-                break;
-            case "t":
-                currentPoint = bounds.top;
-                break;
-            case "b":
-                currentPoint = bounds.bottom;
-                break;
-            default:
-                err.println("Unknown growth side: " + side);
-                return -1;
-        }
-
-        final int startPoint = currentPoint;
-        final int minPoint = currentPoint - changeSize;
-        final int maxPoint = currentPoint + changeSize;
-
-        int maxChange;
-        pw.println("Shrinking docked stack side=" + side);
-        pw.flush();
-        while (currentPoint > minPoint) {
-            maxChange = Math.min(stepSize, currentPoint - minPoint);
-            currentPoint -= maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
-        }
-
-        pw.println("Growing docked stack side=" + side);
-        pw.flush();
-        while (currentPoint < maxPoint) {
-            maxChange = Math.min(stepSize, maxPoint - currentPoint);
-            currentPoint += maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
-        }
-
-        pw.println("Back to Original size side=" + side);
-        pw.flush();
-        while (currentPoint > startPoint) {
-            maxChange = Math.min(stepSize, currentPoint - startPoint);
-            currentPoint -= maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
         }
         return 0;
     }
@@ -2687,10 +2591,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Change docked stack to <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           and supplying temporary different task bounds indicated by");
             pw.println("           <TASK_LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("       size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]");
-            pw.println("           Test command for sizing docked stack by");
-            pw.println("           <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom");
-            pw.println("           applying the optional [DELAY_MS] between each step.");
             pw.println("       move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           Moves the top activity from");
             pw.println("           <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the");

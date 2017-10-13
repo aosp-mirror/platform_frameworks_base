@@ -36,8 +36,6 @@ import android.support.test.InstrumentationRegistry;
 import android.view.IWindow;
 import android.view.WindowManager;
 
-import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -70,7 +68,7 @@ class WindowTestsBase {
     // make sure we don't collide with any existing display. If we run into no other display, the
     // added display should be treated as default. This cannot be the default display
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
-    private static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
+    static int sNextStackId = 1000;
 
     private static boolean sOneTimeSetupDone = false;
     DisplayContent mDisplayContent;

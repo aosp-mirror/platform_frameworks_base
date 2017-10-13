@@ -18,10 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -31,6 +28,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
@@ -102,6 +100,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -155,8 +154,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private static final String ATTR_EFFECTIVE_UID = "effective_uid";
     @Deprecated
     private static final String ATTR_TASKTYPE = "task_type";
-    private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
-    private static final String ATTR_LASTACTIVETIME = "last_active_time";
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
@@ -212,9 +209,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     ComponentName realActivity; // The actual activity component that started the task.
     boolean realActivitySuspended; // True if the actual activity component that started the
                                    // task is suspended.
-    long firstActiveTime;   // First time this task was active.
-    long lastActiveTime;    // Last time this task was active, including sleep.
     boolean inRecents;      // Actually in the recents list?
+    long lastActiveTime;    // Last time this task was active in the current device session,
+                            // including sleep. This time is initialized to the elapsed time when
+                            // restored from disk.
     boolean isAvailable;    // Is the activity available to be launched?
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
@@ -339,6 +337,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         taskId = _taskId;
+        lastActiveTime = SystemClock.elapsedRealtime();
         mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
@@ -359,6 +358,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 TaskPersister.IMAGE_EXTENSION;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         taskId = _taskId;
+        lastActiveTime = SystemClock.elapsedRealtime();
         mAffiliatedTaskId = _taskId;
         voiceSession = null;
         voiceInteractor = null;
@@ -385,12 +385,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
             int _effectiveUid, String _lastDescription, ArrayList<ActivityRecord> activities,
-            long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
-            boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
-            int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, int resizeMode, boolean supportsPictureInPicture,
-            boolean privileged, boolean _realActivitySuspended, boolean userSetupComplete,
-            int minWidth, int minHeight) {
+            long lastTimeMoved, boolean neverRelinquishIdentity,
+            TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
+            int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
+            int resizeMode, boolean supportsPictureInPicture, boolean privileged,
+            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth,
+            int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -412,8 +412,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         userId = _userId;
         mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
-        firstActiveTime = _firstActiveTime;
-        lastActiveTime = _lastActiveTime;
+        lastActiveTime = SystemClock.elapsedRealtime();
         lastDescription = _lastDescription;
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
@@ -520,7 +519,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // All we can do for now is update the bounds so it can be used when the task is
             // added to window manager.
             updateOverrideConfiguration(bounds);
-            if (getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+            if (!inFreeformWindowingMode()) {
                 // re-restore the task so it can have the proper stack association.
                 mService.mStackSupervisor.restoreRecentTaskLocked(this, null);
             }
@@ -616,8 +615,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @return whether the task was reparented
      */
     // TODO: Inspect all call sites and change to just changing windowing mode of the stack vs.
-    // re-parenting the task. Can only be done when we are no longer using static stack Ids like
-    /** {@link ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} */
+    // re-parenting the task. Can only be done when we are no longer using static stack Ids.
     boolean reparent(ActivityStack preferredStack, int position,
             @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
@@ -630,12 +628,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             return false;
         }
 
-        final int sourceStackId = getStackId();
-        final int stackId = toStack.getStackId();
+        final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopActivity();
 
-        final boolean mightReplaceWindow = StackId.replaceWindowsOnTaskMove(sourceStackId, stackId)
-                && topActivity != null;
+        final boolean mightReplaceWindow =
+                replaceWindowsOnTaskMove(getWindowingMode(), toStackWindowingMode)
+                        && topActivity != null;
         if (mightReplaceWindow) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
@@ -707,10 +705,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             toStack.prepareFreezingTaskBounds();
 
             // Make sure the task has the appropriate bounds/size for the stack it is in.
-            final int toStackWindowingMode = toStack.getWindowingMode();
             final boolean toStackSplitScreenPrimary =
                     toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
+            if ((toStackWindowingMode == WINDOWING_MODE_FULLSCREEN
+                    || toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
                     && !Objects.equals(mBounds, toStack.mBounds)) {
                 kept = resize(toStack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
                         deferResume);
@@ -751,7 +749,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // TODO: Handle incorrect request to move before the actual move, not after.
         final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenStack();
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, stackId);
+                DEFAULT_DISPLAY, toStack.mStackId);
 
         boolean successful = (preferredStack == toStack);
         if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
@@ -759,6 +757,18 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             mService.mWindowManager.showRecentApps(false /* fromHome */);
         }
         return successful;
+    }
+
+    /**
+     * Returns true if the windows of tasks being moved to the target stack from the source
+     * stack should be replaced, meaning that window manager will keep the old window around
+     * until the new is ready.
+     * @hide
+     */
+    private static boolean replaceWindowsOnTaskMove(
+            int sourceWindowingMode, int targetWindowingMode) {
+        return sourceWindowingMode == WINDOWING_MODE_FREEFORM
+                || targetWindowingMode == WINDOWING_MODE_FREEFORM;
     }
 
     void cancelWindowTransition() {
@@ -780,14 +790,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void touchActiveTime() {
-        lastActiveTime = System.currentTimeMillis();
-        if (firstActiveTime == 0) {
-            firstActiveTime = lastActiveTime;
-        }
+        lastActiveTime = SystemClock.elapsedRealtime();
     }
 
     long getInactiveDuration() {
-        return System.currentTimeMillis() - lastActiveTime;
+        return SystemClock.elapsedRealtime() - lastActiveTime;
     }
 
     /** Sets the original intent, and the calling uid and package. */
@@ -1263,7 +1270,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             mService.notifyTaskPersisterLocked(this, false);
         }
 
-        if (getStackId() == PINNED_STACK_ID) {
+        if (inPinnedWindowingMode()) {
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
@@ -1493,7 +1500,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @return True if the requested bounds are okay for a resizing request.
      */
     private boolean canResizeToBounds(Rect bounds) {
-        if (bounds == null || getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+        if (bounds == null || !inFreeformWindowingMode()) {
             // Note: If not on the freeform workspace, we ignore the bounds.
             return true;
         }
@@ -1647,8 +1654,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
         out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
         out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
-        out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
-        out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
         out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
         if (lastDescription != null) {
@@ -1721,8 +1726,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         boolean userSetupComplete = true;
         int effectiveUid = -1;
         String lastDescription = null;
-        long firstActiveTime = -1;
-        long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
         int taskId = INVALID_TASK_ID;
@@ -1774,10 +1777,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 effectiveUid = Integer.parseInt(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.parseInt(attrValue);
-            } else if (ATTR_FIRSTACTIVETIME.equals(attrName)) {
-                firstActiveTime = Long.parseLong(attrValue);
-            } else if (ATTR_LASTACTIVETIME.equals(attrName)) {
-                lastActiveTime = Long.parseLong(attrValue);
             } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
                 lastDescription = attrValue;
             } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
@@ -1888,9 +1887,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
-                activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeMode, supportsPictureInPicture, privileged,
+                activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
+                taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
+                callingPackage, resizeMode, supportsPictureInPicture, privileged,
                 realActivitySuspended, userSetupComplete, minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
@@ -1911,7 +1910,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (getStackId() != PINNED_STACK_ID) {
+        if (!inPinnedWindowingMode()) {
             if (minWidth == INVALID_MIN_SIZE) {
                 minWidth = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             }
@@ -2085,7 +2084,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             return;
         }
 
-        if (inStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+        if (inStack.inFreeformWindowingMode()) {
             if (!isResizeable()) {
                 throw new IllegalArgumentException("Can not position non-resizeable task="
                         + this + " in stack=" + inStack);
@@ -2220,7 +2219,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
                 pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
                 pw.print(" isResizeable=" + isResizeable());
-                pw.print(" firstActiveTime=" + firstActiveTime);
                 pw.print(" lastActiveTime=" + lastActiveTime);
                 pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }

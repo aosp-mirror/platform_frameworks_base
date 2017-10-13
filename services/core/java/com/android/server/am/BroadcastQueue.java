@@ -51,8 +51,11 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
+
+import com.android.server.am.proto.BroadcastQueueProto;
 
 /**
  * BROADCASTS
@@ -1583,6 +1586,55 @@ public final class BroadcastQueue {
     final boolean isIdle() {
         return mParallelBroadcasts.isEmpty() && mOrderedBroadcasts.isEmpty()
                 && (mPendingBroadcast == null);
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
+        int N;
+        N = mParallelBroadcasts.size();
+        for (int i = N - 1; i >= 0; i--) {
+            mParallelBroadcasts.get(i).writeToProto(proto, BroadcastQueueProto.PARALLEL_BROADCASTS);
+        }
+        N = mOrderedBroadcasts.size();
+        for (int i = N - 1; i >= 0; i--) {
+            mOrderedBroadcasts.get(i).writeToProto(proto, BroadcastQueueProto.ORDERED_BROADCASTS);
+        }
+        if (mPendingBroadcast != null) {
+            mPendingBroadcast.writeToProto(proto, BroadcastQueueProto.PENDING_BROADCAST);
+        }
+
+        int lastIndex = mHistoryNext;
+        int ringIndex = lastIndex;
+        do {
+            // increasing index = more recent entry, and we want to print the most
+            // recent first and work backwards, so we roll through the ring backwards.
+            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
+            BroadcastRecord r = mBroadcastHistory[ringIndex];
+            if (r != null) {
+                r.writeToProto(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
+            }
+        } while (ringIndex != lastIndex);
+
+        lastIndex = ringIndex = mSummaryHistoryNext;
+        do {
+            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
+            Intent intent = mBroadcastSummaryHistory[ringIndex];
+            if (intent == null) {
+                continue;
+            }
+            long summaryToken = proto.start(BroadcastQueueProto.HISTORICAL_BROADCASTS_SUMMARY);
+            intent.writeToProto(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
+                    false, true, true, false);
+            proto.write(BroadcastQueueProto.BroadcastSummary.ENQUEUE_CLOCK_TIME_MS,
+                    mSummaryHistoryEnqueueTime[ringIndex]);
+            proto.write(BroadcastQueueProto.BroadcastSummary.DISPATCH_CLOCK_TIME_MS,
+                    mSummaryHistoryDispatchTime[ringIndex]);
+            proto.write(BroadcastQueueProto.BroadcastSummary.FINISH_CLOCK_TIME_MS,
+                    mSummaryHistoryFinishTime[ringIndex]);
+            proto.end(summaryToken);
+        } while (ringIndex != lastIndex);
+        proto.end(token);
     }
 
     final boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,

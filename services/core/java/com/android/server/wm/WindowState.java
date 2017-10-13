@@ -16,10 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
@@ -83,7 +80,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -815,13 +811,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final WindowState imeWin = mService.mInputMethodWindow;
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this) {
-                final int stackId = getStackId();
-                if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                if (inFreeformWindowingMode()
                         && mContainingFrame.bottom > contentFrame.bottom) {
                     // In freeform we want to move the top up directly.
                     // TODO: Investigate why this is contentFrame not parentFrame.
                     mContainingFrame.top -= mContainingFrame.bottom - contentFrame.bottom;
-                } else if (stackId != PINNED_STACK_ID
+                } else if (!inPinnedWindowingMode()
                         && mContainingFrame.bottom > parentFrame.bottom) {
                     // But in docked we want to behave like fullscreen and behave as if the task
                     // were given smaller bounds for the purposes of layout. Skip adjustments for
@@ -898,7 +893,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // For pinned workspace the frame isn't limited in any particular
             // way since SystemUI controls the bounds. For freeform however
             // we want to keep things inside the content frame.
-            final Rect limitFrame = task.inPinnedWorkspace() ? mFrame : mContentFrame;
+            final Rect limitFrame = task.inPinnedWindowingMode() ? mFrame : mContentFrame;
             // Keep the frame out of the blocked system area, limit it in size to the content area
             // and make sure that there is always a minimum visible so that the user can drag it
             // into a usable area..
@@ -1210,7 +1205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // application when it has finished drawing.
             if (getOrientationChanging() || dragResizingChanged
                     || isResizedWhileNotDragResizing()) {
-                if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
+                if (DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                     Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
                             + ", surfaceController " + winAnimator.mSurfaceController);
@@ -1662,9 +1657,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             //
             // Anyway we don't need to synchronize position and content updates for these
             // windows since they aren't at the base layer and could be moved around anyway.
-            if (!computeDragResizing() && mAttrs.type == TYPE_BASE_APPLICATION &&
-                    !mWinAnimator.isForceScaled() && !isGoneForLayoutLw() &&
-                    !getTask().inPinnedWorkspace()) {
+            if (!computeDragResizing() && mAttrs.type == TYPE_BASE_APPLICATION
+                    && !mWinAnimator.isForceScaled() && !isGoneForLayoutLw()
+                    && !getTask().inPinnedWindowingMode()) {
                 setResizedWhileNotDragResizing(true);
             }
         }
@@ -2196,12 +2191,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    // TODO: Strange usage of word workspace here and above.
-    boolean inPinnedWorkspace() {
-        final Task task = getTask();
-        return task != null && task.inPinnedWorkspace();
-    }
-
     void applyAdjustForImeIfNeeded() {
         final Task task = getTask();
         if (task != null && task.mStack != null && task.mStack.isAdjustedForIme()) {
@@ -2235,7 +2224,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             } else {
                 getVisibleBounds(mTmpRect);
             }
-            if (inFreeformWorkspace()) {
+            if (inFreeformWindowingMode()) {
                 // For freeform windows we the touch region to include the whole surface for the
                 // shadows.
                 final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
@@ -2938,8 +2927,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mTmpRect;
     }
 
-    @Override
-    public int getStackId() {
+    private int getStackId() {
         final TaskStack stack = getStack();
         if (stack == null) {
             return INVALID_STACK_ID;
@@ -2981,11 +2969,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         synchronized(mService.mWindowMap) {
             return mService.mCurrentFocus == this;
         }
-    }
-
-    boolean inFreeformWorkspace() {
-        final Task task = getTask();
-        return task != null && task.inFreeformWorkspace();
     }
 
     @Override
@@ -3105,7 +3088,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // background.
         return (getDisplayContent().mDividerControllerLocked.isResizing()
                         || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
-                !task.inFreeformWorkspace() && !isGoneForLayoutLw();
+                !task.inFreeformWindowingMode() && !isGoneForLayoutLw();
 
     }
 
@@ -3695,7 +3678,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Force the show in the next prepareSurfaceLocked() call.
         mWinAnimator.mLastAlpha = -1;
-        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) Slog.v(TAG,
+        if (DEBUG_ANIM) Slog.v(TAG,
                 "performShowLocked: mDrawState=HAS_DRAWN in " + this);
         mWinAnimator.mDrawState = HAS_DRAWN;
         mService.scheduleAnimationLocked();
@@ -3756,7 +3739,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
         Task task = getTask();
-        windowInfo.inPictureInPicture = (task != null) && task.inPinnedWorkspace();
+        windowInfo.inPictureInPicture = (task != null) && task.inPinnedWindowingMode();
 
         if (mIsChildWindow) {
             windowInfo.parentToken = getParentWindow().mClient.asBinder();
@@ -4219,7 +4202,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If a freeform window is animating from a position where it would be cutoff, it would be
         // cutoff during the animation. We don't want that, so for the duration of the animation
         // we ignore the decor cropping and depend on layering to position windows correctly.
-        final boolean cropToDecor = !(inFreeformWorkspace() && isAnimatingLw());
+        final boolean cropToDecor = !(inFreeformWindowingMode() && isAnimatingLw());
         if (cropToDecor) {
             // Intersect with the decor rect, offsetted by window position.
             systemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
@@ -4303,7 +4286,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // scale for the animation using the source hint rect
         // (see WindowStateAnimator#setSurfaceBoundariesLocked()).
         if (isDragResizeChanged() || isResizedWhileNotDragResizing()
-                || (surfaceInsetsChanging() && !inPinnedWorkspace())) {
+                || (surfaceInsetsChanging() && !inPinnedWindowingMode())) {
             mLastSurfaceInsets.set(mAttrs.surfaceInsets);
 
             setDragResizing();

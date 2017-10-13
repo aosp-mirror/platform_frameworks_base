@@ -15,6 +15,7 @@
  */
 
 #include <android/util/EncodedBuffer.h>
+#include <android/util/protobuf.h>
 
 #include <stdlib.h>
 
@@ -52,19 +53,21 @@ EncodedBuffer::Pointer::offset() const
     return mOffset;
 }
 
-void
+EncodedBuffer::Pointer*
 EncodedBuffer::Pointer::move(size_t amt)
 {
     size_t newOffset = mOffset + amt;
     mIndex += newOffset / mChunkSize;
     mOffset = newOffset % mChunkSize;
+    return this;
 }
 
-void
+EncodedBuffer::Pointer*
 EncodedBuffer::Pointer::rewind()
 {
     mIndex = 0;
     mOffset = 0;
+    return this;
 }
 
 EncodedBuffer::Pointer
@@ -86,6 +89,7 @@ EncodedBuffer::EncodedBuffer(size_t chunkSize)
 {
     mChunkSize = chunkSize == 0 ? BUFFER_SIZE : chunkSize;
     mWp = Pointer(mChunkSize);
+    mEp = Pointer(mChunkSize);
 }
 
 EncodedBuffer::~EncodedBuffer()
@@ -137,28 +141,136 @@ EncodedBuffer::currentToWrite()
     return mChunkSize - mWp.offset();
 }
 
+void
+EncodedBuffer::writeRawByte(uint8_t val)
+{
+    *writeBuffer() = val;
+    mWp.move();
+}
+
 size_t
-EncodedBuffer::writeRawVarint(uint32_t val)
+EncodedBuffer::writeRawVarint64(uint64_t val)
 {
     size_t size = 0;
     while (true) {
         size++;
         if ((val & ~0x7F) == 0) {
-            *writeBuffer() = (uint8_t) val;
-            mWp.move();
+            writeRawByte((uint8_t) val);
             return size;
         } else {
-            *writeBuffer() = (uint8_t)((val & 0x7F) | 0x80);
-            mWp.move();
+            writeRawByte((uint8_t)((val & 0x7F) | 0x80));
             val >>= 7;
         }
     }
 }
 
 size_t
+EncodedBuffer::writeRawVarint32(uint32_t val)
+{
+    uint64_t v =(uint64_t)val;
+    return writeRawVarint64(v);
+}
+
+void
+EncodedBuffer::writeRawFixed32(uint32_t val)
+{
+    writeRawByte((uint8_t) val);
+    writeRawByte((uint8_t) (val>>8));
+    writeRawByte((uint8_t) (val>>16));
+    writeRawByte((uint8_t) (val>>24));
+}
+
+void
+EncodedBuffer::writeRawFixed64(uint64_t val)
+{
+    writeRawByte((uint8_t) val);
+    writeRawByte((uint8_t) (val>>8));
+    writeRawByte((uint8_t) (val>>16));
+    writeRawByte((uint8_t) (val>>24));
+    writeRawByte((uint8_t) (val>>32));
+    writeRawByte((uint8_t) (val>>40));
+    writeRawByte((uint8_t) (val>>48));
+    writeRawByte((uint8_t) (val>>56));
+}
+
+size_t
 EncodedBuffer::writeHeader(uint32_t fieldId, uint8_t wireType)
 {
-    return writeRawVarint((fieldId << 3) | wireType);
+    return writeRawVarint32((fieldId << FIELD_ID_SHIFT) | wireType);
+}
+
+/******************************** Edit APIs ************************************************/
+EncodedBuffer::Pointer*
+EncodedBuffer::ep()
+{
+    return &mEp;
+}
+
+uint8_t
+EncodedBuffer::readRawByte()
+{
+    uint8_t val = *at(mEp);
+    mEp.move();
+    return val;
+}
+
+uint64_t
+EncodedBuffer::readRawVarint()
+{
+    uint64_t val = 0, shift = 0;
+    size_t start = mEp.pos();
+    while (true) {
+        uint8_t byte = readRawByte();
+        val += (byte & 0x7F) << shift;
+        if ((byte & 0x80) == 0) break;
+        shift += 7;
+    }
+    return val;
+}
+
+uint32_t
+EncodedBuffer::readRawFixed32()
+{
+    uint32_t val = 0;
+    for (auto i=0; i<32; i+=8) {
+        val += (uint32_t)readRawByte() << i;
+    }
+    return val;
+}
+
+uint64_t
+EncodedBuffer::readRawFixed64()
+{
+    uint64_t val = 0;
+    for (auto i=0; i<64; i+=8) {
+        val += (uint64_t)readRawByte() << i;
+    }
+    return val;
+}
+
+void
+EncodedBuffer::editRawFixed32(size_t pos, uint32_t val)
+{
+    size_t oldPos = mEp.pos();
+    mEp.rewind()->move(pos);
+    for (auto i=0; i<32; i+=8) {
+        *at(mEp) = (uint8_t) (val >> i);
+        mEp.move();
+    }
+    mEp.rewind()->move(oldPos);
+}
+
+void
+EncodedBuffer::copy(size_t srcPos, size_t size)
+{
+    if (size == 0) return;
+    Pointer cp(mChunkSize);
+    cp.move(srcPos);
+
+    while (cp.pos() < srcPos + size) {
+        writeRawByte(*at(cp));
+        cp.move();
+    }
 }
 
 /********************************* Read APIs ************************************************/
@@ -220,10 +332,10 @@ EncodedBuffer::iterator::next()
     return res;
 }
 
-uint32_t
+uint64_t
 EncodedBuffer::iterator::readRawVarint()
 {
-    uint32_t val = 0, shift = 0;
+    uint64_t val = 0, shift = 0;
     while (true) {
         uint8_t byte = next();
         val += (byte & 0x7F) << shift;

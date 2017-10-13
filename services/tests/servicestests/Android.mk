@@ -62,6 +62,8 @@ LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
 
+LOCAL_PROGUARD_ENABLED := disabled
+
 include $(BUILD_PACKAGE)
 
 include $(call all-makefiles-under, $(LOCAL_PATH))

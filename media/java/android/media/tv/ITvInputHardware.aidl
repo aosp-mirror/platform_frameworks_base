@@ -40,12 +40,6 @@ interface ITvInputHardware {
     void setStreamVolume(float volume);
 
     /**
-     * Dispatch key event to HDMI service. The events would be automatically converted to
-     * HDMI CEC commands. If the hardware is not representing an HDMI port, this method will fail.
-     */
-    boolean dispatchKeyEventToHdmi(in KeyEvent event);
-
-    /**
      * Override default audio sink from audio policy. When override is on, it is
      * TvInputService's responsibility to adjust to audio configuration change
      * (for example, when the audio sink becomes unavailable or more desirable

@@ -1879,7 +1879,7 @@ public class Activity extends ContextThemeWrapper
 
         if (isFinishing()) {
             if (mAutoFillResetNeeded) {
-                getAutofillManager().commit();
+                getAutofillManager().onActivityFinished();
             } else if (mIntent != null
                     && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
                 // Activity was launched when user tapped a link in the Autofill Save UI - since

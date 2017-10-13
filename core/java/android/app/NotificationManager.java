@@ -934,8 +934,14 @@ public class NotificationManager {
         public static final int PRIORITY_CATEGORY_CALLS = 1 << 3;
         /** Calls from repeat callers are prioritized. */
         public static final int PRIORITY_CATEGORY_REPEAT_CALLERS = 1 << 4;
+        /** Alarms are prioritized */
+        public static final int PRIORITY_CATEGORY_ALARMS = 1 << 5;
+        /** Media, system, game (catch-all for non-never suppressible sounds) are prioritized */
+        public static final int PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER = 1 << 6;
 
         private static final int[] ALL_PRIORITY_CATEGORIES = {
+            PRIORITY_CATEGORY_ALARMS,
+            PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER,
             PRIORITY_CATEGORY_REMINDERS,
             PRIORITY_CATEGORY_EVENTS,
             PRIORITY_CATEGORY_MESSAGES,
@@ -1135,6 +1141,9 @@ public class NotificationManager {
                 case PRIORITY_CATEGORY_MESSAGES: return "PRIORITY_CATEGORY_MESSAGES";
                 case PRIORITY_CATEGORY_CALLS: return "PRIORITY_CATEGORY_CALLS";
                 case PRIORITY_CATEGORY_REPEAT_CALLERS: return "PRIORITY_CATEGORY_REPEAT_CALLERS";
+                case PRIORITY_CATEGORY_ALARMS: return "PRIORITY_CATEGORY_ALARMS";
+                case PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER:
+                    return "PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER";
                 default: return "PRIORITY_CATEGORY_UNKNOWN_" + priorityCategory;
             }
         }

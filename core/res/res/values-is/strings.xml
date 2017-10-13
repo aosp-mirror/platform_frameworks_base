@@ -172,8 +172,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Vinnusniði eytt vegna þess að stjórnunarforrit vantar"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Stjórnunarforrit vinnusniðsins vantar eða er skemmt. Vinnusniðinu og gögnum því tengdu hefur því verið eytt. Hafðu samband við kerfisstjórann til að fá frekari aðstoð."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Vinnusniðið þitt er ekki lengur í boði á þessu tæki"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Of margar tilraunir til að slá inn aðgangsorð"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Tækinu er stjórnað"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Fyrirtækið þitt stjórnar þessu tæki og kann að fylgjast með netnotkun. Ýttu hér til að fá upplýsingar."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tækið verður hreinsað"</string>
@@ -1790,4 +1789,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-kort er ekki leyft"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Sími er ekki leyfður"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Sprettigluggi"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

@@ -1449,8 +1449,7 @@
              quit it.  Only one such app can be running at a time; if the user
              tries to launch a second such app, they will be prompted
              to quit the first before doing so.  While the
-             application is running, the user will be informed of this.
-             @hide -->
+             application is running, the user will be informed of this. -->
         <attr name="cantSaveState" format="boolean" />
         <attr name="uiOptions" />
         <!-- Declare that your application will be able to deal with RTL (right to left) layouts.

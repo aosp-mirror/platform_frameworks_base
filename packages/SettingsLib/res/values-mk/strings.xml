@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Подесувањата за <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> не се отворија"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Овој метод на внес може да го собере сиот текст кој го пишувате, вклучувајќи и лични податоци како што се, лозинки и броеви на кредитни картички. Тоа го прави апликацијата <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Користи го овој метод на внес?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Забелешка: по рестартирање, апликацијава не може да се вклучи додека не го отклучите телефонот"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Состојба на IMS-регистрација"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Регистриран"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не е регистриран"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Недостапен"</string>
 </resources>

@@ -19,6 +19,7 @@ package com.android.systemui.recents.model;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskDescription;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -69,13 +70,11 @@ public class Task {
 
         private int mHashCode;
 
-        public TaskKey(int id, int windowingMode, Intent intent, int userId, long firstActiveTime,
-                long lastActiveTime) {
+        public TaskKey(int id, int windowingMode, Intent intent, int userId, long lastActiveTime) {
             this.id = id;
             this.windowingMode = windowingMode;
             this.baseIntent = intent;
             this.userId = userId;
-            this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
             updateHashCode();
         }
@@ -125,20 +124,6 @@ public class Task {
     public int temporarySortIndexInStack;
 
     /**
-     * The group will be computed separately from the initialization of the task
-     */
-    @ViewDebug.ExportedProperty(deepExport=true, prefix="group_")
-    public TaskGrouping group;
-    /**
-     * The affiliationTaskId is the task id of the parent task or itself if it is not affiliated
-     * with any task.
-     */
-    @ViewDebug.ExportedProperty(category="recents")
-    public int affiliationTaskId;
-    @ViewDebug.ExportedProperty(category="recents")
-    public int affiliationColor;
-
-    /**
      * The icon is the task description icon (if provided), which falls back to the activity icon,
      * which can then fall back to the application icon.
      */
@@ -160,15 +145,9 @@ public class Task {
     public boolean useLightOnPrimaryColor;
 
     /**
-     * The bounds of the task, used only if it is a freeform task.
-     */
-    @ViewDebug.ExportedProperty(category="recents")
-    public Rect bounds;
-
-    /**
      * The task description for this task, only used to reload task icons.
      */
-    public ActivityManager.TaskDescription taskDescription;
+    public TaskDescription taskDescription;
 
     /**
      * The state isLaunchTarget will be set for the correct task upon launching Recents.
@@ -200,28 +179,22 @@ public class Task {
         // Do nothing
     }
 
-    public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
-            ThumbnailData thumbnail, String title, String titleDescription,
-            String dismissDescription, String appInfoDescription, int colorPrimary,
-            int colorBackground, boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
-            boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
+    public Task(TaskKey key, Drawable icon, ThumbnailData thumbnail, String title,
+            String titleDescription, String dismissDescription, String appInfoDescription,
+            int colorPrimary, int colorBackground, boolean isLaunchTarget, boolean isStackTask,
+            boolean isSystemApp, boolean isDockable, TaskDescription taskDescription,
             int resizeMode, ComponentName topActivity, boolean isLocked) {
-        boolean isInAffiliationGroup = (affiliationTaskId != key.id);
-        boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
-        this.affiliationTaskId = affiliationTaskId;
-        this.affiliationColor = affiliationColor;
         this.icon = icon;
         this.thumbnail = thumbnail;
         this.title = title;
         this.titleDescription = titleDescription;
         this.dismissDescription = dismissDescription;
         this.appInfoDescription = appInfoDescription;
-        this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
+        this.colorPrimary = colorPrimary;
         this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
-        this.bounds = bounds;
         this.taskDescription = taskDescription;
         this.isLaunchTarget = isLaunchTarget;
         this.isStackTask = isStackTask;
@@ -237,9 +210,6 @@ public class Task {
      */
     public void copyFrom(Task o) {
         this.key = o.key;
-        this.group = o.group;
-        this.affiliationTaskId = o.affiliationTaskId;
-        this.affiliationColor = o.affiliationColor;
         this.icon = o.icon;
         this.thumbnail = o.thumbnail;
         this.title = o.title;
@@ -249,7 +219,6 @@ public class Task {
         this.colorPrimary = o.colorPrimary;
         this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
-        this.bounds = o.bounds;
         this.taskDescription = o.taskDescription;
         this.isLaunchTarget = o.isLaunchTarget;
         this.isStackTask = o.isStackTask;
@@ -276,11 +245,6 @@ public class Task {
         mCallbacks.remove(cb);
     }
 
-    /** Set the grouping */
-    public void setGroup(TaskGrouping group) {
-        this.group = group;
-    }
-
     /** Updates the task's windowing mode. */
     public void setWindowingMode(int windowingMode) {
         key.setWindowingMode(windowingMode);
@@ -288,14 +252,6 @@ public class Task {
         for (int i = 0; i < callbackCount; i++) {
             mCallbacks.get(i).onTaskWindowingModeChanged();
         }
-    }
-
-    /**
-     * Returns whether this task is on the freeform task stack.
-     */
-    public boolean isFreeformTask() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        return ssp.hasFreeformWorkspaceSupport() && key.windowingMode == WINDOWING_MODE_FREEFORM;
     }
 
     /** Notifies the callback listeners that this task has been loaded */
@@ -315,13 +271,6 @@ public class Task {
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             mCallbacks.get(i).onTaskDataUnloaded();
         }
-    }
-
-    /**
-     * Returns whether this task is affiliated with another task.
-     */
-    public boolean isAffiliatedTask() {
-        return key.id != affiliationTaskId;
     }
 
     /**
@@ -347,17 +296,11 @@ public class Task {
 
     public void dump(String prefix, PrintWriter writer) {
         writer.print(prefix); writer.print(key);
-        if (isAffiliatedTask()) {
-            writer.print(" "); writer.print("affTaskId=" + affiliationTaskId);
-        }
         if (!isDockable) {
             writer.print(" dockable=N");
         }
         if (isLaunchTarget) {
             writer.print(" launchTarget=Y");
-        }
-        if (isFreeformTask()) {
-            writer.print(" freeform=Y");
         }
         if (isLocked) {
             writer.print(" locked=Y");

@@ -1022,20 +1022,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
-        @Override
-        public boolean dispatchKeyEventToHdmi(KeyEvent event) throws RemoteException {
-            synchronized (mImplLock) {
-                if (mReleased) {
-                    throw new IllegalStateException("Device already released.");
-                }
-            }
-            if (mInfo.getType() != TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
-                return false;
-            }
-            // TODO(hdmi): mHdmiClient.sendKeyEvent(event);
-            return false;
-        }
-
         private boolean startCapture(Surface surface, TvStreamConfig config) {
             synchronized (mImplLock) {
                 if (mReleased) {

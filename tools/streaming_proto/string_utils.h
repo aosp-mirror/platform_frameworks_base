@@ -1,7 +1,8 @@
 #include <string>
+#include <vector>
 
 namespace android {
-namespace javastream_proto {
+namespace stream_proto {
 
 using namespace std;
 
@@ -26,7 +27,11 @@ string file_base_name(const string& str);
  */
 string replace_string(const string& str, const char replace, const char with);
 
+/**
+ * Split a string to parts by delimiter.
+ */
+vector<string> split(const string& str, const char delimiter);
 
-} // namespace javastream_proto
+} // namespace stream_proto
 } // namespace android
 

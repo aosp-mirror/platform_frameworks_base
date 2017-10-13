@@ -260,9 +260,9 @@ status_t BootAnimation::readyToRun() {
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
             dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
 
-    SurfaceComposerClient::openGlobalTransaction();
-    control->setLayer(0x40000000);
-    SurfaceComposerClient::closeGlobalTransaction();
+    SurfaceComposerClient::Transaction t;
+    t.setLayer(control, 0x40000000)
+        .apply();
 
     sp<Surface> s = control->getSurface();
 

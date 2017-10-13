@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.misc;
 
+import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -25,7 +26,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,7 +45,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -68,7 +67,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.ArraySet;
@@ -140,11 +138,9 @@ public class SystemServicesProxy {
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
-    ComponentName mAssistComponent;
     private int mCurrentUserId;
 
     boolean mIsSafeMode;
-    boolean mHasFreeformWorkspaceSupport;
 
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
@@ -319,10 +315,6 @@ public class SystemServicesProxy {
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport =
-                mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT) ||
-                        Settings.Global.getInt(context.getContentResolver(),
-                                DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
         mIsSafeMode = mPm.isSafeMode();
         mCurrentUserId = mAm.getCurrentUser();
 
@@ -338,9 +330,6 @@ public class SystemServicesProxy {
         mBgProtectionPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
         mBgProtectionPaint.setColor(0xFFffffff);
         mBgProtectionCanvas = new Canvas();
-
-        // Resolve the assist intent
-        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
         // Since SystemServicesProxy can be accessed from a per-SysUI process component, create a
         // per-process listener to keep track of the current user id to reduce the number of binder
@@ -385,20 +374,15 @@ public class SystemServicesProxy {
 
     /**
      * Returns a list of the recents tasks.
-     *
-     * @param includeFrontMostExcludedTask if set, will ensure that the front most excluded task
-     *                                     will be visible, otherwise no excluded tasks will be
-     *                                     visible.
      */
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean includeFrontMostExcludedTask, ArraySet<Integer> quietProfileIds) {
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
         if (RecentsDebugFlags.Static.EnableMockTasks) {
             ArrayList<ActivityManager.RecentTaskInfo> tasks =
                     new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numLatestTasks, RecentsDebugFlags.Static.MockTaskCount);
+            int count = Math.min(numTasks, RecentsDebugFlags.Static.MockTaskCount);
             for (int i = 0; i < count; i++) {
                 // Create a dummy component name
                 int packageIndex = i % RecentsDebugFlags.Static.MockTasksPackageCount;
@@ -412,7 +396,7 @@ public class SystemServicesProxy {
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
-                rti.firstActiveTime = rti.lastActiveTime = i;
+                rti.lastActiveTime = i;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
                             Bitmap.createBitmap(mDummyIcon), null,
@@ -427,57 +411,24 @@ public class SystemServicesProxy {
             return tasks;
         }
 
-        // Remove home/recents/excluded tasks
-        int minNumTasksToQuery = 10;
-        int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
-        int flags = ActivityManager.RECENT_IGNORE_HOME_AND_RECENTS_STACK_TASKS |
-                ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK |
-                ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES;
-        if (includeFrontMostExcludedTask) {
-            flags |= ActivityManager.RECENT_WITH_EXCLUDED;
-        }
-        List<ActivityManager.RecentTaskInfo> tasks = null;
         try {
-            tasks = mAm.getRecentTasksForUser(numTasksToQuery, flags, userId);
+            List<ActivityManager.RecentTaskInfo> tasks = mIam.getRecentTasks(numTasks,
+                    RECENT_IGNORE_UNAVAILABLE, userId).getList();
+            Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
+            while (iter.hasNext()) {
+                ActivityManager.RecentTaskInfo t = iter.next();
+
+                // Remove the task if it or it's package are blacklsited
+                if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
+                        sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
+                    iter.remove();
+                }
+            }
+            return tasks;
         } catch (Exception e) {
             Log.e(TAG, "Failed to get recent tasks", e);
-        }
-
-        // Break early if we can't get a valid set of tasks
-        if (tasks == null) {
             return new ArrayList<>();
         }
-
-        boolean isFirstValidTask = true;
-        Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            ActivityManager.RecentTaskInfo t = iter.next();
-
-            // NOTE: The order of these checks happens in the expected order of the traversal of the
-            // tasks
-
-            // Remove the task if it or it's package are blacklsited
-            if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
-                    sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
-                iter.remove();
-                continue;
-            }
-
-            // Remove the task if it is marked as excluded, unless it is the first most task and we
-            // are requested to include it
-            boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                    == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-            isExcluded |= quietProfileIds.contains(t.userId);
-            if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
-                iter.remove();
-            }
-
-            isFirstValidTask = false;
-        }
-
-        return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));
     }
 
     /**
@@ -572,13 +523,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns whether this device has freeform workspaces.
-     */
-    public boolean hasFreeformWorkspaceSupport() {
-        return mHasFreeformWorkspaceSupport;
-    }
-
-    /**
      * Returns whether this device is in the safe mode.
      */
     public boolean isInSafeMode() {
@@ -646,7 +590,7 @@ public class SystemServicesProxy {
      */
     public boolean hasSoftNavigationBar() {
         try {
-            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
+            return mIwm.hasNavigationBar();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -715,7 +659,7 @@ public class SystemServicesProxy {
 
         ActivityManager.TaskSnapshot snapshot = null;
         try {
-            snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            snapshot = mIam.getTaskSnapshot(taskId, reducedResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve snapshot", e);
         }
@@ -933,22 +877,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns a logo used on TV for the specified Activity.
-     */
-    public Drawable getActivityLogo(ActivityInfo info) {
-        if (mPm == null) return null;
-
-        // If we are mocking, then return a mock logo
-        if (RecentsDebugFlags.Static.EnableMockTasks) {
-            return new ColorDrawable(0xFF666666);
-        }
-
-        Drawable logo = info.loadLogo(mPm);
-        return logo;
-    }
-
-
-    /**
      * Returns the given label for a user, badging if necessary.
      */
     private String getBadgedLabel(String label, int userId) {
@@ -966,24 +894,6 @@ public class SystemServicesProxy {
             return false;
         }
         return mKgm.isDeviceLocked(userId);
-    }
-
-    /** Returns the package name of the home activity. */
-    public String getHomeActivityPackageName() {
-        if (mPm == null) return null;
-        if (RecentsDebugFlags.Static.EnableMockTasks) return null;
-
-        ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
-        ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);
-        if (defaultHomeActivity != null) {
-            return defaultHomeActivity.getPackageName();
-        } else if (homeActivities.size() == 1) {
-            ResolveInfo info = homeActivities.get(0);
-            if (info.activityInfo != null) {
-                return info.activityInfo.packageName;
-            }
-        }
-        return null;
     }
 
     /**
@@ -1195,7 +1105,7 @@ public class SystemServicesProxy {
             return;
         }
         try {
-            WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
+            mIwm.endProlongedAnimations();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1205,7 +1115,7 @@ public class SystemServicesProxy {
         if (mWm == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(listener);
+            mIwm.registerDockedStackListener(listener);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1232,8 +1142,7 @@ public class SystemServicesProxy {
         if (mWm == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().getStableInsets(Display.DEFAULT_DISPLAY,
-                    outStableInsets);
+            mIwm.getStableInsets(Display.DEFAULT_DISPLAY, outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1243,9 +1152,7 @@ public class SystemServicesProxy {
             IAppTransitionAnimationSpecsFuture future, IRemoteCallback animStartedListener,
             boolean scaleUp) {
         try {
-            WindowManagerGlobal.getWindowManagerService()
-                    .overridePendingAppTransitionMultiThumbFuture(future, animStartedListener,
-                            scaleUp);
+            mIwm.overridePendingAppTransitionMultiThumbFuture(future, animStartedListener, scaleUp);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
@@ -1289,14 +1196,6 @@ public class SystemServicesProxy {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-        });
-    }
-
-    public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
-            int currentUserId) {
-        mUiOffloadThread.submit(() -> {
-            Settings.Secure.putLongForUser(mContext.getContentResolver(),
-                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
         });
     }
 

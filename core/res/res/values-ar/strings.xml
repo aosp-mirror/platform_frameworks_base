@@ -180,8 +180,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"تم حذف الملف الشخصي للعمل نتيجة فقد تطبيق المشرف"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف الشخصي للعمل والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"تم إجراء محاولات كثيرة جدًا لإدخال كلمة المرور"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
@@ -1930,4 +1929,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"‏غير مسموح باستخدام SIM"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"غير مسموح باستخدام الهاتف"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"نافذة منبثقة"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

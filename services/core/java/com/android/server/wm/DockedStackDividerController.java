@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -588,7 +586,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private boolean containsAppInDockedStack(ArraySet<AppWindowToken> apps) {
         for (int i = apps.size() - 1; i >= 0; i--) {
             final AppWindowToken token = apps.valueAt(i);
-            if (token.getTask() != null && token.getTask().mStack.mStackId == DOCKED_STACK_ID) {
+            if (token.getTask() != null && token.inSplitScreenPrimaryWindowingMode()) {
                 return true;
             }
         }

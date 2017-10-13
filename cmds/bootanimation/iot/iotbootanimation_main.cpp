@@ -16,7 +16,7 @@
 
 #define LOG_TAG "IotBootAnimation"
 
-#include <android-base/file.h>
+#include <base/files/file_util.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
@@ -31,12 +31,13 @@
 #include "BootParameters.h"
 
 using namespace android;
-using android::base::ReadFileToString;
 
 // Create a typedef for readability.
 typedef android::BootAnimation::Animation Animation;
 
 namespace {
+
+constexpr const char* kDefaultLibName = "libbootaction.so";
 
 class BootActionAnimationCallbacks : public android::BootAnimation::Callbacks {
 public:
@@ -49,11 +50,13 @@ public:
         // This value is optionally provided by the user and will be written to
         // /oem/oem.prop.
         char property[PROP_VALUE_MAX] = {0};
-        if (property_get("ro.oem.bootactions.lib", property, "") < 1) {
-            ALOGI("No bootaction specified");
+        property_get("ro.oem.bootactions.lib", property, kDefaultLibName);
+        library_path += property;
+
+        if (!::base::PathExists(::base::FilePath(library_path))) {
+            ALOGI("Skipping boot actions: %s does not exist", library_path.c_str());
             return;
         }
-        library_path += property;
 
         mBootAction = new BootAction();
         if (!mBootAction->init(library_path, mBootParameters->getParameters())) {

@@ -176,8 +176,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Працоўны профіль выдалены з-за адсутнасці праграмы адміністратара"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Праграма адміністратара для працоўнага профілю адсутнічае або пашкоджана. У выніку гэтага ваш працоўны профіль і звязаныя з ім даныя былі выдалены. Звярніцеся па дапамогу да адміністратара."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Ваш працоўны профіль больш не даступны на гэтай прыладзе"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Занадта шмат спроб уводу пароля"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Прылада знаходзіцца пад кіраваннем"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Ваша арганізацыя кіруе гэтай прыладай і можа сачыць за сеткавым трафікам. Дакраніцеся для атрымання дадатковай інфармацыі."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Даныя вашай прылады будуць сцерты"</string>
@@ -1860,4 +1859,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-карта не дапускаецца"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Тэлефон не дапускаецца"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

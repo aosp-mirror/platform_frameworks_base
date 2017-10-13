@@ -121,7 +121,7 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"ಪಠ್ಯದಿಂದ ಧ್ವನಿಗೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"ಪಠ್ಯದಿಂದ ಧ್ವನಿಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ಧ್ವನಿಗೆ-ಪಠ್ಯದ ಔಟ್‌ಪುಟ್‌"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ಪ್ರಮಾಣ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ಪಠ್ಯವನ್ನು ಹೇಳಿದ ವೇಗ"</string>
@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ವೈಯಕ್ತಿಕ ಡೇಟಾಗಳಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನೀವು ಟೈಪ್ ಮಾಡುವ ಎಲ್ಲ ಪಠ್ಯವನ್ನು ಸಂಗ್ರಹಿಸಲು ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನಕ್ಕೆ ಸಾಧ್ಯವಾಗಬಹುದು. ಇದು <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಬರುತ್ತದೆ. ಈ ಇನ್‌ಪುಟ್ ವಿಧಾನವನ್ನು ಬಳಸುವುದೇ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"ಗಮನಿಸಿ: ರೀಬೂಟ್ ನಂತರ, ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಅನ್‌ಲಾಕ್ ಮಾಡುವ ತನಕ ಈ ಆಪ್ ಪ್ರಾರಂಭಗೊಳ್ಳುವುದಿಲ್ಲ"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS ನೋಂದಣಿ ಸ್ಥಿತಿ"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"ನೋಂದಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"ಲಭ್ಯವಿಲ್ಲ"</string>
 </resources>

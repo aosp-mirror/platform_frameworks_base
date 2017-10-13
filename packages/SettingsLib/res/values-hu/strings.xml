@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nem sikerült megnyitni a(z) <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> beállításait."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ez a beviteli módszer alkalmas lehet a beírt szövegek – köztük az olyan személyes adatok, mint a jelszavak és a hitelkártyaszámok - összegyűjtésére. A <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> alkalmazás kapcsolta be. Használja ezt a módszert?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Megjegyzés: Újraindítás után ez az alkalmazás csak a telefon feloldását követően indul el"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS-regisztráció állapota"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Regisztrált"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nem regisztrált"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Nem érhető el"</string>
 </resources>

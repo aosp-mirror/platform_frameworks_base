@@ -110,7 +110,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Uklonjene aplikacije"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Uklonjene aplikacije i korisnici"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB dijeljenje veze"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Povezivanje mobitela USB-om"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prijenosna pristupna tačka"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Dijeljenje Bluetooth veze"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Dijeljenje veze"</string>
@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nije uspjelo otvaranje postavki za <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ovaj način unosa može prikupiti sav tekst koji otkucate, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Način omogućava aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Da li želite koristiti ovaj način unosa?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Napomena: Nakon ponovnog pokretanja, ova aplikacija se neće moći pokrenuti dok ne otključate telefon"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Stanje IMS registracije"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrirano"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nije registrirano"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Nije dostupno"</string>
 </resources>

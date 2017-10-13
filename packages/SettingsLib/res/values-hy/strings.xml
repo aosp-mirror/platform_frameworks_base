@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Չստացվեց ցույց տալ <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>-ի տվյալները"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Այս ներմուծման եղանակը հնարավորություն է տալիս հավաքել ձեր մուտքագրած ողջ տեքստը՝ ընդգրկելով անձնական տեղեկություններ, ինչպես գաղտնաբառն ու բանկային քարտի համարները: Սկզբնաղբյուրը <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> հավելվածն է: Կիրառե՞լ այս եղանակը:"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Ուշադրություն. Վերաբեռնումից հետո այս հավելվածը չի գործարկվի մինչև չապակողպեք հեռախոսը"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS ծառայության գրանցման կարգավիճակը"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Գրանցված է"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Գրանցված չէ"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Անհասանելի"</string>
 </resources>

@@ -567,7 +567,7 @@ public class TaskPersister {
         SparseArray<SparseBooleanArray> changedTaskIdsPerUser = new SparseArray<>();
         synchronized (mService) {
             for (int userId : mRecentTasks.usersWithRecentsLoadedLocked()) {
-                SparseBooleanArray taskIdsToSave = mRecentTasks.mPersistedTaskIds.get(userId);
+                SparseBooleanArray taskIdsToSave = mRecentTasks.getTaskIdsForUser(userId);
                 SparseBooleanArray persistedIdsInFile = mTaskIdsInFile.get(userId);
                 if (persistedIdsInFile != null && persistedIdsInFile.equals(taskIdsToSave)) {
                     continue;
@@ -640,7 +640,7 @@ public class TaskPersister {
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            ArraySet<Integer> persistentTaskIds = new ArraySet<Integer>();
+            ArraySet<Integer> persistentTaskIds = new ArraySet<>();
             while (true) {
                 // We can't lock mService while holding TaskPersister.this, but we don't want to
                 // call removeObsoleteFiles every time through the loop, only the last time before
@@ -654,20 +654,7 @@ public class TaskPersister {
                     persistentTaskIds.clear();
                     synchronized (mService) {
                         if (DEBUG) Slog.d(TAG, "mRecents=" + mRecentTasks);
-                        for (int taskNdx = mRecentTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                            final TaskRecord task = mRecentTasks.get(taskNdx);
-                            if (DEBUG) Slog.d(TAG, "LazyTaskWriter: task=" + task +
-                                    " persistable=" + task.isPersistable);
-                            final ActivityStack stack = task.getStack();
-                            if ((task.isPersistable || task.inRecents)
-                                    && (stack == null || !stack.isHomeOrRecentsStack())) {
-                                if (DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
-                                persistentTaskIds.add(task.taskId);
-                            } else {
-                                if (DEBUG) Slog.d(TAG,
-                                        "omitting from persistentTaskIds task=" + task);
-                            }
-                        }
+                        mRecentTasks.getPersistableTaskIds(persistentTaskIds);
                         mService.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
                                 mRecentTasks.usersWithRecentsLoadedLocked());
                     }

@@ -95,11 +95,15 @@ public final class SelectionActionModeHelper {
     }
 
     public void startActionModeAsync(boolean adjustSelection) {
+        // Check if the smart selection should run for editable text.
+        adjustSelection &= !mTextView.isTextEditable()
+                || mTextView.getTextClassifier().getSettings()
+                        .isSuggestSelectionEnabledForEditableText();
+
         mSelectionTracker.onOriginalSelection(
                 getText(mTextView),
                 mTextView.getSelectionStart(),
-                mTextView.getSelectionEnd(),
-                mTextView.isTextEditable());
+                mTextView.getSelectionEnd());
         cancelAsyncTask();
         if (skipTextClassification()) {
             startActionMode(null);
@@ -196,7 +200,10 @@ public final class SelectionActionModeHelper {
     private void startActionMode(@Nullable SelectionResult result) {
         final CharSequence text = getText(mTextView);
         if (result != null && text instanceof Spannable) {
-            Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
+            // Do not change the selection if TextClassifier should be dark launched.
+            if (!mTextView.getTextClassifier().getSettings().isDarkLaunch()) {
+                Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
+            }
             mTextClassification = result.mClassification;
         } else {
             mTextClassification = null;
@@ -377,7 +384,7 @@ public final class SelectionActionModeHelper {
     }
 
     private void resetTextClassificationHelper() {
-        mTextClassificationHelper.reset(
+        mTextClassificationHelper.init(
                 mTextView.getTextClassifier(),
                 getText(mTextView),
                 mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
@@ -415,8 +422,7 @@ public final class SelectionActionModeHelper {
         /**
          * Called when the original selection happens, before smart selection is triggered.
          */
-        public void onOriginalSelection(
-                CharSequence text, int selectionStart, int selectionEnd, boolean editableText) {
+        public void onOriginalSelection(CharSequence text, int selectionStart, int selectionEnd) {
             // If we abandoned a selection and created a new one very shortly after, we may still
             // have a pending request to log ABANDON, which we flush here.
             mDelayedLogAbandon.flush();
@@ -812,11 +818,11 @@ public final class SelectionActionModeHelper {
 
         TextClassificationHelper(TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
-            reset(textClassifier, text, selectionStart, selectionEnd, locales);
+            init(textClassifier, text, selectionStart, selectionEnd, locales);
         }
 
         @UiThread
-        public void reset(TextClassifier textClassifier,
+        public void init(TextClassifier textClassifier,
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             mTextClassifier = Preconditions.checkNotNull(textClassifier);
             mText = Preconditions.checkNotNull(text).toString();
@@ -839,8 +845,12 @@ public final class SelectionActionModeHelper {
             trimText();
             final TextSelection selection = mTextClassifier.suggestSelection(
                     mTrimmedText, mRelativeStart, mRelativeEnd, mLocales);
-            mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
-            mSelectionEnd = Math.min(mText.length(), selection.getSelectionEndIndex() + mTrimStart);
+            // Do not classify new selection boundaries if TextClassifier should be dark launched.
+            if (!mTextClassifier.getSettings().isDarkLaunch()) {
+                mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
+                mSelectionEnd = Math.min(
+                        mText.length(), selection.getSelectionEndIndex() + mTrimStart);
+            }
             return performClassification(selection);
         }
 

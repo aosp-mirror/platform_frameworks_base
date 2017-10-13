@@ -1859,4 +1859,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Kartica SIM ni dovoljena"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefon ni dovoljen"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pojavno okno"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>

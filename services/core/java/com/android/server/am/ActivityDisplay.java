@@ -16,9 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.getStackIdForWindowingMode;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -213,7 +210,11 @@ class ActivityDisplay extends ConfigurationContainer {
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             // TODO: Should be okay to have stacks with with undefined windowing mode long term, but
             // have to set them to something for now due to logic that depending on them.
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
+            windowingMode = getWindowingMode(); // Put in current display's windowing mode
+            if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+                // Else fullscreen for now...
+                windowingMode = WINDOWING_MODE_FULLSCREEN;
+            }
         }
 
         final boolean inSplitScreenMode = hasSplitScreenStack();
@@ -228,24 +229,7 @@ class ActivityDisplay extends ConfigurationContainer {
             windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
         }
 
-        int stackId = INVALID_STACK_ID;
-        if (mDisplayId == DEFAULT_DISPLAY && (activityType == ACTIVITY_TYPE_STANDARD
-                || activityType == ACTIVITY_TYPE_UNDEFINED)) {
-            // TODO: Will be removed once we are no longer using static stack ids.
-            stackId = getStackIdForWindowingMode(windowingMode);
-            if (stackId == INVALID_STACK_ID) {
-                // Whatever...put in fullscreen stack for now.
-                stackId = FULLSCREEN_WORKSPACE_STACK_ID;
-            }
-            final T stack = getStack(stackId);
-            if (stack != null) {
-                return stack;
-            }
-        }
-
-        if (stackId == INVALID_STACK_ID) {
-            stackId = mSupervisor.getNextStackId();
-        }
+        final int stackId = mSupervisor.getNextStackId();
 
         final T stack = createStackUnchecked(windowingMode, activityType, stackId, onTop);
 

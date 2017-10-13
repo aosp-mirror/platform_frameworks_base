@@ -90,6 +90,36 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
     }
 }
 
+// More efficient than repeatedly calling remove(mPq.top()) since it batches the
+// updates to the registered alarm.
+unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>
+                AnomalyMonitor::popSoonerThan(uint32_t timestampSec) {
+
+    if (DEBUG) ALOGD("Removing alarms with time <= %u", timestampSec);
+    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> oldAlarms;
+    std::lock_guard<std::mutex> lock(mLock);
+
+    for (sp<const AnomalyAlarm> t = mPq.top();
+                t != nullptr && t->timestampSec <= timestampSec; t = mPq.top()) {
+        oldAlarms.insert(t);
+        mPq.pop(); // remove t
+    }
+    // Always update registered alarm time (if anything has changed).
+    if (!oldAlarms.empty()) {
+        if (mPq.empty()) {
+            if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
+            mRegisteredAlarmTimeSec = 0;
+            if (mStatsCompanionService != nullptr) {
+                mStatsCompanionService->cancelAnomalyAlarm();
+            }
+        } else {
+            // Always update the registered alarm in this case (unlike remove()).
+            updateRegisteredAlarmTime_l(mPq.top()->timestampSec);
+        }
+    }
+    return oldAlarms;
+}
+
 void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
     if (DEBUG) ALOGD("Updating reg alarm time to %u", timestampSec);
     mRegisteredAlarmTimeSec = timestampSec;

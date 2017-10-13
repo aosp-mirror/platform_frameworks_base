@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -280,8 +278,9 @@ public class StackWindowController
             if (stack.getWindowConfiguration().tasksAreFloating()) {
                 // Floating tasks should not be resized to the screen's bounds.
 
-                if (mStackId == PINNED_STACK_ID && bounds.width() == mTmpDisplayBounds.width() &&
-                        bounds.height() == mTmpDisplayBounds.height()) {
+                if (stack.inPinnedWindowingMode()
+                        && bounds.width() == mTmpDisplayBounds.width()
+                        && bounds.height() == mTmpDisplayBounds.height()) {
                     // If the bounds we are animating is the same as the fullscreen stack
                     // dimensions, then apply the same inset calculations that we normally do for
                     // the fullscreen stack, without intersecting it with the display bounds

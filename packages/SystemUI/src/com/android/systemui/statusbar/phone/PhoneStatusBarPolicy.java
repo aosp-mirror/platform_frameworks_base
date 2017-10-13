@@ -639,12 +639,17 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     }
 
     private Intent getTaskIntent(int taskId, int userId) {
-        List<ActivityManager.RecentTaskInfo> tasks = mContext.getSystemService(ActivityManager.class)
-                .getRecentTasksForUser(NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId);
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).id == taskId) {
-                return tasks.get(i).baseIntent;
+        try {
+            final List<ActivityManager.RecentTaskInfo> tasks =
+                    ActivityManager.getService().getRecentTasks(
+                            NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId).getList();
+            for (int i = 0; i < tasks.size(); i++) {
+                if (tasks.get(i).id == taskId) {
+                    return tasks.get(i).baseIntent;
+                }
             }
+        } catch (RemoteException e) {
+            // Fall through
         }
         return null;
     }

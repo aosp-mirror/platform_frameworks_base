@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<user>
+    <launcher-pins package-name="com.android.launcher.1" launcher-user="0">
+        <package-info version="9" last_udpate_time="1230768000000">
+            <signature hash="0X8l7PvMeFf3vr6kaTCL4LJYCUPpbROjrZihNnXEv8I" />
+        </package-info>
+        <package package-name="com.android.test.1" package-user="0">
+            <pin value="s1" />
+        </package>
+    </launcher-pins>
+    <package name="com.android.test.1" call-count="0" last-reset="1506991428317">
+        <package-info version="8" last_udpate_time="1506534668998">
+            <signature hash="zDmdc5A/Bu5pQDKrBTjwVjT/fhzl6OUKwzCocUhPNM8" />
+        </package-info>
+        <shortcut id="s1" activity="com.android.test.1/com.example.android.shortcutsample.Main" title="Leak wakelock" titleid="0" textid="0" dmessageid="0" timestamp="1507674156622" flags="130">
+            <intent intent-base="#Intent;action=com.example.android.shortcutsample.LEAK;launchFlags=0x1000c000;component=com.example.android.shortcutsample/.Main;end" />
+        </shortcut>
+    </package>
+</user>

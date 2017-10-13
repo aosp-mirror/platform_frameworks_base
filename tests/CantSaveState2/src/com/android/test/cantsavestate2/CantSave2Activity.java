@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.ui;
+package com.android.test.cantsavestate2;
 
-import com.android.systemui.recents.events.EventBus;
+import android.app.Activity;
+import android.os.Bundle;
 
-/**
- * This is sent to update the visibility of all visible freeform task views.
- */
-public class UpdateFreeformTaskViewVisibilityEvent extends EventBus.Event {
-
-    public final boolean visible;
-
-    public UpdateFreeformTaskViewVisibilityEvent(boolean visible) {
-        this.visible = visible;
+public class CantSave2Activity extends Activity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.cant_save_2_activity);
     }
 }

@@ -388,4 +388,8 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Non se puido abrir a configuración de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"É posible que este método de entrada poida recompilar todo o texto que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de entrada?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Nota: Tras un reinicio, non se pode iniciar esta aplicación ata que desbloquees o teléfono"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Estado de rexistro de IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Rexistrado"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non rexistrado"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Non dispoñible"</string>
 </resources>

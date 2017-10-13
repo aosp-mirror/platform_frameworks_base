@@ -275,6 +275,10 @@ package android.media.tv {
     method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
   }
 
+  public static final class TvInputManager.Hardware {
+    method public boolean dispatchKeyEventToHdmi(android.view.KeyEvent);
+  }
+
   public class TvView extends android.view.ViewGroup {
     method public void requestUnblockContent(android.media.tv.TvContentRating);
   }

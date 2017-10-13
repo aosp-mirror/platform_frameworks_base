@@ -24,12 +24,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.icu.text.BreakIterator;
 import android.net.Uri;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -47,6 +47,7 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -90,6 +91,8 @@ final class TextClassifierImpl implements TextClassifier {
     private int mVersion;
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private SmartSelection mSmartSelection;
+
+    private TextClassifierConstants mSettings;
 
     TextClassifierImpl(Context context) {
         mContext = Preconditions.checkNotNull(context);
@@ -187,6 +190,15 @@ final class TextClassifierImpl implements TextClassifier {
         if (LOG_TAG.equals(source)) {
             mMetricsLogger.count(event, 1);
         }
+    }
+
+    @Override
+    public TextClassifierConstants getSettings() {
+        if (mSettings == null) {
+            mSettings = TextClassifierConstants.loadFromString(Settings.Global.getString(
+                    mContext.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+        }
+        return mSettings;
     }
 
     private SmartSelection getSmartSelection(LocaleList localeList) throws FileNotFoundException {

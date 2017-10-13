@@ -30,10 +30,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.InputDevice;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
-import android.view.accessibility.AccessibilityEvent;
+
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ import java.util.List;
  * <p>
  * All methods except {@code injectEvents} must be called only from the main thread.
  */
-public class MotionEventInjector implements EventStreamTransformation, Handler.Callback {
+public class MotionEventInjector extends BaseEventStreamTransformation implements Handler.Callback {
     private static final String LOG_TAG = "MotionEventInjector";
     private static final int MESSAGE_SEND_MOTION_EVENT = 1;
     private static final int MESSAGE_INJECT_EVENTS = 2;
@@ -68,7 +67,6 @@ public class MotionEventInjector implements EventStreamTransformation, Handler.C
     private final Handler mHandler;
     private final SparseArray<Boolean> mOpenGesturesInProgress = new SparseArray<>();
 
-    private EventStreamTransformation mNext;
     private IAccessibilityServiceClient mServiceInterfaceForCurrentGesture;
     private IntArray mSequencesInProgress = new IntArray(5);
     private boolean mIsDestroyed = false;
@@ -114,25 +112,6 @@ public class MotionEventInjector implements EventStreamTransformation, Handler.C
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         cancelAnyPendingInjectedEvents();
         sendMotionEventToNext(event, rawEvent, policyFlags);
-    }
-
-    @Override
-    public void onKeyEvent(KeyEvent event, int policyFlags) {
-        if (mNext != null) {
-            mNext.onKeyEvent(event, policyFlags);
-        }
-    }
-
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (mNext != null) {
-            mNext.onAccessibilityEvent(event);
-        }
-    }
-
-    @Override
-    public void setNext(EventStreamTransformation next) {
-        mNext = next;
     }
 
     @Override
@@ -187,7 +166,7 @@ public class MotionEventInjector implements EventStreamTransformation, Handler.C
             return;
         }
 
-        if (mNext == null) {
+        if (getNext() == null) {
             notifyService(serviceInterface, sequence, false);
             return;
         }
@@ -292,8 +271,8 @@ public class MotionEventInjector implements EventStreamTransformation, Handler.C
 
     private void sendMotionEventToNext(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
-        if (mNext != null) {
-            mNext.onMotionEvent(event, rawEvent, policyFlags);
+        if (getNext() != null) {
+            super.onMotionEvent(event, rawEvent, policyFlags);
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mOpenGesturesInProgress.put(event.getSource(), true);
             }
@@ -305,7 +284,7 @@ public class MotionEventInjector implements EventStreamTransformation, Handler.C
     }
 
     private void cancelAnyGestureInProgress(int source) {
-        if ((mNext != null) && mOpenGesturesInProgress.get(source, false)) {
+        if ((getNext() != null) && mOpenGesturesInProgress.get(source, false)) {
             long now = SystemClock.uptimeMillis();
             MotionEvent cancelEvent =
                     obtainMotionEvent(now, now, MotionEvent.ACTION_CANCEL, getLastTouchPoints(), 1);

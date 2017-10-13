@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
 
@@ -918,6 +919,15 @@ public class IntentFilter implements Parcelable {
             dest.writeInt(mPort);
         }
 
+        void writeToProto(ProtoOutputStream proto, long fieldId) {
+            long token = proto.start(fieldId);
+            // The original host information is already contained in host and wild, no output now.
+            proto.write(AuthorityEntryProto.HOST, mHost);
+            proto.write(AuthorityEntryProto.WILD, mWild);
+            proto.write(AuthorityEntryProto.PORT, mPort);
+            proto.end(token);
+        }
+
         public String getHost() {
             return mOrigHost;
         }
@@ -1737,6 +1747,59 @@ public class IntentFilter implements Parcelable {
             }
             XmlUtils.skipCurrentTag(parser);
         }
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        if (mActions.size() > 0) {
+            Iterator<String> it = mActions.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.ACTIONS, it.next());
+            }
+        }
+        if (mCategories != null) {
+            Iterator<String> it = mCategories.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.CATEGORIES, it.next());
+            }
+        }
+        if (mDataSchemes != null) {
+            Iterator<String> it = mDataSchemes.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.DATA_SCHEMES, it.next());
+            }
+        }
+        if (mDataSchemeSpecificParts != null) {
+            Iterator<PatternMatcher> it = mDataSchemeSpecificParts.iterator();
+            while (it.hasNext()) {
+                it.next().writeToProto(proto, IntentFilterProto.DATA_SCHEME_SPECS);
+            }
+        }
+        if (mDataAuthorities != null) {
+            Iterator<AuthorityEntry> it = mDataAuthorities.iterator();
+            while (it.hasNext()) {
+                it.next().writeToProto(proto, IntentFilterProto.DATA_AUTHORITIES);
+            }
+        }
+        if (mDataPaths != null) {
+            Iterator<PatternMatcher> it = mDataPaths.iterator();
+            while (it.hasNext()) {
+                it.next().writeToProto(proto, IntentFilterProto.DATA_PATHS);
+            }
+        }
+        if (mDataTypes != null) {
+            Iterator<String> it = mDataTypes.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.DATA_TYPES, it.next());
+            }
+        }
+        if (mPriority != 0 || mHasPartialTypes) {
+            proto.write(IntentFilterProto.PRIORITY, mPriority);
+            proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, mHasPartialTypes);
+        }
+        proto.write(IntentFilterProto.GET_AUTO_VERIFY, getAutoVerify());
+        proto.end(token);
     }
 
     public void dump(Printer du, String prefix) {

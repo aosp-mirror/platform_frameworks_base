@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.misc;
+syntax = "proto3";
 
-/**
- * Used to generate successive incremented names.
- */
-public class NamedCounter {
+option java_multiple_files = true;
 
-    int mCount;
-    String mPrefix = "";
-    String mSuffix = "";
+package com.android.server;
 
-    public NamedCounter(String prefix, String suffix) {
-        mPrefix = prefix;
-        mSuffix = suffix;
+message IntentResolverProto {
+
+    message ArrayMapEntry {
+        string key = 1;
+        repeated string values = 2;
     }
 
-    /** Returns the next name. */
-    public String nextName() {
-        String name = mPrefix + mCount + mSuffix;
-        mCount++;
-        return name;
-    }
+    repeated ArrayMapEntry full_mime_types = 1;
+    repeated ArrayMapEntry base_mime_types = 2;
+    repeated ArrayMapEntry wild_mime_types = 3;
+    repeated ArrayMapEntry schemes = 4;
+    repeated ArrayMapEntry non_data_actions = 5;
+    repeated ArrayMapEntry mime_typed_actions = 6;
 }
+

@@ -68,7 +68,7 @@ import java.util.Arrays;
  *       .build();
  * </pre>
  *
- * <p>The save type flags are used to display the appropriate strings in the save UI affordance.
+ * <p>The save type flags are used to display the appropriate strings in the autofill save UI.
  * You can pass multiple values, but try to keep it short if possible. In the above example, just
  * {@code SaveInfo.SAVE_DATA_TYPE_PASSWORD} would be enough.
  *
@@ -103,13 +103,17 @@ import java.util.Arrays;
  *       .build();
  * </pre>
  *
+ * <a name="TriggeringSaveRequest"></a>
+ * <h3>Triggering a save request</h3>
+ *
  * <p>The {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} can be triggered after
  * any of the following events:
  * <ul>
  *   <li>The {@link Activity} finishes.
- *   <li>The app explicitly called {@link AutofillManager#commit()}.
- *   <li>All required views became invisible (if the {@link SaveInfo} was created with the
+ *   <li>The app explicitly calls {@link AutofillManager#commit()}.
+ *   <li>All required views become invisible (if the {@link SaveInfo} was created with the
  *       {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} flag).
+ *   <li>The user clicks a specific view (defined by {@link Builder#setTriggerId(AutofillId)}.
  * </ul>
  *
  * <p>But it is only triggered when all conditions below are met:
@@ -123,10 +127,13 @@ import java.util.Arrays;
  *   <li>There is no {@link Dataset} in the last {@link FillResponse} that completely matches the
  *       screen state (i.e., all required and optional fields in the dataset have the same value as
  *       the fields in the screen).
- *   <li>The user explicitly tapped the UI affordance asking to save data for autofill.
+ *   <li>The user explicitly tapped the autofill save UI asking to save data for autofill.
  * </ul>
  *
- * <p>The service can also customize some aspects of the save UI affordance:
+ * <a name="CustomizingSaveUI"></a>
+ * <h3>Customizing the autofill save UI</h3>
+ *
+ * <p>The service can also customize some aspects of the autofill save UI:
  * <ul>
  *   <li>Add a simple subtitle by calling {@link Builder#setDescription(CharSequence)}.
  *   <li>Add a customized subtitle by calling
@@ -212,16 +219,25 @@ public final class SaveInfo implements Parcelable {
     @interface SaveDataType{}
 
     /**
-     * Usually {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
-     * is called once the {@link Activity} finishes. If this flag is set it is called once all
-     * saved views become invisible.
+     * Usually, a save request is only automatically <a href="#TriggeringSaveRequest">triggered</a>
+     * once the {@link Activity} finishes. If this flag is set, it is triggered once all saved views
+     * become invisible.
      */
     public static final int FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE = 0x1;
+
+    /**
+     * By default, a save request is automatically <a href="#TriggeringSaveRequest">triggered</a>
+     * once the {@link Activity} finishes. If this flag is set, finishing the activity doesn't
+     * trigger a save request.
+     *
+     * <p>This flag is typically used in conjunction with {@link Builder#setTriggerId(AutofillId)}.
+     */
+    public static final int FLAG_DONT_SAVE_ON_FINISH = 0x2;
 
     /** @hide */
     @IntDef(
             flag = true,
-            value = {FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE})
+            value = {FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE, FLAG_DONT_SAVE_ON_FINISH})
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveInfoFlags{}
 
@@ -236,6 +252,7 @@ public final class SaveInfo implements Parcelable {
     private final InternalValidator mValidator;
     private final InternalSanitizer[] mSanitizerKeys;
     private final AutofillId[][] mSanitizerValues;
+    private final AutofillId mTriggerId;
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -259,6 +276,7 @@ public final class SaveInfo implements Parcelable {
                 mSanitizerValues[i] = builder.mSanitizers.valueAt(i);
             }
         }
+        mTriggerId = builder.mTriggerId;
     }
 
     /** @hide */
@@ -320,6 +338,12 @@ public final class SaveInfo implements Parcelable {
         return mSanitizerValues;
     }
 
+    /** @hide */
+    @Nullable
+    public AutofillId getTriggerId() {
+        return mTriggerId;
+    }
+
     /**
      * A builder for {@link SaveInfo} objects.
      */
@@ -338,6 +362,7 @@ public final class SaveInfo implements Parcelable {
         private ArrayMap<InternalSanitizer, AutofillId[]> mSanitizers;
         // Set used to validate against duplicate ids.
         private ArraySet<AutofillId> mSanitizerIds;
+        private AutofillId mTriggerId;
 
         /**
          * Creates a new builder.
@@ -394,13 +419,15 @@ public final class SaveInfo implements Parcelable {
         /**
          * Sets flags changing the save behavior.
          *
-         * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} or {@code 0}.
+         * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE},
+         * {@link #FLAG_DONT_SAVE_ON_FINISH}, or {@code 0}.
          * @return This builder.
          */
         public @NonNull Builder setFlags(@SaveInfoFlags int flags) {
             throwIfDestroyed();
 
-            mFlags = Preconditions.checkFlagsArgument(flags, FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE);
+            mFlags = Preconditions.checkFlagsArgument(flags,
+                    FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE | FLAG_DONT_SAVE_ON_FINISH);
             return this;
         }
 
@@ -493,8 +520,8 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
-         * Sets an object used to validate the user input - if the input is not valid, the Save UI
-         * affordance is not shown.
+         * Sets an object used to validate the user input - if the input is not valid, the
+         * autofill save UI is not shown.
          *
          * <p>Typically used to validate credit card numbers. Examples:
          *
@@ -520,7 +547,7 @@ public final class SaveInfo implements Parcelable {
          *   );
          * </pre>
          *
-         * <p><b>NOTE: </b>the example above is just for illustrative purposes; the same validator
+         * <p><b>Note:</b> the example above is just for illustrative purposes; the same validator
          * could be created using a single regex for the {@code OR} part:
          *
          * <pre class="prettyprint">
@@ -615,6 +642,27 @@ public final class SaveInfo implements Parcelable {
             return this;
         }
 
+       /**
+         * Explicitly defines the view that should commit the autofill context when clicked.
+         *
+         * <p>Usually, the save request is only automatically
+         * <a href="#TriggeringSaveRequest">triggered</a> after the activity is
+         * finished or all relevant views become invisible, but there are scenarios where the
+         * autofill context is automatically commited too late
+         * &mdash;for example, when the activity manually clears the autofillable views when a
+         * button is tapped. This method can be used to trigger the autofill save UI earlier in
+         * these scenarios.
+         *
+         * <p><b>Note:</b> This method should only be used in scenarios where the automatic workflow
+         * is not enough, otherwise it could trigger the autofill save UI when it should not&mdash;
+         * for example, when the user entered invalid credentials for the autofillable views.
+         */
+        public @NonNull Builder setTriggerId(@NonNull AutofillId id) {
+            throwIfDestroyed();
+            mTriggerId = Preconditions.checkNotNull(id);
+            return this;
+        }
+
         /**
          * Builds a new {@link SaveInfo} instance.
          *
@@ -652,13 +700,14 @@ public final class SaveInfo implements Parcelable {
                 .append(", description=").append(mDescription)
                 .append(DebugUtils.flagsToString(SaveInfo.class, "NEGATIVE_BUTTON_STYLE_",
                         mNegativeButtonStyle))
-                .append(", mFlags=").append(mFlags)
-                .append(", mCustomDescription=").append(mCustomDescription)
-                .append(", validation=").append(mValidator)
+                .append(", flags=").append(mFlags)
+                .append(", customDescription=").append(mCustomDescription)
+                .append(", validator=").append(mValidator)
                 .append(", sanitizerKeys=")
                     .append(mSanitizerKeys == null ? "N/A:" : mSanitizerKeys.length)
                 .append(", sanitizerValues=")
                     .append(mSanitizerValues == null ? "N/A:" : mSanitizerValues.length)
+                .append(", triggerId=").append(mTriggerId)
                 .append("]").toString();
     }
 
@@ -687,6 +736,7 @@ public final class SaveInfo implements Parcelable {
                 parcel.writeParcelableArray(mSanitizerValues[i], flags);
             }
         }
+        parcel.writeParcelable(mTriggerId, flags);
         parcel.writeInt(mFlags);
     }
 
@@ -726,6 +776,10 @@ public final class SaveInfo implements Parcelable {
                             parcel.readParcelableArray(null, AutofillId.class);
                     builder.addSanitizer(sanitizers[i], autofillIds);
                 }
+            }
+            final AutofillId triggerId = parcel.readParcelable(null);
+            if (triggerId != null) {
+                builder.setTriggerId(triggerId);
             }
             builder.setFlags(parcel.readInt());
             return builder.build();

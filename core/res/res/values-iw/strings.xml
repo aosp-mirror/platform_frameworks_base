@@ -176,8 +176,7 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"פרופיל העבודה נמחק מפני שחסרה אפליקציית ניהול"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"אפליקציית הניהול של פרופיל העבודה חסרה או פגומה. כתוצאה מכך, פרופיל העבודה שלך נמחק, כולל כל הנתונים הקשורים אליו. לקבלת עזרה, פנה למנהל המערכת."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"פרופיל העבודה שלך אינו זמין עוד במכשיר הזה"</string>
-    <!-- no translation found for work_profile_deleted_reason_maximum_password_failure (8986903510053359694) -->
-    <skip />
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"בוצעו ניסיונות רבים מדי להזנת סיסמה"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"המכשיר מנוהל"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"הארגון שלך מנהל מכשיר זה ועשוי לנטר את התנועה ברשת. הקש לקבלת פרטים."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"תתבצע מחיקה של המכשיר"</string>
@@ -1860,4 +1859,6 @@
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"‏כרטיס ה-SIM לא מורשה"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"הטלפון לא מורשה"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"חלון קופץ"</string>
+    <!-- no translation found for slice_more_content (8504342889413274608) -->
+    <skip />
 </resources>
