@@ -48,6 +48,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implements the internal IInputMethod interface to convert incoming calls
@@ -75,6 +76,20 @@ class IInputMethodWrapper extends IInputMethod.Stub
     final HandlerCaller mCaller;
     final WeakReference<InputMethod> mInputMethod;
     final int mTargetSdkVersion;
+
+    /**
+     * This is not {@null} only between {@link #bindInput(InputBinding)} and {@link #unbindInput()}
+     * so that {@link InputConnectionWrapper} can query if {@link #unbindInput()} has already been
+     * called or not, mainly to avoid unnecessary blocking operations.
+     *
+     * <p>This field must be set and cleared only from the binder thread(s), where the system
+     * guarantees that {@link #bindInput(InputBinding)},
+     * {@link #startInput(IBinder, IInputContext, int, EditorInfo, boolean)}, and
+     * {@link #unbindInput()} are called with the same order as the original calls
+     * in {@link com.android.server.InputMethodManagerService}.  See {@link IBinder#FLAG_ONEWAY}
+     * for detailed semantics.</p>
+     */
+    AtomicBoolean mIsUnbindIssued = null;
 
     // NOTE: we should have a cache of these.
     static final class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
@@ -163,8 +178,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final IBinder startInputToken = (IBinder) args.arg1;
                 final IInputContext inputContext = (IInputContext) args.arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
+                final AtomicBoolean isUnbindIssued = (AtomicBoolean) args.arg4;
                 final InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
+                        ? new InputConnectionWrapper(
+                                mTarget, inputContext, missingMethods, isUnbindIssued) : null;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(ic, info, restarting /* restarting */,
                         startInputToken);
@@ -236,10 +253,15 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void bindInput(InputBinding binding) {
+        if (mIsUnbindIssued != null) {
+            Log.e(TAG, "bindInput must be paired with unbindInput.");
+        }
+        mIsUnbindIssued = new AtomicBoolean();
         // This IInputContext is guaranteed to implement all the methods.
         final int missingMethodFlags = 0;
         InputConnection ic = new InputConnectionWrapper(mTarget,
-                IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags);
+                IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags,
+                mIsUnbindIssued);
         InputBinding nu = new InputBinding(ic, binding);
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
     }
@@ -247,6 +269,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void unbindInput() {
+        if (mIsUnbindIssued != null) {
+            // Signal the flag then forget it.
+            mIsUnbindIssued.set(true);
+            mIsUnbindIssued = null;
+        } else {
+            Log.e(TAG, "unbindInput must be paired with bindInput.");
+        }
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_UNSET_INPUT_CONTEXT));
     }
 
@@ -255,8 +284,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
             EditorInfo attribute, boolean restarting) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_START_INPUT,
-                missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute));
+        if (mIsUnbindIssued == null) {
+            Log.e(TAG, "startInput must be called after bindInput.");
+            mIsUnbindIssued = new AtomicBoolean();
+        }
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOOO(DO_START_INPUT,
+                missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute,
+                mIsUnbindIssued));
     }
 
     @BinderThread
