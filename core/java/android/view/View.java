@@ -2342,9 +2342,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG_HOVERED             = 0x10000000;
 
     /**
-     * no longer needed, should be reused
+     * Flag set by {@link AutofillManager} if it needs to be notified when this view is clicked.
      */
-    private static final int PFLAG_DOES_NOTHING_REUSE_PLEASE = 0x20000000;
+    private static final int PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK = 0x20000000;
 
     /** {@hide} */
     static final int PFLAG_ACTIVATED                   = 0x40000000;
@@ -6397,33 +6397,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
-    /**
-     * Set by {@link AutofillManager} if it needs to be notified when this view is clicked.
-     */
-    private boolean mNotifyAutofillManagerOnClick;
-
-    /**
-     * Temporary variable used to make sure the autofill manager is not called twice on
-     * {@link #performClickInternal()}.
-     */
-    private boolean mAlreadyNotifiedAutofillManagerOnClick;
-
     /** @hide */
     public void setNotifyAutofillManagerOnClick(boolean notify) {
-        mNotifyAutofillManagerOnClick = notify;
+        if (notify) {
+            mPrivateFlags |= PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK;
+        } else {
+            mPrivateFlags &= ~PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK;
+        }
     }
 
     private void notifyAutofillManagerOnClick() {
-        if (!mNotifyAutofillManagerOnClick || mAlreadyNotifiedAutofillManagerOnClick) {
-            return;
-        }
-        // Must notify manager first to avoid scenarios where app has a listener
-        // that changes the state of views the autofill service might be interested on.
-        try {
-            getAutofillManager().notifyViewClicked(this);
-        } finally {
-            // Set it to already called so it's not called twice when
-            mAlreadyNotifiedAutofillManagerOnClick = true;
+        if ((mPrivateFlags & PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK) != 0) {
+            try {
+                getAutofillManager().notifyViewClicked(this);
+            } finally {
+                // Set it to already called so it's not called twice when called by
+                // performClickInternal()
+                mPrivateFlags |= ~PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK;
+            }
         }
     }
 
@@ -6434,21 +6425,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * method).
      */
     private boolean performClickInternal() {
-        mAlreadyNotifiedAutofillManagerOnClick = false;
-
         // Must notify autofill manager before performing the click actions to avoid scenarios where
         // the app has a click listener that changes the state of views the autofill service might
         // be interested on.
         notifyAutofillManagerOnClick();
 
-        boolean performed;
-        try {
-            performed = performClick();
-        } finally {
-            // Reset it for next call.
-            mAlreadyNotifiedAutofillManagerOnClick = false;
-        }
-        return performed;
+        return performClick();
     }
 
     /**
@@ -6463,14 +6445,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     // instead, to guarantee that the autofill manager is notified when necessary (as subclasses
     // could extend this method without calling super.performClick()).
     public boolean performClick() {
-        try {
-            // We still need to call this method to handle the cases where performClick() was called
-            // externally, instead of through performClickInternal()
-            notifyAutofillManagerOnClick();
-        } finally {
-            // Reset it for next call.
-            mAlreadyNotifiedAutofillManagerOnClick = false;
-        }
+        // We still need to call this method to handle the cases where performClick() was called
+        // externally, instead of through performClickInternal()
+        notifyAutofillManagerOnClick();
 
         final boolean result;
         final ListenerInfo li = mListenerInfo;
