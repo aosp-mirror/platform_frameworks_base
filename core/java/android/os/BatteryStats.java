@@ -3054,71 +3054,104 @@ public abstract class BatteryStats implements Parcelable {
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
         final long powerDrainMaMs = counter.getPowerCounter().getCountLocked(which);
+        // Battery real time
+        final long totalControllerActivityTimeMs
+            = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
         long totalTxTimeMs = 0;
         for (LongCounter txState : counter.getTxTimeCounters()) {
             totalTxTimeMs += txState.getCountLocked(which);
         }
-
-        final long totalTimeMs = idleTimeMs + rxTimeMs + totalTxTimeMs;
+        final long sleepTimeMs
+            = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  ");
+        sb.append("     ");
+        sb.append(controllerName);
+        sb.append(" Sleep time:  ");
+        formatTimeMs(sb, sleepTimeMs);
+        sb.append("(");
+        sb.append(formatRatioLocked(sleepTimeMs, totalControllerActivityTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("     ");
         sb.append(controllerName);
         sb.append(" Idle time:   ");
         formatTimeMs(sb, idleTimeMs);
         sb.append("(");
-        sb.append(formatRatioLocked(idleTimeMs, totalTimeMs));
+        sb.append(formatRatioLocked(idleTimeMs, totalControllerActivityTimeMs));
         sb.append(")");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  ");
+        sb.append("     ");
         sb.append(controllerName);
         sb.append(" Rx time:     ");
         formatTimeMs(sb, rxTimeMs);
         sb.append("(");
-        sb.append(formatRatioLocked(rxTimeMs, totalTimeMs));
+        sb.append(formatRatioLocked(rxTimeMs, totalControllerActivityTimeMs));
         sb.append(")");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  ");
+        sb.append("     ");
         sb.append(controllerName);
         sb.append(" Tx time:     ");
-        formatTimeMs(sb, totalTxTimeMs);
-        sb.append("(");
-        sb.append(formatRatioLocked(totalTxTimeMs, totalTimeMs));
-        sb.append(")");
-        pw.println(sb.toString());
 
-        final int numTxLvls = counter.getTxTimeCounters().length;
+        String [] powerLevel;
+        switch(controllerName) {
+            case "Cellular":
+                powerLevel = new String[] {
+                    "   less than 0dBm: ",
+                    "   0dBm to 8dBm: ",
+                    "   8dBm to 15dBm: ",
+                    "   15dBm to 20dBm: ",
+                    "   above 20dBm: "};
+                break;
+            default:
+                powerLevel = new String[] {"[0]", "[1]", "[2]", "[3]", "[4]"};
+                break;
+        }
+        final int numTxLvls = Math.min(counter.getTxTimeCounters().length, powerLevel.length);
         if (numTxLvls > 1) {
+            pw.println(sb.toString());
             for (int lvl = 0; lvl < numTxLvls; lvl++) {
                 final long txLvlTimeMs = counter.getTxTimeCounters()[lvl].getCountLocked(which);
                 sb.setLength(0);
                 sb.append(prefix);
-                sb.append("    [");
-                sb.append(lvl);
-                sb.append("] ");
+                sb.append("    ");
+                sb.append(powerLevel[lvl]);
+                sb.append(" ");
                 formatTimeMs(sb, txLvlTimeMs);
                 sb.append("(");
-                sb.append(formatRatioLocked(txLvlTimeMs, totalTxTimeMs));
+                sb.append(formatRatioLocked(txLvlTimeMs, totalControllerActivityTimeMs));
                 sb.append(")");
                 pw.println(sb.toString());
             }
+        } else {
+            final long txLvlTimeMs = counter.getTxTimeCounters()[0].getCountLocked(which);
+            formatTimeMs(sb, txLvlTimeMs);
+            sb.append("(");
+            sb.append(formatRatioLocked(txLvlTimeMs, totalControllerActivityTimeMs));
+            sb.append(")");
+            pw.println(sb.toString());
         }
 
-        sb.setLength(0);
-        sb.append(prefix);
-        sb.append("  ");
-        sb.append(controllerName);
-        sb.append(" Power drain: ").append(
+        if (powerDrainMaMs > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     ");
+            sb.append(controllerName);
+            sb.append(" Battery drain: ").append(
                 BatteryStatsHelper.makemAh(powerDrainMaMs / (double) (1000*60*60)));
-        sb.append("mAh");
-        pw.println(sb.toString());
+            sb.append("mAh");
+            pw.println(sb.toString());
+        }
     }
 
     /**
@@ -4186,51 +4219,50 @@ public abstract class BatteryStats implements Parcelable {
             pw.println(sb.toString());
         }
 
+        pw.println("");
         pw.print(prefix);
-                pw.print("  Mobile total received: "); pw.print(formatBytesLocked(mobileRxTotalBytes));
-                pw.print(", sent: "); pw.print(formatBytesLocked(mobileTxTotalBytes));
-                pw.print(" (packets received "); pw.print(mobileRxTotalPackets);
-                pw.print(", sent "); pw.print(mobileTxTotalPackets); pw.println(")");
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Phone signal levels:");
-        didOne = false;
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
-            final long time = getPhoneSignalStrengthTime(i, rawRealtime, which);
-            if (time == 0) {
-                continue;
-            }
-            sb.append("\n    ");
-            sb.append(prefix);
-            didOne = true;
-            sb.append(SignalStrength.SIGNAL_STRENGTH_NAMES[i]);
-            sb.append(" ");
-            formatTimeMs(sb, time/1000);
-            sb.append("(");
-            sb.append(formatRatioLocked(time, whichBatteryRealtime));
-            sb.append(") ");
-            sb.append(getPhoneSignalStrengthCount(i, which));
-            sb.append("x");
-        }
-        if (!didOne) sb.append(" (no activity)");
+        sb.append("  CONNECTIVITY POWER SUMMARY START");
+        pw.println(sb.toString());
+
+        pw.print(prefix);
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Logging duration for connectivity statistics: ");
+        formatTimeMs(sb, whichBatteryRealtime / 1000);
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Signal scanning time: ");
-        formatTimeMsNoSpace(sb, getPhoneSignalScanningTime(rawRealtime, which) / 1000);
+        sb.append("  Cellular Statistics:");
         pw.println(sb.toString());
+
+        pw.print(prefix);
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("     Cellular kernel active time: ");
+        final long mobileActiveTime = getMobileRadioActiveTime(rawRealtime, which);
+        formatTimeMs(sb, mobileActiveTime / 1000);
+        sb.append("("); sb.append(formatRatioLocked(mobileActiveTime, whichBatteryRealtime));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        pw.print("     Cellular data received: "); pw.println(formatBytesLocked(mobileRxTotalBytes));
+        pw.print("     Cellular data sent: "); pw.println(formatBytesLocked(mobileTxTotalBytes));
+        pw.print("     Cellular packets received: "); pw.println(mobileRxTotalPackets);
+        pw.print("     Cellular packets sent: "); pw.println(mobileTxTotalPackets);
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Radio types:");
+        sb.append("     Cellular Radio Access Technology:");
         didOne = false;
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             final long time = getPhoneDataConnectionTime(i, rawRealtime, which);
             if (time == 0) {
                 continue;
             }
-            sb.append("\n    ");
+            sb.append("\n       ");
             sb.append(prefix);
             didOne = true;
             sb.append(DATA_CONNECTION_NAMES[i]);
@@ -4239,73 +4271,64 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("(");
             sb.append(formatRatioLocked(time, whichBatteryRealtime));
             sb.append(") ");
-            sb.append(getPhoneDataConnectionCount(i, which));
-            sb.append("x");
         }
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Mobile radio active time: ");
-        final long mobileActiveTime = getMobileRadioActiveTime(rawRealtime, which);
-        formatTimeMs(sb, mobileActiveTime / 1000);
-        sb.append("("); sb.append(formatRatioLocked(mobileActiveTime, whichBatteryRealtime));
-        sb.append(") "); sb.append(getMobileRadioActiveCount(which));
-        sb.append("x");
+        sb.append("     Cellular Rx signal strength (RSRP):");
+        final String[] cellularRxSignalStrengthDescription = new String[]{
+            "very poor (less than -128dBm): ",
+            "poor (-128dBm to -118dBm): ",
+            "moderate (-118dBm to -108dBm): ",
+            "good (-108dBm to -98dBm): ",
+            "great (greater than -98dBm): "};
+        didOne = false;
+        final int numCellularRxBins = Math.min(SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
+            cellularRxSignalStrengthDescription.length);
+        for (int i=0; i<numCellularRxBins; i++) {
+            final long time = getPhoneSignalStrengthTime(i, rawRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            sb.append("\n       ");
+            sb.append(prefix);
+            didOne = true;
+            sb.append(cellularRxSignalStrengthDescription[i]);
+            sb.append(" ");
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+        }
+        if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        final long mobileActiveUnknownTime = getMobileRadioActiveUnknownTime(which);
-        if (mobileActiveUnknownTime != 0) {
-            sb.setLength(0);
-            sb.append(prefix);
-            sb.append("  Mobile radio active unknown time: ");
-            formatTimeMs(sb, mobileActiveUnknownTime / 1000);
-            sb.append("(");
-            sb.append(formatRatioLocked(mobileActiveUnknownTime, whichBatteryRealtime));
-            sb.append(") "); sb.append(getMobileRadioActiveUnknownCount(which));
-            sb.append("x");
-            pw.println(sb.toString());
-        }
-
-        final long mobileActiveAdjustedTime = getMobileRadioActiveAdjustedTime(which);
-        if (mobileActiveAdjustedTime != 0) {
-            sb.setLength(0);
-            sb.append(prefix);
-            sb.append("  Mobile radio active adjusted time: ");
-            formatTimeMs(sb, mobileActiveAdjustedTime / 1000);
-            sb.append("(");
-            sb.append(formatRatioLocked(mobileActiveAdjustedTime, whichBatteryRealtime));
-            sb.append(")");
-            pw.println(sb.toString());
-        }
-
-        printControllerActivity(pw, sb, prefix, "Radio", getModemControllerActivity(), which);
+        printControllerActivity(pw, sb, prefix, "Cellular",
+            getModemControllerActivity(), which);
 
         pw.print(prefix);
-                pw.print("  Wi-Fi total received: "); pw.print(formatBytesLocked(wifiRxTotalBytes));
-                pw.print(", sent: "); pw.print(formatBytesLocked(wifiTxTotalBytes));
-                pw.print(" (packets received "); pw.print(wifiRxTotalPackets);
-                pw.print(", sent "); pw.print(wifiTxTotalPackets); pw.println(")");
         sb.setLength(0);
         sb.append(prefix);
-                sb.append("  Wifi on: "); formatTimeMs(sb, wifiOnTime / 1000);
-                sb.append("("); sb.append(formatRatioLocked(wifiOnTime, whichBatteryRealtime));
-                sb.append("), Wifi running: "); formatTimeMs(sb, wifiRunningTime / 1000);
-                sb.append("("); sb.append(formatRatioLocked(wifiRunningTime, whichBatteryRealtime));
-                sb.append(")");
+        sb.append("  Wifi Statistics:");
         pw.println(sb.toString());
+
+        pw.print("     Wifi data received: "); pw.println(formatBytesLocked(wifiRxTotalBytes));
+        pw.print("     Wifi data sent: "); pw.println(formatBytesLocked(wifiTxTotalBytes));
+        pw.print("     Wifi packets received: "); pw.println(wifiRxTotalPackets);
+        pw.print("     Wifi packets sent: "); pw.println(wifiTxTotalPackets);
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Wifi states:");
+        sb.append("     Wifi states:");
         didOne = false;
         for (int i=0; i<NUM_WIFI_STATES; i++) {
             final long time = getWifiStateTime(i, rawRealtime, which);
             if (time == 0) {
                 continue;
             }
-            sb.append("\n    ");
+            sb.append("\n       ");
             didOne = true;
             sb.append(WIFI_STATE_NAMES[i]);
             sb.append(" ");
@@ -4313,22 +4336,20 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("(");
             sb.append(formatRatioLocked(time, whichBatteryRealtime));
             sb.append(") ");
-            sb.append(getWifiStateCount(i, which));
-            sb.append("x");
         }
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Wifi supplicant states:");
+        sb.append("     Wifi supplicant states:");
         didOne = false;
         for (int i=0; i<NUM_WIFI_SUPPL_STATES; i++) {
             final long time = getWifiSupplStateTime(i, rawRealtime, which);
             if (time == 0) {
                 continue;
             }
-            sb.append("\n    ");
+            sb.append("\n       ");
             didOne = true;
             sb.append(WIFI_SUPPL_STATE_NAMES[i]);
             sb.append(" ");
@@ -4336,17 +4357,23 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("(");
             sb.append(formatRatioLocked(time, whichBatteryRealtime));
             sb.append(") ");
-            sb.append(getWifiSupplStateCount(i, which));
-            sb.append("x");
         }
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         sb.setLength(0);
         sb.append(prefix);
-        sb.append("  Wifi signal levels:");
+        sb.append("     Wifi Rx signal strength (RSSI):");
+        final String[] wifiRxSignalStrengthDescription = new String[]{
+            "very poor (less than -88.75dBm): ",
+            "poor (-88.75 to -77.5dBm): ",
+            "moderate (-77.5dBm to -66.25dBm): ",
+            "good (-66.25dBm to -55dBm): ",
+            "great (greater than -55dBm): "};
         didOne = false;
-        for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
+        final int numWifiRxBins = Math.min(NUM_WIFI_SIGNAL_STRENGTH_BINS,
+            wifiRxSignalStrengthDescription.length);
+        for (int i=0; i<numWifiRxBins; i++) {
             final long time = getWifiSignalStrengthTime(i, rawRealtime, which);
             if (time == 0) {
                 continue;
@@ -4354,20 +4381,24 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("\n    ");
             sb.append(prefix);
             didOne = true;
-            sb.append("level(");
-            sb.append(i);
-            sb.append(") ");
+            sb.append("     ");
+            sb.append(wifiRxSignalStrengthDescription[i]);
             formatTimeMs(sb, time/1000);
             sb.append("(");
             sb.append(formatRatioLocked(time, whichBatteryRealtime));
             sb.append(") ");
-            sb.append(getWifiSignalStrengthCount(i, which));
-            sb.append("x");
         }
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
         printControllerActivity(pw, sb, prefix, "WiFi", getWifiControllerActivity(), which);
+
+        pw.print(prefix);
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  CONNECTIVITY POWER SUMMARY END");
+        pw.println(sb.toString());
+        pw.println("");
 
         pw.print(prefix);
         pw.print("  Bluetooth total received: "); pw.print(formatBytesLocked(btRxTotalBytes));
