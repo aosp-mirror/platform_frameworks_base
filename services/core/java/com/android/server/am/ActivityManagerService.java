@@ -2534,7 +2534,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             mWindowManager = wm;
             mStackSupervisor.setWindowManager(wm);
-            mActivityStarter.setWindowManager(wm);
             mLockTaskController.setWindowManager(wm);
         }
     }
@@ -2776,7 +2775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
-        mActivityStarter = new ActivityStarter(this, mStackSupervisor);
+        mActivityStarter = new ActivityStarter(this);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
