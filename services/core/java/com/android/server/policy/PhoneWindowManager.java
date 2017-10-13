@@ -3056,7 +3056,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         boolean keyguardLocked =
-                mKeyguardDelegate != null && (mKeyguardDelegate.isShowing() || mKeyguardOccluded);
+                mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
                 && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
