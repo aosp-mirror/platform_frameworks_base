@@ -108,13 +108,16 @@ public class TransformState {
         final View transformedView = mTransformedView;
         boolean transformX = (transformationFlags & TRANSFORM_X) != 0;
         boolean transformY = (transformationFlags & TRANSFORM_Y) != 0;
-        boolean transformScale = transformScale(otherState);
+        boolean differentHeight = otherState.getViewHeight() != getViewHeight();
+        boolean differentWidth = otherState.getViewWidth() != getViewWidth();
+        boolean transformScale = transformScale(otherState) && (differentHeight || differentWidth);
         // lets animate the positions correctly
         if (transformationAmount == 0.0f
                 || transformX && getTransformationStartX() == UNDEFINED
                 || transformY && getTransformationStartY() == UNDEFINED
-                || transformScale && getTransformationStartScaleX() == UNDEFINED
-                || transformScale && getTransformationStartScaleY() == UNDEFINED) {
+                || transformScale && getTransformationStartScaleX() == UNDEFINED && differentWidth
+                || transformScale && getTransformationStartScaleY() == UNDEFINED
+                        && differentHeight) {
             int[] otherPosition;
             if (transformationAmount != 0.0f) {
                 otherPosition = otherState.getLaidOutLocationOnScreen();
@@ -132,14 +135,14 @@ public class TransformState {
                 }
                 // we also want to animate the scale if we're the same
                 View otherView = otherState.getTransformedView();
-                if (transformScale && otherState.getViewWidth() != getViewWidth()) {
+                if (transformScale && differentWidth) {
                     setTransformationStartScaleX(otherState.getViewWidth() * otherView.getScaleX()
                             / (float) getViewWidth());
                     transformedView.setPivotX(0);
                 } else {
                     setTransformationStartScaleX(UNDEFINED);
                 }
-                if (transformScale && otherState.getViewHeight() != getViewHeight()) {
+                if (transformScale && differentHeight) {
                     setTransformationStartScaleY(otherState.getViewHeight() * otherView.getScaleY()
                             / (float) getViewHeight());
                     transformedView.setPivotY(0);
