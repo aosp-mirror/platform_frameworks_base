@@ -37,7 +37,7 @@
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
 
-using android::base::StringPrintf;
+using ::android::base::StringPrintf;
 
 namespace android {
 
@@ -60,6 +60,10 @@ struct TypeSpec {
   // Flags denote whether the resource entry is public
   // and under which configurations it varies.
   const ResTable_typeSpec* type_spec;
+
+  // Pointer to the mmapped data where the IDMAP mappings for this type
+  // exist. May be nullptr if no IDMAP exists.
+  const IdmapEntry_header* idmap_entries;
 
   // The number of types that follow this struct.
   // There is a type for each configuration
@@ -84,7 +88,10 @@ namespace {
 // the Type structs.
 class TypeSpecPtrBuilder {
  public:
-  TypeSpecPtrBuilder(const ResTable_typeSpec* header) : header_(header) {}
+  explicit TypeSpecPtrBuilder(const ResTable_typeSpec* header,
+                              const IdmapEntry_header* idmap_header)
+      : header_(header), idmap_header_(idmap_header) {
+  }
 
   void AddType(const ResTable_type* type) {
     ResTable_config config;
@@ -99,6 +106,7 @@ class TypeSpecPtrBuilder {
     }
     TypeSpec* type_spec = (TypeSpec*)::malloc(sizeof(TypeSpec) + (types_.size() * sizeof(Type)));
     type_spec->type_spec = header_;
+    type_spec->idmap_entries = idmap_header_;
     type_spec->type_count = types_.size();
     memcpy(type_spec + 1, types_.data(), types_.size() * sizeof(Type));
     return TypeSpecPtr(type_spec);
@@ -108,6 +116,7 @@ class TypeSpecPtrBuilder {
   DISALLOW_COPY_AND_ASSIGN(TypeSpecPtrBuilder);
 
   const ResTable_typeSpec* header_;
+  const IdmapEntry_header* idmap_header_;
   std::vector<Type> types_;
 };
 
@@ -123,6 +132,14 @@ bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTab
   const TypeSpecPtr& ptr = type_specs_[type_idx - type_id_offset_];
   if (ptr == nullptr) {
     return false;
+  }
+
+  // If there is an IDMAP supplied with this package, translate the entry ID.
+  if (ptr->idmap_entries != nullptr) {
+    if (!LoadedIdmap::Lookup(ptr->idmap_entries, entry_idx, &entry_idx)) {
+      // There is no mapping, so the resource is not meant to be in this overlay package.
+      return false;
+    }
   }
 
   // Don't bother checking if the entry ID is larger than
@@ -225,7 +242,7 @@ static bool VerifyType(const Chunk& chunk) {
   const size_t entries_offset = dtohl(header->entriesStart);
   const size_t offsets_length = sizeof(uint32_t) * entry_count;
 
-  if (offsets_offset + offsets_length > entries_offset) {
+  if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
     LOG(ERROR) << "Entry offsets overlap actual entry data.";
     return false;
   }
@@ -269,13 +286,13 @@ static bool VerifyType(const Chunk& chunk) {
           reinterpret_cast<const uint8_t*>(header) + offset);
       const size_t entry_size = dtohs(entry->size);
       if (entry_size < sizeof(*entry)) {
-        LOG(ERROR) << "ResTable_entry size " << entry_size << " is too small.";
+        LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << i << " is too small.";
         return false;
       }
 
       // Check the declared entrySize.
       if (entry_size > chunk.size() || offset > chunk.size() - entry_size) {
-        LOG(ERROR) << "ResTable_entry size " << entry_size << " is too large.";
+        LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << i << " is too large.";
         return false;
       }
 
@@ -286,13 +303,13 @@ static bool VerifyType(const Chunk& chunk) {
 
         size_t map_entries_start = offset + entry_size;
         if (map_entries_start & 0x03) {
-          LOG(ERROR) << "Map entries start at unaligned offset.";
+          LOG(ERROR) << "Map entries at index " << i << " start at unaligned offset.";
           return false;
         }
 
         // Each entry is sizeof(ResTable_map) big.
         if (map_entry_count > ((chunk.size() - map_entries_start) / sizeof(ResTable_map))) {
-          LOG(ERROR) << "Too many map entries in ResTable_map_entry.";
+          LOG(ERROR) << "Too many map entries in ResTable_map_entry at index " << i << ".";
           return false;
         }
 
@@ -300,7 +317,9 @@ static bool VerifyType(const Chunk& chunk) {
       } else {
         // There needs to be room for one Res_value struct.
         if (offset + entry_size > chunk.size() - sizeof(Res_value)) {
-          LOG(ERROR) << "No room for Res_value after ResTable_entry.";
+          LOG(ERROR) << "No room for Res_value after ResTable_entry at index " << i << " for type "
+                     << (int)header->id << " with config " << header->config.toString().string()
+                     << ".";
           return false;
         }
 
@@ -308,12 +327,12 @@ static bool VerifyType(const Chunk& chunk) {
             reinterpret_cast<const uint8_t*>(entry) + entry_size);
         const size_t value_size = dtohs(value->size);
         if (value_size < sizeof(Res_value)) {
-          LOG(ERROR) << "Res_value is too small.";
+          LOG(ERROR) << "Res_value at index " << i << " is too small.";
           return false;
         }
 
         if (value_size > chunk.size() || offset + entry_size > chunk.size() - value_size) {
-          LOG(ERROR) << "Res_value size is too large.";
+          LOG(ERROR) << "Res_value size " << value_size << " at index " << i << " is too large.";
           return false;
         }
       }
@@ -412,10 +431,13 @@ uint32_t LoadedPackage::FindEntryByName(const std::u16string& type_name,
   return 0u;
 }
 
-std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
+std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
+                                                   const LoadedIdmap* loaded_idmap) {
   ATRACE_CALL();
   std::unique_ptr<LoadedPackage> loaded_package{new LoadedPackage()};
 
+  // typeIdOffset was added at some point, but we still must recognize apps built before this
+  // was added.
   constexpr size_t kMinPackageSize =
       sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
   const ResTable_package* header = chunk.header<ResTable_package, kMinPackageSize>();
@@ -428,6 +450,12 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
   if (loaded_package->package_id_ == 0) {
     // Package ID of 0 means this is a shared library.
     loaded_package->dynamic_ = true;
+  }
+
+  if (loaded_idmap != nullptr) {
+    // This is an overlay and so it needs to pretend to be the target package.
+    loaded_package->package_id_ = loaded_idmap->TargetPackageId();
+    loaded_package->overlay_ = true;
   }
 
   if (header->header.headerSize >= sizeof(ResTable_package)) {
@@ -490,7 +518,16 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
             LOG(ERROR) << "Too many type configurations, overflow detected.";
             return {};
           }
-          loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
+
+          // We only add the type to the package if there is no IDMAP, or if the type is
+          // overlaying something.
+          if (loaded_idmap == nullptr || type_spec_ptr->idmap_entries != nullptr) {
+            // If this is an overlay, insert it at the target type ID.
+            if (type_spec_ptr->idmap_entries != nullptr) {
+              last_type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
+            }
+            loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
+          }
 
           types_builder = {};
           last_type_idx = 0;
@@ -531,7 +568,15 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
         }
 
         last_type_idx = type_spec->id - 1;
-        types_builder = util::make_unique<TypeSpecPtrBuilder>(type_spec);
+
+        // If this is an overlay, associate the mapping of this type to the target type
+        // from the IDMAP.
+        const IdmapEntry_header* idmap_entry_header = nullptr;
+        if (loaded_idmap != nullptr) {
+          idmap_entry_header = loaded_idmap->GetEntryMapForType(type_spec->id);
+        }
+
+        types_builder = util::make_unique<TypeSpecPtrBuilder>(type_spec, idmap_entry_header);
       } break;
 
       case RES_TABLE_TYPE_TYPE: {
@@ -608,7 +653,16 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
       LOG(ERROR) << "Too many type configurations, overflow detected.";
       return {};
     }
-    loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
+
+    // We only add the type to the package if there is no IDMAP, or if the type is
+    // overlaying something.
+    if (loaded_idmap == nullptr || type_spec_ptr->idmap_entries != nullptr) {
+      // If this is an overlay, insert it at the target type ID.
+      if (type_spec_ptr->idmap_entries != nullptr) {
+        last_type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
+      }
+      loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
+    }
   }
 
   if (iter.HadError()) {
@@ -618,7 +672,8 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
   return loaded_package;
 }
 
-bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
+bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
+                           bool load_as_shared_library) {
   ATRACE_CALL();
   const ResTable_header* header = chunk.header<ResTable_header>();
   if (header == nullptr) {
@@ -652,13 +707,13 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
       case RES_TABLE_PACKAGE_TYPE: {
         if (packages_seen + 1 > package_count) {
           LOG(ERROR) << "More package chunks were found than the " << package_count
-                     << " declared in the "
-                        "header.";
+                     << " declared in the header.";
           return false;
         }
         packages_seen++;
 
-        std::unique_ptr<LoadedPackage> loaded_package = LoadedPackage::Load(child_chunk);
+        std::unique_ptr<LoadedPackage> loaded_package =
+            LoadedPackage::Load(child_chunk, loaded_idmap);
         if (!loaded_package) {
           return false;
         }
@@ -684,7 +739,8 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
   return true;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const void* data, size_t len, bool system,
+std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
+                                                   const LoadedIdmap* loaded_idmap, bool system,
                                                    bool load_as_shared_library) {
   ATRACE_CALL();
 
@@ -692,12 +748,12 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const void* data, size_t len,
   std::unique_ptr<LoadedArsc> loaded_arsc(new LoadedArsc());
   loaded_arsc->system_ = system;
 
-  ChunkIterator iter(data, len);
+  ChunkIterator iter(data.data(), data.size());
   while (iter.HasNext()) {
     const Chunk chunk = iter.Next();
     switch (chunk.type()) {
       case RES_TABLE_TYPE:
-        if (!loaded_arsc->LoadTable(chunk, load_as_shared_library)) {
+        if (!loaded_arsc->LoadTable(chunk, loaded_idmap, load_as_shared_library)) {
           return {};
         }
         break;
@@ -715,6 +771,10 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const void* data, size_t len,
 
   // Need to force a move for mingw32.
   return std::move(loaded_arsc);
+}
+
+std::unique_ptr<const LoadedArsc> LoadedArsc::CreateEmpty() {
+  return std::unique_ptr<LoadedArsc>(new LoadedArsc());
 }
 
 }  // namespace android

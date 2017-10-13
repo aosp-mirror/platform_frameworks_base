@@ -38,6 +38,9 @@
 
 namespace android {
 
+constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000001u;
+
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
  * casting on raw data and expect char16_t to be exactly 16 bits.
@@ -1582,6 +1585,30 @@ struct ResTable_lib_entry
     // The package name of the shared library. \0 terminated.
     uint16_t packageName[128];
 };
+
+struct alignas(uint32_t) Idmap_header {
+  // Always 0x504D4449 ('IDMP')
+  uint32_t magic;
+
+  uint32_t version;
+
+  uint32_t target_crc32;
+  uint32_t overlay_crc32;
+
+  uint8_t target_path[256];
+  uint8_t overlay_path[256];
+
+  uint16_t target_package_id;
+  uint16_t type_count;
+} __attribute__((packed));
+
+struct alignas(uint32_t) IdmapEntry_header {
+  uint16_t target_type_id;
+  uint16_t overlay_type_id;
+  uint16_t entry_count;
+  uint16_t entry_id_offset;
+  uint32_t entries[0];
+} __attribute__((packed));
 
 class AssetManager2;
 

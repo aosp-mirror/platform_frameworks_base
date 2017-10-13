@@ -96,24 +96,29 @@ class AssetManager2 {
   // new resource IDs.
   bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<const ApkAssets*> GetApkAssets() const { return apk_assets_; }
+  inline const std::vector<const ApkAssets*> GetApkAssets() const {
+    return apk_assets_;
+  }
 
   // Returns the string pool for the given asset cookie.
-  // Use the string pool returned here with a valid Res_value object of
-  // type Res_value::TYPE_STRING.
+  // Use the string pool returned here with a valid Res_value object of type Res_value::TYPE_STRING.
   const ResStringPool* GetStringPoolForCookie(ApkAssetsCookie cookie) const;
 
   // Returns the DynamicRefTable for the given package ID.
+  // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForPackage(uint32_t package_id) const;
 
   // Returns the DynamicRefTable for the ApkAssets represented by the cookie.
+  // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);
 
-  inline const ResTable_config& GetConfiguration() const { return configuration_; }
+  inline const ResTable_config& GetConfiguration() const {
+    return configuration_;
+  }
 
   // Returns all configurations for which there are resources defined. This includes resource
   // configurations in all the ApkAssets set for this AssetManager.
@@ -226,6 +231,14 @@ class AssetManager2 {
 
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
+
+  template <typename Func>
+  void ForEachPackage(Func func) {
+    for (const PackageGroup& package_group : package_groups_) {
+      func(package_group.packages_.front()->GetPackageName(),
+           package_group.dynamic_ref_table.mAssignedPackageId);
+    }
+  }
 
   void DumpToLog() const;
 

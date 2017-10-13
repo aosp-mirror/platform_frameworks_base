@@ -35,7 +35,9 @@
 
 namespace android {
 
-AssetManager2::AssetManager2() { memset(&configuration_, 0, sizeof(configuration_)); }
+AssetManager2::AssetManager2() {
+  memset(&configuration_, 0, sizeof(configuration_));
+}
 
 bool AssetManager2::SetApkAssets(const std::vector<const ApkAssets*>& apk_assets,
                                  bool invalidate_caches) {
@@ -55,9 +57,9 @@ void AssetManager2::BuildDynamicRefTable() {
   int next_package_id = 0x02;
   const size_t apk_assets_count = apk_assets_.size();
   for (size_t i = 0; i < apk_assets_count; i++) {
-    const ApkAssets* apk_asset = apk_assets_[i];
-    for (const std::unique_ptr<const LoadedPackage>& package :
-         apk_asset->GetLoadedArsc()->GetPackages()) {
+    const LoadedArsc* loaded_arsc = apk_assets_[i]->GetLoadedArsc();
+
+    for (const std::unique_ptr<const LoadedPackage>& package : loaded_arsc->GetPackages()) {
       // Get the package ID or assign one if a shared library.
       int package_id;
       if (package->IsDynamic()) {
@@ -312,7 +314,8 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
     cumulated_flags |= current_flags;
 
-    if (best_cookie == kInvalidCookie || current_config.isBetterThan(best_config, desired_config)) {
+    if (best_cookie == kInvalidCookie || current_config.isBetterThan(best_config, desired_config) ||
+        (loaded_package->IsOverlay() && current_config.compare(best_config) == 0)) {
       best_entry = current_entry;
       best_config = current_config;
       best_cookie = package_group.cookies_[i];

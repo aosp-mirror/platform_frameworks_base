@@ -25,6 +25,7 @@
 
 #include "androidfw/ByteBucketArray.h"
 #include "androidfw/Chunk.h"
+#include "androidfw/Idmap.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 
@@ -70,20 +71,36 @@ class LoadedPackage {
                  uint32_t* out_flags) const;
 
   // Returns the string pool where type names are stored.
-  inline const ResStringPool* GetTypeStringPool() const { return &type_string_pool_; }
+  inline const ResStringPool* GetTypeStringPool() const {
+    return &type_string_pool_;
+  }
 
   // Returns the string pool where the names of resource entries are stored.
-  inline const ResStringPool* GetKeyStringPool() const { return &key_string_pool_; }
+  inline const ResStringPool* GetKeyStringPool() const {
+    return &key_string_pool_;
+  }
 
-  inline const std::string& GetPackageName() const { return package_name_; }
+  inline const std::string& GetPackageName() const {
+    return package_name_;
+  }
 
-  inline int GetPackageId() const { return package_id_; }
+  inline int GetPackageId() const {
+    return package_id_;
+  }
 
   // Returns true if this package is dynamic (shared library) and needs to have an ID assigned.
-  inline bool IsDynamic() const { return dynamic_; }
+  inline bool IsDynamic() const {
+    return dynamic_;
+  }
 
   // Returns true if this package originates from a system provided resource.
-  inline bool IsSystem() const { return system_; }
+  inline bool IsSystem() const {
+    return system_;
+  }
+
+  inline bool IsOverlay() const {
+    return overlay_;
+  }
 
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
   // package could have been assigned a different package ID than what this LoadedPackage was
@@ -111,7 +128,7 @@ class LoadedPackage {
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
-  static std::unique_ptr<LoadedPackage> Load(const Chunk& chunk);
+  static std::unique_ptr<LoadedPackage> Load(const Chunk& chunk, const LoadedIdmap* loaded_idmap);
 
   LoadedPackage() = default;
 
@@ -122,6 +139,7 @@ class LoadedPackage {
   int type_id_offset_ = 0;
   bool dynamic_ = false;
   bool system_ = false;
+  bool overlay_ = false;
 
   ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
@@ -137,14 +155,21 @@ class LoadedArsc {
   // If `load_as_shared_library` is set to true, the application package (0x7f) is treated
   // as a shared library (0x00). When loaded into an AssetManager, the package will be assigned an
   // ID.
-  static std::unique_ptr<const LoadedArsc> Load(const void* data, size_t len, bool system = false,
+  static std::unique_ptr<const LoadedArsc> Load(const StringPiece& data,
+                                                const LoadedIdmap* loaded_idmap = nullptr,
+                                                bool system = false,
                                                 bool load_as_shared_library = false);
+
+  // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
+  static std::unique_ptr<const LoadedArsc> CreateEmpty();
 
   ~LoadedArsc();
 
   // Returns the string pool where all string resource values
   // (Res_value::dataType == Res_value::TYPE_STRING) are indexed.
-  inline const ResStringPool* GetStringPool() const { return &global_string_pool_; }
+  inline const ResStringPool* GetStringPool() const {
+    return &global_string_pool_;
+  }
 
   // Finds the resource with ID `resid` with the best value for configuration `config`.
   // The parameter `out_entry` will be filled with the resulting resource entry.
@@ -157,7 +182,9 @@ class LoadedArsc {
   const LoadedPackage* GetPackageForId(uint32_t resid) const;
 
   // Returns true if this is a system provided resource.
-  inline bool IsSystem() const { return system_; }
+  inline bool IsSystem() const {
+    return system_;
+  }
 
   // Returns a vector of LoadedPackage pointers, representing the packages in this LoadedArsc.
   inline const std::vector<std::unique_ptr<const LoadedPackage>>& GetPackages() const {
@@ -168,7 +195,7 @@ class LoadedArsc {
   DISALLOW_COPY_AND_ASSIGN(LoadedArsc);
 
   LoadedArsc() = default;
-  bool LoadTable(const Chunk& chunk, bool load_as_shared_library);
+  bool LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap, bool load_as_shared_library);
 
   ResStringPool global_string_pool_;
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;

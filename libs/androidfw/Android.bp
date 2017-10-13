@@ -43,6 +43,7 @@ cc_library {
         "AssetManager2.cpp",
         "AttributeResolution.cpp",
         "ChunkIterator.cpp",
+        "Idmap.cpp",
         "LoadedArsc.cpp",
         "LocaleData.cpp",
         "misc.cpp",
