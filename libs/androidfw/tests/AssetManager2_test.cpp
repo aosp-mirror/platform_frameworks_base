@@ -28,6 +28,7 @@
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
 #include "data/system/R.h"
+#include "data/unverified/R.h"
 
 namespace app = com::android::app;
 namespace appaslib = com::android::appaslib::app;
@@ -35,6 +36,7 @@ namespace basic = com::android::basic;
 namespace lib_one = com::android::lib_one;
 namespace lib_two = com::android::lib_two;
 namespace libclient = com::android::libclient;
+namespace unverified = com::android::unverified;
 
 namespace android {
 
@@ -430,5 +432,31 @@ TEST_F(AssetManager2Test, GetResourceId) {
 TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {}
 
 TEST_F(AssetManager2Test, OpensFileFromMultipleApkAssets) {}
+
+TEST_F(AssetManager2Test, OperateOnUnverifiedApkAssets) {
+  std::unique_ptr<const ApkAssets> unverified_assets =
+      ApkAssets::Load(GetTestDataPath() + "/unverified/unverified.apk");
+  ASSERT_NE(nullptr, unverified_assets);
+
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({unverified_assets.get()});
+
+  Res_value value;
+  ResTable_config config;
+  uint32_t flags;
+
+  EXPECT_EQ(kInvalidCookie,
+            assetmanager.GetResource(unverified::R::string::test1, false /*may_be_bag*/, 0u, &value,
+                                     &config, &flags));
+  EXPECT_EQ(kInvalidCookie,
+            assetmanager.GetResource(unverified::R::string::test2, false /*may_be_bag*/, 0u, &value,
+                                     &config, &flags));
+  EXPECT_NE(kInvalidCookie,
+            assetmanager.GetResource(unverified::R::integer::number1, false /*may_be_bag*/, 0u,
+                                     &value, &config, &flags));
+
+  EXPECT_EQ(nullptr, assetmanager.GetBag(unverified::R::style::Theme1));
+  EXPECT_NE(nullptr, assetmanager.GetBag(unverified::R::array::integerArray1));
+}
 
 }  // namespace android

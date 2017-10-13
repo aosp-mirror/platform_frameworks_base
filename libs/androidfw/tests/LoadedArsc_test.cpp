@@ -44,12 +44,9 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 24;
 
-  LoadedArscEntry entry;
-  ResTable_config selected_config;
-  uint32_t flags;
+  FindEntryResult entry;
 
-  ASSERT_TRUE(
-      loaded_arsc->FindEntry(app::R::string::string_one, config, &entry, &selected_config, &flags));
+  ASSERT_TRUE(loaded_arsc->FindEntry(app::R::string::string_one, config, &entry));
   ASSERT_NE(nullptr, entry.entry);
 }
 
@@ -66,12 +63,8 @@ TEST(LoadedArscTest, FindDefaultEntry) {
   desired_config.language[0] = 'd';
   desired_config.language[1] = 'e';
 
-  LoadedArscEntry entry;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test1, desired_config, &entry,
-                                     &selected_config, &flags));
+  FindEntryResult entry;
+  ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test1, desired_config, &entry));
   ASSERT_NE(nullptr, entry.entry);
 }
 
@@ -150,23 +143,15 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   ResTable_config desired_config;
   memset(&desired_config, 0, sizeof(desired_config));
 
-  LoadedArscEntry entry;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test3, desired_config, &entry,
-                                     &selected_config, &flags));
+  FindEntryResult entry;
+  ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test3, desired_config, &entry));
 
   size_t len;
   const char16_t* type_name16 = entry.type_string_ref.string16(&len);
   ASSERT_NE(nullptr, type_name16);
   ASSERT_NE(0u, len);
 
-  size_t utf8_len = utf16_to_utf8_length(type_name16, len);
-  std::string type_name;
-  type_name.resize(utf8_len);
-  utf16_to_utf8(type_name16, len, &*type_name.begin(), utf8_len + 1);
-
+  std::string type_name = util::Utf16ToUtf8(StringPiece16(type_name16, len));
   EXPECT_EQ(std::string("string"), type_name);
 }
 
@@ -210,12 +195,8 @@ TEST(LoadedArscTest, LoadOverlay) {
   ResTable_config desired_config;
   memset(&desired_config, 0, sizeof(desired_config));
 
-  LoadedArscEntry entry;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  ASSERT_TRUE(
-      loaded_arsc->FindEntry(0x08030001u, desired_config, &entry, &selected_config, &flags));
+  FindEntryResult entry;
+  ASSERT_TRUE(loaded_arsc->FindEntry(0x08030001u, desired_config, &entry));
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be

@@ -546,15 +546,15 @@ private:
  */
 class StringPoolRef {
 public:
-    StringPoolRef();
-    StringPoolRef(const ResStringPool* pool, uint32_t index);
+ StringPoolRef() = default;
+ StringPoolRef(const ResStringPool* pool, uint32_t index);
 
-    const char* string8(size_t* outLen) const;
-    const char16_t* string16(size_t* outLen) const;
+ const char* string8(size_t* outLen) const;
+ const char16_t* string16(size_t* outLen) const;
 
 private:
-    const ResStringPool*        mPool;
-    uint32_t                    mIndex;
+ const ResStringPool* mPool = nullptr;
+ uint32_t mIndex = 0u;
 };
 
 /** ********************************************************************

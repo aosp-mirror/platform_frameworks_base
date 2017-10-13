@@ -264,9 +264,7 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
 }
 
 ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_override,
-                                         bool stop_at_first_match, LoadedArscEntry* out_entry,
-                                         ResTable_config* out_selected_config,
-                                         uint32_t* out_flags) {
+                                         bool stop_at_first_match, FindEntryResult* out_entry) {
   ATRACE_CALL();
 
   // Might use this if density_override != 0.
@@ -295,30 +293,28 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
     return kInvalidCookie;
   }
 
-  LoadedArscEntry best_entry;
-  ResTable_config best_config;
+  FindEntryResult best_entry;
   ApkAssetsCookie best_cookie = kInvalidCookie;
   uint32_t cumulated_flags = 0u;
 
   const PackageGroup& package_group = package_groups_[idx];
   const size_t package_count = package_group.packages_.size();
   for (size_t i = 0; i < package_count; i++) {
-    LoadedArscEntry current_entry;
-    ResTable_config current_config;
-    uint32_t current_flags = 0;
-
     const LoadedPackage* loaded_package = package_group.packages_[i];
-    if (!loaded_package->FindEntry(type_idx, entry_id, *desired_config, &current_entry,
-                                   &current_config, &current_flags)) {
+
+    FindEntryResult current_entry;
+    if (!loaded_package->FindEntry(type_idx, entry_id, *desired_config, &current_entry)) {
       continue;
     }
 
-    cumulated_flags |= current_flags;
+    cumulated_flags |= current_entry.type_flags;
 
-    if (best_cookie == kInvalidCookie || current_config.isBetterThan(best_config, desired_config) ||
-        (loaded_package->IsOverlay() && current_config.compare(best_config) == 0)) {
+    const ResTable_config* current_config = current_entry.config;
+    const ResTable_config* best_config = best_entry.config;
+    if (best_cookie == kInvalidCookie ||
+        current_config->isBetterThan(*best_config, desired_config) ||
+        (loaded_package->IsOverlay() && current_config->compare(*best_config) == 0)) {
       best_entry = current_entry;
-      best_config = current_config;
       best_cookie = package_group.cookies_[i];
       if (stop_at_first_match) {
         break;
@@ -332,19 +328,16 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
   *out_entry = best_entry;
   out_entry->dynamic_ref_table = &package_group.dynamic_ref_table;
-  *out_selected_config = best_config;
-  *out_flags = cumulated_flags;
+  out_entry->type_flags = cumulated_flags;
   return best_cookie;
 }
 
 bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) {
   ATRACE_CALL();
 
-  LoadedArscEntry entry;
-  ResTable_config config;
-  uint32_t flags = 0u;
-  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
-                                     true /* stop_at_first_match */, &entry, &config, &flags);
+  FindEntryResult entry;
+  ApkAssetsCookie cookie =
+      FindEntry(resid, 0u /* density_override */, true /* stop_at_first_match */, &entry);
   if (cookie == kInvalidCookie) {
     return false;
   }
@@ -378,11 +371,14 @@ bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) {
 }
 
 bool AssetManager2::GetResourceFlags(uint32_t resid, uint32_t* out_flags) {
-  LoadedArscEntry entry;
-  ResTable_config config;
-  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
-                                     false /* stop_at_first_match */, &entry, &config, out_flags);
-  return cookie != kInvalidCookie;
+  FindEntryResult entry;
+  ApkAssetsCookie cookie =
+      FindEntry(resid, 0u /* density_override */, false /* stop_at_first_match */, &entry);
+  if (cookie != kInvalidCookie) {
+    *out_flags = entry.type_flags;
+    return cookie;
+  }
+  return kInvalidCookie;
 }
 
 ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
@@ -391,11 +387,9 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
                                            uint32_t* out_flags) {
   ATRACE_CALL();
 
-  LoadedArscEntry entry;
-  ResTable_config config;
-  uint32_t flags = 0u;
+  FindEntryResult entry;
   ApkAssetsCookie cookie =
-      FindEntry(resid, density_override, false /* stop_at_first_match */, &entry, &config, &flags);
+      FindEntry(resid, density_override, false /* stop_at_first_match */, &entry);
   if (cookie == kInvalidCookie) {
     return kInvalidCookie;
   }
@@ -409,8 +403,8 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
     // Create a reference since we can't represent this complex type as a Res_value.
     out_value->dataType = Res_value::TYPE_REFERENCE;
     out_value->data = resid;
-    *out_selected_config = config;
-    *out_flags = flags;
+    *out_selected_config = *entry.config;
+    *out_flags = entry.type_flags;
     return cookie;
   }
 
@@ -421,8 +415,8 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
   // Convert the package ID to the runtime assigned package ID.
   entry.dynamic_ref_table->lookupResourceValue(out_value);
 
-  *out_selected_config = config;
-  *out_flags = flags;
+  *out_selected_config = *entry.config;
+  *out_flags = entry.type_flags;
   return cookie;
 }
 
@@ -465,11 +459,9 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
     return cached_iter->second.get();
   }
 
-  LoadedArscEntry entry;
-  ResTable_config config;
-  uint32_t flags = 0u;
-  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
-                                     false /* stop_at_first_match */, &entry, &config, &flags);
+  FindEntryResult entry;
+  ApkAssetsCookie cookie =
+      FindEntry(resid, 0u /* density_override */, false /* stop_at_first_match */, &entry);
   if (cookie == kInvalidCookie) {
     return nullptr;
   }
@@ -520,7 +512,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
       }
       ++new_entry;
     }
-    new_bag->type_spec_flags = flags;
+    new_bag->type_spec_flags = entry.type_flags;
     new_bag->entry_count = static_cast<uint32_t>(entry_count);
     ResolvedBag* result = new_bag.get();
     cached_bags_[resid] = std::move(new_bag);
@@ -537,9 +529,6 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
     LOG(ERROR) << base::StringPrintf("Failed to find parent 0x%08x of bag 0x%08x.", parent_resid, resid);
     return nullptr;
   }
-
-  // Combine flags from the parent and our own bag.
-  flags |= parent_bag->type_spec_flags;
 
   // Create the max possible entries we can make. Once we construct the bag,
   // we will realloc to fit to size.
@@ -629,7 +618,8 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
         new_bag.release(), sizeof(ResolvedBag) + (actual_count * sizeof(ResolvedBag::Entry)))));
   }
 
-  new_bag->type_spec_flags = flags;
+  // Combine flags from the parent and our own bag.
+  new_bag->type_spec_flags = entry.type_flags | parent_bag->type_spec_flags;
   new_bag->entry_count = static_cast<uint32_t>(actual_count);
   ResolvedBag* result = new_bag.get();
   cached_bags_[resid] = std::move(new_bag);
