@@ -18,6 +18,7 @@ package android.service.notification;
 
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Service;
@@ -200,7 +201,11 @@ public abstract class ConditionProviderService extends Service {
         return mProvider;
     }
 
-    private boolean isBound() {
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isBound() {
         if (mProvider == null) {
             Log.w(TAG, "Condition provider service not yet bound.");
             return false;
