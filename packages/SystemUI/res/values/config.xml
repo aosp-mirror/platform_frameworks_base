@@ -167,12 +167,6 @@
     <!-- The animation duration for scrolling the stack to a particular item. -->
     <integer name="recents_animate_task_stack_scroll_duration">200</integer>
 
-    <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_auto_advance_duration">750</integer>
-
-    <!-- The animation duration for subsequent scrolling the stack to a particular item. -->
-    <integer name="recents_subsequent_auto_advance_duration">1000</integer>
-
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
 
@@ -328,7 +322,7 @@
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the value from
+         If < 0, uses the skin temperature sensor shutdown value from
          HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
     <integer name="config_warningTemperature">-1</integer>
 

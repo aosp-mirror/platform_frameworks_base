@@ -994,8 +994,6 @@
   <java-symbol type="string" name="volume_icon_description_notification" />
   <java-symbol type="string" name="volume_icon_description_ringer" />
   <java-symbol type="string" name="wait" />
-  <java-symbol type="string" name="web_user_agent" />
-  <java-symbol type="string" name="web_user_agent_target_content" />
   <java-symbol type="string" name="webpage_unresponsive" />
   <java-symbol type="string" name="whichApplication" />
   <java-symbol type="string" name="whichHomeApplication" />
@@ -3123,4 +3121,9 @@
   <java-symbol type="dimen" name="slice_icon_size" />
   <java-symbol type="dimen" name="slice_padding" />
   <java-symbol type="string" name="slice_more_content" />
+
+  <java-symbol type="string" name="shortcut_restored_on_lower_version" />
+  <java-symbol type="string" name="shortcut_restore_not_supported" />
+  <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
+  <java-symbol type="string" name="shortcut_restore_unknown_issue" />
 </resources>

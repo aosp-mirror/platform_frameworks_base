@@ -1675,6 +1675,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
 
+            mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s2").setDisabledMessage("xyz")
+                            .build()));
+
             mManager.disableShortcuts(list("s2"));
 
             assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
@@ -1710,6 +1714,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))
                     .haveIds("s2")
+                    .areAllWithDisabledReason(ShortcutInfo.DISABLED_REASON_BY_APP)
+                    .forAllShortcuts(si -> {
+                        assertEquals("xyz", si.getDisabledMessage());
+                    })
                     .areAllPinned()
                     .areAllNotWithKeyFieldsOnly()
                     .areAllDisabled();
@@ -1894,7 +1902,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s2");
         });
 
-        dumpsysOnLogcat();
+        dumpsysOnLogcat("Before launcher 2");
 
         runWithCaller(LAUNCHER_2, USER_0, () -> {
             // Launcher2 still has no pinned ones.
@@ -1906,6 +1914,27 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
                     /* none */);
+
+            // Make sure FLAG_MATCH_ALL_PINNED will be ignored.
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
+                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                    .isEmpty();
+
+            // Make sure the special permission works.
+            mInjectCheckAccessShortcutsPermission = true;
+
+            dumpsysOnLogcat("All-pinned");
+
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
+                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                    .haveIds("s1", "s2");
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED), getCallingUser()))
+                    .isEmpty();
+
+            mInjectCheckAccessShortcutsPermission = false;
 
             assertShortcutIds(assertAllDynamic(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
@@ -5054,7 +5083,29 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllPinned()
                     .areAllDisabled()
-                    .areAllWithDisabledReason(package1DisabledReason);
+                    .areAllWithDisabledReason(package1DisabledReason)
+                    .forAllShortcuts(si -> {
+                        switch (package1DisabledReason) {
+                            case ShortcutInfo.DISABLED_REASON_VERSION_LOWER:
+                                assertEquals("This shortcut requires latest app",
+                                        si.getDisabledMessage());
+                                break;
+                            case ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH:
+                                assertEquals(
+                                        "Couldn\u2019t restore shortcut because of app"
+                                        + " signature mismatch",
+                                        si.getDisabledMessage());
+                                break;
+                            case ShortcutInfo.DISABLED_REASON_BACKUP_NOT_SUPPORTED:
+                                assertEquals(
+                                        "Couldn\u2019t restore shortcut because app"
+                                        + " doesn\u2019t support backup and restore",
+                                        si.getDisabledMessage());
+                                break;
+                            default:
+                                fail("Unhandled disabled reason: " + package1DisabledReason);
+                        }
+                    });
             assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
                     .haveIds("s1", "s2")
                     .areAllPinned()
@@ -6371,7 +6422,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
-                R.xml.shortcut_5);
+                R.xml.shortcut_5_altalt);
         updatePackageVersion(CALLING_PACKAGE_2, 1);
                 mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
@@ -6413,6 +6464,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
 
+        dumpsysOnLogcat("After updating package 2");
+
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
@@ -6433,10 +6486,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "ms2", "ms3");
             // ms3 is no longer in manifest, so should be disabled.
             // but ms1 and ms2 should be enabled.
-            assertAllEnabled(list(getCallerShortcut("ms1")));
-            assertAllEnabled(list(getCallerShortcut("ms2")));
-            assertAllDisabled(list(getCallerShortcut("ms3")));
+            assertWith(getCallerShortcuts())
+                    .selectByIds("ms1", "ms2")
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms3")
+                    .areAllDisabled()
+                    .areAllWithDisabledReason(ShortcutInfo.DISABLED_REASON_APP_CHANGED);
         });
+
+        // Make sure the launcher see the correct disabled reason.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertWith(getShortcutAsLauncher(USER_0))
+                    .forShortcutWithId("ms3", si -> {
+                        assertEquals("string-com.android.test.2-user:0-res:"
+                                        + R.string.shortcut_disabled_message3 + "/en",
+                                si.getDisabledMessage());
+                    });
+        });
+
 
         // Package 2 on user 10 has no shortcuts yet.
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {

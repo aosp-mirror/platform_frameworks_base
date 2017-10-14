@@ -18,7 +18,6 @@ package com.android.systemui.recents;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.View.MeasureSpec;
 
 import android.app.ActivityManager;
@@ -56,7 +55,6 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
-import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchMostRecentTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
@@ -72,7 +70,7 @@ import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+import com.android.systemui.recents.misc.TaskStackChangeListener;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -84,7 +82,6 @@ import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionA
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm.VisibilityReport;
 import com.android.systemui.recents.views.TaskStackView;
-import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
@@ -116,10 +113,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
 
     /**
-     * An implementation of TaskStackListener, that allows us to listen for changes to the system
+     * An implementation of TaskStackChangeListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
      */
-    class TaskStackListenerImpl extends TaskStackListener {
+    class TaskStackListenerImpl extends TaskStackChangeListener {
 
         @Override
         public void onTaskStackChangedBackground() {
@@ -408,22 +405,17 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
-                    // Has the user tapped quickly?
-                    boolean isQuickTap = elapsedTime < ViewConfiguration.getDoubleTapTimeout();
                     if (Recents.getConfiguration().isGridEnabled) {
+                        // Has the user tapped quickly?
+                        boolean isQuickTap = elapsedTime < ViewConfiguration.getDoubleTapTimeout();
                         if (isQuickTap) {
                             EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
                         } else {
                             EventBus.getDefault().post(new LaunchMostRecentTaskRequestEvent());
                         }
                     } else {
-                        if (!debugFlags.isPagingEnabled() || isQuickTap) {
-                            // Launch the next focused task
-                            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
-                        } else {
-                            // Notify recents to move onto the next task
-                            EventBus.getDefault().post(new IterateRecentsEvent());
-                        }
+                        // Launch the next focused task
+                        EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
                     }
                 } else {
                     // If the user has toggled it too quickly, then just eat up the event here (it's

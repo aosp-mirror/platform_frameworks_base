@@ -419,7 +419,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mFillsParent
                 || !inSplitScreenSecondaryWindowingMode()
                 || displayContent == null
-                || displayContent.getDockedStackIgnoringVisibility() != null;
+                || displayContent.getSplitScreenPrimaryStackStackIgnoringVisibility() != null;
     }
 
     /** Original bounds of the task if applicable, otherwise fullscreen rect. */

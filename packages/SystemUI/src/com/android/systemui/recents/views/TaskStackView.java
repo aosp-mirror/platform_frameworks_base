@@ -57,7 +57,6 @@ import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimatio
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
-import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchMostRecentTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -1698,15 +1697,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ShowStackActionButtonEvent event) {
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButtonVisible = true;
-        }
+        mStackActionButtonVisible = true;
     }
 
     public final void onBusEvent(HideStackActionButtonEvent event) {
-        if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButtonVisible = false;
-        }
+        mStackActionButtonVisible = false;
     }
 
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
@@ -1844,8 +1839,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
 
-        setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */, false,
-                event.timerIndicatorDuration);
+        setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */, false, 0);
     }
 
     public final void onBusEvent(FocusPreviousTaskViewEvent event) {
@@ -1869,8 +1863,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
                     break;
                 case DOWN:
-                    EventBus.getDefault().send(
-                        new FocusNextTaskViewEvent(0 /* timerIndicatorDuration */));
+                    EventBus.getDefault().send(new FocusNextTaskViewEvent());
                     break;
             }
         }
@@ -1881,7 +1874,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.poke();
 
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (debugFlags.isFastToggleRecentsEnabled() && mFocusedTask != null) {
+        if (mFocusedTask != null) {
             TaskView tv = getChildViewForTask(mFocusedTask);
             if (tv != null) {
                 tv.getHeaderView().cancelFocusTimerIndicator();
@@ -1977,13 +1970,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         relayoutTaskViews(new AnimationProps(SLOW_SYNC_STACK_DURATION,
                 Interpolators.FAST_OUT_SLOW_IN));
         event.getAnimationTrigger().increment();
-    }
-
-    public final void onBusEvent(IterateRecentsEvent event) {
-        if (!mEnterAnimationComplete) {
-            // Cancel the previous task's window transition before animating the focused state
-            EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
-        }
     }
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {

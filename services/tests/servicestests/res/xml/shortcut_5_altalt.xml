@@ -48,6 +48,7 @@
         android:shortcutId="ms3"
         android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutLongLabel="@string/shortcut_title2"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message3"
         >
         <intent
             android:action="android.intent.action.VIEW"

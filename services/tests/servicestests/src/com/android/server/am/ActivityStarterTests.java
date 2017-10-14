@@ -60,7 +60,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mService = createActivityManagerService();
-        mStarter = new ActivityStarter(mService, mService.mStackSupervisor);
+        mStarter = new ActivityStarter(mService);
     }
 
     @Test

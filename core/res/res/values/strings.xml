@@ -2106,12 +2106,6 @@
     <!-- Do not translate.  datepicker mode, overridden for watch -->
     <string name="date_picker_mode" translatable="false">"calendar"</string>
 
-    <!-- Do not translate.  WebView User Agent string -->
-    <string name="web_user_agent" translatable="false">Mozilla/5.0 (Linux; U; <xliff:g id="x">Android %s</xliff:g>)
-        AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 <xliff:g id="mobile">%s</xliff:g>Safari/534.30</string>
-    <!-- Do not translate.  WebView User Agent targeted content -->
-    <string name="web_user_agent_target_content" translatable="false">"Mobile "</string>
-
     <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
     <string name="js_dialog_title">The page at \"<xliff:g id="title">%s</xliff:g>\" says:</string>
     <!-- Default title for a javascript dialog -->
@@ -4735,4 +4729,28 @@
 
     <!-- Format string for indicating there is more content in a slice view -->
     <string name="slice_more_content">+ <xliff:g id="number" example="5">%1$d</xliff:g></string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by a newer version of the app.
+    -->
+    <string name="shortcut_restored_on_lower_version">This shortcut requires latest app</string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by an app that doesn't support backup
+    and restore.
+    -->
+    <string name="shortcut_restore_not_supported">Couldn\u2019t restore shortcut because app doesn\u2019t support backup and restore</string>
+
+    <!--
+    A toast message shown when an app shortcut that was restored from a previous device is clicked,
+    but it cannot be started because the shortcut was created by an app with a different signature.
+    -->
+    <string name="shortcut_restore_signature_mismatch">Couldn\u2019t restore shortcut because of app signature mismatch</string>
+
+    <!--
+    A toast message shown when an app shortcut that wasn't restored due to an unknown issue is clicked,
+    -->
+    <string name="shortcut_restore_unknown_issue">Couldn\u2019t restore shortcut</string>
 </resources>

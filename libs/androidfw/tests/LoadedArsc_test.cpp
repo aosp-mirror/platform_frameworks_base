@@ -32,8 +32,7 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/styles/styles.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
@@ -59,8 +58,7 @@ TEST(LoadedArscTest, FindDefaultEntry) {
   ASSERT_TRUE(
       ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   ResTable_config desired_config;
@@ -82,8 +80,7 @@ TEST(LoadedArscTest, LoadSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -104,8 +101,7 @@ TEST(LoadedArscTest, LoadAppLinkedAgainstSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/libclient/libclient.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -132,8 +128,9 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/appaslib/appaslib.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(
-      contents.data(), contents.size(), false /*system*/, true /*load_as_shared_library*/);
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(contents), nullptr /*loaded_idmap*/, false /*system*/,
+                       true /*load_as_shared_library*/);
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -147,8 +144,7 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/feature/feature.apk", "resources.arsc",
                                       &contents));
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   ResTable_config desired_config;
@@ -172,6 +168,54 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   utf16_to_utf8(type_name16, len, &*type_name.begin(), utf8_len + 1);
 
   EXPECT_EQ(std::string("string"), type_name);
+}
+
+class MockLoadedIdmap : public LoadedIdmap {
+ public:
+  MockLoadedIdmap() : LoadedIdmap() {
+    local_header_.magic = kIdmapMagic;
+    local_header_.version = kIdmapCurrentVersion;
+    local_header_.target_package_id = 0x08;
+    local_header_.type_count = 1;
+    header_ = &local_header_;
+
+    entry_header = util::unique_cptr<IdmapEntry_header>(
+        (IdmapEntry_header*)::malloc(sizeof(IdmapEntry_header) + sizeof(uint32_t)));
+    entry_header->target_type_id = 0x03;
+    entry_header->overlay_type_id = 0x02;
+    entry_header->entry_id_offset = 1;
+    entry_header->entry_count = 1;
+    entry_header->entries[0] = 0x00000000u;
+    type_map_[entry_header->overlay_type_id] = entry_header.get();
+  }
+
+ private:
+  Idmap_header local_header_;
+  util::unique_cptr<IdmapEntry_header> entry_header;
+};
+
+TEST(LoadedArscTest, LoadOverlay) {
+  std::string contents, overlay_contents;
+  ASSERT_TRUE(
+      ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlay/overlay.apk", "resources.arsc",
+                                      &overlay_contents));
+
+  MockLoadedIdmap loaded_idmap;
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(overlay_contents), &loaded_idmap);
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  ResTable_config desired_config;
+  memset(&desired_config, 0, sizeof(desired_config));
+
+  LoadedArscEntry entry;
+  ResTable_config selected_config;
+  uint32_t flags;
+
+  ASSERT_TRUE(
+      loaded_arsc->FindEntry(0x08030001u, desired_config, &entry, &selected_config, &flags));
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be

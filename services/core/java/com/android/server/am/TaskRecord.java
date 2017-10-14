@@ -43,7 +43,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -84,7 +83,6 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
@@ -165,7 +163,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String ATTR_SUPPORTS_PICTURE_IN_PICTURE = "supports_picture_in_picture";
     private static final String ATTR_RESIZE_MODE = "resize_mode";
-    private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
     private static final String ATTR_MIN_WIDTH = "min_width";
     private static final String ATTR_MIN_HEIGHT = "min_height";
@@ -235,10 +232,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // of the root activity.
     boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
                                      // changes on a temporary basis.
-    private int mLockTaskMode;  // Which tasklock mode to launch this task in. One of
-                                // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
-    private boolean mPrivileged;    // The root activity application of this task holds
-                                    // privileged permissions.
 
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
@@ -388,9 +381,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             long lastTimeMoved, boolean neverRelinquishIdentity,
             TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            int resizeMode, boolean supportsPictureInPicture, boolean privileged,
-            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth,
-            int minHeight) {
+            int resizeMode, boolean supportsPictureInPicture, boolean _realActivitySuspended,
+            boolean userSetupComplete, int minWidth, int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -426,7 +418,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mCallingPackage = callingPackage;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
-        mPrivileged = privileged;
         mMinWidth = minWidth;
         mMinHeight = minHeight;
         mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
@@ -658,7 +649,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // In some cases the focused stack isn't the front stack. E.g. pinned stack.
             // Whenever we are moving the top activity from the front stack we want to make sure to
             // move the stack to the front.
-            final boolean wasFront = r != null && supervisor.isFrontStackOnDisplay(sourceStack)
+            final boolean wasFront = r != null && sourceStack.isTopStackOnDisplay()
                     && (sourceStack.topRunningActivityLocked() == r);
 
             // Adjust the position for the new parent stack as needed.
@@ -747,9 +738,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.
-        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenStack();
+        final boolean inSplitScreenMode = supervisor.getDefaultDisplay().hasSplitScreenPrimaryStack();
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
-                DEFAULT_DISPLAY, toStack.mStackId);
+                DEFAULT_DISPLAY, toStack);
 
         boolean successful = (preferredStack == toStack);
         if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
@@ -802,6 +793,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mCallingUid = r.launchedFromUid;
         mCallingPackage = r.launchedFromPackage;
         setIntent(r.intent, r.info);
+        setLockTaskAuth(r);
     }
 
     /** Sets the original intent, _without_ updating the calling uid or package. */
@@ -885,14 +877,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
         mResizeMode = info.resizeMode;
         mSupportsPictureInPicture = info.supportsPictureInPicture();
-        mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
-        mLockTaskMode = info.lockTaskLaunchMode;
-        if (!mPrivileged && (mLockTaskMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
-                || mLockTaskMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
-            // Non-priv apps are not allowed to use always or never, fall back to default
-            mLockTaskMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
-        }
-        setLockTaskAuth();
     }
 
     /** Sets the original minimal width and height. */
@@ -1429,8 +1413,17 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void setLockTaskAuth() {
+        setLockTaskAuth(getRootActivity());
+    }
+
+    private void setLockTaskAuth(@Nullable ActivityRecord r) {
+        if (r == null) {
+            mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
+            return;
+        }
+
         final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
-        switch (mLockTaskMode) {
+        switch (r.lockTaskLaunchMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
                 mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
                         ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
@@ -1671,7 +1664,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
         out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
                 String.valueOf(mSupportsPictureInPicture));
-        out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
         if (mLastNonFullscreenBounds != null) {
             out.attribute(
                     null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
@@ -1739,7 +1731,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         String callingPackage = "";
         int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         boolean supportsPictureInPicture = false;
-        boolean privileged = false;
         Rect bounds = null;
         int minWidth = INVALID_MIN_SIZE;
         int minHeight = INVALID_MIN_SIZE;
@@ -1801,8 +1792,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 resizeMode = Integer.parseInt(attrValue);
             } else if (ATTR_SUPPORTS_PICTURE_IN_PICTURE.equals(attrName)) {
                 supportsPictureInPicture = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_PRIVILEGED.equals(attrName)) {
-                privileged = Boolean.parseBoolean(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
                 bounds = Rect.unflattenFromString(attrValue);
             } else if (ATTR_MIN_WIDTH.equals(attrName)) {
@@ -1889,8 +1878,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
                 activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
                 taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
-                callingPackage, resizeMode, supportsPictureInPicture, privileged,
-                realActivitySuspended, userSetupComplete, minWidth, minHeight);
+                callingPackage, resizeMode, supportsPictureInPicture, realActivitySuspended,
+                userSetupComplete, minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {

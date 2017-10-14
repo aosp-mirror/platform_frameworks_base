@@ -669,7 +669,7 @@ public class TaskStackLayoutAlgorithm {
     public int getInitialFocusState() {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (debugFlags.isPagingEnabled() || launchState.launchedWithAltTab) {
+        if (launchState.launchedWithAltTab) {
             return STATE_FOCUSED;
         } else {
             return STATE_UNFOCUSED;

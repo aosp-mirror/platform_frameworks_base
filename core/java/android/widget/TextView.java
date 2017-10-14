@@ -10338,6 +10338,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
                 structure.setTextStyle(getTextSize(), getCurrentTextColor(),
                         AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
+            } else {
+                structure.setMinTextEms(getMinEms());
+                structure.setMaxTextEms(getMaxEms());
+                int maxLength = -1;
+                for (InputFilter filter: getFilters()) {
+                    if (filter instanceof InputFilter.LengthFilter) {
+                        maxLength = ((InputFilter.LengthFilter) filter).getMax();
+                        break;
+                    }
+                }
+                structure.setMaxTextLength(maxLength);
             }
         }
         structure.setHint(getHint());

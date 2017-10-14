@@ -20,8 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -37,10 +37,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.AdaptiveIconDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -282,12 +282,27 @@ public class LauncherApps {
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
         /**
-         * Does not retrieve CHOOSER only shortcuts.
-         * TODO: Add another flag for MATCH_ALL_PINNED
+         * @hide include all pinned shortcuts by any launchers, not just by the caller,
+         * in the result.
+         * If the caller doesn't havve the {@link android.Manifest.permission#ACCESS_SHORTCUTS}
+         * permission, this flag will be ignored.
+         */
+        @TestApi
+        public static final int FLAG_MATCH_ALL_PINNED = 1 << 10;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST
          * @hide
          */
         public static final int FLAG_MATCH_ALL_KINDS =
-                FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
+                FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_ALL_PINNED
+         * @hide
+         */
+        public static final int FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED =
+                FLAG_MATCH_ALL_KINDS | FLAG_MATCH_ALL_PINNED;
 
         /** @hide kept for unit tests */
         @Deprecated
@@ -319,6 +334,7 @@ public class LauncherApps {
                         FLAG_MATCH_PINNED,
                         FLAG_MATCH_MANIFEST,
                         FLAG_GET_KEY_FIELDS_ONLY,
+                        FLAG_MATCH_MANIFEST,
                 })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
@@ -678,6 +694,21 @@ public class LauncherApps {
         }
     }
 
+    private List<ShortcutInfo> maybeUpdateDisabledMessage(List<ShortcutInfo> shortcuts) {
+        if (shortcuts == null) {
+            return null;
+        }
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = shortcuts.get(i);
+            final String message = ShortcutInfo.getDisabledReasonForRestoreIssue(mContext,
+                    si.getDisabledReason());
+            if (message != null) {
+                si.setDisabledMessage(message);
+            }
+        }
+        return shortcuts;
+    }
+
     /**
      * Returns {@link ShortcutInfo}s that match {@code query}.
      *
@@ -698,10 +729,16 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            return mService.getShortcuts(mContext.getPackageName(),
+            // Note this is the only case we need to update the disabled message for shortcuts
+            // that weren't restored.
+            // The restore problem messages are only shown by the user, and publishers will never
+            // see them. The only other API that the launcher gets shortcuts is the shortcut
+            // changed callback, but that only returns shortcuts with the "key" information, so
+            // that won't return disabled message.
+            return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
                     query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
                     query.mQueryFlags, user)
-                    .getList();
+                    .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

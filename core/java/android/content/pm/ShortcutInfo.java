@@ -224,8 +224,11 @@ public final class ShortcutInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisabledReason{}
 
-    /** @hide */
-    public static String getDisabledReasonLabel(@DisabledReason int disabledReason) {
+    /**
+     * Return a label for disabled reasons, which are *not* supposed to be shown to the user.
+     * @hide
+     */
+    public static String getDisabledReasonDebugString(@DisabledReason int disabledReason) {
         switch (disabledReason) {
             case DISABLED_REASON_NOT_DISABLED:
                 return "[Not disabled]";
@@ -243,6 +246,36 @@ public final class ShortcutInfo implements Parcelable {
                 return "[Disabled: unknown restore issue]";
         }
         return "[Disabled: unknown reason:" + disabledReason + "]";
+    }
+
+    /**
+     * Return a label for a disabled reason for shortcuts that are disabled due to a backup and
+     * restore issue. If the reason is not due to backup & restore, then it'll return null.
+     *
+     * This method returns localized, user-facing strings, which will be returned by
+     * {@link #getDisabledMessage()}.
+     *
+     * @hide
+     */
+    public static String getDisabledReasonForRestoreIssue(Context context,
+            @DisabledReason int disabledReason) {
+        final Resources res = context.getResources();
+
+        switch (disabledReason) {
+            case DISABLED_REASON_VERSION_LOWER:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restored_on_lower_version);
+            case DISABLED_REASON_BACKUP_NOT_SUPPORTED:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_not_supported);
+            case DISABLED_REASON_SIGNATURE_MISMATCH:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_signature_mismatch);
+            case DISABLED_REASON_OTHER_RESTORE_ISSUE:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_unknown_issue);
+        }
+        return null;
     }
 
     /** @hide */
@@ -2042,7 +2075,7 @@ public final class ShortcutInfo implements Parcelable {
         addIndentOrComma(sb, indent);
 
         sb.append("disabledReason=");
-        sb.append(getDisabledReasonLabel(mDisabledReason));
+        sb.append(getDisabledReasonDebugString(mDisabledReason));
 
         addIndentOrComma(sb, indent);
 

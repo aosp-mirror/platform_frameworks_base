@@ -348,20 +348,17 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testPinnedStackLocation() {
-        createStackControllerOnStackOnDisplay(
-                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final int initialStackCount = mDisplayContent.getStackCount();
-        // Ensure that the pinned stack was placed at the end
-        assertEquals(initialStackCount - 1,
-                mDisplayContent.getStackPosition(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD));
+        final TaskStack pinnedStack = createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
+        // Ensure that the pinned stack is the top stack
+        assertEquals(pinnedStack, mDisplayContent.getPinnedStack());
+        assertEquals(pinnedStack, mDisplayContent.getTopStack());
         // By default, this should try to create a new stack on top
-        createTaskStackOnDisplay(mDisplayContent);
-        final int afterStackCount = mDisplayContent.getStackCount();
-        // Make sure the stack count has increased
-        assertEquals(initialStackCount + 1, afterStackCount);
+        final TaskStack otherStack = createTaskStackOnDisplay(mDisplayContent);
+        // Ensure that the other stack is on the display.
+        assertEquals(mDisplayContent, otherStack.getDisplayContent());
         // Ensure that the pinned stack is still on top
-        assertEquals(afterStackCount - 1,
-                mDisplayContent.getStackPosition(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD));
+        assertEquals(pinnedStack, mDisplayContent.getTopStack());
     }
 
     /**

@@ -1829,22 +1829,6 @@ public class ActivityManager {
     }
 
     /**
-     * Completely remove the given task.
-     *
-     * @param taskId Identifier of the task to be removed.
-     * @return Returns true if the given task was found and removed.
-     *
-     * @hide
-     */
-    public boolean removeTask(int taskId) throws SecurityException {
-        try {
-            return getService().removeTask(taskId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Sets the windowing mode for a specific task. Only works on tasks of type
      * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}
      * @param taskId The id of the task to set the windowing mode for.
