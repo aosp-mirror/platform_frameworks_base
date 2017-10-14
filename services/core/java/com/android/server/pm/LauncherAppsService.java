@@ -30,12 +30,10 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
-import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -64,7 +62,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -89,10 +86,14 @@ public class LauncherAppsService extends SystemService {
     static class BroadcastCookie {
         public final UserHandle user;
         public final String packageName;
+        public final int callingUid;
+        public final int callingPid;
 
-        BroadcastCookie(UserHandle userHandle, String packageName) {
+        BroadcastCookie(UserHandle userHandle, String packageName, int callingPid, int callingUid) {
             this.user = userHandle;
             this.packageName = packageName;
+            this.callingUid = callingUid;
+            this.callingPid = callingPid;
         }
     }
 
@@ -125,6 +126,11 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         int injectBinderCallingUid() {
             return getCallingUid();
+        }
+
+        @VisibleForTesting
+        int injectBinderCallingPid() {
+            return getCallingPid();
         }
 
         final int injectCallingUserId() {
@@ -166,7 +172,7 @@ public class LauncherAppsService extends SystemService {
                 }
                 mListeners.unregister(listener);
                 mListeners.register(listener, new BroadcastCookie(UserHandle.of(getCallingUserId()),
-                        callingPackage));
+                        callingPackage, injectBinderCallingPid(), injectBinderCallingUid()));
             }
         }
 
@@ -438,7 +444,7 @@ public class LauncherAppsService extends SystemService {
         private void ensureShortcutPermission(@NonNull String callingPackage) {
             verifyCallingPackage(callingPackage);
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
-                    callingPackage)) {
+                    callingPackage, injectBinderCallingPid(), injectBinderCallingUid())) {
                 throw new SecurityException("Caller can't access shortcut information");
             }
         }
@@ -461,7 +467,8 @@ public class LauncherAppsService extends SystemService {
             return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
-                            componentName, flags, targetUser.getIdentifier()));
+                            componentName, flags, targetUser.getIdentifier(),
+                            injectBinderCallingPid(), injectBinderCallingUid()));
         }
 
         @Override
@@ -514,7 +521,7 @@ public class LauncherAppsService extends SystemService {
         public boolean hasShortcutHostPermission(String callingPackage) {
             verifyCallingPackage(callingPackage);
             return mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
-                    callingPackage);
+                    callingPackage, injectBinderCallingPid(), injectBinderCallingUid());
         }
 
         @Override
@@ -536,7 +543,8 @@ public class LauncherAppsService extends SystemService {
             }
 
             final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
-                    getCallingUserId(), callingPackage, packageName, shortcutId, targetUserId);
+                    getCallingUserId(), callingPackage, packageName, shortcutId, targetUserId,
+                    injectBinderCallingPid(), injectBinderCallingUid());
             if (intents == null || intents.length == 0) {
                 return false;
             }
@@ -901,7 +909,8 @@ public class LauncherAppsService extends SystemService {
 
                         // Make sure the caller has the permission.
                         if (!mShortcutServiceInternal.hasShortcutHostPermission(
-                                launcherUserId, cookie.packageName)) {
+                                launcherUserId, cookie.packageName,
+                                cookie.callingPid, cookie.callingUid)) {
                             continue;
                         }
                         // Each launcher has a different set of pinned shortcuts, so we need to do a
@@ -914,8 +923,8 @@ public class LauncherAppsService extends SystemService {
                                         /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
                                         /* component= */ null,
                                         ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
-                                        | ShortcutQuery.FLAG_GET_ALL_KINDS
-                                        , userId);
+                                        | ShortcutQuery.FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED
+                                        , userId, cookie.callingPid, cookie.callingUid);
                         try {
                             listener.onShortcutChanged(user, packageName,
                                     new ParceledListSlice<>(list));

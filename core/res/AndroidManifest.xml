@@ -3587,6 +3587,10 @@
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
+    <!-- @hide Allows system components to access all app shortcuts. -->
+    <permission android:name="android.permission.ACCESS_SHORTCUTS"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

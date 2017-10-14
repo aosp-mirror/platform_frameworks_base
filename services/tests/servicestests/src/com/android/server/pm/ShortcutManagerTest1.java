@@ -1894,7 +1894,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s2");
         });
 
-        dumpsysOnLogcat();
+        dumpsysOnLogcat("Before launcher 2");
 
         runWithCaller(LAUNCHER_2, USER_0, () -> {
             // Launcher2 still has no pinned ones.
@@ -1906,6 +1906,27 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
                     /* none */);
+
+            // Make sure FLAG_MATCH_ALL_PINNED will be ignored.
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
+                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                    .isEmpty();
+
+            // Make sure the special permission works.
+            mInjectCheckAccessShortcutsPermission = true;
+
+            dumpsysOnLogcat("All-pinned");
+
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED
+                            | ShortcutQuery.FLAG_MATCH_ALL_PINNED), getCallingUser()))
+                    .haveIds("s1", "s2");
+            assertWith(mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_MATCH_PINNED), getCallingUser()))
+                    .isEmpty();
+
+            mInjectCheckAccessShortcutsPermission = false;
 
             assertShortcutIds(assertAllDynamic(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,

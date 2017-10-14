@@ -570,7 +570,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
-        findAll(result, query, cloneFlag, null, 0);
+        findAll(result, query, cloneFlag, null, 0, /*getPinnedByAnyLauncher=*/ false);
     }
 
     /**
@@ -582,7 +582,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
-            @Nullable String callingLauncher, int launcherUserId) {
+            @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
         if (getPackageInfo().isShadow()) {
             // Restored and the app not installed yet, so don't return any.
             return;
@@ -604,9 +604,11 @@ class ShortcutPackage extends ShortcutPackageItem {
             final boolean isPinnedByCaller = (callingLauncher == null)
                     || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
 
-            if (si.isFloating()) {
-                if (!isPinnedByCaller) {
-                    continue;
+            if (!getPinnedByAnyLauncher) {
+                if (si.isFloating()) {
+                    if (!isPinnedByCaller) {
+                        continue;
+                    }
                 }
             }
             final ShortcutInfo clone = si.clone(cloneFlag);

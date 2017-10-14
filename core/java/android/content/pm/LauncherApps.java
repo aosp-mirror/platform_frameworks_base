@@ -282,12 +282,27 @@ public class LauncherApps {
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
         /**
-         * Does not retrieve CHOOSER only shortcuts.
-         * TODO: Add another flag for MATCH_ALL_PINNED
+         * @hide include all pinned shortcuts by any launchers, not just by the caller,
+         * in the result.
+         * If the caller doesn't havve the {@link android.Manifest.permission#ACCESS_SHORTCUTS}
+         * permission, this flag will be ignored.
+         */
+        @TestApi
+        public static final int FLAG_MATCH_ALL_PINNED = 1 << 10;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST
          * @hide
          */
         public static final int FLAG_MATCH_ALL_KINDS =
-                FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
+                FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_ALL_PINNED
+         * @hide
+         */
+        public static final int FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED =
+                FLAG_MATCH_ALL_KINDS | FLAG_MATCH_ALL_PINNED;
 
         /** @hide kept for unit tests */
         @Deprecated
@@ -319,6 +334,7 @@ public class LauncherApps {
                         FLAG_MATCH_PINNED,
                         FLAG_MATCH_MANIFEST,
                         FLAG_GET_KEY_FIELDS_ONLY,
+                        FLAG_MATCH_MANIFEST,
                 })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
