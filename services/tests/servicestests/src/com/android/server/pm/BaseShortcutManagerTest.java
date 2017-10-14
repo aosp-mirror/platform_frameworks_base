@@ -319,7 +319,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
+        boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId,
+                int callingPid, int callingUid) {
             return mDefaultLauncherChecker.test(callingPackage, userId);
         }
 
@@ -449,6 +450,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         void injectSendIntentSender(IntentSender intent, Intent extras) {
             mContext.sendIntentSender(intent);
+        }
+
+        @Override
+        boolean injectCheckAccessShortcutsPermission(int callingPid, int callingUid) {
+            return mInjectCheckAccessShortcutsPermission;
         }
 
         @Override
@@ -696,6 +702,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final int PACKAGE_FALLBACK_LAUNCHER_PRIORITY = -999;
 
     protected String mInjectedBuildFingerprint = "build1";
+
+    protected boolean mInjectCheckAccessShortcutsPermission = false;
 
     static {
         QUERY_ALL.setQueryFlags(
