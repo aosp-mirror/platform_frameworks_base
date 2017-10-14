@@ -250,7 +250,17 @@ cc_library {
         // If enabled, every GLES call is wrapped & error checked
         // Has moderate overhead
         "hwui_enable_opengl_validation",
-],
+    ],
+
+    // Build libhwui with PGO by default.
+    // Location of PGO profile data is defined in build/soong/cc/pgo.go
+    // and is separate from hwui.
+    // To turn it off, set ANDROID_PGO_NO_PROFILE_USE environment variable.
+    pgo: {
+        instrumentation: true,
+        profile_file: "hwui/hwui.profdata",
+        benchmarks: ["hwui"],
+    },
 }
 
 // ------------------------
