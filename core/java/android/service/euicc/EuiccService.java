@@ -97,6 +97,10 @@ public abstract class EuiccService extends Service {
     public static final String ACTION_RESOLVE_NO_PRIVILEGES =
             "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
 
+    /** Ask the user to input carrier confirmation code. */
+    public static final String ACTION_RESOLVE_CONFIRMATION_CODE =
+            "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
+
     /** Intent extra set for resolution requests containing the package name of the calling app. */
     public static final String EXTRA_RESOLUTION_CALLING_PACKAGE =
             "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
@@ -105,6 +109,8 @@ public abstract class EuiccService extends Service {
     public static final int RESULT_OK = 0;
     /** Result code indicating that an active SIM must be deactivated to perform the operation. */
     public static final int RESULT_MUST_DEACTIVATE_SIM = -1;
+    /** Result code indicating that the user must input a carrier confirmation code. */
+    public static final int RESULT_NEED_CONFIRMATION_CODE = -2;
     // New predefined codes should have negative values.
 
     /** Start of implementation-specific error results. */
@@ -119,10 +125,13 @@ public abstract class EuiccService extends Service {
         RESOLUTION_ACTIONS = new ArraySet<>();
         RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_DEACTIVATE_SIM);
         RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_NO_PRIVILEGES);
+        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_CONFIRMATION_CODE);
     }
 
     /** Boolean extra for resolution actions indicating whether the user granted consent. */
     public static final String RESOLUTION_EXTRA_CONSENT = "consent";
+    /** String extra for resolution actions indicating the carrier confirmation code. */
+    public static final String RESOLUTION_EXTRA_CONFIRMATION_CODE = "confirmation_code";
 
     private final IEuiccService.Stub mStubWrapper;
 
