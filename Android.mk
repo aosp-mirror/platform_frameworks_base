@@ -570,6 +570,7 @@ LOCAL_SRC_FILES += \
 	../../system/update_engine/binder_bindings/android/os/IUpdateEngineCallback.aidl \
 
 LOCAL_SRC_FILES += \
+	../../system/core/storaged/binder/android/os/IStoraged.aidl \
 	../../system/netd/server/binder/android/net/INetd.aidl \
 	../../system/vold/binder/android/os/IVold.aidl \
 	../../system/vold/binder/android/os/IVoldListener.aidl \
@@ -608,6 +609,7 @@ LOCAL_AIDL_INCLUDES += \
 	frameworks/av/drm/libmediadrm/aidl \
 	frameworks/av/media/libaudioclient/aidl \
 	frameworks/native/aidl/gui \
+	system/core/storaged/binder \
 	system/netd/server/binder \
 	system/vold/binder \
 	system/bt/binder
