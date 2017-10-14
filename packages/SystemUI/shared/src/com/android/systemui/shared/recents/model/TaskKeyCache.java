@@ -14,12 +14,12 @@
  * limitations under the License
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.systemui.recents.model.Task.TaskKey;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
 
 /**
  * Base class for both strong and LRU task key cache.
@@ -34,7 +34,7 @@ public abstract class TaskKeyCache<V> {
      * Gets a specific entry in the cache with the specified key, regardless of whether the cached
      * value is valid or not.
      */
-    final V get(Task.TaskKey key) {
+    final V get(TaskKey key) {
         return getCacheEntry(key.id);
     }
 
@@ -42,8 +42,8 @@ public abstract class TaskKeyCache<V> {
      * Returns the value only if the key is valid (has not been updated since the last time it was
      * in the cache)
      */
-    final V getAndInvalidateIfModified(Task.TaskKey key) {
-        Task.TaskKey lastKey = mKeys.get(key.id);
+    final V getAndInvalidateIfModified(TaskKey key) {
+        TaskKey lastKey = mKeys.get(key.id);
         if (lastKey != null) {
             if ((lastKey.windowingMode != key.windowingMode) ||
                     (lastKey.lastActiveTime != key.lastActiveTime)) {
@@ -59,7 +59,7 @@ public abstract class TaskKeyCache<V> {
     }
 
     /** Puts an entry in the cache for a specific key. */
-    final void put(Task.TaskKey key, V value) {
+    final void put(TaskKey key, V value) {
         if (key == null || value == null) {
             Log.e(TAG, "Unexpected null key or value: " + key + ", " + value);
             return;
@@ -70,7 +70,7 @@ public abstract class TaskKeyCache<V> {
 
 
     /** Removes a cache entry for a specific key. */
-    final void remove(Task.TaskKey key) {
+    final void remove(TaskKey key) {
         // Remove the key after the cache value because we need it to make the callback
         removeCacheEntry(key.id);
         mKeys.remove(key.id);

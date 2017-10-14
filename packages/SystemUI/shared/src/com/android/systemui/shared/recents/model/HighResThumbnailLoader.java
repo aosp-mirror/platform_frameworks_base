@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import static android.os.Process.setThreadPriority;
 
@@ -25,10 +25,8 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.Task.TaskCallbacks;
+import com.android.systemui.shared.recents.model.Task.TaskCallbacks;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -38,6 +36,8 @@ import java.util.ArrayList;
  */
 public class HighResThumbnailLoader implements TaskCallbacks {
 
+    private final ActivityManagerWrapper mActivityManager;
+
     @GuardedBy("mLoadQueue")
     private final ArrayDeque<Task> mLoadQueue = new ArrayDeque<>();
     @GuardedBy("mLoadQueue")
@@ -46,20 +46,21 @@ public class HighResThumbnailLoader implements TaskCallbacks {
     private boolean mLoaderIdling;
 
     private final ArrayList<Task> mVisibleTasks = new ArrayList<>();
+
     private final Thread mLoadThread;
     private final Handler mMainThreadHandler;
-    private final SystemServicesProxy mSystemServicesProxy;
     private final boolean mIsLowRamDevice;
     private boolean mLoading;
     private boolean mVisible;
     private boolean mFlingingFast;
     private boolean mTaskLoadQueueIdle;
 
-    public HighResThumbnailLoader(SystemServicesProxy ssp, Looper looper, boolean isLowRamDevice) {
+    public HighResThumbnailLoader(ActivityManagerWrapper activityManager, Looper looper,
+            boolean isLowRamDevice) {
+        mActivityManager = activityManager;
         mMainThreadHandler = new Handler(looper);
         mLoadThread = new Thread(mLoader, "Recents-HighResThumbnailLoader");
         mLoadThread.start();
-        mSystemServicesProxy = ssp;
         mIsLowRamDevice = isLowRamDevice;
     }
 
@@ -220,7 +221,7 @@ public class HighResThumbnailLoader implements TaskCallbacks {
         }
 
         private void loadTask(Task t) {
-            ThumbnailData thumbnail = mSystemServicesProxy.getTaskThumbnail(t.key.id,
+            ThumbnailData thumbnail = mActivityManager.getTaskThumbnail(t.key.id,
                     false /* reducedResolution */);
             mMainThreadHandler.post(() -> {
                 synchronized (mLoadQueue) {

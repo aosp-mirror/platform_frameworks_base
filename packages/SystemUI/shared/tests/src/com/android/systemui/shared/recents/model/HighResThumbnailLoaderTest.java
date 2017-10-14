@@ -14,9 +14,10 @@
  * limitations under the License
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyBoolean;
@@ -29,9 +30,9 @@ import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.Task.TaskKey;
+import com.android.systemui.shared.SysuiSharedLibTestCase;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,16 +41,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * runtest systemui -c com.android.systemui.recents.model.HighResThumbnailLoaderTest
+ * runtest --path frameworks/base/packages/SystemUI/shared/tests/src/com/android/systemui/shared/recents/model/HighResThumbnailLoaderTest.java
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class HighResThumbnailLoaderTest extends SysuiTestCase {
+public class HighResThumbnailLoaderTest extends SysuiSharedLibTestCase {
 
     private HighResThumbnailLoader mLoader;
 
     @Mock
-    private SystemServicesProxy mMockSystemServicesProxy;
+    private ActivityManagerWrapper mMockActivityManagerWrapper;
     @Mock
     private Task mTask;
 
@@ -58,10 +59,10 @@ public class HighResThumbnailLoaderTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mLoader = new HighResThumbnailLoader(mMockSystemServicesProxy, Looper.getMainLooper(),
-                false);
+        mLoader = new HighResThumbnailLoader(mMockActivityManagerWrapper, Looper.getMainLooper(),
+                false /* reducedResolution */);
         mTask.key = new TaskKey(0, WINDOWING_MODE_UNDEFINED, null, 0, 0);
-        when(mMockSystemServicesProxy.getTaskThumbnail(anyInt(), anyBoolean()))
+        when(mMockActivityManagerWrapper.getTaskThumbnail(anyInt(), anyBoolean()))
                 .thenReturn(mThumbnailData);
         mLoader.setVisible(true);
         mLoader.setTaskLoadQueueIdle(true);

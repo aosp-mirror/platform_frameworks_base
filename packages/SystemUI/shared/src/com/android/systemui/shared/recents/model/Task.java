@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.ViewDebug;
 
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.shared.recents.utilities.Utilities;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -46,11 +40,11 @@ public class Task {
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded(Task task, ThumbnailData thumbnailData);
+        void onTaskDataLoaded(Task task, ThumbnailData thumbnailData);
         /* Notifies when a task has been unbound */
-        public void onTaskDataUnloaded();
+        void onTaskDataUnloaded();
         /* Notifies when a task's windowing mode has changed. */
-        public void onTaskWindowingModeChanged();
+        void onTaskWindowingModeChanged();
     }
 
     /* The Task Key represents the unique primary key for the task */
@@ -63,8 +57,6 @@ public class Task {
         public final Intent baseIntent;
         @ViewDebug.ExportedProperty(category="recents")
         public final int userId;
-        @ViewDebug.ExportedProperty(category="recents")
-        public long firstActiveTime;
         @ViewDebug.ExportedProperty(category="recents")
         public long lastActiveTime;
 
@@ -134,10 +126,6 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public String titleDescription;
     @ViewDebug.ExportedProperty(category="recents")
-    public String dismissDescription;
-    @ViewDebug.ExportedProperty(category="recents")
-    public String appInfoDescription;
-    @ViewDebug.ExportedProperty(category="recents")
     public int colorPrimary;
     @ViewDebug.ExportedProperty(category="recents")
     public int colorBackground;
@@ -180,17 +168,15 @@ public class Task {
     }
 
     public Task(TaskKey key, Drawable icon, ThumbnailData thumbnail, String title,
-            String titleDescription, String dismissDescription, String appInfoDescription,
-            int colorPrimary, int colorBackground, boolean isLaunchTarget, boolean isStackTask,
-            boolean isSystemApp, boolean isDockable, TaskDescription taskDescription,
-            int resizeMode, ComponentName topActivity, boolean isLocked) {
+            String titleDescription, int colorPrimary, int colorBackground, boolean isLaunchTarget,
+            boolean isStackTask, boolean isSystemApp, boolean isDockable,
+            TaskDescription taskDescription, int resizeMode, ComponentName topActivity,
+            boolean isLocked) {
         this.key = key;
         this.icon = icon;
         this.thumbnail = thumbnail;
         this.title = title;
         this.titleDescription = titleDescription;
-        this.dismissDescription = dismissDescription;
-        this.appInfoDescription = appInfoDescription;
         this.colorPrimary = colorPrimary;
         this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
@@ -214,8 +200,6 @@ public class Task {
         this.thumbnail = o.thumbnail;
         this.title = o.title;
         this.titleDescription = o.titleDescription;
-        this.dismissDescription = o.dismissDescription;
-        this.appInfoDescription = o.appInfoDescription;
         this.colorPrimary = o.colorPrimary;
         this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;

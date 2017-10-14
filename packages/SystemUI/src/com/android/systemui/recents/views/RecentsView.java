@@ -53,7 +53,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
@@ -74,9 +73,9 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -498,7 +497,7 @@ public class RecentsView extends FrameLayout {
     public void onDrawForeground(Canvas canvas) {
         super.onDrawForeground(canvas);
 
-        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        ArrayList<DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
             visDockStates.get(i).viewState.draw(canvas);
         }
@@ -506,7 +505,7 @@ public class RecentsView extends FrameLayout {
 
     @Override
     protected boolean verifyDrawable(Drawable who) {
-        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        ArrayList<DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
             Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
             if (d == who) {
@@ -540,8 +539,8 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DragStartEvent event) {
         updateVisibleDockRegions(Recents.getConfiguration().getDockStatesForCurrentOrientation(),
-                true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
-                TaskStack.DockState.NONE.viewState.hintTextAlpha,
+                true /* isDefaultDockState */, DockState.NONE.viewState.dockAreaAlpha,
+                DockState.NONE.viewState.hintTextAlpha,
                 true /* animateAlpha */, false /* animateBounds */);
 
         // Temporarily hide the stack action button without changing visibility
@@ -555,15 +554,15 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
-        if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
+        if (event.dropTarget == null || !(event.dropTarget instanceof DockState)) {
             updateVisibleDockRegions(
                     Recents.getConfiguration().getDockStatesForCurrentOrientation(),
-                    true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
-                    TaskStack.DockState.NONE.viewState.hintTextAlpha,
+                    true /* isDefaultDockState */, DockState.NONE.viewState.dockAreaAlpha,
+                    DockState.NONE.viewState.hintTextAlpha,
                     true /* animateAlpha */, true /* animateBounds */);
         } else {
-            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
-            updateVisibleDockRegions(new TaskStack.DockState[] {dockState},
+            final DockState dockState = (DockState) event.dropTarget;
+            updateVisibleDockRegions(new DockState[] {dockState},
                     false /* isDefaultDockState */, -1, -1, true /* animateAlpha */,
                     true /* animateBounds */);
         }
@@ -582,8 +581,8 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(final DragEndEvent event) {
         // Handle the case where we drop onto a dock region
-        if (event.dropTarget instanceof TaskStack.DockState) {
-            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+        if (event.dropTarget instanceof DockState) {
+            final DockState dockState = (DockState) event.dropTarget;
 
             // Hide the dock region
             updateVisibleDockRegions(null, false /* isDefaultDockState */, -1, -1,
@@ -812,15 +811,15 @@ public class RecentsView extends FrameLayout {
     /**
      * Updates the dock region to match the specified dock state.
      */
-    private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
+    private void updateVisibleDockRegions(DockState[] newDockStates,
             boolean isDefaultDockState, int overrideAreaAlpha, int overrideHintAlpha,
             boolean animateAlpha, boolean animateBounds) {
-        ArraySet<TaskStack.DockState> newDockStatesSet = Utilities.arrayToSet(newDockStates,
-                new ArraySet<TaskStack.DockState>());
-        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        ArraySet<DockState> newDockStatesSet = Utilities.arrayToSet(newDockStates,
+                new ArraySet<DockState>());
+        ArrayList<DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
-            TaskStack.DockState dockState = visDockStates.get(i);
-            TaskStack.DockState.ViewState viewState = dockState.viewState;
+            DockState dockState = visDockStates.get(i);
+            DockState.ViewState viewState = dockState.viewState;
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it
                 viewState.startAnimation(null, 0, 0, TaskStackView.SLOW_SYNC_STACK_DURATION,

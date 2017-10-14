@@ -51,10 +51,10 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -709,7 +709,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /**** Events ****/
 
     public final void onBusEvent(DragEndEvent event) {
-        if (!(event.dropTarget instanceof TaskStack.DockState)) {
+        if (!(event.dropTarget instanceof DockState)) {
             event.addPostAnimationCallback(() -> {
                 // Reset the clip state for the drag view after the end animation completes
                 setClipViewInStack(true);

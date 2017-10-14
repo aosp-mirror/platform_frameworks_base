@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
+
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
@@ -25,20 +27,25 @@ import android.graphics.Rect;
  */
 public class ThumbnailData {
 
-    // TODO: Make these final once the non-snapshot path is removed.
-    public Bitmap thumbnail;
+    public final Bitmap thumbnail;
     public int orientation;
-    public final Rect insets = new Rect();
+    public Rect insets;
     public boolean reducedResolution;
     public float scale;
 
-    public static ThumbnailData createFromTaskSnapshot(TaskSnapshot snapshot) {
-        ThumbnailData out = new ThumbnailData();
-        out.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
-        out.insets.set(snapshot.getContentInsets());
-        out.orientation = snapshot.getOrientation();
-        out.reducedResolution = snapshot.isReducedResolution();
-        out.scale = snapshot.getScale();
-        return out;
+    public ThumbnailData() {
+        thumbnail = null;
+        orientation = ORIENTATION_UNDEFINED;
+        insets = new Rect();
+        reducedResolution = false;
+        scale = 1f;
+    }
+
+    public ThumbnailData(TaskSnapshot snapshot) {
+        thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
+        insets = new Rect(snapshot.getContentInsets());
+        orientation = snapshot.getOrientation();
+        reducedResolution = snapshot.isReducedResolution();
+        scale = snapshot.getScale();
     }
 }

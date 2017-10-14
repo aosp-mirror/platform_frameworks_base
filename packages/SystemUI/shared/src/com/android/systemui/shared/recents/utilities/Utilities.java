@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.misc;
+package com.android.systemui.shared.recents.utilities;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -38,12 +38,8 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewStub;
 
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.views.TaskViewTransform;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /* Common code */
 public class Utilities {
@@ -76,7 +72,6 @@ public class Utilities {
 
     public static final RectFEvaluator RECTF_EVALUATOR = new RectFEvaluator();
     public static final RectEvaluator RECT_EVALUATOR = new RectEvaluator(new Rect());
-    public static final Rect EMPTY_RECT = new Rect();
 
     /**
      * @return the first parent walking up the view hierarchy that has the given class type.
@@ -250,24 +245,6 @@ public class Utilities {
      */
     public static ViewStub findViewStubById(Activity a, int stubId) {
         return (ViewStub) a.findViewById(stubId);
-    }
-
-    /**
-     * Updates {@param transforms} to be the same size as {@param tasks}.
-     */
-    public static void matchTaskListSize(List<Task> tasks, List<TaskViewTransform> transforms) {
-        // We can reuse the task transforms where possible to reduce object allocation
-        int taskTransformCount = transforms.size();
-        int taskCount = tasks.size();
-        if (taskTransformCount < taskCount) {
-            // If there are less transforms than tasks, then add as many transforms as necessary
-            for (int i = taskTransformCount; i < taskCount; i++) {
-                transforms.add(new TaskViewTransform());
-            }
-        } else if (taskTransformCount > taskCount) {
-            // If there are more transforms than tasks, then just subset the transform list
-            transforms.subList(taskCount, taskTransformCount).clear();
-        }
     }
 
     /**

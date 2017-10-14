@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
@@ -25,233 +25,42 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsDebugFlags;
-import com.android.systemui.recents.events.activity.PackagesChangedEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan.Options;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
+import com.android.systemui.shared.recents.model.TaskKeyLruCache.EvictionCallback;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-
-/**
- * A Task load queue
- */
-class TaskResourceLoadQueue {
-
-    ConcurrentLinkedQueue<Task> mQueue = new ConcurrentLinkedQueue<Task>();
-
-    /** Adds a new task to the load queue */
-    void addTask(Task t) {
-        if (!mQueue.contains(t)) {
-            mQueue.add(t);
-        }
-        synchronized(this) {
-            notifyAll();
-        }
-    }
-
-    /**
-     * Retrieves the next task from the load queue, as well as whether we want that task to be
-     * force reloaded.
-     */
-    Task nextTask() {
-        return mQueue.poll();
-    }
-
-    /** Removes a task from the load queue */
-    void removeTask(Task t) {
-        mQueue.remove(t);
-    }
-
-    /** Clears all the tasks from the load queue */
-    void clearTasks() {
-        mQueue.clear();
-    }
-
-    /** Returns whether the load queue is empty */
-    boolean isEmpty() {
-        return mQueue.isEmpty();
-    }
-}
-
-/**
- * Task resource loader
- */
-class BackgroundTaskLoader implements Runnable {
-    static String TAG = "TaskResourceLoader";
-    static boolean DEBUG = false;
-
-    Context mContext;
-    HandlerThread mLoadThread;
-    Handler mLoadThreadHandler;
-    Handler mMainThreadHandler;
-
-    TaskResourceLoadQueue mLoadQueue;
-    TaskKeyLruCache<Drawable> mIconCache;
-    BitmapDrawable mDefaultIcon;
-
-    boolean mStarted;
-    boolean mCancelled;
-    boolean mWaitingOnLoadQueue;
-
-    private final OnIdleChangedListener mOnIdleChangedListener;
-
-    /** Constructor, creates a new loading thread that loads task resources in the background */
-    public BackgroundTaskLoader(TaskResourceLoadQueue loadQueue,
-            TaskKeyLruCache<Drawable> iconCache, BitmapDrawable defaultIcon,
-            OnIdleChangedListener onIdleChangedListener) {
-        mLoadQueue = loadQueue;
-        mIconCache = iconCache;
-        mDefaultIcon = defaultIcon;
-        mMainThreadHandler = new Handler();
-        mOnIdleChangedListener = onIdleChangedListener;
-        mLoadThread = new HandlerThread("Recents-TaskResourceLoader",
-                android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        mLoadThread.start();
-        mLoadThreadHandler = new Handler(mLoadThread.getLooper());
-    }
-
-    /** Restarts the loader thread */
-    void start(Context context) {
-        mContext = context;
-        mCancelled = false;
-        if (!mStarted) {
-            // Start loading on the load thread
-            mStarted = true;
-            mLoadThreadHandler.post(this);
-        } else {
-            // Notify the load thread to start loading again
-            synchronized (mLoadThread) {
-                mLoadThread.notifyAll();
-            }
-        }
-    }
-
-    /** Requests the loader thread to stop after the current iteration */
-    void stop() {
-        // Mark as cancelled for the thread to pick up
-        mCancelled = true;
-        // If we are waiting for the load queue for more tasks, then we can just reset the
-        // Context now, since nothing is using it
-        if (mWaitingOnLoadQueue) {
-            mContext = null;
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            if (mCancelled) {
-                // We have to unset the context here, since the background thread may be using it
-                // when we call stop()
-                mContext = null;
-                // If we are cancelled, then wait until we are started again
-                synchronized(mLoadThread) {
-                    try {
-                        mLoadThread.wait();
-                    } catch (InterruptedException ie) {
-                        ie.printStackTrace();
-                    }
-                }
-            } else {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                // If we've stopped the loader, then fall through to the above logic to wait on
-                // the load thread
-                if (ssp != null) {
-                    processLoadQueueItem(ssp);
-                }
-
-                // If there are no other items in the list, then just wait until something is added
-                if (!mCancelled && mLoadQueue.isEmpty()) {
-                    synchronized(mLoadQueue) {
-                        try {
-                            mWaitingOnLoadQueue = true;
-                            mMainThreadHandler.post(
-                                    () -> mOnIdleChangedListener.onIdleChanged(true));
-                            mLoadQueue.wait();
-                            mMainThreadHandler.post(
-                                    () -> mOnIdleChangedListener.onIdleChanged(false));
-                            mWaitingOnLoadQueue = false;
-                        } catch (InterruptedException ie) {
-                            ie.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * This needs to be in a separate method to work around an surprising interpreter behavior:
-     * The register will keep the local reference to cachedThumbnailData even if it falls out of
-     * scope. Putting it into a method fixes this issue.
-     */
-    private void processLoadQueueItem(SystemServicesProxy ssp) {
-        // Load the next item from the queue
-        final Task t = mLoadQueue.nextTask();
-        if (t != null) {
-            Drawable cachedIcon = mIconCache.get(t.key);
-
-            // Load the icon if it is stale or we haven't cached one yet
-            if (cachedIcon == null) {
-                cachedIcon = ssp.getBadgedTaskDescriptionIcon(t.taskDescription,
-                        t.key.userId, mContext.getResources());
-
-                if (cachedIcon == null) {
-                    ActivityInfo info = ssp.getActivityInfo(
-                            t.key.getComponent(), t.key.userId);
-                    if (info != null) {
-                        if (DEBUG) Log.d(TAG, "Loading icon: " + t.key);
-                        cachedIcon = ssp.getBadgedActivityIcon(info, t.key.userId);
-                    }
-                }
-
-                if (cachedIcon == null) {
-                    cachedIcon = mDefaultIcon;
-                }
-
-                // At this point, even if we can't load the icon, we will set the
-                // default icon.
-                mIconCache.put(t.key, cachedIcon);
-            }
-
-            if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
-            final ThumbnailData thumbnailData = ssp.getTaskThumbnail(t.key.id,
-                    true /* reducedResolution */);
-
-            if (!mCancelled) {
-                // Notify that the task data has changed
-                final Drawable finalIcon = cachedIcon;
-                mMainThreadHandler.post(
-                        () -> t.notifyTaskDataLoaded(thumbnailData, finalIcon));
-            }
-        }
-    }
-
-    interface OnIdleChangedListener {
-        void onIdleChanged(boolean idle);
-    }
-}
 
 /**
  * Recents task loader
  */
 public class RecentsTaskLoader {
-
     private static final String TAG = "RecentsTaskLoader";
     private static final boolean DEBUG = false;
+
+    /** Levels of svelte in increasing severity/austerity. */
+    // No svelting.
+    public static final int SVELTE_NONE = 0;
+    // Limit thumbnail cache to number of visible thumbnails when Recents was loaded, disable
+    // caching thumbnails as you scroll.
+    public static final int SVELTE_LIMIT_CACHE = 1;
+    // Disable the thumbnail cache, load thumbnails asynchronously when the activity loads and
+    // evict all thumbnails when hidden.
+    public static final int SVELTE_DISABLE_CACHE = 2;
+    // Disable all thumbnail loading.
+    public static final int SVELTE_DISABLE_LOADING = 3;
+
+    private final Context mContext;
 
     // This activity info LruCache is useful because it can be expensive to retrieve ActivityInfos
     // for many tasks, which we use to get the activity labels and icons.  Unlike the other caches
@@ -272,29 +81,27 @@ public class RecentsTaskLoader {
     private final int mMaxThumbnailCacheSize;
     private final int mMaxIconCacheSize;
     private int mNumVisibleTasksLoaded;
+    private int mSvelteLevel;
 
-    int mDefaultTaskBarBackgroundColor;
-    int mDefaultTaskViewBackgroundColor;
-    BitmapDrawable mDefaultIcon;
+    private int mDefaultTaskBarBackgroundColor;
+    private int mDefaultTaskViewBackgroundColor;
+    private final BitmapDrawable mDefaultIcon;
 
-    private TaskKeyLruCache.EvictionCallback mClearActivityInfoOnEviction =
-            new TaskKeyLruCache.EvictionCallback() {
+    private EvictionCallback mClearActivityInfoOnEviction = new EvictionCallback() {
         @Override
-        public void onEntryEvicted(Task.TaskKey key) {
+        public void onEntryEvicted(TaskKey key) {
             if (key != null) {
                 mActivityInfoCache.remove(key.getComponent());
             }
         }
     };
 
-    public RecentsTaskLoader(Context context) {
-        Resources res = context.getResources();
-        mDefaultTaskBarBackgroundColor =
-                context.getColor(R.color.recents_task_bar_default_background_color);
-        mDefaultTaskViewBackgroundColor =
-                context.getColor(R.color.recents_task_view_default_background_color);
-        mMaxThumbnailCacheSize = res.getInteger(R.integer.config_recents_max_thumbnail_count);
-        mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
+    public RecentsTaskLoader(Context context, int maxThumbnailCacheSize, int maxIconCacheSize,
+            int svelteLevel) {
+        mContext = context;
+        mMaxThumbnailCacheSize = maxThumbnailCacheSize;
+        mMaxIconCacheSize = maxIconCacheSize;
+        mSvelteLevel = svelteLevel;
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
@@ -303,16 +110,25 @@ public class RecentsTaskLoader {
 
         // Initialize the proxy, cache and loaders
         int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
-        mHighResThumbnailLoader = new HighResThumbnailLoader(Recents.getSystemServices(),
-                Looper.getMainLooper(), Recents.getConfiguration().isLowRamDevice);
+        mHighResThumbnailLoader = new HighResThumbnailLoader(ActivityManagerWrapper.getInstance(),
+                Looper.getMainLooper(), ActivityManager.isLowRamDeviceStatic());
         mLoadQueue = new TaskResourceLoadQueue();
         mIconCache = new TaskKeyLruCache<>(mMaxIconCacheSize, mClearActivityInfoOnEviction);
         mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);
-        mActivityInfoCache = new LruCache(numRecentTasks);
+        mActivityInfoCache = new LruCache<>(numRecentTasks);
         mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultIcon,
                 mHighResThumbnailLoader::setTaskLoadQueueIdle);
+    }
+
+    /**
+     * Sets the default task bar/view colors if none are provided by the app.
+     */
+    public void setDefaultColors(int defaultTaskBarBackgroundColor,
+            int defaultTaskViewBackgroundColor) {
+        mDefaultTaskBarBackgroundColor = defaultTaskBarBackgroundColor;
+        mDefaultTaskViewBackgroundColor = defaultTaskViewBackgroundColor;
     }
 
     /** Returns the size of the app icon cache. */
@@ -329,12 +145,6 @@ public class RecentsTaskLoader {
         return mHighResThumbnailLoader;
     }
 
-    /** Creates a new plan for loading the recent tasks. */
-    public RecentsTaskLoadPlan createLoadPlan(Context context) {
-        RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context);
-        return plan;
-    }
-
     /** Preloads recents tasks using the specified plan to store the output. */
     public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId) {
         try {
@@ -346,13 +156,11 @@ public class RecentsTaskLoader {
     }
 
     /** Begins loading the heavy task data according to the specified options. */
-    public synchronized void loadTasks(Context context, RecentsTaskLoadPlan plan,
-            RecentsTaskLoadPlan.Options opts) {
+    public synchronized void loadTasks(RecentsTaskLoadPlan plan, Options opts) {
         if (opts == null) {
             throw new RuntimeException("Requires load options");
         }
         if (opts.onlyLoadForCache && opts.loadThumbnails) {
-
             // If we are loading for the cache, we'd like to have the real cache only include the
             // visible thumbnails. However, we also don't want to reload already cached thumbnails.
             // Thus, we copy over the current entries into a second cache, and clear the real cache,
@@ -453,9 +261,7 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached task label if the task key is not expired, updating the cache if it is.
      */
-    String getAndUpdateActivityTitle(Task.TaskKey taskKey, ActivityManager.TaskDescription td) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-
+    String getAndUpdateActivityTitle(TaskKey taskKey, ActivityManager.TaskDescription td) {
         // Return the task description label if it exists
         if (td != null && td.getLabel() != null) {
             return td.getLabel();
@@ -468,7 +274,8 @@ public class RecentsTaskLoader {
         // All short paths failed, load the label from the activity info and cache it
         ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
         if (activityInfo != null) {
-            label = ssp.getBadgedActivityLabel(activityInfo, taskKey.userId);
+            label = ActivityManagerWrapper.getInstance().getBadgedActivityLabel(activityInfo,
+                    taskKey.userId);
             mActivityLabelCache.put(taskKey, label);
             return label;
         }
@@ -481,10 +288,7 @@ public class RecentsTaskLoader {
      * Returns the cached task content description if the task key is not expired, updating the
      * cache if it is.
      */
-    String getAndUpdateContentDescription(Task.TaskKey taskKey, ActivityManager.TaskDescription td,
-            Resources res) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-
+    String getAndUpdateContentDescription(TaskKey taskKey, ActivityManager.TaskDescription td) {
         // Return the cached content description if it exists
         String label = mContentDescriptionCache.getAndInvalidateIfModified(taskKey);
         if (label != null) {
@@ -494,7 +298,8 @@ public class RecentsTaskLoader {
         // All short paths failed, load the label from the activity info and cache it
         ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
         if (activityInfo != null) {
-            label = ssp.getBadgedContentDescription(activityInfo, taskKey.userId, td, res);
+            label = ActivityManagerWrapper.getInstance().getBadgedContentDescription(
+                    activityInfo, taskKey.userId, td);
             if (td == null) {
                 // Only add to the cache if the task description is null, otherwise, it is possible
                 // for the task description to change between calls without the last active time
@@ -513,10 +318,8 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached task icon if the task key is not expired, updating the cache if it is.
      */
-    Drawable getAndUpdateActivityIcon(Task.TaskKey taskKey, ActivityManager.TaskDescription td,
+    Drawable getAndUpdateActivityIcon(TaskKey taskKey, ActivityManager.TaskDescription td,
             Resources res, boolean loadIfNotCached) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-
         // Return the cached activity icon if it exists
         Drawable icon = mIconCache.getAndInvalidateIfModified(taskKey);
         if (icon != null) {
@@ -525,7 +328,8 @@ public class RecentsTaskLoader {
 
         if (loadIfNotCached) {
             // Return and cache the task description icon if it exists
-            icon = ssp.getBadgedTaskDescriptionIcon(td, taskKey.userId, res);
+            icon = ActivityManagerWrapper.getInstance().getBadgedTaskDescriptionIcon(mContext, td,
+                    taskKey.userId, res);
             if (icon != null) {
                 mIconCache.put(taskKey, icon);
                 return icon;
@@ -534,7 +338,8 @@ public class RecentsTaskLoader {
             // Load the icon from the activity info and cache it
             ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
             if (activityInfo != null) {
-                icon = ssp.getBadgedActivityIcon(activityInfo, taskKey.userId);
+                icon = ActivityManagerWrapper.getInstance().getBadgedActivityIcon(activityInfo,
+                        taskKey.userId);
                 if (icon != null) {
                     mIconCache.put(taskKey, icon);
                     return icon;
@@ -548,10 +353,8 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached thumbnail if the task key is not expired, updating the cache if it is.
      */
-    synchronized ThumbnailData getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached,
+    synchronized ThumbnailData getAndUpdateThumbnail(TaskKey taskKey, boolean loadIfNotCached,
             boolean storeInCache) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-
         ThumbnailData cached = mThumbnailCache.getAndInvalidateIfModified(taskKey);
         if (cached != null) {
             return cached;
@@ -564,11 +367,10 @@ public class RecentsTaskLoader {
         }
 
         if (loadIfNotCached) {
-            RecentsConfiguration config = Recents.getConfiguration();
-            if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
+            if (mSvelteLevel < SVELTE_DISABLE_LOADING) {
                 // Load the thumbnail from the system
-                ThumbnailData thumbnailData = ssp.getTaskThumbnail(taskKey.id,
-                        true /* reducedResolution */);
+                ThumbnailData thumbnailData = ActivityManagerWrapper.getInstance().getTaskThumbnail(
+                        taskKey.id, true /* reducedResolution */);
                 if (thumbnailData.thumbnail != null) {
                     if (storeInCache) {
                         mThumbnailCache.put(taskKey, thumbnailData);
@@ -607,12 +409,11 @@ public class RecentsTaskLoader {
      * Returns the activity info for the given task key, retrieving one from the system if the
      * task key is expired.
      */
-    ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
+    ActivityInfo getAndUpdateActivityInfo(TaskKey taskKey) {
         ComponentName cn = taskKey.getComponent();
         ActivityInfo activityInfo = mActivityInfoCache.get(cn);
         if (activityInfo == null) {
-            activityInfo = ssp.getActivityInfo(cn, taskKey.userId);
+            activityInfo = PackageManagerWrapper.getInstance().getActivityInfo(cn, taskKey.userId);
             if (cn == null || activityInfo == null) {
                 Log.e(TAG, "Unexpected null component name or activity info: " + cn + ", " +
                         activityInfo);

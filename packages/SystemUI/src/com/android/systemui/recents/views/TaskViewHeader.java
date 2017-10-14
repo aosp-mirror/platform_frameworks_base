@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.animation.Animator;
@@ -32,7 +31,6 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
@@ -58,8 +56,10 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
 
 /* The task bar view */
 public class TaskViewHeader extends FrameLayout
@@ -170,6 +170,8 @@ public class TaskViewHeader extends FrameLayout
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
     int mDisabledTaskBarBackgroundColor;
+    String mDismissDescFormat;
+    String mAppInfoDescFormat;
     int mTaskWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     // Header background
@@ -218,6 +220,9 @@ public class TaskViewHeader extends FrameLayout
         mDarkInfoIcon = context.getDrawable(R.drawable.recents_info_dark);
         mDisabledTaskBarBackgroundColor =
                 context.getColor(R.color.recents_task_bar_disabled_background_color);
+        mDismissDescFormat = mContext.getString(
+                R.string.accessibility_recents_item_will_be_dismissed);
+        mAppInfoDescFormat = mContext.getString(R.string.accessibility_recents_item_open_app_info);
 
         // Configure the background and dim
         mBackground = new HighlightColorDrawable();
@@ -455,14 +460,14 @@ public class TaskViewHeader extends FrameLayout
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
-        mDismissButton.setContentDescription(t.dismissDescription);
+        mDismissButton.setContentDescription(String.format(mDismissDescFormat, t.titleDescription));
         mDismissButton.setOnClickListener(this);
         mDismissButton.setClickable(false);
         ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
 
         // In accessibility, a single click on the focused app info button will show it
         if (touchExplorationEnabled) {
-            mIconView.setContentDescription(t.appInfoDescription);
+            mIconView.setContentDescription(String.format(mAppInfoDescFormat, t.titleDescription));
             mIconView.setOnClickListener(this);
             mIconView.setClickable(true);
         }
@@ -599,7 +604,7 @@ public class TaskViewHeader extends FrameLayout
         SystemServicesProxy ssp = Recents.getSystemServices();
         ComponentName cn = mTask.key.getComponent();
         int userId = mTask.key.userId;
-        ActivityInfo activityInfo = ssp.getActivityInfo(cn, userId);
+        ActivityInfo activityInfo = PackageManagerWrapper.getInstance().getActivityInfo(cn, userId);
         if (activityInfo == null) {
             return;
         }
@@ -619,11 +624,12 @@ public class TaskViewHeader extends FrameLayout
         }
 
         // Update the overlay contents for the current app
-        mAppTitleView.setText(ssp.getBadgedApplicationLabel(activityInfo.applicationInfo, userId));
+        mAppTitleView.setText(ActivityManagerWrapper.getInstance().getBadgedApplicationLabel(
+                activityInfo.applicationInfo, userId));
         mAppTitleView.setTextColor(mTask.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
-        mAppIconView.setImageDrawable(ssp.getBadgedApplicationIcon(activityInfo.applicationInfo,
-                userId));
+        mAppIconView.setImageDrawable(ActivityManagerWrapper.getInstance().getBadgedApplicationIcon(
+                activityInfo.applicationInfo, userId));
         mAppInfoView.setImageDrawable(mTask.useLightOnPrimaryColor
                 ? mLightInfoIcon
                 : mDarkInfoIcon);
