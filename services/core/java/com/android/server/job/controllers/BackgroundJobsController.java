@@ -167,6 +167,7 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
+        pw.println("BackgroundJobsController");
         pw.print("Foreground uids: [");
         for (int i = 0; i < mForegroundUids.size(); i++) {
             if (mForegroundUids.valueAt(i)) pw.print(mForegroundUids.keyAt(i) + " ");

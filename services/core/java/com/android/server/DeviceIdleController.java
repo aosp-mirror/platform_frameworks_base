@@ -1336,6 +1336,10 @@ public class DeviceIdleController extends SystemService
         public int[] getPowerSaveWhitelistUserAppIds() {
             return DeviceIdleController.this.getPowerSaveWhitelistUserAppIds();
         }
+
+        public int[] getPowerSaveTempWhitelistAppIds() {
+            return DeviceIdleController.this.getAppIdTempWhitelistInternal();
+        }
     }
 
     public DeviceIdleController(Context context) {
