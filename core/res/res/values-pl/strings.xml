@@ -1381,16 +1381,16 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Dysk USB (<xliff:g id="MANUFACTURER">%s</xliff:g>)"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Nośnik USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edytuj"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alert transmisji danych"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alert użycia danych"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Kliknij, by wyświetlić użycie i ustawienia."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Osiągnięto limit danych 2G/3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Osiągnięto limit danych 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Osiągnięto limit danych komórkowych"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Osiągnięto limit danych"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Osiągnięto limit danych Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Dane wstrzymane do końca cyklu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Przekroczono limit danych 2G/3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Przekroczono limit danych 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Przekroczono limit danych komórk."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Przekroczono limit danych"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Przekroczono limit danych Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ponad określony limit"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dane w tle są ograniczone"</string>

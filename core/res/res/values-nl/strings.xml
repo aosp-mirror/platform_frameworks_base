@@ -93,7 +93,7 @@
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Spraakservice is geblokkeerd."</string>
     <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Alle spraakservices zijn geblokkeerd."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS-service is geblokkeerd."</string>
-    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Spraak-/gegevensservices zijn geblokkeerd."</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Spraak-/dataservices zijn geblokkeerd."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Spraak-/SMS-services zijn geblokkeerd."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle spraak-/gegevens-/SMS-services zijn geblokkeerd."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Door peer aangevraagde TTY-modus VOL"</string>
