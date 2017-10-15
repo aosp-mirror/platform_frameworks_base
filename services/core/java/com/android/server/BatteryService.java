@@ -1134,9 +1134,11 @@ public final class BatteryService extends SystemService {
             if (!ledValues.isEnabled()) {
                 mBatteryLight.turnOff();
             } else if (ledValues.isPulsed()) {
+                mBatteryLight.setModes(ledValues.getBrightness());
                 mBatteryLight.setFlashing(ledValues.getColor(), Light.LIGHT_FLASH_TIMED,
                         ledValues.getOnMs(), ledValues.getOffMs());
             } else {
+                mBatteryLight.setModes(ledValues.getBrightness());
                 mBatteryLight.setColor(ledValues.getColor());
             }
         }

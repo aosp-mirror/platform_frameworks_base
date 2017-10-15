@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +52,7 @@ public abstract class Light {
 
     public abstract void setColor(int color);
     public abstract void setFlashing(int color, int mode, int onMS, int offMS);
+    public abstract void setModes(int brightnessLevel);
     public abstract void pulse();
     public abstract void pulse(int color, int onMS);
     public abstract void turnOff();

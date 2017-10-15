@@ -1,4 +1,5 @@
 /* * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2015 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +110,14 @@ public class LightsService extends SystemService {
         }
 
         @Override
+        public void setModes(int brightnessLevel) {
+            synchronized (this) {
+                mBrightnessLevel = brightnessLevel;
+                mModesUpdate = true;
+            }
+        }
+
+        @Override
         public void pulse() {
             pulse(0x00ffffff, 7);
         }
@@ -166,7 +175,7 @@ public class LightsService extends SystemService {
             }
 
             if (!mInitialized || color != mColor || mode != mMode || onMS != mOnMS ||
-                    offMS != mOffMS || mBrightnessMode != brightnessMode) {
+                    offMS != mOffMS || mBrightnessMode != brightnessMode || mModesUpdate) {
                 if (DEBUG) Slog.v(TAG, "setLight #" + mId + ": color=#"
                         + Integer.toHexString(color) + ": brightnessMode=" + brightnessMode);
                 mInitialized = true;
@@ -176,10 +185,12 @@ public class LightsService extends SystemService {
                 mOnMS = onMS;
                 mOffMS = offMS;
                 mBrightnessMode = brightnessMode;
+                mModesUpdate = false;
                 Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", 0x"
                         + Integer.toHexString(color) + ")");
                 try {
-                    setLight_native(mId, color, mode, onMS, offMS, brightnessMode);
+                    setLight_native(mId, color, mode, onMS, offMS,
+                            brightnessMode, mBrightnessLevel);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_POWER);
                 }
@@ -195,6 +206,7 @@ public class LightsService extends SystemService {
         private int mMode;
         private int mOnMS;
         private int mOffMS;
+        private int mBrightnessLevel;
         private boolean mFlashing;
         private int mBrightnessMode;
         private int mLastBrightnessMode;
@@ -202,6 +214,8 @@ public class LightsService extends SystemService {
         private boolean mVrModeEnabled;
         private boolean mUseLowPersistenceForVR;
         private boolean mInitialized;
+        private boolean mLocked;
+        private boolean mModesUpdate;
     }
 
     public LightsService(Context context) {
@@ -249,5 +263,5 @@ public class LightsService extends SystemService {
     };
 
     static native void setLight_native(int light, int color, int mode,
-            int onMS, int offMS, int brightnessMode);
+            int onMS, int offMS, int brightnessMode, int brightnessLevel);
 }
