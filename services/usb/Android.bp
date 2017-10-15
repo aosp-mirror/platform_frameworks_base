@@ -5,6 +5,7 @@ java_library_static {
     libs: [
         "services.core",
         "android.hidl.manager-V1.0-java",
+        "org.lineageos.platform.internal",
     ],
 
     static_libs: [
