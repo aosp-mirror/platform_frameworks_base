@@ -48,6 +48,9 @@
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
+    <!-- Shown in the lock screen when there is SIM card IO error. -->
+    <string name="keyguard_sim_error_message_short">Invalid Card.</string>
+
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
     <string name="keyguard_charged">Charged</string>
