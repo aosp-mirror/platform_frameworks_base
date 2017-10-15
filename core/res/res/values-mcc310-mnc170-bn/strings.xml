@@ -22,4 +22,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mmcc_imsi_unknown_in_hlr" msgid="210168420192421012">"সিমের জন্য প্রস্তুত নয় MM#2"</string>
     <string name="mmcc_illegal_ms" msgid="1130721094178658338">"সিমের অনুমতি নেই MM#3"</string>
+    <!-- no translation found for mmcc_illegal_me (3173546391131606065) -->
+    <skip />
 </resources>

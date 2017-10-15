@@ -12,6 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Build ext.jar
+// ============================================================
+java_library {
+    name: "ext",
+    no_framework_libs: true,
+    static_libs: [
+        "libphonenumber-platform",
+        "nist-sip",
+        "tagsoup",
+    ],
+    dxflags: ["--core-library"],
+}
+
 // ====  c++ proto device library  ==============================
 cc_library {
     name: "libplatformprotos",
