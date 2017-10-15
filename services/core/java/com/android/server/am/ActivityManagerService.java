@@ -5424,7 +5424,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doLowMem = app.instr == null;
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
-                maybeNotifyTopAppKilled(app);
+                maybeNotifyTopAppKilledLocked(app);
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid + ") has died: "
                         + ProcessList.makeOomAdjString(app.setAdj)
                         + ProcessList.makeProcStateString(app.setProcState));
@@ -5459,8 +5459,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /** Show system error dialog when a top app is killed by LMK */
-    void maybeNotifyTopAppKilled(ProcessRecord app) {
-        if (!shouldNotifyTopAppKilled(app)) {
+    void maybeNotifyTopAppKilledLocked(ProcessRecord app) {
+        if (!shouldNotifyTopAppKilledLocked(app)) {
             return;
         }
 
@@ -5470,8 +5470,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /** Only show notification when the top app is killed on low ram devices */
-    private boolean shouldNotifyTopAppKilled(ProcessRecord app) {
-        return app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
+    private boolean shouldNotifyTopAppKilledLocked(ProcessRecord app) {
+        final ActivityRecord TOP_ACT = resumedAppLocked();
+        final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
+        return app == TOP_APP &&
             ActivityManager.isLowRamDeviceStatic();
     }
 
