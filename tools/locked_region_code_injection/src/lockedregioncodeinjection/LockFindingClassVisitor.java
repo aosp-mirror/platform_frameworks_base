@@ -76,7 +76,7 @@ class LockFindingClassVisitor extends ClassVisitor {
         private MethodVisitor chain;
 
         public LockFindingMethodVisitor(String owner, MethodNode mn, MethodVisitor chain) {
-            super(Opcodes.ASM5, mn);
+            super(Opcodes.ASM6, mn);
             assert owner != null;
             this.owner = owner;
             this.chain = chain;
