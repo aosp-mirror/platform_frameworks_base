@@ -1197,15 +1197,6 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    /**
-     * @Deprecated to be removed Q3 2013 use {@link #getVoiceNetworkType}
-     * @hide
-     */
-    public int getNetworkType() {
-        Rlog.e(LOG_TAG, "ServiceState.getNetworkType() DEPRECATED will be removed *******");
-        return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
-    }
-
     /** @hide */
     public int getDataNetworkType() {
         return rilRadioTechnologyToNetworkType(mRilDataRadioTechnology);
