@@ -23,6 +23,7 @@
 #include <log/logprint.h>
 #include <utils/Errors.h>
 #include <unordered_map>
+#include "../matchers/matcher_util.h"
 #include "ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
@@ -88,6 +89,25 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
             break;
     }
     return newCondition;
+}
+
+HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
+                                                 const EventConditionLink& link) {
+    vector<KeyMatcher> eventKey;
+    eventKey.reserve(link.key_in_main().size());
+
+    for (const auto& key : link.key_in_main()) {
+        eventKey.push_back(key);
+    }
+
+    vector<KeyValuePair> dimensionKey = getDimensionKey(event, eventKey);
+
+    for (int i = 0; i < link.key_in_main_size(); i++) {
+        auto& kv = dimensionKey[i];
+        kv.set_key(link.key_in_condition(i).key());
+    }
+
+    return getHashableKey(dimensionKey);
 }
 
 }  // namespace statsd

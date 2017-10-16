@@ -80,6 +80,11 @@ public:
      */
     void ToProto(EventMetricData* out) const;
 
+    /*
+     * Get a KeyValuePair proto object.
+     */
+    KeyValuePair GetKeyValueProto(size_t key) const;
+
 private:
     /**
      * Don't copy, it's slower. If we really need this we can add it but let's try to

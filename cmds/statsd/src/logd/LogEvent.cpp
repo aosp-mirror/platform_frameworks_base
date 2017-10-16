@@ -150,6 +150,29 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
     }
 }
 
+KeyValuePair LogEvent::GetKeyValueProto(size_t key) const {
+    KeyValuePair pair;
+    pair.set_key(key);
+    // If the value is not valid, return the KeyValuePair without assigning the value.
+    // Caller can detect the error by checking the enum for "one of" proto type.
+    if (key < 1 || (key - 1) >= mElements.size()) {
+        return pair;
+    }
+    key--;
+
+    const android_log_list_element& elem = mElements[key];
+    if (elem.type == EVENT_TYPE_INT) {
+        pair.set_value_int(elem.data.int32);
+    } else if (elem.type == EVENT_TYPE_LONG) {
+        pair.set_value_int(elem.data.int64);
+    } else if (elem.type == EVENT_TYPE_STRING) {
+        pair.set_value_str(elem.data.string);
+    } else if (elem.type == EVENT_TYPE_FLOAT) {
+        pair.set_value_float(elem.data.float32);
+    }
+    return pair;
+}
+
 string LogEvent::ToString() const {
     ostringstream result;
     result << "{ " << mTimestampNs << " (" << mTagId << ")";

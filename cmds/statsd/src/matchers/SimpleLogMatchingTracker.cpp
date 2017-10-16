@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "SimpleLogMatchingTracker.h"
@@ -34,10 +34,12 @@ using std::vector;
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
                                                    const SimpleLogEntryMatcher& matcher)
     : LogMatchingTracker(name, index), mMatcher(matcher) {
-    for (int i = 0; i < matcher.tag_size(); i++) {
-        mTagIds.insert(matcher.tag(i));
+    if (!matcher.has_tag()) {
+        mInitialized = false;
+    } else {
+        mTagIds.insert(matcher.tag());
+        mInitialized = true;
     }
-    mInitialized = true;
 }
 
 SimpleLogMatchingTracker::~SimpleLogMatchingTracker() {
@@ -48,7 +50,7 @@ bool SimpleLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMatcher
                                     const unordered_map<string, int>& matcherMap,
                                     vector<bool>& stack) {
     // no need to do anything.
-    return true;
+    return mInitialized;
 }
 
 void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,

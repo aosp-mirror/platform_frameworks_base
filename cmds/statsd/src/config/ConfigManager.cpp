@@ -118,130 +118,156 @@ static StatsdConfig build_fake_config() {
     StatsdConfig config;
     config.set_config_id(12345L);
 
-    // One count metric to count screen on
+    int WAKE_LOCK_TAG_ID = 11;
+    int WAKE_LOCK_UID_KEY_ID = 1;
+    int WAKE_LOCK_STATE_KEY = 2;
+    int WAKE_LOCK_ACQUIRE_VALUE = 1;
+    int WAKE_LOCK_RELEASE_VALUE = 0;
+
+    int APP_USAGE_ID = 12345;
+    int APP_USAGE_UID_KEY_ID = 1;
+    int APP_USAGE_STATE_KEY = 2;
+    int APP_USAGE_FOREGROUND = 1;
+    int APP_USAGE_BACKGROUND = 0;
+
+    int SCREEN_EVENT_TAG_ID = 2;
+    int SCREEN_EVENT_STATE_KEY = 1;
+    int SCREEN_EVENT_ON_VALUE = 2;
+    int SCREEN_EVENT_OFF_VALUE = 1;
+
+    int UID_PROCESS_STATE_TAG_ID = 3;
+    int UID_PROCESS_STATE_UID_KEY = 1;
+
+    // Count Screen ON events.
     CountMetric* metric = config.add_count_metric();
-    metric->set_metric_id(20150717L);
-    metric->set_what("SCREEN_IS_ON");
+    metric->set_metric_id(1);
+    metric->set_what("SCREEN_TURNED_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
 
-    // One count metric to count PHOTO_CHANGE_OR_CHROME_CRASH
+    // Count process state changes, slice by uid.
     metric = config.add_count_metric();
-    metric->set_metric_id(20150718L);
-    metric->set_what("PHOTO_PROCESS_STATE_CHANGE");
-    metric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
-    metric->set_condition("SCREEN_IS_ON");
+    metric->set_metric_id(2);
+    metric->set_what("PROCESS_STATE_CHANGE");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    KeyMatcher* keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
 
+    // Count process state changes, slice by uid, while SCREEN_IS_OFF
+    metric = config.add_count_metric();
+    metric->set_metric_id(3);
+    metric->set_what("PROCESS_STATE_CHANGE");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
+    metric->set_condition("SCREEN_IS_OFF");
+
+    // Count wake lock, slice by uid, while SCREEN_IS_OFF and app in background
+    metric = config.add_count_metric();
+    metric->set_metric_id(4);
+    metric->set_what("APP_GET_WL");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    metric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    EventConditionLink* link = metric->add_links();
+    link->set_condition("APP_IS_BACKGROUND");
+    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+
+    // Duration of an app holding wl, while screen on and app in background
+    DurationMetric* durationMetric = config.add_duration_metric();
+    durationMetric->set_metric_id(5);
+    durationMetric->set_start("APP_GET_WL");
+    durationMetric->set_stop("APP_RELEASE_WL");
+    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
+    keyMatcher = durationMetric->add_dimension();
+    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    durationMetric->set_predicate("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    link = durationMetric->add_links();
+    link->set_condition("APP_IS_BACKGROUND");
+    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+
+    // Event matchers............
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
-    eventMatcher->set_name("SCREEN_IS_ON");
-
+    eventMatcher->set_name("SCREEN_TURNED_ON");
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
-            2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
+    simpleLogEntryMatcher->set_tag(SCREEN_EVENT_TAG_ID);
+    KeyValueMatcher* keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
+    keyValueMatcher->set_eq_int(SCREEN_EVENT_ON_VALUE);
 
     eventMatcher = config.add_log_entry_matcher();
-    eventMatcher->set_name("SCREEN_IS_OFF");
-
+    eventMatcher->set_name("SCREEN_TURNED_OFF");
     simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
+    simpleLogEntryMatcher->set_tag(SCREEN_EVENT_TAG_ID);
+    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
+    keyValueMatcher->set_eq_int(SCREEN_EVENT_OFF_VALUE);
 
-    LogEntryMatcher* procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_CRASH");
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("PROCESS_STATE_CHANGE");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(UID_PROCESS_STATE_TAG_ID);
 
-    SimpleLogEntryMatcher* simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    KeyValueMatcher* keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.google.android.apps.photos" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("APP_GOES_BACKGROUND");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(APP_USAGE_ID);
+    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
+    keyValueMatcher->set_eq_int(APP_USAGE_BACKGROUND);
 
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    keyValueMatcher->set_eq_int(2);
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("APP_GOES_FOREGROUND");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(APP_USAGE_ID);
+    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
+    keyValueMatcher->set_eq_int(APP_USAGE_FOREGROUND);
 
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_START");
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("APP_GET_WL");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(WAKE_LOCK_TAG_ID);
+    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
+    keyValueMatcher->set_eq_int(WAKE_LOCK_ACQUIRE_VALUE);
 
-    simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.google.android.apps.photos" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("APP_RELEASE_WL");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(WAKE_LOCK_TAG_ID);
+    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
+    keyValueMatcher->set_eq_int(WAKE_LOCK_RELEASE_VALUE);
 
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1 /*STATE*/);
-    keyValueMatcher->set_eq_int(1);
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_PROCESS_STATE_CHANGE");
-    LogEntryMatcher_Combination* combinationMatcher = procEventMatcher->mutable_combination();
-    combinationMatcher->set_operation(LogicalOperation::OR);
-    combinationMatcher->add_matcher("PHOTO_START");
-    combinationMatcher->add_matcher("PHOTO_CRASH");
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("CHROME_CRASH");
-
-    simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.android.chrome" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(1 /*STATE*/);
-    keyValueMatcher->set_eq_int(2);
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_CHANGE_OR_CHROME_CRASH");
-    combinationMatcher = procEventMatcher->mutable_combination();
-    combinationMatcher->set_operation(LogicalOperation::OR);
-    combinationMatcher->add_matcher("PHOTO_PROCESS_STATE_CHANGE");
-    combinationMatcher->add_matcher("CHROME_CRASH");
-
+    // Conditions.............
     Condition* condition = config.add_condition();
     condition->set_name("SCREEN_IS_ON");
     SimpleCondition* simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_IS_ON");
-    simpleCondition->set_stop("SCREEN_IS_OFF");
-
-    condition = config.add_condition();
-    condition->set_name("PHOTO_STARTED");
-
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("PHOTO_START");
-    simpleCondition->set_stop("PHOTO_CRASH");
+    simpleCondition->set_start("SCREEN_TURNED_ON");
+    simpleCondition->set_stop("SCREEN_TURNED_OFF");
 
     condition = config.add_condition();
     condition->set_name("SCREEN_IS_OFF");
-
     simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_IS_OFF");
-    simpleCondition->set_stop("SCREEN_IS_ON");
+    simpleCondition->set_start("SCREEN_TURNED_OFF");
+    simpleCondition->set_stop("SCREEN_TURNED_ON");
 
     condition = config.add_condition();
-    condition->set_name("SCREEN_IS_EITHER_ON_OFF");
-
-    Condition_Combination* combination = condition->mutable_combination();
-    combination->set_operation(LogicalOperation::OR);
-    combination->add_condition("SCREEN_IS_ON");
-    combination->add_condition("SCREEN_IS_OFF");
+    condition->set_name("APP_IS_BACKGROUND");
+    simpleCondition = condition->mutable_simple_condition();
+    simpleCondition->set_start("APP_GOES_BACKGROUND");
+    simpleCondition->set_stop("APP_GOES_FOREGROUND");
 
     condition = config.add_condition();
-    condition->set_name("SCREEN_IS_NEITHER_ON_OFF");
-
-    combination = condition->mutable_combination();
-    combination->set_operation(LogicalOperation::NOR);
-    combination->add_condition("SCREEN_IS_ON");
-    combination->add_condition("SCREEN_IS_OFF");
+    condition->set_name("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    Condition_Combination* combination_condition = condition->mutable_combination();
+    combination_condition->set_operation(LogicalOperation::AND);
+    combination_condition->add_condition("APP_IS_BACKGROUND");
+    combination_condition->add_condition("SCREEN_IS_ON");
 
     return config;
 }

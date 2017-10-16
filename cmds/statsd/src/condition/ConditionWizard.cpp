@@ -13,32 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_UTIL_H
-#define STATS_UTIL_H
-
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
-
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "ConditionWizard.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-#define DEFAULT_DIMENSION_KEY ""
-#define MATCHER_NOT_FOUND -2
-#define NANO_SECONDS_IN_A_SECOND (1000 * 1000 * 1000)
+using std::map;
+using std::string;
+using std::vector;
 
-typedef std::string HashableDimensionKey;
+ConditionState ConditionWizard::query(const int index,
+                                      const map<string, HashableDimensionKey>& parameters) {
+    vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
 
-EventMetricData parse(log_msg msg);
+    mAllConditions[index]->isConditionMet(parameters, mAllConditions, cache);
+    return cache[index];
+}
 
-int getTagId(log_msg msg);
-
-std::string getHashableKey(std::vector<KeyValuePair> key);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATS_UTIL_H

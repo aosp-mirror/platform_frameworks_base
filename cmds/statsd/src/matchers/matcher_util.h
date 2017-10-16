@@ -27,6 +27,7 @@
 #include <vector>
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "stats_util.h"
 
 namespace android {
 namespace os {
@@ -42,6 +43,9 @@ bool combinationMatch(const std::vector<int>& children, const LogicalOperation& 
                       const std::vector<MatchingState>& matcherResults);
 
 bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& wrapper);
+
+std::vector<KeyValuePair> getDimensionKey(const LogEvent& event,
+                                          const std::vector<KeyMatcher>& dimensions);
 
 }  // namespace statsd
 }  // namespace os

@@ -40,7 +40,7 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TAG_ID);
+    simpleMatcher->set_tag(TAG_ID);
 
     // Set up the event
     android_log_event_list list(TAG_ID);
@@ -57,7 +57,7 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TAG_ID);
+    simpleMatcher->set_tag(TAG_ID);
     auto keyValue1 = simpleMatcher->add_key_value_matcher();
     keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
     auto keyValue2 = simpleMatcher->add_key_value_matcher();
@@ -94,7 +94,7 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TAG_ID);
+    simpleMatcher->set_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
     keyValue->set_eq_string("some value");
@@ -115,7 +115,8 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TAG_ID);
+
+    simpleMatcher->set_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
@@ -176,7 +177,8 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(TAG_ID);
+    simpleMatcher->set_tag(TAG_ID);
+
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
@@ -199,7 +201,7 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
 
 // Helper for the composite matchers.
 void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, int val) {
-    simpleMatcher->add_tag(tag);
+    simpleMatcher->set_tag(tag);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(key);
     keyValue->set_eq_int(val);
