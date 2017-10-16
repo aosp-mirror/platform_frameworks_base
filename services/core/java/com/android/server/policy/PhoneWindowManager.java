@@ -1152,14 +1152,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
-        final boolean keyguardGoingAway = mWindowManagerInternal.isKeyguardGoingAway();
 
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
         // window manager have reported a draw complete or the keyguard is going away in dismiss
         // mode.
-        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete)
-                || keyguardGoingAway)) {
+        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete))) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
@@ -1170,7 +1168,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // the sensor reading was cleared which can cause it to relaunch the app that
                     // will show in the wrong orientation first before correcting leading to app
                     // launch delays.
-                    mOrientationListener.enable(!keyguardGoingAway /* clearCurrentRotation */);
+                    mOrientationListener.enable(true /* clearCurrentRotation */);
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
