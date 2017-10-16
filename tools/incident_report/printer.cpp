@@ -70,7 +70,6 @@ Out::printf(const char* format, ...)
 
     len = vsnprintf(mBuf, mBufSize, format, args);
     va_end(args);
-    bool truncated = (len >= mBufSize) && (reallocate(len) < len);
 
     va_start(args, format);
     len = vsnprintf(mBuf, mBufSize, format, args);

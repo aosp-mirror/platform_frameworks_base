@@ -34,6 +34,11 @@ cc_library {
         include_dirs: ["external/protobuf/src"],
     },
 
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
     target: {
         host: {
             proto: {
