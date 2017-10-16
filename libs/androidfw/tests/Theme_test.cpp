@@ -128,6 +128,18 @@ TEST_F(ThemeTest, SingleThemeWithParent) {
   EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
+TEST_F(ThemeTest, TryToUseBadResourceId) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+
+  Res_value value;
+  uint32_t flags;
+  ASSERT_EQ(kInvalidCookie, theme->GetAttribute(0x7f000001, &value, &flags));
+}
+
 TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({style_assets_.get()});
