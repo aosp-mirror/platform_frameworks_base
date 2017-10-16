@@ -30,7 +30,7 @@ namespace statsd {
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
 // be a no-op.
-class MetricProducer : public virtual RefBase, public virtual PackageInfoListener {
+class MetricProducer : public virtual PackageInfoListener {
 public:
     virtual ~MetricProducer(){};
 
