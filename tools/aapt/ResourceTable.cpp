@@ -4847,6 +4847,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     const String16 animatedVector16("animated-vector");
     const String16 pathInterpolator16("pathInterpolator");
     const String16 objectAnimator16("objectAnimator");
+    const String16 gradient16("gradient");
 
     const int minSdk = getMinSdkVersion(bundle);
     if (minSdk >= SDK_LOLLIPOP_MR1) {
@@ -4874,7 +4875,8 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         if (bundle->getNoVersionVectors() && (node->getElementName() == vector16 ||
                     node->getElementName() == animatedVector16 ||
                     node->getElementName() == objectAnimator16 ||
-                    node->getElementName() == pathInterpolator16)) {
+                    node->getElementName() == pathInterpolator16 ||
+                    node->getElementName() == gradient16)) {
             // We were told not to version vector tags, so skip the children here.
             continue;
         }
