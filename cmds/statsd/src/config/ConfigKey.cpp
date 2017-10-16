@@ -13,25 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARSE_UTIL_H
-#define PARSE_UTIL_H
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
+#include "config/ConfigKey.h"
 
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include <sstream>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-EventMetricData parse(log_msg msg);
+using std::ostringstream;
 
-int getTagId(log_msg msg);
+ConfigKey::ConfigKey() {
+}
+
+ConfigKey::ConfigKey(const ConfigKey& that) : mName(that.mName), mUid(that.mUid) {
+}
+
+ConfigKey::ConfigKey(int uid, const string& name) : mName(name), mUid(uid) {
+}
+
+ConfigKey::~ConfigKey() {
+}
+
+string ConfigKey::ToString() const {
+    ostringstream out;
+    out << '(' << mUid << ',' << mName << ')';
+    return out.str();
+}
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // PARSE_UTIL_H

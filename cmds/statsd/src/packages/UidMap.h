@@ -18,17 +18,17 @@
 #define STATSD_UIDMAP_H
 
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
-#include "PackageInfoListener.h"
+#include "packages/PackageInfoListener.h"
 
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
 #include <log/logprint.h>
-#include <mutex>
-#include <string>
 #include <stdio.h>
-#include <set>
-#include <unordered_map>
 #include <utils/RefBase.h>
+#include <mutex>
+#include <set>
+#include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -40,12 +40,12 @@ struct AppData {
     const string packageName;
     int versionCode;
 
-    AppData(const string& a, const int v) : packageName(a), versionCode(v) {};
+    AppData(const string& a, const int v) : packageName(a), versionCode(v){};
 };
 
 // UidMap keeps track of what the corresponding app name (APK name) and version code for every uid
 // at any given moment. This map must be updated by StatsCompanionService.
-class UidMap : public virtual android::RefBase  {
+class UidMap : public virtual android::RefBase {
 public:
     /*
      * All three inputs must be the same size, and the jth element in each array refers to the same
@@ -93,5 +93,4 @@ private:
 }  // namespace os
 }  // namespace android
 
-#endif //STATSD_UIDMAP_H
-
+#endif  // STATSD_UIDMAP_H

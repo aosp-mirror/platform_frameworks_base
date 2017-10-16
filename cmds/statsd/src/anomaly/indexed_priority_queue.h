@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_INDEXED_PRIORITY_QUEUE_H
-#define STATSD_INDEXED_PRIORITY_QUEUE_H
+#pragma once
 
-// ALOGE can be called from this file. If header loaded by another class, use their LOG_TAG instead.
-#ifndef LOG_TAG
-#define LOG_TAG "statsd(indexed_priority_queue)"
-#endif  // LOG_TAG
+#include "Log.h"
 
-#include <cutils/log.h>
 #include <utils/RefBase.h>
 #include <unordered_map>
 #include <vector>
@@ -132,23 +127,23 @@ void indexed_priority_queue<AA, Comparator>::remove(sp<const AA> a) {
 // The same as, but slightly more efficient than, remove(top()).
 template <class AA, class Comparator>
 void indexed_priority_queue<AA, Comparator>::pop() {
-  sp<const AA> a = top();
-  if (a == nullptr) return;
-  const size_t idx = 1;
-  if (idx == size()) {  // if a is the last element
+    sp<const AA> a = top();
+    if (a == nullptr) return;
+    const size_t idx = 1;
+    if (idx == size()) {  // if a is the last element
+        pq.pop_back();
+        indices.erase(a);
+        return;
+    }
+    // move last element (guaranteed not to be at idx) to idx, then delete a
+    sp<const AA> last_a = pq.back();
+    pq[idx] = last_a;
     pq.pop_back();
+    indices[last_a] = idx;
     indices.erase(a);
-    return;
-  }
-  // move last element (guaranteed not to be at idx) to idx, then delete a
-  sp<const AA> last_a = pq.back();
-  pq[idx] = last_a;
-  pq.pop_back();
-  indices[last_a] = idx;
-  indices.erase(a);
 
-  // get the heap back in order (since the element at idx is not in order)
-  sift_down(idx);
+    // get the heap back in order (since the element at idx is not in order)
+    sift_down(idx);
 }
 
 template <class AA, class Comparator>
@@ -227,5 +222,3 @@ void indexed_priority_queue<AA, Comparator>::swap_indices(size_t i, size_t j) {
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATSD_INDEXED_PRIORITY_QUEUE_H

@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARSE_UTIL_H
-#define PARSE_UTIL_H
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
+/*
+ * This file must be included at the top of the file. Other header files
+ * occasionally include log.h, and if LOG_TAG isn't set when that happens
+ * we'll get a preprocesser error when we try to define it here.
+ */
 
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#pragma once
 
-namespace android {
-namespace os {
-namespace statsd {
+#define LOG_TAG "statsd"
 
-EventMetricData parse(log_msg msg);
+#include <log/log.h>
 
-int getTagId(log_msg msg);
-
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
-
-#endif  // PARSE_UTIL_H
+#define VLOG(...) \
+    if (DEBUG) ALOGD(__VA_ARGS__);

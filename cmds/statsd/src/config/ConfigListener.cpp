@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_PACKAGE_INFO_LISTENER_H
-#define STATSD_PACKAGE_INFO_LISTENER_H
-
-#include <utils/RefBase.h>
-#include <string>
+#include "config/ConfigListener.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class PackageInfoListener : public virtual android::RefBase {
-public:
-    // Uid map will notify this listener that the app with apk name and uid has been upgraded to
-    // the specified version.
-    virtual void notifyAppUpgrade(const std::string& apk, const int uid, const int version) = 0;
-};
+ConfigListener::ConfigListener() {
+}
+
+ConfigListener::~ConfigListener() {
+}
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif //STATSD_PACKAGE_INFO_LISTENER_H

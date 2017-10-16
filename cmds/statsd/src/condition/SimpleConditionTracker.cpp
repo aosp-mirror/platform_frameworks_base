@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Stats_SimpleConditionTracker"
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "SimpleConditionTracker.h"
-#include <cutils/log.h>
+
 #include <log/logprint.h>
+
+namespace android {
+namespace os {
+namespace statsd {
 
 using std::string;
 using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
-
-namespace android {
-namespace os {
-namespace statsd {
 
 SimpleConditionTracker::SimpleConditionTracker(
         const string& name, const int index, const SimpleCondition& simpleCondition,

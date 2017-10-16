@@ -14,36 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLERMANAGER_H
-#define STATSD_STATSPULLERMANAGER_H
+#pragma once
 
-#include <utils/String16.h>
-#include <unordered_map>
-#include "StatsPuller.h"
+#include <log/log_read.h>
+#include <utils/RefBase.h>
+#include <vector>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-const static int KERNEL_WAKELOCKS = 1;
-
-class StatsPullerManager {
+/**
+ * Callback for LogReader
+ */
+class LogListener : public virtual android::RefBase {
 public:
-    // Enums of pulled data types (pullCodes)
-    // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
-    // TODO: pull the constant from stats_events.proto instead
-    const static int KERNEL_WAKELOCKS;
-    StatsPullerManager();
+    LogListener();
+    virtual ~LogListener();
 
-    String16 pull(const int pullCode);
-
-private:
-    std::unordered_map<int, std::unique_ptr<StatsPuller>> mStatsPullers;
+    // TODO: Rather than using log_msg, which doesn't have any real internal structure
+    // here, we should pull this out into our own LogEntry class.
+    virtual void OnLogEvent(const log_msg& msg) = 0;
 };
-
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATSD_STATSPULLERMANAGER_H

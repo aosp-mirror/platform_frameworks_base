@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "AnomalyMonitor"
 #define DEBUG true
+#include "Log.h"
 
-#include "AnomalyMonitor.h"
-
-#include <cutils/log.h>
+#include "anomaly/AnomalyMonitor.h"
 
 namespace android {
 namespace os {
@@ -92,17 +90,16 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
 
 // More efficient than repeatedly calling remove(mPq.top()) since it batches the
 // updates to the registered alarm.
-unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>
-                AnomalyMonitor::popSoonerThan(uint32_t timestampSec) {
-
+unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popSoonerThan(
+        uint32_t timestampSec) {
     if (DEBUG) ALOGD("Removing alarms with time <= %u", timestampSec);
     unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> oldAlarms;
     std::lock_guard<std::mutex> lock(mLock);
 
-    for (sp<const AnomalyAlarm> t = mPq.top();
-                t != nullptr && t->timestampSec <= timestampSec; t = mPq.top()) {
+    for (sp<const AnomalyAlarm> t = mPq.top(); t != nullptr && t->timestampSec <= timestampSec;
+         t = mPq.top()) {
         oldAlarms.insert(t);
-        mPq.pop(); // remove t
+        mPq.pop();  // remove t
     }
     // Always update registered alarm time (if anything has changed).
     if (!oldAlarms.empty()) {

@@ -16,12 +16,12 @@
 
 #include <android/os/DropBoxManager.h>
 
-#include "DropboxWriter.h"
+#include "storage/DropboxWriter.h"
 
-using android::String16;
 using android::binder::Status;
 using android::os::DropBoxManager;
 using android::sp;
+using android::String16;
 using std::vector;
 
 namespace android {

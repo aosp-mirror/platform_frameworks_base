@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
-
 #include <gtest/gtest.h>
-#include "../src/condition/ConditionTracker.h"
-#include "../src/matchers/LogMatchingTracker.h"
-#include "../src/metrics/CountMetricProducer.h"
-#include "../src/metrics/MetricProducer.h"
-#include "../src/metrics/metrics_manager_util.h"
+
+#include "src/condition/ConditionTracker.h"
+#include "src/matchers/LogMatchingTracker.h"
+#include "src/metrics/CountMetricProducer.h"
+#include "src/metrics/MetricProducer.h"
+#include "src/metrics/metrics_manager_util.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 

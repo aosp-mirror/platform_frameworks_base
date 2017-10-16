@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "LogReader.h"
+#include "logd/LogReader.h"
 
 #include <log/log_read.h>
 
@@ -33,22 +33,10 @@ namespace statsd {
 #define SNOOZE_INITIAL_MS 100
 #define SNOOZE_MAX_MS (10 * 60 * 1000)  // Ten minutes
 
-// ================================================================================
-LogListener::LogListener() {
-}
-
-LogListener::~LogListener() {
-}
-
-// ================================================================================
-LogReader::LogReader() {
+LogReader::LogReader(const sp<LogListener>& listener) : mListener(listener) {
 }
 
 LogReader::~LogReader() {
-}
-
-void LogReader::AddListener(const sp<LogListener>& listener) {
-    m_listeners.push_back(listener);
 }
 
 void LogReader::Run() {
@@ -119,11 +107,8 @@ int LogReader::connect_and_read() {
             // Record that we read one (used above to know how to snooze).
             lineCount++;
 
-            // Call the listeners
-            for (vector<sp<LogListener> >::iterator it = m_listeners.begin();
-                 it != m_listeners.end(); it++) {
-                (*it)->OnLogEvent(msg);
-            }
+            // Call the listener
+            mListener->OnLogEvent(msg);
         }
     }
 

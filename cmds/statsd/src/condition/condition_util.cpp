@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+#include "Log.h"
+
 #include "condition_util.h"
 
-#include <cutils/log.h>
 #include <log/event_tag_map.h>
 #include <log/log_event_list.h>
 #include <log/logprint.h>
@@ -27,14 +28,15 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
 
+namespace android {
+namespace os {
+namespace statsd {
+
 using std::set;
 using std::string;
 using std::unordered_map;
 using std::vector;
 
-namespace android {
-namespace os {
-namespace statsd {
 
 ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const LogicalOperation& operation,

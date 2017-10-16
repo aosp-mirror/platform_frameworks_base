@@ -13,25 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARSE_UTIL_H
-#define PARSE_UTIL_H
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
+#pragma once
 
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
+#include "config/ConfigKey.h"
+
+#include <utils/RefBase.h>
+#include <string>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-EventMetricData parse(log_msg msg);
+using android::RefBase;
+using std::string;
 
-int getTagId(log_msg msg);
+/**
+ * Callback for different subsystems inside statsd to implement to find out
+ * when a configuration has been added, updated or removed.
+ */
+class ConfigListener : public virtual RefBase {
+public:
+    ConfigListener();
+    virtual ~ConfigListener();
+
+    /**
+     * A configuration was added or updated.
+     */
+    virtual void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) = 0;
+
+    /**
+     * A configuration was removed.
+     */
+    virtual void OnConfigRemoved(const ConfigKey& key) = 0;
+};
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // PARSE_UTIL_H

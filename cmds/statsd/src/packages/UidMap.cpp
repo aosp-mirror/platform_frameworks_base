@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#include "UidMap.h"
-#include <cutils/log.h>
+#include "Log.h"
+
+#include "packages/UidMap.h"
+
 #include <utils/Errors.h>
 
 using namespace android;
@@ -48,18 +50,18 @@ int UidMap::getAppVersion(int uid, const string& packageName) const {
     return 0;
 }
 
-void UidMap::updateMap(const vector <int32_t> &uid, const vector <int32_t> &versionCode,
-                       const vector <String16> &packageName) {
-    lock_guard<mutex> lock(mMutex); // Exclusively lock for updates.
+void UidMap::updateMap(const vector<int32_t>& uid, const vector<int32_t>& versionCode,
+                       const vector<String16>& packageName) {
+    lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
     mMap.clear();
-    for (unsigned long j=0; j<uid.size(); j++) {
-        mMap.insert(make_pair(uid[j], AppData(string(String8(packageName[j]).string()),
-                                              versionCode[j])));
+    for (unsigned long j = 0; j < uid.size(); j++) {
+        mMap.insert(make_pair(uid[j],
+                              AppData(string(String8(packageName[j]).string()), versionCode[j])));
     }
 
-    if (mOutput.initial_size() == 0) { // Provide the initial states in the mOutput proto
-        for (unsigned long j=0; j<uid.size(); j++) {
+    if (mOutput.initial_size() == 0) {  // Provide the initial states in the mOutput proto
+        for (unsigned long j = 0; j < uid.size(); j++) {
             auto t = mOutput.add_initial();
             t->set_app(string(String8(packageName[j]).string()));
             t->set_version(int(versionCode[j]));
@@ -68,7 +70,7 @@ void UidMap::updateMap(const vector <int32_t> &uid, const vector <int32_t> &vers
     }
 }
 
-void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t& versionCode){
+void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t& versionCode) {
     lock_guard<mutex> lock(mMutex);
 
     string app = string(String8(app_16).string());
@@ -80,7 +82,7 @@ void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t
 
     auto log = mOutput.add_changes();
     log->set_deletion(false);
-    //log.timestamp = TODO: choose how timestamps are computed
+    // log.timestamp = TODO: choose how timestamps are computed
     log->set_app(app);
     log->set_uid(uid);
     log->set_version(versionCode);
@@ -99,15 +101,14 @@ void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int32_t
     mMap.insert(make_pair(uid, AppData(app, int(versionCode))));
 }
 
-
-void UidMap::removeApp(const String16& app_16, const int32_t& uid){
+void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
     lock_guard<mutex> lock(mMutex);
 
     string app = string(String8(app_16).string());
 
     auto log = mOutput.add_changes();
     log->set_deletion(true);
-    //log.timestamp = TODO: choose how timestamps are computed
+    // log.timestamp = TODO: choose how timestamps are computed
     log->set_app(app);
     log->set_uid(uid);
 
@@ -123,19 +124,19 @@ void UidMap::removeApp(const String16& app_16, const int32_t& uid){
 }
 
 void UidMap::addListener(sp<PackageInfoListener> producer) {
-    lock_guard<mutex> lock(mMutex); // Lock for updates
+    lock_guard<mutex> lock(mMutex);  // Lock for updates
     mSubscribers.insert(producer);
 }
 
 void UidMap::removeListener(sp<PackageInfoListener> producer) {
-    lock_guard<mutex> lock(mMutex); // Lock for updates
+    lock_guard<mutex> lock(mMutex);  // Lock for updates
     mSubscribers.erase(producer);
 }
 
 UidMapping UidMap::getAndClearOutput() {
-    lock_guard<mutex> lock(mMutex); // Lock for updates
+    lock_guard<mutex> lock(mMutex);  // Lock for updates
 
-    auto ret = UidMapping(mOutput); // Copy that will be returned.
+    auto ret = UidMapping(mOutput);  // Copy that will be returned.
     mOutput.Clear();
 
     // Re-initialize the initial state for the outputs. This results in extra data being uploaded
@@ -154,10 +155,10 @@ void UidMap::printUidMap(FILE* out) {
     lock_guard<mutex> lock(mMutex);
 
     for (auto it : mMap) {
-        fprintf(out, "%s, v%d (%i)\n", it.second.packageName.c_str(), it.second.versionCode, it.first);
+        fprintf(out, "%s, v%d (%i)\n", it.second.packageName.c_str(), it.second.versionCode,
+                it.first);
     }
 }
-
 
 }  // namespace statsd
 }  // namespace os

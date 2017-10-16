@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include "KernelWakelockPuller.h"
+#include "Log.h"
+
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IPCThreadState.h>
-#include <cutils/log.h>
 #include <private/android_filesystem_config.h>
-#include "StatsPuller.h"
 #include "StatsService.h"
+#include "external/KernelWakelockPuller.h"
+#include "external/StatsPuller.h"
 
 using namespace android;
 using namespace android::base;
@@ -40,15 +41,15 @@ String16 KernelWakelockPuller::pull() {
     sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
     String16 returned_value("");
     if (statsCompanion != NULL) {
-      Status status = statsCompanion->pullData(KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS,
-                                             &returned_value);
-      if (!status.isOk()) {
-          ALOGW("error pulling kernel wakelock");
-      }
-      ALOGD("KernelWakelockPuller::pull succeeded!");
-      // TODO: remove this when we integrate into aggregation chain.
-      ALOGD("%s", String8(returned_value).string());
-      return returned_value;
+        Status status = statsCompanion->pullData(KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS,
+                                                 &returned_value);
+        if (!status.isOk()) {
+            ALOGW("error pulling kernel wakelock");
+        }
+        ALOGD("KernelWakelockPuller::pull succeeded!");
+        // TODO: remove this when we integrate into aggregation chain.
+        ALOGD("%s", String8(returned_value).string());
+        return returned_value;
     } else {
         ALOGW("statsCompanion not found!");
         return String16();

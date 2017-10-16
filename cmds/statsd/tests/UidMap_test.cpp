@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
+#include "packages/UidMap.h"
 
 #include <gtest/gtest.h>
-#include "../src/UidMap.h"
+
 #include <stdio.h>
 
 using namespace android;

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "StatsPullerManager"
 #define DEBUG true
+#include "Log.h"
 
-#include "StatsPullerManager.h"
 #include <android/os/IStatsCompanionService.h>
-#include <cutils/log.h>
-#include "StatsService.h"
 #include "KernelWakelockPuller.h"
-
+#include "StatsService.h"
+#include "external/StatsPullerManager.h"
 
 using namespace android;
 

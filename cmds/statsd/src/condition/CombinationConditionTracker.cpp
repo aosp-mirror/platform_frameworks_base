@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "CombinationConditionTracker"
+
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "CombinationConditionTracker.h"
-#include <cutils/log.h>
+
 #include <log/logprint.h>
-using std::string;
-using std::unique_ptr;
-using std::unordered_map;
-using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
+
+using std::string;
+using std::unique_ptr;
+using std::unordered_map;
+using std::vector;
 
 CombinationConditionTracker::CombinationConditionTracker(const string& name, const int index)
     : ConditionTracker(name, index) {

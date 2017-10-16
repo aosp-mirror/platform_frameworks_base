@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARSE_UTIL_H
-#define PARSE_UTIL_H
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
+#ifndef STATSD_PACKAGE_INFO_LISTENER_H
+#define STATSD_PACKAGE_INFO_LISTENER_H
 
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include <utils/RefBase.h>
+#include <string>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-EventMetricData parse(log_msg msg);
-
-int getTagId(log_msg msg);
+class PackageInfoListener : public virtual android::RefBase {
+public:
+    // Uid map will notify this listener that the app with apk name and uid has been upgraded to
+    // the specified version.
+    virtual void notifyAppUpgrade(const std::string& apk, const int uid, const int version) = 0;
+};
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // PARSE_UTIL_H
+#endif  // STATSD_PACKAGE_INFO_LISTENER_H

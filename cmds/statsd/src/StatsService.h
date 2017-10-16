@@ -17,11 +17,11 @@
 #ifndef STATS_SERVICE_H
 #define STATS_SERVICE_H
 
-#include "AnomalyMonitor.h"
 #include "StatsLogProcessor.h"
-#include "StatsPullerManager.h"
-#include "StatsPuller.h"
-#include "UidMap.h"
+#include "anomaly/AnomalyMonitor.h"
+#include "config/ConfigManager.h"
+#include "external/StatsPullerManager.h"
+#include "packages/UidMap.h"
 
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
@@ -42,75 +42,114 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsService : public BnStatsManager {
+class StatsService : public BnStatsManager, public LogListener {
 public:
     StatsService(const sp<Looper>& handlerLooper);
     virtual ~StatsService();
 
     virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
-
     virtual status_t dump(int fd, const Vector<String16>& args);
-
     virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 
     virtual Status systemRunning();
-
-    // Inform statsd that statsCompanion is ready.
     virtual Status statsCompanionReady();
-
     virtual Status informAnomalyAlarmFired();
-
     virtual Status informPollAlarmFired();
-
     virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
                                     const vector<String16>& app);
     virtual Status informOnePackage(const String16& app, int32_t uid, int32_t version);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
 
-    virtual status_t setProcessor(const sp<StatsLogProcessor>& main_processor);
+    /**
+     * Called right before we start processing events.
+     */
+    void Startup();
+
+    /**
+     * Called by LogReader when there's a log event to process.
+     */
+    virtual void OnLogEvent(const log_msg& msg);
 
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
 
-    // TODO: Move this to a more logical file/class
-    // TODO: Should be private. Temporarily public for testing purposes only.
-    const sp<AnomalyMonitor> mAnomalyMonitor;
-
-    sp<UidMap> getUidMap() {
-        return m_UidMap;
-    }
-
     /** Fetches and returns the StatsCompanionService. */
     static sp<IStatsCompanionService> getStatsCompanionService();
 
 private:
-    sp<UidMap> m_UidMap; // Reference to the UID map needed for translating UID to app name/version.
+    /**
+     * Load system properties at init.
+     */
+    void init_system_properties();
 
-    sp<StatsLogProcessor> m_processor;  // Reference to the processor for updating configs.
+    /**
+     * Helper for loading system properties.
+     */
+    static void init_build_type_callback(void* cookie, const char* name, const char* value,
+                                         uint32_t serial);
 
-    status_t doPrintStatsLog(FILE* out, const Vector<String8>& args);
+    /**
+     * Text output of dumpsys.
+     */
+    void dump_impl(FILE* out);
 
-    void printCmdHelp(FILE* out);
+    /**
+     * Print usage information for the commands
+     */
+    void print_cmd_help(FILE* out);
 
-    status_t doLoadConfig(FILE* in);
+    /**
+     * Handle the config sub-command.
+     */
+    status_t cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 
+    /**
+     * Print the event log.
+     */
+    status_t cmd_print_stats_log(FILE* out, const Vector<String8>& args);
+
+    /**
+     * Print the mapping of uids to package names.
+     */
+    status_t cmd_print_uid_map(FILE* out);
+
+    /**
+     * Update a configuration.
+     */
+    void set_config(int uid, const string& name, const StatsdConfig& config);
+
+    /**
+     * Tracks the uid <--> package name mapping.
+     */
+    sp<UidMap> mUidMap;
+
+    /**
+     * Fetches external metrics.
+     * TODO: This should be an sp<>
+     */
     StatsPullerManager mStatsPullerManager;
 
-    status_t doPrintUidMap(FILE* out);
-};
+    /**
+     * Tracks the configurations that have been passed to statsd.
+     */
+    sp<ConfigManager> mConfigManager;
 
-// --- StatsdDeathRecipient ---
-class StatsdDeathRecipient : public IBinder::DeathRecipient {
-public:
-    StatsdDeathRecipient(sp<AnomalyMonitor> anomalyMonitor) : mAnmlyMntr(anomalyMonitor) {
-    }
+    /**
+     * The metrics recorder.
+     */
+    sp<StatsLogProcessor> mProcessor;
 
-    virtual void binderDied(const wp<IBinder>& who);
+    /**
+     * The anomaly detector.
+     */
+    const sp<AnomalyMonitor> mAnomalyMonitor;
 
-private:
-    const sp<AnomalyMonitor> mAnmlyMntr;
+    /**
+     * Whether this is an eng build.
+     */
+    bool mEngBuild;
 };
 
 }  // namespace statsd

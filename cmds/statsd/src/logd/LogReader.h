@@ -17,6 +17,8 @@
 #ifndef LOGREADER_H
 #define LOGREADER_H
 
+#include "logd/LogListener.h"
+
 #include <log/log_read.h>
 #include <utils/RefBase.h>
 
@@ -27,37 +29,19 @@ namespace os {
 namespace statsd {
 
 /**
- * Callback for LogReader
- */
-class LogListener : public virtual android::RefBase {
-public:
-    LogListener();
-    virtual ~LogListener();
-
-    // TODO: Rather than using log_msg, which doesn't have any real internal structure
-    // here, we should pull this out into our own LogEntry class.
-    virtual void OnLogEvent(const log_msg& msg) = 0;
-};
-
-/**
  * Class to read logs from logd.
  */
 class LogReader : public virtual android::RefBase {
 public:
     /**
-     * Construct the LogReader with a pointer back to the StatsService
+     * Construct the LogReader with the event listener. (Which is StatsService)
      */
-    LogReader();
+    LogReader(const sp<LogListener>& listener);
 
     /**
      * Destructor.
      */
     virtual ~LogReader();
-
-    /**
-     * Add a LogListener class.
-     */
-    void AddListener(const android::sp<LogListener>& listener);
 
     /**
      * Run the main LogReader loop
@@ -66,9 +50,9 @@ public:
 
 private:
     /**
-     * List of listeners to call back on when we do get an event.
+     * Who is going to get the events when they're read.
      */
-    std::vector<android::sp<LogListener> > m_listeners;
+    sp<LogListener> mListener;
 
     /**
      * Connect to a single instance of logd, and read until there's a read error.

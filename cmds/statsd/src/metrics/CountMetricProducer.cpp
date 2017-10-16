@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "CountMetric"
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "CountMetricProducer.h"
 #include "CountAnomalyTracker.h"

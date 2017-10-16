@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "statsd"
+#include "Log.h"
 
-#include "LogEntryPrinter.h"
-#include "LogReader.h"
-#include "StatsLogProcessor.h"
 #include "StatsService.h"
-#include "UidMap.h"
+#include "logd/LogReader.h"
 
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <binder/Status.h>
-#include <cutils/log.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
 
@@ -53,16 +49,12 @@ struct log_reader_thread_data {
 static void* log_reader_thread_func(void* cookie) {
     log_reader_thread_data* data = static_cast<log_reader_thread_data*>(cookie);
 
-    sp<LogReader> reader = new LogReader();
+    sp<LogReader> reader = new LogReader(data->service);
 
-    // Put the printer one first, so it will print before the real ones.
-    reader->AddListener(new LogEntryPrinter(STDOUT_FILENO));
-    sp<StatsLogProcessor> main_processor = new StatsLogProcessor(data->service->getUidMap());
-    data->service->setProcessor(main_processor);
-    reader->AddListener(main_processor);
+    // Tell StatsService that we're ready to go.
+    data->service->Startup();
 
-    // TODO: Construct and add real LogListners here.
-
+    // Run the read loop. Never returns.
     reader->Run();
 
     ALOGW("statsd LogReader.Run() is not supposed to return.");
@@ -127,6 +119,8 @@ int main(int /*argc*/, char** /*argv*/) {
 
     // TODO: This line is temporary, since statsd doesn't start up automatically (and therefore
     // the call in StatsService::SystemRunning() won't ever be called right now).
+    // TODO: Are you sure? Don't we need to reconnect to the system process if we get restarted?
+    //  --joeo
     service->sayHiToStatsCompanion();
 
     // Start the log reader thread

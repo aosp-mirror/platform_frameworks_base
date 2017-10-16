@@ -17,14 +17,14 @@
 #include <android/os/DropBoxManager.h>
 #include <androidfw/ZipUtils.h>
 
-#include "DropboxReader.h"
+#include "storage/DropboxReader.h"
 
-using android::String16;
-using android::ZipUtils;
 using android::base::unique_fd;
 using android::binder::Status;
 using android::os::DropBoxManager;
 using android::sp;
+using android::String16;
+using android::ZipUtils;
 using std::vector;
 
 namespace android {

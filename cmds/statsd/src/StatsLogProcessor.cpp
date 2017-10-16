@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#include <StatsLogProcessor.h>
+#include "Log.h"
 
-#include <cutils/log.h>
-#include <frameworks/base/cmds/statsd/src/stats_log.pb.h>
+#include "StatsLogProcessor.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "metrics/CountMetricProducer.h"
+#include "stats_util.h"
+
 #include <log/log_event_list.h>
-#include <metrics/CountMetricProducer.h>
 #include <utils/Errors.h>
 
 using namespace android;
@@ -31,12 +33,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsLogProcessor::StatsLogProcessor(const sp<UidMap> &uidMap)
-        : m_dropbox_writer("all-logs"), m_UidMap(uidMap)
-{
-    // hardcoded config
-    // this should be called from StatsService when it receives a statsd_config
-    UpdateConfig(0, buildFakeConfig());
+StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap)
+    : m_dropbox_writer("all-logs"), mUidMap(uidMap) {
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -54,21 +52,30 @@ void StatsLogProcessor::OnLogEvent(const log_msg& msg) {
     }
 }
 
-void StatsLogProcessor::UpdateConfig(const int config_source, const StatsdConfig& config) {
-    auto it = mMetricsManagers.find(config_source);
+void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
+    auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
         it->second->finish();
     }
 
-    ALOGD("Updated configuration for source %i", config_source);
+    ALOGD("Updated configuration for key %s", key.ToString().c_str());
 
     unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(config);
     if (newMetricsManager->isConfigValid()) {
-        mMetricsManagers.insert({config_source, std::move(newMetricsManager)});
+        mMetricsManagers[key] = std::move(newMetricsManager);
+        // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
         ALOGD("StatsdConfig valid");
     } else {
         // If there is any error in the config, don't use it.
         ALOGD("StatsdConfig NOT valid");
+    }
+}
+
+void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
+    auto it = mMetricsManagers.find(key);
+    if (it != mMetricsManagers.end()) {
+        it->second->finish();
+        mMetricsManagers.erase(it);
     }
 }
 

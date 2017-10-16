@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "statsd"
 #define DEBUG true
+#include "Log.h"
 
 #include "StatsService.h"
-#include "DropboxReader.h"
+#include "storage/DropboxReader.h"
 
 #include <android-base/file.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
-#include <cutils/log.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
@@ -31,6 +30,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/system_properties.h>
 #include <unistd.h>
 
 using namespace android;
@@ -39,24 +39,65 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// ======================================================================
+/**
+ * Watches for the death of the stats companion (system process).
+ */
+class CompanionDeathRecipient : public IBinder::DeathRecipient {
+public:
+    CompanionDeathRecipient(const sp<AnomalyMonitor>& anomalyMonitor);
+    virtual void binderDied(const wp<IBinder>& who);
+
+private:
+    const sp<AnomalyMonitor> mAnomalyMonitor;
+};
+
+CompanionDeathRecipient::CompanionDeathRecipient(const sp<AnomalyMonitor>& anomalyMonitor)
+    : mAnomalyMonitor(anomalyMonitor) {
+}
+
+void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
+    ALOGW("statscompanion service died");
+    mAnomalyMonitor->setStatsCompanionService(nullptr);
+}
+
+// ======================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    :   mAnomalyMonitor(new AnomalyMonitor(2)),m_UidMap(new UidMap()), mStatsPullerManager()
-    // TODO: Change AnomalyMonitor initialization based on the config
+    : mStatsPullerManager(),
+
+      mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
 {
-    ALOGD("stats service constructed");
+    mUidMap = new UidMap();
+    mConfigManager = new ConfigManager();
+    mProcessor = new StatsLogProcessor(mUidMap);
+
+    mConfigManager->AddListener(mProcessor);
+
+    init_system_properties();
 }
 
 StatsService::~StatsService() {
 }
 
-status_t StatsService::setProcessor(const sp<StatsLogProcessor>& main_processor) {
-    m_processor = main_processor;
-    ALOGD("stats service set to processor %p", m_processor.get());
-    return NO_ERROR;
+void StatsService::init_system_properties() {
+    mEngBuild = false;
+    const prop_info* buildType = __system_property_find("ro.build.type");
+    if (buildType != NULL) {
+        __system_property_read_callback(buildType, init_build_type_callback, this);
+    }
 }
 
-// Implement our own because the default binder implementation isn't
-// properly handling SHELL_COMMAND_TRANSACTION
+void StatsService::init_build_type_callback(void* cookie, const char* /*name*/, const char* value,
+                                            uint32_t serial) {
+    if (0 == strcmp("eng", value)) {
+        reinterpret_cast<StatsService*>(cookie)->mEngBuild = true;
+    }
+}
+
+/**
+ * Implement our own because the default binder implementation isn't
+ * properly handling SHELL_COMMAND_TRANSACTION.
+ */
 status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* reply,
                                   uint32_t flags) {
     status_t err;
@@ -105,56 +146,159 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
     }
 }
 
+/**
+ * Write debugging data about statsd.
+ */
 status_t StatsService::dump(int fd, const Vector<String16>& args) {
     FILE* out = fdopen(fd, "w");
     if (out == NULL) {
         return NO_MEMORY;  // the fd is already open
     }
 
-    fprintf(out, "StatsService::dump:");
-    ALOGD("StatsService::dump:");
-    const int N = args.size();
-    for (int i = 0; i < N; i++) {
-        fprintf(out, " %s", String8(args[i]).string());
-        ALOGD("   %s", String8(args[i]).string());
-    }
-    fprintf(out, "\n");
+    // TODO: Proto format for incident reports
+    dump_impl(out);
 
     fclose(out);
     return NO_ERROR;
 }
 
+/**
+ * Write debugging data about statsd in text format.
+ */
+void StatsService::dump_impl(FILE* out) {
+    mConfigManager->Dump(out);
+}
+
+/**
+ * Implementation of the adb shell cmd stats command.
+ */
 status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& args) {
-    if (args.size() > 0) {
-        if (!args[0].compare(String8("print-stats-log")) && args.size() > 1) {
-            return doPrintStatsLog(out, args);
-        }
+    // TODO: Permission check
+
+    const int argCount = args.size();
+    if (argCount >= 1) {
+        // adb shell cmd stats config ...
         if (!args[0].compare(String8("config"))) {
-            return doLoadConfig(in);
+            return cmd_config(in, out, err, args);
         }
+
+        // adb shell cmd stats print-stats-log
+        if (!args[0].compare(String8("print-stats-log")) && args.size() > 1) {
+            return cmd_print_stats_log(out, args);
+        }
+
+        // adb shell cmd stats print-stats-log
         if (!args[0].compare(String8("print-uid-map"))) {
-            return doPrintUidMap(out);
+            return cmd_print_uid_map(out);
         }
     }
 
-    printCmdHelp(out);
+    print_cmd_help(out);
     return NO_ERROR;
 }
 
-status_t StatsService::doLoadConfig(FILE* in) {
-    string content;
-    if (!android::base::ReadFdToString(fileno(in), &content)) {
-        return UNKNOWN_ERROR;
+void StatsService::print_cmd_help(FILE* out) {
+    fprintf(out,
+            "usage: adb shell cmd stats print-stats-log [tag_required] "
+            "[timestamp_nsec_optional]\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats print-uid-map \n");
+    fprintf(out, "\n");
+    fprintf(out, "  Prints the UID, app name, version mapping.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats config remove [UID] NAME\n");
+    fprintf(out, "usage: adb shell cmd stats config update [UID] NAME\n");
+    fprintf(out, "\n");
+    fprintf(out, "  Adds, updates or removes a configuration. The proto should be in\n");
+    fprintf(out, "  wire-encoded protobuf format and passed via stdin.\n");
+    fprintf(out, "\n");
+    fprintf(out, "  UID           The uid to use. It is only possible to pass the UID\n");
+    fprintf(out, "                parameter on eng builds.  If UID is omitted the calling\n");
+    fprintf(out, "                uid is used.\n");
+    fprintf(out, "  NAME          The per-uid name to use\n");
+}
+
+status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args) {
+    const int argCount = args.size();
+    if (argCount >= 2) {
+        if (args[1] == "update" || args[1] == "remove") {
+            bool good = false;
+            int uid = -1;
+            string name;
+
+            if (argCount == 3) {
+                // Automatically pick the UID
+                uid = IPCThreadState::self()->getCallingUid();
+                // TODO: What if this isn't a binder call? Should we fail?
+                name.assign(args[2].c_str(), args[2].size());
+                good = true;
+            } else if (argCount == 4) {
+                // If it's a userdebug or eng build, then the shell user can
+                // impersonate other uids.
+                if (mEngBuild) {
+                    const char* s = args[2].c_str();
+                    if (*s != '\0') {
+                        char* end = NULL;
+                        uid = strtol(s, &end, 0);
+                        if (*end == '\0') {
+                            name.assign(args[3].c_str(), args[3].size());
+                            good = true;
+                        }
+                    }
+                } else {
+                    fprintf(err, "The config can only be set for other UIDs on eng builds.\n");
+                }
+            }
+
+            if (!good) {
+                // If arg parsing failed, print the help text and return an error.
+                print_cmd_help(out);
+                return UNKNOWN_ERROR;
+            }
+
+            if (args[1] == "update") {
+                // Read stream into buffer.
+                string buffer;
+                if (!android::base::ReadFdToString(fileno(in), &buffer)) {
+                    fprintf(err, "Error reading stream for StatsConfig.\n");
+                    return UNKNOWN_ERROR;
+                }
+
+                // Parse buffer.
+                StatsdConfig config;
+                if (!config.ParseFromString(buffer)) {
+                    fprintf(err, "Error parsing proto stream for StatsConfig.\n");
+                    return UNKNOWN_ERROR;
+                }
+
+                // Add / update the config.
+                mConfigManager->UpdateConfig(ConfigKey(uid, name), config);
+            } else {
+                // Remove the config.
+                mConfigManager->RemoveConfig(ConfigKey(uid, name));
+            }
+
+            return NO_ERROR;
+        }
     }
-    StatsdConfig config;
-    if (config.ParseFromString(content)) {
-        ALOGD("Config parsed from command line: %s", config.SerializeAsString().c_str());
-        m_processor->UpdateConfig(0, config);
-        return NO_ERROR;
-    } else {
-        ALOGD("Config failed to be parsed");
-        return UNKNOWN_ERROR;
+    print_cmd_help(out);
+    return UNKNOWN_ERROR;
+}
+
+status_t StatsService::cmd_print_stats_log(FILE* out, const Vector<String8>& args) {
+    long msec = 0;
+
+    if (args.size() > 2) {
+        msec = strtol(args[2].string(), NULL, 10);
     }
+    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
+}
+
+status_t StatsService::cmd_print_uid_map(FILE* out) {
+    mUidMap->printUidMap(out);
+    return NO_ERROR;
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
@@ -166,7 +310,7 @@ Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<i
                                          "Only system uid can call informAllUidData");
     }
 
-    m_UidMap->updateMap(uid, version, app);
+    mUidMap->updateMap(uid, version, app);
     if (DEBUG) ALOGD("StatsService::informAllUidData succeeded");
 
     return Status::ok();
@@ -179,7 +323,7 @@ Status StatsService::informOnePackage(const String16& app, int32_t uid, int32_t 
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackage");
     }
-    m_UidMap->updateApp(app, uid, version);
+    mUidMap->updateApp(app, uid, version);
     return Status::ok();
 }
 
@@ -190,7 +334,7 @@ Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackageRemoved");
     }
-    m_UidMap->removeApp(app, uid);
+    mUidMap->removeApp(app, uid);
     return Status::ok();
 }
 
@@ -282,38 +426,18 @@ Status StatsService::statsCompanionReady() {
                 "statscompanion unavailable despite it contacting statsd!");
     }
     if (DEBUG) ALOGD("StatsService::statsCompanionReady linking to statsCompanion.");
-    IInterface::asBinder(statsCompanion)->linkToDeath(new StatsdDeathRecipient(mAnomalyMonitor));
+    IInterface::asBinder(statsCompanion)->linkToDeath(new CompanionDeathRecipient(mAnomalyMonitor));
     mAnomalyMonitor->setStatsCompanionService(statsCompanion);
 
     return Status::ok();
 }
 
-void StatsdDeathRecipient::binderDied(const wp<IBinder>& who) {
-    ALOGW("statscompanion service died");
-    mAnmlyMntr->setStatsCompanionService(nullptr);
+void StatsService::Startup() {
+    mConfigManager->Startup();
 }
 
-status_t StatsService::doPrintStatsLog(FILE* out, const Vector<String8>& args) {
-    long msec = 0;
-
-    if (args.size() > 2) {
-        msec = strtol(args[2].string(), NULL, 10);
-    }
-    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
-}
-
-status_t StatsService::doPrintUidMap(FILE* out) {
-    m_UidMap->printUidMap(out);
-    return NO_ERROR;
-}
-
-void StatsService::printCmdHelp(FILE* out) {
-    fprintf(out, "Usage:\n");
-    fprintf(out, "\t print-stats-log [tag_required] [timestamp_nsec_optional]\n");
-    fprintf(out, "\t print-uid-map Prints the UID, app name, version mapping.\n");
-    fprintf(out,
-            "\t config\t Loads a new config from command-line (must be proto in wire-encoded "
-            "format).\n");
+void StatsService::OnLogEvent(const log_msg& msg) {
+    mProcessor->OnLogEvent(msg);
 }
 
 }  // namespace statsd

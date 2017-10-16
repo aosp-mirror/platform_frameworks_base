@@ -13,25 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARSE_UTIL_H
-#define PARSE_UTIL_H
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
+#ifndef STATSD_STATSPULLERMANAGER_H
+#define STATSD_STATSPULLERMANAGER_H
 
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include <utils/String16.h>
+#include <unordered_map>
+#include "external/StatsPuller.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-EventMetricData parse(log_msg msg);
+const static int KERNEL_WAKELOCKS = 1;
 
-int getTagId(log_msg msg);
+class StatsPullerManager {
+public:
+    // Enums of pulled data types (pullCodes)
+    // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
+    // TODO: pull the constant from stats_events.proto instead
+    const static int KERNEL_WAKELOCKS;
+    StatsPullerManager();
+
+    String16 pull(const int pullCode);
+
+private:
+    std::unordered_map<int, std::unique_ptr<StatsPuller>> mStatsPullers;
+};
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // PARSE_UTIL_H
+#endif  // STATSD_STATSPULLERMANAGER_H

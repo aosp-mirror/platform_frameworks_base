@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
+#include "condition/condition_util.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 #include <gtest/gtest.h>
-#include "../src/condition/condition_util.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 #include <stdio.h>
 #include <vector>

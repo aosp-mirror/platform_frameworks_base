@@ -17,10 +17,11 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
+#include "matchers/matcher_util.h"
+#include "packages/PackageInfoListener.h"
+
 #include <log/logprint.h>
 #include <utils/RefBase.h>
-#include "../matchers/matcher_util.h"
-#include "PackageInfoListener.h"
 
 namespace android {
 namespace os {

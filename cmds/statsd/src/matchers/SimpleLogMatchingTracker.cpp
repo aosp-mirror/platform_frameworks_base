@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SimpleLogMatchingTracker"
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "SimpleLogMatchingTracker.h"
-#include <cutils/log.h>
+
 #include <log/logprint.h>
+
+namespace android {
+namespace os {
+namespace statsd {
 
 using std::string;
 using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
-namespace android {
-namespace os {
-namespace statsd {
 
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
                                                    const SimpleLogEntryMatcher& matcher)

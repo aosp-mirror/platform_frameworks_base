@@ -18,7 +18,7 @@
 #define STATSD_KERNELWAKELOCKPULLER_H
 
 #include <utils/String16.h>
-#include "StatsPuller.h"
+#include "external/StatsPuller.h"
 
 namespace android {
 namespace os {

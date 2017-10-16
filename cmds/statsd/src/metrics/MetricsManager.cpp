@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "MetricManager"
 #define DEBUG true  // STOPSHIP if true
+#include "Log.h"
 #define VLOG(...) \
     if (DEBUG) ALOGD(__VA_ARGS__);
 
 #include "MetricsManager.h"
-#include <cutils/log.h>
 #include <log/logprint.h>
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"

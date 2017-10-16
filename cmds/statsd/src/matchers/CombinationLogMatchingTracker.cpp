@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-#include "CombinationLogMatchingTracker.h"
+#include "Log.h"
 
-#include <cutils/log.h>
-#include "matcher_util.h"
+#include "CombinationLogMatchingTracker.h"
+#include "matchers/matcher_util.h"
+
+namespace android {
+namespace os {
+namespace statsd {
+
 using std::set;
 using std::string;
 using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
-
-namespace android {
-namespace os {
-namespace statsd {
 
 CombinationLogMatchingTracker::CombinationLogMatchingTracker(const string& name, const int index)
     : LogMatchingTracker(name, index) {

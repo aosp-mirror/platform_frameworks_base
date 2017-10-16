@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef METRICS_MANAGER_H
-#define METRICS_MANAGER_H
+#pragma once
 
-#include <cutils/log.h>
+#include "condition/ConditionTracker.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/LogMatchingTracker.h"
+#include "metrics/MetricProducer.h"
+
 #include <log/logprint.h>
 #include <unordered_map>
-#include "../condition/ConditionTracker.h"
-#include "../matchers/LogMatchingTracker.h"
-#include "MetricProducer.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
@@ -94,4 +93,3 @@ private:
 }  // namespace os
 }  // namespace android
 
-#endif  // METRICS_MANAGER_H

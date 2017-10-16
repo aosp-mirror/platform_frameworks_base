@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/matcher_util.h"
+#include "stats_util.h"
 
 #include <gtest/gtest.h>
 #include <log/log_event_list.h>
 #include <log/log_read.h>
 #include <log/logprint.h>
-#include "../src/matchers/matcher_util.h"
-#include "../src/stats_util.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 #include <stdio.h>
 

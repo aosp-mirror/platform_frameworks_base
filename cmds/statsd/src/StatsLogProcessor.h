@@ -16,12 +16,13 @@
 #ifndef STATS_LOG_PROCESSOR_H
 #define STATS_LOG_PROCESSOR_H
 
-#include "DropboxWriter.h"
-#include "LogReader.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "config/ConfigListener.h"
+#include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
-#include "stats_util.h"
-#include "UidMap.h"
+#include "packages/UidMap.h"
+#include "storage/DropboxWriter.h"
+
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 #include <log/logprint.h>
 #include <stdio.h>
@@ -31,22 +32,23 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsLogProcessor : public LogListener {
+class StatsLogProcessor : public ConfigListener {
 public:
     StatsLogProcessor(const sp<UidMap> &uidMap);
     virtual ~StatsLogProcessor();
 
     virtual void OnLogEvent(const log_msg& msg);
 
-    void UpdateConfig(const int config_source, const StatsdConfig& config);
+    void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
+    void OnConfigRemoved(const ConfigKey& key);
 
 private:
     // TODO: use EventMetrics to log the events.
     DropboxWriter m_dropbox_writer;
 
-    std::unordered_map<int, std::unique_ptr<MetricsManager>> mMetricsManagers;
+    std::unordered_map<ConfigKey, std::unique_ptr<MetricsManager>> mMetricsManagers;
 
-    sp<UidMap> m_UidMap; // Reference to the UidMap to lookup app name and version for each uid.
+    sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 };
 
 }  // namespace statsd

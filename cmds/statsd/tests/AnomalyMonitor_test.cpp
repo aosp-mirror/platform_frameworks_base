@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
-
-#include "../src/AnomalyMonitor.h"
+#include "anomaly/AnomalyMonitor.h"
 
 #include <gtest/gtest.h>
 

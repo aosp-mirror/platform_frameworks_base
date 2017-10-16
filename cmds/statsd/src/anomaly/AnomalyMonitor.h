@@ -17,12 +17,13 @@
 #ifndef ANOMALY_MONITOR_H
 #define ANOMALY_MONITOR_H
 
+#include "anomaly/indexed_priority_queue.h"
+
 #include <android/os/IStatsCompanionService.h>
-#include <indexed_priority_queue.h>
 #include <utils/RefBase.h>
 
-#include <unordered_set>
 #include <queue>
+#include <unordered_set>
 #include <vector>
 
 using namespace android;
@@ -91,8 +92,8 @@ public:
      * Returns and removes all alarms whose timestamp <= the given timestampSec.
      * Always updates the registered alarm if return is non-empty.
      */
-    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>
-                    popSoonerThan(uint32_t timestampSec);
+    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> popSoonerThan(
+            uint32_t timestampSec);
 
     /**
      * Returns the projected alarm timestamp that is registered with

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#include "matcher_util.h"
-#include <cutils/log.h>
+#include "Log.h"
+
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/LogMatchingTracker.h"
+#include "matchers/matcher_util.h"
+#include "stats_util.h"
+
 #include <log/event_tag_map.h>
 #include <log/log_event_list.h>
 #include <log/logprint.h>
 #include <utils/Errors.h>
-#include <unordered_map>
-#include "LogMatchingTracker.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "stats_util.h"
 
 #include <sstream>
+#include <unordered_map>
 
 using std::set;
 using std::string;

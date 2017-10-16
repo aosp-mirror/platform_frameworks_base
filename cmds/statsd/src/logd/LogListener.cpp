@@ -14,48 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef LOG_ENTRY_PRINTER_H
-#define LOG_ENTRY_PRINTER_H
+#include "logd/LogReader.h"
 
-#include "LogReader.h"
+#include <log/log_read.h>
 
-#include <log/logprint.h>
+#include <utils/Errors.h>
 
-#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+
+using namespace android;
+using namespace std;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-/**
- * Decodes the log entry and prints it to the supplied file descriptor.
- */
-class LogEntryPrinter : public LogListener {
-public:
-    LogEntryPrinter(int out);
-    virtual ~LogEntryPrinter();
+LogListener::LogListener() {
+}
 
-    virtual void OnLogEvent(const log_msg& msg);
-
-private:
-    /**
-     * Where to write to.
-     */
-    int m_out;
-
-    /**
-     * Numeric to string tag name mapping.
-     */
-    EventTagMap* m_tags;
-
-    /**
-     * Pretty printing format.
-     */
-    AndroidLogFormat* m_format;
-};
+LogListener::~LogListener() {
+}
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // LOG_ENTRY_PRINTER_H

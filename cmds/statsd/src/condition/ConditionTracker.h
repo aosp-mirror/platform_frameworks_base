@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef CONDITION_TRACKER_H
-#define CONDITION_TRACKER_H
+#pragma once
 
-#include <cutils/log.h>
+#include "Log.h"
+
+#include "condition/condition_util.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/LogMatchingTracker.h"
+#include "matchers/matcher_util.h"
+
 #include <log/logprint.h>
 #include <utils/RefBase.h>
+
 #include <unordered_map>
-#include "../matchers/LogMatchingTracker.h"
-#include "../matchers/matcher_util.h"
-#include "condition_util.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
@@ -102,4 +104,3 @@ protected:
 }  // namespace os
 }  // namespace android
 
-#endif  // CONDITION_TRACKER_H
