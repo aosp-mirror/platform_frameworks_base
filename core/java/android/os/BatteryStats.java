@@ -447,8 +447,7 @@ public abstract class BatteryStats implements Parcelable {
 
         /**
          * Returns the max duration if it is being tracked.
-         * Not all Timer subclasses track the max, total, current durations.
-
+         * Not all Timer subclasses track the max, total, and current durations.
          */
         public long getMaxDurationMsLocked(long elapsedRealtimeMs) {
             return -1;
@@ -456,14 +455,14 @@ public abstract class BatteryStats implements Parcelable {
 
         /**
          * Returns the current time the timer has been active, if it is being tracked.
-         * Not all Timer subclasses track the max, total, current durations.
+         * Not all Timer subclasses track the max, total, and current durations.
          */
         public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
             return -1;
         }
 
         /**
-         * Returns the current time the timer has been active, if it is being tracked.
+         * Returns the total time the timer has been active, if it is being tracked.
          *
          * Returns the total cumulative duration (i.e. sum of past durations) that this timer has
          * been on since reset.
@@ -471,7 +470,7 @@ public abstract class BatteryStats implements Parcelable {
          * depending on the Timer, getTotalTimeLocked may represent the total 'blamed' or 'pooled'
          * time, rather than the actual time. By contrast, getTotalDurationMsLocked always gives
          * the actual total time.
-         * Not all Timer subclasses track the max, total, current durations.
+         * Not all Timer subclasses track the max, total, and current durations.
          */
         public long getTotalDurationMsLocked(long elapsedRealtimeMs) {
             return -1;
@@ -600,9 +599,17 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getFullWifiLockTime(long elapsedRealtimeUs, int which);
         public abstract long getWifiScanTime(long elapsedRealtimeUs, int which);
         public abstract int getWifiScanCount(int which);
+        /**
+         * Returns the timer keeping track of wifi scans.
+         */
+        public abstract Timer getWifiScanTimer();
         public abstract int getWifiScanBackgroundCount(int which);
         public abstract long getWifiScanActualTime(long elapsedRealtimeUs);
         public abstract long getWifiScanBackgroundTime(long elapsedRealtimeUs);
+        /**
+         * Returns the timer keeping track of background wifi scans.
+         */
+        public abstract Timer getWifiScanBackgroundTimer();
         public abstract long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which);
         public abstract int getWifiBatchedScanCount(int csphBin, int which);
         public abstract long getWifiMulticastTime(long elapsedRealtimeUs, int which);
@@ -2824,6 +2831,10 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    private static long roundUsToMs(long timeUs) {
+        return (timeUs + 500) / 1000;
+    }
+
     private static long computeWakeLock(Timer timer, long elapsedRealtimeUs, int which) {
         if (timer != null) {
             // Convert from microseconds to milliseconds with rounding
@@ -3028,8 +3039,7 @@ public abstract class BatteryStats implements Parcelable {
                                         Timer timer, long rawRealtime, int which) {
         if (timer != null) {
             // Convert from microseconds to milliseconds with rounding
-            final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500)
-                    / 1000;
+            final long totalTime = roundUsToMs(timer.getTotalTimeLocked(rawRealtime, which));
             final int count = timer.getCountLocked(which);
             if (totalTime != 0 || count != 0) {
                 dumpLine(pw, uid, category, type, totalTime, count);
@@ -3052,12 +3062,26 @@ public abstract class BatteryStats implements Parcelable {
             return;
         }
         // Convert from microseconds to milliseconds with rounding
-        final long totalTimeMs = (timer.getTotalTimeLocked(rawRealtimeUs, which) + 500) / 1000;
+        final long timeMs = roundUsToMs(timer.getTotalTimeLocked(rawRealtimeUs, which));
         final int count = timer.getCountLocked(which);
-        if (totalTimeMs != 0 || count != 0) {
+        final long maxDurationMs = timer.getMaxDurationMsLocked(rawRealtimeUs / 1000);
+        final long curDurationMs = timer.getCurrentDurationMsLocked(rawRealtimeUs / 1000);
+        final long totalDurationMs = timer.getTotalDurationMsLocked(rawRealtimeUs / 1000);
+        if (timeMs != 0 || count != 0 || maxDurationMs != -1 || curDurationMs != -1
+                || totalDurationMs != -1) {
             final long token = proto.start(fieldId);
-            proto.write(TimerProto.DURATION_MS, totalTimeMs);
+            proto.write(TimerProto.DURATION_MS, timeMs);
             proto.write(TimerProto.COUNT, count);
+            // These values will be -1 for timers that don't implement the functionality.
+            if (maxDurationMs != -1) {
+                proto.write(TimerProto.MAX_DURATION_MS, maxDurationMs);
+            }
+            if (curDurationMs != -1) {
+                proto.write(TimerProto.CURRENT_DURATION_MS, curDurationMs);
+            }
+            if (totalDurationMs != -1) {
+                proto.write(TimerProto.TOTAL_DURATION_MS, totalDurationMs);
+            }
             proto.end(token);
         }
     }
@@ -3770,7 +3794,7 @@ public abstract class BatteryStats implements Parcelable {
                 linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW),
                         rawRealtime, "w", which, linePrefix);
 
-                // Only log if we had at lease one wakelock...
+                // Only log if we had at least one wakelock...
                 if (sb.length() > 0) {
                     String name = wakelocks.keyAt(iw);
                     if (name.indexOf(',') >= 0) {
@@ -6126,9 +6150,8 @@ public abstract class BatteryStats implements Parcelable {
             return;
         }
         int count = steps.mNumStepDurations;
-        long token;
         for (int i = 0; i < count; ++i) {
-            token = proto.start(fieldId);
+            long token = proto.start(fieldId);
             proto.write(SystemProto.BatteryLevelStep.DURATION_MS, steps.getDurationAt(i));
             proto.write(SystemProto.BatteryLevelStep.LEVEL, steps.getLevelAt(i));
 
@@ -6621,15 +6644,443 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         if ((flags & (DUMP_HISTORY_ONLY | DUMP_DAILY_ONLY)) == 0) {
-            // TODO: implement dumpProtoAppsLocked(proto, apps);
-            dumpProtoSystemLocked(context, proto, (flags & DUMP_DEVICE_WIFI_ONLY) != 0);
+            final BatteryStatsHelper helper = new BatteryStatsHelper(context, false,
+                    (flags & DUMP_DEVICE_WIFI_ONLY) != 0);
+            helper.create(this);
+            helper.refreshStats(STATS_SINCE_CHARGED, UserHandle.USER_ALL);
+
+            dumpProtoAppsLocked(proto, helper, apps);
+            dumpProtoSystemLocked(proto, helper);
         }
 
         proto.end(bToken);
         proto.flush();
     }
 
-    private void dumpProtoSystemLocked(Context context, ProtoOutputStream proto, boolean wifiOnly) {
+    private void dumpProtoAppsLocked(ProtoOutputStream proto, BatteryStatsHelper helper,
+            List<ApplicationInfo> apps) {
+        final int which = STATS_SINCE_CHARGED;
+        final long rawUptimeUs = SystemClock.uptimeMillis() * 1000;
+        final long rawRealtimeMs = SystemClock.elapsedRealtime();
+        final long rawRealtimeUs = rawRealtimeMs * 1000;
+        final long batteryUptimeUs = getBatteryUptime(rawUptimeUs);
+
+        SparseArray<ArrayList<String>> aidToPackages = new SparseArray<>();
+        if (apps != null) {
+            for (int i = 0; i < apps.size(); ++i) {
+                ApplicationInfo ai = apps.get(i);
+                int aid = UserHandle.getAppId(ai.uid);
+                ArrayList<String> pkgs = aidToPackages.get(aid);
+                if (pkgs == null) {
+                    pkgs = new ArrayList<String>();
+                    aidToPackages.put(aid, pkgs);
+                }
+                pkgs.add(ai.packageName);
+            }
+        }
+
+        SparseArray<BatterySipper> uidToSipper = new SparseArray<>();
+        final List<BatterySipper> sippers = helper.getUsageList();
+        if (sippers != null) {
+            for (int i = 0; i < sippers.size(); ++i) {
+                final BatterySipper bs = sippers.get(i);
+                if (bs.drainType != BatterySipper.DrainType.APP) {
+                    // Others are handled by dumpProtoSystemLocked()
+                    continue;
+                }
+                uidToSipper.put(bs.uidObj.getUid(), bs);
+            }
+        }
+
+        SparseArray<? extends Uid> uidStats = getUidStats();
+        final int n = uidStats.size();
+        for (int iu = 0; iu < n; ++iu) {
+            final long uTkn = proto.start(BatteryStatsProto.UIDS);
+            final Uid u = uidStats.valueAt(iu);
+
+            final int uid = uidStats.keyAt(iu);
+            proto.write(UidProto.UID, uid);
+
+            // Print packages and apk stats (UID_DATA & APK_DATA)
+            ArrayList<String> pkgs = aidToPackages.get(UserHandle.getAppId(uid));
+            if (pkgs == null) {
+                pkgs = new ArrayList<String>();
+            }
+            final ArrayMap<String, ? extends BatteryStats.Uid.Pkg> packageStats =
+                    u.getPackageStats();
+            for (int ipkg = packageStats.size() - 1; ipkg >= 0; --ipkg) {
+                String pkg = packageStats.keyAt(ipkg);
+                final ArrayMap<String, ? extends  Uid.Pkg.Serv> serviceStats =
+                        packageStats.valueAt(ipkg).getServiceStats();
+                if (serviceStats.size() == 0) {
+                    // Due to the way ActivityManagerService logs wakeup alarms, some packages (for
+                    // example, "android") may be included in the packageStats that aren't part of
+                    // the UID. If they don't have any services, then they shouldn't be listed here.
+                    // These packages won't be a part in the pkgs List.
+                    continue;
+                }
+
+                final long pToken = proto.start(UidProto.PACKAGES);
+                proto.write(UidProto.Package.NAME, pkg);
+                // Remove from the packages list since we're logging it here.
+                pkgs.remove(pkg);
+
+                for (int isvc = serviceStats.size() - 1; isvc >= 0; --isvc) {
+                    final BatteryStats.Uid.Pkg.Serv ss = serviceStats.valueAt(isvc);
+                    long sToken = proto.start(UidProto.Package.SERVICES);
+
+                    proto.write(UidProto.Package.Service.NAME, serviceStats.keyAt(isvc));
+                    proto.write(UidProto.Package.Service.START_DURATION_MS,
+                            roundUsToMs(ss.getStartTime(batteryUptimeUs, which)));
+                    proto.write(UidProto.Package.Service.START_COUNT, ss.getStarts(which));
+                    proto.write(UidProto.Package.Service.LAUNCH_COUNT, ss.getLaunches(which));
+
+                    proto.end(sToken);
+                }
+                proto.end(pToken);
+            }
+            // Print any remaining packages that weren't in the packageStats map. pkgs is pulled
+            // from PackageManager data. Packages are only included in packageStats if there was
+            // specific data tracked for them (services and wakeup alarms, etc.).
+            for (String p : pkgs) {
+                final long pToken = proto.start(UidProto.PACKAGES);
+                proto.write(UidProto.Package.NAME, p);
+                proto.end(pToken);
+            }
+
+            // Total wakelock data (AGGREGATED_WAKELOCK_DATA)
+            if (u.getAggregatedPartialWakelockTimer() != null) {
+                final Timer timer = u.getAggregatedPartialWakelockTimer();
+                // Times are since reset (regardless of 'which')
+                final long totTimeMs = timer.getTotalDurationMsLocked(rawRealtimeMs);
+                final Timer bgTimer = timer.getSubTimer();
+                final long bgTimeMs = bgTimer != null
+                        ? bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                final long awToken = proto.start(UidProto.AGGREGATED_WAKELOCK);
+                proto.write(UidProto.AggregatedWakelock.PARTIAL_DURATION_MS, totTimeMs);
+                proto.write(UidProto.AggregatedWakelock.BACKGROUND_PARTIAL_DURATION_MS, bgTimeMs);
+                proto.end(awToken);
+            }
+
+            // Audio (AUDIO_DATA)
+            dumpTimer(proto, UidProto.AUDIO, u.getAudioTurnedOnTimer(), rawRealtimeUs, which);
+
+            // Bluetooth Controller (BLUETOOTH_CONTROLLER_DATA)
+            dumpControllerActivityProto(proto, UidProto.BLUETOOTH_CONTROLLER,
+                    u.getBluetoothControllerActivity(), which);
+
+            // BLE scans (BLUETOOTH_MISC_DATA) (uses totalDurationMsLocked and MaxDurationMsLocked)
+            final Timer bleTimer = u.getBluetoothScanTimer();
+            if (bleTimer != null) {
+                final long bmToken = proto.start(UidProto.BLUETOOTH_MISC);
+
+                dumpTimer(proto, UidProto.BluetoothMisc.APPORTIONED_BLE_SCAN, bleTimer,
+                        rawRealtimeUs, which);
+                dumpTimer(proto, UidProto.BluetoothMisc.BACKGROUND_BLE_SCAN,
+                        u.getBluetoothScanBackgroundTimer(), rawRealtimeUs, which);
+                // Unoptimized scan timer. Unpooled and since reset (regardless of 'which').
+                dumpTimer(proto, UidProto.BluetoothMisc.UNOPTIMIZED_BLE_SCAN,
+                        u.getBluetoothUnoptimizedScanTimer(), rawRealtimeUs, which);
+                // Unoptimized bg scan timer. Unpooled and since reset (regardless of 'which').
+                dumpTimer(proto, UidProto.BluetoothMisc.BACKGROUND_UNOPTIMIZED_BLE_SCAN,
+                        u.getBluetoothUnoptimizedScanBackgroundTimer(), rawRealtimeUs, which);
+                // Result counters
+                proto.write(UidProto.BluetoothMisc.BLE_SCAN_RESULT_COUNT,
+                        u.getBluetoothScanResultCounter() != null
+                            ? u.getBluetoothScanResultCounter().getCountLocked(which) : 0);
+                proto.write(UidProto.BluetoothMisc.BACKGROUND_BLE_SCAN_RESULT_COUNT,
+                        u.getBluetoothScanResultBgCounter() != null
+                            ? u.getBluetoothScanResultBgCounter().getCountLocked(which) : 0);
+
+                proto.end(bmToken);
+            }
+
+            // Camera (CAMERA_DATA)
+            dumpTimer(proto, UidProto.CAMERA, u.getCameraTurnedOnTimer(), rawRealtimeUs, which);
+
+            // CPU stats (CPU_DATA & CPU_TIMES_AT_FREQ_DATA)
+            final long cpuToken = proto.start(UidProto.CPU);
+            proto.write(UidProto.Cpu.USER_DURATION_MS, roundUsToMs(u.getUserCpuTimeUs(which)));
+            proto.write(UidProto.Cpu.SYSTEM_DURATION_MS, roundUsToMs(u.getSystemCpuTimeUs(which)));
+
+            final long[] cpuFreqs = getCpuFreqs();
+            if (cpuFreqs != null) {
+                final long[] cpuFreqTimeMs = u.getCpuFreqTimes(which);
+                // If total cpuFreqTimes is null, then we don't need to check for
+                // screenOffCpuFreqTimes.
+                if (cpuFreqTimeMs != null && cpuFreqTimeMs.length == cpuFreqs.length) {
+                    long[] screenOffCpuFreqTimeMs = u.getScreenOffCpuFreqTimes(which);
+                    if (screenOffCpuFreqTimeMs == null) {
+                        screenOffCpuFreqTimeMs = new long[cpuFreqTimeMs.length];
+                    }
+                    for (int ic = 0; ic < cpuFreqTimeMs.length; ++ic) {
+                        long cToken = proto.start(UidProto.Cpu.BY_FREQUENCY);
+                        proto.write(UidProto.Cpu.ByFrequency.FREQUENCY_INDEX, ic + 1);
+                        proto.write(UidProto.Cpu.ByFrequency.TOTAL_DURATION_MS,
+                                cpuFreqTimeMs[ic]);
+                        proto.write(UidProto.Cpu.ByFrequency.SCREEN_OFF_DURATION_MS,
+                                screenOffCpuFreqTimeMs[ic]);
+                        proto.end(cToken);
+                    }
+                }
+            }
+            proto.end(cpuToken);
+
+            // Flashlight (FLASHLIGHT_DATA)
+            dumpTimer(proto, UidProto.FLASHLIGHT, u.getFlashlightTurnedOnTimer(),
+                    rawRealtimeUs, which);
+
+            // Foreground activity (FOREGROUND_ACTIVITY_DATA)
+            dumpTimer(proto, UidProto.FOREGROUND_ACTIVITY, u.getForegroundActivityTimer(),
+                    rawRealtimeUs, which);
+
+            // Foreground service (FOREGROUND_SERVICE_DATA)
+            dumpTimer(proto, UidProto.FOREGROUND_SERVICE, u.getForegroundServiceTimer(),
+                    rawRealtimeUs, which);
+
+            // Job completion (JOB_COMPLETION_DATA)
+            final ArrayMap<String, SparseIntArray> completions = u.getJobCompletionStats();
+            final int[] reasons = new int[]{
+                JobParameters.REASON_CANCELED,
+                JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
+                JobParameters.REASON_PREEMPT,
+                JobParameters.REASON_TIMEOUT,
+                JobParameters.REASON_DEVICE_IDLE,
+            };
+            for (int ic = 0; ic < completions.size(); ++ic) {
+                SparseIntArray types = completions.valueAt(ic);
+                if (types != null) {
+                    final long jcToken = proto.start(UidProto.JOB_COMPLETION);
+
+                    proto.write(UidProto.JobCompletion.NAME, completions.keyAt(ic));
+
+                    for (int r : reasons) {
+                        long rToken = proto.start(UidProto.JobCompletion.REASON_COUNT);
+                        proto.write(UidProto.JobCompletion.ReasonCount.NAME, r);
+                        proto.write(UidProto.JobCompletion.ReasonCount.COUNT, types.get(r, 0));
+                        proto.end(rToken);
+                    }
+
+                    proto.end(jcToken);
+                }
+            }
+
+            // Scheduled jobs (JOB_DATA)
+            final ArrayMap<String, ? extends Timer> jobs = u.getJobStats();
+            for (int ij = jobs.size() - 1; ij >= 0; --ij) {
+                final Timer timer = jobs.valueAt(ij);
+                final Timer bgTimer = timer.getSubTimer();
+                final long jToken = proto.start(UidProto.JOBS);
+
+                proto.write(UidProto.Job.NAME, jobs.keyAt(ij));
+                // Background uses totalDurationMsLocked, while total uses totalTimeLocked
+                dumpTimer(proto, UidProto.Job.TOTAL, timer, rawRealtimeUs, which);
+                dumpTimer(proto, UidProto.Job.BACKGROUND, bgTimer, rawRealtimeUs, which);
+
+                proto.end(jToken);
+            }
+
+            // Modem Controller (MODEM_CONTROLLER_DATA)
+            dumpControllerActivityProto(proto, UidProto.MODEM_CONTROLLER,
+                    u.getModemControllerActivity(), which);
+
+            // Network stats (NETWORK_DATA)
+            final long nToken = proto.start(UidProto.NETWORK);
+            proto.write(UidProto.Network.MOBILE_BYTES_RX,
+                    u.getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_BYTES_TX,
+                    u.getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which));
+            proto.write(UidProto.Network.WIFI_BYTES_RX,
+                    u.getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which));
+            proto.write(UidProto.Network.WIFI_BYTES_TX,
+                    u.getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which));
+            proto.write(UidProto.Network.BT_BYTES_RX,
+                    u.getNetworkActivityBytes(NETWORK_BT_RX_DATA, which));
+            proto.write(UidProto.Network.BT_BYTES_TX,
+                    u.getNetworkActivityBytes(NETWORK_BT_TX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_PACKETS_RX,
+                    u.getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_PACKETS_TX,
+                    u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which));
+            proto.write(UidProto.Network.WIFI_PACKETS_RX,
+                    u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which));
+            proto.write(UidProto.Network.WIFI_PACKETS_TX,
+                    u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_ACTIVE_DURATION_MS,
+                    roundUsToMs(u.getMobileRadioActiveTime(which)));
+            proto.write(UidProto.Network.MOBILE_ACTIVE_COUNT,
+                    u.getMobileRadioActiveCount(which));
+            proto.write(UidProto.Network.MOBILE_WAKEUP_COUNT,
+                    u.getMobileRadioApWakeupCount(which));
+            proto.write(UidProto.Network.WIFI_WAKEUP_COUNT,
+                    u.getWifiRadioApWakeupCount(which));
+            proto.write(UidProto.Network.MOBILE_BYTES_BG_RX,
+                    u.getNetworkActivityBytes(NETWORK_MOBILE_BG_RX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_BYTES_BG_TX,
+                    u.getNetworkActivityBytes(NETWORK_MOBILE_BG_TX_DATA, which));
+            proto.write(UidProto.Network.WIFI_BYTES_BG_RX,
+                    u.getNetworkActivityBytes(NETWORK_WIFI_BG_RX_DATA, which));
+            proto.write(UidProto.Network.WIFI_BYTES_BG_TX,
+                    u.getNetworkActivityBytes(NETWORK_WIFI_BG_TX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_PACKETS_BG_RX,
+                    u.getNetworkActivityPackets(NETWORK_MOBILE_BG_RX_DATA, which));
+            proto.write(UidProto.Network.MOBILE_PACKETS_BG_TX,
+                    u.getNetworkActivityPackets(NETWORK_MOBILE_BG_TX_DATA, which));
+            proto.write(UidProto.Network.WIFI_PACKETS_BG_RX,
+                    u.getNetworkActivityPackets(NETWORK_WIFI_BG_RX_DATA, which));
+            proto.write(UidProto.Network.WIFI_PACKETS_BG_TX,
+                    u.getNetworkActivityPackets(NETWORK_WIFI_BG_TX_DATA, which));
+            proto.end(nToken);
+
+            // Power use item (POWER_USE_ITEM_DATA)
+            BatterySipper bs = uidToSipper.get(uid);
+            if (bs != null) {
+                final long bsToken = proto.start(UidProto.POWER_USE_ITEM);
+                proto.write(UidProto.PowerUseItem.COMPUTED_POWER_MAH, bs.totalPowerMah);
+                proto.write(UidProto.PowerUseItem.SHOULD_HIDE, bs.shouldHide);
+                proto.write(UidProto.PowerUseItem.SCREEN_POWER_MAH, bs.screenPowerMah);
+                proto.write(UidProto.PowerUseItem.PROPORTIONAL_SMEAR_MAH,
+                        bs.proportionalSmearMah);
+                proto.end(bsToken);
+            }
+
+            // Processes (PROCESS_DATA)
+            final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats =
+                    u.getProcessStats();
+            for (int ipr = processStats.size() - 1; ipr >= 0; --ipr) {
+                final Uid.Proc ps = processStats.valueAt(ipr);
+                final long prToken = proto.start(UidProto.PROCESS);
+
+                proto.write(UidProto.Process.NAME, processStats.keyAt(ipr));
+                proto.write(UidProto.Process.USER_DURATION_MS, ps.getUserTime(which));
+                proto.write(UidProto.Process.SYSTEM_DURATION_MS, ps.getSystemTime(which));
+                proto.write(UidProto.Process.FOREGROUND_DURATION_MS, ps.getForegroundTime(which));
+                proto.write(UidProto.Process.START_COUNT, ps.getStarts(which));
+                proto.write(UidProto.Process.ANR_COUNT, ps.getNumAnrs(which));
+                proto.write(UidProto.Process.CRASH_COUNT, ps.getNumCrashes(which));
+
+                proto.end(prToken);
+            }
+
+            // Sensors (SENSOR_DATA)
+            final SparseArray<? extends BatteryStats.Uid.Sensor> sensors = u.getSensorStats();
+            for (int ise = 0; ise < sensors.size(); ++ise) {
+                final Uid.Sensor se = sensors.valueAt(ise);
+                final Timer timer = se.getSensorTime();
+                if (timer == null) {
+                    continue;
+                }
+                final Timer bgTimer = se.getSensorBackgroundTime();
+                final int sensorNumber = sensors.keyAt(ise);
+                final long seToken = proto.start(UidProto.SENSORS);
+
+                proto.write(UidProto.Sensor.ID, sensorNumber);
+                // Background uses totalDurationMsLocked, while total uses totalTimeLocked
+                dumpTimer(proto, UidProto.Sensor.APPORTIONED, timer, rawRealtimeUs, which);
+                dumpTimer(proto, UidProto.Sensor.BACKGROUND, bgTimer, rawRealtimeUs, which);
+
+                proto.end(seToken);
+            }
+
+            // State times (STATE_TIME_DATA)
+            for (int ips = 0; ips < Uid.NUM_PROCESS_STATE; ++ips) {
+                long durMs = roundUsToMs(u.getProcessStateTime(ips, rawRealtimeUs, which));
+                if (durMs == 0) {
+                    continue;
+                }
+                final long stToken = proto.start(UidProto.STATES);
+                proto.write(UidProto.StateTime.STATE, ips);
+                proto.write(UidProto.StateTime.DURATION_MS, durMs);
+                proto.end(stToken);
+            }
+
+            // Syncs (SYNC_DATA)
+            final ArrayMap<String, ? extends Timer> syncs = u.getSyncStats();
+            for (int isy = syncs.size() - 1; isy >= 0; --isy) {
+                final Timer timer = syncs.valueAt(isy);
+                final Timer bgTimer = timer.getSubTimer();
+                final long syToken = proto.start(UidProto.SYNCS);
+
+                proto.write(UidProto.Sync.NAME, syncs.keyAt(isy));
+                // Background uses totalDurationMsLocked, while total uses totalTimeLocked
+                dumpTimer(proto, UidProto.Sync.TOTAL, timer, rawRealtimeUs, which);
+                dumpTimer(proto, UidProto.Sync.BACKGROUND, bgTimer, rawRealtimeUs, which);
+
+                proto.end(syToken);
+            }
+
+            // User activity (USER_ACTIVITY_DATA)
+            if (u.hasUserActivity()) {
+                for (int i = 0; i < Uid.NUM_USER_ACTIVITY_TYPES; ++i) {
+                    int val = u.getUserActivityCount(i, which);
+                    if (val != 0) {
+                        final long uaToken = proto.start(UidProto.USER_ACTIVITY);
+                        proto.write(UidProto.UserActivity.NAME, i);
+                        proto.write(UidProto.UserActivity.COUNT, val);
+                        proto.end(uaToken);
+                    }
+                }
+            }
+
+            // Vibrator (VIBRATOR_DATA)
+            dumpTimer(proto, UidProto.VIBRATOR, u.getVibratorOnTimer(), rawRealtimeUs, which);
+
+            // Video (VIDEO_DATA)
+            dumpTimer(proto, UidProto.VIDEO, u.getVideoTurnedOnTimer(), rawRealtimeUs, which);
+
+            // Wakelocks (WAKELOCK_DATA)
+            final ArrayMap<String, ? extends Uid.Wakelock> wakelocks = u.getWakelockStats();
+            for (int iw = wakelocks.size() - 1; iw >= 0; --iw) {
+                final Uid.Wakelock wl = wakelocks.valueAt(iw);
+                final long wToken = proto.start(UidProto.WAKELOCKS);
+                proto.write(UidProto.Wakelock.NAME, wakelocks.keyAt(iw));
+                dumpTimer(proto, UidProto.Wakelock.FULL, wl.getWakeTime(WAKE_TYPE_FULL),
+                        rawRealtimeUs, which);
+                final Timer pTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                if (pTimer != null) {
+                    dumpTimer(proto, UidProto.Wakelock.PARTIAL, pTimer, rawRealtimeUs, which);
+                    dumpTimer(proto, UidProto.Wakelock.BACKGROUND_PARTIAL, pTimer.getSubTimer(),
+                            rawRealtimeUs, which);
+                }
+                dumpTimer(proto, UidProto.Wakelock.WINDOW, wl.getWakeTime(WAKE_TYPE_WINDOW),
+                        rawRealtimeUs, which);
+                proto.end(wToken);
+            }
+
+            // Wakeup alarms (WAKEUP_ALARM_DATA)
+            for (int ipkg = packageStats.size() - 1; ipkg >= 0; --ipkg) {
+                final Uid.Pkg ps = packageStats.valueAt(ipkg);
+                final ArrayMap<String, ? extends Counter> alarms = ps.getWakeupAlarmStats();
+                for (int iwa = alarms.size() - 1; iwa >= 0; --iwa) {
+                    final long waToken = proto.start(UidProto.WAKEUP_ALARM);
+                    proto.write(UidProto.WakeupAlarm.NAME, alarms.keyAt(iwa));
+                    proto.write(UidProto.WakeupAlarm.COUNT,
+                            alarms.valueAt(iwa).getCountLocked(which));
+                    proto.end(waToken);
+                }
+            }
+
+            // Wifi Controller (WIFI_CONTROLLER_DATA)
+            dumpControllerActivityProto(proto, UidProto.WIFI_CONTROLLER,
+                    u.getWifiControllerActivity(), which);
+
+            // Wifi data (WIFI_DATA)
+            final long wToken = proto.start(UidProto.WIFI);
+            proto.write(UidProto.Wifi.FULL_WIFI_LOCK_DURATION_MS,
+                    roundUsToMs(u.getFullWifiLockTime(rawRealtimeUs, which)));
+            dumpTimer(proto, UidProto.Wifi.APPORTIONED_SCAN, u.getWifiScanTimer(),
+                    rawRealtimeUs, which);
+            proto.write(UidProto.Wifi.RUNNING_DURATION_MS,
+                    roundUsToMs(u.getWifiRunningTime(rawRealtimeUs, which)));
+            dumpTimer(proto, UidProto.Wifi.BACKGROUND_SCAN, u.getWifiScanBackgroundTimer(),
+                    rawRealtimeUs, which);
+            proto.end(wToken);
+
+            proto.end(uTkn);
+        }
+    }
+
+    private void dumpProtoSystemLocked(ProtoOutputStream proto, BatteryStatsHelper helper) {
         final long sToken = proto.start(BatteryStatsProto.SYSTEM);
         final long rawUptimeUs = SystemClock.uptimeMillis() * 1000;
         final long rawRealtimeMs = SystemClock.elapsedRealtime();
@@ -6637,7 +7088,7 @@ public abstract class BatteryStats implements Parcelable {
         final int which = STATS_SINCE_CHARGED;
 
         // Battery data (BATTERY_DATA)
-        long token = proto.start(SystemProto.BATTERY);
+        final long bToken = proto.start(SystemProto.BATTERY);
         proto.write(SystemProto.Battery.START_CLOCK_TIME_MS, getStartClockTime());
         proto.write(SystemProto.Battery.START_COUNT, getStartCount());
         proto.write(SystemProto.Battery.TOTAL_REALTIME_MS,
@@ -6660,10 +7111,10 @@ public abstract class BatteryStats implements Parcelable {
                 getMinLearnedBatteryCapacity());
         proto.write(SystemProto.Battery.MAX_LEARNED_BATTERY_CAPACITY_UAH,
                 getMaxLearnedBatteryCapacity());
-        proto.end(token);
+        proto.end(bToken);
 
         // Battery discharge (BATTERY_DISCHARGE_DATA)
-        token = proto.start(SystemProto.BATTERY_DISCHARGE);
+        final long bdToken = proto.start(SystemProto.BATTERY_DISCHARGE);
         proto.write(SystemProto.BatteryDischarge.LOWER_BOUND_SINCE_CHARGE,
                 getLowDischargeAmountSinceCharge());
         proto.write(SystemProto.BatteryDischarge.UPPER_BOUND_SINCE_CHARGE,
@@ -6680,10 +7131,11 @@ public abstract class BatteryStats implements Parcelable {
                 getUahDischargeScreenOff(which) / 1000);
         proto.write(SystemProto.BatteryDischarge.TOTAL_MAH_SCREEN_DOZE,
                 getUahDischargeScreenDoze(which) / 1000);
-        proto.end(token);
+        proto.end(bdToken);
 
         // Time remaining
         long timeRemainingUs = computeChargeTimeRemaining(rawRealtimeUs);
+        // These are part of a oneof, so we should only set one of them.
         if (timeRemainingUs >= 0) {
             // Charge time remaining (CHARGE_TIME_REMAIN_DATA)
             proto.write(SystemProto.CHARGE_TIME_REMAINING_MS, timeRemainingUs / 1000);
@@ -6702,11 +7154,11 @@ public abstract class BatteryStats implements Parcelable {
 
         // Phone data connection (DATA_CONNECTION_TIME_DATA and DATA_CONNECTION_COUNT_DATA)
         for (int i = 0; i < NUM_DATA_CONNECTION_TYPES; ++i) {
-            token = proto.start(SystemProto.DATA_CONNECTION);
+            final long pdcToken = proto.start(SystemProto.DATA_CONNECTION);
             proto.write(SystemProto.DataConnection.NAME, i);
             dumpTimer(proto, SystemProto.DataConnection.TOTAL, getPhoneDataConnectionTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(pdcToken);
         }
 
         // Discharge step (DISCHARGE_STEP_DATA)
@@ -6729,7 +7181,7 @@ public abstract class BatteryStats implements Parcelable {
                 getModemControllerActivity(), which);
 
         // Global network data (GLOBAL_NETWORK_DATA)
-        token = proto.start(SystemProto.GLOBAL_NETWORK);
+        final long gnToken = proto.start(SystemProto.GLOBAL_NETWORK);
         proto.write(SystemProto.GlobalNetwork.MOBILE_BYTES_RX,
                 getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which));
         proto.write(SystemProto.GlobalNetwork.MOBILE_BYTES_TX,
@@ -6750,7 +7202,7 @@ public abstract class BatteryStats implements Parcelable {
                 getNetworkActivityBytes(NETWORK_BT_RX_DATA, which));
         proto.write(SystemProto.GlobalNetwork.BT_BYTES_TX,
                 getNetworkActivityBytes(NETWORK_BT_TX_DATA, which));
-        proto.end(token);
+        proto.end(gnToken);
 
         // Wifi controller (GLOBAL_WIFI_CONTROLLER_DATA)
         dumpControllerActivityProto(proto, SystemProto.GLOBAL_WIFI_CONTROLLER,
@@ -6758,21 +7210,21 @@ public abstract class BatteryStats implements Parcelable {
 
 
         // Global wifi (GLOBAL_WIFI_DATA)
-        token = proto.start(SystemProto.GLOBAL_WIFI);
+        final long gwToken = proto.start(SystemProto.GLOBAL_WIFI);
         proto.write(SystemProto.GlobalWifi.ON_DURATION_MS,
                 getWifiOnTime(rawRealtimeUs, which) / 1000);
         proto.write(SystemProto.GlobalWifi.RUNNING_DURATION_MS,
                 getGlobalWifiRunningTime(rawRealtimeUs, which) / 1000);
-        proto.end(token);
+        proto.end(gwToken);
 
         // Kernel wakelock (KERNEL_WAKELOCK_DATA)
         final Map<String, ? extends Timer> kernelWakelocks = getKernelWakelockStats();
         for (Map.Entry<String, ? extends Timer> ent : kernelWakelocks.entrySet()) {
-            token = proto.start(SystemProto.KERNEL_WAKELOCK);
+            final long kwToken = proto.start(SystemProto.KERNEL_WAKELOCK);
             proto.write(SystemProto.KernelWakelock.NAME, ent.getKey());
             dumpTimer(proto, SystemProto.KernelWakelock.TOTAL, ent.getValue(),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(kwToken);
         }
 
         // Misc (MISC_DATA)
@@ -6802,7 +7254,7 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
         }
-        token = proto.start(SystemProto.MISC);
+        final long mToken = proto.start(SystemProto.MISC);
         proto.write(SystemProto.Misc.SCREEN_ON_DURATION_MS,
                 getScreenOnTime(rawRealtimeUs, which) / 1000);
         proto.write(SystemProto.Misc.PHONE_ON_DURATION_MS,
@@ -6845,11 +7297,7 @@ public abstract class BatteryStats implements Parcelable {
                 getDeviceIdlingCount(DEVICE_IDLE_MODE_LIGHT, which));
         proto.write(SystemProto.Misc.LONGEST_LIGHT_DOZE_DURATION_MS,
                 getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_LIGHT));
-        proto.end(token);
-
-        final BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
-        helper.create(this);
-        helper.refreshStats(which, UserHandle.USER_ALL);
+        proto.end(mToken);
 
         // Power use item (POWER_USE_ITEM_DATA)
         final List<BatterySipper> sippers = helper.getUsageList();
@@ -6881,7 +7329,7 @@ public abstract class BatteryStats implements Parcelable {
                         n = SystemProto.PowerUseItem.FLASHLIGHT;
                         break;
                     case APP:
-                        // dumpProtoAppLocked will handle this.
+                        // dumpProtoAppsLocked will handle this.
                         continue;
                     case USER:
                         n = SystemProto.PowerUseItem.USER;
@@ -6900,7 +7348,7 @@ public abstract class BatteryStats implements Parcelable {
                         n = SystemProto.PowerUseItem.MEMORY;
                         break;
                 }
-                token = proto.start(SystemProto.POWER_USE_ITEM);
+                final long puiToken = proto.start(SystemProto.POWER_USE_ITEM);
                 proto.write(SystemProto.PowerUseItem.NAME, n);
                 proto.write(SystemProto.PowerUseItem.UID, uid);
                 proto.write(SystemProto.PowerUseItem.COMPUTED_POWER_MAH, bs.totalPowerMah);
@@ -6908,39 +7356,39 @@ public abstract class BatteryStats implements Parcelable {
                 proto.write(SystemProto.PowerUseItem.SCREEN_POWER_MAH, bs.screenPowerMah);
                 proto.write(SystemProto.PowerUseItem.PROPORTIONAL_SMEAR_MAH,
                         bs.proportionalSmearMah);
-                proto.end(token);
+                proto.end(puiToken);
             }
         }
 
         // Power use summary (POWER_USE_SUMMARY_DATA)
-        token = proto.start(SystemProto.POWER_USE_SUMMARY);
+        final long pusToken = proto.start(SystemProto.POWER_USE_SUMMARY);
         proto.write(SystemProto.PowerUseSummary.BATTERY_CAPACITY_MAH,
                 helper.getPowerProfile().getBatteryCapacity());
         proto.write(SystemProto.PowerUseSummary.COMPUTED_POWER_MAH, helper.getComputedPower());
         proto.write(SystemProto.PowerUseSummary.MIN_DRAINED_POWER_MAH, helper.getMinDrainedPower());
         proto.write(SystemProto.PowerUseSummary.MAX_DRAINED_POWER_MAH, helper.getMaxDrainedPower());
-        proto.end(token);
+        proto.end(pusToken);
 
         // RPM stats (RESOURCE_POWER_MANAGER_DATA)
         final Map<String, ? extends Timer> rpmStats = getRpmStats();
         final Map<String, ? extends Timer> screenOffRpmStats = getScreenOffRpmStats();
         for (Map.Entry<String, ? extends Timer> ent : rpmStats.entrySet()) {
-            token = proto.start(SystemProto.RESOURCE_POWER_MANAGER);
+            final long rpmToken = proto.start(SystemProto.RESOURCE_POWER_MANAGER);
             proto.write(SystemProto.ResourcePowerManager.NAME, ent.getKey());
             dumpTimer(proto, SystemProto.ResourcePowerManager.TOTAL,
                     ent.getValue(), rawRealtimeUs, which);
             dumpTimer(proto, SystemProto.ResourcePowerManager.SCREEN_OFF,
                     screenOffRpmStats.get(ent.getKey()), rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(rpmToken);
         }
 
         // Screen brightness (SCREEN_BRIGHTNESS_DATA)
         for (int i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; ++i) {
-            token = proto.start(SystemProto.SCREEN_BRIGHTNESS);
+            final long sbToken = proto.start(SystemProto.SCREEN_BRIGHTNESS);
             proto.write(SystemProto.ScreenBrightness.NAME, i);
             dumpTimer(proto, SystemProto.ScreenBrightness.TOTAL, getScreenBrightnessTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(sbToken);
         }
 
         // Signal scanning time (SIGNAL_SCANNING_TIME_DATA)
@@ -6949,47 +7397,47 @@ public abstract class BatteryStats implements Parcelable {
 
         // Phone signal strength (SIGNAL_STRENGTH_TIME_DATA and SIGNAL_STRENGTH_COUNT_DATA)
         for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; ++i) {
-            token = proto.start(SystemProto.PHONE_SIGNAL_STRENGTH);
+            final long pssToken = proto.start(SystemProto.PHONE_SIGNAL_STRENGTH);
             proto.write(SystemProto.PhoneSignalStrength.NAME, i);
             dumpTimer(proto, SystemProto.PhoneSignalStrength.TOTAL, getPhoneSignalStrengthTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(pssToken);
         }
 
         // Wakeup reasons (WAKEUP_REASON_DATA)
         final Map<String, ? extends Timer> wakeupReasons = getWakeupReasonStats();
         for (Map.Entry<String, ? extends Timer> ent : wakeupReasons.entrySet()) {
-            token = proto.start(SystemProto.WAKEUP_REASON);
+            final long wrToken = proto.start(SystemProto.WAKEUP_REASON);
             proto.write(SystemProto.WakeupReason.NAME, ent.getKey());
             dumpTimer(proto, SystemProto.WakeupReason.TOTAL, ent.getValue(), rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(wrToken);
         }
 
         // Wifi signal strength (WIFI_SIGNAL_STRENGTH_TIME_DATA and WIFI_SIGNAL_STRENGTH_COUNT_DATA)
         for (int i = 0; i < NUM_WIFI_SIGNAL_STRENGTH_BINS; ++i) {
-            token = proto.start(SystemProto.WIFI_SIGNAL_STRENGTH);
+            final long wssToken = proto.start(SystemProto.WIFI_SIGNAL_STRENGTH);
             proto.write(SystemProto.WifiSignalStrength.NAME, i);
             dumpTimer(proto, SystemProto.WifiSignalStrength.TOTAL, getWifiSignalStrengthTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(wssToken);
         }
 
         // Wifi state (WIFI_STATE_TIME_DATA and WIFI_STATE_COUNT_DATA)
         for (int i = 0; i < NUM_WIFI_STATES; ++i) {
-            token = proto.start(SystemProto.WIFI_STATE);
+            final long wsToken = proto.start(SystemProto.WIFI_STATE);
             proto.write(SystemProto.WifiState.NAME, i);
             dumpTimer(proto, SystemProto.WifiState.TOTAL, getWifiStateTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(wsToken);
         }
 
         // Wifi supplicant state (WIFI_SUPPL_STATE_TIME_DATA and WIFI_SUPPL_STATE_COUNT_DATA)
         for (int i = 0; i < NUM_WIFI_SUPPL_STATES; ++i) {
-            token = proto.start(SystemProto.WIFI_SUPPLICANT_STATE);
+            final long wssToken = proto.start(SystemProto.WIFI_SUPPLICANT_STATE);
             proto.write(SystemProto.WifiSupplicantState.NAME, i);
             dumpTimer(proto, SystemProto.WifiSupplicantState.TOTAL, getWifiSupplStateTimer(i),
                     rawRealtimeUs, which);
-            proto.end(token);
+            proto.end(wssToken);
         }
 
         proto.end(sToken);

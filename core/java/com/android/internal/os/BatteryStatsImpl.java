@@ -6428,6 +6428,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public Timer getWifiScanTimer() {
+            return mWifiScanTimer;
+        }
+
+        @Override
         public int getWifiScanBackgroundCount(int which) {
             if (mWifiScanTimer == null || mWifiScanTimer.getSubTimer() == null) {
                 return 0;
@@ -6451,6 +6456,14 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             final long elapsedRealtimeMs = (elapsedRealtimeUs + 500) / 1000;
             return mWifiScanTimer.getSubTimer().getTotalDurationMsLocked(elapsedRealtimeMs) * 1000;
+        }
+
+        @Override
+        public Timer getWifiScanBackgroundTimer() {
+            if (mWifiScanTimer == null) {
+                return null;
+            }
+            return mWifiScanTimer.getSubTimer();
         }
 
         @Override
