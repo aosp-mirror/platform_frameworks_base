@@ -14,29 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLER_H
-#define STATSD_STATSPULLER_H
+package android.os;
 
-#include <android/os/StatsLogEventWrapper.h>
-#include <utils/String16.h>
-#include <vector>
-
-using android::os::StatsLogEventWrapper;
-using std::vector;
-
-namespace android {
-namespace os {
-namespace statsd {
-
-class StatsPuller {
-public:
-    virtual ~StatsPuller(){};
-
-    virtual vector<StatsLogEventWrapper> pull() = 0;
-};
-
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
-
-#endif  // STATSD_STATSPULLER_H
+/** @hide */
+parcelable StatsLogEventWrapper cpp_header "android/os/StatsLogEventWrapper.h";

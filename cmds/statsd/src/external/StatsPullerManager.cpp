@@ -21,6 +21,11 @@
 #include "KernelWakelockPuller.h"
 #include "StatsService.h"
 #include "external/StatsPullerManager.h"
+#include "logd/LogEvent.h"
+#include <cutils/log.h>
+#include <algorithm>
+
+#include <iostream>
 
 using namespace android;
 
@@ -35,13 +40,27 @@ StatsPullerManager::StatsPullerManager() {
             {static_cast<int>(KERNEL_WAKELOCKS), std::make_unique<KernelWakelockPuller>()});
 }
 
-String16 StatsPullerManager::pull(int pullCode) {
+vector<std::shared_ptr<LogEvent>> StatsPullerManager::Pull(int pullCode) {
     if (DEBUG) ALOGD("Initiating pulling %d", pullCode);
+
+    vector<std::shared_ptr<LogEvent>> ret;
     if (mStatsPullers.find(pullCode) != mStatsPullers.end()) {
-        return (mStatsPullers.find(pullCode)->second)->pull();
+        vector<StatsLogEventWrapper> outputs = (mStatsPullers.find(pullCode)->second)->pull();
+        for (const StatsLogEventWrapper& it : outputs) {
+            log_msg tmp;
+            tmp.entry_v1.len = it.bytes.size();
+            // Manually set the header size to 28 bytes to match the pushed log events.
+            tmp.entry.hdr_size = 28;
+            // And set the received bytes starting after the 28 bytes reserved for header.
+            std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + 28);
+            std::shared_ptr<LogEvent> evt = std::make_shared<LogEvent>(tmp);
+            ret.push_back(evt);
+            // ret.emplace_back(tmp);
+        }
+        return ret;
     } else {
         ALOGD("Unknown pull code %d", pullCode);
-        return String16();
+        return ret;  // Return early since we don't know what to pull.
     }
 }
 

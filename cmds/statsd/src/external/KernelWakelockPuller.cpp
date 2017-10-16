@@ -37,9 +37,9 @@ const int KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS = 20;
 
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
-String16 KernelWakelockPuller::pull() {
+vector<StatsLogEventWrapper> KernelWakelockPuller::pull() {
     sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
-    String16 returned_value("");
+    vector<StatsLogEventWrapper> returned_value;
     if (statsCompanion != NULL) {
         Status status = statsCompanion->pullData(KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS,
                                                  &returned_value);
@@ -47,12 +47,10 @@ String16 KernelWakelockPuller::pull() {
             ALOGW("error pulling kernel wakelock");
         }
         ALOGD("KernelWakelockPuller::pull succeeded!");
-        // TODO: remove this when we integrate into aggregation chain.
-        ALOGD("%s", String8(returned_value).string());
         return returned_value;
     } else {
         ALOGW("statsCompanion not found!");
-        return String16();
+        return returned_value;
     }
 }
 

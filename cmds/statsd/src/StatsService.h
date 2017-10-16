@@ -121,6 +121,11 @@ private:
     status_t cmd_print_uid_map(FILE* out);
 
     /**
+     * Print contents of a pulled metrics source.
+     */
+    status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);
+
+    /**
      * Update a configuration.
      */
     void set_config(int uid, const string& name, const StatsdConfig& config);
@@ -132,9 +137,8 @@ private:
 
     /**
      * Fetches external metrics.
-     * TODO: This should be an sp<>
      */
-    StatsPullerManager mStatsPullerManager;
+    sp<StatsPullerManager> mStatsPullerManager;
 
     /**
      * Tracks the configurations that have been passed to statsd.

@@ -49,7 +49,8 @@ statsd_common_src := \
     src/stats_util.cpp
 
 statsd_common_c_includes := \
-    $(LOCAL_PATH)/src
+    $(LOCAL_PATH)/src \
+    $(LOCAL_PATH)/../../libs/services/include
 
 statsd_common_aidl_includes := \
     $(LOCAL_PATH)/../../core/java
@@ -95,7 +96,7 @@ else
 endif
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
 
-LOCAL_AIDL_INCLUDES := $(statsd_common_c_includes)
+LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
 LOCAL_C_INCLUDES += $(statsd_common_c_includes)
 
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries)
@@ -117,7 +118,7 @@ LOCAL_MODULE := statsd_test
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_AIDL_INCLUDES := $(statsd_common_c_includes)
+LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
 LOCAL_C_INCLUDES += $(statsd_common_c_includes)
 
 LOCAL_CFLAGS += \

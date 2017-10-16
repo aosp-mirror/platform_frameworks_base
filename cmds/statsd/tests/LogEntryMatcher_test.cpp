@@ -42,12 +42,10 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
     simpleMatcher->set_tag(TAG_ID);
 
-    // Set up the event
-    android_log_event_list list(TAG_ID);
+    LogEvent event(TAG_ID);
 
     // Convert to a LogEvent
-    list.convert_to_reader();
-    LogEvent event(999, &list);
+    event.init();
 
     // Test
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
@@ -64,13 +62,13 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
     keyValue2->mutable_key_matcher()->set_key(FIELD_ID_2);
 
     // Set up the event
-    android_log_event_list list(TAG_ID);
-    list << true;
-    list << false;
+    LogEvent event(TAG_ID);
+    auto list = event.GetAndroidLogEventList();
+    *list << true;
+    *list << false;
 
     // Convert to a LogEvent
-    list.convert_to_reader();
-    LogEvent event(999, &list);
+    event.init();
 
     // Test
     keyValue1->set_eq_bool(true);
@@ -100,12 +98,12 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     keyValue->set_eq_string("some value");
 
     // Set up the event
-    android_log_event_list list(TAG_ID);
-    list << "some value";
+    LogEvent event(TAG_ID);
+    auto list = event.GetAndroidLogEventList();
+    *list << "some value";
 
     // Convert to a LogEvent
-    list.convert_to_reader();
-    LogEvent event(999, &list);
+    event.init();
 
     // Test
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
@@ -121,12 +119,11 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
     // Set up the event
-    android_log_event_list list(TAG_ID);
-    list << 11;
+    LogEvent event(TAG_ID);
+    auto list = event.GetAndroidLogEventList();
+    *list << 11;
 
-    // Convert to a LogEvent
-    list.convert_to_reader();
-    LogEvent event(999, &list);
+    event.init();
 
     // Test
 

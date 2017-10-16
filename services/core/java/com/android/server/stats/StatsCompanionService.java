@@ -33,12 +33,14 @@ import android.os.IStatsManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StatsLogEventWrapper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
@@ -49,6 +51,7 @@ import java.util.Map;
 /**
  * Helper service for statsd (the native stats management service in cmds/statsd/).
  * Used for registering and receiving alarms on behalf of statsd.
+ *
  * @hide
  */
 public class StatsCompanionService extends IStatsCompanionService.Stub {
@@ -90,7 +93,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         // Needed since the new user basically has a version of every app.
                         informAllUidsLocked(context);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
+                        Slog.e(TAG, "Failed to inform statsd latest update of all apps", e);
                         forgetEverything();
                     }
                 }
@@ -99,9 +102,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
     }
 
-    private final static int[] toIntArray(List<Integer> list){
+    private final static int[] toIntArray(List<Integer> list) {
         int[] ret = new int[list.size()];
-        for(int i = 0;i < ret.length;i++) {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = list.get(i);
         }
         return ret;
@@ -113,7 +116,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         PackageManager pm = context.getPackageManager();
         final List<UserInfo> users = um.getUsers(true);
         if (DEBUG) {
-            Slog.w(TAG, "Iterating over "+users.size() + " profiles.");
+            Slog.w(TAG, "Iterating over " + users.size() + " profiles.");
         }
 
         List<Integer> uids = new ArrayList();
@@ -122,23 +125,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
-          List<PackageInfo> pi = pm.getInstalledPackagesAsUser(0, profile.id);
-          for (int j = 0; j < pi.size(); j++) {
-              if (pi.get(j).applicationInfo != null) {
-                  uids.add(pi.get(j).applicationInfo.uid);
-                  versions.add(pi.get(j).versionCode);
-                  apps.add(pi.get(j).packageName);
-              }
-          }
+            List<PackageInfo> pi = pm.getInstalledPackagesAsUser(0, profile.id);
+            for (int j = 0; j < pi.size(); j++) {
+                if (pi.get(j).applicationInfo != null) {
+                    uids.add(pi.get(j).applicationInfo.uid);
+                    versions.add(pi.get(j).versionCode);
+                    apps.add(pi.get(j).packageName);
+                }
+            }
         }
         sStatsd.informAllUidData(toIntArray(uids), toIntArray(versions), apps.toArray(new
-            String[apps.size()]));
+                String[apps.size()]));
         if (DEBUG) {
-            Slog.w(TAG, "Sent data for "+uids.size() +" apps");
+            Slog.w(TAG, "Sent data for " + uids.size() + " apps");
         }
     }
 
-    public final static class AppUpdateReceiver extends BroadcastReceiver  {
+    public final static class AppUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
@@ -147,7 +150,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
              * waste, we ignore the REMOVE and ADD broadcasts that contain the replacing flag.
              */
             if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) &&
-                intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 return; // Keep only replacing or normal add and remove.
             }
             synchronized (sStatsdLock) {
@@ -180,9 +183,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
             }
         }
-    };
+    }
 
-    public final static class AnomalyAlarmReceiver extends BroadcastReceiver  {
+    public final static class AnomalyAlarmReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
@@ -200,7 +203,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             // AlarmManager releases its own wakelock here.
         }
-    };
+    }
 
     public final static class PollingAlarmReceiver extends BroadcastReceiver {
         @Override
@@ -220,7 +223,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             // AlarmManager releases its own wakelock here.
         }
-    };
+    }
 
     @Override // Binder call
     public void setAnomalyAlarm(long timestampMs) {
@@ -286,33 +289,34 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
     @Override // Binder call
-    public String pullData(int pullCode) {
+    public StatsLogEventWrapper[] pullData(int pullCode) {
         enforceCallingPermission();
-        if (DEBUG) Slog.d(TAG, "Fetching " + pullCode);
+        if (DEBUG) {
+            Slog.d(TAG, "Pulling " + pullCode);
+        }
 
-        StringBuilder s = new StringBuilder(); // TODO: use and return a Parcel instead of a string
+        List<StatsLogEventWrapper> ret = new ArrayList<>();
         switch (pullCode) {
-            case PULL_CODE_KERNEL_WAKELOCKS:
+            case PULL_CODE_KERNEL_WAKELOCKS: {
                 final KernelWakelockStats wakelockStats =
                         mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
-
                 for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
                     String name = ent.getKey();
                     KernelWakelockStats.Entry kws = ent.getValue();
-                    s.append("Wakelock ")
-                            .append(name)
-                            .append(", time=")
-                            .append(kws.mTotalTime)
-                            .append(", count=")
-                            .append(kws.mCount)
-                            .append('\n');
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(101, 4);
+                    e.writeInt(kws.mCount);
+                    e.writeInt(kws.mVersion);
+                    e.writeLong(kws.mTotalTime);
+                    e.writeString(name);
+                    ret.add(e);
                 }
                 break;
+            }
             default:
                 Slog.w(TAG, "No such pollable data as " + pullCode);
                 return null;
         }
-        return s.toString();
+        return ret.toArray(new StatsLogEventWrapper[ret.size()]);
     }
 
     @Override // Binder call
@@ -331,7 +335,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     // Lifecycle and related code
 
-    /** Fetches the statsd IBinder service */
+    /**
+     * Fetches the statsd IBinder service
+     */
     private static IStatsManager fetchStatsdService() {
         return IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
     }
@@ -363,13 +369,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    /** Now that the android system is ready, StatsCompanion is ready too, so inform statsd. */
+    /**
+     * Now that the android system is ready, StatsCompanion is ready too, so inform statsd.
+     */
     private void systemReady() {
         if (DEBUG) Slog.d(TAG, "Learned that systemReady");
         sayHiToStatsd();
     }
 
-    /** Tells statsd that statscompanion is ready. If the binder call returns, link to statsd. */
+    /**
+     * Tells statsd that statscompanion is ready. If the binder call returns, link to statsd.
+     */
     private void sayHiToStatsd() {
         synchronized (sStatsdLock) {
             if (sStatsd != null) {
@@ -398,14 +408,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
                 mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter, null,
-                    null);
+                        null);
 
                 // Setup receiver for user initialize (which happens once for a new user) and
                 // if a user is removed.
                 filter = new IntentFilter(Intent.ACTION_USER_INITIALIZE);
                 filter.addAction(Intent.ACTION_USER_REMOVED);
                 mContext.registerReceiverAsUser(mUserUpdateReceiver, UserHandle.ALL,
-                    filter, null, null);
+                        filter, null, null);
 
                 // Pull the latest state of UID->app name, version mapping when statsd starts.
                 informAllUidsLocked(mContext);
