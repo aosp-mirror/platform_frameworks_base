@@ -22,6 +22,8 @@ cc_binary_host {
     cflags: [
         "-g",
         "-O0",
+        "-Wall",
+        "-Werror",
     ],
     srcs: ["main.cpp"],
     shared_libs: [
