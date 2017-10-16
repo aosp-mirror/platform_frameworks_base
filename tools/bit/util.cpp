@@ -101,7 +101,6 @@ TrackedFile::HasChanged() const
 void
 get_directory_contents(const string& name, map<string,FileInfo>* results)
 {
-    int err;
     DIR* dir = opendir(name.c_str());
     if (dir == NULL) {
         return;
@@ -241,7 +240,9 @@ read_file(const string& filename)
     fseek(file, 0, SEEK_SET);
 
     char* buf = (char*)malloc(size);
-    fread(buf, 1, size, file);
+    if ((size_t) size != fread(buf, 1, size, file)) {
+        return string();
+    }
 
     string result(buf, size);
 

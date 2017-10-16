@@ -561,6 +561,15 @@ check_device_property(const string& property, const string& expected)
     }
 }
 
+static void
+chdir_or_exit(const char *path) {
+    // TODO: print_command("cd", path);
+    if (0 != chdir(path)) {
+        print_error("Error: Could not chdir: %s", path);
+        exit(1);
+    }
+}
+
 /**
  * Run the build, install, and test actions.
  */
@@ -583,8 +592,7 @@ run_phases(vector<Target*> targets, const Options& options)
     const string buildId = get_build_var(buildTop, "BUILD_ID", false);
     const string buildOut = get_out_dir();
 
-    // TODO: print_command("cd", buildTop.c_str());
-    chdir(buildTop.c_str());
+    chdir_or_exit(buildTop.c_str());
 
     // Get the modules for the targets
     map<string,Module> modules;
@@ -952,7 +960,7 @@ run_tab_completion(const string& word)
     const string buildProduct = get_required_env("TARGET_PRODUCT", false);
     const string buildOut = get_out_dir();
 
-    chdir(buildTop.c_str());
+    chdir_or_exit(buildTop.c_str());
 
     string buildDevice = sniff_device_name(buildOut, buildProduct);
 
