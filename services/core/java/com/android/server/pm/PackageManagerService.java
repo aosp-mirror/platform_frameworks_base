@@ -285,6 +285,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
+import com.android.server.pm.dex.DexLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -2461,7 +2462,10 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock);
+        DexManager.Listener dexManagerListener = DexLogger.getListener(this,
+                installer, mInstallLock);
+        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
+                dexManagerListener);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(

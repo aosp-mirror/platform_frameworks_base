@@ -489,6 +489,16 @@ public class Installer extends SystemService {
         }
     }
 
+    public byte[] hashSecondaryDexFile(String dexPath, String packageName, int uid,
+            @Nullable String volumeUuid, int flags) throws InstallerException {
+        if (!checkBeforeRemote()) return new byte[0];
+        try {
+            return mInstalld.hashSecondaryDexFile(dexPath, packageName, uid, volumeUuid, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void invalidateMounts() throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
