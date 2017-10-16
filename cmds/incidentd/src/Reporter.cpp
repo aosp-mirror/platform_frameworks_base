@@ -48,6 +48,10 @@ ReportRequest::ReportRequest(const IncidentReportArgs& a,
 
 ReportRequest::~ReportRequest()
 {
+    if (fd >= 0) {
+        // clean up the opened file descriptor
+        close(fd);
+    }
 }
 
 bool

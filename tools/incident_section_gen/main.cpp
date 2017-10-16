@@ -113,7 +113,7 @@ static inline bool isDefaultDest(const FieldDescriptor* field) {
     return field->options().GetExtension(privacy).dest() == PrivacyFlags::default_instance().dest();
 }
 
-// Returns true if the descriptor doesn't have any non default privacy flags set, including its submessages
+// Returns false if the descriptor doesn't have any non default privacy flags set, including its submessages
 static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias, map<string, bool> &msgNames) {
     bool hasDefaultFlags[descriptor->field_count()];
     // iterate though its field and generate sub flags first
@@ -129,13 +129,18 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
         };
 
         PrivacyFlags p = field->options().GetExtension(privacy);
-
         switch (field->type()) {
             case FieldDescriptor::TYPE_MESSAGE:
-                if (generatePrivacyFlags(field->message_type(), field_name, msgNames) &&
-                    isDefaultDest(field)) break;
-
-                printf("Privacy %s { %d, %d, %s_LIST, %d, NULL };\n", field_name, field->number(), field->type(), field_name, p.dest());
+                if (generatePrivacyFlags(field->message_type(), field_name, msgNames)) {
+                    printf("Privacy %s { %d, %d, %s_LIST, %d, NULL };\n", field_name, field->number(),
+                            field->type(), field_name, p.dest());
+                } else if (isDefaultDest(field)) {
+                    // don't create a new privacy if the value is default.
+                    break;
+                } else{
+                    printf("Privacy %s { %d, %d, NULL, %d, NULL };\n", field_name, field->number(),
+                            field->type(), p.dest());
+                }
                 hasDefaultFlags[i] = false;
                 break;
             case FieldDescriptor::TYPE_STRING:
@@ -147,12 +152,14 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
                     printf("    \"%s\",\n", replaceAll(p.patterns(i), '\\', "\\\\").c_str());
                 }
                 printf("    NULL };\n");
-                printf("Privacy %s { %d, %d, NULL, %d, %s_patterns };\n", field_name, field->number(), field->type(), p.dest(), field_name);
+                printf("Privacy %s { %d, %d, NULL, %d, %s_patterns };\n", field_name, field->number(),
+                        field->type(), p.dest(), field_name);
                 hasDefaultFlags[i] = false;
                 break;
             default:
                 if (isDefaultDest(field)) break;
-                printf("Privacy %s { %d, %d, NULL, %d, NULL };\n", field_name, field->number(), field->type(), p.dest());
+                printf("Privacy %s { %d, %d, NULL, %d, NULL };\n", field_name, field->number(),
+                        field->type(), p.dest());
                 hasDefaultFlags[i] = false;
         }
         // add the field name to message map, true means it has default flags
@@ -163,14 +170,14 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
     for (int i=0; i<descriptor->field_count(); i++) {
         allDefaults &= hasDefaultFlags[i];
     }
-    if (allDefaults) return true;
+    if (allDefaults) return false;
 
     emptyline();
 
     bool needConst = strcmp(alias, "PRIVACY_POLICY") == 0;
     int policyCount = 0;
 
-    printf("%s Privacy* %s_LIST[] = {\n", needConst ? "const" : "", alias);
+    printf("%sPrivacy* %s_LIST[] = {\n", needConst ? "const " : "", alias);
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
         if (hasDefaultFlags[i]) continue;
@@ -184,7 +191,7 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const char* alias
         printf("    NULL };\n");
     }
     emptyline();
-    return false;
+    return true;
 }
 
 static bool generateSectionListCpp(Descriptor const* descriptor) {
@@ -222,7 +229,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
 
     // generates PRIVACY_POLICY
     map<string, bool> messageNames;
-    if (generatePrivacyFlags(descriptor, "PRIVACY_POLICY", messageNames)) {
+    if (!generatePrivacyFlags(descriptor, "PRIVACY_POLICY", messageNames)) {
         // if no privacy options set at all, define an empty list
         printf("const Privacy* PRIVACY_POLICY_LIST[] = {};\n");
         printf("const int PRIVACY_POLICY_COUNT = 0;\n");
