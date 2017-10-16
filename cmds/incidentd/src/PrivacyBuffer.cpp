@@ -28,37 +28,41 @@ using namespace android::util;
  * Write the field to buf based on the wire type, iterator will point to next field.
  * If skip is set to true, no data will be written to buf. Return number of bytes written.
  */
-static size_t
-write_field_or_skip(EncodedBuffer::iterator* iter, EncodedBuffer* buf, uint8_t wireType, bool skip)
+void
+PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
 {
-    EncodedBuffer::Pointer snapshot = iter->rp()->copy();
+    uint8_t wireType = read_wire_type(fieldTag);
     size_t bytesToWrite = 0;
-    uint64_t varint = 0;
+    uint32_t varint = 0;
+
     switch (wireType) {
         case WIRE_TYPE_VARINT:
-            varint = iter->readRawVarint();
-            if(!skip) return buf->writeRawVarint64(varint);
-            break;
+            varint = mData.readRawVarint();
+            if (!skip) {
+                mProto.writeRawVarint(fieldTag);
+                mProto.writeRawVarint(varint);
+            }
+            return;
         case WIRE_TYPE_FIXED64:
+            if (!skip) mProto.writeRawVarint(fieldTag);
             bytesToWrite = 8;
             break;
         case WIRE_TYPE_LENGTH_DELIMITED:
-            bytesToWrite = iter->readRawVarint();
-            if(!skip) buf->writeRawVarint32(bytesToWrite);
+            bytesToWrite = mData.readRawVarint();
+            if(!skip) mProto.writeLengthDelimitedHeader(read_field_id(fieldTag), bytesToWrite);
             break;
         case WIRE_TYPE_FIXED32:
+            if (!skip) mProto.writeRawVarint(fieldTag);
             bytesToWrite = 4;
             break;
     }
     if (skip) {
-        iter->rp()->move(bytesToWrite);
+        mData.rp()->move(bytesToWrite);
     } else {
         for (size_t i=0; i<bytesToWrite; i++) {
-            *buf->writeBuffer() = iter->next();
-            buf->wp()->move();
+            mProto.writeRawByte(mData.next());
         }
     }
-    return skip ? 0 : iter->rp()->pos() - snapshot.pos();
 }
 
 /**
@@ -68,46 +72,27 @@ write_field_or_skip(EncodedBuffer::iterator* iter, EncodedBuffer* buf, uint8_t w
  * The iterator must point to the head of a protobuf formatted field for successful operation.
  * After exit with NO_ERROR, iterator points to the next protobuf field's head.
  */
-static status_t
-stripField(EncodedBuffer::iterator* iter, EncodedBuffer* buf, const Privacy* parentPolicy, const PrivacySpec& spec)
+status_t
+PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec)
 {
-    if (!iter->hasNext() || parentPolicy == NULL) return BAD_VALUE;
-    uint32_t varint = iter->readRawVarint();
-    uint8_t wireType = read_wire_type(varint);
-    uint32_t fieldId = read_field_id(varint);
-    const Privacy* policy = parentPolicy->lookup(fieldId);
+    if (!mData.hasNext() || parentPolicy == NULL) return BAD_VALUE;
+    uint32_t fieldTag = mData.readRawVarint();
+    const Privacy* policy = parentPolicy->lookup(read_field_id(fieldTag));
+
     if (policy == NULL || !policy->IsMessageType() || !policy->HasChildren()) {
         bool skip = !spec.CheckPremission(policy);
-        size_t amt = buf->size();
-        if (!skip) amt += buf->writeHeader(fieldId, wireType);
-        amt += write_field_or_skip(iter, buf, wireType, skip); // point to head of next field
-        return buf->size() != amt ? BAD_VALUE : NO_ERROR;
+        // iterator will point to head of next field
+        writeFieldOrSkip(fieldTag, skip);
+        return NO_ERROR;
     }
     // current field is message type and its sub-fields have extra privacy policies
-    deque<EncodedBuffer*> q;
-    uint32_t msgSize = iter->readRawVarint();
-    size_t finalSize = 0;
-    EncodedBuffer::Pointer start = iter->rp()->copy();
-    while (iter->rp()->pos() - start.pos() != msgSize) {
-        EncodedBuffer* v = new EncodedBuffer();
-        status_t err = stripField(iter, v, policy, spec);
+    uint32_t msgSize = mData.readRawVarint();
+    EncodedBuffer::Pointer start = mData.rp()->copy();
+    while (mData.rp()->pos() - start.pos() != msgSize) {
+        long long token = mProto.start(policy->EncodedFieldId());
+        status_t err = stripField(policy, spec);
         if (err != NO_ERROR) return err;
-        if (v->size() == 0) continue;
-        q.push_back(v);
-        finalSize += v->size();
-    }
-
-    buf->writeHeader(fieldId, wireType);
-    buf->writeRawVarint32(finalSize);
-    while (!q.empty()) {
-        EncodedBuffer* subField = q.front();
-        EncodedBuffer::iterator it = subField->begin();
-        while (it.hasNext()) {
-            *buf->writeBuffer() = it.next();
-            buf->wp()->move();
-        }
-        q.pop_front();
-        delete subField;
+        mProto.end(token);
     }
     return NO_ERROR;
 }
@@ -116,7 +101,7 @@ stripField(EncodedBuffer::iterator* iter, EncodedBuffer* buf, const Privacy* par
 PrivacyBuffer::PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data)
         :mPolicy(policy),
          mData(data),
-         mBuffer(0),
+         mProto(),
          mSize(0)
 {
 }
@@ -134,11 +119,11 @@ PrivacyBuffer::strip(const PrivacySpec& spec)
         return NO_ERROR;
     }
     while (mData.hasNext()) {
-        status_t err = stripField(&mData, &mBuffer, mPolicy, spec);
+        status_t err = stripField(mPolicy, spec);
         if (err != NO_ERROR) return err;
     }
     if (mData.bytesRead() != mData.size()) return BAD_VALUE;
-    mSize = mBuffer.size();
+    mSize = mProto.size();
     mData.rp()->rewind(); // rewind the read pointer back to beginning after the strip.
     return NO_ERROR;
 }
@@ -147,7 +132,7 @@ void
 PrivacyBuffer::clear()
 {
     mSize = 0;
-    mBuffer.wp()->rewind();
+    mProto = ProtoOutputStream();
 }
 
 size_t
@@ -157,7 +142,7 @@ status_t
 PrivacyBuffer::flush(int fd)
 {
     status_t err = NO_ERROR;
-    EncodedBuffer::iterator iter = size() == mData.size() ? mData : mBuffer.begin();
+    EncodedBuffer::iterator iter = size() == mData.size() ? mData : mProto.data();
     while (iter.readBuffer() != NULL) {
         err = write_all(fd, iter.readBuffer(), iter.currentToRead());
         iter.rp()->move(iter.currentToRead());
