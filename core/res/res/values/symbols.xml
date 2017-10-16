@@ -459,6 +459,7 @@
   <java-symbol type="bool" name="config_hasPermanentDpad" />
   <java-symbol type="bool" name="config_useDefaultFocusHighlight" />
   <java-symbol type="array" name="config_deviceSpecificSystemServices" />
+  <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 

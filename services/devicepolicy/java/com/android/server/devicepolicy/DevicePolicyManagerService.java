@@ -198,6 +198,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.IllegalStateException;
+import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -214,7 +216,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Implementation of the device policy APIs.
  */
-public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
+public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     protected static final String LOG_TAG = "DevicePolicyManager";
 
@@ -451,11 +453,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     };
 
     public static final class Lifecycle extends SystemService {
-        private DevicePolicyManagerService mService;
+        private BaseIDevicePolicyManager mService;
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new DevicePolicyManagerService(context);
+            String dpmsClassName = context.getResources()
+                    .getString(R.string.config_deviceSpecificDevicePolicyManagerService);
+            if (TextUtils.isEmpty(dpmsClassName)) {
+                dpmsClassName = DevicePolicyManagerService.class.getName();
+            }
+            try {
+                Class serviceClass = Class.forName(dpmsClassName);
+                Constructor constructor = serviceClass.getConstructor(Context.class);
+                mService = (BaseIDevicePolicyManager) constructor.newInstance(context);
+            } catch (Exception e) {
+                throw new IllegalStateException(
+                    "Failed to instantiate DevicePolicyManagerService with class name: "
+                    + dpmsClassName, e);
+            }
         }
 
         @Override
@@ -1551,6 +1566,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext = context;
         }
 
+        public boolean hasFeature() {
+            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
+        }
+
         Context createContextAsUser(UserHandle user) throws PackageManager.NameNotFoundException {
             final String packageName = mContext.getPackageName();
             return mContext.createPackageContextAsUser(packageName, 0, user);
@@ -1848,8 +1867,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // TODO: why does SecurityLogMonitor need to be created even when mHasFeature == false?
         mSecurityLogMonitor = new SecurityLogMonitor(this);
 
-        mHasFeature = mInjector.getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
+        mHasFeature = mInjector.hasFeature();
         mIsWatch = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         mBackgroundHandler = BackgroundThread.getHandler();
@@ -3033,6 +3051,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @VisibleForTesting
+    @Override
     void systemReady(int phase) {
         if (!mHasFeature) {
             return;
@@ -3099,6 +3118,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
     void handleStartUser(int userId) {
         updateScreenCaptureDisabledInWindowManager(userId,
                 getScreenCaptureDisabled(null, userId));
@@ -3107,10 +3127,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         startOwnerService(userId, "start-user");
     }
 
+    @Override
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
     }
 
+    @Override
     void handleStopUser(int userId) {
         stopOwnerService(userId, "stop-user");
     }
