@@ -20,6 +20,7 @@
 #include <log/log_read.h>
 #include <log/logprint.h>
 #include <set>
+#include <string>
 #include <unordered_map>
 #include <vector>
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
@@ -36,6 +37,8 @@ typedef struct {
     std::unordered_map<int, std::string> strMap;
     std::unordered_map<int, bool> boolMap;
     std::unordered_map<int, float> floatMap;
+
+    std::string toString() const;
 } LogEventWrapper;
 
 enum MatchingState {

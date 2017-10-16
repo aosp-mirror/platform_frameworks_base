@@ -587,6 +587,17 @@ LOCAL_SRC_FILES += \
 	lowpan/java/android/net/lowpan/ILowpanManagerListener.aidl \
 	lowpan/java/android/net/lowpan/ILowpanManager.aidl
 
+# StatsLog generated functions
+statslog_src_dir := $(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)/statslog
+gen := $(statslog_src_dir)/android/util/StatsLog.java
+$(gen): PRIVATE_PATH := $(LOCAL_PATH)
+$(gen): PRIVATE_CUSTOM_TOOL = $(HOST_OUT_EXECUTABLES)/stats-log-api-gen --java $@
+$(gen): $(HOST_OUT_EXECUTABLES)/stats-log-api-gen
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(gen)
+statslog_src_dir:=
+gen:=
+
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += \
       $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
