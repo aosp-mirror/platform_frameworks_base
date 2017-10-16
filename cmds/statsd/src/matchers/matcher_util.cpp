@@ -26,53 +26,14 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
 
-#include <sstream>
-
 using std::set;
 using std::string;
-using std::ostringstream;
 using std::unordered_map;
 using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
-
-string LogEventWrapper::toString() const {
-    std::ostringstream result;
-    result << "{ " << timestamp_ns << " (" << tagId << ")";
-    for (int index = 1; ; index++) {
-        auto intVal = intMap.find(index);
-        auto strVal = strMap.find(index);
-        auto boolVal = boolMap.find(index);
-        auto floatVal = floatMap.find(index);
-        if (intVal != intMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(intVal->second);
-        } else if (strVal != strMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << strVal->second;
-        } else if (boolVal != boolMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(boolVal->second);
-        } else if (floatVal != floatMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(floatVal->second);
-        } else {
-            break;
-        }
-    }
-    result << " }";
-    return result.str();
-}
 
 LogEventWrapper parseLogEvent(log_msg msg) {
     LogEventWrapper wrapper;
@@ -87,32 +48,38 @@ LogEventWrapper parseLogEvent(log_msg msg) {
 
     if (context) {
         memset(&elem, 0, sizeof(elem));
-        // TODO: The log is actually structured inside one list.  This is convenient
-        // because we'll be able to use it to put the attribution (WorkSource) block first
-        // without doing our own tagging scheme.  Until that change is in, just drop the
-        // list-related log elements and the order we get there is our index-keyed data
-        // structure.
-        int32_t key = 1;
+        size_t index = 0;
+        int32_t key = -1;
         do {
             elem = android_log_read_next(context);
             switch ((int)elem.type) {
                 case EVENT_TYPE_INT:
-                    wrapper.intMap[key] = elem.data.int32;
-                    key++;
+                    if (index % 2 == 0) {
+                        key = elem.data.int32;
+                    } else {
+                        wrapper.intMap[key] = elem.data.int32;
+                    }
+                    index++;
                     break;
                 case EVENT_TYPE_FLOAT:
-                    wrapper.floatMap[key] = elem.data.float32;
-                    key++;
+                    if (index % 2 == 1) {
+                        wrapper.floatMap[key] = elem.data.float32;
+                    }
+                    index++;
                     break;
                 case EVENT_TYPE_STRING:
-                    // without explicit calling string() constructor, there will be an
-                    // additional 0 in the end of the string.
-                    wrapper.strMap[key] = string(elem.data.string);
-                    key++;
+                    if (index % 2 == 1) {
+                        // without explicit calling string() constructor, there will be an
+                        // additional 0 in the end of the string.
+                        wrapper.strMap[key] = string(elem.data.string);
+                    }
+                    index++;
                     break;
                 case EVENT_TYPE_LONG:
-                    wrapper.intMap[key] = elem.data.int64;
-                    key++;
+                    if (index % 2 == 1) {
+                        wrapper.intMap[key] = elem.data.int64;
+                    }
+                    index++;
                     break;
                 case EVENT_TYPE_LIST:
                     break;
@@ -123,6 +90,10 @@ LogEventWrapper parseLogEvent(log_msg msg) {
                 default:
                     elem.complete = true;
                     break;
+            }
+
+            if (elem.complete) {
+                break;
             }
         } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
 
