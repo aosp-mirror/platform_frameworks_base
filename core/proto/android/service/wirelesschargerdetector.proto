@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.power;
 
 option java_multiple_files = true;
 
 message WirelessChargerDetectorProto {
     message VectorProto {
-        float x = 1;
-        float y = 2;
-        float z = 3;
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
     }
 
     // Previously observed wireless power state.
-    bool is_powered_wirelessly = 1;
+    optional bool is_powered_wirelessly = 1;
     // True if the device is thought to be at rest on a wireless charger.
-    bool is_at_rest = 2;
+    optional bool is_at_rest = 2;
     // The gravity vector most recently observed while at rest.
-    VectorProto rest = 3;
+    optional VectorProto rest = 3;
     // True if detection is in progress.
-    bool is_detection_in_progress = 4;
+    optional bool is_detection_in_progress = 4;
     // The time when detection was last performed.
-    int64 detection_start_time_ms = 5;
+    optional int64 detection_start_time_ms = 5;
     // True if the rest position should be updated if at rest.
-    bool is_must_update_rest_position = 6;
+    optional bool is_must_update_rest_position = 6;
     // The total number of samples collected.
-    int32 total_samples = 7;
+    optional int32 total_samples = 7;
     // The number of samples collected that showed evidence of not being at rest.
-    int32 moving_samples = 8;
+    optional int32 moving_samples = 8;
     // The value of the first sample that was collected.
-    VectorProto first_sample = 9;
+    optional VectorProto first_sample = 9;
     // The value of the last sample that was collected.
-    VectorProto last_sample = 10;
+    optional VectorProto last_sample = 10;
 }

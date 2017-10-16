@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.content";
 option java_multiple_files = true;
 
@@ -25,18 +24,18 @@ package android.content;
 
 // Next Tag: 13
 message IntentProto {
-    string action = 1;
+    optional string action = 1;
     repeated string categories = 2;
-    string data = 3;
-    string type = 4;
-    string flag = 5;
-    string package = 6;
-    string component = 7;
-    string source_bounds = 8;
-    string clip_data = 9;
-    string extras = 10;
-    int32 content_user_hint = 11;
-    string selector = 12;
+    optional string data = 3;
+    optional string type = 4;
+    optional string flag = 5;
+    optional string package = 6;
+    optional string component = 7;
+    optional string source_bounds = 8;
+    optional string clip_data = 9;
+    optional string extras = 10;
+    optional int32 content_user_hint = 11;
+    optional string selector = 12;
 }
 
 // Next Tag: 11
@@ -48,13 +47,13 @@ message IntentFilterProto {
     repeated AuthorityEntryProto data_authorities = 5;
     repeated android.os.PatternMatcherProto data_paths = 6;
     repeated string data_types = 7;
-    int32 priority = 8;
-    bool has_partial_types = 9;
-    bool get_auto_verify = 10;
+    optional int32 priority = 8;
+    optional bool has_partial_types = 9;
+    optional bool get_auto_verify = 10;
 }
 
 message AuthorityEntryProto {
-    string host = 1;
-    bool wild = 2;
-    int32 port = 3;
+    optional string host = 1;
+    optional bool wild = 2;
+    optional int32 port = 3;
 }

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.notification;
 
 option java_multiple_files = true;
@@ -29,54 +28,60 @@ import "frameworks/base/core/proto/android/content/component_name.proto";
 message NotificationServiceDumpProto {
     repeated NotificationRecordProto records = 1;
 
-    ZenModeProto zen = 2;
+    optional ZenModeProto zen = 2;
 
-    ManagedServicesProto notification_listeners = 3;
+    optional ManagedServicesProto notification_listeners = 3;
 
-    int32 listener_hints = 4;
+    optional int32 listener_hints = 4;
 
     repeated ListenersDisablingEffectsProto listeners_disabling_effects = 5;
 
-    ManagedServicesProto notification_assistants = 6;
+    optional ManagedServicesProto notification_assistants = 6;
 
-    ManagedServicesProto condition_providers = 7;
+    optional ManagedServicesProto condition_providers = 7;
 
-    RankingHelperProto ranking_config = 8;
+    optional RankingHelperProto ranking_config = 8;
 }
 
 message NotificationRecordProto {
-    string key = 1;
-    State state = 2;
-    int32 flags = 3;
-    string channelId = 4;
-    string sound = 5;
-    int32 sound_usage = 6;
-    bool can_vibrate = 7;
-    bool can_show_light = 8;
-    string group_key = 9;
-    int32 importance = 10;
+    optional string key = 1;
+
+    enum State {
+        ENQUEUED = 0;
+        POSTED = 1;
+        SNOOZED = 2;
+    }
+    optional State state = 2;
+    optional int32 flags = 3;
+    optional string channelId = 4;
+    optional string sound = 5;
+    optional int32 sound_usage = 6;
+    optional bool can_vibrate = 7;
+    optional bool can_show_light = 8;
+    optional string group_key = 9;
+    optional int32 importance = 10;
 }
 
 message ListenersDisablingEffectsProto {
-    int32 hint = 1;
+    optional int32 hint = 1;
     repeated ManagedServiceInfoProto listeners = 2;
 }
 
 message ManagedServiceInfoProto {
-    android.content.ComponentNameProto component = 1;
-    int32 user_id = 2;
-    string service = 3;
-    bool is_system = 4;
-    bool is_guest = 5;
+    optional android.content.ComponentNameProto component = 1;
+    optional int32 user_id = 2;
+    optional string service = 3;
+    optional bool is_system = 4;
+    optional bool is_guest = 5;
 }
 
 message ManagedServicesProto {
-    string caption = 1;
+    optional string caption = 1;
 
     message ServiceProto {
         repeated string name = 1;
-        int32 user_id = 2;
-        bool is_primary = 3;
+        optional int32 user_id = 2;
+        optional bool is_primary = 3;
     }
     repeated ServiceProto approved = 2;
 
@@ -94,17 +99,17 @@ message RankingHelperProto {
     repeated string notification_signal_extractors = 1;
 
     message RecordProto {
-        string package = 1;
+        optional string package = 1;
         // Default value is UNKNOWN_UID = USER_NULL = -10000.
-        int32 uid = 2;
+        optional int32 uid = 2;
         // Default is IMPORTANCE_UNSPECIFIED (-1000).
-        int32 importance = 3;
+        optional int32 importance = 3;
         // Default is PRIORITY_DEFAULT (0).
-        int32 priority = 4;
+        optional int32 priority = 4;
         // Default is VISIBILITY_NO_OVERRIDE (-1000).
-        int32 visibility = 5;
+        optional int32 visibility = 5;
         // Default is true.
-        bool show_badge = 6;
+        optional bool show_badge = 6;
         repeated android.app.NotificationChannelProto channels = 7;
         repeated android.app.NotificationChannelGroupProto channel_groups = 8;
     }
@@ -112,25 +117,16 @@ message RankingHelperProto {
     repeated RecordProto records_restored_without_uid = 3;
 }
 
-enum State {
-    ENQUEUED = 0;
-
-    POSTED = 1;
-
-    SNOOZED = 2;
-}
-
 message ZenModeProto {
-    ZenMode zen_mode = 1;
+    enum ZenMode {
+        ZEN_MODE_OFF = 0;
+        ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+        ZEN_MODE_NO_INTERRUPTIONS = 2;
+        ZEN_MODE_ALARMS = 3;
+    }
+    optional ZenMode zen_mode = 1;
     repeated string enabled_active_conditions = 2;
-    int32 suppressed_effects = 3;
+    optional int32 suppressed_effects = 3;
     repeated string suppressors = 4;
-    android.app.PolicyProto policy = 5;
-}
-
-enum ZenMode {
-    ZEN_MODE_OFF = 0;
-    ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
-    ZEN_MODE_NO_INTERRUPTIONS = 2;
-    ZEN_MODE_ALARMS = 3;
+    optional android.app.PolicyProto policy = 5;
 }

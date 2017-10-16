@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.app";
 option java_multiple_files = true;
 
@@ -27,9 +26,9 @@ import "frameworks/base/core/proto/android/app/notification_channel.proto";
  * An android.app.NotificationChannelGroup object.
  */
 message NotificationChannelGroupProto {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    bool is_blocked = 4;
+    optional string id = 1;
+    optional string name = 2;
+    optional string description = 3;
+    optional bool is_blocked = 4;
     repeated android.app.NotificationChannelProto channels = 5;
 }

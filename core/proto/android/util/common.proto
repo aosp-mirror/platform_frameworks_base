@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.util;
 
 option java_multiple_files = true;
@@ -25,9 +24,9 @@ option java_multiple_files = true;
  */
 message AggStats {
 
-    int64 min = 1;
+    optional int64 min = 1;
 
-    int64 average = 2;
+    optional int64 average = 2;
 
-    int64 max = 3;
+    optional int64 max = 3;
 }

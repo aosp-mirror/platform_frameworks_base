@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "IncidentHeaderProtoMetadata";
 
@@ -29,6 +28,6 @@ message IncidentHeaderProto {
         CAUSE_CRASH = 3;
     }
 
-    Cause cause = 1;
+    optional Cause cause = 1;
 }
 

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "IncidentProtoMetadata";
 
@@ -52,74 +51,74 @@ message IncidentProto {
     //SystemProperties system_properties = 1000;
 
     // Linux services
-    Procrank procrank = 2000 [
+    optional Procrank procrank = 2000 [
         (section).type = SECTION_COMMAND,
         (section).args = "/system/xbin/procrank"
     ];
 
-    PageTypeInfo page_type_info = 2001 [
+    optional PageTypeInfo page_type_info = 2001 [
         (section).type = SECTION_FILE,
         (section).args = "/proc/pagetypeinfo"
     ];
 
-    KernelWakeSources kernel_wake_sources = 2002 [
+    optional KernelWakeSources kernel_wake_sources = 2002 [
         (section).type = SECTION_FILE,
         (section).args = "/d/wakeup_sources"
     ];
 
 
     // System Services
-    android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+    optional android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "fingerprint --proto --incident"
     ];
 
-    android.service.NetworkStatsServiceDumpProto netstats = 3001 [
+    optional android.service.NetworkStatsServiceDumpProto netstats = 3001 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "netstats --proto"
     ];
 
-    android.providers.settings.SettingsServiceDumpProto settings = 3002;
-    android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;
-    android.service.notification.NotificationServiceDumpProto notification = 3004 [
+    optional android.providers.settings.SettingsServiceDumpProto settings = 3002;
+    optional android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;
+    optional android.service.notification.NotificationServiceDumpProto notification = 3004 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "notification --proto"
     ];
 
-    android.service.batterystats.BatteryStatsServiceDumpProto batterystats = 3005 [
+    optional android.service.batterystats.BatteryStatsServiceDumpProto batterystats = 3005 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "batterystats --proto"
     ];
 
-    android.service.battery.BatteryServiceDumpProto battery = 3006 [
+    optional android.service.battery.BatteryServiceDumpProto battery = 3006 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "battery --proto"
     ];
 
-    android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007 [
+    optional android.service.diskstats.DiskStatsServiceDumpProto diskstats = 3007 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "diskstats --proto"
     ];
 
-    android.service.pm.PackageServiceDumpProto package = 3008;
-    android.service.power.PowerServiceDumpProto power = 3009;
-    android.service.print.PrintServiceDumpProto print = 3010;
+    optional android.service.pm.PackageServiceDumpProto package = 3008;
+    optional android.service.power.PowerServiceDumpProto power = 3009;
+    optional android.service.print.PrintServiceDumpProto print = 3010;
 
-    android.service.procstats.ProcessStatsServiceDumpProto procstats = 3011 [
+    optional android.service.procstats.ProcessStatsServiceDumpProto procstats = 3011 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "procstats --proto"
     ];
 
-    com.android.server.am.proto.ActivityStackSupervisorProto activities = 3012 [
+    optional com.android.server.am.proto.ActivityStackSupervisorProto activities = 3012 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto activities"
     ];
 
-    com.android.server.am.proto.BroadcastProto broadcasts = 3013 [
+    optional com.android.server.am.proto.BroadcastProto broadcasts = 3013 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto broadcasts"
     ];
 
-    com.android.server.am.proto.ServiceProto amservices = 3014;
-    com.android.server.am.proto.ProcessProto amprocesses = 3015;
+    optional com.android.server.am.proto.ServiceProto amservices = 3014;
+    optional com.android.server.am.proto.ProcessProto amprocesses = 3015;
 }
