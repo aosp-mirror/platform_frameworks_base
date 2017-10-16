@@ -1,13 +1,3 @@
-
-genrule {
-    name: "android_util_StatsLog.cpp",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --jni $(genDir)/android_util_StatsLog.cpp",
-    out: [
-        "android_util_StatsLog.cpp",
-    ],
-}
-
 cc_library_shared {
     name: "libandroid_runtime",
 
@@ -114,6 +104,7 @@ cc_library_shared {
         "android_nio_utils.cpp",
         "android_util_AssetManager.cpp",
         "android_util_Binder.cpp",
+	"android_util_StatsLog.cpp",
         "android_util_EventLog.cpp",
         "android_util_MemoryIntArray.cpp",
         "android_util_Log.cpp",
@@ -280,12 +271,10 @@ cc_library_shared {
         "libhwbinder",
         "libvintf",
         "libnativewindow",
+
         "libhwui",
         "libdl",
-        "libstatslog",
     ],
-
-    generated_sources: ["android_util_StatsLog.cpp"],
 
     local_include_dirs: ["android/graphics"],
     export_include_dirs: [

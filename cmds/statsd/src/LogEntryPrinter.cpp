@@ -20,11 +20,6 @@
 #include <log/logprint.h>
 #include <utils/Errors.h>
 
-#include "matchers/matcher_util.h"
-
-#define PRINT_WITH_LIBLOG 0
-#define PRINT_WITH_LOG_EVENT_WRAPPER 1
-
 using namespace android;
 
 namespace android {
@@ -49,24 +44,16 @@ LogEntryPrinter::~LogEntryPrinter() {
 }
 
 void LogEntryPrinter::OnLogEvent(const log_msg& msg) {
-    if (PRINT_WITH_LIBLOG) {
-        status_t err;
-        AndroidLogEntry entry;
-        char buf[1024];
+    status_t err;
+    AndroidLogEntry entry;
+    char buf[1024];
 
-        err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1), &entry,
-                                                 m_tags, buf, sizeof(buf));
-        if (err == NO_ERROR) {
-            android_log_printLogLine(m_format, m_out, &entry);
-        } else {
-            printf("log entry: %s\n", buf);
-            fflush(stdout);
-        }
-    }
-
-    if (PRINT_WITH_LOG_EVENT_WRAPPER) {
-        LogEventWrapper event = parseLogEvent(msg);
-        printf("event: %s\n", event.toString().c_str());
+    err = android_log_processBinaryLogBuffer(&(const_cast<log_msg*>(&msg)->entry_v1), &entry,
+                                             m_tags, buf, sizeof(buf));
+    if (err == NO_ERROR) {
+        android_log_printLogLine(m_format, m_out, &entry);
+    } else {
+        printf("log entry: %s\n", buf);
         fflush(stdout);
     }
 }

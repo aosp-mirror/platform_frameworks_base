@@ -14,51 +14,22 @@
 
 LOCAL_PATH:= $(call my-dir)
 
+# ================
+# proto static lib
+# ================
+include $(CLEAR_VARS)
 
-statsd_common_src := \
-    ../../core/java/android/os/IStatsCompanionService.aidl \
-    ../../core/java/android/os/IStatsManager.aidl \
-    src/stats_log.proto \
-    src/statsd_config.proto \
-    src/stats_events.proto \
-    src/condition/CombinationConditionTracker.cpp \
-    src/condition/condition_util.cpp \
-    src/condition/SimpleConditionTracker.cpp \
-    src/matchers/CombinationLogMatchingTracker.cpp \
-    src/matchers/matcher_util.cpp \
-    src/matchers/SimpleLogMatchingTracker.cpp \
-    src/metrics/CountAnomalyTracker.cpp \
-    src/metrics/CountMetricProducer.cpp \
-    src/metrics/MetricsManager.cpp \
-    src/metrics/metrics_manager_util.cpp \
-    src/AnomalyMonitor.cpp \
-    src/DropboxReader.cpp \
-    src/DropboxWriter.cpp \
-    src/KernelWakelockPuller.cpp \
-    src/LogEntryPrinter.cpp \
-    src/LogReader.cpp \
-    src/StatsLogProcessor.cpp \
-    src/StatsPullerManager.cpp \
-    src/StatsService.cpp \
-    src/stats_util.cpp \
-    src/UidMap.cpp
+LOCAL_MODULE := statsd_proto
+LOCAL_MODULE_TAGS := optional
 
-statsd_common_c_includes := \
-    $(LOCAL_PATH)/src
+LOCAL_SRC_FILES := $(call all-proto-files-under, src)
 
-statsd_common_aidl_includes := \
-    $(LOCAL_PATH)/../../core/java
+LOCAL_PROTOC_FLAGS :=
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
 
-statsd_common_shared_libraries := \
-    libbase \
-    libbinder \
-    libcutils \
-    libincident \
-    liblog \
-    libselinux \
-    libutils \
-    libservices \
-    libandroidfw
+include $(BUILD_STATIC_LIBRARY)
+
+STATSD_PROTO_INCLUDES := $(local-generated-sources-dir)/src/$(LOCAL_PATH)
 
 # =========
 # statsd
@@ -69,8 +40,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := statsd
 
 LOCAL_SRC_FILES := \
-    $(statsd_common_src) \
-    src/main.cpp
+    ../../core/java/android/os/IStatsCompanionService.aidl \
+    ../../core/java/android/os/IStatsManager.aidl \
+    $(call all-cpp-files-under,src) \
 
 LOCAL_CFLAGS += \
     -Wall \
@@ -88,19 +60,30 @@ else
     LOCAL_CFLAGS += \
             -Os
 endif
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
 
-LOCAL_AIDL_INCLUDES := $(statsd_common_c_includes)
-LOCAL_C_INCLUDES += $(statsd_common_c_includes)
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/../../core/java
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
+	STATSD_PROTO_INCLUDES
 
-LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries)
+LOCAL_STATIC_LIBRARIES := statsd_proto
+
+LOCAL_SHARED_LIBRARIES := \
+        libbase \
+        libbinder \
+        libcutils \
+        libincident \
+        liblog \
+        libselinux \
+        libutils \
+        libservices \
+        libandroidfw \
+        libprotobuf-cpp-lite \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
 #LOCAL_INIT_RC := statsd.rc
 
 include $(BUILD_EXECUTABLE)
-
 
 # ==============
 # statsd_test
@@ -112,8 +95,8 @@ LOCAL_MODULE := statsd_test
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_AIDL_INCLUDES := $(statsd_common_c_includes)
-LOCAL_C_INCLUDES += $(statsd_common_c_includes)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src \
+	STATSD_PROTO_INCLUDES
 
 LOCAL_CFLAGS += \
     -Wall \
@@ -124,25 +107,38 @@ LOCAL_CFLAGS += \
     -Wno-unused-parameter
 
 LOCAL_SRC_FILES := \
-    $(statsd_common_src) \
-    tests/indexed_priority_queue_test.cpp \
-    tests/LogReader_test.cpp \
-    tests/MetricsManager_test.cpp \
-    tests/UidMap_test.cpp \
-    tests/LogEntryMatcher_test.cpp \
-    tests/AnomalyMonitor_test.cpp \
-    tests/ConditionTracker_test.cpp
+    src/stats_log.proto \
+    src/statsd_config.proto \
+    ../../core/java/android/os/IStatsCompanionService.aidl \
+    ../../core/java/android/os/IStatsManager.aidl \
+    src/StatsService.cpp \
+    src/AnomalyMonitor.cpp \
+    src/stats_util.cpp \
+    src/LogEntryPrinter.cpp \
+    src/LogReader.cpp \
+    src/matchers/matcher_util.cpp \
+    src/condition/SimpleConditionTracker.cpp \
+    src/condition/CombinationConditionTracker.cpp \
+    src/matchers/SimpleLogMatchingTracker.cpp \
+    src/matchers/CombinationLogMatchingTracker.cpp \
+    src/metrics/metrics_manager_util.cpp \
+    src/metrics/CountMetricProducer.cpp \
+    src/metrics/CountAnomalyTracker.cpp \
+    src/condition/condition_util.cpp \
+    src/UidMap.cpp \
+    $(call all-cpp-files-under, tests) \
 
 LOCAL_STATIC_LIBRARIES := \
-    libgmock
+    libgmock \
+    statsd_proto \
 
-LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries)
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
-
-statsd_common_src:=
-statsd_common_aidl_includes:=
-statsd_common_c_includes:=
+LOCAL_SHARED_LIBRARIES := \
+    libbase \
+    libbinder \
+    libcutils \
+    liblog \
+    libselinux \
+    libutils \
+    libprotobuf-cpp-lite \
 
 include $(BUILD_NATIVE_TEST)
-
