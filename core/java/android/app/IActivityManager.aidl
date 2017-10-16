@@ -108,7 +108,7 @@ interface IActivityManager {
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
-    void attachApplication(in IApplicationThread app);
+    void attachApplication(in IApplicationThread app, long startSeq);
     oneway void activityIdle(in IBinder token, in Configuration config,
             in boolean stopProfiling);
     void activityPaused(in IBinder token);

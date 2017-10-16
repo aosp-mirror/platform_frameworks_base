@@ -322,7 +322,7 @@ public final class BroadcastQueue {
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
         boolean didSomething = false;
         final BroadcastRecord br = mPendingBroadcast;
-        if (br != null && br.curApp.pid == app.pid) {
+        if (br != null && br.curApp.pid > 0 && br.curApp.pid == app.pid) {
             if (br.curApp != app) {
                 Slog.e(TAG, "App mismatch when sending pending broadcast to "
                         + app.processName + ", intended target is " + br.curApp.processName);
@@ -876,9 +876,16 @@ public final class BroadcastQueue {
                         + mPendingBroadcast.curApp);
 
                 boolean isDead;
-                synchronized (mService.mPidsSelfLocked) {
-                    ProcessRecord proc = mService.mPidsSelfLocked.get(mPendingBroadcast.curApp.pid);
-                    isDead = proc == null || proc.crashing;
+                if (mPendingBroadcast.curApp.pid > 0) {
+                    synchronized (mService.mPidsSelfLocked) {
+                        ProcessRecord proc = mService.mPidsSelfLocked.get(
+                                mPendingBroadcast.curApp.pid);
+                        isDead = proc == null || proc.crashing;
+                    }
+                } else {
+                    final ProcessRecord proc = mService.mProcessNames.get(
+                            mPendingBroadcast.curApp.processName, mPendingBroadcast.curApp.uid);
+                    isDead = proc == null || !proc.pendingStart;
                 }
                 if (!isDead) {
                     // It's still alive, so keep waiting

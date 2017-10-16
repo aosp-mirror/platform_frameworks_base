@@ -34,6 +34,7 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -353,6 +354,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.DebugUtils;
@@ -1588,6 +1590,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     long mProcStateSeqCounter = 0;
 
+    /**
+     * A global counter for generating sequence numbers to uniquely identify pending process starts.
+     */
+    @GuardedBy("this")
+    private long mProcStartSeqCounter = 0;
+
+    /**
+     * Contains {@link ProcessRecord} objects for pending process starts.
+     *
+     * Mapping: {@link #mProcStartSeqCounter} -> {@link ProcessRecord}
+     */
+    @GuardedBy("this")
+    private final LongSparseArray<ProcessRecord> mPendingStarts = new LongSparseArray<>();
+
     private final Injector mInjector;
 
     static final class ProcessChangeItem {
@@ -1775,6 +1791,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final Handler mUiHandler;
+    final ServiceThread mProcStartHandlerThread;
+    final Handler mProcStartHandler;
 
     final ActivityManagerConstants mConstants;
 
@@ -2701,6 +2719,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mVrController = null;
         mLockTaskController = null;
         mLifecycleManager = null;
+        mProcStartHandlerThread = null;
+        mProcStartHandler = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2724,6 +2744,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
         mUiHandler = mInjector.getUiHandler(this);
+
+        mProcStartHandlerThread = new ServiceThread(TAG + ":procStart",
+                THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
+        mProcStartHandlerThread.start();
+        mProcStartHandler = new Handler(mProcStartHandlerThread.getLooper());
 
         mConstants = new ActivityManagerConstants(this, mHandler);
 
@@ -3384,8 +3409,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (lrui >= 0) {
             if (!app.killed) {
                 Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
-                killProcessQuiet(app.pid);
-                killProcessGroup(app.uid, app.pid);
+                if (app.pid > 0) {
+                    killProcessQuiet(app.pid);
+                    killProcessGroup(app.uid, app.pid);
+                } else {
+                    app.pendingStart = false;
+                }
             }
             if (lrui <= mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
@@ -3646,7 +3675,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || transit == TRANSIT_TASK_TO_FRONT;
     }
 
-    int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
+    boolean startIsolatedProcess(String entryPoint, String[] entryPointArgs,
             String processName, String abiOverride, int uid, Runnable crashHandler) {
         synchronized(this) {
             ApplicationInfo info = new ApplicationInfo();
@@ -3668,7 +3697,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
                     uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
                     crashHandler);
-            return proc != null ? proc.pid : 0;
+            return proc != null;
         }
     }
 
@@ -3789,9 +3818,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         checkTime(startTime, "startProcess: stepping in to startProcess");
-        startProcessLocked(app, hostingType, hostingNameStr, abiOverride);
+        final boolean success = startProcessLocked(app, hostingType, hostingNameStr, abiOverride);
         checkTime(startTime, "startProcess: done starting proc!");
-        return (app.pid != 0) ? app : null;
+        return success ? app : null;
     }
 
     boolean isAllowedWhileBooting(ApplicationInfo ai) {
@@ -3803,8 +3832,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */);
     }
 
-    private final void startProcessLocked(ProcessRecord app, String hostingType,
+    /**
+     * @return {@code true} if process start is successful, false otherwise.
+     */
+    private final boolean startProcessLocked(ProcessRecord app, String hostingType,
             String hostingNameStr, String abiOverride) {
+        if (app.pendingStart) {
+            return true;
+        }
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != MY_PID) {
             checkTime(startTime, "startProcess: removing from pids map");
@@ -3960,90 +3995,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             final String entryPoint = "android.app.ActivityThread";
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
-                    app.processName);
-            checkTime(startTime, "startProcess: asking zygote to start proc");
-            ProcessStartResult startResult;
-            if (hostingType.equals("webview_service")) {
-                startResult = startWebView(entryPoint,
-                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
-                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, null);
-            } else {
-                startResult = Process.start(entryPoint,
-                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
-                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, invokeWith, null);
-            }
-            checkTime(startTime, "startProcess: returned from zygote!");
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-            mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
-            checkTime(startTime, "startProcess: done updating battery stats");
-
-            EventLog.writeEvent(EventLogTags.AM_PROC_START,
-                    UserHandle.getUserId(uid), startResult.pid, uid,
-                    app.processName, hostingType,
-                    hostingNameStr != null ? hostingNameStr : "");
-
-            try {
-                AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
-                        seInfo, app.info.sourceDir, startResult.pid);
-            } catch (RemoteException ex) {
-                // Ignore
-            }
-
-            if (app.persistent) {
-                Watchdog.getInstance().processStarted(app.processName, startResult.pid);
-            }
-
-            checkTime(startTime, "startProcess: building log message");
-            StringBuilder buf = mStringBuilder;
-            buf.setLength(0);
-            buf.append("Start proc ");
-            buf.append(startResult.pid);
-            buf.append(':');
-            buf.append(app.processName);
-            buf.append('/');
-            UserHandle.formatUid(buf, uid);
-            if (app.isolatedEntryPoint != null) {
-                buf.append(" [");
-                buf.append(app.isolatedEntryPoint);
-                buf.append("]");
-            }
-            buf.append(" for ");
-            buf.append(hostingType);
-            if (hostingNameStr != null) {
-                buf.append(" ");
-                buf.append(hostingNameStr);
-            }
-            Slog.i(TAG, buf.toString());
-            app.setPid(startResult.pid);
-            app.usingWrapper = startResult.usingWrapper;
-            app.removed = false;
-            app.killed = false;
-            app.killedByAm = false;
-            checkTime(startTime, "startProcess: starting to update pids map");
-            ProcessRecord oldApp;
-            synchronized (mPidsSelfLocked) {
-                oldApp = mPidsSelfLocked.get(startResult.pid);
-            }
-            // If there is already an app occupying that pid that hasn't been cleaned up
-            if (oldApp != null && !app.isolated) {
-                // Clean up anything relating to this pid first
-                Slog.w(TAG, "Reusing pid " + startResult.pid
-                        + " while app is still mapped to it");
-                cleanUpApplicationRecordLocked(oldApp, false, false, -1,
-                        true /*replacingPid*/);
-            }
-            synchronized (mPidsSelfLocked) {
-                this.mPidsSelfLocked.put(startResult.pid, app);
-                Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                msg.obj = app;
-                mHandler.sendMessageDelayed(msg, startResult.usingWrapper
-                        ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
-            }
-            checkTime(startTime, "startProcess: done updating pids map");
+            return startProcessLocked(hostingType, hostingNameStr, entryPoint, app, uid, gids,
+                    runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet, invokeWith,
+                    startTime);
         } catch (RuntimeException e) {
             Slog.e(TAG, "Failure starting process " + app.processName, e);
 
@@ -4055,7 +4010,220 @@ public class ActivityManagerService extends IActivityManager.Stub
             // it doesn't hurt to use it again.)
             forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid), false,
                     false, true, false, false, UserHandle.getUserId(app.userId), "start failure");
+            return false;
         }
+    }
+
+    @GuardedBy("this")
+    private boolean startProcessLocked(String hostingType, String hostingNameStr, String entryPoint,
+            ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
+            String seInfo, String requiredAbi, String instructionSet, String invokeWith,
+            long startTime) {
+        app.pendingStart = true;
+        app.killedByAm = false;
+        app.removed = false;
+        app.killed = false;
+        final long startSeq = app.startSeq = ++mProcStartSeqCounter;
+        app.setStartParams(uid, hostingType, hostingNameStr, seInfo, startTime);
+        if (mConstants.FLAG_PROCESS_START_ASYNC) {
+            if (DEBUG_PROCESSES) Slog.i(TAG_PROCESSES,
+                    "Posting procStart msg for " + app.toShortString());
+            mProcStartHandler.post(() -> {
+                try {
+                    synchronized (ActivityManagerService.this) {
+                        final String reason = isProcStartValidLocked(app, startSeq);
+                        if (reason != null) {
+                            Slog.w(TAG_PROCESSES, app + " not valid anymore,"
+                                    + " don't start process, " + reason);
+                            app.pendingStart = false;
+                            return;
+                        }
+                        app.usingWrapper = invokeWith != null
+                                || SystemProperties.get("wrap." + app.processName) != null;
+                        mPendingStarts.put(startSeq, app);
+                    }
+                    final ProcessStartResult startResult = startProcess(app.hostingType, entryPoint,
+                            app, app.startUid, gids, runtimeFlags, mountExternal, app.seInfo,
+                            requiredAbi, instructionSet, invokeWith, app.startTime);
+                    synchronized (ActivityManagerService.this) {
+                        handleProcessStartedLocked(app, startResult, startSeq);
+                    }
+                } catch (RuntimeException e) {
+                    synchronized (ActivityManagerService.this) {
+                        Slog.e(TAG, "Failure starting process " + app.processName, e);
+                        mPendingStarts.remove(startSeq);
+                        app.pendingStart = false;
+                        forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
+                                false, false, true, false, false,
+                                UserHandle.getUserId(app.userId), "start failure");
+                    }
+                }
+            });
+            return true;
+        } else {
+            try {
+                final ProcessStartResult startResult = startProcess(hostingType, entryPoint, app,
+                        uid, gids, runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet,
+                        invokeWith, startTime);
+                handleProcessStartedLocked(app, startResult.pid, startResult.usingWrapper,
+                        startSeq, false);
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Failure starting process " + app.processName, e);
+                app.pendingStart = false;
+                forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
+                        false, false, true, false, false,
+                        UserHandle.getUserId(app.userId), "start failure");
+            }
+            return app.pid > 0;
+        }
+    }
+
+    private ProcessStartResult startProcess(String hostingType, String entryPoint,
+            ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
+            String seInfo, String requiredAbi, String instructionSet, String invokeWith,
+            long startTime) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
+                    app.processName);
+            checkTime(startTime, "startProcess: asking zygote to start proc");
+            final ProcessStartResult startResult;
+            if (hostingType.equals("webview_service")) {
+                startResult = startWebView(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, null,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            } else {
+                startResult = Process.start(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, invokeWith,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            }
+            checkTime(startTime, "startProcess: returned from zygote!");
+            return startResult;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    @GuardedBy("this")
+    private String isProcStartValidLocked(ProcessRecord app, long expectedStartSeq) {
+        StringBuilder sb = null;
+        if (app.killedByAm) {
+            if (sb == null) sb = new StringBuilder();
+            sb.append("killedByAm=true;");
+        }
+        if (mProcessNames.get(app.processName, app.uid) != app) {
+            if (sb == null) sb = new StringBuilder();
+            sb.append("No entry in mProcessNames;");
+        }
+        if (!app.pendingStart) {
+            if (sb == null) sb = new StringBuilder();
+            sb.append("pendingStart=false;");
+        }
+        if (app.startSeq > expectedStartSeq) {
+            if (sb == null) sb = new StringBuilder();
+            sb.append("seq=" + app.startSeq + ",expected=" + expectedStartSeq + ";");
+        }
+        return sb == null ? null : sb.toString();
+    }
+
+    @GuardedBy("this")
+    private boolean handleProcessStartedLocked(ProcessRecord pending,
+            ProcessStartResult startResult, long expectedStartSeq) {
+        // Indicates that this process start has been taken care of.
+        if (mPendingStarts.get(expectedStartSeq) == null) {
+            if (pending.pid == startResult.pid) {
+                pending.usingWrapper = startResult.usingWrapper;
+                // TODO: Update already existing clients of usingWrapper
+            }
+            return false;
+        }
+        return handleProcessStartedLocked(pending, startResult.pid, startResult.usingWrapper,
+                expectedStartSeq, false);
+    }
+
+    @GuardedBy("this")
+    private boolean handleProcessStartedLocked(ProcessRecord app, int pid, boolean usingWrapper,
+            long expectedStartSeq, boolean procAttached) {
+        mPendingStarts.remove(expectedStartSeq);
+        final String reason = isProcStartValidLocked(app, expectedStartSeq);
+        if (reason != null) {
+            Slog.w(TAG_PROCESSES, app + " start not valid, killing pid=" + pid
+                    + ", " + reason);
+            app.pendingStart = false;
+            Process.killProcessQuiet(pid);
+            Process.killProcessGroup(app.uid, app.pid);
+            return false;
+        }
+        mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
+        checkTime(app.startTime, "startProcess: done updating battery stats");
+
+        EventLog.writeEvent(EventLogTags.AM_PROC_START,
+                UserHandle.getUserId(app.startUid), pid, app.startUid,
+                app.processName, app.hostingType,
+                app.hostingNameStr != null ? app.hostingNameStr : "");
+
+        try {
+            AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
+                    app.seInfo, app.info.sourceDir, pid);
+        } catch (RemoteException ex) {
+            // Ignore
+        }
+
+        if (app.persistent) {
+            Watchdog.getInstance().processStarted(app.processName, pid);
+        }
+
+        checkTime(app.startTime, "startProcess: building log message");
+        StringBuilder buf = mStringBuilder;
+        buf.setLength(0);
+        buf.append("Start proc ");
+        buf.append(pid);
+        buf.append(':');
+        buf.append(app.processName);
+        buf.append('/');
+        UserHandle.formatUid(buf, app.startUid);
+        if (app.isolatedEntryPoint != null) {
+            buf.append(" [");
+            buf.append(app.isolatedEntryPoint);
+            buf.append("]");
+        }
+        buf.append(" for ");
+        buf.append(app.hostingType);
+        if (app.hostingNameStr != null) {
+            buf.append(" ");
+            buf.append(app.hostingNameStr);
+        }
+        Slog.i(TAG, buf.toString());
+        app.setPid(pid);
+        app.usingWrapper = usingWrapper;
+        app.pendingStart = false;
+        checkTime(app.startTime, "startProcess: starting to update pids map");
+        ProcessRecord oldApp;
+        synchronized (mPidsSelfLocked) {
+            oldApp = mPidsSelfLocked.get(pid);
+        }
+        // If there is already an app occupying that pid that hasn't been cleaned up
+        if (oldApp != null && !app.isolated) {
+            // Clean up anything relating to this pid first
+            Slog.w(TAG, "Reusing pid " + pid
+                    + " while app is still mapped to it");
+            cleanUpApplicationRecordLocked(oldApp, false, false, -1,
+                    true /*replacingPid*/);
+        }
+        synchronized (mPidsSelfLocked) {
+            this.mPidsSelfLocked.put(pid, app);
+            if (!procAttached) {
+                Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                msg.obj = app;
+                mHandler.sendMessageDelayed(msg, usingWrapper
+                        ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
+            }
+        }
+        checkTime(app.startTime, "startProcess: done updating pids map");
+        return true;
     }
 
     void updateUsageStats(ActivityRecord component, boolean resumed) {
@@ -5894,7 +6062,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
 
-            if (app != null) {
+            if (app != null && app.pid > 0) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
                 dumpStackTraces(tracesPath, firstPids, null, null, true /* useTombstoned */);
@@ -6856,13 +7024,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             mHeavyWeightProcess = null;
         }
         boolean needRestart = false;
-        if (app.pid > 0 && app.pid != MY_PID) {
+        if ((app.pid > 0 && app.pid != MY_PID) || (app.pid == 0 && app.pendingStart)) {
             int pid = app.pid;
-            synchronized (mPidsSelfLocked) {
-                mPidsSelfLocked.remove(pid);
-                mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+            if (pid > 0) {
+                synchronized (mPidsSelfLocked) {
+                    mPidsSelfLocked.remove(pid);
+                    mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+                }
+                mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
+                if (app.isolated) {
+                    mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+                    getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
+                }
             }
-            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
             boolean willRestart = false;
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
@@ -6872,10 +7046,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             app.kill(reason, true);
-            if (app.isolated) {
-                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
-                getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
-            }
             handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
@@ -6949,7 +7119,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private final boolean attachApplicationLocked(IApplicationThread thread,
-            int pid) {
+            int pid, int callingUid, long startSeq) {
 
         // Find the application record that is being attached...  either via
         // the pid if we are running in multiple processes, or just pull the
@@ -6962,6 +7132,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } else {
             app = null;
+        }
+
+        // It's possible that process called attachApplication before we got a chance to
+        // update the internal state.
+        if (app == null && startSeq > 0) {
+            final ProcessRecord pending = mPendingStarts.get(startSeq);
+            if (pending != null && pending.startUid == callingUid
+                    && handleProcessStartedLocked(pending, pid, pending.usingWrapper,
+                            startSeq, true)) {
+                app = pending;
+            }
         }
 
         if (app == null) {
@@ -7258,11 +7439,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public final void attachApplication(IApplicationThread thread) {
+    public final void attachApplication(IApplicationThread thread, long startSeq) {
         synchronized (this) {
             int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
-            attachApplicationLocked(thread, callingPid);
+            attachApplicationLocked(thread, callingPid, callingUid, startSeq);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -11326,7 +11508,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final long[] mProcessStateStatsLongs = new long[1];
 
-    boolean isProcessAliveLocked(ProcessRecord proc) {
+    private boolean isProcessAliveLocked(ProcessRecord proc) {
+        if (proc.pid <= 0) {
+            if (DEBUG_OOM_ADJ) Slog.d(TAG, "Process hasn't started yet: " + proc);
+            return false;
+        }
         if (proc.procStatFile == null) {
             proc.procStatFile = "/proc/" + proc.pid + "/stat";
         }
@@ -15884,6 +16070,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
+        if (dumpAll && mPendingStarts.size() > 0) {
+            if (needSep) pw.println();
+            needSep = true;
+            pw.println("  mPendingStarts: ");
+            for (int i = 0, len = mPendingStarts.size(); i < len; ++i ) {
+                pw.println("    " + mPendingStarts.keyAt(i) + ": " + mPendingStarts.valueAt(i));
+            }
+        }
         if (dumpPackage == null) {
             pw.println("  mGlobalConfiguration: " + getGlobalConfiguration());
             mStackSupervisor.dumpDisplayConfigs(pw, "  ");
@@ -16918,7 +17112,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
                     ProcessRecord proc = mLruProcesses.get(i);
-                    if (proc.pid == pid) {
+                    if (proc.pid > 0 && proc.pid == pid) {
                         procs.add(proc);
                     } else if (allPkgs && proc.pkgList != null
                             && proc.pkgList.containsKey(args[start])) {
@@ -18344,7 +18538,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         for (int i = mPendingProcessChanges.size() - 1; i >= 0; i--) {
             ProcessChangeItem item = mPendingProcessChanges.get(i);
-            if (item.pid == app.pid) {
+            if (app.pid > 0 && item.pid == app.pid) {
                 mPendingProcessChanges.remove(i);
                 mAvailProcessChanges.add(item);
             }
@@ -18396,6 +18590,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.remove(app.pid);
             }
             addProcessNameLocked(app);
+            app.pendingStart = false;
             startProcessLocked(app, "restart", app.processName);
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
@@ -23588,7 +23783,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + ")\n");
                     if (app.pid > 0 && app.pid != MY_PID) {
                         app.kill("empty", false);
-                    } else {
+                    } else if (app.thread != null) {
                         try {
                             app.thread.scheduleExit();
                         } catch (Exception e) {
@@ -24104,7 +24299,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
+        public boolean startIsolatedProcess(String entryPoint, String[] entryPointArgs,
                 String processName, String abiOverride, int uid, Runnable crashHandler) {
             return ActivityManagerService.this.startIsolatedProcess(entryPoint, entryPointArgs,
                     processName, abiOverride, uid, crashHandler);

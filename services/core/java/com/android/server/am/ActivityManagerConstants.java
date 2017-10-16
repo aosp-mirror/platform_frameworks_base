@@ -66,6 +66,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_BG_START_TIMEOUT = "service_bg_start_timeout";
     static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
     static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
+    static final String KEY_PROCESS_START_ASYNC = "process_start_async";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -93,6 +94,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_BG_START_TIMEOUT = 15*1000;
     private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
     private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
+    private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
 
 
     // Maximum number of cached processes we will allow.
@@ -201,6 +203,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Maximum number of retries for bound foreground services that crash soon after start
     public long BOUND_SERVICE_MAX_CRASH_RETRY = DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY;
+
+    // Indicates if the processes need to be started asynchronously.
+    public boolean FLAG_PROCESS_START_ASYNC = DEFAULT_PROCESS_START_ASYNC;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -325,6 +330,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION);
             BOUND_SERVICE_MAX_CRASH_RETRY = mParser.getInt(KEY_BOUND_SERVICE_CRASH_MAX_RETRY,
                 DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY);
+            FLAG_PROCESS_START_ASYNC = mParser.getBoolean(KEY_PROCESS_START_ASYNC,
+                    DEFAULT_PROCESS_START_ASYNC);
 
             updateMaxCachedProcesses();
         }

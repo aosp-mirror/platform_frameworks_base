@@ -99,7 +99,10 @@ public abstract class ActivityManagerInternal {
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
-    public abstract int startIsolatedProcess(String entryPoint, String[] mainArgs,
+    /**
+     * @return {@code true} if process start is successful, {@code false} otherwise.
+     */
+    public abstract boolean startIsolatedProcess(String entryPoint, String[] mainArgs,
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**

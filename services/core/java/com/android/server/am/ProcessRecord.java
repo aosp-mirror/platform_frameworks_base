@@ -196,6 +196,9 @@ final class ProcessRecord {
 
     String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
+    boolean pendingStart;       // Process start is pending.
+    long startSeq;              // Seq no. indicating the latest process start associated with
+                                // this process record.
 
     // These reports are generated & stored when an app gets into an error condition.
     // They will be "null" when all is OK.
@@ -210,6 +213,23 @@ final class ProcessRecord {
     public boolean inFullBackup;
     // App is allowed to manage whitelists such as temporary Power Save mode whitelist.
     boolean whitelistManager;
+
+    // Params used in starting this process.
+    String hostingType;
+    String hostingNameStr;
+    String seInfo;
+    long startTime;
+    // This will be same as {@link #uid} usually except for some apps used during factory testing.
+    int startUid;
+
+    void setStartParams(int startUid, String hostingType, String hostingNameStr, String seInfo,
+            long startTime) {
+        this.startUid = startUid;
+        this.hostingType = hostingType;
+        this.hostingNameStr = hostingNameStr;
+        this.seInfo = seInfo;
+        this.startTime = startTime;
+    }
 
     void dump(PrintWriter pw, String prefix) {
         final long nowUptime = SystemClock.uptimeMillis();
@@ -348,6 +368,10 @@ final class ProcessRecord {
         if (hasStartedServices) {
             pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);
         }
+        if (pendingStart) {
+            pw.print(prefix); pw.print("pendingStart="); pw.println(pendingStart);
+        }
+        pw.print(prefix); pw.print("startSeq="); pw.println(startSeq);
         if (setProcState > ActivityManager.PROCESS_STATE_SERVICE) {
             pw.print(prefix); pw.print("lastCpuTime="); pw.print(lastCpuTime);
                     if (lastCpuTime > 0) {
@@ -627,9 +651,13 @@ final class ProcessRecord {
             if (noisy) {
                 Slog.i(TAG, "Killing " + toShortString() + " (adj " + setAdj + "): " + reason);
             }
-            EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
-            Process.killProcessQuiet(pid);
-            ActivityManagerService.killProcessGroup(uid, pid);
+            if (pid > 0) {
+                EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
+                Process.killProcessQuiet(pid);
+                ActivityManagerService.killProcessGroup(uid, pid);
+            } else {
+                pendingStart = false;
+            }
             if (!persistent) {
                 killed = true;
                 killedByAm = true;
