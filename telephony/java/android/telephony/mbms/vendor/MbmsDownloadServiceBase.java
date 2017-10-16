@@ -113,6 +113,10 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     @Override
     public final int initialize(final int subscriptionId,
             final IMbmsDownloadSessionCallback callback) throws RemoteException {
+        if (callback == null) {
+            throw new NullPointerException("Callback must not be null");
+        }
+
         final int uid = Binder.getCallingUid();
         callback.asBinder().linkToDeath(new DeathRecipient() {
             @Override
@@ -240,6 +244,13 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     public final int registerStateCallback(final DownloadRequest downloadRequest,
             final IDownloadStateCallback callback, int flags) throws RemoteException {
         final int uid = Binder.getCallingUid();
+        if (downloadRequest == null) {
+            throw new NullPointerException("Download request must not be null");
+        }
+        if (callback == null) {
+            throw new NullPointerException("Callback must not be null");
+        }
+
         DeathRecipient deathRecipient = new DeathRecipient() {
             @Override
             public void binderDied() {
@@ -292,6 +303,13 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     public final int unregisterStateCallback(
             final DownloadRequest downloadRequest, final IDownloadStateCallback callback)
             throws RemoteException {
+        if (downloadRequest == null) {
+            throw new NullPointerException("Download request must not be null");
+        }
+        if (callback == null) {
+            throw new NullPointerException("Callback must not be null");
+        }
+
         DeathRecipient deathRecipient =
                 mDownloadCallbackDeathRecipients.remove(callback.asBinder());
         if (deathRecipient == null) {
