@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.v14.preference.EditTextPreferenceDialogFragment;
 import android.support.v7.preference.EditTextPreference;
 import android.util.AttributeSet;
@@ -30,7 +31,8 @@ public class CustomEditTextPreference extends EditTextPreference {
 
     private CustomPreferenceDialogFragment mFragment;
 
-    public CustomEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CustomEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -69,7 +71,12 @@ public class CustomEditTextPreference extends EditTextPreference {
     protected void onClick(DialogInterface dialog, int which) {
     }
 
+    @CallSuper
     protected void onBindDialogView(View view) {
+        final EditText editText = view.findViewById(android.R.id.edit);
+        if (editText != null) {
+            editText.requestFocus();
+        }
     }
 
     private void setFragment(CustomPreferenceDialogFragment fragment) {
