@@ -31,5 +31,5 @@ cc_binary_host {
         "libprotobuf-cpp-full",
     ],
 
-    cflags: ["-Wno-unused-parameter"],
+    cflags: ["-Wall", "-Werror"],
 }
