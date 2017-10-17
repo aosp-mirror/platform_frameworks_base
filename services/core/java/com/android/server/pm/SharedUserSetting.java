@@ -18,7 +18,9 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.PackageParser;
+import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +53,13 @@ public final class SharedUserSetting extends SettingBase {
     public String toString() {
         return "SharedUserSetting{" + Integer.toHexString(System.identityHashCode(this)) + " "
                 + name + "/" + userId + "}";
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, userId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
+        proto.end(token);
     }
 
     void removePackage(PackageSetting packageSetting) {
