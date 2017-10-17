@@ -5412,6 +5412,18 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public String[] getWifiIfaces() {
+        synchronized (mWifiNetworkLock) {
+            return mWifiIfaces;
+        }
+    }
+
+    public String[] getMobileIfaces() {
+        synchronized (mModemNetworkLock) {
+            return mModemIfaces;
+        }
+    }
+
     @Override public long getScreenOnTime(long elapsedRealtimeUs, int which) {
         return mScreenOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }

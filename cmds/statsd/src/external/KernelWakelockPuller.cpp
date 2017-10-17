@@ -33,7 +33,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const int KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS = 20;
+const int KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS = 1004;
 
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
