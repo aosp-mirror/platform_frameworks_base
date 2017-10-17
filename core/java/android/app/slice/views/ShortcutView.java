@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
+import android.app.slice.views.SliceView.SliceModeView;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
-import android.slice.views.SliceView.SliceModeView;
 import android.view.ViewGroup;
 
 import com.android.internal.R;

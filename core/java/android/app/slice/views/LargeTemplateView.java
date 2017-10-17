@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
+import android.app.slice.views.SliceView.SliceModeView;
 import android.content.Context;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
-import android.slice.views.SliceView.SliceModeView;
 import android.util.TypedValue;
 
 import com.android.internal.widget.LinearLayoutManager;
 import com.android.internal.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -86,7 +85,7 @@ public class LargeTemplateView extends SliceModeView {
         if (slice.hasHint(Slice.HINT_LIST)) {
             addList(slice, items);
         } else {
-            Arrays.asList(slice.getItems()).forEach(item -> {
+            slice.getItems().forEach(item -> {
                 if (item.hasHint(Slice.HINT_ACTIONS)) {
                     return;
                 } else if (item.getType() == SliceItem.TYPE_COLOR) {
@@ -109,7 +108,7 @@ public class LargeTemplateView extends SliceModeView {
     }
 
     private void addList(Slice slice, List<SliceItem> items) {
-        List<SliceItem> sliceItems = Arrays.asList(slice.getItems());
+        List<SliceItem> sliceItems = slice.getItems();
         sliceItems.forEach(i -> i.addHint(Slice.HINT_LIST_ITEM));
         items.addAll(sliceItems);
     }

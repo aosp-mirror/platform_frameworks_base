@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.views.LargeSliceAdapter.SliceListView;
 import android.content.Context;
 import android.graphics.Color;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.views.LargeSliceAdapter.SliceListView;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -38,7 +38,7 @@ import android.widget.TextView;
 import com.android.internal.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * @hide
@@ -76,10 +76,10 @@ public class GridView extends LinearLayout implements SliceListView {
         removeAllViews();
         int total = 1;
         if (slice.getType() == SliceItem.TYPE_SLICE) {
-            SliceItem[] items = slice.getSlice().getItems();
-            total = items.length;
+            List<SliceItem> items = slice.getSlice().getItems();
+            total = items.size();
             for (int i = 0; i < total; i++) {
-                SliceItem item = items[i];
+                SliceItem item = items.get(i);
                 if (isFull()) {
                     continue;
                 }
@@ -142,7 +142,7 @@ public class GridView extends LinearLayout implements SliceListView {
             // TODO: Unify sporadic inflates that happen throughout the code.
             ArrayList<SliceItem> items = new ArrayList<>();
             if (item.getType() == SliceItem.TYPE_SLICE) {
-                items.addAll(Arrays.asList(item.getSlice().getItems()));
+                items.addAll(item.getSlice().getItems());
             }
             items.forEach(i -> {
                 Context context = getContext();

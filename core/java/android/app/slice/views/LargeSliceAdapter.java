@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package android.slice.views;
+package android.app.slice.views;
 
+import android.app.slice.Slice;
+import android.app.slice.SliceItem;
+import android.app.slice.SliceQuery;
+import android.app.slice.views.LargeSliceAdapter.SliceViewHolder;
 import android.content.Context;
-import android.slice.Slice;
-import android.slice.SliceItem;
-import android.slice.SliceQuery;
-import android.slice.views.LargeSliceAdapter.SliceViewHolder;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
