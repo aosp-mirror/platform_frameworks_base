@@ -20,31 +20,31 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Rect;
 
 import android.os.SystemProperties;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.DockState;
+import com.android.systemui.shared.recents.model.TaskStack;
 
 /**
  * Represents the dock regions for each orientation.
  */
 class DockRegion {
-    public static TaskStack.DockState[] PHONE_LANDSCAPE = {
+    public static DockState[] PHONE_LANDSCAPE = {
             // We only allow docking to the left in landscape for now on small devices
-            TaskStack.DockState.LEFT
+            DockState.LEFT
     };
-    public static TaskStack.DockState[] PHONE_PORTRAIT = {
+    public static DockState[] PHONE_PORTRAIT = {
             // We only allow docking to the top for now on small devices
-            TaskStack.DockState.TOP
+            DockState.TOP
     };
-    public static TaskStack.DockState[] TABLET_LANDSCAPE = {
-            TaskStack.DockState.LEFT,
-            TaskStack.DockState.RIGHT
+    public static DockState[] TABLET_LANDSCAPE = {
+            DockState.LEFT,
+            DockState.RIGHT
     };
-    public static TaskStack.DockState[] TABLET_PORTRAIT = PHONE_PORTRAIT;
+    public static DockState[] TABLET_PORTRAIT = PHONE_PORTRAIT;
 }
 
 /**
@@ -55,18 +55,6 @@ public class RecentsConfiguration {
 
     private static final int LARGE_SCREEN_MIN_DP = 600;
     private static final int XLARGE_SCREEN_MIN_DP = 720;
-
-    /** Levels of svelte in increasing severity/austerity. */
-    // No svelting.
-    public static final int SVELTE_NONE = 0;
-    // Limit thumbnail cache to number of visible thumbnails when Recents was loaded, disable
-    // caching thumbnails as you scroll.
-    public static final int SVELTE_LIMIT_CACHE = 1;
-    // Disable the thumbnail cache, load thumbnails asynchronously when the activity loads and
-    // evict all thumbnails when hidden.
-    public static final int SVELTE_DISABLE_CACHE = 2;
-    // Disable all thumbnail loading.
-    public static final int SVELTE_DISABLE_LOADING = 3;
 
     // Launch states
     public RecentsActivityLaunchState mLaunchState = new RecentsActivityLaunchState();
@@ -125,7 +113,7 @@ public class RecentsConfiguration {
      * Returns the preferred dock states for the current orientation.
      * @return a list of dock states for device and its orientation
      */
-    public TaskStack.DockState[] getDockStatesForCurrentOrientation() {
+    public DockState[] getDockStatesForCurrentOrientation() {
         boolean isLandscape = mAppContext.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
         RecentsConfiguration config = Recents.getConfiguration();

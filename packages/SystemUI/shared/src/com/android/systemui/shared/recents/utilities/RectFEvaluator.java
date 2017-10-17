@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.recents.misc;
+package com.android.systemui.shared.recents.utilities;
 
 import android.animation.TypeEvaluator;
 import android.graphics.RectF;
@@ -23,7 +23,7 @@ import android.graphics.RectF;
  */
 public class RectFEvaluator implements TypeEvaluator<RectF> {
 
-    private RectF mRect = new RectF();
+    private final RectF mRect = new RectF();
 
     /**
      * This function returns the result of linearly interpolating the start and

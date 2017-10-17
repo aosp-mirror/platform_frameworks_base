@@ -17,7 +17,7 @@
 package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task;
 
 /**
  * This is sent when we want to cancel the enter-recents window animation for the launch task.

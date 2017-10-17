@@ -23,8 +23,8 @@ import android.view.ViewConfiguration;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewTransform;
 

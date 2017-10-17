@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import android.util.LruCache;
+
+import com.android.systemui.shared.recents.model.Task.TaskKey;
 
 import java.io.PrintWriter;
 
 /**
- * A mapping of {@link Task.TaskKey} to value, with additional LRU functionality where the least
+ * A mapping of {@link TaskKey} to value, with additional LRU functionality where the least
  * recently referenced key/values will be evicted as more values than the given cache size are
  * inserted.
  *
@@ -31,7 +33,7 @@ import java.io.PrintWriter;
 public class TaskKeyLruCache<V> extends TaskKeyCache<V> {
 
     public interface EvictionCallback {
-        public void onEntryEvicted(Task.TaskKey key);
+        void onEntryEvicted(TaskKey key);
     }
 
     private final LruCache<Integer, V> mCache;

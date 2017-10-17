@@ -17,7 +17,7 @@
 package com.android.systemui.recents.events.ui;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.model.ThumbnailData;
 
 /**
  * Sent when a task snapshot has changed.

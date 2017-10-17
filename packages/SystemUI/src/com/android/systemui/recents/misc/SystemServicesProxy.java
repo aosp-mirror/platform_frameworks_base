@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.misc;
 
-import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -27,25 +26,20 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -54,7 +48,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -67,8 +60,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-import android.util.ArraySet;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.Display;
@@ -85,17 +76,11 @@ import com.android.internal.os.BackgroundThread;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsDebugFlags.Static;
 import com.android.systemui.recents.RecentsImpl;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -112,26 +97,18 @@ public class SystemServicesProxy {
         sBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
     }
 
-    final static List<String> sRecentsBlacklist;
-    static {
-        sRecentsBlacklist = new ArrayList<>();
-        sRecentsBlacklist.add(PipMenuActivity.class.getName());
-    }
-
     private static SystemServicesProxy sSystemServicesProxy;
 
     AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
     PackageManager mPm;
-    IconDrawableFactory mDrawableFactory;
     IPackageManager mIpm;
     private final IDreamManager mDreamManager;
     private final Context mContext;
     AssistUtils mAssistUtils;
     WindowManager mWm;
     IWindowManager mIwm;
-    KeyguardManager mKgm;
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
@@ -167,12 +144,10 @@ public class SystemServicesProxy {
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManager.getService();
         mPm = context.getPackageManager();
-        mDrawableFactory = IconDrawableFactory.newInstance(context);
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mIwm = WindowManagerGlobal.getWindowManagerService();
-        mKgm = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mUm = UserManager.get(context);
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
@@ -200,9 +175,6 @@ public class SystemServicesProxy {
         // calls to fetch it.
         UserInfoController userInfoController = Dependency.get(UserInfoController.class);
         userInfoController.addCallback(mOnUserInfoChangedListener);
-
-        Collections.addAll(sRecentsBlacklist,
-                res.getStringArray(R.array.recents_blacklist_array));
     }
 
     /**
@@ -221,38 +193,6 @@ public class SystemServicesProxy {
      */
     public void gc() {
         BackgroundThread.getHandler().post(mGcRunnable);
-    }
-
-    /**
-     * @return whether the provided {@param className} is blacklisted
-     */
-    public boolean isBlackListedActivity(String className) {
-        return sRecentsBlacklist.contains(className);
-    }
-
-    /**
-     * Returns a list of the recents tasks.
-     */
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
-        if (mAm == null) return null;
-        try {
-            List<ActivityManager.RecentTaskInfo> tasks = mIam.getRecentTasks(numTasks,
-                    RECENT_IGNORE_UNAVAILABLE, userId).getList();
-            Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
-            while (iter.hasNext()) {
-                ActivityManager.RecentTaskInfo t = iter.next();
-
-                // Remove the task if it or it's package are blacklsited
-                if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
-                        sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
-                    iter.remove();
-                }
-            }
-            return tasks;
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to get recent tasks", e);
-            return new ArrayList<>();
-        }
     }
 
     /**
@@ -457,43 +397,6 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Returns the top task thumbnail for the given task id */
-    public ThumbnailData getTaskThumbnail(int taskId, boolean reduced) {
-        if (mAm == null) return null;
-
-        // If we are mocking, then just return a dummy thumbnail
-        if (Static.EnableTransitionThumbnailDebugMode) {
-            ThumbnailData thumbnailData = new ThumbnailData();
-            thumbnailData.thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth,
-                    mDummyThumbnailHeight, Bitmap.Config.ARGB_8888);
-            thumbnailData.thumbnail.eraseColor(0xff333333);
-            return thumbnailData;
-        }
-
-        return getThumbnail(taskId, reduced);
-    }
-
-    /**
-     * Returns a task thumbnail from the activity manager
-     */
-    public @NonNull ThumbnailData getThumbnail(int taskId, boolean reducedResolution) {
-        if (mAm == null) {
-            return new ThumbnailData();
-        }
-
-        ActivityManager.TaskSnapshot snapshot = null;
-        try {
-            snapshot = mIam.getTaskSnapshot(taskId, reducedResolution);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to retrieve snapshot", e);
-        }
-        if (snapshot != null) {
-            return ThumbnailData.createFromTaskSnapshot(snapshot);
-        } else {
-            return new ThumbnailData();
-        }
-    }
-
     /** Set the task's windowing mode. */
     public void setTaskWindowingMode(int taskId, int windowingMode) {
         if (mIam == null) return;
@@ -531,170 +434,12 @@ public class SystemServicesProxy {
         });
     }
 
-    /**
-     * Returns the activity info for a given component name.
-     *
-     * @param cn The component name of the activity.
-     * @param userId The userId of the user that this is for.
-     */
-    public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
-        if (mIpm == null) return null;
-
-        try {
-            return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Returns the activity info for a given component name.
-     *
-     * @param cn The component name of the activity.
-     */
-    public ActivityInfo getActivityInfo(ComponentName cn) {
-        if (mPm == null) return null;
-
-        try {
-            return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Returns the activity label, badging if necessary.
-     */
-    public String getBadgedActivityLabel(ActivityInfo info, int userId) {
-        if (mPm == null) return null;
-
-        return getBadgedLabel(info.loadLabel(mPm).toString(), userId);
-    }
-
-    /**
-     * Returns the application label, badging if necessary.
-     */
-    public String getBadgedApplicationLabel(ApplicationInfo appInfo, int userId) {
-        if (mPm == null) return null;
-
-        return getBadgedLabel(appInfo.loadLabel(mPm).toString(), userId);
-    }
-
-    /**
-     * Returns the content description for a given task, badging it if necessary.  The content
-     * description joins the app and activity labels.
-     */
-    public String getBadgedContentDescription(ActivityInfo info, int userId,
-            ActivityManager.TaskDescription td, Resources res) {
-        String activityLabel;
-        if (td != null && td.getLabel() != null) {
-            activityLabel = td.getLabel();
-        } else {
-            activityLabel = info.loadLabel(mPm).toString();
-        }
-        String applicationLabel = info.applicationInfo.loadLabel(mPm).toString();
-        String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
-        return applicationLabel.equals(activityLabel) ? badgedApplicationLabel
-                : res.getString(R.string.accessibility_recents_task_header,
-                        badgedApplicationLabel, activityLabel);
-    }
-
-    /**
-     * Returns the activity icon for the ActivityInfo for a user, badging if
-     * necessary.
-     */
-    public Drawable getBadgedActivityIcon(ActivityInfo info, int userId) {
-        if (mPm == null) return null;
-
-        return mDrawableFactory.getBadgedIcon(info, info.applicationInfo, userId);
-    }
-
-    /**
-     * Returns the application icon for the ApplicationInfo for a user, badging if
-     * necessary.
-     */
-    public Drawable getBadgedApplicationIcon(ApplicationInfo appInfo, int userId) {
-        if (mPm == null) return null;
-
-        return mDrawableFactory.getBadgedIcon(appInfo, userId);
-    }
-
-    /**
-     * Returns the task description icon, loading and badging it if it necessary.
-     */
-    public Drawable getBadgedTaskDescriptionIcon(ActivityManager.TaskDescription taskDescription,
-            int userId, Resources res) {
-        Bitmap tdIcon = taskDescription.getInMemoryIcon();
-        Drawable dIcon = null;
-        if (tdIcon != null) {
-            dIcon = new BitmapDrawable(res, tdIcon);
-        } else if (taskDescription.getIconResource() != 0) {
-            try {
-                dIcon = mContext.getDrawable(taskDescription.getIconResource());
-            } catch (NotFoundException e) {
-                Log.e(TAG, "Could not find icon drawable from resource", e);
-            }
-        } else {
-            tdIcon = ActivityManager.TaskDescription.loadTaskDescriptionIcon(
-                    taskDescription.getIconFilename(), userId);
-            if (tdIcon != null) {
-                dIcon = new BitmapDrawable(res, tdIcon);
-            }
-        }
-        if (dIcon != null) {
-            return getBadgedIcon(dIcon, userId);
-        }
-        return null;
-    }
-
     public ActivityManager.TaskDescription getTaskDescription(int taskId) {
         try {
             return mIam.getTaskDescription(taskId);
         } catch (RemoteException e) {
             return null;
         }
-    }
-
-    /**
-     * Returns the given icon for a user, badging if necessary.
-     */
-    private Drawable getBadgedIcon(Drawable icon, int userId) {
-        if (userId != UserHandle.myUserId()) {
-            icon = mPm.getUserBadgedIcon(icon, new UserHandle(userId));
-        }
-        return icon;
-    }
-
-    /**
-     * Returns a banner used on TV for the specified Activity.
-     */
-    public Drawable getActivityBanner(ActivityInfo info) {
-        if (mPm == null) return null;
-
-        Drawable banner = info.loadBanner(mPm);
-        return banner;
-    }
-
-    /**
-     * Returns the given label for a user, badging if necessary.
-     */
-    private String getBadgedLabel(String label, int userId) {
-        if (userId != UserHandle.myUserId()) {
-            label = mPm.getUserBadgedLabel(label, new UserHandle(userId)).toString();
-        }
-        return label;
-    }
-
-    /**
-     * Returns whether the provided {@param userId} is currently locked (and showing Keyguard).
-     */
-    public boolean isDeviceLocked(int userId) {
-        if (mKgm == null) {
-            return false;
-        }
-        return mKgm.isDeviceLocked(userId);
     }
 
     /**

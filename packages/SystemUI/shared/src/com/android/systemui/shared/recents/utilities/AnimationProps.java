@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.views;
+package com.android.systemui.shared.recents.utilities;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -24,8 +24,7 @@ import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.view.View;
 import android.view.animation.Interpolator;
-
-import com.android.systemui.Interpolators;
+import android.view.animation.LinearInterpolator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,7 +36,8 @@ import java.util.List;
  */
 public class AnimationProps {
 
-    public static final AnimationProps IMMEDIATE = new AnimationProps(0, Interpolators.LINEAR);
+    private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
+    public static final AnimationProps IMMEDIATE = new AnimationProps(0, LINEAR_INTERPOLATOR);
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ALL, TRANSLATION_X, TRANSLATION_Y, TRANSLATION_Z, ALPHA, SCALE, BOUNDS})
@@ -51,7 +51,6 @@ public class AnimationProps {
     public static final int SCALE = 5;
     public static final int BOUNDS = 6;
     public static final int DIM_ALPHA = 7;
-    public static final int FOCUS_STATE = 8;
 
     private SparseLongArray mPropStartDelay;
     private SparseLongArray mPropDuration;
@@ -195,9 +194,9 @@ public class AnimationProps {
             if (interp != null) {
                 return interp;
             }
-            return mPropInterpolators.get(ALL, Interpolators.LINEAR);
+            return mPropInterpolators.get(ALL, LINEAR_INTERPOLATOR);
         }
-        return Interpolators.LINEAR;
+        return LINEAR_INTERPOLATOR;
     }
 
     /**

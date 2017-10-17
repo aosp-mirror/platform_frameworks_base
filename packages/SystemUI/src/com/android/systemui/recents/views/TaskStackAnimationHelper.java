@@ -18,13 +18,11 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
-import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -37,9 +35,10 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -85,11 +85,11 @@ import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.RecentsTaskLoadPlan;
-import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan;
+import com.android.systemui.shared.recents.model.RecentsTaskLoader;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -427,7 +427,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan loadPlan = RecentsImpl.consumeInstanceLoadPlan();
         if (loadPlan == null) {
-            loadPlan = loader.createLoadPlan(this);
+            loadPlan = new RecentsTaskLoadPlan(this);
         }
 
         // Start loading tasks according to the load plan
@@ -441,7 +441,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loadOpts.runningTaskId = launchState.launchedToTaskId;
         loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
-        loader.loadTasks(this, loadPlan, loadOpts);
+        loader.loadTasks(loadPlan, loadOpts);
         TaskStack stack = loadPlan.getTaskStack();
         mRecentsView.onReload(stack, mIsVisible);
 
@@ -815,13 +815,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         RecentsTaskLoader loader = Recents.getTaskLoader();
-        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(this);
         loader.preloadTasks(loadPlan, -1 /* runningTaskId */);
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
-        loader.loadTasks(this, loadPlan, loadOpts);
+        loader.loadTasks(loadPlan, loadOpts);
 
         TaskStack stack = loadPlan.getTaskStack();
         int numStackTasks = stack.getStackTaskCount();

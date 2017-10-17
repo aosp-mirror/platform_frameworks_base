@@ -24,7 +24,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.MutableFloat;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.ViewDebug;
@@ -36,9 +35,9 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.FreePathInterpolator;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 
@@ -505,9 +504,7 @@ public class TaskStackLayoutAlgorithm {
             boolean scrollToFront = launchState.launchedFromHome || launchState.launchedFromPipApp
                     || launchState.launchedWithNextPipApp || launchState.launchedViaDockGesture;
 
-            if (launchState.launchedFromBlacklistedApp) {
-                mInitialScrollP = mMaxScrollP;
-            } else if (launchState.launchedWithAltTab) {
+            if (launchState.launchedWithAltTab) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else if (Recents.getConfiguration().isLowRamDevice) {
                 mInitialScrollP = mTaskStackLowRamLayoutAlgorithm.getInitialScrollP(mNumStackTasks,
@@ -535,7 +532,6 @@ public class TaskStackLayoutAlgorithm {
         boolean scrollToFront = launchState.launchedFromHome ||
                 launchState.launchedFromPipApp ||
                 launchState.launchedWithNextPipApp ||
-                launchState.launchedFromBlacklistedApp ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
             if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {

@@ -14,13 +14,11 @@
  * limitations under the License
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import android.util.ArrayMap;
-import android.util.Log;
-import android.util.SparseArray;
 
-import com.android.systemui.recents.model.Task.TaskKey;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
 
 import java.io.PrintWriter;
 

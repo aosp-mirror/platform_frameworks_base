@@ -30,7 +30,7 @@ import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -159,7 +159,7 @@ public class SystemBarScrimViews {
 
     public final void onBusEvent(final DragEndEvent event) {
         // Hide the nav bar scrims once we drop to a dock region
-        if (event.dropTarget instanceof TaskStack.DockState) {
+        if (event.dropTarget instanceof DockState) {
             animateScrimToCurrentNavBarState(false /* hasStackTasks */);
         }
     }

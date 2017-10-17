@@ -87,9 +87,10 @@ import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.grid.GridTaskView;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
@@ -470,7 +471,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         boolean useTargetStackScroll = Float.compare(curStackScroll, targetStackScroll) != 0;
 
         // We can reuse the task transforms where possible to reduce object allocation
-        Utilities.matchTaskListSize(tasks, taskTransforms);
+        matchTaskListSize(tasks, taskTransforms);
 
         // Update the stack transforms
         TaskViewTransform frontTransform = null;
@@ -700,7 +701,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void getCurrentTaskTransforms(ArrayList<Task> tasks,
             ArrayList<TaskViewTransform> transformsOut) {
-        Utilities.matchTaskListSize(tasks, transformsOut);
+        matchTaskListSize(tasks, transformsOut);
         int focusState = mLayoutAlgorithm.getFocusState();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
@@ -723,7 +724,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void getLayoutTaskTransforms(float stackScroll, int focusState, ArrayList<Task> tasks,
             boolean ignoreTaskOverrides, ArrayList<TaskViewTransform> transformsOut) {
-        Utilities.matchTaskListSize(tasks, transformsOut);
+        matchTaskListSize(tasks, transformsOut);
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
@@ -1901,10 +1902,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         AnimationProps animation = new AnimationProps(SLOW_SYNC_STACK_DURATION,
                 Interpolators.FAST_OUT_SLOW_IN);
         boolean ignoreTaskOverrides = false;
-        if (event.dropTarget instanceof TaskStack.DockState) {
+        if (event.dropTarget instanceof DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
-            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            final DockState dockState = (DockState) event.dropTarget;
             Rect systemInsets = new Rect(mStableLayoutAlgorithm.mSystemInsets);
             // When docked, the nav bar insets are consumed and the activity is measured without
             // insets.  However, the window bounds include the insets, so we need to subtract them
@@ -1931,7 +1932,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(final DragEndEvent event) {
         // We don't handle drops on the dock regions
-        if (event.dropTarget instanceof TaskStack.DockState) {
+        if (event.dropTarget instanceof DockState) {
             // However, we do need to reset the overrides, since the last state of this task stack
             // view layout was ignoring task overrides (see DragDropTargetChangedEvent handler)
             mLayoutAlgorithm.clearUnfocusedTaskOverrides();
@@ -2196,6 +2197,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
             EventBus.getDefault().send(new HideStackActionButtonEvent());
+        }
+    }
+
+    /**
+     * Updates {@param transforms} to be the same size as {@param tasks}.
+     */
+    private void matchTaskListSize(List<Task> tasks, List<TaskViewTransform> transforms) {
+        // We can reuse the task transforms where possible to reduce object allocation
+        int taskTransformCount = transforms.size();
+        int taskCount = tasks.size();
+        if (taskTransformCount < taskCount) {
+            // If there are less transforms than tasks, then add as many transforms as necessary
+            for (int i = taskTransformCount; i < taskCount; i++) {
+                transforms.add(new TaskViewTransform());
+            }
+        } else if (taskTransformCount > taskCount) {
+            // If there are more transforms than tasks, then just subset the transform list
+            transforms.subList(taskCount, taskTransformCount).clear();
         }
     }
 

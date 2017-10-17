@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.model;
+package com.android.systemui.shared.recents.model;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
-import android.util.ArraySet;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 
-import com.android.systemui.Prefs;
-import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsDebugFlags;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
-import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
+import com.android.systemui.shared.recents.model.Task.TaskKey;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,14 +56,17 @@ public class RecentsTaskLoadPlan {
         public int numVisibleTaskThumbnails = 0;
     }
 
-    Context mContext;
+    private final Context mContext;
+    private final KeyguardManager mKeyguardManager;
 
-    List<ActivityManager.RecentTaskInfo> mRawTasks;
-    TaskStack mStack;
+    private List<ActivityManager.RecentTaskInfo> mRawTasks;
+    private TaskStack mStack;
 
-    /** Package level ctor */
-    RecentsTaskLoadPlan(Context context) {
+    private final SparseBooleanArray mTmpLockedUsers = new SparseBooleanArray();
+
+    public RecentsTaskLoadPlan(Context context) {
         mContext = context;
+        mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
     }
 
     /**
@@ -85,9 +76,9 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, callers should synchronize on the loader before making this call.
      */
     void preloadRawTasks() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        int currentUserId = ssp.getCurrentUser();
-        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(), currentUserId);
+        int currentUserId = ActivityManagerWrapper.getInstance().getCurrentUserId();
+        mRawTasks = ActivityManagerWrapper.getInstance().getRecentTasks(
+                ActivityManager.getMaxRecentTasksStatic(), currentUserId);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -111,18 +102,13 @@ public class RecentsTaskLoadPlan {
             preloadRawTasks();
         }
 
-        SparseBooleanArray lockedUsers = new SparseBooleanArray();
-        String dismissDescFormat = mContext.getString(
-                R.string.accessibility_recents_item_will_be_dismissed);
-        String appInfoDescFormat = mContext.getString(
-                R.string.accessibility_recents_item_open_app_info);
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
 
             // Compose the task key
             final int windowingMode = t.configuration.windowConfiguration.getWindowingMode();
-            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, windowingMode, t.baseIntent,
+            TaskKey taskKey = new TaskKey(t.persistentId, windowingMode, t.baseIntent,
                     t.userId, t.lastActiveTime);
 
             boolean isFreeformTask = windowingMode == WINDOWING_MODE_FREEFORM;
@@ -133,9 +119,7 @@ public class RecentsTaskLoadPlan {
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
             String titleDescription = loader.getAndUpdateContentDescription(taskKey,
-                    t.taskDescription, res);
-            String dismissDescription = String.format(dismissDescFormat, titleDescription);
-            String appInfoDescription = String.format(appInfoDescFormat, titleDescription);
+                    t.taskDescription);
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
@@ -145,17 +129,18 @@ public class RecentsTaskLoadPlan {
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&
                     ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
-            if (lockedUsers.indexOfKey(t.userId) < 0) {
-                lockedUsers.put(t.userId, Recents.getSystemServices().isDeviceLocked(t.userId));
+
+            // TODO: Refactor to not do this every preload
+            if (mTmpLockedUsers.indexOfKey(t.userId) < 0) {
+                mTmpLockedUsers.put(t.userId, mKeyguardManager.isDeviceLocked(t.userId));
             }
-            boolean isLocked = lockedUsers.get(t.userId);
+            boolean isLocked = mTmpLockedUsers.get(t.userId);
 
             // Add the task to the stack
             Task task = new Task(taskKey, icon,
-                    thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
-                    activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
-                    t.supportsSplitScreenMultiWindow, t.taskDescription, t.resizeMode,
-                    t.topActivity, isLocked);
+                    thumbnail, title, titleDescription, activityColor, backgroundColor,
+                    isLaunchTarget, isStackTask, isSystemApp, t.supportsSplitScreenMultiWindow,
+                    t.taskDescription, t.resizeMode, t.topActivity, isLocked);
 
             allTasks.add(task);
         }
@@ -179,7 +164,7 @@ public class RecentsTaskLoadPlan {
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
-            Task.TaskKey taskKey = task.key;
+            TaskKey taskKey = task.key;
 
             boolean isRunningTask = (task.key.id == opts.runningTaskId);
             boolean isVisibleTask = i >= (taskCount - opts.numVisibleTasks);
@@ -208,13 +193,6 @@ public class RecentsTaskLoadPlan {
      */
     public TaskStack getTaskStack() {
         return mStack;
-    }
-
-    /**
-     * Returns the raw list of recent tasks.
-     */
-    public List<ActivityManager.RecentTaskInfo> getRawTasks() {
-        return mRawTasks;
     }
 
     /** Returns whether there are any tasks in any stacks. */

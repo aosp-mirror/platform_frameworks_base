@@ -21,8 +21,6 @@ public class RecentsDebugFlags {
     public static class Static {
         // Enables debug drawing for the transition thumbnail
         public static final boolean EnableTransitionThumbnailDebugMode = false;
-        // Enables debug thumbnail to be fetched
-        public static final boolean EnableThumbnailDebugMode = false;
 
         // Disables enter and exit transitions for other tasks for low ram devices
         public static final boolean DisableRecentsLowRamEnterExitAnimation = false;

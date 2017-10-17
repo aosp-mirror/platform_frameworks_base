@@ -20,37 +20,24 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.os.UserHandle.USER_CURRENT;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
-import android.app.IActivityManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityManager;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.settingslib.accessibility.AccessibilityUtils;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Dispatches shortcut to System UI components
@@ -62,7 +49,6 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
-    private IActivityManager mActivityManager = ActivityManager.getService();
 
     protected final long META_MASK = ((long) KeyEvent.META_META_ON) << Integer.SIZE;
     protected final long ALT_MASK = ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;
@@ -109,7 +95,7 @@ public class ShortcutKeyDispatcher extends SystemUI
                         ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
                         : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 List<ActivityManager.RecentTaskInfo> taskList =
-                        SystemServicesProxy.getInstance(mContext).getRecentTasks(1, USER_CURRENT);
+                        ActivityManagerWrapper.getInstance().getRecentTasks(1, USER_CURRENT);
                 recents.showRecentApps(
                         false /* triggeredFromAltTab */,
                         false /* fromHome */);
