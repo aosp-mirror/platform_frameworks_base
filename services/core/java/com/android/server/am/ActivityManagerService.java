@@ -1690,7 +1690,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
     static final int START_USER_SWITCH_FG_MSG = 712;
-    static final int TOP_APP_KILLED_BY_LMK_MSG = 73;
     static final int NOTIFY_VR_KEYGUARD_MSG = 74;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -1921,17 +1920,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int pid = msg.arg1;
                 final int uid = msg.arg2;
                 dispatchProcessDied(pid, uid);
-                break;
-            }
-            case TOP_APP_KILLED_BY_LMK_MSG: {
-                final String appName = (String) msg.obj;
-                final AlertDialog d = new BaseErrorDialog(mUiContext);
-                d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-                d.setTitle(mUiContext.getText(R.string.top_app_killed_title));
-                d.setMessage(mUiContext.getString(R.string.top_app_killed_message, appName));
-                d.setButton(DialogInterface.BUTTON_POSITIVE, mUiContext.getText(R.string.close),
-                        obtainMessage(DISMISS_DIALOG_UI_MSG, d));
-                d.show();
                 break;
             }
             case DISPATCH_UIDS_CHANGED_UI_MSG: {
@@ -5465,7 +5453,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doLowMem = app.instr == null;
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
-                maybeNotifyTopAppKilled(app);
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid + ") has died: "
                         + ProcessList.makeOomAdjString(app.setAdj)
                         + ProcessList.makeProcStateString(app.setProcState));
@@ -5497,23 +5484,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
                     + thread.asBinder());
         }
-    }
-
-    /** Show system error dialog when a top app is killed by LMK */
-    void maybeNotifyTopAppKilled(ProcessRecord app) {
-        if (!shouldNotifyTopAppKilled(app)) {
-            return;
-        }
-
-        Message msg = mHandler.obtainMessage(TOP_APP_KILLED_BY_LMK_MSG);
-        msg.obj = mContext.getPackageManager().getApplicationLabel(app.info);
-        mUiHandler.sendMessage(msg);
-    }
-
-    /** Only show notification when the top app is killed on low ram devices */
-    private boolean shouldNotifyTopAppKilled(ProcessRecord app) {
-        return app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
-            ActivityManager.isLowRamDeviceStatic();
     }
 
     /**
