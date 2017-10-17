@@ -22,7 +22,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
-import "frameworks/base/cmds/statsd/src/stats_events.proto";
+import "frameworks/base/cmds/statsd/src/stats_events_copy.proto";
 
 message KeyValuePair {
   optional int32 key = 1;

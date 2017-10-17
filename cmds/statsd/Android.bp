@@ -21,8 +21,6 @@ cc_library_host_shared {
     name: "libstats_proto_host",
     srcs: [
         "src/stats_events.proto",
-        "src/stats_log.proto",
-        "src/statsd_config.proto",
     ],
 
     shared_libs: [
