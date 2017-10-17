@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -188,7 +188,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
-        return false;
+        return attrs.type == TYPE_STATUS_BAR;
     }
 
     @Override

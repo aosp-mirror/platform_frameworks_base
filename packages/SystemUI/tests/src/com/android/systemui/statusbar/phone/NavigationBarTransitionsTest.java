@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.IWindowManager;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
@@ -41,6 +42,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mDependency.injectMockDependency(IWindowManager.class);
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         NavigationBarView navBar = spy(new NavigationBarView(mContext, null));
         when(navBar.getCurrentView()).thenReturn(navBar);
