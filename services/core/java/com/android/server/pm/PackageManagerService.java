@@ -3261,23 +3261,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        // If we have a profile for a compressed APK, copy it to the reference location.
-        // Since the package is the stub one, remove the stub suffix to get the normal package and
-        // APK name.
-        File profileFile = new File(getPrebuildProfilePath(pkg).replace(STUB_SUFFIX, ""));
-        if (profileFile.exists()) {
-            try {
-                // We could also do this lazily before calling dexopt in
-                // PackageDexOptimizer to prevent this happening on first boot. The issue
-                // is that we don't have a good way to say "do this only once".
-                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                        pkg.applicationInfo.uid, pkg.packageName)) {
-                    Log.e(TAG, "decompressPackage failed to copy system profile!");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ", e);
-            }
-        }
         return dstCodePath;
     }
 
@@ -9114,10 +9097,30 @@ public class PackageManagerService extends IPackageManager.Stub
                         // package and APK names.
                         String systemProfilePath =
                                 getPrebuildProfilePath(disabledPs.pkg).replace(STUB_SUFFIX, "");
-                        File systemProfile = new File(systemProfilePath);
-                        // Use the profile for compilation if there exists one for the same package
-                        // in the system partition.
-                        useProfileForDexopt = systemProfile.exists();
+                        profileFile = new File(systemProfilePath);
+                        // If we have a profile for a compressed APK, copy it to the reference
+                        // location.
+                        // Note that copying the profile here will cause it to override the
+                        // reference profile every OTA even though the existing reference profile
+                        // may have more data. We can't copy during decompression since the
+                        // directories are not set up at that point.
+                        if (profileFile.exists()) {
+                            try {
+                                // We could also do this lazily before calling dexopt in
+                                // PackageDexOptimizer to prevent this happening on first boot. The
+                                // issue is that we don't have a good way to say "do this only
+                                // once".
+                                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                        pkg.applicationInfo.uid, pkg.packageName)) {
+                                    Log.e(TAG, "Failed to copy system profile for stub package!");
+                                } else {
+                                    useProfileForDexopt = true;
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Failed to copy profile " +
+                                        profileFile.getAbsolutePath() + " ", e);
+                            }
+                        }
                     }
                 }
             }
