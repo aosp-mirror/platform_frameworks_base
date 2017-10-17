@@ -395,7 +395,7 @@ public class MediaMetadataRetriever
      * @see #getFrameAtTime(long, int)
      */
     /* Do not change these option values without updating their counterparts
-     * in include/media/stagefright/MediaSource.h!
+     * in include/media/MediaSource.h!
      */
     /**
      * This option is used with {@link #getFrameAtTime(long, int)} to retrieve

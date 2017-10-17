@@ -37,7 +37,8 @@
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/DataSource.h>
+#include <media/DataSource.h>
+#include <media/stagefright/InterfaceUtils.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
@@ -744,7 +745,7 @@ static void android_media_MediaExtractor_setDataSourceCallback(
     }
 
     sp<DataSource> bridge =
-        DataSource::CreateFromIDataSource(new JMediaDataSource(env, callbackObj));
+        CreateDataSourceFromIDataSource(new JMediaDataSource(env, callbackObj));
     status_t err = extractor->setDataSource(bridge);
 
     if (err != OK) {
