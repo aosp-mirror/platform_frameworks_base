@@ -87,14 +87,15 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void updateIcon(ImageView iv, State state) {
-        if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))
+        final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
+        if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))
                 || !Objects.equals(state.slash, iv.getTag(R.id.qs_slash_tag))) {
             boolean shouldAnimate = iv.isShown() && mAnimationEnabled
                     && iv.getDrawable() != null;
-            Drawable d = state.icon != null
-                    ? shouldAnimate ? state.icon.getDrawable(mContext)
-                    : state.icon.getInvisibleDrawable(mContext) : null;
-            int padding = state.icon != null ? state.icon.getPadding() : 0;
+            Drawable d = icon != null
+                    ? shouldAnimate ? icon.getDrawable(mContext)
+                    : icon.getInvisibleDrawable(mContext) : null;
+            int padding = icon != null ? icon.getPadding() : 0;
             if (d != null) {
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
@@ -107,7 +108,7 @@ public class QSIconViewImpl extends QSIconView {
                 iv.setImageDrawable(d);
             }
 
-            iv.setTag(R.id.qs_icon_tag, state.icon);
+            iv.setTag(R.id.qs_icon_tag, icon);
             iv.setTag(R.id.qs_slash_tag, state.slash);
             iv.setPadding(0, padding, 0, padding);
             if (d instanceof Animatable2) {
