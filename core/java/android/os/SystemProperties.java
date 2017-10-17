@@ -84,9 +84,6 @@ public class SystemProperties {
     /**
      * Get the String value for the given {@code key}.
      *
-     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
-     * method will crash in native code.
-     *
      * @param key the key to lookup
      * @return an empty string if the {@code key} isn't found
      */
@@ -98,9 +95,6 @@ public class SystemProperties {
 
     /**
      * Get the String value for the given {@code key}.
-     *
-     * <b>WARNING:</b> Do not use this method if the value may not be a valid UTF string! This
-     * method will crash in native code.
      *
      * @param key the key to lookup
      * @param def the default value in case the property is not set or empty
