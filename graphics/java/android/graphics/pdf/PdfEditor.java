@@ -23,6 +23,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
@@ -72,8 +73,8 @@ public final class PdfEditor {
 
         final long size;
         try {
-            Libcore.os.lseek(input.getFileDescriptor(), 0, OsConstants.SEEK_SET);
-            size = Libcore.os.fstat(input.getFileDescriptor()).st_size;
+            Os.lseek(input.getFileDescriptor(), 0, OsConstants.SEEK_SET);
+            size = Os.fstat(input.getFileDescriptor()).st_size;
         } catch (ErrnoException ee) {
             throw new IllegalArgumentException("file descriptor not seekable");
         }
