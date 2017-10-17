@@ -154,9 +154,6 @@ public class UserDataPreparerTest {
         File systemDeDir = mUserDataPreparer.getDataSystemDeDirectory(TEST_USER_ID);
         systemDeDir.mkdirs();
         writeFile(new File(systemDeDir, "file"), "-----" );
-        File miscDeDir = mUserDataPreparer.getDataMiscDeDirectory(TEST_USER_ID);
-        miscDeDir.mkdirs();
-        writeFile(new File(miscDeDir, "file"), "-----" );
 
         mUserDataPreparer.destroyUserData(TEST_USER_ID, StorageManager.FLAG_STORAGE_DE);
 
@@ -168,8 +165,6 @@ public class UserDataPreparerTest {
         assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(systemDir)));
         assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
                 systemDeDir)));
-        assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
-                miscDeDir)));
     }
 
     @Test
@@ -177,9 +172,6 @@ public class UserDataPreparerTest {
         File systemCeDir = mUserDataPreparer.getDataSystemCeDirectory(TEST_USER_ID);
         systemCeDir.mkdirs();
         writeFile(new File(systemCeDir, "file"), "-----" );
-        File miscCeDir = mUserDataPreparer.getDataMiscCeDirectory(TEST_USER_ID);
-        miscCeDir.mkdirs();
-        writeFile(new File(miscCeDir, "file"), "-----" );
 
         mUserDataPreparer.destroyUserData(TEST_USER_ID, StorageManager.FLAG_STORAGE_CE);
 
@@ -190,8 +182,6 @@ public class UserDataPreparerTest {
 
         assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
                 systemCeDir)));
-        assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
-                miscCeDir)));
     }
 
     @Test
