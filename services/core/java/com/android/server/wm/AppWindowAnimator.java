@@ -295,13 +295,11 @@ public class AppWindowAnimator {
     void updateThumbnailLayer() {
         if (thumbnail != null) {
             final int layer = mAppToken.getHighestAnimLayer();
-            if (layer != mThumbnailLayer) {
-                if (DEBUG_LAYERS) Slog.v(TAG,
-                        "Setting thumbnail layer " + mAppToken + ": layer=" + layer);
-                thumbnail.setLayer(layer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
-                        - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
-                mThumbnailLayer = layer;
-            }
+            if (DEBUG_LAYERS) Slog.v(TAG,
+                    "Setting thumbnail layer " + mAppToken + ": layer=" + layer);
+            thumbnail.setLayer(layer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
+                    - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
+            mThumbnailLayer = layer;
         }
     }
 
