@@ -790,7 +790,7 @@ public class SystemServicesProxy {
             ActivityManager.StackInfo stackInfo =
                     mIam.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
             if (stackInfo == null) {
-                stackInfo = mIam.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
+                stackInfo = mIam.getStackInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             }
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
