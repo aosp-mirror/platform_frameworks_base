@@ -129,7 +129,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 /**
  * Helper class used by TextView to handle editable text views.
@@ -163,6 +163,7 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_REPLACE = 9;
     private static final int MENU_ITEM_ORDER_AUTOFILL = 10;
     private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
+    private static final int MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
     private static final float MAGNIFIER_ZOOM = 1.25f;
@@ -3793,6 +3794,7 @@ public class Editor {
         private final RectF mSelectionBounds = new RectF();
         private final boolean mHasSelection;
         private final int mHandleHeight;
+        private final Map<MenuItem, OnClickListener> mAssistClickHandlers = new HashMap<>();
 
         public TextActionModeCallback(boolean hasSelection) {
             mHasSelection = hasSelection;
@@ -3820,6 +3822,8 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mAssistClickHandlers.clear();
+
             mode.setTitle(null);
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
@@ -3903,14 +3907,14 @@ public class Editor {
 
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
-            updateAssistMenuItem(menu);
+            updateAssistMenuItems(menu);
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
-            updateAssistMenuItem(menu);
+            updateAssistMenuItems(menu);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3943,32 +3947,118 @@ public class Editor {
             }
         }
 
-        private void updateAssistMenuItem(Menu menu) {
-            menu.removeItem(TextView.ID_ASSIST);
+        private void updateAssistMenuItems(Menu menu) {
+            clearAssistMenuItems(menu);
+            if (!mTextView.isDeviceProvisioned()) {
+                return;
+            }
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
-            if (canAssist()) {
-                menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
-                        textClassification.getLabel())
-                        .setIcon(textClassification.getIcon())
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                mMetricsLogger.write(
-                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
-                                .setType(MetricsEvent.TYPE_OPEN)
-                                .setSubtype(textClassification.getLogType()));
+            final int count = textClassification != null ? textClassification.getActionCount() : 0;
+            for (int i = 0; i < count; i++) {
+                if (!isValidAssistMenuItem(i)) {
+                    continue;
+                }
+                final int groupId = TextView.ID_ASSIST;
+                final int order = (i == 0)
+                        ? MENU_ITEM_ORDER_ASSIST
+                        : MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i;
+                final int id = (i == 0) ? TextView.ID_ASSIST : Menu.NONE;
+                final int showAsFlag = (i == 0)
+                        ? MenuItem.SHOW_AS_ACTION_ALWAYS
+                        : MenuItem.SHOW_AS_ACTION_NEVER;
+                final MenuItem item = menu.add(
+                        groupId, id, order, textClassification.getLabel(i))
+                        .setIcon(textClassification.getIcon(i))
+                        .setIntent(textClassification.getIntent(i));
+                item.setShowAsAction(showAsFlag);
+                mAssistClickHandlers.put(item, textClassification.getOnClickListener(i));
+                if (id == TextView.ID_ASSIST) {
+                    mMetricsLogger.write(
+                            new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
+                                    .setType(MetricsEvent.TYPE_OPEN)
+                                    .setSubtype(textClassification.getLogType()));
+                }
             }
         }
 
-        private boolean canAssist() {
+        private void clearAssistMenuItems(Menu menu) {
+            int i = 0;
+            while (i < menu.size()) {
+                final MenuItem menuItem = menu.getItem(i);
+                if (menuItem.getGroupId() == TextView.ID_ASSIST) {
+                    menu.removeItem(menuItem.getItemId());
+                    continue;
+                }
+                i++;
+            }
+        }
+
+        private boolean isValidAssistMenuItem(int index) {
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
-            return mTextView.isDeviceProvisioned()
-                    && textClassification != null
-                    && (textClassification.getIcon() != null
-                            || !TextUtils.isEmpty(textClassification.getLabel()))
-                    && (textClassification.getOnClickListener() != null
-                            || (textClassification.getIntent() != null
-                                    && mTextView.getContext().canStartActivityForResult()));
+            if (!mTextView.isDeviceProvisioned() || textClassification == null
+                    || index < 0 || index >= textClassification.getActionCount()) {
+                return false;
+            }
+            final Drawable icon = textClassification.getIcon(index);
+            final CharSequence label = textClassification.getLabel(index);
+            final boolean hasUi = icon != null || !TextUtils.isEmpty(label);
+            final OnClickListener onClick = textClassification.getOnClickListener(index);
+            final Intent intent = textClassification.getIntent(index);
+            final boolean hasAction = onClick != null || isSupportedIntent(intent);
+            return hasUi && hasAction;
+        }
+
+        private boolean isSupportedIntent(Intent intent) {
+            if (intent == null) {
+                return false;
+            }
+            final Context context = mTextView.getContext();
+            final ResolveInfo info = context.getPackageManager().resolveActivity(intent, 0);
+            final boolean samePackage = context.getPackageName().equals(
+                    info.activityInfo.packageName);
+            if (samePackage) {
+                return true;
+            }
+
+            final boolean exported =  info.activityInfo.exported;
+            final boolean requiresPermission = info.activityInfo.permission != null;
+            final boolean hasPermission = !requiresPermission
+                    || context.checkSelfPermission(info.activityInfo.permission)
+                            == PackageManager.PERMISSION_GRANTED;
+            return exported && hasPermission;
+        }
+
+        private boolean onAssistMenuItemClicked(MenuItem assistMenuItem) {
+            Preconditions.checkArgument(assistMenuItem.getGroupId() == TextView.ID_ASSIST);
+
+            final TextClassification textClassification =
+                    getSelectionActionModeHelper().getTextClassification();
+            if (!mTextView.isDeviceProvisioned() || textClassification == null) {
+                // No textClassification result to handle the click. Eat the click.
+                return true;
+            }
+
+            OnClickListener onClickListener = mAssistClickHandlers.get(assistMenuItem);
+            if (onClickListener == null) {
+                final Intent intent = assistMenuItem.getIntent();
+                if (intent != null) {
+                    onClickListener = TextClassification.createStartActivityOnClickListener(
+                            mTextView.getContext(), intent);
+                }
+            }
+            if (onClickListener != null) {
+                onClickListener.onClick(mTextView);
+                stopTextActionMode();
+                if (assistMenuItem.getItemId() == TextView.ID_ASSIST) {
+                    mMetricsLogger.action(
+                            MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
+                            textClassification.getLogType());
+                }
+            }
+            // We tried our best.
+            return true;
         }
 
         @Override
@@ -3982,25 +4072,7 @@ public class Editor {
             if (customCallback != null && customCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-            final TextClassification textClassification =
-                    getSelectionActionModeHelper().getTextClassification();
-            if (TextView.ID_ASSIST == item.getItemId() && textClassification != null) {
-                final OnClickListener onClickListener =
-                        textClassification.getOnClickListener();
-                if (onClickListener != null) {
-                    onClickListener.onClick(mTextView);
-                } else {
-                    final Intent intent = textClassification.getIntent();
-                    if (intent != null) {
-                        TextClassification.createStartActivityOnClickListener(
-                                mTextView.getContext(), intent)
-                                .onClick(mTextView);
-                    }
-                }
-                mMetricsLogger.action(
-                        MetricsEvent.ACTION_TEXT_SELECTION_MENU_ITEM_ASSIST,
-                        textClassification.getLogType());
-                stopTextActionMode();
+            if (item.getGroupId() == TextView.ID_ASSIST && onAssistMenuItemClicked(item)) {
                 return true;
             }
             return mTextView.onTextContextMenuItem(item.getItemId());
@@ -4029,6 +4101,8 @@ public class Editor {
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.hide();
             }
+
+            mAssistClickHandlers.clear();
         }
 
         @Override
@@ -6560,6 +6634,9 @@ public class Editor {
 
         private void loadSupportedActivities() {
             mSupportedActivities.clear();
+            if (!mContext.canStartActivityForResult()) {
+                return;
+            }
             PackageManager packageManager = mTextView.getContext().getPackageManager();
             List<ResolveInfo> unfiltered =
                     packageManager.queryIntentActivities(createProcessTextIntent(), 0);
