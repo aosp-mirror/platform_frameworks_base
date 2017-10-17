@@ -449,6 +449,9 @@ class WindowSurfacePlacer {
             //       animating?
             wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
+            // setAllAppWinAnimators so the windows get onExitAnimationDone once the animation is
+            // done.
+            wtoken.setAllAppWinAnimators();
             // Force the allDrawn flag, because we want to start
             // this guy's animations regardless of whether it's
             // gotten drawn.
