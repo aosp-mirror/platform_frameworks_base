@@ -1570,6 +1570,18 @@ public class CarrierConfigManager {
     public static final String KEY_DISABLE_CHARGE_INDICATION_BOOL =
             "disable_charge_indication_bool";
 
+    /**
+     * Boolean indicating whether to skip the call forwarding (CF) fail-to-disable dialog.
+     * The logic used to determine whether we succeeded in disabling is carrier specific,
+     * so the dialog may not always be accurate.
+     * {@code false} - show CF fail-to-disable dialog.
+     * {@code true}  - skip showing CF fail-to-disable dialog.
+     *
+     * @hide
+     */
+    public static final String KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL =
+            "skip_cf_fail_to_disable_dialog_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1723,6 +1735,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
