@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.content";
 option java_multiple_files = true;
 
@@ -28,22 +27,22 @@ import "frameworks/base/core/proto/android/content/locale.proto";
  * An android resource configuration.
  */
 message ConfigurationProto {
-  float font_scale = 1;
-  uint32 mcc = 2;
-  uint32 mnc = 3;
+  optional float font_scale = 1;
+  optional uint32 mcc = 2;
+  optional uint32 mnc = 3;
   repeated LocaleProto locales = 4;
-  uint32 screen_layout = 5;
-  uint32 touchscreen = 6;
-  uint32 keyboard_hidden = 7;
-  uint32 hard_keyboard_hidden = 8;
-  uint32 navigation = 9;
-  uint32 navigation_hidden = 10;
-  uint32 orientation = 11;
-  uint32 ui_mode = 12;
-  uint32 screen_width_dp = 13;
-  uint32 screen_height_dp = 14;
-  uint32 smallest_screen_width_dp = 15;
-  uint32 density_dpi = 16;
-  .android.app.WindowConfigurationProto window_configuration = 17;
+  optional uint32 screen_layout = 5;
+  optional uint32 touchscreen = 6;
+  optional uint32 keyboard_hidden = 7;
+  optional uint32 hard_keyboard_hidden = 8;
+  optional uint32 navigation = 9;
+  optional uint32 navigation_hidden = 10;
+  optional uint32 orientation = 11;
+  optional uint32 ui_mode = 12;
+  optional uint32 screen_width_dp = 13;
+  optional uint32 screen_height_dp = 14;
+  optional uint32 smallest_screen_width_dp = 15;
+  optional uint32 density_dpi = 16;
+  optional .android.app.WindowConfigurationProto window_configuration = 17;
 }
 

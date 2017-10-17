@@ -53,6 +53,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
@@ -593,6 +594,23 @@ public class Recents extends SystemUI
         // flag is reset.
         if (!event.visible) {
             mImpl.setWaitingForTransitionStart(false);
+        }
+    }
+
+    public final void onBusEvent(DockedFirstAnimationFrameEvent event) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        int processUser = ssp.getProcessUser();
+        if (!ssp.isSystemUser(processUser)) {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mUserToSystemCallbacks.sendDockedFirstAnimationFrameEvent();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
         }
     }
 

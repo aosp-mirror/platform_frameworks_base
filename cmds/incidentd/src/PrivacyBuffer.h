@@ -20,6 +20,7 @@
 #include "Privacy.h"
 
 #include <android/util/EncodedBuffer.h>
+#include <android/util/ProtoOutputStream.h>
 #include <stdint.h>
 #include <utils/Errors.h>
 
@@ -60,8 +61,11 @@ private:
     const Privacy* mPolicy;
     EncodedBuffer::iterator& mData;
 
-    EncodedBuffer mBuffer;
+    ProtoOutputStream mProto;
     size_t mSize;
+
+    status_t stripField(const Privacy* parentPolicy, const PrivacySpec& spec);
+    void writeFieldOrSkip(uint32_t fieldTag, bool skip);
 };
 
 #endif // PRIVACY_BUFFER_H

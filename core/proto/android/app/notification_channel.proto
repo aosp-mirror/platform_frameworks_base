@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.app";
 option java_multiple_files = true;
 
@@ -27,28 +26,28 @@ import "frameworks/base/core/proto/android/media/audioattributes.proto";
  * An android.app.NotificationChannel object.
  */
 message NotificationChannelProto {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    int32 importance = 4;
-    bool can_bypass_dnd = 5;
+    optional string id = 1;
+    optional string name = 2;
+    optional string description = 3;
+    optional int32 importance = 4;
+    optional bool can_bypass_dnd = 5;
     // Default is VISIBILITY_NO_OVERRIDE (-1000).
-    int32 lockscreen_visibility = 6;
-    string sound = 7;
-    bool use_lights = 8;
+    optional int32 lockscreen_visibility = 6;
+    optional string sound = 7;
+    optional bool use_lights = 8;
     // Default is 0.
-    int32 light_color = 9;
+    optional int32 light_color = 9;
     repeated int64 vibration = 10;
     // Bitwise representation of fields that have been changed by the user,
     // preventing the app from making changes to these fields.
-    int32 user_locked_fields = 11;
-    bool is_vibration_enabled = 12;
+    optional int32 user_locked_fields = 11;
+    optional bool is_vibration_enabled = 12;
     // Default is true.
-    bool show_badge = 13;
+    optional bool show_badge = 13;
     // Default is false.
-    bool is_deleted = 14;
-    string group = 15;
-    android.media.AudioAttributesProto audio_attributes = 16;
+    optional bool is_deleted = 14;
+    optional string group = 15;
+    optional android.media.AudioAttributesProto audio_attributes = 16;
     // If this is a blockable system notification channel.
-    bool is_blockable_system = 17;
+    optional bool is_blockable_system = 17;
 }

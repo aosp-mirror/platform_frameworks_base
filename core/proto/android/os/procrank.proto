@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "ProcrankProto";
 
@@ -27,56 +26,56 @@ message Procrank {
     repeated ProcessProto processes = 1;
 
     // Summary
-    SummaryProto summary = 2;
+    optional SummaryProto summary = 2;
 }
 
 // Next Tag: 11
 message ProcessProto {
     // ID of the process
-    int32 pid = 1;
+    optional int32 pid = 1;
 
     // virtual set size, unit KB
-    int64 vss = 2;
+    optional int64 vss = 2;
 
     // resident set size, unit KB
-    int64 rss = 3;
+    optional int64 rss = 3;
 
     // proportional set size, unit KB
-    int64 pss = 4;
+    optional int64 pss = 4;
 
     // unique set size, unit KB
-    int64 uss = 5;
+    optional int64 uss = 5;
 
     // swap size, unit KB
-    int64 swap = 6;
+    optional int64 swap = 6;
 
     // proportional swap size, unit KB
-    int64 pswap = 7;
+    optional int64 pswap = 7;
 
     // unique swap size, unit KB
-    int64 uswap = 8;
+    optional int64 uswap = 8;
 
     // zswap size, unit KB
-    int64 zswap = 9;
+    optional int64 zswap = 9;
 
     // process command
-    string cmdline = 10;
+    optional string cmdline = 10;
 }
 
 // Next Tag: 3
 message SummaryProto {
-    ProcessProto total = 1;
+    optional ProcessProto total = 1;
 
-    ZramProto zram = 2;
+    optional ZramProto zram = 2;
 
-    RamProto ram = 3;
+    optional RamProto ram = 3;
 }
 
 // TODO: sync on how to use these values
 message ZramProto {
-    string raw_text = 1;
+    optional string raw_text = 1;
 }
 
 message RamProto {
-    string raw_text = 1;
+    optional string raw_text = 1;
 }

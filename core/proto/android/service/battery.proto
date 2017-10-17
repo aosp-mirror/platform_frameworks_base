@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.battery;
 
 option java_multiple_files = true;
@@ -48,29 +47,29 @@ message BatteryServiceDumpProto {
     }
 
     // If true: UPDATES STOPPED -- use 'reset' to restart
-    bool are_updates_stopped = 1;
+    optional bool are_updates_stopped = 1;
     // Plugged status of power sources
-    BatteryPlugged plugged = 2;
+    optional BatteryPlugged plugged = 2;
     // Max current in microamperes
-    int32 max_charging_current = 3;
+    optional int32 max_charging_current = 3;
     // Max voltage
-    int32 max_charging_voltage = 4;
+    optional int32 max_charging_voltage = 4;
     // Battery capacity in microampere-hours
-    int32 charge_counter = 5;
+    optional int32 charge_counter = 5;
     // Charging status
-    BatteryStatus status = 6;
+    optional BatteryStatus status = 6;
     // Battery health
-    BatteryHealth health = 7;
+    optional BatteryHealth health = 7;
     // True if the battery is present
-    bool is_present = 8;
+    optional bool is_present = 8;
     // Charge level, from 0 through "scale" inclusive
-    int32 level = 9;
+    optional int32 level = 9;
     // The maximum value for the charge level
-    int32 scale = 10;
+    optional int32 scale = 10;
     // Battery voltage in millivolts
-    int32 voltage = 11;
+    optional int32 voltage = 11;
     // Battery temperature in tenths of a degree Centigrade
-    int32 temperature = 12;
+    optional int32 temperature = 12;
     // The type of battery installed, e.g. "Li-ion"
-    string technology = 13;
+    optional string technology = 13;
 }

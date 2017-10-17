@@ -24,6 +24,7 @@ import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.am.BatteryStatsService;
@@ -35,7 +36,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hidl.manager.V1_0.IServiceManager;
+import android.hidl.manager.V1_0.IServiceNotification;
 import android.hardware.health.V2_0.HealthInfo;
+import android.hardware.health.V2_0.IHealth;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryProperties;
@@ -63,6 +67,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * <p>BatteryService monitors the charging status, and charge level of the device
@@ -1017,6 +1024,123 @@ public final class BatteryService extends SystemService {
         public int getInvalidCharger() {
             synchronized (mLock) {
                 return mInvalidCharger;
+            }
+        }
+    }
+
+    /**
+     * HealthServiceWrapper wraps the internal IHealth service and refreshes the service when
+     * necessary.
+     *
+     * On new registration of IHealth service, {@link #onRegistration onRegistration} is called and
+     * the internal service is refreshed.
+     * On death of an existing IHealth service, the internal service is NOT cleared to avoid
+     * race condition between death notification and new service notification. Hence,
+     * a caller must check for transaction errors when calling into the service.
+     *
+     * @hide Should only be used internally.
+     */
+    @VisibleForTesting
+    static final class HealthServiceWrapper {
+        private static final String TAG = "HealthServiceWrapper";
+        public static final String INSTANCE_HEALTHD = "backup";
+        public static final String INSTANCE_VENDOR = "default";
+        // All interesting instances, sorted by priority high -> low.
+        private static final List<String> sAllInstances =
+                Arrays.asList(INSTANCE_VENDOR, INSTANCE_HEALTHD);
+
+        private final IServiceNotification mNotification = new Notification();
+        private Callback mCallback;
+        private IHealthSupplier mHealthSupplier;
+
+        /**
+         * init should be called after constructor. For testing purposes, init is not called by
+         * constructor.
+         */
+        HealthServiceWrapper() {
+        }
+
+        /**
+         * Start monitoring registration of new IHealth services. Only instances that are in
+         * {@code sAllInstances} and in device / framework manifest are used. This function should
+         * only be called once.
+         * @throws RemoteException transaction error when talking to IServiceManager
+         * @throws NoSuchElementException if one of the following cases:
+         *         - No service manager;
+         *         - none of {@code sAllInstances} are in manifests (i.e. not
+         *           available on this device), or none of these instances are available to current
+         *           process.
+         * @throws NullPointerException when callback is null or supplier is null
+         */
+        void init(Callback callback,
+                  IServiceManagerSupplier managerSupplier,
+                  IHealthSupplier healthSupplier)
+                throws RemoteException, NoSuchElementException, NullPointerException {
+            if (callback == null || managerSupplier == null || healthSupplier == null)
+                throw new NullPointerException();
+
+            mCallback = callback;
+            mHealthSupplier = healthSupplier;
+
+            IServiceManager manager = managerSupplier.get();
+            for (String name : sAllInstances) {
+                if (manager.getTransport(IHealth.kInterfaceName, name) ==
+                        IServiceManager.Transport.EMPTY) {
+                    continue;
+                }
+
+                manager.registerForNotifications(IHealth.kInterfaceName, name, mNotification);
+                Slog.i(TAG, "health: HealthServiceWrapper listening to instance " + name);
+                return;
+            }
+
+            throw new NoSuchElementException(String.format(
+                    "No IHealth service instance among %s is available. Perhaps no permission?",
+                    sAllInstances.toString()));
+        }
+
+        interface Callback {
+            /**
+             * This function is invoked asynchronously when a new and related IServiceNotification
+             * is received.
+             * @param service the recently retrieved service from IServiceManager.
+             * Can be a dead service before service notification of a new service is delivered.
+             * Implementation must handle cases for {@link RemoteException}s when calling
+             * into service.
+             * @param instance instance name.
+             */
+            void onRegistration(IHealth service, String instance);
+        }
+
+        /**
+         * Supplier of services.
+         * Must not return null; throw {@link NoSuchElementException} if a service is not available.
+         */
+        interface IServiceManagerSupplier {
+            IServiceManager get() throws NoSuchElementException, RemoteException;
+        }
+        /**
+         * Supplier of services.
+         * Must not return null; throw {@link NoSuchElementException} if a service is not available.
+         */
+        interface IHealthSupplier {
+            IHealth get(String instanceName) throws NoSuchElementException, RemoteException;
+        }
+
+        private class Notification extends IServiceNotification.Stub {
+            @Override
+            public final void onRegistration(String interfaceName, String instanceName,
+                    boolean preexisting) {
+                if (!IHealth.kInterfaceName.equals(interfaceName)) return;
+                if (!sAllInstances.contains(instanceName)) return;
+                try {
+                    IHealth service = mHealthSupplier.get(instanceName);
+                    Slog.i(TAG, "health: new instance registered " + instanceName);
+                    mCallback.onRegistration(service, instanceName);
+                } catch (NoSuchElementException | RemoteException ex) {
+                    Slog.e(TAG, "health: Cannot get instance '" + instanceName + "': " +
+                           ex.getMessage() + ". Perhaps no permission?");
+                }
             }
         }
     }

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 import "frameworks/base/core/proto/android/content/intent.proto";
 import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
@@ -27,140 +26,140 @@ package com.android.server.am.proto;
 option java_multiple_files = true;
 
 message ActivityManagerServiceProto {
-  ActivityStackSupervisorProto activities = 1;
+  optional ActivityStackSupervisorProto activities = 1;
 
-  BroadcastProto broadcasts = 2;
+  optional BroadcastProto broadcasts = 2;
 
-  ServiceProto services = 3;
+  optional ServiceProto services = 3;
 
-  ProcessProto processes = 4;
+  optional ProcessProto processes = 4;
 }
 
 message ActivityStackSupervisorProto {
-  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
   repeated ActivityDisplayProto displays = 2;
-  KeyguardControllerProto keyguard_controller = 3;
-  int32 focused_stack_id = 4;
-  .com.android.server.wm.proto.IdentifierProto resumed_activity = 5;
+  optional KeyguardControllerProto keyguard_controller = 3;
+  optional int32 focused_stack_id = 4;
+  optional .com.android.server.wm.proto.IdentifierProto resumed_activity = 5;
 }
 
 /* represents ActivityStackSupervisor.ActivityDisplay */
 message ActivityDisplayProto {
-  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
-  int32 id = 2;
+  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional int32 id = 2;
   repeated ActivityStackProto stacks = 3;
 }
 
 message ActivityStackProto {
-  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
-  int32 id = 2;
+  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional int32 id = 2;
   repeated TaskRecordProto tasks = 3;
-  .com.android.server.wm.proto.IdentifierProto resumed_activity = 4;
-  int32 display_id = 5;
-  bool fullscreen = 6;
-  .android.graphics.RectProto bounds = 7;
+  optional .com.android.server.wm.proto.IdentifierProto resumed_activity = 4;
+  optional int32 display_id = 5;
+  optional bool fullscreen = 6;
+  optional .android.graphics.RectProto bounds = 7;
 }
 
 message TaskRecordProto {
-  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
-  int32 id = 2;
+  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional int32 id = 2;
   repeated ActivityRecordProto activities = 3;
-  int32 stack_id = 4;
-  .android.graphics.RectProto last_non_fullscreen_bounds = 5;
-  string real_activity = 6;
-  string orig_activity = 7;
-  int32 activity_type = 8;
-  int32 return_to_type = 9;
-  int32 resize_mode = 10;
-  bool fullscreen = 11;
-  .android.graphics.RectProto bounds = 12;
-  int32 min_width = 13;
-  int32 min_height = 14;
+  optional int32 stack_id = 4;
+  optional .android.graphics.RectProto last_non_fullscreen_bounds = 5;
+  optional string real_activity = 6;
+  optional string orig_activity = 7;
+  optional int32 activity_type = 8;
+  optional int32 return_to_type = 9;
+  optional int32 resize_mode = 10;
+  optional bool fullscreen = 11;
+  optional .android.graphics.RectProto bounds = 12;
+  optional int32 min_width = 13;
+  optional int32 min_height = 14;
 }
 
 message ActivityRecordProto {
-  .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
-  .com.android.server.wm.proto.IdentifierProto identifier = 2;
-  string state = 3;
-  bool visible = 4;
-  bool front_of_task = 5;
-  int32 proc_id = 6;
+  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.proto.IdentifierProto identifier = 2;
+  optional string state = 3;
+  optional bool visible = 4;
+  optional bool front_of_task = 5;
+  optional int32 proc_id = 6;
 }
 
 message KeyguardControllerProto {
-  bool keyguard_showing = 1;
-  bool keyguard_occluded = 2;
+  optional bool keyguard_showing = 1;
+  optional bool keyguard_occluded = 2;
 }
 
 message BroadcastProto {
   repeated ReceiverListProto  receiver_list = 1;
 
-  .com.android.server.IntentResolverProto receiver_resolver = 2;
+  optional .com.android.server.IntentResolverProto receiver_resolver = 2;
 
   repeated BroadcastQueueProto broadcast_queue = 3;
 
   repeated StickyBroadcastProto sticky_broadcasts = 4;
 
   message MainHandler {
-    string handler = 1;
-    .android.os.LooperProto looper = 2;
+    optional string handler = 1;
+    optional .android.os.LooperProto looper = 2;
   }
-  MainHandler handler = 5;
+  optional MainHandler handler = 5;
 }
 
 message ReceiverListProto {
-  ProcessRecordProto app = 1;
-  int32 pid = 2;
-  int32 uid = 3;
-  int32 user = 4;
-  BroadcastRecordProto current = 5;
-  bool linked_to_death = 6;
+  optional ProcessRecordProto app = 1;
+  optional int32 pid = 2;
+  optional int32 uid = 3;
+  optional int32 user = 4;
+  optional BroadcastRecordProto current = 5;
+  optional bool linked_to_death = 6;
   repeated BroadcastFilterProto filters = 7;
-  string hex_hash = 8; // this hash is used to find the object in IntentResolver
+  optional string hex_hash = 8; // this hash is used to find the object in IntentResolver
 }
 
 message ProcessRecordProto {
-  int32 pid = 1;
-  string process_name = 2;
-  int32 uid = 3;
-  int32 user_id = 4;
-  int32 app_id = 5;
-  int32 isolated_app_id = 6;
+  optional int32 pid = 1;
+  optional string process_name = 2;
+  optional int32 uid = 3;
+  optional int32 user_id = 4;
+  optional int32 app_id = 5;
+  optional int32 isolated_app_id = 6;
 }
 
 message BroadcastRecordProto {
-  int32 user_id = 1;
-  string intent_action = 2;
+  optional int32 user_id = 1;
+  optional string intent_action = 2;
 }
 
 message BroadcastFilterProto {
-  .android.content.IntentFilterProto intent_filter = 1;
-  string required_permission = 2;
-  string hex_hash = 3; // used to find the object in IntentResolver
-  int32 owning_user_id = 4;
+  optional .android.content.IntentFilterProto intent_filter = 1;
+  optional string required_permission = 2;
+  optional string hex_hash = 3; // used to find the object in IntentResolver
+  optional int32 owning_user_id = 4;
 }
 
 message BroadcastQueueProto {
-  string queue_name = 1;
+  optional string queue_name = 1;
   repeated BroadcastRecordProto parallel_broadcasts = 2;
   repeated BroadcastRecordProto ordered_broadcasts = 3;
-  BroadcastRecordProto pending_broadcast = 4;
+  optional BroadcastRecordProto pending_broadcast = 4;
   repeated BroadcastRecordProto historical_broadcasts = 5;
 
   message BroadcastSummary {
-    .android.content.IntentProto intent = 1;
-    int64 enqueue_clock_time_ms = 2;
-    int64 dispatch_clock_time_ms = 3;
-    int64 finish_clock_time_ms = 4;
+    optional .android.content.IntentProto intent = 1;
+    optional int64 enqueue_clock_time_ms = 2;
+    optional int64 dispatch_clock_time_ms = 3;
+    optional int64 finish_clock_time_ms = 4;
   }
   repeated BroadcastSummary historical_broadcasts_summary = 6;
 }
 
 message StickyBroadcastProto {
-  int32 user = 1;
+  optional int32 user = 1;
 
   message StickyAction {
-    string name = 1;
+    optional string name = 1;
     repeated .android.content.IntentProto intents = 2;
   }
   repeated StickyAction actions = 2;

@@ -105,7 +105,9 @@ get_command_output(const Command& command, int* err, bool quiet)
     }
 
     int fds[2];
-    pipe(fds);
+    if (0 != pipe(fds)) {
+        return string();
+    }
 
     pid_t pid = fork();
 

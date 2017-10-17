@@ -124,8 +124,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         } else {
             if (selectedUser != null) {
                 // Show the selected user's static wallpaper.
-                return LoaderResult.success(
-                        mWallpaperManager.getBitmapAsUser(selectedUser.getIdentifier()));
+                return LoaderResult.success(mWallpaperManager.getBitmapAsUser(
+                        selectedUser.getIdentifier(), true /* hardware */));
 
             } else {
                 // When there is no selected user, show the system wallpaper

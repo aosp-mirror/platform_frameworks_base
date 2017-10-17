@@ -22,6 +22,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.util.ArrayMap;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.NightDisplayController;
@@ -303,6 +305,8 @@ public class Dependency extends SystemUI {
                 getDependency(BG_LOOPER), getDependency(MetricsLogger.class)));
 
         mProviders.put(LightBarController.class, () -> new LightBarController(mContext));
+
+        mProviders.put(IWindowManager.class, () -> WindowManagerGlobal.getWindowManagerService());
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

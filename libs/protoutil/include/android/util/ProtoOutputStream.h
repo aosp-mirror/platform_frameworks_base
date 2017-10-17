@@ -37,7 +37,7 @@ namespace util {
 class ProtoOutputStream
 {
 public:
-    ProtoOutputStream(int fd);
+    ProtoOutputStream();
     ~ProtoOutputStream();
 
     /**
@@ -60,13 +60,19 @@ public:
     void end(long long token);
 
     /**
-     * Flushes the protobuf data out.
+     * Flushes the protobuf data out to given fd.
      */
-    bool flush();
+    size_t size();
+    EncodedBuffer::iterator data();
+    bool flush(int fd);
+
+    // Please don't use the following functions to dump protos unless you are sure about it.
+    void writeRawVarint(uint64_t varint);
+    void writeLengthDelimitedHeader(uint32_t id, size_t size);
+    void writeRawByte(uint8_t byte);
 
 private:
     EncodedBuffer mBuffer;
-    int mFd;
     size_t mCopyBegin;
     bool mCompact;
     int mDepth;

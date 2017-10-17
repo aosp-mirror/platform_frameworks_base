@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.graphics;
 
 option java_multiple_files = true;
 
 message RectProto {
-  int32 left = 1;
-  int32 top = 2;
-  int32 right = 3;
-  int32 bottom = 4;
+  optional int32 left = 1;
+  optional int32 top = 2;
+  optional int32 right = 3;
+  optional int32 bottom = 4;
 }
 

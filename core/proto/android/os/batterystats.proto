@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_multiple_files = true;
 
 package android.os;
@@ -23,13 +22,13 @@ package android.os;
 import "frameworks/base/core/proto/android/telephony/signalstrength.proto";
 
 message BatteryStatsProto {
-  int32 report_version = 1;
-  int64 parcel_version = 2;
-  string start_platform_version = 3;
-  string end_platform_version = 4;
-  BatteryHistoryProto history = 5;
+  optional int32 report_version = 1;
+  optional int64 parcel_version = 2;
+  optional string start_platform_version = 3;
+  optional string end_platform_version = 4;
+  optional BatteryHistoryProto history = 5;
   repeated UidProto uids = 6;
-  SystemProto system = 7;
+  optional SystemProto system = 7;
 }
 
 message BatteryHistoryProto {
@@ -37,21 +36,21 @@ message BatteryHistoryProto {
 
 message ControllerActivityProto {
   // Time (milliseconds) spent in the idle state.
-  int64 idle_duration_ms = 1;
+  optional int64 idle_duration_ms = 1;
   // Time (milliseconds) spent in the receive state.
-  int64 rx_duration_ms = 2;
+  optional int64 rx_duration_ms = 2;
   // Total power (mAh) consumed by the controller in all states. The value may
   // always be 0 if the device doesn't support power calculations.
-  int64 power_mah = 3;
+  optional int64 power_mah = 3;
 
   // Represents a transmit level, where each level may draw a different amount
   // of power. The levels themselves are controller-specific (and may possibly
   // be device specific...yet to be confirmed).
   message TxLevel {
     // Transmit level. Higher levels draw more power.
-    int32 level = 1;
+    optional int32 level = 1;
     // Time spent in this specific transmit level state.
-    int64 duration_ms = 2;
+    optional int64 duration_ms = 2;
   }
   repeated TxLevel tx = 4;
 }
@@ -62,65 +61,65 @@ message SystemProto {
     // In case of device time manually reset by users:
     //   start_clock_time_ms keeps the same value in the current collection
     //   period and changes for later collection periods.
-    int64 start_clock_time_ms = 1;
+    optional int64 start_clock_time_ms = 1;
     // #times the device has been started since start_clock_time_millis.
-    int64 start_count = 2;
+    optional int64 start_count = 2;
     // Total realtime duration (= SINCE_UNPLUGGED battery_realtime_millis.)
-    int64 total_realtime_ms = 3;
-    int64 total_uptime_ms = 4;
+    optional int64 total_realtime_ms = 3;
+    optional int64 total_uptime_ms = 4;
     // Realtime duration on battery.
-    int64 battery_realtime_ms = 5;
+    optional int64 battery_realtime_ms = 5;
     // Uptime duration (i.e., not suspend).
     // Uptime is anytime the CPUs were on. The radio and Wifi chip
     // can be running while the CPUs are off.
-    int64 battery_uptime_ms = 6;
+    optional int64 battery_uptime_ms = 6;
     // Total realtime duration measured with screen off or dozing.
-    int64 screen_off_realtime_ms = 7;
+    optional int64 screen_off_realtime_ms = 7;
     // Total uptime duration measured with screen off or dozing.
-    int64 screen_off_uptime_ms = 8;
+    optional int64 screen_off_uptime_ms = 8;
     // Total time the screen was dozing while the device was running on battery.
     // For historical reasons, screen_doze_duration_msec is a subset of
     // screen_off_realtime_msec.
-    int64 screen_doze_duration_ms = 9;
+    optional int64 screen_doze_duration_ms = 9;
     // The estimated real battery capacity, which may be less than the declared
     // battery capacity (for example, because of battery aging). This field is
     // less reliable than min(max)_learned_battery_capacity_uah, use those two
     // fields whenever possible.
-    int64 estimated_battery_capacity_mah = 10;
+    optional int64 estimated_battery_capacity_mah = 10;
     // The minimum learned battery capacity in uAh.
-    int64 min_learned_battery_capacity_uah = 11;
+    optional int64 min_learned_battery_capacity_uah = 11;
     // The maximum learned battery capacity in uAh.
-    int64 max_learned_battery_capacity_uah = 12;
+    optional int64 max_learned_battery_capacity_uah = 12;
   };
-  Battery battery = 1;
+  optional Battery battery = 1;
 
   message BatteryDischarge {
     // Discharged battery percentage points since the stats were last reset
     // after charging (lower bound approximation).
-    int32 lower_bound_since_charge = 1;
+    optional int32 lower_bound_since_charge = 1;
     // Upper bound approximation.
-    int32 upper_bound_since_charge = 2;
+    optional int32 upper_bound_since_charge = 2;
     // Discharged points while screen is on.
-    int32 screen_on_since_charge = 3;
+    optional int32 screen_on_since_charge = 3;
     // Discharged points while screen is off.
-    int32 screen_off_since_charge = 4;
+    optional int32 screen_off_since_charge = 4;
     // Discharged points while screen was dozing. For historical reasons,
     // screen_doze_since_charge is a subset of screen_off_since_charge.
-    int32 screen_doze_since_charge = 5;
+    optional int32 screen_doze_since_charge = 5;
     // Total amount of battery discharged in mAh. This will only be non-zero for
     // devices that report battery discharge via a coulomb counter.
-    int64 total_mah = 6;
+    optional int64 total_mah = 6;
     // Total amount of battery discharged while the screen was off in mAh.
     // This will only be non-zero for devices that report battery discharge
     // via a coulomb counter.
-    int64 total_mah_screen_off = 7;
+    optional int64 total_mah_screen_off = 7;
     // Total amount of battery discharged while the screen was dozing in mAh.
     // This will only be non-zero for devices that report battery discharge
     // via a coulomb counter. For historical reasons, total_mah_screen_doze is
     // a subset of total_mah_screen_off.
-    int64 total_mah_screen_doze = 8;
+    optional int64 total_mah_screen_doze = 8;
   };
-  BatteryDischarge battery_discharge = 2;
+  optional BatteryDischarge battery_discharge = 2;
 
   oneof time_remaining {
     // Approximation for how much time remains until the battery is fully
@@ -138,9 +137,9 @@ message SystemProto {
   // for the entire duration should be marked MIXED.
   message BatteryLevelStep {
     // How long the battery was at the current level.
-    int64 duration_ms = 1;
+    optional int64 duration_ms = 1;
     // Battery level
-    int32 level = 2;
+    optional int32 level = 2;
 
     // State of the display. A special enum is used rather than
     // DisplayProto.State because a MIXED value needs to be in the enum, and
@@ -156,7 +155,7 @@ message SystemProto {
     }
     // The state of the display for the entire battery level step. MIXED is used
     // if there were multiple states for this step.
-    DisplayState display_state = 3;
+    optional DisplayState display_state = 3;
 
     // Indicates status in power save mode.
     enum PowerSaveMode {
@@ -166,7 +165,7 @@ message SystemProto {
     }
     // Battery Saver mode for the entire battery level step. MIXED is used
     // if there were multiple states for this step.
-    PowerSaveMode power_save_mode = 4;
+    optional PowerSaveMode power_save_mode = 4;
 
     // Indicates status in idle mode.
     enum IdleMode {
@@ -176,7 +175,7 @@ message SystemProto {
     }
     // Doze mode for the entire battery level step. MIXED is used if there were
     // multiple states for this step.
-    IdleMode idle_mode = 5;
+    optional IdleMode idle_mode = 5;
   };
   // Battery level steps when the device was charging.
   repeated BatteryLevelStep charge_step = 5;
@@ -206,109 +205,109 @@ message SystemProto {
       HSPAP = 15;
       OTHER = 16;
     };
-    Name name = 1;
-    TimerProto total = 2;
+    optional Name name = 1;
+    optional TimerProto total = 2;
   };
   repeated DataConnection data_connection = 8;
 
-  ControllerActivityProto global_bluetooth_controller = 9;
-  ControllerActivityProto global_modem_controller = 10;
-  ControllerActivityProto global_wifi_controller = 11;
+  optional ControllerActivityProto global_bluetooth_controller = 9;
+  optional ControllerActivityProto global_modem_controller = 10;
+  optional ControllerActivityProto global_wifi_controller = 11;
 
   message GlobalNetwork {
     // Total Bytes received on mobile connections.
-    int64 mobile_bytes_rx = 1;
+    optional int64 mobile_bytes_rx = 1;
     // Total Bytes transmitted on mobile connections.
-    int64 mobile_bytes_tx = 2;
+    optional int64 mobile_bytes_tx = 2;
     // Total Bytes received on wifi connections.
-    int64 wifi_bytes_rx = 3;
+    optional int64 wifi_bytes_rx = 3;
     // Total Bytes transmitted on wifi connections.
-    int64 wifi_bytes_tx = 4;
+    optional int64 wifi_bytes_tx = 4;
     // Total Packets received on mobile connections.
-    int64 mobile_packets_rx = 5;
+    optional int64 mobile_packets_rx = 5;
     // Total Packets transmitted on mobile connections.
-    int64 mobile_packets_tx = 6;
+    optional int64 mobile_packets_tx = 6;
     // Total Packets received on wifi connections.
-    int64 wifi_packets_rx = 7;
+    optional int64 wifi_packets_rx = 7;
     // Total Packets transmitted on wifi connections.
-    int64 wifi_packets_tx = 8;
+    optional int64 wifi_packets_tx = 8;
     // Total Bytes received on bluetooth connections.
-    int64 bt_bytes_rx = 9;
+    optional int64 bt_bytes_rx = 9;
     // Total Bytes transmitted on bluetooth connections.
-    int64 bt_bytes_tx = 10;
+    optional int64 bt_bytes_tx = 10;
   };
-  GlobalNetwork global_network = 12;
+  optional GlobalNetwork global_network = 12;
 
   message GlobalWifi {
     // The amount of time that wifi has been on while the device was running on
     // battery.
-    int64 on_duration_ms = 1;
+    optional int64 on_duration_ms = 1;
     // The amount of time that wifi has been on and the driver has been in the
     // running state while the device was running on battery.
-    int64 running_duration_ms = 2;
+    optional int64 running_duration_ms = 2;
   }
-  GlobalWifi global_wifi = 13;
+  optional GlobalWifi global_wifi = 13;
 
   // Kernel wakelock metrics are only recorded when the device is unplugged
   // *and* the screen is off.
   message KernelWakelock {
-    string name = 1;
+    optional string name = 1;
     // Kernel wakelock stats aren't apportioned across all kernel wakelocks (as
     // app wakelocks stats are).
-    TimerProto total = 2;
+    optional TimerProto total = 2;
     // The kernel doesn't have the data to enable printing out current and max
     // durations.
   };
   repeated KernelWakelock kernel_wakelock = 14;
 
   message Misc {
-    int64 screen_on_duration_ms = 1;
-    int64 phone_on_duration_ms = 2;
-    int64 full_wakelock_total_duration_ms = 3;
+    optional int64 screen_on_duration_ms = 1;
+    optional int64 phone_on_duration_ms = 2;
+    optional int64 full_wakelock_total_duration_ms = 3;
     // The total elapsed time that a partial wakelock was held. This duration
     // does not double count wakelocks held at the same time.
-    int64 partial_wakelock_total_duration_ms = 4;
-    int64 mobile_radio_active_duration_ms = 5;
+    optional int64 partial_wakelock_total_duration_ms = 4;
+    optional int64 mobile_radio_active_duration_ms = 5;
     // The time that is the difference between the mobile radio time we saw
     // based on the elapsed timestamp when going down vs. the given time stamp
     // from the radio.
-    int64 mobile_radio_active_adjusted_time_ms = 6;
-    int32 mobile_radio_active_count = 7;
+    optional int64 mobile_radio_active_adjusted_time_ms = 6;
+    optional int32 mobile_radio_active_count = 7;
     // The amount of time that the mobile network has been active (in a high
     // power state) but not being able to blame on an app.
-    int32 mobile_radio_active_unknown_duration_ms = 8;
+    optional int32 mobile_radio_active_unknown_duration_ms = 8;
     // Total amount of time the device was in the interactive state.
-    int64 interactive_duration_ms = 9;
-    int64 battery_saver_mode_enabled_duration_ms = 10;
-    int32 num_connectivity_changes = 11;
+    optional int64 interactive_duration_ms = 9;
+    optional int64 battery_saver_mode_enabled_duration_ms = 10;
+    optional int32 num_connectivity_changes = 11;
     // Amount of time the device was in deep Doze.
-    int64 deep_doze_enabled_duration_ms = 12;
+    optional int64 deep_doze_enabled_duration_ms = 12;
     // How many times the device went into deep Doze mode.
-    int32 deep_doze_count = 13;
+    optional int32 deep_doze_count = 13;
     // Amount of time the device was idling in deep Doze. Idling time
     // encompasses "doze" time and the maintenance windows that allow apps to
     // operate.
-    int64 deep_doze_idling_duration_ms = 14;
+    optional int64 deep_doze_idling_duration_ms = 14;
     // How many times the device idling for deep Doze mode.
-    int32 deep_doze_idling_count = 15;
-    int64 longest_deep_doze_duration_ms = 16;
+    optional int32 deep_doze_idling_count = 15;
+    optional int64 longest_deep_doze_duration_ms = 16;
     // Amount of time the device was in Doze Light.
-    int64 light_doze_enabled_duration_ms = 17;
+    optional int64 light_doze_enabled_duration_ms = 17;
     // How many times the device went into Doze Light mode.
-    int32 light_doze_count = 18;
+    optional int32 light_doze_count = 18;
     // Amount of time the device was idling in Doze Light. Idling time
     // encompasses "doze" time and the maintenance windows that allow apps to
     // operate.
-    int64 light_doze_idling_duration_ms = 19;
+    optional int64 light_doze_idling_duration_ms = 19;
     // How many times the device idling for Doze Light mode.
-    int32 light_doze_idling_count = 20;
-    int64 longest_light_doze_duration_ms = 21;
+    optional int32 light_doze_idling_count = 20;
+    optional int64 longest_light_doze_duration_ms = 21;
   }
-  Misc misc = 15;
+  optional Misc misc = 15;
 
   message PhoneSignalStrength {
-    android.telephony.SignalStrengthProto.StrengthName name = 1;
-    TimerProto total = 2;
+    optional android.telephony.SignalStrengthProto.StrengthName name = 1;
+    optional TimerProto total = 2;
   };
   repeated PhoneSignalStrength phone_signal_strength = 16;
 
@@ -328,40 +327,40 @@ message SystemProto {
       CAMERA = 11;
       MEMORY = 12;
     };
-    Sipper name = 1;
+    optional Sipper name = 1;
     // UID, only valid for the USER sipper.
-    int32 uid = 2;
+    optional int32 uid = 2;
     // Estimated power use in mAh.
-    double computed_power_mah = 3;
+    optional double computed_power_mah = 3;
     // Starting in Oreo, Battery Settings has two modes to display the battery
     // info. The first is "app usage list". In this mode, items with should_hide
     // enabled are hidden.
-    bool should_hide = 4;
+    optional bool should_hide = 4;
     // Smeared power from screen usage. Screen usage power is split and smeared
     // among apps, based on activity time.
-    double screen_power_mah = 5;
+    optional double screen_power_mah = 5;
     // Smeared power using proportional method. Power usage from hidden sippers
     // is smeared to all apps proportionally (except for screen usage).
-    double proportional_smear_mah = 6;
+    optional double proportional_smear_mah = 6;
   };
   repeated PowerUseItem power_use_item = 17;
 
   message PowerUseSummary {
-    double battery_capacity_mah = 1;
-    double computed_power_mah = 2;
+    optional double battery_capacity_mah = 1;
+    optional double computed_power_mah = 2;
     // Lower bound of actual power drained.
-    double min_drained_power_mah = 3;
+    optional double min_drained_power_mah = 3;
     // Upper bound of actual power drained.
-    double max_drained_power_mah = 4;
+    optional double max_drained_power_mah = 4;
   };
-  PowerUseSummary power_use_summary = 18;
+  optional PowerUseSummary power_use_summary = 18;
 
   message ResourcePowerManager {
-    string name = 1;
-    TimerProto total = 2;
-    TimerProto screen_off = 3;
+    optional string name = 1;
+    optional TimerProto total = 2;
+    optional TimerProto screen_off = 3;
   }
-  ResourcePowerManager resource_power_manager = 19;
+  optional ResourcePowerManager resource_power_manager = 19;
 
   message ScreenBrightness {
     enum Name {
@@ -371,17 +370,17 @@ message SystemProto {
       LIGHT = 3;
       BRIGHT = 4;
     };
-    Name name = 1;
-    TimerProto total = 2;
+    optional Name name = 1;
+    optional TimerProto total = 2;
   };
   repeated ScreenBrightness screen_brightness = 20;
 
   // Duration and number of times trying to acquire a signal
-  TimerProto signal_scanning = 21;
+  optional TimerProto signal_scanning = 21;
 
   message WakeupReason {
-    string name = 1;
-    TimerProto total = 2;
+    optional string name = 1;
+    optional TimerProto total = 2;
   };
   repeated WakeupReason wakeup_reason = 22;
 
@@ -393,8 +392,8 @@ message SystemProto {
       GOOD = 3;
       GREAT = 4;
     };
-    Name name = 1;
-    TimerProto total = 2;
+    optional Name name = 1;
+    optional TimerProto total = 2;
   };
   repeated WifiSignalStrength wifi_signal_strength = 23;
 
@@ -409,8 +408,8 @@ message SystemProto {
       ON_CONNECTED_STA_P2P = 6;
       SOFT_AP = 7;
     };
-    Name name = 1;
-    TimerProto total = 2;
+    optional Name name = 1;
+    optional TimerProto total = 2;
   };
   repeated WifiState wifi_state = 24;
 
@@ -430,19 +429,19 @@ message SystemProto {
       DORMANT = 11;
       UNINITIALIZED = 12;
     };
-    Name name = 1;
-    TimerProto total = 2;
+    optional Name name = 1;
+    optional TimerProto total = 2;
   };
   repeated WifiSupplicantState wifi_supplicant_state = 25;
 }
 
 message TimerProto {
-  int64 duration_ms = 1;
-  int64 count = 2;
+  optional int64 duration_ms = 1;
+  optional int64 count = 2;
 }
 
 message UidProto {
   // Combination of app ID and user ID.
-  int32 uid = 1;
+  optional int32 uid = 1;
   repeated string package_names = 2;
 }

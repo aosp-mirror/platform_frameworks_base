@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.os;
 
 option java_multiple_files = true;
 
 message WorkSourceProto {
     message WorkSourceContentProto {
-        int32 uid = 1;
-        string name = 2;
+        optional int32 uid = 1;
+        optional string name = 2;
     }
 
     repeated WorkSourceContentProto work_source_contents = 1;

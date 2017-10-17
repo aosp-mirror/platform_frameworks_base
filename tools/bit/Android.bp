@@ -30,6 +30,11 @@ cc_binary_host {
         "util.cpp",
     ],
 
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+
     static_libs: [
         "libexpat",
         "libinstrumentation",

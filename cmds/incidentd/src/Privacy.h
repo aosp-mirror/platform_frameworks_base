@@ -40,6 +40,8 @@ struct Privacy {
     bool IsMessageType() const;
     bool IsStringType() const;
     bool HasChildren() const;
+    uint64_t EncodedFieldId() const;
+
     const Privacy* lookup(uint32_t fieldId) const;
 };
 

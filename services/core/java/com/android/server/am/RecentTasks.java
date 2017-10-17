@@ -427,8 +427,7 @@ class RecentTasks {
     }
 
     void removeTasksByPackageName(String packageName, int userId) {
-        final int size = mTasks.size();
-        for (int i = 0; i < size; i++) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);
             final String taskPackageName =
                     tr.getBaseIntent().getComponent().getPackageName();
@@ -441,8 +440,7 @@ class RecentTasks {
 
     void cleanupDisabledPackageTasksLocked(String packageName, Set<String> filterByClasses,
             int userId) {
-        final int size = mTasks.size();
-        for (int i = 0; i < size; i++) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);
             if (userId != UserHandle.USER_ALL && tr.userId != userId) {
                 continue;

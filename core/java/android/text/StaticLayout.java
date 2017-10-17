@@ -21,21 +21,18 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
-import android.os.LocaleList;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -101,7 +98,6 @@ public class StaticLayout extends Layout {
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
-            b.mLocales = null;
 
             b.mMeasuredText = MeasuredText.obtain();
             return b;
@@ -118,7 +114,6 @@ public class StaticLayout extends Layout {
             b.mMeasuredText = null;
             b.mLeftIndents = null;
             b.mRightIndents = null;
-            b.mLocales = null;
             b.mLeftPaddings = null;
             b.mRightPaddings = null;
             nFinishBuilder(b.mNativePtr);
@@ -409,17 +404,6 @@ public class StaticLayout extends Layout {
             return this;
         }
 
-        @NonNull
-        private long[] getHyphenators(@NonNull LocaleList locales) {
-            final int length = locales.size();
-            final long[] result = new long[length];
-            for (int i = 0; i < length; i++) {
-                final Locale locale = locales.get(i);
-                result[i] = Hyphenator.get(locale).getNativePtr();
-            }
-            return result;
-        }
-
         /**
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
@@ -438,27 +422,12 @@ public class StaticLayout extends Layout {
          * After all paragraphs, call finish() to release expensive buffers.
          */
 
-        private Pair<String, long[]> getLocaleAndHyphenatorIfChanged(TextPaint paint) {
-            final LocaleList locales = paint.getTextLocales();
-            if (!locales.equals(mLocales)) {
-                mLocales = locales;
-                return new Pair(locales.toLanguageTags(), getHyphenators(locales));
-            } else {
-                // passing null means keep current locale.
-                // TODO: move locale change detection to native.
-                return new Pair(null, null);
-            }
-        }
-
         /* package */ void addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
-            Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl, locHyph.first,
-                    locHyph.second);
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl);
         }
 
         /* package */ void addReplacementRun(TextPaint paint, int start, int end, float width) {
-            Pair<String, long[]> locHyph = getLocaleAndHyphenatorIfChanged(paint);
-            nAddReplacementRun(mNativePtr, start, end, width, locHyph.first, locHyph.second);
+            nAddReplacementRun(mNativePtr, paint.getNativeInstance(), start, end, width);
         }
 
         /**
@@ -515,8 +484,6 @@ public class StaticLayout extends Layout {
 
         // This will go away and be subsumed by native builder code
         private MeasuredText mMeasuredText;
-
-        private LocaleList mLocales;
 
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
     }
@@ -806,9 +773,6 @@ public class StaticLayout extends Layout {
                     variableTabStops = stops;
                 }
             }
-
-            // TODO: Move locale tracking code to native.
-            b.mLocales = null;  // Reset the locale tracking.
 
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
@@ -1537,15 +1501,16 @@ public class StaticLayout extends Layout {
             @Nullable int[] indents, @Nullable int[] leftPaddings, @Nullable int[] rightPaddings,
             @IntRange(from = 0) int indentsOffset);
 
+    // TODO: Make this method CriticalNative once native code defers doing layouts.
     private static native void nAddStyleRun(
             /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl,
-            @Nullable String languageTags, @Nullable long[] hyphenators);
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl);
 
-    private static native void nAddReplacementRun(/* non-zero */ long nativePtr,
+    // TODO: Make this method CriticalNative once native code defers doing layouts.
+    private static native void nAddReplacementRun(
+            /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end,
-            @FloatRange(from = 0.0f) float width, @Nullable String languageTags,
-            @Nullable long[] hyphenators);
+            @FloatRange(from = 0.0f) float width);
 
     // populates LineBreaks and returns the number of breaks found
     //

@@ -165,7 +165,7 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
-    private static final float MAGNIFIER_ZOOM = 1.5f;
+    private static final float MAGNIFIER_ZOOM = 1.25f;
     @IntDef({MagnifierHandleTrigger.SELECTION_START,
             MagnifierHandleTrigger.SELECTION_END,
             MagnifierHandleTrigger.INSERTION})
@@ -4550,12 +4550,14 @@ public class Editor {
             final float centerYOnScreen = yPosInView + mTextView.getTotalPaddingTop()
                     - mTextView.getScrollY() + coordinatesOnScreen[1];
 
+            suspendBlink();
             mMagnifier.show(centerXOnScreen, centerYOnScreen, MAGNIFIER_ZOOM);
         }
 
         protected final void dismissMagnifier() {
             if (mMagnifier != null) {
                 mMagnifier.dismiss();
+                resumeBlink();
             }
         }
 
