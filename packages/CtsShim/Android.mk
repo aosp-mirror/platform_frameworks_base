@@ -30,6 +30,7 @@ LOCAL_BUILT_MODULE_STEM := package.apk
 # Make sure the build system doesn't try to resign the APK
 LOCAL_CERTIFICATE := PRESIGNED
 LOCAL_DEX_PREOPT := false
+LOCAL_MODULE_TARGET_ARCH := arm arm64 x86 x86_64
 
 my_archs := arm x86
 my_src_arch := $(call get-prebuilt-src-arch, $(my_archs))
@@ -50,6 +51,7 @@ LOCAL_BUILT_MODULE_STEM := package.apk
 # Make sure the build system doesn't try to resign the APK
 LOCAL_CERTIFICATE := PRESIGNED
 LOCAL_DEX_PREOPT := false
+LOCAL_MODULE_TARGET_ARCH := arm arm64 x86 x86_64
 
 my_archs := arm x86
 my_src_arch := $(call get-prebuilt-src-arch, $(my_archs))
