@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.slice.SliceManager;
 import android.app.timezone.RulesManager;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
@@ -944,6 +945,16 @@ final class SystemServiceRegistry {
                                 ICrossProfileApps.Stub.asInterface(b));
                     }
                 });
+
+        registerService(Context.SLICE_SERVICE, SliceManager.class,
+                new CachedServiceFetcher<SliceManager>() {
+                    @Override
+                    public SliceManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new SliceManager(ctx.getOuterContext(),
+                                ctx.mMainThread.getHandler());
+                    }
+            });
     }
 
     /**
