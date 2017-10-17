@@ -35,7 +35,6 @@ import android.text.TextUtils;
 import android.text.method.WordIterator;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.TextViewMetrics;
@@ -163,7 +162,7 @@ final class TextClassifierImpl implements TextClassifier {
             }
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
-            Log.e(LOG_TAG, "Error getting assist info.", t);
+            Log.e(LOG_TAG, "Error getting text classification info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.classifyText(
