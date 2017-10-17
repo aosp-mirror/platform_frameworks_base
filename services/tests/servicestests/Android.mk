@@ -33,7 +33,10 @@ LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aid
     aidl/com/android/servicestests/aidl/ICmdReceiverService.aidl
 LOCAL_SRC_FILES += $(call all-java-files-under, test-apps/JobTestApp/src)
 
-LOCAL_JAVA_LIBRARIES := android.test.mock legacy-android-test
+LOCAL_JAVA_LIBRARIES := \
+    android.hidl.manager-V1.0-java \
+    android.test.mock \
+    legacy-android-test \
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
