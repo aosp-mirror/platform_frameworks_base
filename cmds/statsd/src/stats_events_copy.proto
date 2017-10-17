@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+// STOPSHIP: this is a duplicate of stats_event.proto with LITE_RUNTIME added
+// to produce device side lite proto. We should move statsd to soong so that
+// we can generate full and lite library from the same proto file.
 syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
 
 // TODO: Not the right package and class name
 package android.os.statsd;
