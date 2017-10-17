@@ -4,11 +4,14 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := \
+  $(call all-java-files-under, src) \
+  src/android/os/ISomeService.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     apct-perftests-utils \
+    guava \
     legacy-android-test
 
 LOCAL_PACKAGE_NAME := CorePerfTests
