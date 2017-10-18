@@ -1,3 +1,4 @@
+#
 # Copyright (C) 2017 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,20 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_TAGS := tests
-LOCAL_SDK_VERSION := current
+LOCAL_MODULE := libshim_jni
 
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_SRC_FILES := Shim.c
 
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
+LOCAL_SDK_VERSION := 24
 
-LOCAL_PACKAGE_NAME := JobTestApp
-LOCAL_DEX_PREOPT := false
-LOCAL_PROGUARD_ENABLED := disabled
-
-include $(BUILD_PACKAGE)
+include $(BUILD_SHARED_LIBRARY)

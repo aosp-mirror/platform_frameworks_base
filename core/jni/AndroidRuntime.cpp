@@ -615,9 +615,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char jitprithreadweightOptBuf[sizeof("-Xjitprithreadweight:")-1 + PROPERTY_VALUE_MAX];
     char jittransitionweightOptBuf[sizeof("-Xjittransitionweight:")-1 + PROPERTY_VALUE_MAX];
     char hotstartupsamplesOptsBuf[sizeof("-Xps-hot-startup-method-samples:")-1 + PROPERTY_VALUE_MAX];
+    char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
+    char foregroundHeapGrowthMultiplierOptsBuf[
+            sizeof("-XX:ForegroundHeapGrowthMultiplier=")-1 + PROPERTY_VALUE_MAX];
     char cachePruneBuf[sizeof("-Xzygote-max-boot-retry=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsImageFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
@@ -721,6 +724,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                        heaptargetutilizationOptsBuf,
                        "-XX:HeapTargetUtilization=");
 
+    /* Foreground heap growth multiplier option */
+    parseRuntimeOption("dalvik.vm.foreground-heap-growth-multiplier",
+                       foregroundHeapGrowthMultiplierOptsBuf,
+                       "-XX:ForegroundHeapGrowthMultiplier=");
+
     /*
      * JIT related options.
      */
@@ -740,6 +748,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     parseRuntimeOption("dalvik.vm.jittransitionweight",
                        jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
+
+    /*
+     * Madvise related options.
+     */
+    parseRuntimeOption("dalvik.vm.madvise-random", madviseRandomOptsBuf, "-XX:MadviseRandomAccess:");
 
     /*
      * Profile related options.

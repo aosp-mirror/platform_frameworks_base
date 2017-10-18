@@ -398,7 +398,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
-    // final boolean mAllowAnimationsInLowPowerMode;
+    final boolean mAllowAnimationsInLowPowerMode;
 
     final boolean mAllowBootMessages;
 
@@ -1039,8 +1039,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_defaultInTouchMode);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
-//        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
-//                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
+        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
@@ -1086,7 +1086,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 public void onLowPowerModeChanged(PowerSaveState result) {
                     synchronized (mWindowMap) {
                         final boolean enabled = result.batterySaverEnabled;
-                        if (mAnimationsDisabled != enabled) {
+                        if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
                             mAnimationsDisabled = enabled;
                             dispatchNewAnimatorScaleLocked(null);
                         }
@@ -2994,10 +2994,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-// TODO: Use of this can be removed. Revert ag/I8369723d6a77f2c602f1ef080371fa7cd9ee094e
-//        synchronized (mWindowMap) {
-//            mKeyguardGoingAway = keyguardGoingAway;
-//        }
+        synchronized (mWindowMap) {
+            mKeyguardGoingAway = keyguardGoingAway;
+        }
     }
 
     // -------------------------------------------------------------
@@ -7433,11 +7432,6 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isKeyguardLocked() {
             return WindowManagerService.this.isKeyguardLocked();
-        }
-
-        @Override
-        public boolean isKeyguardGoingAway() {
-            return WindowManagerService.this.mKeyguardGoingAway;
         }
 
         @Override

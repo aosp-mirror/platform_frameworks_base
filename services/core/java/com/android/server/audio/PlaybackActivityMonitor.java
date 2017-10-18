@@ -184,11 +184,15 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    private static final int FLAGS_FOR_SILENCE_OVERRIDE =
+            AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
+            AudioAttributes.FLAG_BYPASS_MUTE;
+
     private void checkVolumeForPrivilegedAlarm(AudioPlaybackConfiguration apc, int event) {
         if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED ||
                 apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-            if ((apc.getAudioAttributes().getAllFlags() &
-                    AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0 &&
+            if ((apc.getAudioAttributes().getAllFlags() & FLAGS_FOR_SILENCE_OVERRIDE)
+                        == FLAGS_FOR_SILENCE_OVERRIDE  &&
                     apc.getAudioAttributes().getUsage() == AudioAttributes.USAGE_ALARM &&
                     mContext.checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE,
                             apc.getClientPid(), apc.getClientUid()) ==

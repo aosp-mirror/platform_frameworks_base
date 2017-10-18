@@ -30,6 +30,10 @@ struct XmlFlattenerOptions {
    * Keep attribute raw string values along with typed values.
    */
   bool keep_raw_values = false;
+
+  // Encode the strings in UTF-16. Only needed for AndroidManifest.xml to avoid a bug in
+  // certain non-AOSP platforms: https://issuetracker.google.com/64434571
+  bool use_utf16 = false;
 };
 
 class XmlFlattener : public IXmlResourceConsumer {

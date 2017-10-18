@@ -31,7 +31,6 @@ LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 
 LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl \
     aidl/com/android/servicestests/aidl/ICmdReceiverService.aidl
-LOCAL_SRC_FILES += $(call all-java-files-under, test-apps/JobTestApp/src)
 
 LOCAL_JAVA_LIBRARIES := android.test.mock legacy-android-test
 
@@ -63,6 +62,5 @@ LOCAL_DX_FLAGS := --multi-dex
 LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
 
 include $(BUILD_PACKAGE)
-
 
 include $(call all-makefiles-under, $(LOCAL_PATH))

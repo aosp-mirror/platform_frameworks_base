@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -517,14 +518,27 @@ final class ServiceRecord extends Binder {
                             } catch (PackageManager.NameNotFoundException e) {
                             }
                         }
-                        if (localForegroundNoti.getSmallIcon() == null
-                                || nm.getNotificationChannel(localPackageName, appUid,
+                        if (nm.getNotificationChannel(localPackageName, appUid,
                                 localForegroundNoti.getChannelId()) == null) {
+                            int targetSdkVersion = Build.VERSION_CODES.O_MR1;
+                            try {
+                                final ApplicationInfo applicationInfo =
+                                        ams.mContext.getPackageManager().getApplicationInfoAsUser(
+                                                appInfo.packageName, 0, userId);
+                                targetSdkVersion = applicationInfo.targetSdkVersion;
+                            } catch (PackageManager.NameNotFoundException e) {
+                            }
+                            if (targetSdkVersion >= Build.VERSION_CODES.O_MR1) {
+                                throw new RuntimeException(
+                                        "invalid channel for service notification: "
+                                                + foregroundNoti);
+                            }
+                        }
+                        if (localForegroundNoti.getSmallIcon() == null) {
                             // Notifications whose icon is 0 are defined to not show
                             // a notification, silently ignoring it.  We don't want to
                             // just ignore it, we want to prevent the service from
                             // being foreground.
-                            // Also every notification needs a channel.
                             throw new RuntimeException("invalid service notification: "
                                     + foregroundNoti);
                         }
