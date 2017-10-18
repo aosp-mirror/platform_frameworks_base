@@ -136,7 +136,7 @@ public class WifiManagerTest {
 
         assertEquals(mApConfig, callback.mRes.getWifiConfiguration());
         callback.mRes.close();
-        verify(mWifiService).stopLocalOnlyHotspot();
+        verify(mWifiService).stopLocalOnlyHotspot(TEST_PACKAGE_NAME);
     }
 
     /**
@@ -156,7 +156,7 @@ public class WifiManagerTest {
             assertEquals(mApConfig, res.getWifiConfiguration());
         }
 
-        verify(mWifiService).stopLocalOnlyHotspot();
+        verify(mWifiService).stopLocalOnlyHotspot(TEST_PACKAGE_NAME);
     }
 
     /**
@@ -547,7 +547,7 @@ public class WifiManagerTest {
                 anyString())).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mWifiManager.cancelLocalOnlyHotspotRequest();
-        verify(mWifiService).stopLocalOnlyHotspot();
+        verify(mWifiService).stopLocalOnlyHotspot(TEST_PACKAGE_NAME);
     }
 
     /**
@@ -569,7 +569,7 @@ public class WifiManagerTest {
                 anyString())).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mWifiManager.cancelLocalOnlyHotspotRequest();
-        verify(mWifiService).stopLocalOnlyHotspot();
+        verify(mWifiService).stopLocalOnlyHotspot(TEST_PACKAGE_NAME);
         mLooper.dispatchAll();
         assertEquals(ERROR_NOT_SET, callback.mFailureReason);
         assertFalse(callback.mOnStartedCalled);
@@ -593,7 +593,7 @@ public class WifiManagerTest {
         assertFalse(callback.mOnStoppedCalled);
         assertEquals(null, callback.mRes);
         mWifiManager.cancelLocalOnlyHotspotRequest();
-        verify(mWifiService, never()).stopLocalOnlyHotspot();
+        verify(mWifiService, never()).stopLocalOnlyHotspot(anyString());
     }
 
     /**
