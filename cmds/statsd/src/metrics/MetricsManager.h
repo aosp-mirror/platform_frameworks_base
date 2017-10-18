@@ -18,10 +18,10 @@
 
 #include "condition/ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
 #include "metrics/MetricProducer.h"
 
-#include <log/logprint.h>
 #include <unordered_map>
 
 namespace android {
@@ -38,7 +38,7 @@ public:
     // Return whether the configuration is valid.
     bool isConfigValid() const;
 
-    void onLogEvent(const log_msg& logMsg);
+    void onLogEvent(const LogEvent& event);
 
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();

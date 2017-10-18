@@ -38,7 +38,7 @@ public:
 
     virtual ~CountMetricProducer();
 
-    void onMatchedLogEvent(const LogEventWrapper& event) override;
+    void onMatchedLogEvent(const LogEvent& event) override;
 
     void onConditionChanged(const bool conditionMet) override;
 

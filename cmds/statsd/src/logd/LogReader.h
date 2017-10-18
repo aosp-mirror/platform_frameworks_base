@@ -19,7 +19,6 @@
 
 #include "logd/LogListener.h"
 
-#include <log/log_read.h>
 #include <utils/RefBase.h>
 
 #include <vector>

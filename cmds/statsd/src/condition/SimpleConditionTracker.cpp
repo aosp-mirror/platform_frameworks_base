@@ -89,7 +89,7 @@ bool SimpleConditionTracker::init(const vector<Condition>& allConditionConfig,
     return mInitialized;
 }
 
-bool SimpleConditionTracker::evaluateCondition(const LogEventWrapper& event,
+bool SimpleConditionTracker::evaluateCondition(const LogEvent& event,
                                                const vector<MatchingState>& eventMatcherValues,
                                                const vector<sp<ConditionTracker>>& mAllConditions,
                                                vector<ConditionState>& conditionCache,

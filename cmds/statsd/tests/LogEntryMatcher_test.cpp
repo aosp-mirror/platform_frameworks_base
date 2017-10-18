@@ -27,141 +27,175 @@ using namespace android::os::statsd;
 using std::unordered_map;
 using std::vector;
 
-const int kTagIdWakelock = 123;
-const int kKeyIdState = 45;
-const int kKeyIdPackageVersion = 67;
+const int TAG_ID = 123;
+const int FIELD_ID_1 = 1;
+const int FIELD_ID_2 = 2;
+const int FIELD_ID_3 = 2;
+
+// Private API from liblog.
+extern "C" void android_log_rewind(android_log_context ctx);
 
 #ifdef __ANDROID__
 TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
+    simpleMatcher->add_tag(TAG_ID);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    // Set up the event
+    android_log_event_list list(TAG_ID);
 
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    // Convert to a LogEvent
+    list.convert_to_reader();
+    LogEvent event(999, &list);
+
+    // Test
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 }
 
 TEST(LogEntryMatcherTest, TestBoolMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
-    auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
+    simpleMatcher->add_tag(TAG_ID);
+    auto keyValue1 = simpleMatcher->add_key_value_matcher();
+    keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
+    auto keyValue2 = simpleMatcher->add_key_value_matcher();
+    keyValue2->mutable_key_matcher()->set_key(FIELD_ID_2);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    // Set up the event
+    android_log_event_list list(TAG_ID);
+    list << true;
+    list << false;
 
-    keyValue->set_eq_bool(true);
-    wrapper.boolMap[kKeyIdState] = true;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    // Convert to a LogEvent
+    list.convert_to_reader();
+    LogEvent event(999, &list);
 
-    keyValue->set_eq_bool(false);
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
+    // Test
+    keyValue1->set_eq_bool(true);
+    keyValue2->set_eq_bool(false);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 
-    wrapper.boolMap[kKeyIdState] = false;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    keyValue1->set_eq_bool(false);
+    keyValue2->set_eq_bool(false);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_bool(true);
+    keyValue2->set_eq_bool(false);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+
+    keyValue1->set_eq_bool(true);
+    keyValue2->set_eq_bool(true);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
 TEST(LogEntryMatcherTest, TestStringMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
+    simpleMatcher->add_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
-    keyValue->set_eq_string("wakelock_name");
+    keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
+    keyValue->set_eq_string("some value");
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    // Set up the event
+    android_log_event_list list(TAG_ID);
+    list << "some value";
 
-    wrapper.strMap[kKeyIdState] = "wakelock_name";
+    // Convert to a LogEvent
+    list.convert_to_reader();
+    LogEvent event(999, &list);
 
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    // Test
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 }
 
 TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
+    simpleMatcher->add_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
+    keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    // Set up the event
+    android_log_event_list list(TAG_ID);
+    list << 11;
 
+    // Convert to a LogEvent
+    list.convert_to_reader();
+    LogEvent event(999, &list);
+
+    // Test
+
+    // eq_int
+    keyValue->set_eq_int(10);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_eq_int(11);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_eq_int(12);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+
+    // lt_int
     keyValue->set_lt_int(10);
-    wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_lt_int(11);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_lt_int(12);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 
-    keyValue->set_gt_int(10);
-    wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-}
-
-TEST(LogEntryMatcherTest, TestIntWithEqualityComparisonMatcher) {
-    // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
-    auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
-
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
-
+    // lte_int
     keyValue->set_lte_int(10);
-    wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_lte_int(11);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_lte_int(12);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 
+    // gt_int
+    keyValue->set_gt_int(10);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_gt_int(11);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_gt_int(12);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+
+    // gte_int
     keyValue->set_gte_int(10);
-    wrapper.intMap[kKeyIdState] = 11;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 10;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.intMap[kKeyIdState] = 9;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_gte_int(11);
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    keyValue->set_gte_int(12);
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
+
+#if 0
 
 TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
     // Set up the matcher
     LogEntryMatcher matcher;
     auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
-    simpleMatcher->add_tag(kTagIdWakelock);
+    simpleMatcher->add_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
-    keyValue->mutable_key_matcher()->set_key(kKeyIdState);
+    keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
 
-    LogEventWrapper wrapper;
-    wrapper.tagId = kTagIdWakelock;
+    LogEvent event;
+    event.tagId = TAG_ID;
 
     keyValue->set_lt_float(10.0);
-    wrapper.floatMap[kKeyIdState] = 10.1;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.floatMap[kKeyIdState] = 9.9;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
+    event.floatMap[FIELD_ID_1] = 10.1;
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
+    event.floatMap[FIELD_ID_1] = 9.9;
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 
     keyValue->set_gt_float(10.0);
-    wrapper.floatMap[kKeyIdState] = 10.1;
-    EXPECT_TRUE(matchesSimple(*simpleMatcher, wrapper));
-    wrapper.floatMap[kKeyIdState] = 9.9;
-    EXPECT_FALSE(matchesSimple(*simpleMatcher, wrapper));
+    event.floatMap[FIELD_ID_1] = 10.1;
+    EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
+    event.floatMap[FIELD_ID_1] = 9.9;
+    EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
+#endif
 
 // Helper for the composite matchers.
 void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, int val) {

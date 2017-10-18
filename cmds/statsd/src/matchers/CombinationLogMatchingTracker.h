@@ -41,7 +41,7 @@ public:
 
     ~CombinationLogMatchingTracker();
 
-    void onLogEvent(const LogEventWrapper& event,
+    void onLogEvent(const LogEvent& event,
                     const std::vector<sp<LogMatchingTracker>>& allTrackers,
                     std::vector<MatchingState>& matcherResults) override;
 

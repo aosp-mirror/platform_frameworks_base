@@ -65,7 +65,7 @@ public:
     // mAllConditions: the list of all ConditionTracker
     // conditionCache: the cached results of the ConditionTrackers for this new event.
     // changedCache: the bit map to record whether the condition has changed.
-    virtual bool evaluateCondition(const LogEventWrapper& event,
+    virtual bool evaluateCondition(const LogEvent& event,
                                    const std::vector<MatchingState>& eventMatcherValues,
                                    const std::vector<sp<ConditionTracker>>& mAllConditions,
                                    std::vector<ConditionState>& conditionCache,

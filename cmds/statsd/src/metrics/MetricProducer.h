@@ -36,7 +36,7 @@ public:
     virtual ~MetricProducer(){};
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    virtual void onMatchedLogEvent(const LogEventWrapper& event) = 0;
+    virtual void onMatchedLogEvent(const LogEvent& event) = 0;
 
     virtual void onConditionChanged(const bool condition) = 0;
 

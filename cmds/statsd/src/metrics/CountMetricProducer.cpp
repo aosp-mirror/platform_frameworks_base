@@ -66,8 +66,8 @@ void CountMetricProducer::onConditionChanged(const bool conditionMet) {
     mCondition = conditionMet;
 }
 
-void CountMetricProducer::onMatchedLogEvent(const LogEventWrapper& event) {
-    time_t eventTime = event.timestamp_ns / 1000000000;
+void CountMetricProducer::onMatchedLogEvent(const LogEvent& event) {
+    time_t eventTime = event.GetTimestampNs() / 1000000000;
 
     // this is old event, maybe statsd restarted?
     if (eventTime < mStartTime) {

@@ -68,7 +68,7 @@ public:
     /**
      * Called by LogReader when there's a log event to process.
      */
-    virtual void OnLogEvent(const log_msg& msg);
+    virtual void OnLogEvent(const LogEvent& event);
 
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.

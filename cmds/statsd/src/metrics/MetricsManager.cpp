@@ -59,19 +59,18 @@ void MetricsManager::finish() {
 }
 
 // Consume the stats log if it's interesting to this metric.
-void MetricsManager::onLogEvent(const log_msg& logMsg) {
+void MetricsManager::onLogEvent(const LogEvent& event) {
     if (!mConfigValid) {
         return;
     }
 
-    int tagId = getTagId(logMsg);
+    int tagId = event.GetTagId();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
     }
 
     // Since at least one of the metrics is interested in this event, we parse it now.
-    LogEventWrapper event = parseLogEvent(logMsg);
     vector<MatchingState> matcherCache(mAllLogEntryMatchers.size(), MatchingState::kNotComputed);
 
     for (auto& matcher : mAllLogEntryMatchers) {
