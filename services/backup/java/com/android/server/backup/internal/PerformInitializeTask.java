@@ -79,7 +79,8 @@ public class PerformInitializeTask implements Runnable {
                 }
 
                 Slog.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
-                EventLog.writeEvent(EventLogTags.BACKUP_START, transport.transportDirName());
+                String transportDirName = transport.transportDirName();
+                EventLog.writeEvent(EventLogTags.BACKUP_START, transportDirName);
                 long startRealtime = SystemClock.elapsedRealtime();
                 int status = transport.initializeDevice();
 
@@ -94,7 +95,7 @@ public class PerformInitializeTask implements Runnable {
                     EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     backupManagerService
                             .resetBackupState(new File(backupManagerService.getBaseStateDir(),
-                                    transport.transportDirName()));
+                                    transportDirName));
                     EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(false, transportName);

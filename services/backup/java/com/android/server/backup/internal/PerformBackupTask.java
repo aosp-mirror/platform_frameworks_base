@@ -339,7 +339,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // The backend reports that our dataset has been wiped.  Note this in
                 // the event log; the no-success code below will reset the backup
                 // state as well.
-                EventLog.writeEvent(EventLogTags.BACKUP_RESET, mTransport.transportDirName());
+                EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
             }
         } catch (Exception e) {
             Slog.e(TAG, "Error in backup thread", e);
