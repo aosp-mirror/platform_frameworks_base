@@ -67,6 +67,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -79,6 +80,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.TimingsTraceLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -232,6 +234,7 @@ class UserController implements Handler.Callback {
         mUiHandler = mInjector.getUiHandler(this);
         // User 0 is the first and only user that runs at boot.
         final UserState uss = new UserState(UserHandle.SYSTEM);
+        uss.mUnlockProgress.addListener(new UserProgressListener());
         mStartedUsers.put(UserHandle.USER_SYSTEM, uss);
         mUserLru.add(UserHandle.USER_SYSTEM);
         mLockPatternUtils = mInjector.getLockPatternUtils();
@@ -903,6 +906,7 @@ class UserController implements Handler.Callback {
                 uss = mStartedUsers.get(userId);
                 if (uss == null) {
                     uss = new UserState(UserHandle.of(userId));
+                    uss.mUnlockProgress.addListener(new UserProgressListener());
                     mStartedUsers.put(userId, uss);
                     updateStartedUserArrayLU();
                     needStart = true;
@@ -1853,6 +1857,33 @@ class UserController implements Handler.Callback {
         }
         return false;
     }
+
+    private static class UserProgressListener extends IProgressListener.Stub {
+        private volatile long mUnlockStarted;
+        @Override
+        public void onStarted(int id, Bundle extras) throws RemoteException {
+            Slog.d(TAG, "Started unlocking user " + id);
+            mUnlockStarted = SystemClock.uptimeMillis();
+        }
+
+        @Override
+        public void onProgress(int id, int progress, Bundle extras) throws RemoteException {
+            Slog.d(TAG, "Unlocking user " + id + " progress " + progress);
+        }
+
+        @Override
+        public void onFinished(int id, Bundle extras) throws RemoteException {
+            long unlockTime = SystemClock.uptimeMillis() - mUnlockStarted;
+
+            // Report system user unlock time to perf dashboard
+            if (id == UserHandle.USER_SYSTEM) {
+                new TimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER)
+                        .logDuration("SystemUserUnlock", unlockTime);
+            } else {
+                Slog.d(TAG, "Unlocking user " + id + " took " + unlockTime + " ms");
+            }
+        }
+    };
 
     @VisibleForTesting
     static class Injector {
