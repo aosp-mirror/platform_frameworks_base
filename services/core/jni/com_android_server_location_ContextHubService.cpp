@@ -1162,7 +1162,7 @@ jint nativeSendMessage(JNIEnv *env,
     }
 
     if (result != Result::OK) {
-        ALOGD("Send Message failure - %d", retVal);
+        ALOGD("Send Message failure - %d", result);
         if (msgType == CONTEXT_HUB_LOAD_APP) {
             jint ignored;
             closeLoadTxn(false, &ignored);
