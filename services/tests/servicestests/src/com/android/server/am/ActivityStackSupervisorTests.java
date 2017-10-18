@@ -77,7 +77,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     @Test
     public void testRestoringInvalidTask() throws Exception {
         TaskRecord task = mSupervisor.anyTaskForIdLocked(0 /*taskId*/,
-                MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null);
+                MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null, false /* onTop */);
         assertNull(task);
     }
 
@@ -116,9 +116,9 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         mSupervisor.moveActivityToPinnedStackLocked(secondActivity, sourceBounds,
                 0f /*aspectRatio*/, false, "secondMove");
 
-        // Need to get pinned stack again as a new instance might have been created.
+        // Need to get stacks again as a new instance might have been created.
         pinnedStack = display.getPinnedStack();
-
+        mFullscreenStack = display.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         // Ensure stacks have swapped tasks.
         ensureStackPlacement(pinnedStack, secondTask);
         ensureStackPlacement(mFullscreenStack, firstTask);
