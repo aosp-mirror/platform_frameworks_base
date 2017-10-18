@@ -84,7 +84,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public interface CheckSaveListener {
         // Invoked when importance has changed and the NotificationInfo wants to try to save it.
         // Listener should run saveImportance unless the change should be canceled.
-        void checkSave(Runnable saveImportance);
+        void checkSave(Runnable saveImportance, StatusBarNotification sbn);
     }
 
     public interface OnSettingsClickListener {
@@ -409,7 +409,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public boolean handleCloseControls(boolean save, boolean force) {
         if (save && hasImportanceChanged()) {
             if (mCheckSaveListener != null) {
-                mCheckSaveListener.checkSave(() -> { saveImportance(); });
+                mCheckSaveListener.checkSave(this::saveImportance, mSbn);
             } else {
                 saveImportance();
             }

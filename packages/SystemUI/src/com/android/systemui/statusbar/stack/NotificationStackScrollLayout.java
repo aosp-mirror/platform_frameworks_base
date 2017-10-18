@@ -1343,7 +1343,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         // Check if we need to clear any snooze leavebehinds
-        NotificationGuts guts = mStatusBar.getExposedGuts();
+        NotificationGuts guts = mStatusBar.getGutsManager().getExposedGuts();
         if (guts != null && !isTouchInView(ev, guts)
                 && guts.getGutsContent() instanceof NotificationSnooze) {
             NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
@@ -2508,12 +2508,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         // Check if we need to clear any snooze leavebehinds
         boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
-        NotificationGuts guts = mStatusBar.getExposedGuts();
+        NotificationGuts guts = mStatusBar.getGutsManager().getExposedGuts();
         if (!isTouchInView(ev, guts) && isUp && !swipeWantsIt && !expandWantsIt
                 && !scrollWantsIt) {
             mCheckForLeavebehind = false;
-            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
-                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+            mStatusBar.getGutsManager().closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
         }
         if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
             mCheckForLeavebehind = true;
@@ -3355,8 +3356,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void checkSnoozeLeavebehind() {
         if (mCheckForLeavebehind) {
-            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
-                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+            mStatusBar.getGutsManager().closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
             mCheckForLeavebehind = false;
         }
     }
@@ -4438,8 +4440,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // of the panel early.
                 handleChildDismissed(view);
             }
-            mStatusBar.closeAndSaveGuts(true /* removeLeavebehind */, false /* force */,
-                    false /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+            mStatusBar.getGutsManager().closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
             handleMenuCoveredOrDismissed();
         }
 
@@ -4524,7 +4527,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         public void closeControlsIfOutsideTouch(MotionEvent ev) {
-            NotificationGuts guts = mStatusBar.getExposedGuts();
+            NotificationGuts guts = mStatusBar.getGutsManager().getExposedGuts();
             View view = null;
             if (guts != null && !guts.getGutsContent().isLeavebehind()) {
                 // Only close visible guts if they're not a leavebehind.
@@ -4536,8 +4539,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             if (view != null && !isTouchInView(ev, view)) {
                 // Touch was outside visible guts / menu notification, close what's visible
-                mStatusBar.closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
-                        true /* removeControls */, -1 /* x */, -1 /* y */, false /* resetMenu */);
+                mStatusBar.getGutsManager().closeAndSaveGuts(false /* removeLeavebehind */,
+                        false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
+                        false /* resetMenu */);
                 resetExposedMenuView(true /* animate */, true /* force */);
             }
         }
