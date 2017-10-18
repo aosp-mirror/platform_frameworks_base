@@ -31,7 +31,7 @@ struct Module
     vector<string> installed;
 };
 
-string get_build_var(const string& buildTop, const string& name, bool quiet);
+string get_build_var(const string& name, bool quiet);
 
 /**
  * Poke around in the out directory and try to find a device name that matches
