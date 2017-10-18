@@ -16,6 +16,8 @@
 
 package android.view.textclassifier;
 
+import android.content.res.AssetFileDescriptor;
+
 /**
  *  Java wrapper for SmartSelection native library interface.
  *  This library is used for detecting entities in text.
@@ -39,6 +41,26 @@ final class SmartSelection {
      */
     SmartSelection(int fd) {
         mCtx = nativeNew(fd);
+    }
+
+    /**
+     * Creates a new instance of SmartSelect predictor, using the provided model image, given as a
+     * file path.
+     */
+    SmartSelection(String path) {
+        mCtx = nativeNewFromPath(path);
+    }
+
+    /**
+     * Creates a new instance of SmartSelect predictor, using the provided model image, given as an
+     * AssetFileDescriptor.
+     */
+    SmartSelection(AssetFileDescriptor afd) {
+        mCtx = nativeNewFromAssetFileDescriptor(afd, afd.getStartOffset(), afd.getLength());
+        if (mCtx == 0L) {
+            throw new IllegalArgumentException(
+                "Couldn't initialize TC from given AssetFileDescriptor");
+        }
     }
 
     /**
@@ -69,6 +91,15 @@ final class SmartSelection {
     }
 
     /**
+     * Annotates given input text. Every word of the input is a part of some annotation.
+     * The annotations are sorted by their position in the context string.
+     * The annotations do not overlap.
+     */
+    public AnnotatedSpan[] annotate(String text) {
+        return nativeAnnotate(mCtx, text);
+    }
+
+    /**
      * Frees up the allocated memory.
      */
     public void close() {
@@ -91,11 +122,18 @@ final class SmartSelection {
 
     private static native long nativeNew(int fd);
 
+    private static native long nativeNewFromPath(String path);
+
+    private static native long nativeNewFromAssetFileDescriptor(AssetFileDescriptor afd,
+                                                                long offset, long size);
+
     private static native int[] nativeSuggest(
             long context, String text, int selectionBegin, int selectionEnd);
 
     private static native ClassificationResult[] nativeClassifyText(
             long context, String text, int selectionBegin, int selectionEnd, int hintFlags);
+
+    private static native AnnotatedSpan[] nativeAnnotate(long context, String text);
 
     private static native void nativeClose(long context);
 
@@ -112,6 +150,31 @@ final class SmartSelection {
         ClassificationResult(String collection, float score) {
             mCollection = collection;
             mScore = score;
+        }
+    }
+
+    /** Represents a result of Annotate call. */
+    public static final class AnnotatedSpan {
+        final int mStartIndex;
+        final int mEndIndex;
+        final ClassificationResult[] mClassification;
+
+        AnnotatedSpan(int startIndex, int endIndex, ClassificationResult[] classification) {
+            mStartIndex = startIndex;
+            mEndIndex = endIndex;
+            mClassification = classification;
+        }
+
+        public int getStartIndex() {
+            return mStartIndex;
+        }
+
+        public int getEndIndex() {
+            return mEndIndex;
+        }
+
+        public ClassificationResult[] getClassification() {
+            return mClassification;
         }
     }
 }
