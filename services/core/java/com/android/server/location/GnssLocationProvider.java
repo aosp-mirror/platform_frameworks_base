@@ -63,6 +63,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
@@ -565,6 +566,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         final PowerSaveState result =
                 mPowerManager.getPowerSaveState(ServiceType.GPS);
         switch (result.gpsMode) {
+            case BatterySaverPolicy.GPS_MODE_REALLY_DISABLED_WHEN_SCREEN_OFF:
             case BatterySaverPolicy.GPS_MODE_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
                 disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
@@ -573,6 +575,28 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (disableGps != mDisableGps) {
             mDisableGps = disableGps;
             updateRequirements();
+
+            updateLocationModeForReallyDisabledWhenScreenOff(result.gpsMode);
+        }
+    }
+
+    boolean mLocationDisabledForPowerSaving;
+
+    private void updateLocationModeForReallyDisabledWhenScreenOff(int gpsMode) {
+        final boolean disableLocation = mDisableGps
+                && (gpsMode == BatterySaverPolicy.GPS_MODE_REALLY_DISABLED_WHEN_SCREEN_OFF);
+
+// TODO Secondary user, intent sent in LocationSettingsBase
+        if (disableLocation != mLocationDisabledForPowerSaving) {
+Log.w("XXX:GnssLP", "mLocationDisabledForPowerSaving=" + mLocationDisabledForPowerSaving + " on u" + UserHandle.myUserId());
+            mLocationDisabledForPowerSaving = disableLocation;
+            if (disableLocation) {
+                Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.LOCATION_MODE,
+                        android.provider.Settings.Secure.LOCATION_MODE_OFF);
+            } else {
+                Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.LOCATION_MODE,
+                        android.provider.Settings.Secure.LOCATION_MODE_PREVIOUS);
+            }
         }
     }
 
@@ -2547,6 +2571,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
         s.append("  mStarted=").append(mStarted).append('\n');
         s.append("  mFixInterval=").append(mFixInterval).append('\n');
         s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
+        s.append("  mDisableLocation (battery saver mode)=").append(mLocationDisabledForPowerSaving)
+                .append('\n');
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
         s.append(" ( ");
         if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHEDULING ");

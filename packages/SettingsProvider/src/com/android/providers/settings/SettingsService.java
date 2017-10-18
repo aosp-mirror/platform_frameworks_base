@@ -109,6 +109,7 @@ final public class SettingsService extends Binder {
 
         int mUser = -1;     // unspecified
         CommandVerb mVerb = CommandVerb.UNSPECIFIED;
+        private final String NULL_MARKER = "";
         String mTable = null;
         String mKey = null;
         String mValue = null;
@@ -149,6 +150,9 @@ final public class SettingsService extends Binder {
                         mVerb = CommandVerb.GET;
                     } else if ("put".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.PUT;
+                    } else if ("putnull".equalsIgnoreCase(arg)) {
+                        mVerb = CommandVerb.PUT;
+                        mValue = NULL_MARKER;
                     } else if ("delete".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.DELETE;
                     } else if ("list".equalsIgnoreCase(arg)) {
@@ -254,6 +258,9 @@ final public class SettingsService extends Binder {
             if (!valid) {
                 perr.println("Bad arguments");
                 return -1;
+            }
+            if (mValue == NULL_MARKER) { // Note "==", not equals().
+                mValue = null;
             }
 
             if (mUser == UserHandle.USER_CURRENT) {
@@ -473,6 +480,8 @@ final public class SettingsService extends Binder {
                 pw.println("      Change the contents of KEY to VALUE.");
                 pw.println("      TAG to associate with the setting.");
                 pw.println("      {default} to set as the default, case-insensitive only for global/secure namespace");
+                pw.println("  putnull [--user <USER_ID> | current] NAMESPACE KEY [TAG] [default]");
+                pw.println("      Same as \"put\", except it sets null to KEY.");
                 pw.println("  delete NAMESPACE KEY");
                 pw.println("      Delete the entry for KEY.");
                 pw.println("  reset [--user <USER_ID> | current] NAMESPACE {PACKAGE_NAME | RESET_MODE}");

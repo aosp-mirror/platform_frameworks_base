@@ -71,6 +71,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -1847,6 +1848,13 @@ public final class Settings {
                 if (makeDefault) {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
+
+                // Log all EBS relevant config changes.
+                if (Global.LOW_POWER_MODE_TRIGGER_LEVEL.equals(name)
+                        || name.startsWith(Settings.Global.BATTERY_SAVER_CONSTANTS)) {
+                    Slog.w("XXX", "Detected write: " + mCallSetCommand + ", " + name + ", args=" + arg, new RuntimeException("HERE"));
+                }
+
                 IContentProvider cp = mProviderHolder.getProvider(cr);
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
@@ -9346,6 +9354,9 @@ public final class Settings {
          * @see com.android.server.power.BatterySaverPolicy
          */
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
+
+        /** @hide */
+        public static final String BATTERY_SAVER_USE_RED_BAR = "battery_saver_use_red_bar";
 
         /**
          * Battery anomaly detection specific settings
