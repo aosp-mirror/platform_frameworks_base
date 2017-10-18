@@ -73,7 +73,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
      * for reading back float buffers (skbug.com/6945).
      */
     if (pixelConfig == kRGBA_half_GrPixelConfig &&
-            !DeviceInfo::get()->extensions().hasFloatTextures()) {
+            !grContext->caps()->isConfigTexturable(kRGBA_half_GrPixelConfig)) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }

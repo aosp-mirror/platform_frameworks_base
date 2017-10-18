@@ -31,6 +31,12 @@ namespace android {
 namespace uirenderer {
 
 Extensions::Extensions() {
+    if (Properties::getRenderPipelineType() != RenderPipelineType::OpenGL) {
+        //Extensions class is used only by OpenGL pipeline
+        //The code below will crash for SkiaVulkan, because OpenGL is not initialized
+        //TODO: instantiate Extensions class only for OpenGL pipeline
+        return;
+    }
     const char* version = (const char*) glGetString(GL_VERSION);
 
     // Section 6.1.5 of the OpenGL ES specification indicates the GL version
