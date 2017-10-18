@@ -417,8 +417,8 @@ public class PermissionManagerService {
                 bp = new BasePermission(info.name, tree.getSourcePackageName(),
                         BasePermission.TYPE_DYNAMIC);
             } else if (bp.isDynamic()) {
-                throw new SecurityException(
-                        "Not allowed to modify non-dynamic permission "
+                // TODO: switch this back to SecurityException
+                Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + info.name);
             }
             changed = bp.addToTree(fixedLevel, info, tree);
@@ -444,8 +444,8 @@ public class PermissionManagerService {
                 return;
             }
             if (bp.isDynamic()) {
-                throw new SecurityException(
-                        "Not allowed to modify non-dynamic permission "
+                // TODO: switch this back to SecurityException
+                Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + permName);
             }
             mSettings.removePermissionLocked(permName);
