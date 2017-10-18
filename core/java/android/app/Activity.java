@@ -5923,7 +5923,7 @@ public class Activity extends ContextThemeWrapper
      * <p>
      * This method is deprecated starting in API Level 11 and replaced by action
      * bar styles. For information on styling the Action Bar, read the <a
-     * href="{@docRoot} guide/topics/ui/actionbar.html">Action Bar</a> developer
+     * href="{@docRoot}training/appbar/index.html">Action Bar</a> developer
      * guide.
      *
      * @deprecated Use action bar styles instead.
