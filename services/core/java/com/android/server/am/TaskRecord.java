@@ -231,9 +231,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private boolean mSupportsPictureInPicture;  // Whether or not this task and its activities
             // support PiP. Based on the {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag
             // of the root activity.
-    boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
-                                     // changes on a temporary basis.
-
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
     /** Can enter app pinning with user approval. Can never start over existing lockTask task. */
@@ -1457,7 +1454,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
     private boolean isResizeable(boolean checkSupportsPip) {
         return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
-                || (checkSupportsPip && mSupportsPictureInPicture)) && !mTemporarilyUnresizable;
+                || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
     boolean isResizeable() {

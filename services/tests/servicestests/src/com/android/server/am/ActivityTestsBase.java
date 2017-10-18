@@ -276,19 +276,20 @@ public class ActivityTestsBase {
         return service;
     }
 
-    protected interface ActivityStackReporter {
-        int onActivityRemovedFromStackInvocationCount();
-    }
-
     /**
      * Overrided of {@link ActivityStack} that tracks test metrics, such as the number of times a
      * method is called. Note that its functionality depends on the implementations of the
      * construction arguments.
      */
     protected static class TestActivityStack<T extends StackWindowController>
-            extends ActivityStack<T> implements ActivityStackReporter {
+            extends ActivityStack<T> {
         private int mOnActivityRemovedFromStackCount = 0;
         private T mContainerController;
+
+        static final int IS_TRANSLUCENT_UNSET = 0;
+        static final int IS_TRANSLUCENT_FALSE = 1;
+        static final int IS_TRANSLUCENT_TRUE = 2;
+        private int mIsTranslucent = IS_TRANSLUCENT_UNSET;
 
         TestActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
                 int windowingMode, int activityType, boolean onTop) {
@@ -302,8 +303,7 @@ public class ActivityTestsBase {
         }
 
         // Returns the number of times {@link #onActivityRemovedFromStack} has been called
-        @Override
-        public int onActivityRemovedFromStackInvocationCount() {
+        int onActivityRemovedFromStackInvocationCount() {
             return mOnActivityRemovedFromStackCount;
         }
 
@@ -316,6 +316,23 @@ public class ActivityTestsBase {
         @Override
         T getWindowContainerController() {
             return mContainerController;
+        }
+
+        void setIsTranslucent(boolean isTranslucent) {
+            mIsTranslucent = isTranslucent ? IS_TRANSLUCENT_TRUE : IS_TRANSLUCENT_FALSE;
+        }
+
+        @Override
+        boolean isStackTranslucent(ActivityRecord starting, ActivityStack stackBehind) {
+            switch (mIsTranslucent) {
+                case IS_TRANSLUCENT_TRUE:
+                    return true;
+                case IS_TRANSLUCENT_FALSE:
+                    return false;
+                case IS_TRANSLUCENT_UNSET:
+                default:
+                    return super.isStackTranslucent(starting, stackBehind);
+            }
         }
     }
 }

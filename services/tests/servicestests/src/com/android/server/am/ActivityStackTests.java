@@ -16,13 +16,19 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
@@ -45,7 +51,6 @@ import org.junit.Test;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStackTests extends ActivityTestsBase {
-    private static final int TEST_STACK_ID = 100;
     private static final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
     private static final ComponentName testOverlayComponent =
@@ -126,5 +131,123 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(mTask.getTopActivity(false /* includeOverlays */), r);
         assertEquals(mTask.getTopActivity(true /* includeOverlays */), taskOverlay);
         assertNotNull(result.r);
+    }
+
+    @Test
+    public void testShouldBeVisible_Fullscreen() throws Exception {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final TestActivityStack homeStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+        final ActivityStack pinnedStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        assertTrue(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(pinnedStack.shouldBeVisible(null /* starting */));
+
+        final TestActivityStack fullscreenStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        // Home stack shouldn't be visible behind an opaque fullscreen stack, but pinned stack
+        // should be visible since it is always on-top.
+        fullscreenStack.setIsTranslucent(false);
+        assertFalse(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(pinnedStack.shouldBeVisible(null /* starting */));
+        assertTrue(fullscreenStack.shouldBeVisible(null /* starting */));
+
+        // Home stack should be visible behind a translucent fullscreen stack.
+        fullscreenStack.setIsTranslucent(true);
+        assertTrue(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(pinnedStack.shouldBeVisible(null /* starting */));
+    }
+
+    @Test
+    public void testShouldBeVisible_SplitScreen() throws Exception {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final TestActivityStack homeStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+        final TestActivityStack splitScreenPrimary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack splitScreenSecondary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        // Home stack shouldn't be visible if both halves of split-screen are opaque.
+        splitScreenPrimary.setIsTranslucent(false);
+        splitScreenSecondary.setIsTranslucent(false);
+        assertFalse(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+
+        // Home stack should be visible if one of the halves of split-screen is translucent.
+        splitScreenPrimary.setIsTranslucent(true);
+        assertTrue(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+
+        final TestActivityStack splitScreenSecondary2 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        // First split-screen secondary shouldn't be visible behind another opaque split-split
+        // secondary.
+        splitScreenSecondary2.setIsTranslucent(false);
+        assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+
+        // First split-screen secondary should be visible behind another translucent split-split
+        // secondary.
+        splitScreenSecondary2.setIsTranslucent(true);
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+
+        final TestActivityStack assistantStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
+
+        // Split-screen stacks shouldn't be visible behind an opaque fullscreen stack.
+        assistantStack.setIsTranslucent(false);
+        assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+        assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+
+        // Split-screen stacks should be visible behind a translucent fullscreen stack.
+        assistantStack.setIsTranslucent(true);
+        assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+    }
+
+    @Test
+    public void testShouldBeVisible_Finishing() throws Exception {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final TestActivityStack homeStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+        final TestActivityStack translucentStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        translucentStack.setIsTranslucent(true);
+
+        assertTrue(homeStack.shouldBeVisible(null /* starting */));
+        assertTrue(translucentStack.shouldBeVisible(null /* starting */));
+
+        final ActivityRecord topRunningHomeActivity = homeStack.topRunningActivityLocked();
+        topRunningHomeActivity.finishing = true;
+        final ActivityRecord topRunningTranslucentActivity =
+                translucentStack.topRunningActivityLocked();
+        topRunningTranslucentActivity.finishing = true;
+
+        // Home shouldn't be visible since its activity is marked as finishing and it isn't the top
+        // of the stack list.
+        assertFalse(homeStack.shouldBeVisible(null /* starting */));
+        // Home should be visible if we are starting an activity within it.
+        assertTrue(homeStack.shouldBeVisible(topRunningHomeActivity /* starting */));
+        // The translucent stack should be visible since it is the top of the stack list even though
+        // it has its activity marked as finishing.
+        assertTrue(translucentStack.shouldBeVisible(null /* starting */));
+    }
+
+    private <T extends ActivityStack> T createStackForShouldBeVisibleTest(
+            ActivityDisplay display, int windowingMode, int activityType, boolean onTop) {
+        final T stack = display.createStack(windowingMode, activityType, onTop);
+        // Create a task and activity in the stack so that it has a top running activity.
+        final TaskRecord task = createTask(mSupervisor, testActivityComponent, stack);
+        final ActivityRecord r = createActivity(mService, testActivityComponent, task, 0);
+        return stack;
     }
 }

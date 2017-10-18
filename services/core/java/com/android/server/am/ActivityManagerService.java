@@ -31,6 +31,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
@@ -10318,7 +10319,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             // TODO(multi-display): Have the caller pass in the windowing mode and activity type.
             final ActivityStack stack = display.createStack(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /*onTop*/);
+                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
+                    ON_TOP);
             return (stack != null) ? stack.mStackId : INVALID_STACK_ID;
         }
     }
