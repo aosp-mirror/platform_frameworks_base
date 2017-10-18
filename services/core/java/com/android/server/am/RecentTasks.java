@@ -914,7 +914,7 @@ class RecentTasks {
         mTmpQuietProfileUserIds.clear();
         for (int userId : profileUserIds) {
             final UserInfo userInfo = mUserController.getUserInfo(userId);
-            if (userInfo.isManagedProfile() && userInfo.isQuietModeEnabled()) {
+            if (userInfo != null && userInfo.isManagedProfile() && userInfo.isQuietModeEnabled()) {
                 mTmpQuietProfileUserIds.put(userId, true);
             }
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "User: " + userInfo
