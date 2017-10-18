@@ -92,7 +92,7 @@ bool CombinationLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMa
     return true;
 }
 
-void CombinationLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
+void CombinationLogMatchingTracker::onLogEvent(const LogEvent& event,
                                                const vector<sp<LogMatchingTracker>>& allTrackers,
                                                vector<MatchingState>& matcherResults) {
     // this event has been processed.
@@ -100,7 +100,7 @@ void CombinationLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
         return;
     }
 
-    if (mTagIds.find(event.tagId) == mTagIds.end()) {
+    if (mTagIds.find(event.GetTagId()) == mTagIds.end()) {
         matcherResults[mIndex] = MatchingState::kNotMatched;
         return;
     }

@@ -51,7 +51,7 @@ bool SimpleLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMatcher
     return true;
 }
 
-void SimpleLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
+void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,
                                           const vector<sp<LogMatchingTracker>>& allTrackers,
                                           vector<MatchingState>& matcherResults) {
     if (matcherResults[mIndex] != MatchingState::kNotComputed) {
@@ -59,7 +59,7 @@ void SimpleLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
         return;
     }
 
-    if (mTagIds.find(event.tagId) == mTagIds.end()) {
+    if (mTagIds.find(event.GetTagId()) == mTagIds.end()) {
         matcherResults[mIndex] = MatchingState::kNotMatched;
         return;
     }

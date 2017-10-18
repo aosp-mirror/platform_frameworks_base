@@ -29,6 +29,7 @@ statsd_common_src := \
     src/config/ConfigManager.cpp \
     src/external/KernelWakelockPuller.cpp \
     src/external/StatsPullerManager.cpp \
+    src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
     src/logd/LogReader.cpp \
     src/matchers/CombinationLogMatchingTracker.cpp \

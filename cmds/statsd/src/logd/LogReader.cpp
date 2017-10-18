@@ -16,8 +16,6 @@
 
 #include "logd/LogReader.h"
 
-#include <log/log_read.h>
-
 #include <utils/Errors.h>
 
 #include <time.h>
@@ -94,6 +92,7 @@ int LogReader::connect_and_read() {
 
     // Read forever
     if (eventLogger) {
+
         while (true) {
             log_msg msg;
 
@@ -107,8 +106,11 @@ int LogReader::connect_and_read() {
             // Record that we read one (used above to know how to snooze).
             lineCount++;
 
+            // Wrap it in a LogEvent object
+            LogEvent event(msg);
+
             // Call the listener
-            mListener->OnLogEvent(msg);
+            mListener->OnLogEvent(event);
         }
     }
 

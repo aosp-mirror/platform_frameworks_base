@@ -24,7 +24,6 @@
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
-#include <log/logprint.h>
 #include <stdio.h>
 #include <unordered_map>
 
@@ -37,7 +36,7 @@ public:
     StatsLogProcessor(const sp<UidMap> &uidMap);
     virtual ~StatsLogProcessor();
 
-    virtual void OnLogEvent(const log_msg& msg);
+    virtual void OnLogEvent(const LogEvent& event);
 
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);

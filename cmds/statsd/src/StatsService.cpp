@@ -436,8 +436,8 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
-void StatsService::OnLogEvent(const log_msg& msg) {
-    mProcessor->OnLogEvent(msg);
+void StatsService::OnLogEvent(const LogEvent& event) {
+    mProcessor->OnLogEvent(event);
 }
 
 }  // namespace statsd

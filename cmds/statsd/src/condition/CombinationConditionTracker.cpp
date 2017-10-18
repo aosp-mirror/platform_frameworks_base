@@ -103,7 +103,7 @@ bool CombinationConditionTracker::init(const vector<Condition>& allConditionConf
 }
 
 bool CombinationConditionTracker::evaluateCondition(
-        const LogEventWrapper& event, const std::vector<MatchingState>& eventMatcherValues,
+        const LogEvent& event, const std::vector<MatchingState>& eventMatcherValues,
         const std::vector<sp<ConditionTracker>>& mAllConditions,
         std::vector<ConditionState>& conditionCache, std::vector<bool>& changedCache) {
     // value is up to date.

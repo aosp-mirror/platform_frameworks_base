@@ -17,16 +17,16 @@
 #ifndef LOG_MATCHING_TRACKER_H
 #define LOG_MATCHING_TRACKER_H
 
-#include <log/log_read.h>
-#include <log/logprint.h>
-#include <utils/RefBase.h>
-#include <set>
-#include <unordered_map>
-
-#include <vector>
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "matcher_util.h"
+#include "logd/LogEvent.h"
+#include "matchers/matcher_util.h"
+
+#include <utils/RefBase.h>
+
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 namespace android {
 namespace os {
@@ -59,7 +59,7 @@ public:
     // matcherResults: The cached results for all matchers for this event. Parent matchers can
     //                 directly access the children's matching results if they have been evaluated.
     //                 Otherwise, call children matchers' onLogEvent.
-    virtual void onLogEvent(const LogEventWrapper& event,
+    virtual void onLogEvent(const LogEvent& event,
                             const std::vector<sp<LogMatchingTracker>>& allTrackers,
                             std::vector<MatchingState>& matcherResults) = 0;
 

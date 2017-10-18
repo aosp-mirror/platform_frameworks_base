@@ -40,100 +40,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-string LogEventWrapper::toString() const {
-    std::ostringstream result;
-    result << "{ " << timestamp_ns << " (" << tagId << ")";
-    for (int index = 1; ; index++) {
-        auto intVal = intMap.find(index);
-        auto strVal = strMap.find(index);
-        auto boolVal = boolMap.find(index);
-        auto floatVal = floatMap.find(index);
-        if (intVal != intMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(intVal->second);
-        } else if (strVal != strMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << strVal->second;
-        } else if (boolVal != boolMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(boolVal->second);
-        } else if (floatVal != floatMap.end()) {
-            result << " ";
-            result << std::to_string(index);
-            result << "->";
-            result << std::to_string(floatVal->second);
-        } else {
-            break;
-        }
-    }
-    result << " }";
-    return result.str();
-}
-
-LogEventWrapper parseLogEvent(log_msg msg) {
-    LogEventWrapper wrapper;
-    wrapper.timestamp_ns = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
-    wrapper.tagId = getTagId(msg);
-
-    // start iterating k,v pairs.
-    android_log_context context =
-            create_android_log_parser(const_cast<log_msg*>(&msg)->msg() + sizeof(uint32_t),
-                                      const_cast<log_msg*>(&msg)->len() - sizeof(uint32_t));
-    android_log_list_element elem;
-
-    if (context) {
-        memset(&elem, 0, sizeof(elem));
-        // TODO: The log is actually structured inside one list.  This is convenient
-        // because we'll be able to use it to put the attribution (WorkSource) block first
-        // without doing our own tagging scheme.  Until that change is in, just drop the
-        // list-related log elements and the order we get there is our index-keyed data
-        // structure.
-        int32_t key = 1;
-        do {
-            elem = android_log_read_next(context);
-            switch ((int)elem.type) {
-                case EVENT_TYPE_INT:
-                    wrapper.intMap[key] = elem.data.int32;
-                    key++;
-                    break;
-                case EVENT_TYPE_FLOAT:
-                    wrapper.floatMap[key] = elem.data.float32;
-                    key++;
-                    break;
-                case EVENT_TYPE_STRING:
-                    // without explicit calling string() constructor, there will be an
-                    // additional 0 in the end of the string.
-                    wrapper.strMap[key] = string(elem.data.string);
-                    key++;
-                    break;
-                case EVENT_TYPE_LONG:
-                    wrapper.intMap[key] = elem.data.int64;
-                    key++;
-                    break;
-                case EVENT_TYPE_LIST:
-                    break;
-                case EVENT_TYPE_LIST_STOP:
-                    break;
-                case EVENT_TYPE_UNKNOWN:
-                    break;
-                default:
-                    elem.complete = true;
-                    break;
-            }
-        } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
-
-        android_log_destroy(&context);
-    }
-
-    return wrapper;
-}
-
 bool combinationMatch(const vector<int>& children, const LogicalOperation& operation,
                       const vector<MatchingState>& matcherResults) {
     bool matched;
@@ -183,96 +89,103 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEventWrapper& event) {
-    const int tagId = event.tagId;
+bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& event) {
+    const int tagId = event.GetTagId();
+    /*
     const unordered_map<int, long>& intMap = event.intMap;
     const unordered_map<int, string>& strMap = event.strMap;
     const unordered_map<int, float>& floatMap = event.floatMap;
     const unordered_map<int, bool>& boolMap = event.boolMap;
+    */
 
     for (int i = 0; i < simpleMatcher.tag_size(); i++) {
         if (simpleMatcher.tag(i) != tagId) {
             continue;
         }
 
+        // TODO Is this right? Shouldn't this second loop be outside the outer loop?
+        // If I understand correctly, the event matches if one of the tags match,
+        // and ALL of the key-value matchers match. --joeo
+
         // now see if this event is interesting to us -- matches ALL the matchers
         // defined in the metrics.
         bool allMatched = true;
-        for (int j = 0; j < simpleMatcher.key_value_matcher_size(); j++) {
+        for (int j = 0; allMatched && j < simpleMatcher.key_value_matcher_size(); j++) {
             auto cur = simpleMatcher.key_value_matcher(j);
 
             // TODO: Check if this key is a magic key (eg package name).
+            // TODO: Maybe make packages a different type in the config?
             int key = cur.key_matcher().key();
 
-            switch (cur.value_matcher_case()) {
-                case KeyValueMatcher::ValueMatcherCase::kEqString: {
-                    auto it = strMap.find(key);
-                    if (it == strMap.end() || cur.eq_string().compare(it->second) != 0) {
+            const KeyValueMatcher::ValueMatcherCase matcherCase = cur.value_matcher_case();
+            if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqString) {
+                // String fields
+                status_t err = NO_ERROR;
+                const char* val = event.GetString(key, &err);
+                if (err == NO_ERROR && val != NULL) {
+                    if (!(cur.eq_string() == val)) {
                         allMatched = false;
                     }
-                    break;
                 }
-                case KeyValueMatcher::ValueMatcherCase::kEqInt: {
-                    auto it = intMap.find(key);
-                    if (it == intMap.end() || cur.eq_int() != it->second) {
+            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt
+                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt
+                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt
+                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt
+                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
+                // Integer fields
+                status_t err = NO_ERROR;
+                int64_t val = event.GetLong(key, &err);
+                if (err == NO_ERROR) {
+                    if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt) {
+                        if (!(val == cur.eq_int())) {
+                            allMatched = false;
+                        }
+                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt) {
+                        if (!(val < cur.lt_int())) {
+                            allMatched = false;
+                        }
+                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt) {
+                        if (!(val > cur.gt_int())) {
+                            allMatched = false;
+                        }
+                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt) {
+                        if (!(val <= cur.lte_int())) {
+                            allMatched = false;
+                        }
+                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
+                        if (!(val >= cur.gte_int())) {
+                            allMatched = false;
+                        }
+                    }
+                }
+                break;
+            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqBool) {
+                // Boolean fields
+                status_t err = NO_ERROR;
+                bool val = event.GetBool(key, &err);
+                if (err == NO_ERROR) {
+                    if (!(cur.eq_bool() == val)) {
                         allMatched = false;
                     }
-                    break;
                 }
-                case KeyValueMatcher::ValueMatcherCase::kEqBool: {
-                    auto it = boolMap.find(key);
-                    if (it == boolMap.end() || cur.eq_bool() != it->second) {
-                        allMatched = false;
+            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat
+                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
+                // Float fields
+                status_t err = NO_ERROR;
+                bool val = event.GetFloat(key, &err);
+                if (err == NO_ERROR) {
+                    if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat) {
+                        if (!(cur.lt_float() <= val)) {
+                            allMatched = false;
+                        }
+                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
+                        if (!(cur.gt_float() >= val)) {
+                            allMatched = false;
+                        }
                     }
-                    break;
                 }
-                    // Begin numeric comparisons
-                case KeyValueMatcher::ValueMatcherCase::kLtInt: {
-                    auto it = intMap.find(key);
-                    if (it == intMap.end() || cur.lt_int() <= it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                case KeyValueMatcher::ValueMatcherCase::kGtInt: {
-                    auto it = intMap.find(key);
-                    if (it == intMap.end() || cur.gt_int() >= it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                case KeyValueMatcher::ValueMatcherCase::kLtFloat: {
-                    auto it = floatMap.find(key);
-                    if (it == floatMap.end() || cur.lt_float() <= it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                case KeyValueMatcher::ValueMatcherCase::kGtFloat: {
-                    auto it = floatMap.find(key);
-                    if (it == floatMap.end() || cur.gt_float() >= it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                // Begin comparisons with equality
-                case KeyValueMatcher::ValueMatcherCase::kLteInt: {
-                    auto it = intMap.find(key);
-                    if (it == intMap.end() || cur.lte_int() < it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                case KeyValueMatcher::ValueMatcherCase::kGteInt: {
-                    auto it = intMap.find(key);
-                    if (it == intMap.end() || cur.gte_int() > it->second) {
-                        allMatched = false;
-                    }
-                    break;
-                }
-                case KeyValueMatcher::ValueMatcherCase::VALUE_MATCHER_NOT_SET:
-                    // If value matcher is not present, assume that we match.
-                    break;
+            } else {
+                // If value matcher is not present, assume that we match.
             }
         }
 

@@ -37,7 +37,7 @@ public:
               const std::unordered_map<std::string, int>& conditionNameIndexMap,
               std::vector<bool>& stack) override;
 
-    bool evaluateCondition(const LogEventWrapper& event,
+    bool evaluateCondition(const LogEvent& event,
                            const std::vector<MatchingState>& eventMatcherValues,
                            const std::vector<sp<ConditionTracker>>& mAllConditions,
                            std::vector<ConditionState>& conditionCache,

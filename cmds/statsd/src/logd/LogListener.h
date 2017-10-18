@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <log/log_read.h>
+#include "logd/LogEvent.h"
+
 #include <utils/RefBase.h>
 #include <vector>
 
@@ -32,9 +33,7 @@ public:
     LogListener();
     virtual ~LogListener();
 
-    // TODO: Rather than using log_msg, which doesn't have any real internal structure
-    // here, we should pull this out into our own LogEntry class.
-    virtual void OnLogEvent(const log_msg& msg) = 0;
+    virtual void OnLogEvent(const LogEvent& msg) = 0;
 };
 
 }  // namespace statsd
