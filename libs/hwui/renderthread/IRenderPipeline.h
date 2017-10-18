@@ -81,6 +81,7 @@ public:
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
+    virtual void onPrepareTree() = 0;
 
     virtual ~IRenderPipeline() {}
 };
