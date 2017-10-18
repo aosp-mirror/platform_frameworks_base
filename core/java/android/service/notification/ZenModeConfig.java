@@ -93,7 +93,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ZEN_ATT_USER = "user";
     private static final String ALLOW_TAG = "allow";
     private static final String ALLOW_ATT_ALARMS = "alarms";
-    private static final String ALLOW_ATT_MEDIA = "media_system_other";
+    private static final String ALLOW_ATT_MEDIA_SYSTEM_OTHER = "media_system_other";
     private static final String ALLOW_ATT_CALLS = "calls";
     private static final String ALLOW_ATT_REPEAT_CALLERS = "repeatCallers";
     private static final String ALLOW_ATT_MESSAGES = "messages";
@@ -460,7 +460,7 @@ public class ZenModeConfig implements Parcelable {
                     rt.allowWhenScreenOn =
                             safeBoolean(parser, ALLOW_ATT_SCREEN_ON, DEFAULT_ALLOW_SCREEN_ON);
                     rt.allowAlarms = safeBoolean(parser, ALLOW_ATT_ALARMS, DEFAULT_ALLOW_ALARMS);
-                    rt.allowMediaSystemOther = safeBoolean(parser, ALLOW_ATT_MEDIA,
+                    rt.allowMediaSystemOther = safeBoolean(parser, ALLOW_ATT_MEDIA_SYSTEM_OTHER,
                             DEFAULT_ALLOW_MEDIA_SYSTEM_OTHER);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
@@ -493,7 +493,7 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_SCREEN_OFF, Boolean.toString(allowWhenScreenOff));
         out.attribute(null, ALLOW_ATT_SCREEN_ON, Boolean.toString(allowWhenScreenOn));
         out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
-        out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowMediaSystemOther));
+        out.attribute(null, ALLOW_ATT_MEDIA_SYSTEM_OTHER, Boolean.toString(allowMediaSystemOther));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
