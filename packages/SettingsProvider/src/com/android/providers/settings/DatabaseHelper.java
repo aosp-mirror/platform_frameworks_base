@@ -2319,8 +2319,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
                     R.bool.def_screen_brightness_automatic_mode);
 
-            loadDefaultAnimationSettings(stmt);
-
             loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                     R.bool.def_accelerometer_rotation);
 
@@ -2513,6 +2511,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
             loadSetting(stmt, Settings.Global.MODE_RINGER,
                     AudioManager.RINGER_MODE_NORMAL);
+
+            loadDefaultAnimationSettings(stmt);
 
             // --- Previously in 'secure'
             loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
