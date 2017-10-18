@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -113,6 +114,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     // Used to indicate to the AdapterView that it can use this Adapter immediately after
     // construction (happens when we have a cached FixedSizeRemoteViewsCache).
     private boolean mDataReady = false;
+
+    /**
+     * USed to dedupe {@link RemoteViews#mApplication} so that we do not hold on to
+     * multiple copies of the same ApplicationInfo object.
+     */
+    private ApplicationInfo mLastRemoteViewAppInfo;
 
     /**
      * An interface for the RemoteAdapter to notify other classes when adapters
@@ -309,6 +316,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     static class RemoteViewsFrameLayout extends AppWidgetHostView {
         private final FixedSizeRemoteViewsCache mCache;
 
+        public int cacheIndex = -1;
+
         public RemoteViewsFrameLayout(Context context, FixedSizeRemoteViewsCache cache) {
             super(context);
             mCache = cache;
@@ -359,26 +368,23 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * Stores the references of all the RemoteViewsFrameLayouts that have been returned by the
      * adapter that have not yet had their RemoteViews loaded.
      */
-    private class RemoteViewsFrameLayoutRefSet {
-        private final SparseArray<LinkedList<RemoteViewsFrameLayout>> mReferences =
-                new SparseArray<>();
-        private final HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>
-                mViewToLinkedList = new HashMap<>();
+    private class RemoteViewsFrameLayoutRefSet
+            extends SparseArray<LinkedList<RemoteViewsFrameLayout>> {
 
         /**
          * Adds a new reference to a RemoteViewsFrameLayout returned by the adapter.
          */
         public void add(int position, RemoteViewsFrameLayout layout) {
-            LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(position);
+            LinkedList<RemoteViewsFrameLayout> refs = get(position);
 
             // Create the list if necessary
             if (refs == null) {
-                refs = new LinkedList<RemoteViewsFrameLayout>();
-                mReferences.put(position, refs);
+                refs = new LinkedList<>();
+                put(position, refs);
             }
-            mViewToLinkedList.put(layout, refs);
 
             // Add the references to the list
+            layout.cacheIndex = position;
             refs.add(layout);
         }
 
@@ -389,18 +395,13 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         public void notifyOnRemoteViewsLoaded(int position, RemoteViews view) {
             if (view == null) return;
 
-            final LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(position);
+            // Remove this set from the original mapping
+            final LinkedList<RemoteViewsFrameLayout> refs = removeReturnOld(position);
             if (refs != null) {
                 // Notify all the references for that position of the newly loaded RemoteViews
                 for (final RemoteViewsFrameLayout ref : refs) {
                     ref.onRemoteViewsLoaded(view, mRemoteViewsOnClickHandler, true);
-                    if (mViewToLinkedList.containsKey(ref)) {
-                        mViewToLinkedList.remove(ref);
-                    }
                 }
-                refs.clear();
-                // Remove this set from the original mapping
-                mReferences.remove(position);
             }
         }
 
@@ -408,20 +409,14 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
          * We need to remove views from this set if they have been recycled by the AdapterView.
          */
         public void removeView(RemoteViewsFrameLayout rvfl) {
-            if (mViewToLinkedList.containsKey(rvfl)) {
-                mViewToLinkedList.get(rvfl).remove(rvfl);
-                mViewToLinkedList.remove(rvfl);
+            if (rvfl.cacheIndex < 0) {
+                return;
             }
-        }
-
-        /**
-         * Removes all references to all RemoteViewsFrameLayouts returned by the adapter.
-         */
-        public void clear() {
-            // We currently just clear the references, and leave all the previous layouts returned
-            // in their default state of the loading view.
-            mReferences.clear();
-            mViewToLinkedList.clear();
+            final LinkedList<RemoteViewsFrameLayout> refs = get(rvfl.cacheIndex);
+            if (refs != null) {
+                refs.remove(rvfl);
+            }
+            rvfl.cacheIndex = -1;
         }
     }
 
@@ -534,7 +529,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // too much memory.
         private final SparseArray<RemoteViews> mIndexRemoteViews = new SparseArray<>();
 
-        // An array of indices to load, Indices which are explicitely requested are set to true,
+        // An array of indices to load, Indices which are explicitly requested are set to true,
         // and those determined by the preloading algorithm to prefetch are set to false.
         private final SparseBooleanArray mIndicesToLoad = new SparseBooleanArray();
 
@@ -992,6 +987,20 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + " null RemoteViews " +
                     "returned from RemoteViewsFactory.");
             return;
+        }
+
+        if (remoteViews.mApplication != null) {
+            // We keep track of last application info. This helps when all the remoteViews have
+            // same applicationInfo, which should be the case for a typical adapter. But if every
+            // view has different application info, there will not be any optimization.
+            if (mLastRemoteViewAppInfo != null
+                    && remoteViews.hasSameAppInfo(mLastRemoteViewAppInfo)) {
+                // We should probably also update the remoteViews for nested ViewActions.
+                // Hopefully, RemoteViews in an adapter would be less complicated.
+                remoteViews.mApplication = mLastRemoteViewAppInfo;
+            } else {
+                mLastRemoteViewAppInfo = remoteViews.mApplication;
+            }
         }
 
         int layoutId = remoteViews.getLayoutId();
