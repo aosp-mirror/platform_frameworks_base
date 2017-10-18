@@ -36,31 +36,16 @@ using namespace std;
 
 map<string,string> g_buildVars;
 
-static unsigned int
-get_thread_count()
-{
-    unsigned int threads = std::thread::hardware_concurrency();
-    // Guess if the value cannot be computed
-    return threads == 0 ? 4 : static_cast<unsigned int>(threads * 1.3f);
-}
-
 string
-get_build_var(const string& buildTop, const string& name, bool quiet)
+get_build_var(const string& name, bool quiet)
 {
     int err;
 
     map<string,string>::iterator it = g_buildVars.find(name);
     if (it == g_buildVars.end()) {
-        Command cmd("make");
-        cmd.AddArg("--no-print-directory");
-        cmd.AddArg(string("-j") + std::to_string(get_thread_count()));
-        cmd.AddArg("-C");
-        cmd.AddArg(buildTop);
-        cmd.AddArg("-f");
-        cmd.AddArg("build/core/config.mk");
-        cmd.AddArg(string("dumpvar-") + name);
-        cmd.AddEnv("CALLED_FROM_SETUP", "true");
-        cmd.AddEnv("BUILD_SYSTEM", "build/core");
+        Command cmd("build/soong/soong_ui.bash");
+        cmd.AddArg("--dumpvar-mode");
+        cmd.AddArg(name);
 
         string output = trim(get_command_output(cmd, &err, quiet));
         if (err == 0) {
@@ -208,10 +193,8 @@ read_modules(const string& buildOut, const string& device, map<string,Module>* r
 int
 build_goals(const vector<string>& goals)
 {
-    Command cmd("make");
-    cmd.AddArg(string("-j") + std::to_string(get_thread_count()));
-    cmd.AddArg("-f");
-    cmd.AddArg("build/core/main.mk");
+    Command cmd("build/soong/soong_ui.bash");
+    cmd.AddArg("--make-mode");
     for (size_t i=0; i<goals.size(); i++) {
         cmd.AddArg(goals[i]);
     }
