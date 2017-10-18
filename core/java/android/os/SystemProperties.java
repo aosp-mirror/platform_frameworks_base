@@ -157,7 +157,7 @@ public class SystemProperties {
      * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
      */
     public static void set(@NonNull String key, @Nullable String val) {
-        if (val != null && val.length() > PROP_VALUE_MAX) {
+        if (val != null && !val.startsWith("ro.") && val.length() > PROP_VALUE_MAX) {
             throw new IllegalArgumentException("value of system property '" + key
                     + "' is longer than " + PROP_VALUE_MAX + " characters: " + val);
         }
