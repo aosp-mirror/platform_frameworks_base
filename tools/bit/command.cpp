@@ -189,7 +189,7 @@ run_command(const Command& command)
 int
 exec_with_path_search(const char* prog, char const* const* argv, char const* const* envp)
 {
-    if (prog[0] == '/') {
+    if (strchr(prog, '/') != NULL) {
         return execve(prog, (char*const*)argv, (char*const*)envp);
     } else {
         char* pathEnv = strdup(getenv("PATH"));
