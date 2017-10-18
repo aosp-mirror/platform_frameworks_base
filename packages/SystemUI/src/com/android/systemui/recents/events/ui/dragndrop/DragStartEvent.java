@@ -19,7 +19,7 @@ package com.android.systemui.recents.events.ui.dragndrop;
 import android.graphics.Point;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**

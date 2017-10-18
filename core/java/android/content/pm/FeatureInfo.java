@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 /**
  * Definition of a single optional hardware or software feature of an Android
@@ -111,6 +112,18 @@ public class FeatureInfo implements Parcelable {
         dest.writeInt(version);
         dest.writeInt(reqGlEsVersion);
         dest.writeInt(flags);
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        if (name != null) {
+            proto.write(FeatureInfoProto.NAME, name);
+        }
+        proto.write(FeatureInfoProto.VERSION, version);
+        proto.write(FeatureInfoProto.GLES_VERSION, getGlEsVersion());
+        proto.write(FeatureInfoProto.FLAGS, flags);
+        proto.end(token);
     }
 
     public static final Creator<FeatureInfo> CREATOR = new Creator<FeatureInfo>() {

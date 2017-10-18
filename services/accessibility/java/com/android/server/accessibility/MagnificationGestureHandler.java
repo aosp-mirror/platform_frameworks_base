@@ -101,21 +101,12 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @SuppressWarnings("WeakerAccess")
 class MagnificationGestureHandler extends BaseEventStreamTransformation {
-    private static final String LOG_TAG = "MagnificationEventHandler";
+    private static final String LOG_TAG = "MagnificationGestureHandler";
 
     private static final boolean DEBUG_ALL = false;
     private static final boolean DEBUG_STATE_TRANSITIONS = false || DEBUG_ALL;
     private static final boolean DEBUG_DETECTING = false || DEBUG_ALL;
-    private static final boolean DEBUG_PANNING = false || DEBUG_ALL;
-
-    /** @see DelegatingState */
-    @VisibleForTesting static final int STATE_DELEGATING = 1;
-    /** @see DetectingState */
-    @VisibleForTesting static final int STATE_DETECTING = 2;
-    /** @see ViewportDraggingState */
-    @VisibleForTesting static final int STATE_VIEWPORT_DRAGGING = 3;
-    /** @see PanningScalingState */
-    @VisibleForTesting static final int STATE_PANNING_SCALING = 4;
+    private static final boolean DEBUG_PANNING_SCALING = false || DEBUG_ALL;
 
     private static final float MIN_SCALE = 2.0f;
     private static final float MAX_SCALE = 5.0f;
@@ -184,6 +175,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (DEBUG_ALL) Slog.i(LOG_TAG, "onMotionEvent(" + event + ")");
+
         if ((!mDetectTripleTap && !mDetectShortcutTrigger)
                 || !event.isFromSource(SOURCE_TOUCHSCREEN)) {
             dispatchTransformedEvent(event, rawEvent, policyFlags);
@@ -213,6 +206,11 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     @Override
     public void onDestroy() {
+        if (DEBUG_STATE_TRANSITIONS) {
+            Slog.i(LOG_TAG, "onDestroy(); delayed = "
+                    + MotionEventInfo.toString(mDetectingState.mDelayedEventQueue));
+        }
+
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
         }
@@ -239,6 +237,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     private void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
+        if (DEBUG_ALL) Slog.i(LOG_TAG, "dispatchTransformedEvent(event = " + event + ")");
+
         // If the touchscreen event is within the magnified portion of the screen we have
         // to change its location to be where the user thinks he is poking the
         // UI which may have been magnified and panned.
@@ -332,8 +332,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
      * magnification level.
      * This makes it the preferred mode for one-off adjustments, due to its precision and ease of
      * triggering.
-     *
-     * @see #STATE_PANNING_SCALING
      */
     final class PanningScalingState extends SimpleOnGestureListener
             implements OnScaleGestureListener, State {
@@ -385,7 +383,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             if (mCurrentState != mPanningScalingState) {
                 return true;
             }
-            if (DEBUG_PANNING) {
+            if (DEBUG_PANNING_SCALING) {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + distanceX
                         + " scrollY: " + distanceY);
             }
@@ -402,12 +400,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     return false;
                 }
                 final float deltaScale = detector.getScaleFactor() - mInitialScaleFactor;
-                if (abs(deltaScale) > mScalingThreshold) {
-                    mScaling = true;
-                    return true;
-                } else {
-                    return false;
-                }
+                mScaling = abs(deltaScale) > mScalingThreshold;
+                return mScaling;
             }
 
             final float initialScale = mMagnificationController.getScale();
@@ -431,6 +425,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
             final float pivotX = detector.getFocusX();
             final float pivotY = detector.getFocusY();
+            if (DEBUG_PANNING_SCALING) Slog.i(LOG_TAG, "Scaled content to: " + scale + "x");
             mMagnificationController.setScale(scale, pivotX, pivotY, false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             return /* handled: */ true;
@@ -469,8 +464,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
      * Unlike when {@link PanningScalingState panning}, the viewport moves in the opposite direction
      * of the finger, and any part of the screen is reachable without lifting the finger.
      * This makes it the preferable mode for tasks like reading text spanning full screen width.
-     *
-     * @see #STATE_VIEWPORT_DRAGGING
      */
     final class ViewportDraggingState implements State {
 
@@ -534,7 +527,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     final class DelegatingState implements State {
         /**
-         * Time of last {@link MotionEvent#ACTION_DOWN} while in {@link #STATE_DELEGATING}
+         * Time of last {@link MotionEvent#ACTION_DOWN} while in {@link DelegatingState}
          */
         public long mLastDelegatedDownEventTime;
 
@@ -563,8 +556,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     /**
      * This class handles motion events when the event dispatch has not yet
      * determined what the user is doing. It watches for various tap events.
-     *
-     * @see #STATE_DETECTING
      */
     final class DetectingState implements State, Handler.Callback {
 
@@ -737,14 +728,14 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             return MotionEventInfo.countOf(mDelayedEventQueue, ACTION_UP);
         }
 
-        /** -> {@link #STATE_DELEGATING} */
+        /** -> {@link DelegatingState} */
         public void afterMultiTapTimeoutTransitionToDelegatingState() {
             mHandler.sendEmptyMessageDelayed(
                     MESSAGE_TRANSITION_TO_DELEGATING_STATE,
                     mMultiTapMaxDelay);
         }
 
-        /** -> {@link #STATE_VIEWPORT_DRAGGING} */
+        /** -> {@link ViewportDraggingState} */
         public void afterLongTapTimeoutTransitionToDraggingState(MotionEvent event) {
             mHandler.sendMessageDelayed(
                     mHandler.obtainMessage(MESSAGE_ON_TRIPLE_TAP_AND_HOLD, event),
@@ -865,6 +856,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     }
 
     private void zoomOn(float centerX, float centerY) {
+        if (DEBUG_DETECTING) Slog.i(LOG_TAG, "zoomOn(" + centerX + ", " + centerY + ")");
+
         final float scale = MathUtils.constrain(
                 mMagnificationController.getPersistedScale(),
                 MIN_SCALE, MAX_SCALE);
@@ -875,6 +868,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
     }
 
     private void zoomOff() {
+        if (DEBUG_DETECTING) Slog.i(LOG_TAG, "zoomOff()");
+
         mMagnificationController.reset(/* animate */ true);
     }
 

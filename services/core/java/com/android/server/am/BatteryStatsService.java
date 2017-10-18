@@ -297,26 +297,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     void noteProcessStart(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessStartLocked(name, uid);
-
-            // TODO: remove this once we figure out properly where and how
-            // PROCESS_EVENT = 1112
-            // KEY_STATE = 1
-            // KEY_PACKAGE_NAME: 1002
-            // KEY_UID: 2
-            StatsLog.writeArray(1112, 1, 1, 1002, name, 2, uid);
         }
     }
 
     void noteProcessCrash(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessCrashLocked(name, uid);
-
-            // TODO: remove this once we figure out properly where and how
-            // PROCESS_EVENT = 1112
-            // KEY_STATE = 1
-            // KEY_PACKAGE_NAME: 1002
-            // KEY_UID: 2
-            StatsLog.writeArray(1112, 1, 2, 1002, name, 2, uid);
         }
     }
 
@@ -334,6 +320,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     void noteUidProcessState(int uid, int state) {
         synchronized (mStats) {
+            // TODO: remove this once we figure out properly where and how
+            StatsLog.write(StatsLog.PROCESS_STATE_CHANGED, uid, state);
+
             mStats.noteUidProcessStateLocked(uid, state);
         }
     }
@@ -548,12 +537,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         if (DBG) Slog.d(TAG, "begin noteScreenState");
         synchronized (mStats) {
-            mStats.noteScreenStateLocked(state);
             // TODO: remove this once we figure out properly where and how
-            // SCREEN_EVENT = 2
-            // KEY_STATE: 1
-            // State value: state. We can change this to our own def later.
-            StatsLog.writeArray(2, 1, state);
+            StatsLog.write(StatsLog.SCREEN_STATE_CHANGED, state);
+
+            mStats.noteScreenStateLocked(state);
         }
         if (DBG) Slog.d(TAG, "end noteScreenState");
     }

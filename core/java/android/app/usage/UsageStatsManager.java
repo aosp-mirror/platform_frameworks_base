@@ -48,10 +48,10 @@ import java.util.Map;
  * </pre>
  * A request for data in the middle of a time interval will include that interval.
  * <p/>
- * <b>NOTE:</b> This API requires the permission android.permission.PACKAGE_USAGE_STATS, which
- * is a system-level permission and will not be granted to third-party apps. However, declaring
- * the permission implies intention to use the API and the user of the device can grant permission
- * through the Settings application.
+ * <b>NOTE:</b> This API requires the permission android.permission.PACKAGE_USAGE_STATS.
+ * However, declaring the permission implies intention to use the API and the user of the device
+ * still needs to grant permission through the Settings application.
+ * See {@link android.provider.Settings#ACTION_USAGE_ACCESS_SETTINGS}
  */
 @SystemService(Context.USAGE_STATS_SERVICE)
 public final class UsageStatsManager {
@@ -122,7 +122,7 @@ public final class UsageStatsManager {
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
-     * @return A list of {@link UsageStats} or null if none are available.
+     * @return A list of {@link UsageStats}
      *
      * @see #INTERVAL_DAILY
      * @see #INTERVAL_WEEKLY
@@ -139,7 +139,7 @@ public final class UsageStatsManager {
                 return slice.getList();
             }
         } catch (RemoteException e) {
-            // fallthrough and return null.
+            // fallthrough and return the empty list.
         }
         return Collections.emptyList();
     }
@@ -152,7 +152,7 @@ public final class UsageStatsManager {
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
-     * @return A list of {@link ConfigurationStats} or null if none are available.
+     * @return A list of {@link ConfigurationStats}
      */
     public List<ConfigurationStats> queryConfigurations(int intervalType, long beginTime,
             long endTime) {
@@ -185,7 +185,7 @@ public final class UsageStatsManager {
                 return iter;
             }
         } catch (RemoteException e) {
-            // fallthrough and return null
+            // fallthrough and return empty result.
         }
         return sEmptyResults;
     }
@@ -197,8 +197,7 @@ public final class UsageStatsManager {
      *
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
-     * @return A {@link java.util.Map} keyed by package name, or null if no stats are
-     *         available.
+     * @return A {@link java.util.Map} keyed by package name
      */
     public Map<String, UsageStats> queryAndAggregateUsageStats(long beginTime, long endTime) {
         List<UsageStats> stats = queryUsageStats(INTERVAL_BEST, beginTime, endTime);

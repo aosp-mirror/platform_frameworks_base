@@ -29,14 +29,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
@@ -63,7 +62,7 @@ import com.android.systemui.recents.events.component.SetWaitingForTransitionStar
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.shared.recents.model.RecentsTaskLoader;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -192,10 +191,20 @@ public class Recents extends SystemUI
 
     @Override
     public void start() {
+        final Resources res = mContext.getResources();
+        final int defaultTaskBarBackgroundColor =
+                mContext.getColor(R.color.recents_task_bar_default_background_color);
+        final int defaultTaskViewBackgroundColor =
+                mContext.getColor(R.color.recents_task_view_default_background_color);
         sDebugFlags = new RecentsDebugFlags();
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
-        sTaskLoader = new RecentsTaskLoader(mContext);
+        sTaskLoader = new RecentsTaskLoader(mContext,
+                // TODO: Once we start building the AAR, move these into the loader
+                res.getInteger(R.integer.config_recents_max_thumbnail_count),
+                res.getInteger(R.integer.config_recents_max_icon_count),
+                res.getInteger(R.integer.recents_svelte_level));
+        sTaskLoader.setDefaultColors(defaultTaskBarBackgroundColor, defaultTaskViewBackgroundColor);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 

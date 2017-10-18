@@ -528,84 +528,23 @@ public class ViewDebug {
     /** @hide */
     public static void profileViewAndChildren(final View view, BufferedWriter out)
             throws IOException {
-        profileViewAndChildren(view, out, true);
+        RenderNode node = RenderNode.create("ViewDebug", null);
+        profileViewAndChildren(view, node, out, true);
+        node.destroy();
     }
 
-    private static void profileViewAndChildren(final View view, BufferedWriter out, boolean root)
-            throws IOException {
-
+    private static void profileViewAndChildren(View view, RenderNode node, BufferedWriter out,
+            boolean root) throws IOException {
         long durationMeasure =
                 (root || (view.mPrivateFlags & View.PFLAG_MEASURED_DIMENSION_SET) != 0)
-                        ? profileViewOperation(view, new ViewOperation<Void>() {
-                    public Void[] pre() {
-                        forceLayout(view);
-                        return null;
-                    }
-
-                    private void forceLayout(View view) {
-                        view.forceLayout();
-                        if (view instanceof ViewGroup) {
-                            ViewGroup group = (ViewGroup) view;
-                            final int count = group.getChildCount();
-                            for (int i = 0; i < count; i++) {
-                                forceLayout(group.getChildAt(i));
-                            }
-                        }
-                    }
-
-                    public void run(Void... data) {
-                        view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
-                    }
-
-                    public void post(Void... data) {
-                    }
-                })
-                        : 0;
+                        ? profileViewMeasure(view) : 0;
         long durationLayout =
                 (root || (view.mPrivateFlags & View.PFLAG_LAYOUT_REQUIRED) != 0)
-                        ? profileViewOperation(view, new ViewOperation<Void>() {
-                    public Void[] pre() {
-                        return null;
-                    }
-
-                    public void run(Void... data) {
-                        view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom);
-                    }
-
-                    public void post(Void... data) {
-                    }
-                }) : 0;
+                        ? profileViewLayout(view) : 0;
         long durationDraw =
                 (root || !view.willNotDraw() || (view.mPrivateFlags & View.PFLAG_DRAWN) != 0)
-                        ? profileViewOperation(view, new ViewOperation<Object>() {
-                    public Object[] pre() {
-                        final DisplayMetrics metrics =
-                                (view != null && view.getResources() != null) ?
-                                        view.getResources().getDisplayMetrics() : null;
-                        final Bitmap bitmap = metrics != null ?
-                                Bitmap.createBitmap(metrics, metrics.widthPixels,
-                                        metrics.heightPixels, Bitmap.Config.RGB_565) : null;
-                        final Canvas canvas = bitmap != null ? new Canvas(bitmap) : null;
-                        return new Object[] {
-                                bitmap, canvas
-                        };
-                    }
+                        ? profileViewDraw(view, node) : 0;
 
-                    public void run(Object... data) {
-                        if (data[1] != null) {
-                            view.draw((Canvas) data[1]);
-                        }
-                    }
-
-                    public void post(Object... data) {
-                        if (data[1] != null) {
-                            ((Canvas) data[1]).setBitmap(null);
-                        }
-                        if (data[0] != null) {
-                            ((Bitmap) data[0]).recycle();
-                        }
-                    }
-                }) : 0;
         out.write(String.valueOf(durationMeasure));
         out.write(' ');
         out.write(String.valueOf(durationLayout));
@@ -616,34 +555,86 @@ public class ViewDebug {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
             for (int i = 0; i < count; i++) {
-                profileViewAndChildren(group.getChildAt(i), out, false);
+                profileViewAndChildren(group.getChildAt(i), node, out, false);
             }
         }
     }
 
-    interface ViewOperation<T> {
-        T[] pre();
-        void run(T... data);
-        void post(T... data);
+    private static long profileViewMeasure(final View view) {
+        return profileViewOperation(view, new ViewOperation() {
+            @Override
+            public void pre() {
+                forceLayout(view);
+            }
+
+            private void forceLayout(View view) {
+                view.forceLayout();
+                if (view instanceof ViewGroup) {
+                    ViewGroup group = (ViewGroup) view;
+                    final int count = group.getChildCount();
+                    for (int i = 0; i < count; i++) {
+                        forceLayout(group.getChildAt(i));
+                    }
+                }
+            }
+
+            @Override
+            public void run() {
+                view.measure(view.mOldWidthMeasureSpec, view.mOldHeightMeasureSpec);
+            }
+        });
     }
 
-    private static <T> long profileViewOperation(View view, final ViewOperation<T> operation) {
+    private static long profileViewLayout(View view) {
+        return profileViewOperation(view,
+                () -> view.layout(view.mLeft, view.mTop, view.mRight, view.mBottom));
+    }
+
+    private static long profileViewDraw(View view, RenderNode node) {
+        DisplayMetrics dm = view.getResources().getDisplayMetrics();
+        if (dm == null) {
+            return 0;
+        }
+
+        if (view.isHardwareAccelerated()) {
+            DisplayListCanvas canvas = node.start(dm.widthPixels, dm.heightPixels);
+            try {
+                return profileViewOperation(view, () -> view.draw(canvas));
+            } finally {
+                node.end(canvas);
+            }
+        } else {
+            Bitmap bitmap = Bitmap.createBitmap(
+                    dm, dm.widthPixels, dm.heightPixels, Bitmap.Config.RGB_565);
+            Canvas canvas = new Canvas(bitmap);
+            try {
+                return profileViewOperation(view, () -> view.draw(canvas));
+            } finally {
+                canvas.setBitmap(null);
+                bitmap.recycle();
+            }
+        }
+    }
+
+    interface ViewOperation {
+        default void pre() {}
+
+        void run();
+    }
+
+    private static long profileViewOperation(View view, final ViewOperation operation) {
         final CountDownLatch latch = new CountDownLatch(1);
         final long[] duration = new long[1];
 
-        view.post(new Runnable() {
-            public void run() {
-                try {
-                    T[] data = operation.pre();
-                    long start = Debug.threadCpuTimeNanos();
-                    //noinspection unchecked
-                    operation.run(data);
-                    duration[0] = Debug.threadCpuTimeNanos() - start;
-                    //noinspection unchecked
-                    operation.post(data);
-                } finally {
-                    latch.countDown();
-                }
+        view.post(() -> {
+            try {
+                operation.pre();
+                long start = Debug.threadCpuTimeNanos();
+                //noinspection unchecked
+                operation.run();
+                duration[0] = Debug.threadCpuTimeNanos() - start;
+            } finally {
+                latch.countDown();
             }
         });
 

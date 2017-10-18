@@ -36,6 +36,7 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -241,17 +242,24 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
                 int continuedPointerId = mStrokeIdToPointerId
                         .get(touchPoint.mContinuedStrokeId, -1);
                 if (continuedPointerId == -1) {
+                    Slog.w(LOG_TAG, "Can't continue gesture due to unknown continued stroke id in "
+                            + touchPoint);
                     return false;
                 }
                 mStrokeIdToPointerId.put(touchPoint.mStrokeId, continuedPointerId);
                 int lastPointIndex = findPointByStrokeId(
                         mLastTouchPoints, mNumLastTouchPoints, touchPoint.mContinuedStrokeId);
                 if (lastPointIndex < 0) {
+                    Slog.w(LOG_TAG, "Can't continue gesture due continued gesture id of "
+                            + touchPoint + " not matching any previous strokes in "
+                            + Arrays.asList(mLastTouchPoints));
                     return false;
                 }
                 if (mLastTouchPoints[lastPointIndex].mIsEndOfPath
                         || (mLastTouchPoints[lastPointIndex].mX != touchPoint.mX)
                         || (mLastTouchPoints[lastPointIndex].mY != touchPoint.mY)) {
+                    Slog.w(LOG_TAG, "Can't continue gesture due to points mismatch between "
+                            + mLastTouchPoints[lastPointIndex] + " and " + touchPoint);
                     return false;
                 }
                 // Update the last touch point to match the continuation, so the gestures will

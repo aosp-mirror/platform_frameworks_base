@@ -476,6 +476,17 @@ public class Editor {
         stopTextActionModeWithPreservingSelection();
     }
 
+    void invalidateMagnifier() {
+        final DisplayMetrics dm = mTextView.getResources().getDisplayMetrics();
+        invalidateMagnifier(0, 0, dm.widthPixels, dm.heightPixels);
+    }
+
+    void invalidateMagnifier(final float l, final float t, final float r, final float b) {
+        if (mMagnifier != null) {
+            mTextView.post(() -> mMagnifier.invalidate(new RectF(l, t, r, b)));
+        }
+    }
+
     private void discardTextDisplayLists() {
         if (mTextRenderNodes != null) {
             for (int i = 0; i < mTextRenderNodes.length; i++) {
@@ -4545,10 +4556,8 @@ public class Editor {
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f;
             final int[] coordinatesOnScreen = new int[2];
             mTextView.getLocationOnScreen(coordinatesOnScreen);
-            final float centerXOnScreen = xPosInView + mTextView.getTotalPaddingLeft()
-                    - mTextView.getScrollX() + coordinatesOnScreen[0];
-            final float centerYOnScreen = yPosInView + mTextView.getTotalPaddingTop()
-                    - mTextView.getScrollY() + coordinatesOnScreen[1];
+            final float centerXOnScreen = mTextView.convertViewToScreenCoord(xPosInView, true);
+            final float centerYOnScreen = mTextView.convertViewToScreenCoord(yPosInView, false);
 
             suspendBlink();
             mMagnifier.show(centerXOnScreen, centerYOnScreen, MAGNIFIER_ZOOM);

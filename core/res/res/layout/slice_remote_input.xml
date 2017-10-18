@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <!-- LinearLayout -->
-<android.slice.views.RemoteInputView
+<android.app.slice.views.RemoteInputView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/remote_input"
         android:background="@drawable/slice_remote_input_bg"
@@ -73,4 +73,4 @@
 
     </FrameLayout>
 
-</android.slice.views.RemoteInputView>
+</android.app.slice.views.RemoteInputView>

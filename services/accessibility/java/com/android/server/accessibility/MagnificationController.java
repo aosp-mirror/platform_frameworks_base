@@ -56,6 +56,7 @@ import java.util.Locale;
  * constraints.
  */
 class MagnificationController implements Handler.Callback {
+    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "MagnificationController";
 
     public static final float MIN_SCALE = 1.0f;
@@ -509,6 +510,12 @@ class MagnificationController implements Handler.Callback {
 
     private boolean setScaleAndCenterLocked(float scale, float centerX, float centerY,
             boolean animate, int id) {
+        if (DEBUG) {
+            Slog.i(LOG_TAG,
+                    "setScaleAndCenterLocked(scale = " + scale + ", centerX = " + centerX
+                            + ", centerY = " + centerY + ", animate = " + animate + ", id = " + id
+                            + ")");
+        }
         final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
         sendSpecToAnimation(mCurrentMagnificationSpec, animate);
         if (isMagnifying() && (id != INVALID_ID)) {
@@ -535,7 +542,9 @@ class MagnificationController implements Handler.Callback {
 
             final float nonNormOffsetX = mCurrentMagnificationSpec.offsetX - offsetX;
             final float nonNormOffsetY = mCurrentMagnificationSpec.offsetY - offsetY;
-            updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY);
+            if (updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY)) {
+                onMagnificationChangedLocked();
+            }
             if (id != INVALID_ID) {
                 mIdOfLastServiceToMagnify = id;
             }
@@ -633,6 +642,11 @@ class MagnificationController implements Handler.Callback {
     }
 
     private boolean updateCurrentSpecWithOffsetsLocked(float nonNormOffsetX, float nonNormOffsetY) {
+        if (DEBUG) {
+            Slog.i(LOG_TAG,
+                    "updateCurrentSpecWithOffsetsLocked(nonNormOffsetX = " + nonNormOffsetX
+                            + ", nonNormOffsetY = " + nonNormOffsetY + ")");
+        }
         boolean changed = false;
         final float offsetX = MathUtils.constrain(nonNormOffsetX, getMinOffsetXLocked(), 0);
         if (Float.compare(mCurrentMagnificationSpec.offsetX, offsetX) != 0) {
@@ -750,6 +764,9 @@ class MagnificationController implements Handler.Callback {
     }
 
     private void sendSpecToAnimation(MagnificationSpec spec, boolean animate) {
+        if (DEBUG) {
+            Slog.i(LOG_TAG, "sendSpecToAnimation(spec = " + spec + ", animate = " + animate + ")");
+        }
         if (Thread.currentThread().getId() == mMainThreadId) {
             mSpecAnimationBridge.updateSentSpecMainThread(spec, animate);
         } else {

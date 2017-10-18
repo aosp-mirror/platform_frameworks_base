@@ -15,49 +15,116 @@
  */
 
 syntax = "proto2";
-option optimize_for = LITE_RUNTIME;
 
+// TODO: Not the right package and class name
 package android.os.statsd;
-
 option java_package = "com.android.os";
 option java_outer_classname = "StatsEventProto";
 
+/**
+ * The master event class. This message defines all of the available
+ * raw stats log events from the Android system, also known as "atoms."
+ *
+ * This field contains a single oneof with all of the available messages.
+ * The stats-log-api-gen tool runs as part of the Android build and
+ * generates the android.util.StatsLog class, which contains the constants
+ * and methods that Android uses to log.
+ *
+ * This StatsEvent class is not actually built into the Android system.
+ * Instead, statsd on Android constructs these messages synthetically,
+ * in the format defined here and in stats_log.proto.
+ */
 message StatsEvent {
-  oneof event {
-    // Screen state change.
-    ScreenStateChange screen_state_change = 2;
-    // Process state change.
-    ProcessStateChange process_state_change = 1112;
-  }
+    oneof event {
+        ScreenStateChanged screen_state_changed = 1;
+        ProcessStateChanged process_state_changed = 2;
+        WakeLockChanged wakelock_changed = 3;
+    }
 }
 
-// Logs changes in screen state. This event is logged in
-// frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
-message ScreenStateChange {
-  // Screen state enums follow the values defined in below file.
-  // frameworks/base/core/java/android/view/Display.java
-  enum State {
-    STATE_UNKNOWN = 0;
-    STATE_OFF = 1;
-    STATE_ON = 2;
-    STATE_DOZE = 3;
-    STATE_DOZE_SUSPEND = 4;
-    STATE_VR = 5;
-  }
-  // New screen state.
-  optional State display_state = 1;
+/**
+ * A WorkSource represents the chained attribution of applications that
+ * resulted in a particular bit of work being done.
+ */
+message WorkSource {
+    // TODO
 }
 
-// Logs changes in process state. This event is logged in
-// frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
-message ProcessStateChange {
-  // Type of process event.
-  enum State {
-    START = 1;
-    CRASH = 2;
-  }
-  optional State state = 1;
+/*
+ * *****************************************************************************
+ * Below are all of the individual atoms that are logged by Android via statsd
+ * and Westworld.
+ *
+ * RULES:
+ *   - The field ids for each atom must start at 1, and count upwards by 1.
+ *     Skipping field ids is not allowed.
+ *   - These form an API, so renaming, renumbering or removing fields is
+ *     not allowed between android releases.  (This is not currently enforced,
+ *     but there will be a tool to enforce this restriction).
+ *   - The types must be built-in protocol buffer types, namely, no sub-messages
+ *     are allowed (yet).  The bytes type is also not allowed.
+ *   - The CamelCase name of the message type should match the
+ *     underscore_separated name as defined in StatsEvent.
+ *   - If an atom represents work that can be attributed to an app, there can
+ *     be exactly one WorkSource field. It must be field number 1.
+ *   - A field that is a uid should be a string field, tagged with the [xxx]
+ *     annotation. The generated code on android will be represented by UIDs,
+ *     and those UIDs will be translated in xxx to those strings.
+ *
+ * CONVENTIONS:
+ *   - Events are past tense. e.g. ScreenStateChanged, not ScreenStateChange
+ *   - If there is a UID, it goes first. Think in an object-oriented fashion.
+ * *****************************************************************************
+ */
 
-  // UID associated with the package.
-  optional int32 uid = 2;
+/**
+ * Logs when the screen state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenStateChanged {
+    // TODO: Use the real screen state.
+    enum State {
+        STATE_UNKNOWN = 0;
+        STATE_OFF = 1;
+        STATE_ON = 2;
+        STATE_DOZE = 3;
+        STATE_DOZE_SUSPEND = 4;
+        STATE_VR = 5;
+    }
+    // New screen state.
+    optional State display_state = 1;
 }
+
+/**
+ * Logs that the state of a process state, as per the activity manager has changed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ProcessStateChanged {
+    // TODO: Use the real (mapped) process states.
+    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+
+    // The state.
+    optional int32 state = 2;
+}
+
+/**
+ * Logs that the state of a wakelock has changed.
+ *
+ * Logged from:
+ *   TODO
+ */
+message WakeLockChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 2;
+
+    // TODO: Use a constant instead of boolean?
+    optional bool state = 3;
+}
+

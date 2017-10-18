@@ -21860,11 +21860,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mAvailableFeatures) {
             final int count = mAvailableFeatures.size();
             for (int i = 0; i < count; i++) {
-                final FeatureInfo feat = mAvailableFeatures.valueAt(i);
-                final long featureToken = proto.start(PackageServiceDumpProto.FEATURES);
-                proto.write(PackageServiceDumpProto.FeatureProto.NAME, feat.name);
-                proto.write(PackageServiceDumpProto.FeatureProto.VERSION, feat.version);
-                proto.end(featureToken);
+                mAvailableFeatures.valueAt(i).writeToProto(proto, PackageServiceDumpProto.FEATURES);
             }
         }
     }

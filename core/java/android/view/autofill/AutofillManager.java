@@ -997,7 +997,12 @@ public final class AutofillManager {
     }
 
     private AutofillClient getClientLocked() {
-        return mContext.getAutofillClient();
+        final AutofillClient client = mContext.getAutofillClient();
+        if (client == null && sDebug) {
+            Log.d(TAG, "No AutofillClient for " + mContext.getPackageName() + " on context "
+                    + mContext);
+        }
+        return client;
     }
 
     /** @hide */
@@ -1579,6 +1584,7 @@ public final class AutofillManager {
         final String pfx = outerPrefix + "  ";
         pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
         pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
+        pw.print(pfx); pw.print("context: "); pw.println(mContext);
         pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
         pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);

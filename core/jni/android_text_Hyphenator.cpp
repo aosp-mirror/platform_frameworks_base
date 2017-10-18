@@ -83,6 +83,7 @@ static void init() {
     constexpr int INDIC_MIN_SUFFIX = 2;
 
     addHyphenator("as", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Assamese
+    addHyphenator("be", 2, 2); // Belarusian
     addHyphenator("bg", 2, 2); // Bulgarian
     addHyphenator("bn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Bengali
     addHyphenator("cu", 1, 2); // Church Slavonic
@@ -106,6 +107,7 @@ static void init() {
     // Going with a more conservative value of (2, 2) for now.
     addHyphenator("hy", 2, 2); // Armenian
     addHyphenator("kn", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Kannada
+    addHyphenator("la", 2, 2); // Latin
     addHyphenator("ml", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Malayalam
     addHyphenator("mn-Cyrl", 2, 2); // Mongolian in Cyrillic script
     addHyphenator("mr", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX); // Marathi

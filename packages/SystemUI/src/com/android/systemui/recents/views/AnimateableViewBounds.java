@@ -22,7 +22,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 
-import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.shared.recents.utilities.Utilities;
 
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {

@@ -28,8 +28,6 @@ import android.view.InputEvent;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
-import com.android.systemui.recents.misc.Utilities;
-
 import java.io.PrintWriter;
 
 /**

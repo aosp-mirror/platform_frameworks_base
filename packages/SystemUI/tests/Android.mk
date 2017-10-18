@@ -38,6 +38,7 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
+    SystemUISharedLib \
     android-support-v4 \
     android-support-v7-recyclerview \
     android-support-v7-preference \

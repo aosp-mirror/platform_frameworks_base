@@ -3112,7 +3112,7 @@
     <!-- Allows an application to bind app's slices and get their
          content. This content will be surfaced to the
          user and not to leave the device.
-         <p>Not for use by third-party applications. @hide -->
+         <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.BIND_SLICE"
         android:protectionLevel="signature|privileged|development" />
 

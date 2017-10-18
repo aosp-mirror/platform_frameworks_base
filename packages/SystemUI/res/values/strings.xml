@@ -451,8 +451,6 @@
     <string name="accessibility_recents_item_open_app_info">Open <xliff:g id="app" example="Calendar">%s</xliff:g> application info.</string>
     <!-- Content description to tell the user an application has been launched from recents -->
     <string name="accessibility_recents_item_launched">Starting <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
-    <!-- Content description of individual recents task. -->
-    <string name="accessibility_recents_task_header"><xliff:g id="app" example="Chrome">%1$s</xliff:g> <xliff:g id="activity_label" example="www.google.com">%2$s</xliff:g></string>
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
 
@@ -809,10 +807,6 @@
     <string name="recents_accessibility_split_screen_left">Split screen to the left</string>
     <!-- Recents: Accessibility split to the right -->
     <string name="recents_accessibility_split_screen_right">Split screen to the right</string>
-
-    <!-- Fully qualified activity class names to be blacklisted in Recents, add package names into overlay as needed -->
-    <string-array name="recents_blacklist_array">
-    </string-array>
 
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_charged">Charged</string>

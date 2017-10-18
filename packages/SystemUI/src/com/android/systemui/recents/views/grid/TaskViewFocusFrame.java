@@ -23,7 +23,7 @@ import android.view.View;
 
 import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 import com.android.systemui.R;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 
 public class TaskViewFocusFrame extends View implements OnGlobalFocusChangeListener {

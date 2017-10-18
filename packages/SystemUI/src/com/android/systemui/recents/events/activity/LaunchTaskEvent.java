@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.graphics.Rect;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**

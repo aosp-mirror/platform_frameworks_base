@@ -17,6 +17,8 @@
 syntax = "proto2";
 package android.service.pm;
 
+import "frameworks/base/core/proto/android/content/featureinfo.proto";
+
 option java_multiple_files = true;
 option java_outer_classname = "PackageServiceProto";
 
@@ -36,10 +38,6 @@ message PackageServiceDumpProto {
         // Should be filled if is_jar is false
         optional string apk = 4;
     }
-    message FeatureProto {
-        optional string name = 1;
-        optional int32 version = 2;
-    }
     message SharedUserProto {
         optional int32 user_id = 1;
         optional string name = 2;
@@ -49,7 +47,7 @@ message PackageServiceDumpProto {
     optional PackageShortProto required_verifier_package = 1;
     optional PackageShortProto verifier_package = 2;
     repeated SharedLibraryProto shared_libraries = 3;
-    repeated FeatureProto features = 4;
+    repeated android.content.pm.FeatureInfoProto features = 4;
     repeated PackageProto packages = 5;
     repeated SharedUserProto shared_users = 6;
     // Messages from the settings problem file
