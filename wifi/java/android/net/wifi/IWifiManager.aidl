@@ -66,11 +66,11 @@ interface IWifiManager
 
     List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
 
-    int addOrUpdateNetwork(in WifiConfiguration config);
+    int addOrUpdateNetwork(in WifiConfiguration config, String packageName);
 
-    boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config);
+    boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config, String packageName);
 
-    boolean removePasspointConfiguration(in String fqdn);
+    boolean removePasspointConfiguration(in String fqdn, String packageName);
 
     List<PasspointConfiguration> getPasspointConfigurations();
 
@@ -80,21 +80,21 @@ interface IWifiManager
 
     void deauthenticateNetwork(long holdoff, boolean ess);
 
-    boolean removeNetwork(int netId);
+    boolean removeNetwork(int netId, String packageName);
 
-    boolean enableNetwork(int netId, boolean disableOthers);
+    boolean enableNetwork(int netId, boolean disableOthers, String packageName);
 
-    boolean disableNetwork(int netId);
+    boolean disableNetwork(int netId, String packageName);
 
-    void startScan(in ScanSettings requested, in WorkSource ws, in String packageName);
+    void startScan(in ScanSettings requested, in WorkSource ws, String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
-    void disconnect();
+    void disconnect(String packageName);
 
-    void reconnect();
+    void reconnect(String packageName);
 
-    void reassociate();
+    void reassociate(String packageName);
 
     WifiInfo getConnectionInfo(String callingPackage);
 
@@ -108,7 +108,7 @@ interface IWifiManager
 
     boolean isDualBandSupported();
 
-    boolean saveConfiguration();
+    boolean saveConfiguration(String packageName);
 
     DhcpInfo getDhcpInfo();
 
@@ -134,7 +134,7 @@ interface IWifiManager
 
     boolean stopSoftAp();
 
-    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, in String packageName);
+    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, String packageName);
 
     void stopLocalOnlyHotspot();
 
@@ -146,9 +146,9 @@ interface IWifiManager
 
     WifiConfiguration getWifiApConfiguration();
 
-    void setWifiApConfiguration(in WifiConfiguration wifiConfig);
+    void setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
-    Messenger getWifiServiceMessenger();
+    Messenger getWifiServiceMessenger(String packageName);
 
     void enableTdls(String remoteIPAddress, boolean enable);
 
@@ -165,9 +165,9 @@ interface IWifiManager
 
     void enableWifiConnectivityManager(boolean enabled);
 
-    void disableEphemeralNetwork(String SSID);
+    void disableEphemeralNetwork(String SSID, String packageName);
 
-    void factoryReset();
+    void factoryReset(String packageName);
 
     Network getCurrentNetwork();
 
