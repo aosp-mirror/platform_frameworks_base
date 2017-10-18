@@ -615,6 +615,7 @@ package android.bluetooth {
   public final class BluetoothAdapter {
     method public boolean disableBLE();
     method public boolean enableBLE();
+    method public boolean enableNoAutoConnect();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
     field public static final java.lang.String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
@@ -622,8 +623,17 @@ package android.bluetooth {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
+    method public boolean cancelBondProcess();
     method public boolean isConnected();
     method public boolean isEncrypted();
+    method public boolean removeBond();
+    method public boolean setPhonebookAccessPermission(int);
+  }
+
+  public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
+    method public boolean connect(android.bluetooth.BluetoothDevice);
+    method public boolean disconnect(android.bluetooth.BluetoothDevice);
+    method public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
 }

@@ -16,8 +16,10 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
@@ -416,6 +418,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHeadset service = mService;
@@ -456,6 +460,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHeadset service = mService;
@@ -543,6 +549,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         final IBluetoothHeadset service = mService;
