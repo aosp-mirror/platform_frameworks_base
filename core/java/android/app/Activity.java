@@ -6259,6 +6259,8 @@ public class Activity extends ContextThemeWrapper
         final AutofillManager afm = getAutofillManager();
         if (afm != null) {
             afm.dump(prefix, writer);
+        } else {
+            writer.print(prefix); writer.println("No AutofillManager");
         }
     }
 
