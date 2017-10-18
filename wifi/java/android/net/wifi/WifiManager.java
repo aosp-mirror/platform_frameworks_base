@@ -3430,6 +3430,7 @@ public class WifiManager {
      * Set wifi verbose log. Called from developer settings.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void enableVerboseLogging (int verbose) {
         try {
             mService.enableVerboseLogging(verbose);
