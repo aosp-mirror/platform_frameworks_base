@@ -1,6 +1,8 @@
 #include "Errors.h"
 #include "string_utils.h"
 
+#include <frameworks/base/tools/streaming_proto/stream.pb.h>
+
 #include "google/protobuf/compiler/plugin.pb.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"
@@ -160,6 +162,12 @@ write_field(stringstream& text, const FieldDescriptorProto& field, const string&
     text << endl;
 }
 
+static inline bool
+should_generate_fields_mapping(const DescriptorProto& message)
+{
+    return message.options().GetExtension(stream).enable_fields_mapping();
+}
+
 static void
 write_message(stringstream& text, const DescriptorProto& message, const string& indent)
 {
@@ -167,8 +175,7 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
     const string indented = indent + INDENT;
 
     text << indent << "// message " << message.name() << endl;
-    text << indent << "class " << message.name() << " {" << endl;
-    text << indent << "public:" << endl;
+    text << indent << "namespace " << message.name() << " {" << endl;
 
     // Enums
     N = message.enum_type_size();
@@ -188,12 +195,27 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
         write_field(text, message.field(i), indented);
     }
 
-    text << indent << "};" << endl;
+    if (should_generate_fields_mapping(message)) {
+        N = message.field_size();
+        text << indented << "const int _FIELD_COUNT = " << N << ";" << endl;
+        text << indented << "const char* _FIELD_NAMES[" << N << "] = {" << endl;
+        for (int i=0; i<N; i++) {
+            text << indented << INDENT << "\"" << message.field(i).name() << "\"," << endl;
+        }
+        text << indented << "};" << endl;
+        text << indented << "const uint64_t _FIELD_IDS[" << N << "] = {" << endl;
+        for (int i=0; i<N; i++) {
+            text << indented << INDENT << make_constant_name(message.field(i).name()) << "," << endl;
+        }
+        text << indented << "};" << endl << endl;
+    }
+
+    text << indent << "} //" << message.name() << endl;
     text << endl;
 }
 
 static void
-write_cpp_file(CodeGeneratorResponse* response, const FileDescriptorProto& file_descriptor)
+write_header_file(CodeGeneratorResponse* response, const FileDescriptorProto& file_descriptor)
 {
     stringstream text;
 
@@ -255,7 +277,7 @@ int main(int argc, char const *argv[])
     for (int i=0; i<N; i++) {
         const FileDescriptorProto& file_descriptor = request.proto_file(i);
         if (should_generate_for_file(request, file_descriptor.name())) {
-            write_cpp_file(&response, file_descriptor);
+            write_header_file(&response, file_descriptor);
         }
     }
 

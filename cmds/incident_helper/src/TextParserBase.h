@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef INCIDENT_HELPER_H
-#define INCIDENT_HELPER_H
+#ifndef TEXT_PARSER_BASE_H
+#define TEXT_PARSER_BASE_H
 
 #include <utils/Errors.h>
 #include <utils/String8.h>
@@ -68,37 +68,4 @@ public:
     virtual status_t Parse(const int in, const int out) const;
 };
 
-/**
- * Kernel wakeup sources parser, parses text to protobuf in /d/wakeup_sources
- */
-class KernelWakesParser : public TextParserBase {
-public:
-    KernelWakesParser() : TextParserBase(String8("KernelWakeSources")) {};
-    ~KernelWakesParser() {};
-
-    virtual status_t Parse(const int in, const int out) const;
-};
-
-/**
- * PageTypeInfo parser, parses text to protobuf in /proc/pageinfotype
- */
-class PageTypeInfoParser : public TextParserBase {
-public:
-    PageTypeInfoParser() : TextParserBase(String8("PageTypeInfo")) {};
-    ~PageTypeInfoParser() {};
-
-    virtual status_t Parse(const int in, const int out) const;
-};
-
-/**
- * Procrank parser, parses text produced by command procrank
- */
-class ProcrankParser : public TextParserBase {
-public:
-    ProcrankParser() : TextParserBase(String8("ProcrankParser")) {};
-    ~ProcrankParser() {};
-
-    virtual status_t Parse(const int in, const int out) const;
-};
-
-#endif  // INCIDENT_HELPER_H
+#endif // TEXT_PARSER_BASE_H

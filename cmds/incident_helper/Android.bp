@@ -8,44 +8,53 @@ cc_defaults {
         "-O0"
     ],
 
-    srcs: [
-        "IncidentHelper.cpp",
-        "ih_util.cpp",
+    local_include_dirs: [
+        "src/",
+        "src/parsers/",
     ],
+
+    srcs: [
+        "src/parsers/*.cpp",
+        "src/TextParserBase.cpp",
+        "src/ih_util.cpp",
+    ],
+
+    generated_headers: ["gen-platform-proto-constants"],
 
     shared_libs: [
         "libbase",
         "liblog",
-        "libprotobuf-cpp-full",
+        "libprotoutil",
         "libutils",
-    ],
-
-    static_libs: [
-        "libplatformprotos",
     ],
 }
 
 cc_binary {
     name: "incident_helper",
     defaults: ["incident_helper_defaults"],
-    srcs: ["main.cpp"],
+    srcs: ["src/main.cpp"],
 }
 
 
 cc_test {
     name: "incident_helper_test",
     defaults: ["incident_helper_defaults"],
+    local_include_dirs: ["src/"],
 
     srcs: [
-        "tests/IncidentHelper_test.cpp",
-        "tests/ih_util_test.cpp",
+        "tests/*.cpp",
     ],
 
     data: [
         "testdata/*",
     ],
 
+    shared_libs: [
+        "libprotobuf-cpp-full",
+    ],
+
     static_libs: [
         "libgmock",
+        "libplatformprotos"
     ],
 }

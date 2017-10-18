@@ -87,6 +87,15 @@ bool hasPrefix(std::string* line, const char* key) {
     return true;
 }
 
+int toInt(const std::string& s) {
+    return atoi(s.c_str());
+}
+
+long long toLongLong(const std::string& s) {
+    return atoll(s.c_str());
+}
+
+// ==============================================================================
 Reader::Reader(const int fd) : Reader(fd, BUFFER_SIZE) {};
 
 Reader::Reader(const int fd, const size_t capacity)
@@ -150,4 +159,58 @@ bool Reader::readLine(std::string* line, const char newline) {
 bool Reader::ok(std::string* error) {
     error->assign(mStatus);
     return mStatus.empty();
+}
+
+// ==============================================================================
+Table::Table(const char* names[], const uint64_t ids[], const int count)
+        :mFieldNames(names),
+         mFieldIds(ids),
+         mFieldCount(count)
+{
+}
+
+Table::~Table()
+{
+}
+
+bool
+Table::insertField(ProtoOutputStream& proto, const std::string& name, const std::string& value)
+{
+    uint64_t found = 0;
+    for (int i=0; i<mFieldCount; i++) {
+        if (strcmp(name.c_str(), mFieldNames[i]) == 0) {
+            found = mFieldIds[i];
+            break;
+        }
+    }
+
+    switch (found & FIELD_TYPE_MASK) {
+        case FIELD_TYPE_DOUBLE:
+        case FIELD_TYPE_FLOAT:
+            // TODO: support parse string to float/double
+            return false;
+        case FIELD_TYPE_STRING:
+        case FIELD_TYPE_BYTES:
+            proto.write(found, value);
+            break;
+        case FIELD_TYPE_INT64:
+        case FIELD_TYPE_SINT64:
+        case FIELD_TYPE_UINT64:
+        case FIELD_TYPE_FIXED64:
+        case FIELD_TYPE_SFIXED64:
+            proto.write(found, toLongLong(value));
+            break;
+        case FIELD_TYPE_BOOL:
+        case FIELD_TYPE_ENUM:
+        case FIELD_TYPE_INT32:
+        case FIELD_TYPE_SINT32:
+        case FIELD_TYPE_UINT32:
+        case FIELD_TYPE_FIXED32:
+        case FIELD_TYPE_SFIXED32:
+            proto.write(found, toInt(value));
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
