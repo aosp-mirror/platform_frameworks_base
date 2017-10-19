@@ -674,7 +674,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             checked.add(activity);
 
-            if (!s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
+            if ((activity != null)
+                    && !s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
                 return false;
             }
         }
