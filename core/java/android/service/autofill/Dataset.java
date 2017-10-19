@@ -201,7 +201,8 @@ public final class Dataset implements Parcelable {
          * Creates a new builder for a dataset where each field will be visualized independently.
          *
          * <p>When using this constructor, fields must be set through
-         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)}.
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} or
+         * {@link #setValue(AutofillId, AutofillValue, Pattern, RemoteViews)}.
          */
         public Builder() {
         }

@@ -970,6 +970,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     boolean isValid;
                     try {
                         isValid = validator.isValid(valueFinder);
+                        if (sDebug) Slog.d(TAG, validator + " returned " + isValid);
                         log.setType(isValid
                                 ? MetricsEvent.TYPE_SUCCESS
                                 : MetricsEvent.TYPE_DISMISS);
