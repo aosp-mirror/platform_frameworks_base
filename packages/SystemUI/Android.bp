@@ -67,6 +67,7 @@ android_library {
         "org.lineageos.platform.internal",
     ],
     manifest: "AndroidManifest.xml",
+    additional_manifests: ["LineageManifest.xml"],
 
     libs: [
         "telephony-common",

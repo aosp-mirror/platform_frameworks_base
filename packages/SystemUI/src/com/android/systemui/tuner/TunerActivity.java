@@ -54,10 +54,19 @@ public class TunerActivity extends Activity implements
 
         if (getFragmentManager().findFragmentByTag(TAG_TUNER) == null) {
             final String action = getIntent().getAction();
-            boolean showDemoMode = action != null && action.equals(
-                    "com.android.settings.action.DEMO_MODE");
-            final PreferenceFragment fragment = showDemoMode ? new DemoModeFragment()
-                    : new TunerFragment();
+            final Fragment fragment;
+            if ("com.android.settings.action.DEMO_MODE".equals(action)) {
+                fragment = new DemoModeFragment();
+            } else if ("com.android.settings.action.NAV_BAR_TUNER".equals(action)) {
+                fragment = new NavBarTuner();
+            } else if ("com.android.settings.action.POWER_NOTIF_CONTROLS".equals(action)) {
+                fragment = new PowerNotificationControlsFragment();
+            } else if ("com.android.settings.action.STATUS_BAR_TUNER".equals(action)) {
+                fragment = new StatusBarTuner();
+            } else {
+                fragment = new TunerFragment();
+            }
+
             getFragmentManager().beginTransaction().replace(R.id.content_frame,
                     fragment, TAG_TUNER).commit();
         }
