@@ -67,6 +67,7 @@ android_library {
         "vendor.lineage.biometrics.fingerprint.inscreen-V1.0-java",
     ],
     manifest: "AndroidManifest.xml",
+    additional_manifests: ["MagmaManifest.xml"],
 
     libs: [
         "telephony-common",
