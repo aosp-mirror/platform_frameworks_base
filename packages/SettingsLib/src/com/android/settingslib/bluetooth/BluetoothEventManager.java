@@ -107,14 +107,16 @@ public class BluetoothEventManager {
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
     public void setReceiverHandler(android.os.Handler handler) {
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mProfileBroadcastReceiver);
         mReceiverHandler = handler;
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
         registerProfileIntentReceiver();
@@ -148,11 +150,31 @@ public class BluetoothEventManager {
         }
     };
 
+    private final BroadcastReceiver mProfileBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent
+                    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            Handler handler = mHandlerMap.get(action);
+            if (handler != null) {
+                handler.onReceive(context, intent, device);
+            }
+        }
+    };
+
     private class AdapterStateChangedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                                     BluetoothAdapter.ERROR);
+            // Reregister Profile Broadcast Receiver as part of TURN OFF
+            if (state == BluetoothAdapter.STATE_OFF)
+            {
+                context.unregisterReceiver(mProfileBroadcastReceiver);
+                registerProfileIntentReceiver();
+            }
             // update local profiles and get paired devices
             mLocalAdapter.setBluetoothStateInt(state);
             // send callback to update UI and possibly start scanning
