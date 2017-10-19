@@ -16,14 +16,6 @@
 
 package android.inputmethodservice;
 
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethod;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionCallback;
-import com.android.internal.view.InputConnectionWrapper;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -40,6 +32,14 @@ import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
+
+import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethod;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionCallback;
+import com.android.internal.view.InputConnectionWrapper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -67,17 +67,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
-   
+
     final WeakReference<AbstractInputMethodService> mTarget;
     final Context mContext;
     final HandlerCaller mCaller;
     final WeakReference<InputMethod> mInputMethod;
     final int mTargetSdkVersion;
-    
-    static class Notifier {
-        boolean notified;
-    }
-    
+
     // NOTE: we should have a cache of these.
     static final class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
         final Context mContext;
@@ -108,18 +104,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
         }
     }
-    
-    public IInputMethodWrapper(AbstractInputMethodService context,
-            InputMethod inputMethod) {
-        mTarget = new WeakReference<AbstractInputMethodService>(context);
+
+    public IInputMethodWrapper(AbstractInputMethodService context, InputMethod inputMethod) {
+        mTarget = new WeakReference<>(context);
         mContext = context.getApplicationContext();
         mCaller = new HandlerCaller(mContext, null, this, true /*asyncHandler*/);
-        mInputMethod = new WeakReference<InputMethod>(inputMethod);
+        mInputMethod = new WeakReference<>(inputMethod);
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-    }
-
-    public InputMethod getInternalInputMethod() {
-        return mInputMethod.get();
     }
 
     @Override
