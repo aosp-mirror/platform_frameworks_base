@@ -713,7 +713,7 @@ public class SurfaceControl {
         }
     }
 
-    public void setRelativeLayer(IBinder relativeTo, int zorder) {
+    public void setRelativeLayer(SurfaceControl relativeTo, int zorder) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.setRelativeLayer(this, relativeTo, zorder);
@@ -1215,9 +1215,9 @@ public class SurfaceControl {
             return this;
         }
 
-        public Transaction setRelativeLayer(SurfaceControl sc, IBinder relativeTo, int z) {
+        public Transaction setRelativeLayer(SurfaceControl sc, SurfaceControl relativeTo, int z) {
             nativeSetRelativeLayer(mNativeObject, sc.mNativeObject,
-                    relativeTo, z);
+                    relativeTo.getHandle(), z);
             return this;
         }
 

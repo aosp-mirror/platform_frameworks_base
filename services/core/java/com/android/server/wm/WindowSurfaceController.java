@@ -252,7 +252,7 @@ class WindowSurfaceController {
                 if (mAnimator.mWin.usesRelativeZOrdering()) {
                     mSurfaceControl.setRelativeLayer(
                             mAnimator.mWin.getParentWindow()
-                            .mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                            .mWinAnimator.mSurfaceController.mSurfaceControl,
                             -1);
                 } else {
                     mSurfaceLayer = layer;
