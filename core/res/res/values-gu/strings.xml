@@ -249,8 +249,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ચેતવણીઓ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"રિટેલ ડેમો"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB કનેક્શન"</string>
-    <!-- no translation found for notification_channel_heavy_weight_app (6218742927792852607) -->
-    <skip />
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"ઍપ ચાલી રહ્યું છે"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ઍપ બૅટરીનો વપરાશ કરી રહ્યાં છે"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> બૅટરીનો ઉપયોગ કરી રહ્યું છે"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ઍપ બૅટરીનો ઉપયોગ કરી રહ્યાં છે"</string>
@@ -980,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
     <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"કૉલ કરો"</string>
+    <string name="map" msgid="6521159124535543457">"શોધો"</string>
+    <string name="browse" msgid="1245903488306147205">"ખોલો"</string>
+    <string name="sms" msgid="4560537514610063430">"સંદેશ મોકલો"</string>
+    <string name="add_contact" msgid="7867066569670597203">"ઉમેરો"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ કાર્યો કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -999,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
     <string name="yes" msgid="5362982303337969312">"ઓકે"</string>
     <string name="no" msgid="5141531044935541497">"રદ કરો"</string>
-    <string name="close" msgid="2318214661230355730">"બંધ કરો"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ધ્યાન આપો"</string>
     <string name="loading" msgid="7933681260296021180">"લોડ કરી રહ્યું છે…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ચાલુ"</string>
@@ -1056,8 +1049,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"સ્કેલ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"હંમેશા બતાવો"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"આને સિસ્ટમ સેટિંગ્સ &gt; ઍપ્લિકેશનો &gt; ડાઉનલોડ કરેલમાં ફરીથી સક્ષમ કરો."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"ઍપ પ્રતિસાદ આપી રહી નથી"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ખૂબ વધારે મેમરીનો ઉપયોગ કરતી હોઈ શકે."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> વર્તમાન પ્રદર્શન કદની સેટિંગનું સમર્થન કરતું નથી અને અનપેક્ષિત રીતે વર્તી શકે છે."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"હંમેશાં બતાવો"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> ઍપ્લિકેશન (<xliff:g id="PROCESS">%2$s</xliff:g> પ્રક્રિયા)એ તેની સ્વ-લાગુ કરેલ StrictMode નીતિનું ઉલ્લંઘન કર્યું છે."</string>
@@ -1791,18 +1782,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"કટોકટી સંદેશાઓનું પરીક્ષણ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"જવાબ આપો"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"સિમ મંજૂર નથી"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIMની જોગવાઈ કરી નથી"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"સિમ મંજૂર નથી"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"ફોન મંજૂર નથી"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"પૉપઅપ વિંડો"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"આ શૉર્ટકટ માટે નવી ઍપ જરૂરી છે"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપ બૅકઅપ અને ફરી મેળવવાનું સમર્થન કરતી નથી"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપમાં છે તે સહી મેળ ખાતી નથી"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"શૉર્ટકટ પાછો મેળવી શકાયો નથી"</string>
 </resources>

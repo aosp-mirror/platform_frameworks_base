@@ -979,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
     <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"కాల్ చేయండి"</string>
+    <string name="map" msgid="6521159124535543457">"గుర్తించండి"</string>
+    <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
+    <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
+    <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -998,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
     <string name="yes" msgid="5362982303337969312">"సరే"</string>
     <string name="no" msgid="5141531044935541497">"రద్దు చేయి"</string>
-    <string name="close" msgid="2318214661230355730">"మూసివేయండి"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"గమనిక"</string>
     <string name="loading" msgid="7933681260296021180">"లోడ్ చేస్తోంది…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ఆన్‌లో ఉంది"</string>
@@ -1055,8 +1049,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ప్రమాణం"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ఎల్లప్పుడూ చూపు"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేసినవిలో దీన్ని పునఃప్రారంభించండి."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"యాప్ ప్రతిస్పందించలేదు"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> చాలా ఎక్కువ మెమరీని ఉపయోగించుకోవచ్చు."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుత ప్రదర్శన పరిమాణ సెట్టింగ్‌కు మద్దతు ఇవ్వదు, దీని వలన ఊహించని సమస్యలు తలెత్తవచ్చు."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ఎల్లప్పుడూ చూపు"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
@@ -1790,18 +1782,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"అత్యవసర సందేశాల పరీక్ష"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ప్రత్యుత్తరం పంపండి"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM అనుమతించబడదు"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM సక్రియం కాలేదు"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM అనుమతించబడదు"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"ఫోన్ అనుమతించబడదు"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"పాప్అప్ విండో"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ఈ సత్వరమార్గానికి తాజా యాప్ అవసరం"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"బ్యాకప్ మరియు పునరుద్ధరణకు యాప్ మద్దతు ఇవ్వని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"యాప్ సంతకం సరిపోలని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
 </resources>

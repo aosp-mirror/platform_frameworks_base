@@ -979,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="email" msgid="4560673117055050403">"이메일"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"전화"</string>
+    <string name="map" msgid="6521159124535543457">"위치 확인"</string>
+    <string name="browse" msgid="1245903488306147205">"열기"</string>
+    <string name="sms" msgid="4560537514610063430">"메시지"</string>
+    <string name="add_contact" msgid="7867066569670597203">"추가"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -998,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="yes" msgid="5362982303337969312">"확인"</string>
     <string name="no" msgid="5141531044935541497">"취소"</string>
-    <string name="close" msgid="2318214661230355730">"닫기"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"주의"</string>
     <string name="loading" msgid="7933681260296021180">"로드 중.."</string>
     <string name="capital_on" msgid="1544682755514494298">"ON"</string>
@@ -1055,8 +1049,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"배율"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"항상 표시"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"시스템 설정 &gt; 앱 &gt; 다운로드로 이동하여 이 모드를 다시 사용하도록 설정합니다."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"앱이 응답하지 않음"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 메모리를 과도하게 사용하는 것으로 보입니다."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 현재 디스플레이 크기 설정을 지원하지 않으며 예기치 않게 동작할 수 있습니다."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"항상 표시"</string>
     <string name="smv_application" msgid="3307209192155442829">"앱 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>
@@ -1790,18 +1782,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"긴급 메시지 테스트"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"답장"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM이 허용되지 않음"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM이 프로비저닝되지 않음"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM이 허용되지 않음"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"전화가 허용되지 않음"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"팝업 창"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g>개 더보기"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"바로가기를 사용하려면 최신 앱이 필요합니다"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"앱이 백업 및 복원을 지원하지 않으므로 바로가기를 복원할 수 없습니다"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"앱 서명이 일치하지 않아 바로가기를 복원할 수 없습니다"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"바로가기를 복원할 수 없습니다"</string>
 </resources>

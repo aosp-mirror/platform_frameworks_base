@@ -297,7 +297,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
-    <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
+    <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Inaruhusu programu kuwa upau wa hali."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"panua/kunja mwambaa hali"</string>
@@ -977,16 +977,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Mbinu ya uingizaji"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Vitendo vya maandishi"</string>
     <string name="email" msgid="4560673117055050403">"Barua pepe"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"Simu"</string>
+    <string name="map" msgid="6521159124535543457">"Tafuta"</string>
+    <string name="browse" msgid="1245903488306147205">"Fungua"</string>
+    <string name="sms" msgid="4560537514610063430">"Ujumbe"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Ongeza"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>
@@ -996,7 +991,6 @@
     <string name="cancel" msgid="6442560571259935130">"Ghairi"</string>
     <string name="yes" msgid="5362982303337969312">"Sawa"</string>
     <string name="no" msgid="5141531044935541497">"Ghairi"</string>
-    <string name="close" msgid="2318214661230355730">"FUNGA"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Zingatia"</string>
     <string name="loading" msgid="7933681260296021180">"Inapakia…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Washa"</string>
@@ -1053,8 +1047,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Kipimo"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Onyesha kila wakati"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Wezesha tena hii katika mipangilio ya Mfumo &gt; Programu &gt;  iliyopakuliwa."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"Programu haifanyi kazi"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"Huenda <xliff:g id="APP_NAME">%1$s</xliff:g> inatumia hifadhi nyingi mno."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> haiwezi kutumia mipangilio ya sasa ya ukubwa wa Skrini na huenda isifanye kazi vizuri."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Onyesha kila wakati"</string>
     <string name="smv_application" msgid="3307209192155442829">"Programu <xliff:g id="APPLICATION">%1$s</xliff:g>  (utaratibu  <xliff:g id="PROCESS">%2$s</xliff:g>) imeenda kinyume na sera yake ya StrictMode."</string>
@@ -1078,7 +1070,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Anza <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Komesha programu ya zamani bila kuhifadhi."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> imezidi kiwango cha hifadhi kinachotakikana"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Imezidi kikomo cha hifadhi; gonga ili uishiriki"</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Imezidi kikomo cha hifadhi; gusa ili uishiriki"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Ungependa kushiriki picha ya binafsi?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Mchakato wa <xliff:g id="PROC">%1$s</xliff:g> umezidi kiwango kinachotakikana cha hifadhi cha <xliff:g id="SIZE">%2$s</xliff:g>. Unaweza kupata picha ya hifadhi ili uishiriki na msadini programu wa picha. Tahadhari: picha hii ya hifadhi inaweza kuwa na maelezo yako ya binafsi ambayo yanaweza kufikiwa na programu."</string>
     <string name="sendText" msgid="5209874571959469142">"Chagua kitendo kwa ajili ya maandishi"</string>
@@ -1788,18 +1780,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Jaribio la ujumbe wa dharura"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Jibu"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM imekataliwa"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM haikubaliwi"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM imekataliwa"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Simu imekataliwa"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"Dirisha Ibukizi"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Njia hii ya mkato inahitaji toleo jipya la programu"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Imeshindwa kurejesha njia ya mkato kwa sababu programu haitumii kipengele cha hifadhi rudufu na kurejesha upya"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Imeshindwa kurejesha njia ya mkato kwa sababu ufunguo wako wa kuambatisha cheti kwenye programu haulingani"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Imeshindwa kurejesha njia ya mkato"</string>
 </resources>
