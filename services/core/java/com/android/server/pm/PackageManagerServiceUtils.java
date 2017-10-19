@@ -33,6 +33,7 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -230,7 +231,7 @@ public class PackageManagerServiceUtils {
      */
     public static String realpath(File path) throws IOException {
         try {
-            return Libcore.os.realpath(path.getAbsolutePath());
+            return Os.realpath(path.getAbsolutePath());
         } catch (ErrnoException ee) {
             throw ee.rethrowAsIOException();
         }
