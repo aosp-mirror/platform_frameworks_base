@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile;
 
 /**
  * Quick settings common detail view with line items.
@@ -185,7 +186,7 @@ public class QSDetailItems extends FrameLayout {
             view.setVisibility(mItemsVisible ? VISIBLE : INVISIBLE);
             final ImageView iv = (ImageView) view.findViewById(android.R.id.icon);
             if (item.iconDrawable != null) {
-                iv.setImageDrawable(item.iconDrawable);
+                iv.setImageDrawable(item.iconDrawable.getDrawable(iv.getContext()));
             } else {
                 iv.setImageResource(item.icon);
             }
@@ -258,7 +259,7 @@ public class QSDetailItems extends FrameLayout {
 
     public static class Item {
         public int icon;
-        public Drawable iconDrawable;
+        public QSTile.Icon iconDrawable;
         public Drawable overlay;
         public CharSequence line1;
         public CharSequence line2;
