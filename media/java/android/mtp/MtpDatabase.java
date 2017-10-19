@@ -471,10 +471,14 @@ public class MtpDatabase implements AutoCloseable {
                     if (parent == 0xFFFFFFFF) {
                         // all objects in root of store
                         parent = 0;
+                        where = STORAGE_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(storageID),
+                                Integer.toString(parent)};
+                    }  else {
+                        // If a parent is specified, the storage is redundant
+                        where = PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(parent)};
                     }
-                    where = STORAGE_PARENT_WHERE;
-                    whereArgs = new String[] { Integer.toString(storageID),
-                                               Integer.toString(parent) };
                 }
             } else {
                 // query specific format
@@ -487,11 +491,16 @@ public class MtpDatabase implements AutoCloseable {
                     if (parent == 0xFFFFFFFF) {
                         // all objects in root of store
                         parent = 0;
+                        where = STORAGE_FORMAT_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(storageID),
+                                Integer.toString(format),
+                                Integer.toString(parent)};
+                    } else {
+                        // If a parent is specified, the storage is redundant
+                        where = FORMAT_PARENT_WHERE;
+                        whereArgs = new String[]{Integer.toString(format),
+                                Integer.toString(parent)};
                     }
-                    where = STORAGE_FORMAT_PARENT_WHERE;
-                    whereArgs = new String[] { Integer.toString(storageID),
-                                               Integer.toString(format),
-                                               Integer.toString(parent) };
                 }
             }
         }
@@ -845,7 +854,7 @@ public class MtpDatabase implements AutoCloseable {
         return MtpConstants.RESPONSE_OK;
     }
 
-    private int moveObject(int handle, int newParent, String newPath) {
+    private int moveObject(int handle, int newParent, int newStorage, String newPath) {
         String[] whereArgs = new String[] {  Integer.toString(handle) };
 
         // do not allow renaming any of the special subdirectories
@@ -857,6 +866,7 @@ public class MtpDatabase implements AutoCloseable {
         ContentValues values = new ContentValues();
         values.put(Files.FileColumns.DATA, newPath);
         values.put(Files.FileColumns.PARENT, newParent);
+        values.put(Files.FileColumns.STORAGE_ID, newStorage);
         int updated = 0;
         try {
             // note - we are relying on a special case in MediaProvider.update() to update
