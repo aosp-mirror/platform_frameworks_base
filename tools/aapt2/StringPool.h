@@ -49,6 +49,8 @@ struct StyleString {
 // Otherwise, the style data array would have to be sparse and take up more space.
 class StringPool {
  public:
+  using size_type = size_t;
+
   class Context {
    public:
     enum : uint32_t {
@@ -164,6 +166,9 @@ class StringPool {
   // Adds a string to the pool, unless it already exists, with a context object that can be used
   // when sorting the string pool. Returns a reference to the string in the pool.
   Ref MakeRef(const android::StringPiece& str, const Context& context);
+
+  // Adds a string from another string pool. Returns a reference to the string in the string pool.
+  Ref MakeRef(const Ref& ref);
 
   // Adds a style to the string pool and returns a reference to it.
   StyleRef MakeRef(const StyleString& str);
