@@ -20,7 +20,6 @@
 #include "io_util.h"
 
 #include <android/util/protobuf.h>
-#include <deque>
 
 using namespace android::util;
 

@@ -45,8 +45,9 @@ static bool
 read_length_delimited(CodedInputStream* in, uint32 fieldId, Descriptor const* descriptor,
         GenericMessage* message)
 {
-    uint32 size;
+    uint32_t size;
     if (!in->ReadVarint32(&size)) {
+        fprintf(stderr, "Fail to read size of %s\n", descriptor->name().c_str());
         return false;
     }
 
@@ -68,6 +69,9 @@ read_length_delimited(CodedInputStream* in, uint32 fieldId, Descriptor const* de
                 message->addString(fieldId, str);
                 return true;
             } else {
+                fprintf(stderr, "Fail to read string of field %s, expect size %d, read %lu\n",
+                        field->full_name().c_str(), size, str.size());
+                fprintf(stderr, "String read \"%s\"\n", str.c_str());
                 return false;
             }
         } else if (type == FieldDescriptor::TYPE_BYTES) {

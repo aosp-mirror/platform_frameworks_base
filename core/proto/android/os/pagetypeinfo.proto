@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 syntax = "proto2";
+
 option java_multiple_files = true;
 option java_outer_classname = "PageTypeInfoProto";
 
