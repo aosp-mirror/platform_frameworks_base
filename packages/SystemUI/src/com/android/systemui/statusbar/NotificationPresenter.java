@@ -19,6 +19,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
 
+import java.util.Set;
+
 /**
  * An abstraction of something that presents notifications, e.g. StatusBar. Contains methods
  * for both querying the state of the system (some modularised piece of functionality may
@@ -26,7 +28,8 @@ import android.service.notification.NotificationListenerService;
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
  * want to perform some action before doing so).
  */
-public interface NotificationPresenter {
+public interface NotificationPresenter extends NotificationUpdateHandler,
+        NotificationData.Environment {
 
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
@@ -66,12 +69,6 @@ public interface NotificationPresenter {
      */
     void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation);
 
-    // TODO: Create NotificationUpdateHandler and move this method to there.
-    /**
-     * Removes a notification.
-     */
-    void removeNotification(String key, NotificationListenerService.RankingMap ranking);
-
     // TODO: Create NotificationEntryManager and move this method to there.
     /**
      * Gets the latest ranking map.
@@ -82,6 +79,14 @@ public interface NotificationPresenter {
      * Called when the locked status of the device is changed for a work profile.
      */
     void onWorkChallengeChanged();
+
+    /**
+     * Notifications in this set are kept around when they were canceled in response to a remote
+     * input interaction. This allows us to show what you replied and allows you to continue typing
+     * into it.
+     */
+    // TODO: Create NotificationEntryManager and move this method to there.
+    Set<String> getKeysKeptForRemoteInput();
 
     /**
      * Called when the current user changes.

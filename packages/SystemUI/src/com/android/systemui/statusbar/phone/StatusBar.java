@@ -200,6 +200,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationInfo;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -249,6 +250,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 public class StatusBar extends SystemUI implements DemoMode,
@@ -819,14 +821,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // Set up the initial notification state.
-        try {
-            mNotificationListener.registerAsSystemService(mContext,
-                    new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),
-                    UserHandle.USER_ALL);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to register notification listener", e);
-        }
-
+        mNotificationListener = new NotificationListener(this, mContext);
+        mNotificationListener.register();
 
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -1519,13 +1515,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         SystemServicesProxy.getInstance(mContext).awakenDreamsAsync();
     }
 
-    public void addNotification(StatusBarNotification notification, RankingMap ranking)
-            throws InflationException {
+    @Override
+    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
         String key = notification.getKey();
         if (DEBUG) Log.d(TAG, "addNotification key=" + key);
 
         mNotificationData.updateRanking(ranking);
-        Entry shadeEntry = createNotificationViews(notification);
+        Entry shadeEntry = null;
+        try {
+            shadeEntry = createNotificationViews(notification);
+        } catch (InflationException e) {
+            handleInflationException(notification, e);
+            return;
+        }
         boolean isHeadsUped = shouldPeek(shadeEntry);
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
             if (shouldSuppressFullScreenIntent(key)) {
@@ -1539,11 +1541,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                             + key);
                 }
             } else {
-                // Stop screensaver if the notification has a full-screen intent.
+                // Stop screensaver if the notification has a fullscreen intent.
                 // (like an incoming phone call)
                 awakenDreams();
 
-                // not immersive & a full-screen alert should be shown
+                // not immersive & a fullscreen alert should be shown
                 if (DEBUG)
                     Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
                 try {
@@ -1620,7 +1622,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected void updateNotificationRanking(RankingMap ranking) {
+    @Override
+    public void updateNotificationRanking(RankingMap ranking) {
         mNotificationData.updateRanking(ranking);
         updateNotifications();
     }
@@ -1673,7 +1676,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
             boolean updated = false;
             try {
-                updateNotification(newSbn, null);
+                updateNotificationInternal(newSbn, null);
                 updated = true;
             } catch (InflationException e) {
                 deferRemoval = false;
@@ -5693,90 +5696,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
-    private final NotificationListenerWithPlugins mNotificationListener =
-            new NotificationListenerWithPlugins() {
-        @Override
-        public void onListenerConnected() {
-            if (DEBUG) Log.d(TAG, "onListenerConnected");
-            onPluginConnected();
-            final StatusBarNotification[] notifications = getActiveNotifications();
-            if (notifications == null) {
-                Log.w(TAG, "onListenerConnected unable to get active notifications.");
-                return;
-            }
-            final RankingMap currentRanking = getCurrentRanking();
-            mHandler.post(() -> {
-                for (StatusBarNotification sbn : notifications) {
-                    try {
-                        addNotification(sbn, currentRanking);
-                    } catch (InflationException e) {
-                        handleInflationException(sbn, e);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onNotificationPosted(final StatusBarNotification sbn,
-                final RankingMap rankingMap) {
-            if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
-            if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
-                mHandler.post(() -> {
-                    processForRemoteInput(sbn.getNotification());
-                    String key = sbn.getKey();
-                    mKeysKeptForRemoteInput.remove(key);
-                    boolean isUpdate = mNotificationData.get(key) != null;
-                    // In case we don't allow child notifications, we ignore children of
-                    // notifications that have a summary, since we're not going to show them
-                    // anyway. This is true also when the summary is canceled,
-                    // because children are automatically canceled by NoMan in that case.
-                    if (!ENABLE_CHILD_NOTIFICATIONS
-                            && mGroupManager.isChildInGroupWithSummary(sbn)) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
-                        }
-
-                        // Remove existing notification to avoid stale data.
-                        if (isUpdate) {
-                            removeNotification(key, rankingMap);
-                        } else {
-                            mNotificationData.updateRanking(rankingMap);
-                        }
-                        return;
-                    }
-                    try {
-                        if (isUpdate) {
-                            updateNotification(sbn, rankingMap);
-                        } else {
-                            addNotification(sbn, rankingMap);
-                        }
-                    } catch (InflationException e) {
-                        handleInflationException(sbn, e);
-                    }
-                });
-            }
-        }
-
-        @Override
-        public void onNotificationRemoved(StatusBarNotification sbn,
-                final RankingMap rankingMap) {
-            if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
-            if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
-                final String key = sbn.getKey();
-                mHandler.post(() -> removeNotification(key, rankingMap));
-            }
-        }
-
-        @Override
-        public void onNotificationRankingUpdate(final RankingMap rankingMap) {
-            if (DEBUG) Log.d(TAG, "onRankingUpdate");
-            if (rankingMap != null) {
-                RankingMap r = onPluginRankingUpdate(rankingMap);
-                mHandler.post(() -> updateNotificationRanking(r));
-            }
-        }
-
-    };
+    protected NotificationListener mNotificationListener;
 
     protected void notifyUserAboutHiddenNotifications() {
         if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
@@ -6061,51 +5981,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         row.updateNotification(entry);
-    }
-
-    /**
-     * Adds RemoteInput actions from the WearableExtender; to be removed once more apps support this
-     * via first-class API.
-     *
-     * TODO: Remove once enough apps specify remote inputs on their own.
-     */
-    private void processForRemoteInput(Notification n) {
-        if (!ENABLE_REMOTE_INPUT) return;
-
-        if (n.extras != null && n.extras.containsKey("android.wearable.EXTENSIONS") &&
-                (n.actions == null || n.actions.length == 0)) {
-            Notification.Action viableAction = null;
-            Notification.WearableExtender we = new Notification.WearableExtender(n);
-
-            List<Notification.Action> actions = we.getActions();
-            final int numActions = actions.size();
-
-            for (int i = 0; i < numActions; i++) {
-                Notification.Action action = actions.get(i);
-                if (action == null) {
-                    continue;
-                }
-                RemoteInput[] remoteInputs = action.getRemoteInputs();
-                if (remoteInputs == null) {
-                    continue;
-                }
-                for (RemoteInput ri : remoteInputs) {
-                    if (ri.getAllowFreeFormInput()) {
-                        viableAction = action;
-                        break;
-                    }
-                }
-                if (viableAction != null) {
-                    break;
-                }
-            }
-
-            if (viableAction != null) {
-                Notification.Builder rebuilder = Notification.Builder.recoverBuilder(mContext, n);
-                rebuilder.setActions(viableAction);
-                rebuilder.build(); // will rewrite n
-            }
-        }
     }
 
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
@@ -6496,8 +6371,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.setNotificationCount(mStackScroller.getNotGoneChildCount());
     }
 
-    public void updateNotification(StatusBarNotification notification, RankingMap ranking)
-            throws InflationException {
+    // TODO: Move this to NotificationEntryManager once it is created.
+    private void updateNotificationInternal(StatusBarNotification notification,
+            RankingMap ranking) throws InflationException {
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
@@ -6545,6 +6421,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         setAreThereNotifications();
+    }
+
+    @Override
+    public void updateNotification(StatusBarNotification notification, RankingMap ranking) {
+        try {
+            updateNotificationInternal(notification, ranking);
+        } catch (InflationException e) {
+            handleInflationException(notification, e);
+        }
     }
 
     protected void notifyHeadsUpGoingToSleep() {
@@ -6741,6 +6626,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public RankingMap getLatestRankingMap() {
         return mLatestRankingMap;
+    }
+
+    @Override
+    public Set<String> getKeysKeptForRemoteInput() {
+        return mKeysKeptForRemoteInput;
     }
 
     private final NotificationInfo.CheckSaveListener mCheckSaveListener =
