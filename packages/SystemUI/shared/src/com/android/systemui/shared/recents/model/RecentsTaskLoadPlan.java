@@ -115,8 +115,12 @@ public class RecentsTaskLoadPlan {
             boolean isStackTask = !isFreeformTask;
             boolean isLaunchTarget = taskKey.id == runningTaskId;
 
-            // Load the title, icon, and color
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
+            if (info == null) {
+                continue;
+            }
+
+            // Load the title, icon, and color
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
             String titleDescription = loader.getAndUpdateContentDescription(taskKey,
                     t.taskDescription);
