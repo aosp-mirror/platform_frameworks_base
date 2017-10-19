@@ -78,7 +78,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -469,7 +468,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             // TODO: this should delegate to DCS so the system process avoids
             // holding open FDs into containers.
-            final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(),
+            final FileDescriptor targetFd = Os.open(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, 0644);
             Os.chmod(target.getAbsolutePath(), 0644);
 
@@ -481,7 +480,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             if (offsetBytes > 0) {
-                Libcore.os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
+                Os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
             }
 
             if (PackageInstaller.ENABLE_REVOCABLE_FD) {
@@ -516,7 +515,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             final File target = new File(resolveStageDir(), name);
 
-            final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(), O_RDONLY, 0);
+            final FileDescriptor targetFd = Os.open(target.getAbsolutePath(), O_RDONLY, 0);
             return new ParcelFileDescriptor(targetFd);
 
         } catch (ErrnoException e) {
