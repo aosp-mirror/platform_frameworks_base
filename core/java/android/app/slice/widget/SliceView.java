@@ -183,10 +183,25 @@ public class SliceView extends ViewGroup {
     }
 
     /**
+     * Populates this view with the {@link Slice} associated with the provided {@link Intent}. To
+     * use this method your app must have the permission
+     * {@link android.Manifest.permission#BIND_SLICE}).
+     * <p>
+     * Setting a slice differs from {@link #showSlice(Slice)} because it will ensure the view is
+     * updated with the slice identified by the provided intent changes. The lifecycle of this
+     * observer is handled by SliceView in {@link #onAttachedToWindow()} and
+     * {@link #onDetachedFromWindow()}. To unregister this observer outside of that you can call
+     * {@link #clearSlice}.
+     *
+     * @return true if a slice was found for the provided intent.
      * @hide
      */
-    public void showSlice(Intent intent) {
-        // TODO
+    public boolean setSlice(@Nullable Intent intent) {
+        Slice s = Slice.bindSlice(mContext, intent);
+        if (s != null) {
+            return setSlice(s.getUri());
+        }
+        return s != null;
     }
 
     /**
@@ -199,8 +214,7 @@ public class SliceView extends ViewGroup {
      * is handled by SliceView in {@link #onAttachedToWindow()} and {@link #onDetachedFromWindow()}.
      * To unregister this observer outside of that you can call {@link #clearSlice}.
      *
-     * @return true if the a slice was found for the provided uri.
-     * @see #clearSlice
+     * @return true if a slice was found for the provided uri.
      */
     public boolean setSlice(@NonNull Uri sliceUri) {
         Preconditions.checkNotNull(sliceUri,

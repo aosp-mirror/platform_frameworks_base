@@ -21,9 +21,12 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
-import android.app.slice.widget.SliceView;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.IContentProvider;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -399,6 +402,60 @@ public final class Slice implements Parcelable {
             final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
                     null, extras);
             Bundle.setDefusable(res, true);
+            if (res == null) {
+                return null;
+            }
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            resolver.releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Turns a slice intent into slice content. Expects an explicit intent. If there is no
+     * {@link ContentProvider} associated with the given intent this will throw
+     * {@link IllegalArgumentException}.
+     *
+     * @param context The context to use.
+     * @param intent The intent associated with a slice.
+     * @return The Slice provided by the app or null if none is given.
+     * @see Slice
+     * @see SliceProvider#onMapIntentToUri(Intent)
+     * @see Intent
+     */
+    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent) {
+        Preconditions.checkNotNull(intent, "intent");
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+                "Slice intent must be explicit " + intent);
+        ContentResolver resolver = context.getContentResolver();
+
+        // Check if the intent has data for the slice uri on it and use that
+        final Uri intentData = intent.getData();
+        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
+            return bindSlice(resolver, intentData);
+        }
+        // Otherwise ask the app
+        List<ResolveInfo> providers =
+                context.getPackageManager().queryIntentContentProviders(intent, 0);
+        if (providers == null) {
+            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+        }
+        String authority = providers.get(0).providerInfo.authority;
+        Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).build();
+        IContentProvider provider = resolver.acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
+            final Bundle res = provider.call(resolver.getPackageName(),
+                    SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;
             }
