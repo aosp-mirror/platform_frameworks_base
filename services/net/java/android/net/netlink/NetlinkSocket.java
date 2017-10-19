@@ -96,7 +96,7 @@ public class NetlinkSocket implements Closeable {
         mDescriptor = Os.socket(
                 OsConstants.AF_NETLINK, OsConstants.SOCK_DGRAM, nlProto);
 
-        Libcore.os.setsockoptInt(
+        Os.setsockoptInt(
                 mDescriptor, OsConstants.SOL_SOCKET,
                 OsConstants.SO_RCVBUF, SOCKET_RECV_BUFSIZE);
     }
