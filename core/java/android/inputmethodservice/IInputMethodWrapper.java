@@ -16,6 +16,8 @@
 
 package android.inputmethodservice;
 
+import android.annotation.BinderThread;
+import android.annotation.MainThread;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -113,6 +115,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
     }
 
+    @MainThread
     @Override
     public void executeMessage(Message msg) {
         InputMethod inputMethod = mInputMethod.get();
@@ -196,6 +199,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
 
+    @BinderThread
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         AbstractInputMethodService target = mTarget.get();
@@ -223,11 +227,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
 
+    @BinderThread
     @Override
     public void attachToken(IBinder token) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_ATTACH_TOKEN, token));
     }
 
+    @BinderThread
     @Override
     public void bindInput(InputBinding binding) {
         // This IInputContext is guaranteed to implement all the methods.
@@ -238,11 +244,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
     }
 
+    @BinderThread
     @Override
     public void unbindInput() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_UNSET_INPUT_CONTEXT));
     }
 
+    @BinderThread
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
@@ -251,12 +259,14 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute));
     }
 
+    @BinderThread
     @Override
     public void createSession(InputChannel channel, IInputSessionCallback callback) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_CREATE_SESSION,
                 channel, callback));
     }
 
+    @BinderThread
     @Override
     public void setSessionEnabled(IInputMethodSession session, boolean enabled) {
         try {
@@ -273,6 +283,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
 
+    @BinderThread
     @Override
     public void revokeSession(IInputMethodSession session) {
         try {
@@ -288,18 +299,21 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
     }
 
+    @BinderThread
     @Override
     public void showSoftInput(int flags, ResultReceiver resultReceiver) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_SHOW_SOFT_INPUT,
                 flags, resultReceiver));
     }
 
+    @BinderThread
     @Override
     public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_HIDE_SOFT_INPUT,
                 flags, resultReceiver));
     }
 
+    @BinderThread
     @Override
     public void changeInputMethodSubtype(InputMethodSubtype subtype) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CHANGE_INPUTMETHOD_SUBTYPE,
