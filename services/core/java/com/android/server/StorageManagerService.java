@@ -56,6 +56,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IStoraged;
 import android.os.IVold;
 import android.os.IVoldListener;
 import android.os.IVoldTaskListener;
@@ -395,6 +396,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     private final Context mContext;
 
     private volatile IVold mVold;
+    private volatile IStoraged mStoraged;
 
     private volatile boolean mSystemReady = false;
     private volatile boolean mBootCompleted = false;
@@ -809,6 +811,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                 }
                 for (int userId : systemUnlockedUsers) {
                     mVold.onUserStarted(userId);
+                    mStoraged.onUserStarted(userId);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
@@ -824,6 +827,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         // bind mount against.
         try {
             mVold.onUserStarted(userId);
+            mStoraged.onUserStarted(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -850,6 +854,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
         try {
             mVold.onUserStopped(userId);
+            mStoraged.onUserStopped(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -1335,13 +1340,36 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     private void connect() {
-        IBinder binder = ServiceManager.getService("vold");
+        IBinder binder = ServiceManager.getService("storaged");
+        if (binder != null) {
+            try {
+                binder.linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        Slog.w(TAG, "storaged died; reconnecting");
+                        mStoraged = null;
+                        connect();
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                binder = null;
+            }
+        }
+
+        if (binder != null) {
+            mStoraged = IStoraged.Stub.asInterface(binder);
+        } else {
+            Slog.w(TAG, "storaged not found; trying again");
+        }
+
+        binder = ServiceManager.getService("vold");
         if (binder != null) {
             try {
                 binder.linkToDeath(new DeathRecipient() {
                     @Override
                     public void binderDied() {
                         Slog.w(TAG, "vold died; reconnecting");
+                        mVold = null;
                         connect();
                     }
                 }, 0);
@@ -1354,18 +1382,21 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
             mVold = IVold.Stub.asInterface(binder);
             try {
                 mVold.setListener(mListener);
-                onDaemonConnected();
-                return;
             } catch (RemoteException e) {
+                mVold = null;
                 Slog.w(TAG, "vold listener rejected; trying again", e);
             }
         } else {
             Slog.w(TAG, "vold not found; trying again");
         }
 
-        BackgroundThread.getHandler().postDelayed(() -> {
-            connect();
-        }, DateUtils.SECOND_IN_MILLIS);
+        if (mStoraged == null || mVold == null) {
+            BackgroundThread.getHandler().postDelayed(() -> {
+                connect();
+            }, DateUtils.SECOND_IN_MILLIS);
+        } else {
+            onDaemonConnected();
+        }
     }
 
     private void systemReady() {
