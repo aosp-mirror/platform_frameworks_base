@@ -16,6 +16,8 @@
 
 package android.security.net.config;
 
+import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import java.net.Socket;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
@@ -76,5 +78,18 @@ public final class TestUtils extends Assert {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, tmf.getTrustManagers(), null);
         return context;
+    }
+
+    public static ApplicationInfo makeApplicationInfo() {
+        ApplicationInfo info = new ApplicationInfo();
+        info.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+        info.targetSandboxVersion = 1;
+        return info;
+    }
+
+    public static ApplicationInfo makeApplicationInfo(int targetSdkVersion) {
+        ApplicationInfo info = makeApplicationInfo();
+        info.targetSdkVersion = targetSdkVersion;
+        return info;
     }
 }
