@@ -50,6 +50,10 @@ public class ListOfThinItemsTest extends ActivityInstrumentationTestCase<ListOfT
 
     @LargeTest
     public void testScrollToBottom() {
+        // focus the listview
+        getActivity().runOnUiThread(() -> mListView.requestFocus());
+        getInstrumentation().waitForIdleSync();
+
         final int numItems = mListView.getAdapter().getCount();
         final int listBottom = mListView.getHeight() - mListView.getListPaddingBottom();
         for (int i = 0; i < numItems; i++) {
@@ -78,6 +82,10 @@ public class ListOfThinItemsTest extends ActivityInstrumentationTestCase<ListOfT
 
     @LargeTest
     public void testScrollToTop() {
+        // focus the listview
+        getActivity().runOnUiThread(() -> mListView.requestFocus());
+        getInstrumentation().waitForIdleSync();
+
         final int numItems = mListView.getAdapter().getCount();
 
         for (int i = 0; i < numItems - 1; i++) {
