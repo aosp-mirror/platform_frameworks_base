@@ -584,7 +584,7 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Etxekoa"</item>
     <item msgid="869923650527136615">"Mugikorra"</item>
-    <item msgid="7897544654242874543">"Lanekoa"</item>
+    <item msgid="7897544654242874543">"Lantokia"</item>
     <item msgid="1103601433382158155">"Laneko faxa"</item>
     <item msgid="1735177144948329370">"Etxeko faxa"</item>
     <item msgid="603878674477207394">"Bilagailua"</item>
@@ -593,24 +593,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Etxekoa"</item>
-    <item msgid="7084237356602625604">"Lanekoa"</item>
+    <item msgid="7084237356602625604">"Lantokia"</item>
     <item msgid="1112044410659011023">"Beste bat"</item>
     <item msgid="2374913952870110618">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Etxekoa"</item>
-    <item msgid="5629153956045109251">"Lanekoa"</item>
+    <item msgid="5629153956045109251">"Lantokia"</item>
     <item msgid="4966604264500343469">"Beste bat"</item>
     <item msgid="4932682847595299369">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Etxekoa"</item>
-    <item msgid="1359644565647383708">"Lanekoa"</item>
+    <item msgid="1359644565647383708">"Lantokia"</item>
     <item msgid="7868549401053615677">"Beste bat"</item>
     <item msgid="3145118944639869809">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Lanekoa"</item>
+    <item msgid="7546335612189115615">"Lantokia"</item>
     <item msgid="4378074129049520373">"Beste bat"</item>
     <item msgid="3455047468583965104">"Pertsonalizatua"</item>
   </string-array>
@@ -627,7 +627,7 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Pertsonalizatua"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Etxekoa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mugikorra"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Lanekoa"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Lantokia"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Laneko faxa"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Etxeko faxa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Bilagailua"</string>
@@ -651,16 +651,16 @@
     <string name="eventTypeOther" msgid="7388178939010143077">"Beste bat"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Pertsonalizatua"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Etxekoa"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Lanekoa"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Lantokia"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Beste bat"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mugikorra"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Pertsonalizatua"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Etxekoa"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Lanekoa"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Lantokia"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Beste bat"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Pertsonalizatua"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Orri nagusia"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Lanekoa"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Lantokia"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Beste bat"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Pertsonalizatua"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -672,7 +672,7 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"Lanekoa"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Lantokia"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Bestelakoa"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Pertsonalizatua"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Pertsonalizatua"</string>
@@ -692,7 +692,7 @@
     <string name="relationTypeSpouse" msgid="394136939428698117">"Ezkonlaguna"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Pertsonalizatua"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Etxekoa"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Lanekoa"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Lantokia"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Beste bat"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Ez da kontaktua ikusteko aplikaziorik aurkitu."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Idatzi PIN kodea"</string>
@@ -979,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Idazketa-metodoa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
     <string name="email" msgid="4560673117055050403">"Posta"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"Deitu"</string>
+    <string name="map" msgid="6521159124535543457">"Aurkitu"</string>
+    <string name="browse" msgid="1245903488306147205">"Ireki"</string>
+    <string name="sms" msgid="4560537514610063430">"Bidali mezua"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Gehitu"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -998,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"Utzi"</string>
     <string name="yes" msgid="5362982303337969312">"Ados"</string>
     <string name="no" msgid="5141531044935541497">"Utzi"</string>
-    <string name="close" msgid="2318214661230355730">"ITXI"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Abisua"</string>
     <string name="loading" msgid="7933681260296021180">"Kargatzen…"</string>
     <string name="capital_on" msgid="1544682755514494298">"AKTIBATUTA"</string>
@@ -1055,8 +1049,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Eskala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Erakutsi beti"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Gaitu hori berriro Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"Aplikazioak ez du erantzuten"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> memoria gehiegi erabiltzen ari liteke."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak ez du onartzen uneko pantailaren tamaina eta espero ez bezala joka lezake."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Erakutsi beti"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioak (<xliff:g id="PROCESS">%2$s</xliff:g> prozesua) berak aplikatutako StrictMode gidalerroa urratu du."</string>
@@ -1790,18 +1782,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Larrialdi-mezuen proba"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Erantzun"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Ez da onartzen SIM txartela"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Ez dago SIM txartelik"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Ez da onartzen SIM txartela"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Ez da onartzen telefonoa"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"Leiho gainerakorra"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"Beste <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Aplikazioaren bertsio berriena behar da lasterbideak funtziona dezan"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Ezin izan da leheneratu lasterbidea aplikazioak ez duelako onartzen babeskopiak egiteko eta leheneratzeko aukera"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Ezin izan da leheneratu lasterbidea aplikazioaren sinadurak ez datozelako bat"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Ezin izan da leheneratu lasterbidea"</string>
 </resources>

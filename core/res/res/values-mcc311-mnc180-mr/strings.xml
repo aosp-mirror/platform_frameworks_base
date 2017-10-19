@@ -22,6 +22,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mmcc_imsi_unknown_in_hlr" msgid="531930017979728896">"SIM ने MM#2 ची तरतूद केलेली नाही"</string>
     <string name="mmcc_illegal_ms" msgid="97745044956236881">"SIM ने MM#3 ला परवानगी दिली नाही"</string>
-    <!-- no translation found for mmcc_illegal_me (5766888847785331904) -->
-    <skip />
+    <string name="mmcc_illegal_me" msgid="5766888847785331904">"फोन MM#6 ला अनुमती देत नाही"</string>
 </resources>
