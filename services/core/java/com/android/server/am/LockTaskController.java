@@ -19,17 +19,11 @@ package com.android.server.am;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.DISABLE_BACK;
-import static android.app.StatusBarManager.DISABLE_HOME;
-import static android.app.StatusBarManager.DISABLE_MASK;
-import static android.app.StatusBarManager.DISABLE_NONE;
-import static android.app.StatusBarManager.DISABLE_RECENT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
-import static android.provider.Settings.Secure.LOCK_TO_APP_EXIT_LOCKED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -46,7 +40,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.StatusBarManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Debug;
@@ -55,6 +52,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -84,13 +82,39 @@ public class LockTaskController {
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
 
     @VisibleForTesting
-    static final int STATUS_BAR_MASK_LOCKED = DISABLE_MASK
-            & (~DISABLE_BACK);
+    static final int STATUS_BAR_MASK_LOCKED = StatusBarManager.DISABLE_MASK
+            & (~StatusBarManager.DISABLE_EXPAND)
+            & (~StatusBarManager.DISABLE_NOTIFICATION_TICKER)
+            & (~StatusBarManager.DISABLE_SYSTEM_INFO)
+            & (~StatusBarManager.DISABLE_BACK);
     @VisibleForTesting
-    static final int STATUS_BAR_MASK_PINNED = DISABLE_MASK
-            & (~DISABLE_BACK)
-            & (~DISABLE_HOME)
-            & (~DISABLE_RECENT);
+    static final int STATUS_BAR_MASK_PINNED = StatusBarManager.DISABLE_MASK
+            & (~StatusBarManager.DISABLE_BACK)
+            & (~StatusBarManager.DISABLE_HOME)
+            & (~StatusBarManager.DISABLE_RECENT);
+
+    private static final SparseArray<Pair<Integer, Integer>> STATUS_BAR_FLAG_MAP_LOCKED;
+    static {
+        STATUS_BAR_FLAG_MAP_LOCKED = new SparseArray<>();
+
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_SYSTEM_INFO,
+                new Pair<>(StatusBarManager.DISABLE_CLOCK, StatusBarManager.DISABLE2_SYSTEM_ICONS));
+
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS,
+                new Pair<>(StatusBarManager.DISABLE_NOTIFICATION_ICONS
+                        | StatusBarManager.DISABLE_NOTIFICATION_ALERTS,
+                        StatusBarManager.DISABLE2_NOTIFICATION_SHADE));
+
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_HOME,
+                new Pair<>(StatusBarManager.DISABLE_HOME, StatusBarManager.DISABLE2_NONE));
+
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS,
+                new Pair<>(StatusBarManager.DISABLE_RECENT, StatusBarManager.DISABLE2_NONE));
+
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
+                new Pair<>(StatusBarManager.DISABLE_NONE,
+                        StatusBarManager.DISABLE2_GLOBAL_ACTIONS));
+    }
 
     /** Tag used for disabling of keyguard */
     private static final String LOCK_TASK_TAG = "Lock-to-App";
@@ -129,6 +153,11 @@ public class LockTaskController {
      * Packages that are allowed to be launched into the lock task mode for each user.
      */
     private final SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
+
+    /**
+     * Features that are allowed by DPC to show during LockTask mode.
+     */
+    private final SparseArray<Integer> mLockTaskFeatures = new SparseArray<>();
 
     /**
      * Store the current lock task mode. Possible values:
@@ -319,29 +348,16 @@ public class LockTaskController {
     private void performStopLockTask(int userId) {
         // When lock task ends, we enable the status bars.
         try {
-            if (getStatusBarService() != null) {
-                getStatusBarService().disable(DISABLE_NONE, mToken,
-                        mContext.getPackageName());
+            setStatusBarState(LOCK_TASK_MODE_NONE, userId);
+            setKeyguardState(LOCK_TASK_MODE_NONE, userId);
+            if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
+                lockKeyguardIfNeeded();
             }
-            mWindowManager.reenableKeyguard(mToken);
             if (getDevicePolicyManager() != null) {
                 getDevicePolicyManager().notifyLockTaskModeChanged(false, null, userId);
             }
             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
                 getLockTaskNotify().showPinningExitToast();
-            }
-            try {
-                boolean shouldLockKeyguard = Settings.Secure.getIntForUser(
-                        mContext.getContentResolver(),
-                        LOCK_TO_APP_EXIT_LOCKED,
-                        USER_CURRENT) != 0;
-                if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard) {
-                    mWindowManager.lockNow(null);
-                    mWindowManager.dismissKeyguard(null /* callback */);
-                    getLockPatternUtils().requireCredentialEntry(USER_ALL);
-                }
-            } catch (Settings.SettingNotFoundException e) {
-                // No setting, don't lock.
             }
         } catch (RemoteException ex) {
             throw new RuntimeException(ex);
@@ -448,16 +464,8 @@ public class LockTaskController {
                 getLockTaskNotify().showPinningStartToast();
             }
             mLockTaskModeState = lockTaskModeState;
-            if (getStatusBarService() != null) {
-                int flags = 0;
-                if (mLockTaskModeState == LOCK_TASK_MODE_LOCKED) {
-                    flags = STATUS_BAR_MASK_LOCKED;
-                } else if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
-                    flags = STATUS_BAR_MASK_PINNED;
-                }
-                getStatusBarService().disable(flags, mToken, mContext.getPackageName());
-            }
-            mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
+            setStatusBarState(lockTaskModeState, userId);
+            setKeyguardState(lockTaskModeState, userId);
             if (getDevicePolicyManager() != null) {
                 getDevicePolicyManager().notifyLockTaskModeChanged(true, packageName, userId);
             }
@@ -533,6 +541,135 @@ public class LockTaskController {
             }
         }
         return false;
+    }
+
+    /**
+     * Update the UI features that are enabled for LockTask mode.
+     * @param userId Which user these feature flags are associated with
+     * @param flags Bitfield of feature flags
+     * @see DevicePolicyManager#setLockTaskFeatures(ComponentName, int)
+     */
+    void updateLockTaskFeatures(int userId, int flags) {
+        int oldFlags = getLockTaskFeaturesForUser(userId);
+        if (flags == oldFlags) {
+            return;
+        }
+
+        mLockTaskFeatures.put(userId, flags);
+        TaskRecord lockedTask = getLockedTask();
+        if (lockedTask != null && userId == lockedTask.userId) {
+            mHandler.post(() -> {
+                if (mLockTaskModeState == LOCK_TASK_MODE_LOCKED) {
+                    setStatusBarState(mLockTaskModeState, userId);
+                    setKeyguardState(mLockTaskModeState, userId);
+                }
+            });
+        }
+    }
+
+    /**
+     * Helper method for configuring the status bar disabled state.
+     * Should only be called on the handler thread to avoid race.
+     */
+    private void setStatusBarState(int lockTaskModeState, int userId) {
+        IStatusBarService statusBar = getStatusBarService();
+        if (statusBar == null) {
+            Slog.e(TAG, "Can't find StatusBarService");
+            return;
+        }
+
+        // Default state, when lockTaskModeState == LOCK_TASK_MODE_NONE
+        int flags1 = StatusBarManager.DISABLE_NONE;
+        int flags2 = StatusBarManager.DISABLE2_NONE;
+
+        if (lockTaskModeState == LOCK_TASK_MODE_PINNED) {
+            flags1 = STATUS_BAR_MASK_PINNED;
+
+        } else if (lockTaskModeState == LOCK_TASK_MODE_LOCKED) {
+            int lockTaskFeatures = getLockTaskFeaturesForUser(userId);
+            Pair<Integer, Integer> statusBarFlags = getStatusBarDisableFlags(lockTaskFeatures);
+            flags1 = statusBarFlags.first;
+            flags2 = statusBarFlags.second;
+        }
+
+        try {
+            statusBar.disable(flags1, mToken, mContext.getPackageName());
+            statusBar.disable2(flags2, mToken, mContext.getPackageName());
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to set status bar flags", e);
+        }
+    }
+
+    /**
+     * Helper method for configuring the keyguard disabled state.
+     * Should only be called on the handler thread to avoid race.
+     */
+    private void setKeyguardState(int lockTaskModeState, int userId) {
+        if (lockTaskModeState == LOCK_TASK_MODE_NONE) {
+            mWindowManager.reenableKeyguard(mToken);
+
+        } else if (lockTaskModeState == LOCK_TASK_MODE_LOCKED) {
+            int lockTaskFeatures = getLockTaskFeaturesForUser(userId);
+            if ((DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD & lockTaskFeatures) == 0) {
+                mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
+            } else {
+                mWindowManager.reenableKeyguard(mToken);
+            }
+
+        } else { // lockTaskModeState == LOCK_TASK_MODE_PINNED
+            mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
+        }
+    }
+
+    /**
+     * Helper method for locking the device immediately. This may be necessary when the device
+     * leaves the pinned mode.
+     */
+    private void lockKeyguardIfNeeded() {
+        try {
+            boolean shouldLockKeyguard = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
+                    USER_CURRENT) != 0;
+            if (shouldLockKeyguard) {
+                mWindowManager.lockNow(null);
+                mWindowManager.dismissKeyguard(null /* callback */);
+                getLockPatternUtils().requireCredentialEntry(USER_ALL);
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            // No setting, don't lock.
+        }
+    }
+
+    /**
+     * Translates from LockTask feature flags to StatusBarManager disable and disable2 flags.
+     * @param lockTaskFlags Bitfield of flags as per
+     *                      {@link DevicePolicyManager#setLockTaskFeatures(ComponentName, int)}
+     * @return A {@link Pair} of {@link StatusBarManager#disable(int)} and
+     *         {@link StatusBarManager#disable2(int)} flags
+     */
+    @VisibleForTesting
+    Pair<Integer, Integer> getStatusBarDisableFlags(int lockTaskFlags) {
+        // Everything is disabled by default
+        int flags1 = StatusBarManager.DISABLE_MASK;
+        int flags2 = StatusBarManager.DISABLE2_MASK;
+        for (int i = STATUS_BAR_FLAG_MAP_LOCKED.size() - 1; i >= 0; i--) {
+            Pair<Integer, Integer> statusBarFlags = STATUS_BAR_FLAG_MAP_LOCKED.valueAt(i);
+            if ((STATUS_BAR_FLAG_MAP_LOCKED.keyAt(i) & lockTaskFlags) != 0) {
+                flags1 &= ~statusBarFlags.first;
+                flags2 &= ~statusBarFlags.second;
+            }
+        }
+        // Some flags are not used for LockTask purposes, so we mask them
+        flags1 &= STATUS_BAR_MASK_LOCKED;
+        return new Pair<>(flags1, flags2);
+    }
+
+    /**
+     * Gets the cached value of LockTask feature flags for a specific user.
+     */
+    private int getLockTaskFeaturesForUser(int userId) {
+        return mLockTaskFeatures.get(userId, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
     }
 
     /**

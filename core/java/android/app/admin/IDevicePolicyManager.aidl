@@ -226,6 +226,9 @@ interface IDevicePolicyManager {
     String[] getLockTaskPackages(in ComponentName who);
     boolean isLockTaskPermitted(in String pkg);
 
+    void setLockTaskFeatures(in ComponentName who, int flags);
+    int getLockTaskFeatures(in ComponentName who);
+
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
