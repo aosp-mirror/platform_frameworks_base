@@ -16,11 +16,16 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.NETID_UNSET;
-
 import android.net.LinkProperties;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.IpConnectivityLog;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tracks events related to the default network for the purpose of default network metrics.
@@ -28,26 +33,46 @@ import android.net.metrics.IpConnectivityLog;
  */
 public class DefaultNetworkMetrics {
 
-    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private static final int ROLLING_LOG_SIZE = 64;
 
-    public void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
-        int newNetid = NETID_UNSET;
-        int prevNetid = NETID_UNSET;
-        int[] transports = new int[0];
-        boolean hadIPv4 = false;
-        boolean hadIPv6 = false;
+    // Event buffer used for metrics upload. The buffer is cleared when events are collected.
+    @GuardedBy("this")
+    private final List<DefaultNetworkEvent> mEvents = new ArrayList<>();
 
+    public synchronized void listEvents(PrintWriter pw) {
+        long localTimeMs = System.currentTimeMillis();
+        for (DefaultNetworkEvent ev : mEvents) {
+            pw.println(ev);
+        }
+    }
+
+    public synchronized void listEventsAsProto(PrintWriter pw) {
+        for (DefaultNetworkEvent ev : mEvents) {
+            pw.print(IpConnectivityEventBuilder.toProto(ev));
+        }
+    }
+
+    public synchronized void flushEvents(List<IpConnectivityEvent> out) {
+        for (DefaultNetworkEvent ev : mEvents) {
+            out.add(IpConnectivityEventBuilder.toProto(ev));
+        }
+        mEvents.clear();
+    }
+
+    public synchronized void logDefaultNetworkEvent(
+            NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
+        DefaultNetworkEvent ev = new DefaultNetworkEvent();
         if (newNai != null) {
-            newNetid = newNai.network.netId;
-            transports = newNai.networkCapabilities.getTransportTypes();
+            ev.netId = newNai.network().netId;
+            ev.transportTypes = newNai.networkCapabilities.getTransportTypes();
         }
         if (prevNai != null) {
-            prevNetid = prevNai.network.netId;
+            ev.prevNetId = prevNai.network().netId;
             final LinkProperties lp = prevNai.linkProperties;
-            hadIPv4 = lp.hasIPv4Address() && lp.hasIPv4DefaultRoute();
-            hadIPv6 = lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
+            ev.prevIPv4 = lp.hasIPv4Address() && lp.hasIPv4DefaultRoute();
+            ev.prevIPv6 = lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
         }
 
-        mMetricsLog.log(new DefaultNetworkEvent(newNetid, transports, prevNetid, hadIPv4, hadIPv6));
+        mEvents.add(ev);
     }
 }

@@ -196,6 +196,8 @@ final public class IpConnectivityMetrics extends SystemService {
 
         final List<IpConnectivityEvent> protoEvents = IpConnectivityEventBuilder.toProto(events);
 
+        mDefaultNetworkMetrics.flushEvents(protoEvents);
+
         if (mNetdListener != null) {
             mNetdListener.flushStatistics(protoEvents);
         }
@@ -236,6 +238,7 @@ final public class IpConnectivityMetrics extends SystemService {
             if (mNetdListener != null) {
                 mNetdListener.listAsProtos(pw);
             }
+            mDefaultNetworkMetrics.listEventsAsProto(pw);
             return;
         }
 
@@ -245,6 +248,7 @@ final public class IpConnectivityMetrics extends SystemService {
         if (mNetdListener != null) {
             mNetdListener.list(pw);
         }
+        mDefaultNetworkMetrics.listEvents(pw);
     }
 
     /**
@@ -262,6 +266,7 @@ final public class IpConnectivityMetrics extends SystemService {
         if (mNetdListener != null) {
             mNetdListener.list(pw);
         }
+        mDefaultNetworkMetrics.listEvents(pw);
     }
 
     private void cmdStats(FileDescriptor fd, PrintWriter pw, String[] args) {
