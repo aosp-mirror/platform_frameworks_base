@@ -384,6 +384,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void attachToken(IBinder token) {
             if (mToken == null) {
@@ -397,6 +398,7 @@ public class InputMethodService extends AbstractInputMethodService {
          *
          * <p>Calls {@link InputMethodService#onBindInput()} when done.</p>
          */
+        @MainThread
         @Override
         public void bindInput(InputBinding binding) {
             mInputBinding = binding;
@@ -415,6 +417,7 @@ public class InputMethodService extends AbstractInputMethodService {
          *
          * <p>Calls {@link InputMethodService#onUnbindInput()} when done.</p>
          */
+        @MainThread
         @Override
         public void unbindInput() {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
@@ -427,6 +430,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void startInput(InputConnection ic, EditorInfo attribute) {
             if (DEBUG) Log.v(TAG, "startInput(): editor=" + attribute);
@@ -436,6 +440,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void restartInput(InputConnection ic, EditorInfo attribute) {
             if (DEBUG) Log.v(TAG, "restartInput(): editor=" + attribute);
@@ -446,6 +451,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * {@inheritDoc}
          * @hide
          */
+        @MainThread
         @Override
         public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
@@ -462,6 +468,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
@@ -481,6 +488,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
@@ -513,6 +521,7 @@ public class InputMethodService extends AbstractInputMethodService {
         /**
          * {@inheritDoc}
          */
+        @MainThread
         @Override
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
             onCurrentInputMethodSubtypeChanged(subtype);
