@@ -12428,7 +12428,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             .getPrivAppDenyPermissions(pkg.packageName);
                     final boolean permissionViolation =
                             deniedPermissions == null || !deniedPermissions.contains(perm);
-                    if (permissionViolation) {
+                    if (permissionViolation
+                            && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                         if (mPrivappPermissionsViolations == null) {
                             mPrivappPermissionsViolations = new ArraySet<>();
                         }
