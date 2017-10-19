@@ -31,7 +31,6 @@ import java.util.Arrays;
  * RFC 4301.
  */
 public final class IpSecAlgorithm implements Parcelable {
-
     /**
      * AES-CBC Encryption/Ciphering Algorithm.
      *
@@ -68,6 +67,7 @@ public final class IpSecAlgorithm implements Parcelable {
      * <p>Valid truncation lengths are multiples of 8 bits from 192 to (default) 384.
      */
     public static final String AUTH_HMAC_SHA384 = "hmac(sha384)";
+
     /**
      * SHA512 HMAC Authentication/Integrity Algorithm
      *
@@ -75,8 +75,24 @@ public final class IpSecAlgorithm implements Parcelable {
      */
     public static final String AUTH_HMAC_SHA512 = "hmac(sha512)";
 
+    /**
+     * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm.
+     *
+     * <p>Valid lengths for this key are {128, 192, 256}.
+     *
+     * <p>Valid ICV (truncation) lengths are {64, 96, 128}.
+     */
+    public static final String AUTH_CRYPT_AES_GCM = "rfc4106(gcm(aes))";
+
     /** @hide */
-    @StringDef({CRYPT_AES_CBC, AUTH_HMAC_MD5, AUTH_HMAC_SHA1, AUTH_HMAC_SHA256, AUTH_HMAC_SHA512})
+    @StringDef({
+        CRYPT_AES_CBC,
+        AUTH_HMAC_MD5,
+        AUTH_HMAC_SHA1,
+        AUTH_HMAC_SHA256,
+        AUTH_HMAC_SHA512,
+        AUTH_CRYPT_AES_GCM
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AlgorithmName {}
 
@@ -102,7 +118,7 @@ public final class IpSecAlgorithm implements Parcelable {
      * @param algoName precise name of the algorithm to be used.
      * @param key non-null Key padded to a multiple of 8 bits.
      * @param truncLenBits the number of bits of output hash to use; only meaningful for
-     *     Authentication.
+     *     Authentication or Authenticated Encryption (equivalent to ICV length).
      */
     public IpSecAlgorithm(@AlgorithmName String algoName, byte[] key, int truncLenBits) {
         if (!isTruncationLengthValid(algoName, truncLenBits)) {
@@ -175,6 +191,8 @@ public final class IpSecAlgorithm implements Parcelable {
                 return (truncLenBits >= 192 && truncLenBits <= 384);
             case AUTH_HMAC_SHA512:
                 return (truncLenBits >= 256 && truncLenBits <= 512);
+            case AUTH_CRYPT_AES_GCM:
+                return (truncLenBits == 64 || truncLenBits == 96 || truncLenBits == 128);
             default:
                 return false;
         }
