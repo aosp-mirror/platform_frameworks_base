@@ -30,6 +30,8 @@
 
 namespace android {
 
+using android::hidl::base::V1_0::IBase;
+using hardware::hidl_death_recipient;
 using hardware::hidl_vec;
 using hardware::thermal::V1_0::CoolingDevice;
 using hardware::thermal::V1_0::CpuUsage;
@@ -58,7 +60,22 @@ static struct {
 
 jfloat gUndefinedTemperature;
 
-static sp<IThermal> gThermalModule;
+static void getThermalHalLocked();
+static std::mutex gThermalHalMutex;
+static sp<IThermal> gThermalHal = nullptr;
+
+// struct ThermalHalDeathRecipient;
+struct ThermalHalDeathRecipient : virtual public hidl_death_recipient {
+      // hidl_death_recipient interface
+      virtual void serviceDied(uint64_t cookie, const wp<IBase>& who) override {
+          std::lock_guard<std::mutex> lock(gThermalHalMutex);
+          ALOGE("ThermalHAL just died");
+          gThermalHal = nullptr;
+          getThermalHalLocked();
+      }
+};
+
+sp<ThermalHalDeathRecipient> gThermalHalDeathRecipient = nullptr;
 
 // ----------------------------------------------------------------------------
 
@@ -66,25 +83,50 @@ float finalizeTemperature(float temperature) {
     return isnan(temperature) ? gUndefinedTemperature : temperature;
 }
 
-static void nativeInit(JNIEnv* env, jobject obj) {
-    // TODO(b/31632518)
-    if (gThermalModule == nullptr) {
-        gThermalModule = IThermal::getService();
+// The caller must be holding gThermalHalMutex.
+static void getThermalHalLocked() {
+    if (gThermalHal != nullptr) {
+        return;
     }
 
-    if (gThermalModule == nullptr) {
+    gThermalHal = IThermal::getService();
+
+    if (gThermalHal == nullptr) {
         ALOGE("Unable to get Thermal service.");
+    } else {
+        if (gThermalHalDeathRecipient == nullptr) {
+            gThermalHalDeathRecipient = new ThermalHalDeathRecipient();
+        }
+        hardware::Return<bool> linked = gThermalHal->linkToDeath(
+            gThermalHalDeathRecipient, 0x451F /* cookie */);
+        if (!linked.isOk()) {
+            ALOGE("Transaction error in linking to ThermalHAL death: %s",
+            linked.description().c_str());
+            gThermalHal = nullptr;
+        } else if (!linked) {
+            ALOGW("Unable to link to ThermalHal death notifications");
+            gThermalHal = nullptr;
+        } else {
+            ALOGD("Link to death notification successful");
+        }
     }
 }
 
+static void nativeInit(JNIEnv* env, jobject obj) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    getThermalHalLocked();
+}
+
 static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
-    if (gThermalModule == nullptr) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    getThermalHalLocked();
+    if (gThermalHal == nullptr) {
         ALOGE("Couldn't get fan speeds because of HAL error.");
         return env->NewFloatArray(0);
     }
 
     hidl_vec<CoolingDevice> list;
-    Return<void> ret = gThermalModule->getCoolingDevices(
+    Return<void> ret = gThermalHal->getCoolingDevices(
             [&list](ThermalStatus status, hidl_vec<CoolingDevice> devices) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(devices);
@@ -109,12 +151,14 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
 
 static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type,
                                                int source) {
-    if (gThermalModule == nullptr) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    getThermalHalLocked();
+    if (gThermalHal == nullptr) {
         ALOGE("Couldn't get device temperatures because of HAL error.");
         return env->NewFloatArray(0);
     }
     hidl_vec<Temperature> list;
-    Return<void> ret = gThermalModule->getTemperatures(
+    Return<void> ret = gThermalHal->getTemperatures(
             [&list](ThermalStatus status, hidl_vec<Temperature> temperatures) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(temperatures);
@@ -154,12 +198,14 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
 }
 
 static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
-    if (gThermalModule == nullptr || !gCpuUsageInfoClassInfo.initMethod) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    getThermalHalLocked();
+    if (gThermalHal == nullptr || !gCpuUsageInfoClassInfo.initMethod) {
         ALOGE("Couldn't get CPU usages because of HAL error.");
         return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
     }
     hidl_vec<CpuUsage> list;
-    Return<void> ret = gThermalModule->getCpuUsages(
+    Return<void> ret = gThermalHal->getCpuUsages(
             [&list](ThermalStatus status, hidl_vec<CpuUsage> cpuUsages) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(cpuUsages);
@@ -202,7 +248,6 @@ static const JNINativeMethod gHardwarePropertiesManagerServiceMethods[] = {
 };
 
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env) {
-    gThermalModule = nullptr;
     int res = jniRegisterNativeMethods(env, "com/android/server/HardwarePropertiesManagerService",
                                        gHardwarePropertiesManagerServiceMethods,
                                        NELEM(gHardwarePropertiesManagerServiceMethods));
