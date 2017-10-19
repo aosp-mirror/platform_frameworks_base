@@ -17,10 +17,12 @@
 package com.android.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +39,6 @@ import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.support.test.filters.SmallTest;
-import android.system.OsConstants;
 
 import java.net.Socket;
 import java.util.Arrays;
@@ -53,8 +54,8 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class IpSecServiceParameterizedTest {
 
-    private static final int DROID_SPI = 0xD1201D;
-    private static final int DROID_SPI2 = DROID_SPI + 1;
+    private static final int TEST_SPI_OUT = 0xD1201D;
+    private static final int TEST_SPI_IN = TEST_SPI_OUT + 1;
 
     private final String mRemoteAddr;
 
@@ -81,6 +82,16 @@ public class IpSecServiceParameterizedTest {
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
 
+    private static final IpSecAlgorithm AUTH_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 4);
+    private static final IpSecAlgorithm CRYPT_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
+    private static final IpSecAlgorithm AEAD_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, CRYPT_KEY, CRYPT_KEY.length * 4);
+
+    private static final int[] DIRECTIONS =
+            new int[] {IpSecTransform.DIRECTION_IN, IpSecTransform.DIRECTION_OUT};
+
     public IpSecServiceParameterizedTest(String remoteAddr) {
         mRemoteAddr = remoteAddr;
     }
@@ -103,14 +114,14 @@ public class IpSecServiceParameterizedTest {
                         eq(IpSecTransform.DIRECTION_OUT),
                         anyString(),
                         eq(mRemoteAddr),
-                        eq(DROID_SPI)))
-                .thenReturn(DROID_SPI);
+                        eq(TEST_SPI_OUT)))
+                .thenReturn(TEST_SPI_OUT);
 
         IpSecSpiResponse spiResp =
                 mIpSecService.reserveSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_OUT, mRemoteAddr, DROID_SPI, new Binder());
+                        IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
         assertEquals(IpSecManager.Status.OK, spiResp.status);
-        assertEquals(DROID_SPI, spiResp.spi);
+        assertEquals(TEST_SPI_OUT, spiResp.spi);
     }
 
     @Test
@@ -120,56 +131,60 @@ public class IpSecServiceParameterizedTest {
                         eq(IpSecTransform.DIRECTION_OUT),
                         anyString(),
                         eq(mRemoteAddr),
-                        eq(DROID_SPI)))
-                .thenReturn(DROID_SPI);
+                        eq(TEST_SPI_OUT)))
+                .thenReturn(TEST_SPI_OUT);
 
         IpSecSpiResponse spiResp =
                 mIpSecService.reserveSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_OUT, mRemoteAddr, DROID_SPI, new Binder());
+                        IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
 
         mIpSecService.releaseSecurityParameterIndex(spiResp.resourceId);
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(spiResp.resourceId), anyInt(), anyString(), anyString(), eq(DROID_SPI));
+                        eq(spiResp.resourceId),
+                        anyInt(),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI_OUT));
     }
 
-    IpSecConfig buildIpSecConfig() throws Exception {
-        IpSecManager ipSecManager = new IpSecManager(mIpSecService);
-
-        // Mocking the netd to allocate SPI
+    private int getNewSpiResourceId(int direction, String remoteAddress, int returnSpi)
+            throws Exception {
         when(mMockNetd.ipSecAllocateSpi(anyInt(), anyInt(), anyString(), anyString(), anyInt()))
-                .thenReturn(DROID_SPI)
-                .thenReturn(DROID_SPI2);
+                .thenReturn(returnSpi);
 
-        IpSecAlgorithm encryptAlgo = new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
-        IpSecAlgorithm authAlgo =
-                new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 8);
+        IpSecSpiResponse spi =
+                mIpSecService.reserveSecurityParameterIndex(
+                        direction,
+                        NetworkUtils.numericToInetAddress(remoteAddress).getHostAddress(),
+                        IpSecManager.INVALID_SECURITY_PARAMETER_INDEX,
+                        new Binder());
+        return spi.resourceId;
+    }
 
-        /** Allocate and add SPI records in the IpSecService through IpSecManager interface. */
-        IpSecManager.SecurityParameterIndex outSpi =
-                ipSecManager.reserveSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_OUT,
-                        NetworkUtils.numericToInetAddress(mRemoteAddr));
-        IpSecManager.SecurityParameterIndex inSpi =
-                ipSecManager.reserveSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_IN,
-                        NetworkUtils.numericToInetAddress(mRemoteAddr));
-
-        IpSecConfig config = new IpSecConfig();
-        config.setSpiResourceId(IpSecTransform.DIRECTION_IN, inSpi.getResourceId());
-        config.setSpiResourceId(IpSecTransform.DIRECTION_OUT, outSpi.getResourceId());
-        config.setEncryption(IpSecTransform.DIRECTION_OUT, encryptAlgo);
-        config.setAuthentication(IpSecTransform.DIRECTION_OUT, authAlgo);
-        config.setEncryption(IpSecTransform.DIRECTION_IN, encryptAlgo);
-        config.setAuthentication(IpSecTransform.DIRECTION_IN, authAlgo);
+    private void addDefaultSpisAndRemoteAddrToIpSecConfig(IpSecConfig config) throws Exception {
+        config.setSpiResourceId(
+                IpSecTransform.DIRECTION_OUT,
+                getNewSpiResourceId(IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT));
+        config.setSpiResourceId(
+                IpSecTransform.DIRECTION_IN,
+                getNewSpiResourceId(IpSecTransform.DIRECTION_IN, mRemoteAddr, TEST_SPI_IN));
         config.setRemoteAddress(mRemoteAddr);
-        return config;
+    }
+
+    private void addAuthAndCryptToIpSecConfig(IpSecConfig config) throws Exception {
+        for (int direction : DIRECTIONS) {
+            config.setEncryption(direction, CRYPT_ALGO);
+            config.setAuthentication(direction, AUTH_ALGO);
+        }
     }
 
     @Test
     public void testCreateTransportModeTransform() throws Exception {
-        IpSecConfig ipSecConfig = buildIpSecConfig();
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
@@ -183,11 +198,70 @@ public class IpSecServiceParameterizedTest {
                         anyString(),
                         anyString(),
                         anyLong(),
-                        eq(DROID_SPI),
+                        eq(TEST_SPI_OUT),
                         eq(IpSecAlgorithm.AUTH_HMAC_SHA256),
                         eq(AUTH_KEY),
                         anyInt(),
                         eq(IpSecAlgorithm.CRYPT_AES_CBC),
+                        eq(CRYPT_KEY),
+                        anyInt(),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        anyInt(),
+                        anyInt(),
+                        anyInt());
+        verify(mMockNetd)
+                .ipSecAddSecurityAssociation(
+                        eq(createTransformResp.resourceId),
+                        anyInt(),
+                        eq(IpSecTransform.DIRECTION_IN),
+                        anyString(),
+                        anyString(),
+                        anyLong(),
+                        eq(TEST_SPI_IN),
+                        eq(IpSecAlgorithm.AUTH_HMAC_SHA256),
+                        eq(AUTH_KEY),
+                        anyInt(),
+                        eq(IpSecAlgorithm.CRYPT_AES_CBC),
+                        eq(CRYPT_KEY),
+                        anyInt(),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        anyInt(),
+                        anyInt(),
+                        anyInt());
+    }
+
+    @Test
+    public void testCreateTransportModeTransformAead() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+
+        ipSecConfig.setAuthenticatedEncryption(IpSecTransform.DIRECTION_OUT, AEAD_ALGO);
+        ipSecConfig.setAuthenticatedEncryption(IpSecTransform.DIRECTION_IN, AEAD_ALGO);
+
+        IpSecTransformResponse createTransformResp =
+                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+        assertEquals(IpSecManager.Status.OK, createTransformResp.status);
+
+        verify(mMockNetd)
+                .ipSecAddSecurityAssociation(
+                        eq(createTransformResp.resourceId),
+                        anyInt(),
+                        eq(IpSecTransform.DIRECTION_OUT),
+                        anyString(),
+                        anyString(),
+                        anyLong(),
+                        eq(TEST_SPI_OUT),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        eq(IpSecAlgorithm.AUTH_CRYPT_AES_GCM),
                         eq(CRYPT_KEY),
                         anyInt(),
                         anyInt(),
@@ -201,11 +275,14 @@ public class IpSecServiceParameterizedTest {
                         anyString(),
                         anyString(),
                         anyLong(),
-                        eq(DROID_SPI2),
-                        eq(IpSecAlgorithm.AUTH_HMAC_SHA256),
-                        eq(AUTH_KEY),
-                        anyInt(),
-                        eq(IpSecAlgorithm.CRYPT_AES_CBC),
+                        eq(TEST_SPI_IN),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        eq(""),
+                        isNull(),
+                        eq(0),
+                        eq(IpSecAlgorithm.AUTH_CRYPT_AES_GCM),
                         eq(CRYPT_KEY),
                         anyInt(),
                         anyInt(),
@@ -214,8 +291,68 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
+    public void testCreateInvalidConfigAeadWithAuth() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+
+        for (int direction : DIRECTIONS) {
+            ipSecConfig.setAuthentication(direction, AUTH_ALGO);
+            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
+        }
+
+        try {
+            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+            fail(
+                    "IpSecService should have thrown an error on authentication being"
+                            + " enabled with authenticated encryption");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testCreateInvalidConfigAeadWithCrypt() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+
+        for (int direction : DIRECTIONS) {
+            ipSecConfig.setEncryption(direction, CRYPT_ALGO);
+            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
+        }
+
+        try {
+            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+            fail(
+                    "IpSecService should have thrown an error on encryption being"
+                            + " enabled with authenticated encryption");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testCreateInvalidConfigAeadWithAuthAndCrypt() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+
+        for (int direction : DIRECTIONS) {
+            ipSecConfig.setAuthentication(direction, AUTH_ALGO);
+            ipSecConfig.setEncryption(direction, CRYPT_ALGO);
+            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
+        }
+
+        try {
+            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+            fail(
+                    "IpSecService should have thrown an error on authentication and encryption being"
+                            + " enabled with authenticated encryption");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
     public void testDeleteTransportModeTransform() throws Exception {
-        IpSecConfig ipSecConfig = buildIpSecConfig();
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
@@ -227,19 +364,21 @@ public class IpSecServiceParameterizedTest {
                         eq(IpSecTransform.DIRECTION_OUT),
                         anyString(),
                         anyString(),
-                        eq(DROID_SPI));
+                        eq(TEST_SPI_OUT));
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
                         eq(createTransformResp.resourceId),
                         eq(IpSecTransform.DIRECTION_IN),
                         anyString(),
                         anyString(),
-                        eq(DROID_SPI2));
+                        eq(TEST_SPI_IN));
     }
 
     @Test
     public void testApplyTransportModeTransform() throws Exception {
-        IpSecConfig ipSecConfig = buildIpSecConfig();
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
@@ -255,7 +394,7 @@ public class IpSecServiceParameterizedTest {
                         eq(IpSecTransform.DIRECTION_OUT),
                         anyString(),
                         anyString(),
-                        eq(DROID_SPI));
+                        eq(TEST_SPI_OUT));
         verify(mMockNetd)
                 .ipSecApplyTransportModeTransform(
                         eq(pfd.getFileDescriptor()),
@@ -263,7 +402,7 @@ public class IpSecServiceParameterizedTest {
                         eq(IpSecTransform.DIRECTION_IN),
                         anyString(),
                         anyString(),
-                        eq(DROID_SPI2));
+                        eq(TEST_SPI_IN));
     }
 
     @Test
