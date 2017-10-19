@@ -182,7 +182,6 @@
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Tutte le applicazioni recenti sono state rimosse."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Mostra informazioni sull\'applicazione <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Avvio di <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notifica eliminata."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Area notifiche."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Impostazioni rapide."</string>
@@ -345,8 +344,6 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Schermo diviso in alto"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Schermo diviso a sinistra"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Schermo diviso a destra"</string>
-  <string-array name="recents_blacklist_array">
-  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carica"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"In carica"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> al termine della carica"</string>
@@ -506,7 +503,7 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tocca per disattivare l\'audio."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s comandi del volume mostrati. Fai scorrere verso l\'alto per ignorare."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Comandi del volume nascosti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Sintetizzatore interfaccia utente di sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Ottimizzatore UI di sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra percentuale batteria incorporata"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
@@ -529,12 +526,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profilo di lavoro"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Il divertimento riservato a pochi eletti"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Il sintetizzatore interfaccia utente di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="got_it" msgid="2239653834387972602">"OK"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! Il sintetizzatore interfaccia utente di sistema è stato aggiunto alle impostazioni."</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! L\'Ottimizzatore UI di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Rimuovi dalle impostazioni"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere il sintetizzatore interfaccia utente di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere l\'Ottimizzatore UI di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Applicazione non installata sul dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostra i secondi nell\'orologio"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra i secondi nell\'orologio nella barra di stato. Ciò potrebbe ridurre la durata della carica della batteria."</string>

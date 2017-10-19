@@ -180,7 +180,6 @@
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"हाल ही के सभी ऐप्लिकेशन ख़ारिज कर दिए गए."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन की जानकारी खोलें."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ हो रहा है."</string>
-    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारिज की गई."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"त्वरित सेटिंग."</string>
@@ -343,8 +342,6 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"ऊपर की ओर दो स्क्रीन बनाएं"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"बाईं ओर दो स्क्रीन बनाएं"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"दाईं ओर दो स्क्रीन बनाएं"</string>
-  <string-array name="recents_blacklist_array">
-  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हो रही है"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"पूर्ण होने में <xliff:g id="CHARGING_TIME">%s</xliff:g> शेष"</string>
