@@ -612,6 +612,16 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <pre>
      *          accumulated delta range = -k * carrier phase    (where k is a constant)</pre>
+     *
+     * <p>Similar to the concept of an RTCM "Phaserange", when the accumulated delta range is
+     * initially chosen, and whenever it is reset, it will retain the integer nature
+     * of the relative carrier phase offset between satellites observed by this receiver, such that
+     * the double difference of this value between receivers and satellites may be used, together
+     * with integer ambiguity resolution, to determine highly precise relative location between
+     * receivers.
+     *
+     * <p>This includes ensuring that all half-cycle ambiguities are resolved before this value is
+     * reported as {@link #ADR_STATE_VALID}.
      */
     public double getAccumulatedDeltaRangeMeters() {
         return mAccumulatedDeltaRangeMeters;
@@ -861,7 +871,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the Signal-to-Noise ratio (SNR) in dB.
+     * Gets the (post-correlation & integration) Signal-to-Noise ratio (SNR) in dB.
      *
      * <p>The value is only available if {@link #hasSnrInDb()} is {@code true}.
      */
