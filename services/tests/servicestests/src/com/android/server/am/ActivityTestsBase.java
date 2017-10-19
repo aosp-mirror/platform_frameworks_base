@@ -323,7 +323,7 @@ public class ActivityTestsBase {
         }
 
         @Override
-        boolean isStackTranslucent(ActivityRecord starting, ActivityStack stackBehind) {
+        boolean isStackTranslucent(ActivityRecord starting) {
             switch (mIsTranslucent) {
                 case IS_TRANSLUCENT_TRUE:
                     return true;
@@ -331,7 +331,7 @@ public class ActivityTestsBase {
                     return false;
                 case IS_TRANSLUCENT_UNSET:
                 default:
-                    return super.isStackTranslucent(starting, stackBehind);
+                    return super.isStackTranslucent(starting);
             }
         }
     }

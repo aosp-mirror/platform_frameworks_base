@@ -430,7 +430,7 @@ public class LockTaskController {
         }
 
         if (andResume) {
-            mSupervisor.findTaskToMoveToFrontLocked(task, 0, null, reason,
+            mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
             mSupervisor.resumeFocusedStackTopActivityLocked();
             mWindowManager.executeAppTransition();

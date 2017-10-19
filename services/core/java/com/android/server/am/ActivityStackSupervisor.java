@@ -678,10 +678,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (prev != null) {
-            prev.getTask().setTaskToReturnTo(ACTIVITY_TYPE_STANDARD);
-        }
-
         mHomeStack.moveHomeStackTaskToTop();
         ActivityRecord r = getHomeActivity();
         final String myReason = reason + " resumeHomeStackTask";
@@ -2090,21 +2086,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void findTaskToMoveToFrontLocked(TaskRecord task, int flags, ActivityOptions options,
+    void findTaskToMoveToFront(TaskRecord task, int flags, ActivityOptions options,
             String reason, boolean forceNonResizeable) {
+        final ActivityStack currentStack = task.getStack();
+        if (currentStack == null) {
+            Slog.e(TAG, "findTaskToMoveToFront: can't move task="
+                    + task + " to front. Stack is null");
+            return;
+        }
+
         if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
             mUserLeaving = true;
         }
-        if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-            // Caller wants the home activity moved with it.  To accomplish this,
-            // we'll just indicate that this task returns to the home task.
-            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
-        }
-        final ActivityStack currentStack = task.getStack();
-        if (currentStack == null) {
-            Slog.e(TAG, "findTaskToMoveToFrontLocked: can't move task="
-                    + task + " to front. Stack is null");
-            return;
+
+        final ActivityRecord prev = topRunningActivityLocked();
+
+        if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0
+                || (prev != null && prev.isActivityTypeRecents())) {
+            // Caller wants the home activity moved with it or the previous task is recents in which
+            // case we always return home from the task we are moving to the front.
+            moveHomeStackToFront("findTaskToMoveToFront");
         }
 
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
@@ -2115,7 +2116,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             if (stack != currentStack) {
                 task.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE, DEFER_RESUME,
-                        "findTaskToMoveToFrontLocked");
+                        "findTaskToMoveToFront");
                 stack = currentStack;
                 // moveTaskToStackUncheckedLocked() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
@@ -2551,13 +2552,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         final int returnToType =
                                 toDisplay.getTopVisibleStackActivityType(WINDOWING_MODE_PINNED);
                         final boolean isTopTask = i == (size - 1);
-                        if (inPinnedWindowingMode) {
-                            // Update the return-to to reflect where the pinned stack task was
-                            // moved from so that we retain the stack that was previously
-                            // visible if the pinned stack is recreated.
-                            // See moveActivityToPinnedStackLocked().
-                            task.setTaskToReturnTo(returnToType);
-                        }
                         // Defer resume until all the tasks have been moved to the fullscreen stack
                         task.reparent(toStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
                                 isTopTask /* animate */, DEFER_RESUME,
@@ -3030,12 +3024,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         moveActivityToPinnedStackLocked(r, null /* sourceBounds */, 0f /* aspectRatio */,
-                true /* moveHomeStackToFront */, "moveTopActivityToPinnedStack");
+                "moveTopActivityToPinnedStack");
         return true;
     }
 
     void moveActivityToPinnedStackLocked(ActivityRecord r, Rect sourceHintBounds, float aspectRatio,
-            boolean moveHomeStackToFront, String reason) {
+            String reason) {
 
         mWindowManager.deferSurfaceLayout();
 
@@ -3061,17 +3055,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     true /* allowResizeInDockedMode */, !DEFER_RESUME);
 
             if (task.mActivities.size() == 1) {
-                // There is only one activity in the task. So, we can just move the task over to
-                // the stack without re-parenting the activity in a different task.  We don't
-                // move the home stack forward if we are currently entering picture-in-picture
-                // while pausing because that changes the focused stack and may prevent the new
-                // starting activity from resuming.
-                if (moveHomeStackToFront && task.returnsToHomeTask()
-                        && (r.state == RESUMED || !r.supportsEnterPipOnTaskSwitch)) {
-                    // Move the home stack forward if the task we just moved to the pinned stack
-                    // was launched from home so home should be visible behind it.
-                    moveHomeStackToFront(reason);
-                }
                 // Defer resume until below, and do not schedule PiP changes until we animate below
                 task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE, DEFER_RESUME,
                         false /* schedulePictureInPictureModeChange */, reason);
@@ -4512,6 +4495,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 throw new IllegalArgumentException(
                         "startActivityFromRecents: Task " + taskId + " not found.");
             }
+
+            // We always want to return to the home activity instead of the recents activity from
+            // whatever is started from the recents activity, so move the home stack forward.
+            moveHomeStackToFront("startActivityFromRecents");
 
             // If the user must confirm credentials (e.g. when first launching a work app and the
             // Work Challenge is present) let startActivityInPackage handle the intercepting.

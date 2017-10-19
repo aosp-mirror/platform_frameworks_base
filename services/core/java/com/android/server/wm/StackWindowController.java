@@ -152,7 +152,8 @@ public class StackWindowController
         }
     }
 
-    public void positionChildAtBottom(TaskWindowContainerController child) {
+    public void positionChildAtBottom(TaskWindowContainerController child,
+            boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -164,7 +165,7 @@ public class StackWindowController
                 Slog.e(TAG_WM, "positionChildAtBottom: task=" + child + " not found");
                 return;
             }
-            mContainer.positionChildAt(POSITION_BOTTOM, childTask, false /* includingParents */);
+            mContainer.positionChildAt(POSITION_BOTTOM, childTask, includingParents);
 
             if (mService.mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(true);

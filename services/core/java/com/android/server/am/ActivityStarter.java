@@ -169,9 +169,6 @@ class ActivityStarter {
     private Intent mNewTaskIntent;
     private ActivityStack mSourceStack;
     private ActivityStack mTargetStack;
-    // Indicates that we moved other task and are going to put something on top soon, so
-    // we don't want to show it redundantly or accidentally change what's shown below.
-    private boolean mMovedOtherTask;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
@@ -227,7 +224,6 @@ class ActivityStarter {
         mSourceStack = null;
 
         mTargetStack = null;
-        mMovedOtherTask = false;
         mMovedToFront = false;
         mNoAnimation = false;
         mKeepCurTransition = false;
@@ -1184,12 +1180,8 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
         mService.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
                 mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));
-        if (mSourceRecord != null) {
-            mStartActivity.getTask().setTaskToReturnTo(mSourceRecord);
-        }
         if (newTask) {
-            EventLog.writeEvent(
-                    EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
+            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
                     mStartActivity.getTask().taskId);
         }
         ActivityStack.logStartActivity(
@@ -1579,7 +1571,6 @@ class ActivityStarter {
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
-                mMovedOtherTask = true;
 
                 // If the launch flags carry both NEW_TASK and CLEAR_TASK, the task's activities
                 // will be cleared soon by ActivityStarter in setTaskFromIntentActivity().
@@ -1644,7 +1635,6 @@ class ActivityStarter {
                     intentActivity.showStartingWindow(null /* prev */, false /* newTask */,
                             true /* taskSwitch */);
                 }
-                updateTaskReturnToType(intentActivity.getTask(), mLaunchFlags, focusStack);
             }
         }
         if (!mMovedToFront && mDoResume) {
@@ -1663,27 +1653,6 @@ class ActivityStarter {
         return intentActivity;
     }
 
-    private void updateTaskReturnToType(
-            TaskRecord task, int launchFlags, ActivityStack focusedStack) {
-        if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-            // Caller wants to appear on home activity.
-            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
-            return;
-        } else if (focusedStack == null || focusedStack.isActivityTypeHome()) {
-            // Task will be launched over the home stack, so return home.
-            task.setTaskToReturnTo(ACTIVITY_TYPE_HOME);
-            return;
-        } else if (focusedStack != task.getStack() && focusedStack.isActivityTypeAssistant()) {
-            // Task was launched over the assistant stack, so return there
-            task.setTaskToReturnTo(ACTIVITY_TYPE_ASSISTANT);
-            return;
-        }
-
-        // Else we are coming from an application stack so return to an application.
-        task.setTaskToReturnTo(ACTIVITY_TYPE_STANDARD);
-    }
-
     private void setTaskFromIntentActivity(ActivityRecord intentActivity) {
         if ((mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                 == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK)) {
@@ -1700,11 +1669,6 @@ class ActivityStarter {
             task.performClearTaskLocked();
             mReuseTask = task;
             mReuseTask.setIntent(mStartActivity);
-
-            // When we clear the task - focus will be adjusted, which will bring another task
-            // to top before we launch the activity we need. This will temporary swap their
-            // mTaskToReturnTo values and we don't want to overwrite them accidentally.
-            mMovedOtherTask = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                 || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
             ActivityRecord top = intentActivity.getTask().performClearTaskLocked(mStartActivity,
@@ -1806,15 +1770,6 @@ class ActivityStarter {
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
 
-        if (!mMovedOtherTask) {
-            // If stack id is specified in activity options, usually it means that activity is
-            // launched not from currently focused stack (e.g. from SysUI or from shell) - in
-            // that case we check the target stack.
-            // TODO: Not sure I understand the value or use of the commented out code and the
-            // comment above. See if this causes any issues and why...
-            updateTaskReturnToType(mStartActivity.getTask(), mLaunchFlags,
-                    /*preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : */topStack);
-        }
         if (mDoResume) {
             mTargetStack.moveToFront("reuseOrNewTask");
         }
