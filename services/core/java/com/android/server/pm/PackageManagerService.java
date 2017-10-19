@@ -6900,6 +6900,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     && info.activityInfo.splitName != null
                     && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
                             info.activityInfo.splitName)) {
+                if (mInstantAppInstallerInfo == null) {
+                    if (DEBUG_INSTALL) {
+                        Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
+                    }
+                    resolveInfos.remove(i);
+                    continue;
+                }
                 // requested activity is defined in a split that hasn't been installed yet.
                 // add the installer to the resolve list
                 if (DEBUG_INSTALL) {
@@ -6913,14 +6920,22 @@ public class PackageManagerService extends IPackageManager.Stub
                         installFailureActivity,
                         info.activityInfo.applicationInfo.versionCode,
                         null /*failureIntent*/);
-                // make sure this resolver is the default
-                installerInfo.isDefault = true;
                 installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                         | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                 // add a non-generic filter
                 installerInfo.filter = new IntentFilter();
-                // load resources from the correct package
+
+                // This resolve info may appear in the chooser UI, so let us make it
+                // look as the one it replaces as far as the user is concerned which
+                // requires loading the correct label and icon for the resolve info.
                 installerInfo.resolvePackageName = info.getComponentInfo().packageName;
+                installerInfo.labelRes = info.resolveLabelResId();
+                installerInfo.icon = info.resolveIconResId();
+
+                // propagate priority/preferred order/default
+                installerInfo.priority = info.priority;
+                installerInfo.preferredOrder = info.preferredOrder;
+                installerInfo.isDefault = info.isDefault;
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
