@@ -55,7 +55,7 @@ bool RawString::Equals(const Value* value) const {
 }
 
 RawString* RawString::Clone(StringPool* new_pool) const {
-  RawString* rs = new RawString(new_pool->MakeRef(*value));
+  RawString* rs = new RawString(new_pool->MakeRef(value));
   rs->comment_ = comment_;
   rs->source_ = source_;
   return rs;
@@ -197,7 +197,7 @@ bool String::Flatten(android::Res_value* out_value) const {
 }
 
 String* String::Clone(StringPool* new_pool) const {
-  String* str = new String(new_pool->MakeRef(*value));
+  String* str = new String(new_pool->MakeRef(value));
   str->comment_ = comment_;
   str->source_ = source_;
   str->untranslatable_sections = untranslatable_sections;
@@ -280,7 +280,7 @@ bool FileReference::Flatten(android::Res_value* out_value) const {
 }
 
 FileReference* FileReference::Clone(StringPool* new_pool) const {
-  FileReference* fr = new FileReference(new_pool->MakeRef(*path));
+  FileReference* fr = new FileReference(new_pool->MakeRef(path));
   fr->file = file;
   fr->comment_ = comment_;
   fr->source_ = source_;
