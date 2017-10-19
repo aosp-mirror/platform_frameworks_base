@@ -281,6 +281,8 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>If encryption is set for a given direction without also providing an SPI for that
          * direction, creation of an IpSecTransform will fail upon calling a build() method.
          *
+         * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
+         *
          * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the encryption to be applied.
          */
@@ -296,12 +298,37 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>If authentication is set for a given direction without also providing an SPI for that
          * direction, creation of an IpSecTransform will fail upon calling a build() method.
          *
+         * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
+         *
          * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the authentication to be applied.
          */
         public IpSecTransform.Builder setAuthentication(
                 @TransformDirection int direction, IpSecAlgorithm algo) {
             mConfig.setAuthentication(direction, algo);
+            return this;
+        }
+
+        /**
+         * Add an authenticated encryption algorithm to the transform for the given direction.
+         *
+         * <p>If an authenticated encryption algorithm is set for a given direction without also
+         * providing an SPI for that direction, creation of an IpSecTransform will fail upon calling
+         * a build() method.
+         *
+         * <p>The Authenticated Encryption (AE) class of algorithms are also known as Authenticated
+         * Encryption with Associated Data (AEAD) algorithms, or Combined mode algorithms (as
+         * referred to in RFC 4301)
+         *
+         * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
+         *
+         * @param direction either {@link #DIRECTION_IN or #DIRECTION_OUT}
+         * @param algo {@link IpSecAlgorithm} specifying the authenticated encryption algorithm to
+         *     be applied.
+         */
+        public IpSecTransform.Builder setAuthenticatedEncryption(
+                @TransformDirection int direction, IpSecAlgorithm algo) {
+            mConfig.setAuthenticatedEncryption(direction, algo);
             return this;
         }
 
