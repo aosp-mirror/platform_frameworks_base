@@ -64,6 +64,11 @@ public abstract class SystemService {
     public static final int PHASE_SYSTEM_SERVICES_READY = 500;
 
     /**
+     * After receiving this boot phase, services can safely call into device specific services.
+     */
+    public static final int PHASE_DEVICE_SPECIFIC_SERVICES_READY = 520;
+
+    /**
      * After receiving this boot phase, services can broadcast Intents.
      */
     public static final int PHASE_ACTIVITY_MANAGER_READY = 550;
