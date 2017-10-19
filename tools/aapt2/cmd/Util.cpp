@@ -72,7 +72,6 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   }
 
   *out_path = parts[0];
-  std::vector<ConfigDescription> configs;
   for (const StringPiece& config_str : util::Tokenize(parts[1], ',')) {
     ConfigDescription config;
     if (!ConfigDescription::Parse(config_str, &config)) {
@@ -141,6 +140,16 @@ static xml::NamespaceDecl CreateAndroidNamespaceDecl() {
   return decl;
 }
 
+static std::string MakePackageSafeName(const std::string &name) {
+  std::string result(name);
+  for (char &c : result) {
+    if (c == '-') {
+      c = '_';
+    }
+  }
+  return result;
+}
+
 std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                                                         const SplitConstraints& constraints) {
   const ResourceId kVersionCode(0x0101021b);
@@ -172,7 +181,11 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   if (app_info.split_name) {
     split_name << app_info.split_name.value() << ".";
   }
-  split_name << "config." << util::Joiner(constraints.configs, "_");
+  std::vector<std::string> sanitized_config_names;
+  for (const auto &config : constraints.configs) {
+    sanitized_config_names.push_back(MakePackageSafeName(config.toString().string()));
+  }
+  split_name << "config." << util::Joiner(sanitized_config_names, "_");
 
   manifest_el->attributes.push_back(xml::Attribute{"", "split", split_name.str()});
 
