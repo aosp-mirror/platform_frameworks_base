@@ -180,7 +180,6 @@
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"सबै हालका अनुप्रयोगहरू खारेज गरियो।"</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> अनुप्रयोग सम्बन्धी जानकारी खोल्नुहोस्।"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g>सुरु गर्दै।"</string>
-    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना खारेज।"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना कक्ष।"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"द्रुत सेटिङहरू"</string>
@@ -343,8 +342,6 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"विभाजित-स्क्रिनलाई शीर्ष स्थानमा राख्नुहोस्‌"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"विभाजित-स्क्रिनलाई बायाँतर्फ राख्नुहोस्‌"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"विभाजित-स्क्रिनलाई दायाँतर्फ राख्नुहोस्‌"</string>
-  <string-array name="recents_blacklist_array">
-  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हुँदै"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण नभएसम्म"</string>
