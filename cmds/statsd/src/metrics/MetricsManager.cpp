@@ -43,7 +43,7 @@ MetricsManager::MetricsManager(const StatsdConfig& config) {
 }
 
 MetricsManager::~MetricsManager() {
-    VLOG("~MetricManager()");
+    VLOG("~MetricsManager()");
 }
 
 bool MetricsManager::isConfigValid() const {

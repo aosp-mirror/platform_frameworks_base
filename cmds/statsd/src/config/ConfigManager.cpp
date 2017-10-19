@@ -144,6 +144,12 @@ static StatsdConfig build_fake_config() {
     metric->set_what("SCREEN_TURNED_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
 
+    // Anomaly threshold for screen-on count.
+    Alert* alert = metric->add_alerts();
+    alert->set_number_of_buckets(6);
+    alert->set_trigger_if_sum_gt(10);
+    alert->set_refractory_period_secs(30);
+
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();
     metric->set_metric_id(2);

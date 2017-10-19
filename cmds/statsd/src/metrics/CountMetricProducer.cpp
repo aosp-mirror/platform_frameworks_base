@@ -39,14 +39,23 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
                                          const sp<ConditionWizard>& wizard)
     // TODO: Pass in the start time from MetricsManager, instead of calling time() here.
     : MetricProducer((time(nullptr) * NANO_SECONDS_IN_A_SECOND), conditionIndex, wizard),
-      mMetric(metric),
-      // TODO: read mAnomalyTracker parameters from config file.
-      mAnomalyTracker(6, 10) {
+      mMetric(metric) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
     } else {
         mBucketSizeNs = LLONG_MAX;
+    }
+
+    mAnomalyTrackers.reserve(metric.alerts_size());
+    for (int i = 0; i < metric.alerts_size(); i++) {
+        const Alert& alert = metric.alerts(i);
+        if (alert.trigger_if_sum_gt() > 0 && alert.number_of_buckets() > 0) {
+            mAnomalyTrackers.push_back(std::make_unique<CountAnomalyTracker>(alert));
+        } else {
+            ALOGW("Ignoring invalid count metric alert: threshold=%lld num_buckets= %d",
+                  alert.trigger_if_sum_gt(), alert.number_of_buckets());
+        }
     }
 
     // TODO: use UidMap if uid->pkg_name is required
@@ -148,6 +157,11 @@ void CountMetricProducer::onMatchedLogEventInternal(
         count++;
     }
 
+    // TODO: Re-add anomaly detection (similar to):
+    // for (auto& tracker : mAnomalyTrackers) {
+    //     tracker->checkAnomaly(mCounter);
+    // }
+
     VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
          mCurrentSlicedCounter[eventKey]);
 }
@@ -175,6 +189,11 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         VLOG("metric %lld, dump key value: %s -> %d", mMetric.metric_id(), counter.first.c_str(),
              counter.second);
     }
+
+    // TODO: Re-add anomaly detection (similar to):
+    // for (auto& tracker : mAnomalyTrackers) {
+    //     tracker->addPastBucket(mCounter, numBucketsForward);
+    //}
 
     // Reset counters
     mCurrentSlicedCounter.clear();

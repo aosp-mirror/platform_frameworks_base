@@ -60,13 +60,13 @@ protected:
 private:
     const CountMetric mMetric;
 
-    CountAnomalyTracker mAnomalyTracker;
-
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucketInfo>> mPastBuckets;
 
     // The current bucket.
     std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
+
+    vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
 
     void flushCounterIfNeeded(const uint64_t newEventTime);
 };
