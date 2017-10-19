@@ -82,13 +82,6 @@ public class TunerFragment extends PreferenceFragment {
                 if (preference != null) getPreferenceScreen().removePreference(preference);
             }
         }
-
-        if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
-                0) == 0) {
-            if (getFragmentManager().findFragmentByTag(WARNING_TAG) == null) {
-                new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
-            }
-        }
     }
 
     private boolean alwaysOnAvailable() {

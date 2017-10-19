@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    android:key="status_bar"
+    android:title="@string/status_bar">
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="rotate"
+        android:title="@string/status_bar_settings_auto_rotation" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="headset"
+        android:title="@string/headset" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="managed_profile"
+        android:title="@string/status_bar_work" />
+
+    <!-- ime -->
+    <!-- sync_failing -->
+    <!-- sync_active -->
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="cast"
+        android:title="@string/quick_settings_cast_title" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="hotspot"
+        android:title="@string/quick_settings_hotspot_label" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="bluetooth"
+        android:title="@string/quick_settings_bluetooth_label" />
+
+    <!-- nfc -->
+    <!-- tty -->
+    <!-- speakerphone -->
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="zen"
+        android:title="@string/quick_settings_dnd_label" />
+
+    <!-- mute -->
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="volume"
+        android:title="@*android:string/volume_unknown" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="wifi"
+        android:title="@string/quick_settings_wifi_label" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="ethernet"
+        android:title="@string/status_bar_ethernet" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="mobile"
+        android:title="@string/quick_settings_cellular_detail_title" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="airplane"
+        android:title="@string/status_bar_airplane" />
+
+    <!-- other weird signal stuff -->
+
+    <com.android.systemui.tuner.BatteryPreference
+        android:title="@string/battery"
+        android:summary="%s"
+        android:entries="@array/battery_options" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="alarm_clock"
+        android:title="@string/status_bar_alarm" />
+
+    <!-- secure -->
+
+    <com.android.systemui.tuner.ClockPreference
+        android:title="@string/tuner_time"
+        android:summary="%s"
+        android:entries="@array/clock_options" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="low_priority"
+        android:title="@string/tuner_low_priority"
+        sysui:defValue="false" />
+
+</PreferenceScreen>
