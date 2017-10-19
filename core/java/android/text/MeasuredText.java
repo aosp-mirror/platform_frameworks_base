@@ -106,8 +106,8 @@ class MeasuredText {
         if (mWidths == null || mWidths.length < len) {
             mWidths = ArrayUtils.newUnpaddedFloatArray(len);
         }
-        if (mChars == null || mChars.length < len) {
-            mChars = ArrayUtils.newUnpaddedCharArray(len);
+        if (mChars == null || mChars.length != len) {
+            mChars = new char[len];
         }
         TextUtils.getChars(text, start, end, mChars, 0);
 
@@ -151,7 +151,7 @@ class MeasuredText {
                 boolean isRtl = textDir.isRtl(mChars, 0, len);
                 bidiRequest = isRtl ? Layout.DIR_REQUEST_RTL : Layout.DIR_REQUEST_LTR;
             }
-            mDir = AndroidBidi.bidi(bidiRequest, mChars, mLevels, len, false);
+            mDir = AndroidBidi.bidi(bidiRequest, mChars, mLevels);
             mEasy = false;
         }
     }

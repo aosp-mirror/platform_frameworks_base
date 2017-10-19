@@ -96,7 +96,7 @@ public class StaticLayoutBidiTest {
         int n = chs.length;
         byte[] chInfo = new byte[n];
 
-        int resultDir = AndroidBidi.bidi(dir, chs, chInfo, n, false);
+        int resultDir = AndroidBidi.bidi(dir, chs, chInfo);
 
         {
             StringBuilder sb = new StringBuilder("info:");
