@@ -20,6 +20,10 @@ This XML file declares which signature|privileged permissions should be granted 
 applications that come with the platform
 -->
 <permissions>
+    <privapp-permissions package="android.ext.services">
+        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.backupconfirm">
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
@@ -365,10 +369,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.vpndialogs">
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CONTROL_VPN"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.google.android.ext.services">
-        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
     </privapp-permissions>
 
 </permissions>
