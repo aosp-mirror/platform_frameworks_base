@@ -979,7 +979,6 @@
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
     <string name="yes" msgid="5362982303337969312">"ઓકે"</string>
     <string name="no" msgid="5141531044935541497">"રદ કરો"</string>
-    <string name="close" msgid="2318214661230355730">"બંધ કરો"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ધ્યાન આપો"</string>
     <string name="loading" msgid="7933681260296021180">"લોડ કરી રહ્યું છે…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ચાલુ"</string>
@@ -1036,8 +1035,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"સ્કેલ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"હંમેશા બતાવો"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"આને સિસ્ટમ સેટિંગ્સ &gt; ઍપ્લિકેશનો &gt; ડાઉનલોડ કરેલમાં ફરીથી સક્ષમ કરો."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"ઍપ પ્રતિસાદ આપી રહી નથી"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> ખૂબ વધારે મેમરીનો ઉપયોગ કરતી હોઈ શકે."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> વર્તમાન પ્રદર્શન કદની સેટિંગનું સમર્થન કરતું નથી અને અનપેક્ષિત રીતે વર્તી શકે છે."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"હંમેશાં બતાવો"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> ઍપ્લિકેશન (<xliff:g id="PROCESS">%2$s</xliff:g> પ્રક્રિયા)એ તેની સ્વ-લાગુ કરેલ StrictMode નીતિનું ઉલ્લંઘન કર્યું છે."</string>
