@@ -180,7 +180,7 @@ public:
     virtual MtpProperty*            getDevicePropertyDesc(MtpDeviceProperty property);
 
     virtual MtpResponseCode         moveObject(MtpObjectHandle handle, MtpObjectHandle newParent,
-                                            MtpString& newPath);
+                                            MtpStorageID newStorage, MtpString& newPath);
 
     virtual void                    sessionStarted();
 
@@ -998,11 +998,11 @@ MtpResponseCode MyMtpDatabase::deleteFile(MtpObjectHandle handle) {
 }
 
 MtpResponseCode MyMtpDatabase::moveObject(MtpObjectHandle handle, MtpObjectHandle newParent,
-        MtpString &newPath) {
+        MtpStorageID newStorage, MtpString &newPath) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jstring stringValue = env->NewStringUTF((const char *) newPath);
     MtpResponseCode result = env->CallIntMethod(mDatabase, method_moveObject,
-                (jint)handle, (jint)newParent, stringValue);
+                (jint)handle, (jint)newParent, (jint) newStorage, stringValue);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     env->DeleteLocalRef(stringValue);
@@ -1374,7 +1374,7 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
         ALOGE("Can't find deleteFile");
         return -1;
     }
-    method_moveObject = env->GetMethodID(clazz, "moveObject", "(IILjava/lang/String;)I");
+    method_moveObject = env->GetMethodID(clazz, "moveObject", "(IIILjava/lang/String;)I");
     if (method_moveObject == NULL) {
         ALOGE("Can't find moveObject");
         return -1;
