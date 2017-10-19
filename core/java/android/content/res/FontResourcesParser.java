@@ -15,13 +15,14 @@
  */
 package android.content.res;
 
-import com.android.internal.R;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
+
+import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -78,12 +79,15 @@ public class FontResourcesParser {
         private final @NonNull String mFileName;
         private int mWeight;
         private int mItalic;
+        private int mTtcIndex;
         private int mResourceId;
 
-        public FontFileResourceEntry(@NonNull String fileName, int weight, int italic) {
+        public FontFileResourceEntry(@NonNull String fileName, int weight, int italic,
+                int ttcIndex) {
             mFileName = fileName;
             mWeight = weight;
             mItalic = italic;
+            mTtcIndex = ttcIndex;
         }
 
         public @NonNull String getFileName() {
@@ -96,6 +100,10 @@ public class FontResourcesParser {
 
         public int getItalic() {
             return mItalic;
+        }
+
+        public int getTtcIndex() {
+            return mTtcIndex;
         }
     }
 
@@ -203,6 +211,7 @@ public class FontResourcesParser {
                 Typeface.RESOLVE_BY_FONT_TABLE);
         int italic = array.getInt(R.styleable.FontFamilyFont_fontStyle,
                 Typeface.RESOLVE_BY_FONT_TABLE);
+        int ttcIndex = array.getInt(R.styleable.FontFamilyFont_ttcIndex, 0);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
         array.recycle();
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -211,7 +220,7 @@ public class FontResourcesParser {
         if (filename == null) {
             return null;
         }
-        return new FontFileResourceEntry(filename, weight, italic);
+        return new FontFileResourceEntry(filename, weight, italic, ttcIndex);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {

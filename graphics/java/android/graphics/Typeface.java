@@ -250,9 +250,9 @@ public class Typeface {
 
         FontFamily fontFamily = new FontFamily();
         for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
-            // TODO: Add ttc and variation font support. (b/37853920)
+            // TODO: Add variation font support. (b/37853920)
             if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
-                    0 /* resourceCookie */, false /* isAsset */, 0 /* ttcIndex */,
+                    0 /* resourceCookie */, false /* isAsset */, fontFile.getTtcIndex(),
                     fontFile.getWeight(), fontFile.getItalic(), null /* axes */)) {
                 return null;
             }
