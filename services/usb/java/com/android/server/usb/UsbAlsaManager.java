@@ -255,6 +255,7 @@ public final class UsbAlsaManager {
     }
 
     private void alsaFileAdded(String name) {
+        Slog.i(TAG, "alsaFileAdded(" + name + ")");
         int type = AlsaDevice.TYPE_UNKNOWN;
         int card = -1, device = -1;
 
