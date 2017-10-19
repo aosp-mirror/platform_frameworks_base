@@ -476,17 +476,6 @@ public class Editor {
         stopTextActionModeWithPreservingSelection();
     }
 
-    void invalidateMagnifier() {
-        final DisplayMetrics dm = mTextView.getResources().getDisplayMetrics();
-        invalidateMagnifier(0, 0, dm.widthPixels, dm.heightPixels);
-    }
-
-    void invalidateMagnifier(final float l, final float t, final float r, final float b) {
-        if (mMagnifier != null) {
-            mTextView.post(() -> mMagnifier.invalidate(new RectF(l, t, r, b)));
-        }
-    }
-
     private void discardTextDisplayLists() {
         if (mTextRenderNodes != null) {
             for (int i = 0; i < mTextRenderNodes.length; i++) {
@@ -4550,17 +4539,15 @@ public class Editor {
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
             // Horizontally snap to character offset.
-            final float xPosInView = getHorizontal(mTextView.getLayout(), offset);
+            final float xPosInView = getHorizontal(mTextView.getLayout(), offset)
+                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
             // Vertically snap to middle of current line.
             final float yPosInView = (mTextView.getLayout().getLineTop(lineNumber)
-                    + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f;
-            final int[] coordinatesOnScreen = new int[2];
-            mTextView.getLocationOnScreen(coordinatesOnScreen);
-            final float centerXOnScreen = mTextView.convertViewToScreenCoord(xPosInView, true);
-            final float centerYOnScreen = mTextView.convertViewToScreenCoord(yPosInView, false);
+                    + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
+                    + mTextView.getTotalPaddingTop() - mTextView.getScrollY();
 
             suspendBlink();
-            mMagnifier.show(centerXOnScreen, centerYOnScreen, MAGNIFIER_ZOOM);
+            mMagnifier.show(xPosInView, yPosInView, MAGNIFIER_ZOOM);
         }
 
         protected final void dismissMagnifier() {

@@ -18,10 +18,17 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/floatingToolbarPopupBackgroundDrawable">
-    <ImageView
-        android:id="@+id/magnifier_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    android:layout_height="wrap_content">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/magnifier_inner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/floatingToolbarPopupBackgroundDrawable"
+        android:elevation="@android:dimen/magnifier_elevation">
+        <ImageView
+            android:id="@+id/magnifier_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </LinearLayout>
