@@ -32,6 +32,7 @@ import "frameworks/base/core/proto/android/service/power.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
+import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
@@ -125,4 +126,9 @@ message IncidentProto {
 
     optional com.android.server.am.proto.ServiceProto amservices = 3014;
     optional com.android.server.am.proto.ProcessProto amprocesses = 3015;
+
+    optional com.android.server.AlarmManagerServiceProto alarm = 3016 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "alarm --proto"
+    ];
 }
