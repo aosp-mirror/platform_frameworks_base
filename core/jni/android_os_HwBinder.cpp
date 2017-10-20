@@ -306,7 +306,7 @@ static jobject JHwBinder_native_getService(
         jstring serviceNameObj) {
 
     using ::android::hidl::base::V1_0::IBase;
-    using ::android::hidl::manager::V1_0::IServiceManager;
+    using ::android::hardware::details::getRawServiceInternal;
 
     if (ifaceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
@@ -317,22 +317,12 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    auto manager = hardware::defaultServiceManager();
-
-    if (manager == nullptr) {
-        LOG(ERROR) << "Could not get hwservicemanager.";
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-        return NULL;
-    }
-
     const char *ifaceNameCStr = env->GetStringUTFChars(ifaceNameObj, NULL);
     if (ifaceNameCStr == NULL) {
         return NULL; // XXX exception already pending?
     }
     std::string ifaceName(ifaceNameCStr);
     env->ReleaseStringUTFChars(ifaceNameObj, ifaceNameCStr);
-    ::android::hardware::hidl_string ifaceNameHStr;
-    ifaceNameHStr.setToExternal(ifaceName.c_str(), ifaceName.size());
 
     const char *serviceNameCStr = env->GetStringUTFChars(serviceNameObj, NULL);
     if (serviceNameCStr == NULL) {
@@ -340,50 +330,9 @@ static jobject JHwBinder_native_getService(
     }
     std::string serviceName(serviceNameCStr);
     env->ReleaseStringUTFChars(serviceNameObj, serviceNameCStr);
-    ::android::hardware::hidl_string serviceNameHStr;
-    serviceNameHStr.setToExternal(serviceName.c_str(), serviceName.size());
 
-    LOG(INFO) << "Looking for service "
-              << ifaceName
-              << "/"
-              << serviceName;
-
-    Return<IServiceManager::Transport> transportRet =
-            manager->getTransport(ifaceNameHStr, serviceNameHStr);
-
-    if (!transportRet.isOk()) {
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-        return NULL;
-    }
-
-    IServiceManager::Transport transport = transportRet;
-
-#ifdef __ANDROID_TREBLE__
-#ifdef __ANDROID_DEBUGGABLE__
-    const char* testingOverride = std::getenv("TREBLE_TESTING_OVERRIDE");
-    const bool vintfLegacy = (transport == IServiceManager::Transport::EMPTY)
-            && testingOverride && !strcmp(testingOverride, "true");
-#else // __ANDROID_TREBLE__ but not __ANDROID_DEBUGGABLE__
-    const bool vintfLegacy = false;
-#endif // __ANDROID_DEBUGGABLE__
-#else // not __ANDROID_TREBLE__
-    const bool vintfLegacy = (transport == IServiceManager::Transport::EMPTY);
-#endif // __ANDROID_TREBLE__";
-
-    if (transport != IServiceManager::Transport::HWBINDER && !vintfLegacy) {
-        LOG(ERROR) << "service " << ifaceName << " declares transport method "
-                   << toString(transport) << " but framework expects hwbinder.";
-        signalExceptionForError(env, NAME_NOT_FOUND, true /* canThrowRemoteException */);
-        return NULL;
-    }
-
-    Return<sp<hidl::base::V1_0::IBase>> ret = manager->get(ifaceNameHStr, serviceNameHStr);
-
-    if (!ret.isOk()) {
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-        return NULL;
-    }
-
+    // TODO(b/67981006): true /* retry */
+    sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, false /* retry */, false /* getStub */); 
     sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
     if (service == NULL) {
