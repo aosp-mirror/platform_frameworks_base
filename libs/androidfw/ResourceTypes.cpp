@@ -6014,9 +6014,6 @@ void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales,
 StringPoolRef::StringPoolRef(const ResStringPool* pool, uint32_t index)
     : mPool(pool), mIndex(index) {}
 
-StringPoolRef::StringPoolRef()
-    : mPool(NULL), mIndex(0) {}
-
 const char* StringPoolRef::string8(size_t* outLen) const {
     if (mPool != NULL) {
         return mPool->string8At(mIndex, outLen);

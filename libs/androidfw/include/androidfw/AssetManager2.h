@@ -245,21 +245,22 @@ class AssetManager2 {
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
 
-  // Finds the best entry for `resid` amongst all the ApkAssets. The entry can be a simple
-  // Res_value, or a complex map/bag type.
+  // Finds the best entry for `resid` from the set of ApkAssets. The entry can be a simple
+  // Res_value, or a complex map/bag type. If successful, it is available in `out_entry`.
+  // Returns kInvalidCookie on failure. Otherwise, the return value is the cookie associated with
+  // the ApkAssets in which the entry was found.
   //
   // `density_override` overrides the density of the current configuration when doing a search.
   //
   // When `stop_at_first_match` is true, the first match found is selected and the search
   // terminates. This is useful for methods that just look up the name of a resource and don't
-  // care about the value. In this case, the value of `out_flags` is incomplete and should not
-  // be used.
+  // care about the value. In this case, the value of `FindEntryResult::type_flags` is incomplete
+  // and should not be used.
   //
-  // `out_flags` stores the resulting bitmask of configuration axis with which the resource
-  // value varies.
+  // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
+  // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                            uint32_t* out_flags);
+                            FindEntryResult* out_entry);
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
