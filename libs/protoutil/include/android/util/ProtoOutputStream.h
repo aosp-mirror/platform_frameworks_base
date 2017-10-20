@@ -35,6 +35,10 @@ const uint64_t FIELD_TYPE_SHIFT = 32;
  */
 const uint64_t FIELD_TYPE_MASK = 0x0ffULL << FIELD_TYPE_SHIFT;
 
+/**
+ * The types are copied from external/protobuf/src/google/protobuf/descriptor.h directly,
+ * so no extra mapping needs to be maintained in this case.
+ */
 const uint64_t FIELD_TYPE_UNKNOWN  = 0;
 const uint64_t FIELD_TYPE_DOUBLE   = 1ULL << FIELD_TYPE_SHIFT;   // double, exactly eight bytes on the wire.
 const uint64_t FIELD_TYPE_FLOAT    = 2ULL << FIELD_TYPE_SHIFT;   // float, exactly four bytes on the wire.
@@ -49,7 +53,7 @@ const uint64_t FIELD_TYPE_FIXED64  = 6ULL << FIELD_TYPE_SHIFT;   // uint64, exac
 const uint64_t FIELD_TYPE_FIXED32  = 7ULL << FIELD_TYPE_SHIFT;   // uint32, exactly four bytes on the wire.
 const uint64_t FIELD_TYPE_BOOL     = 8ULL << FIELD_TYPE_SHIFT;   // bool, varint on the wire.
 const uint64_t FIELD_TYPE_STRING   = 9ULL << FIELD_TYPE_SHIFT;   // UTF-8 text.
-const uint64_t FIELD_TYPE_GROUP    = 10ULL << FIELD_TYPE_SHIFT;  // Tag-delimited message.  Deprecated.
+// const uint64_t FIELD_TYPE_GROUP = 10ULL << FIELD_TYPE_SHIFT;  // Tag-delimited message.  Deprecated.
 const uint64_t FIELD_TYPE_MESSAGE  = 11ULL << FIELD_TYPE_SHIFT;  // Length-delimited message.
 
 const uint64_t FIELD_TYPE_BYTES    = 12ULL << FIELD_TYPE_SHIFT;  // Arbitrary byte array.
@@ -69,7 +73,7 @@ const uint64_t FIELD_COUNT_MASK = 0x0fULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_UNKNOWN = 0;
 const uint64_t FIELD_COUNT_SINGLE = 1ULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_REPEATED = 2ULL << FIELD_COUNT_SHIFT;
-const uint64_t FIELD_COUNT_PACKED = 4ULL << FIELD_COUNT_SHIFT;
+const uint64_t FIELD_COUNT_PACKED = 5ULL << FIELD_COUNT_SHIFT;
 
 /**
  * Class to write to a protobuf stream.

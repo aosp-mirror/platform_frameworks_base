@@ -21,8 +21,11 @@ cc_defaults {
     name: "protoc-gen-stream-defaults",
     srcs: [
         "Errors.cpp",
+        "stream_proto_utils.cpp",
         "string_utils.cpp",
     ],
+
+    shared_libs: ["libprotoc"],
 }
 
 cc_library {
@@ -52,7 +55,6 @@ cc_binary_host {
     ],
 
     defaults: ["protoc-gen-stream-defaults"],
-    shared_libs: ["libprotoc"],
 }
 
 cc_binary_host {
@@ -62,6 +64,5 @@ cc_binary_host {
     ],
 
     defaults: ["protoc-gen-stream-defaults"],
-    shared_libs: ["libprotoc"],
     static_libs: ["streamingflags"],
 }
