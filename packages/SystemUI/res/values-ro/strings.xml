@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI sistem"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeți"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminați din listă"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informații despre aplicație"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info aplicație"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ecranele dvs. recente apar aici"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunțați la aplicațiile recente"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -61,7 +61,7 @@
     <string name="label_view" msgid="6304565553218192990">"Afișați"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utilizați în mod prestabilit pt. acest dispoz. USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliz. în mod prestabilit pt. acest accesoriu USB"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți depanarea USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți remedierea erorilor prin USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Amprenta digitală din cheia RSA a computerului este:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permiteți întotdeauna de pe acest computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Remedierea erorilor prin USB nu este permisă"</string>
@@ -314,6 +314,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Mai multe setări"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Terminat"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectat"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Conectat, bateria la <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Se conectează..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -356,7 +357,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Căutați"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisați în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisați spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nu veți fi deranjat(ă) de sunete și vibrații, exceptând alarmele, mementourile, evenimentele și apelanții pe care îi menționați."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de dvs. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Se vor anunța prin sunete și vibrații numai alarmele. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizați"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor. Totuși, veți putea iniția apeluri."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor."</string>
@@ -386,7 +388,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Adăugați un utilizator"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Utilizator nou"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Invitat"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Adăugați un oaspete"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Adăugați un invitat"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Eliminați invitatul"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ștergeți invitatul?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
@@ -478,7 +480,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nu, mulț."</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Config."</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Opriți acum"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Dezactivați acum"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Extindeți"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Restrângeți"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ecranul este fixat"</string>
@@ -556,8 +558,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Nu veți mai primi aceste notificări"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorii de notificări"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Această aplicație nu are categorii de notificare"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Notificările din această aplicație nu pot fi dezactivate"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="few">1 din <xliff:g id="NUMBER_1">%d</xliff:g> categorii de notificare din această aplicație</item>
       <item quantity="other">1 din <xliff:g id="NUMBER_1">%d</xliff:g> de categorii de notificare din această aplicație</item>
@@ -581,8 +582,16 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opțiuni de amânare a notificării"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANULAȚI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Amânată <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="few">%d ore</item>
+      <item quantity="other">%d de ore</item>
+      <item quantity="one">%d oră</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="few">%d minute</item>
+      <item quantity="other">%d de minute</item>
+      <item quantity="one">%d minut</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilizarea bateriei"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economisirea bateriei"</string>
@@ -725,7 +734,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizați"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Închideți"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trageți în jos pentru a închide"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul imagine în imagine"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul picture-in-picture"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
     <string name="pip_play" msgid="1417176722760265888">"Redați"</string>
@@ -772,4 +781,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Înlocuiți"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicațiile rulează în fundal"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Atingeți pentru mai multe detalii privind bateria și utilizarea datelor"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Dezactivați datele mobile?"</string>
 </resources>

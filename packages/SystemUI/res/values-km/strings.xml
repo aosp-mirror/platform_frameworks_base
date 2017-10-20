@@ -150,7 +150,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"រ៉ូ​មីង"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ទិន្នន័យទូរសព្ទចល័តបានបើក"</string>
@@ -310,6 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"ការ​កំណត់​ច្រើន​ទៀត"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"រួចរាល់"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"បាន​ភ្ជាប់"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"បានភ្ជាប់ ហើយថ្មមានកម្រិត <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"កំពុង​តភ្ជាប់..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ការ​ភ្ជាប់"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ហតស្ប៉ត"</string>
@@ -352,7 +353,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"អ្នកនឹងគ្មានការរំខានដោយសារសំឡេង និងភាពរំញ័រឡើយ លើកលែងតែសំឡេងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបានបញ្ជាក់ប៉ុណ្ណោះ។"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"សំឡេង និងរំញ័រមិន​រំខានដល់អ្នកឡើយ លើកលែងតែសំឡេងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់។ អ្នកនៅតែឮអ្វីគ្រប់យ៉ាងដែលអ្នកជ្រើសរើសឲ្យលេង រួមទាំងតន្រ្តី វីដេអូ និងហ្គេមផងដែរ។"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"សំឡេង និងរំញ័រមិន​រំខានដល់អ្នកឡើយ លើកលែងតែសំឡេងរោទ៍។ អ្នកនៅតែឮអ្វីគ្រប់យ៉ាងដែលអ្នកជ្រើសរើសឲ្យលេង រួមទាំងតន្រ្តី វីដេអូ និងហ្គេមផងដែរ។"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ប្ដូរតាមបំណង"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ ដោយរួមបញ្ចូលទាំងសំឡេងរោទ៍ តន្ត្រី វីដេអូ និងហ្គេម។ អ្នកនឹងនៅតែអាចធ្វើការហៅទូរសព្ទបានដដែល។"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"វារារាំងសំឡេង និងរំញ័រទាំងអស់ដែលចេញពីម៉ោងរោទិ៍ តន្ត្រី វីដេអូ និងហ្គេម។"</string>
@@ -474,7 +476,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ទេ អរគុណ!"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"រៀបចំ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"បញ្ចប់ឥឡូវនេះ"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"បិទឥឡូវនេះ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
@@ -552,8 +554,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"អ្នក​នឹង​មិន​ទទួល​បានការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"ប្រភេទនៃការជូនដំណឹងចំនួន <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"កម្មវិធីនេះ​មិនមាន​ប្រភេទនៃ​ការជូនដំណឹង​ទេ"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ការជូនដំណឹងពី​កម្មវិធីនេះមិនអាចបិទបានទេ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_1">%d</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
       <item quantity="one">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_0">%d</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
@@ -575,8 +576,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ជម្រើស​ផ្អាកការ​ជូនដំណឹង"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"មិន​ធ្វើវិញ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"បាន​ផ្អាក​រយៈពេល <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d ម៉ោង</item>
+      <item quantity="one">%d ម៉ោង</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d នាទី</item>
+      <item quantity="one">%d នាទី</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ការប្រើប្រាស់ថ្ម"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"កម្មវិធីសន្សំថ្មមិនអាចប្រើបានអំឡុងពេលសាកថ្មទេ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"កម្មវិធីសន្សំថ្ម"</string>
@@ -719,8 +726,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"បង្រួម"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"បិទ"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"អូស​ចុះក្រោម​ដើម្បី​បដិសេធ"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"ម៉ឺនុយ​រូបភាព​ក្នុងរូបភាព"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបភាពក្នុងរូបភាព"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"ម៉ឺនុយ​រូប​ក្នុងរូប"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបក្នុងរូប"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
     <string name="pip_play" msgid="1417176722760265888">"លេង"</string>
     <string name="pip_pause" msgid="8881063404466476571">"ផ្អាក"</string>
@@ -754,7 +761,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"កម្មវិធី​ប្រើ​ភ្លាមៗ​មិន​តម្រូវ​ឲ្យ​មានការ​ដំឡើង​ទេ។"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="go_to_web" msgid="1106022723459948514">"ចូលទៅកាន់បណ្តាញ"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"ទិន្នន័យ​ចល័ត"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ប៊្លូធូស​បាន​បិទ"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"មុខងារ​កុំរំខាន​បាន​បិទ"</string>
@@ -766,4 +773,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ជំនួស"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"បិទទិន្នន័យ​ចល័ត?"</string>
 </resources>

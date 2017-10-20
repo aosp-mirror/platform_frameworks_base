@@ -269,8 +269,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Écran de veille"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne pas déranger"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priorités seulement"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes uniquement"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Prioritaires seulement"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmes seulement"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Aucune interruption"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
@@ -312,6 +312,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Plus de paramètres"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Terminé"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Connecté"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Connecté. Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connexion en cours…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Partage de connexion"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Point d\'accès sans fil"</string>
@@ -335,7 +336,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> est désactivée en mode sécurisé."</string>
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> est désactivée en mode sans échec."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Effacer tout"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Glissez l\'élément ici pour utiliser l\'écran partagé"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
@@ -351,10 +352,11 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Chargée dans <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"N\'est pas en charge"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Le réseau peut\nêtre surveillé."</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Rechercher"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni par les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même faire des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -370,7 +372,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Aucune interruption"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priorités seulement"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes uniquement"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorités\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
@@ -476,7 +478,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non, merci"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Arrêter maintenant"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Désactiver maintenant"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Développer"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Réduire"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
@@ -554,8 +556,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Vous ne recevrez plus ces notifications"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> catégories de notification"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Cette application n\'a pas de catégories de notification"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Les notifications de cette application ne peuvent pas être désactivées"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 catégorie de notification sur <xliff:g id="NUMBER_1">%d</xliff:g> provenant de cette application</item>
       <item quantity="other">1 catégorie de notification sur <xliff:g id="NUMBER_1">%d</xliff:g> provenant de cette application</item>
@@ -577,8 +578,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"options de répétition des notifications"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANNULER"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d heure</item>
+      <item quantity="other">%d heures</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minute</item>
+      <item quantity="other">%d minutes</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilisation de la pile"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Économie d\'énergie"</string>
@@ -768,4 +775,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Remplacer"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Applications qui fonctionnent en arrière-plan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Désactiver les données cellulaires?"</string>
 </resources>

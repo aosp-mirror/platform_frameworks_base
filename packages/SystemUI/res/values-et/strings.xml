@@ -229,8 +229,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Taskulamp on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Värvi ümberpööramine on välja lülitatud."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Värvi ümberpööramine on sisse lülitatud."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiilside leviala on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiilside leviala on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiilside kuumkoht on välja lülitatud."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiilside kuumkoht on sisse lülitatud."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekraanikuva ülekandmine on peatatud."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Töörežiim on väljas."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Töörežiim on sees."</string>
@@ -270,7 +270,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Mitte segada"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Ainult prioriteetsed"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult alarmid"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ainult äratused"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Täielik vaikus"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> seadet)"</string>
@@ -312,9 +312,10 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Rohkem seadeid"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Valmis"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ühendatud"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Ühendatud, aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ühenduse loomine ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Jagamine"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Leviala"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Kuumkoht"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Märguanded"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Taskulamp"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobiilne andmeside"</string>
@@ -331,7 +332,7 @@
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC on lubatud"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Hiljutisi üksusi pole"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Olete kõik ära kustutanud"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduste teave"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Rakenduse teave"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekraanikuva kinnitamine"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"otsing"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Rakendust <xliff:g id="APP">%s</xliff:g> ei saanud käivitada."</string>
@@ -354,7 +355,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Otsing"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lohistage üles: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lohistage vasakule: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Teid segatakse helide ja värinaga vaid teie määratud alarmide, meeldetuletuste, sündmuste ning helistajate puhul."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Helid ja värinad ei sega teid. Kuulete siiski enda määratud äratusi, meeldetuletusi, sündmusi ja helistajaid. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Helid ja värinad ei sega teid. Kuulete siiski äratusi. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Kohanda"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja värinad. Saate siiski helistada."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja vibratsioonid."</string>
@@ -370,7 +372,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Täielik vaikus. See vaigistab ka ekraanilugejad."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Täielik vaikus"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Ainult prioriteetsed"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult alarmid"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ainult äratused"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Täielik\nvaikus"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Ainult\nprioriteetsed"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ainult\nalarmid"</string>
@@ -381,7 +383,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Kasutaja vahetamine, praegune kasutaja: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Praegune kasutaja <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Kuva profiil"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Kasutaja lisamine"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Lisa kasutaja"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Uus kasutaja"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Külaline"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Lisa külaline"</string>
@@ -476,7 +478,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Tänan, ei"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Seadistus"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Lõpeta nüüd"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Lülita kohe välja"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Laiendamine"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ahendamine"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekraan on kinnitatud"</string>
@@ -524,7 +526,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Kiirseaded, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Leviala"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Kuumkoht"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Tööprofiil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kõik ei pruugi sellest rõõmu tunda"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Süsteemi kasutajaliidese tuuner pakub täiendavaid võimalusi Androidi kasutajaliidese muutmiseks ja kohandamiseks. Need katselised funktsioonid võivad muutuda, rikki minna või tulevastest versioonidest kaduda. Olge jätkamisel ettevaatlik."</string>
@@ -554,8 +556,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Te ei saa enam neid märguandeid"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> märguandekategooriat"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Sellel rakendusel ei ole märguannete kategooriaid"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Selle rakenduse märguandeid ei saa välja lülitada"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 <xliff:g id="NUMBER_1">%d</xliff:g>-st märguannete kategooriast sellelt rakenduselt</item>
       <item quantity="one">1 <xliff:g id="NUMBER_0">%d</xliff:g>-st märguannete kategooriast sellelt rakenduselt</item>
@@ -577,8 +578,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"märguannete edasilükkamise valikud"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"VÕTA TAGASI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Edasi lükatud <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d tundi</item>
+      <item quantity="one">%d tund</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d minutit</item>
+      <item quantity="one">%d minut</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akukasutus"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akusäästja pole laadimise ajal saadaval"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akusäästja"</string>
@@ -768,4 +775,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Asenda"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Rakendusi käitatakse taustal"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Kas lülitada mobiilne andmeside välja?"</string>
 </resources>
