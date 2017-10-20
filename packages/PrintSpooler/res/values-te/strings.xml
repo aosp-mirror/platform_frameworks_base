@@ -25,7 +25,7 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"కాగితపు పరిమాణం:"</string>
     <string name="label_color" msgid="1108690305218188969">"రంగు"</string>
     <string name="label_duplex" msgid="5370037254347072243">"రెండు వైపుల"</string>
-    <string name="label_orientation" msgid="2853142581990496477">"దృగ్విన్యాసం"</string>
+    <string name="label_orientation" msgid="2853142581990496477">"ఓరియంటేషన్"</string>
     <string name="label_pages" msgid="7768589729282182230">"పేజీలు"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"ప్రింటర్ ఎంచుకోండి"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"మొత్తం <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
@@ -33,7 +33,7 @@
     <string name="pages_range_example" msgid="8558694453556945172">"ఉదా. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"ముద్రణ పరిదృశ్యం"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"పరిదృశ్యం చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ అనువర్తనం క్రాష్ అయ్యింది"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ యాప్ క్రాష్ అయ్యింది"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ముద్రణ జాబ్‌ను ఉత్పన్నం చేస్తోంది"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF వలె సేవ్ చేయి"</string>
     <string name="all_printers" msgid="5018829726861876202">"అన్ని ప్రింటర్‌లు…"</string>
@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF వలె సేవ్ చేయి"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ముద్రణ ఎంపికలు విస్తరించబడ్డాయి"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ముద్రణ ఎంపికలు కుదించబడ్డాయి"</string>
-    <string name="search" msgid="5421724265322228497">"శోధించు"</string>
+    <string name="search" msgid="5421724265322228497">"వెతుకు"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"అన్ని ప్రింటర్‌లు"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"సేవను జోడించు"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"శోధన పెట్టె చూపబడింది"</string>
@@ -81,7 +81,7 @@
     </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ను ముద్రిస్తోంది"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ను రద్దు చేస్తోంది"</string>
-    <string name="failed_notification_title_template" msgid="2256217208186530973">"ప్రింటర్ లోపం <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"ప్రింటర్ ఎర్రర్ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ప్రింటర్ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ను బ్లాక్ చేసింది"</string>
     <string name="cancel" msgid="4373674107267141885">"రద్దు చేయి"</string>
     <string name="restart" msgid="2472034227037808749">"పునఃప్రారంభించు"</string>

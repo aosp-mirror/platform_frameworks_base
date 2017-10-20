@@ -47,9 +47,9 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"‏שמור כ-PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"אפשרויות ההדפסה הורחבו"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"אפשרויות ההדפסה כווצו"</string>
-    <string name="search" msgid="5421724265322228497">"חפש"</string>
+    <string name="search" msgid="5421724265322228497">"חיפוש"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"כל המדפסות"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"הוסף שירות"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"הוספת שירות"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"תיבת החיפוש מוצגת"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"תיבת החיפוש מוסתרת"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"הוסף מדפסת"</string>
@@ -88,7 +88,7 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"שגיאת מדפסת ב-<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"המדפסת חסמה את <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"ביטול"</string>
-    <string name="restart" msgid="2472034227037808749">"הפעל מחדש"</string>
+    <string name="restart" msgid="2472034227037808749">"הפעלה מחדש"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"אין חיבור למדפסת"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"לא ידוע"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"האם להשתמש ב-<xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
