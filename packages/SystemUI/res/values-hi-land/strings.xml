@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="toast_rotation_locked" msgid="7609673011431556092">"स्‍क्रीन को अभी भूदृश्य अभिविन्यास में लॉक किया गया है."</string>
+    <string name="toast_rotation_locked" msgid="7609673011431556092">"स्क्रीन अभी लैंडस्केप दिशा में लॉक है."</string>
 </resources>

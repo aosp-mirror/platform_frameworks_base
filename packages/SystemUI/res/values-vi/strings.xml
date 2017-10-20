@@ -240,9 +240,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Đang sạc"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Đã tạm dừng dữ liệu 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Đã tạm dừng dữ liệu 4G"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Dữ liệu di động bị tạm dừng"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Dữ liệu di động đã bị tạm dừng"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Đã tạm dừng dữ liệu"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Đã đạt đến giới hạn dữ liệu mà bạn đặt. Bạn hiện không còn sử dụng dữ liệu di động.\n\nNếu tiếp tục, bạn có thể phải trả phí sử dụng dữ liệu."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Dữ liệu đã đạt đến mức giới hạn mà bạn đã đặt. Bạn hiện không sử dụng dữ liệu di động nữa.\n\nNếu tiếp tục, bạn có thể bị tính phí sử dụng dữ liệu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Tiếp tục"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
@@ -310,6 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Cài đặt khác"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Xong"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Đã kết nối"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Đang kết nối..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Điểm phát sóng"</string>
@@ -352,7 +353,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tìm kiếm"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Trượt lên để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Trượt sang trái để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, nhắc nhở, sự kiện và người gọi mà bạn chỉ định."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, nhắc nhở, sự kiện và người gọi mà bạn chỉ định. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tùy chỉnh"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Chế độ này sẽ chặn TẤT CẢ âm thanh và tiếng rung, bao gồm báo thức, âm nhạc, video và trò chơi. Bạn vẫn có thể gọi điện thoại."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Chế độ này sẽ chặn TẤT CẢ âm thanh và tiếng rung, bao gồm báo thức, âm nhạc, video và trò chơi."</string>
@@ -474,7 +476,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ko, cảm ơn"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Thiết lập"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Kết thúc bây giờ"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Tắt ngay bây giờ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mở rộng"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Thu gọn"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Màn hình được ghim"</string>
@@ -554,8 +556,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Bạn sẽ không nhận được những thông báo này nữa"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> danh mục thông báo"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ứng dụng này không có loại thông báo"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Không thể tắt thông báo từ ứng dụng này"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 trên tổng số <xliff:g id="NUMBER_1">%d</xliff:g> loại thông báo từ ứng dụng này</item>
       <item quantity="one">1 trên tổng số <xliff:g id="NUMBER_0">%d</xliff:g> loại thông báo từ ứng dụng này</item>
@@ -577,8 +578,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Tùy chọn báo lại thông báo"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"HOÀN TÁC"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Báo lại sau <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d giờ</item>
+      <item quantity="one">%d giờ</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d phút</item>
+      <item quantity="one">%d phút</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Mức sử dụng pin"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Trình tiết kiệm pin không khả dụng trong khi sạc"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Trình tiết kiệm pin"</string>
@@ -768,4 +775,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Thay thế"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Tắt dữ liệu di động?"</string>
 </resources>

@@ -312,6 +312,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Altre impostazioni"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Fine"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Connesso"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connessione..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -354,7 +355,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Ricerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Su per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"A sinistra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non ti disturberanno: suoni e vibrazioni, ad eccezione di sveglie, promemoria, eventi e chiamate da contatti da te specificati."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Non verrai disturbato da suoni e vibrazioni, ad eccezione di sveglie, promemoria, eventi, chiamate da contatti da te specificati ed elementi che hai scelto di continuare a riprodurre, inclusi video, musica e giochi."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Non verrai disturbato da suoni e vibrazioni, ad eccezione delle sveglie e degli elementi che hai scelto di continuare a riprodurre, inclusi video, musica e giochi."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizza"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Verranno bloccati TUTTI i suoni e le vibrazioni, anche di sveglie, musica, video e giochi. Potrai ancora telefonare."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Verranno bloccati TUTTI i suoni e le vibrazioni, anche di sveglie, musica, video e giochi."</string>
@@ -476,7 +478,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No, grazie"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Termina adesso"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Disattiva ora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Espandi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Comprimi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è bloccata"</string>
@@ -504,7 +506,7 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tocca per disattivare l\'audio."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s comandi del volume mostrati. Fai scorrere verso l\'alto per ignorare."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Comandi del volume nascosti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Sintetizzatore interfaccia utente di sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Ottimizzatore UI di sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra percentuale batteria incorporata"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
@@ -527,12 +529,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profilo di lavoro"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Il divertimento riservato a pochi eletti"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Il sintetizzatore interfaccia utente di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="got_it" msgid="2239653834387972602">"OK"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! Il sintetizzatore interfaccia utente di sistema è stato aggiunto alle impostazioni."</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! L\'Ottimizzatore UI di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Rimuovi dalle impostazioni"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere il sintetizzatore interfaccia utente di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere l\'Ottimizzatore UI di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Applicazione non installata sul dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostra i secondi nell\'orologio"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra i secondi nell\'orologio nella barra di stato. Ciò potrebbe ridurre la durata della carica della batteria."</string>
@@ -554,8 +556,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Non riceverai più queste notifiche"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorie di notifica"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Questa app non ha categorie di notifica"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Le notifiche di quest\'app non possono essere disattivate"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 categoria di notifica su <xliff:g id="NUMBER_1">%d</xliff:g> di questa app</item>
       <item quantity="one">1 categoria di notifica su <xliff:g id="NUMBER_0">%d</xliff:g> di questa app</item>
@@ -577,8 +578,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opzioni di posticipazione notifiche"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANNULLA"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Posticipato di <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d ore</item>
+      <item quantity="one">%d ora</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d minuti</item>
+      <item quantity="one">%d minuto</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilizzo batteria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Risparmio energetico non disponibile durante la ricarica"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Risparmio energetico"</string>
@@ -591,7 +598,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Sinistra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Destra"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Al centro"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Scheda"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Spazio"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Invio"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
@@ -721,8 +728,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Riduci a icona"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Chiudi"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trascina verso il basso per ignorare"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture-in-picture"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> è in picture-in-picture"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture in picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> è in Picture in picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
     <string name="pip_play" msgid="1417176722760265888">"Riproduci"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Metti in pausa"</string>
@@ -768,4 +775,5 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Sostituisci"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"App in esecuzione in background"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Disattivare i dati mobili?"</string>
 </resources>
