@@ -26,7 +26,15 @@ import android.view.Choreographer;
  */
 public final class SfVsyncFrameCallbackProvider implements AnimationFrameCallbackProvider {
 
-    private final Choreographer mChoreographer = Choreographer.getSfInstance();
+    private final Choreographer mChoreographer;
+
+    public SfVsyncFrameCallbackProvider() {
+        mChoreographer = Choreographer.getSfInstance();
+    }
+
+    public SfVsyncFrameCallbackProvider(Choreographer choreographer) {
+        mChoreographer = choreographer;
+    }
 
     @Override
     public void postFrameCallback(Choreographer.FrameCallback callback) {

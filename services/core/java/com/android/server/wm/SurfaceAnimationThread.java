@@ -14,43 +14,44 @@
  * limitations under the License
  */
 
-package com.android.server;
+package com.android.server.wm;
 
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import android.os.Handler;
 import android.os.Trace;
 
+import com.android.server.ServiceThread;
+
 /**
- * Thread for handling all legacy window animations, or anything that's directly impacting
- * animations like starting windows or traversals.
+ * Thread for running {@link SurfaceAnimationRunner} that does not hold the window manager lock.
  */
-public final class AnimationThread extends ServiceThread {
-    private static AnimationThread sInstance;
+public final class SurfaceAnimationThread extends ServiceThread {
+    private static SurfaceAnimationThread sInstance;
     private static Handler sHandler;
 
-    private AnimationThread() {
-        super("android.anim", THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
+    private SurfaceAnimationThread() {
+        super("android.anim.lf", THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
     }
 
     private static void ensureThreadLocked() {
         if (sInstance == null) {
-            sInstance = new AnimationThread();
+            sInstance = new SurfaceAnimationThread();
             sInstance.start();
             sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_WINDOW_MANAGER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
 
-    public static AnimationThread get() {
-        synchronized (AnimationThread.class) {
+    public static SurfaceAnimationThread get() {
+        synchronized (SurfaceAnimationThread.class) {
             ensureThreadLocked();
             return sInstance;
         }
     }
 
     public static Handler getHandler() {
-        synchronized (AnimationThread.class) {
+        synchronized (SurfaceAnimationThread.class) {
             ensureThreadLocked();
             return sHandler;
         }
