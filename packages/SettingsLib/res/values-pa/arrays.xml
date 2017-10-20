@@ -39,7 +39,7 @@
     <item msgid="8878186979715711006">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</item>
     <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਨਾਲ ਪ੍ਰਮਾਣਿਤ ਕਰ ਰਿਹਾ ਹੈ…"</item>
-    <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਤੋਂ IP ਪਤਾ ਪ੍ਰਾਪਤ ਕਰ ਰਿਹਾ ਹੈ…"</item>
+    <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਤੋਂ IP ਪਤਾ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="8937994881315223448">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</item>
     <item msgid="1330262655415760617">"ਮੁਅੱਤਲ ਕੀਤਾ"</item>
     <item msgid="7698638434317271902">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਤੋਂ ਡਿਸਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</item>
@@ -50,7 +50,7 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"ਕਦੇ ਵੀ ਜਾਂਚ ਨਾ ਕਰੋ"</item>
-    <item msgid="6042769699089883931">"ਕੇਵਲ DRM ਸਮੱਗਰੀ ਲਈ ਜਾਂਚ ਕਰੋ"</item>
+    <item msgid="6042769699089883931">"ਸਿਰਫ਼ DRM ਸਮੱਗਰੀ ਲਈ ਜਾਂਚ ਕਰੋ"</item>
     <item msgid="9174900380056846820">"ਹਮੇਸ਼ਾਂ ਜਾਂਚ ਕਰੋ"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
@@ -60,34 +60,20 @@
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
+    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
+    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
     <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
+    <item msgid="3011533352527449572">"avrcp13"</item>
+    <item msgid="8837606198371920819">"avrcp15"</item>
+    <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="8910200421843557332">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="8434403964359457768">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"ਵਿਕਲਪਿਕ ਕੋਡੈਕ ਯੋਗ ਬਣਾਓ"</item>
-    <item msgid="3304843301758635896">"ਵਿਕਲਪਿਕ ਕੋਡੈਕ ਅਯੋਗ ਬਣਾਓ"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="2279916056363477395">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="6641171061200063516">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"ਵਿਕਲਪਿਕ ਕੋਡੈਕ ਯੋਗ ਬਣਾਓ"</item>
-    <item msgid="741805482892725657">"ਵਿਕਲਪਿਕ ਕੋਡੈਕ ਅਯੋਗ ਬਣਾਓ"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"ਸਿਸਟਮ ਚੋਣ ਦੀ ਵਰਤੋਂ ਕਰੋ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -125,14 +111,14 @@
     <item msgid="8883739882299884241">"ਸਟੀਰੀਓ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"ਔਡੀਓ ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ (990kbps/909kbps)"</item>
-    <item msgid="2921767058740704969">"ਸੰਤੁਲਿਤ ਔਡੀਓ ਅਤੇ ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ (660kbps/606kbps)"</item>
+    <item msgid="7158319962230727476">" ਆਡੀਓ  ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ (990kbps/909kbps)"</item>
+    <item msgid="2921767058740704969">"ਸੰਤੁਲਿਤ  ਆਡੀਓ  ਅਤੇ ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ (660kbps/606kbps)"</item>
     <item msgid="8860982705384396512">"ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ (330kbps/303kbps)"</item>
     <item msgid="4414060457677684127">"ਸਰਵੋਤਮ ਕੋਸ਼ਿਸ਼ (ਅਨੁਕੂਲਨਕਾਰੀ ਬਿਟ ਰੇਟ)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="6398189564246596868">"ਔਡੀਓ ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</item>
-    <item msgid="4327143584633311908">"ਸੰਤੁਲਿਤ ਔਡੀਓ ਅਤੇ ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ"</item>
+    <item msgid="6398189564246596868">" ਆਡੀਓ  ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</item>
+    <item msgid="4327143584633311908">"ਸੰਤੁਲਿਤ  ਆਡੀਓ  ਅਤੇ ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ"</item>
     <item msgid="4681409244565426925">"ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</item>
     <item msgid="364670732877872677">"ਸਰਵੋਤਮ ਕੋਸ਼ਿਸ਼ (ਅਨੁਕੂਲਨਕਾਰੀ ਬਿਟ ਰੇਟ)"</item>
   </string-array>
@@ -152,11 +138,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"ਬੰਦ"</item>
-    <item msgid="2969458029344750262">"64K ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
-    <item msgid="1342285115665698168">"256K ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
-    <item msgid="1314234299552254621">"1M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
-    <item msgid="3606047780792894151">"4M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
-    <item msgid="5431354956856655120">"16M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+    <item msgid="2969458029344750262">"64K ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="1342285115665698168">"256K ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="1314234299552254621">"1M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="3606047780792894151">"4M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
+    <item msgid="5431354956856655120">"16M ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"ਬੰਦ"</item>
@@ -220,7 +206,7 @@
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"ਬੰਦ"</item>
     <item msgid="675719912558941285">"ਨੀਲੇ ਵਿੱਚ ਗ਼ੈਰ-ਆਇਤਾਕਾਰ ਕਲਿਪ ਖੇਤਰ ਡ੍ਰਾ ਕਰੋ"</item>
-    <item msgid="1064373276095698656">"ਹਾਈਲਾਈਟ ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਹਨ"</item>
+    <item msgid="1064373276095698656">"ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਉਜਾਗਰ ਕਰੋ"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="2193584639058893150">"ਬੰਦ"</item>
@@ -247,9 +233,9 @@
   <string-array name="usb_configuration_titles">
     <item msgid="488237561639712799">"ਚਾਰਜਿੰਗ"</item>
     <item msgid="5220695614993094977">"MTP (ਮੀਡੀਆ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
-    <item msgid="2086000968159047375">"PTP (ਤਸਵੀਰ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
+    <item msgid="2086000968159047375">"PTP (ਪਿਕਚਰ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB ਈਥਰਨੈਟ)"</item>
-    <item msgid="1718924214939774352">"ਔਡੀਓ ਸਰੋਤ"</item>
+    <item msgid="1718924214939774352">" ਆਡੀਓ  ਸਰੋਤ"</item>
     <item msgid="8126315616613006284">"MIDI"</item>
   </string-array>
 </resources>

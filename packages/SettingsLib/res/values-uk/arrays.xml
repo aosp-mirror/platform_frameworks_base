@@ -60,34 +60,20 @@
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (за умовчанням)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
+    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
+    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
     <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
+    <item msgid="3011533352527449572">"acrcp13"</item>
+    <item msgid="8837606198371920819">"avrcp15"</item>
+    <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Використовувати вибір системи (за умовчанням)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="8910200421843557332">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="8434403964359457768">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"Увімкнути додаткові кодеки"</item>
-    <item msgid="3304843301758635896">"Вимкнути додаткові кодеки"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Використовувати вибір системи (за умовчанням)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="2279916056363477395">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="6641171061200063516">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"Увімкнути додаткові кодеки"</item>
-    <item msgid="741805482892725657">"Вимкнути додаткові кодеки"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Використовувати вибір системи (за умовчанням)"</item>
     <item msgid="8895532488906185219">"44,1 кГц"</item>
@@ -138,25 +124,25 @@
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Вимкнено"</item>
-    <item msgid="1593289376502312923">"64 Кб"</item>
-    <item msgid="487545340236145324">"256 Кб"</item>
-    <item msgid="2423528675294333831">"1 Мб"</item>
-    <item msgid="180883774509476541">"4 Мб"</item>
-    <item msgid="2803199102589126938">"16 Мб"</item>
+    <item msgid="1593289376502312923">"64 КБ"</item>
+    <item msgid="487545340236145324">"256 КБ"</item>
+    <item msgid="2423528675294333831">"1 МБ"</item>
+    <item msgid="180883774509476541">"4 МБ"</item>
+    <item msgid="2803199102589126938">"16 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="6089470720451068364">"Вимкнено"</item>
-    <item msgid="4622460333038586791">"64 Кб"</item>
-    <item msgid="2212125625169582330">"256 Кб"</item>
-    <item msgid="1704946766699242653">"1 Мб"</item>
+    <item msgid="4622460333038586791">"64 КБ"</item>
+    <item msgid="2212125625169582330">"256 КБ"</item>
+    <item msgid="1704946766699242653">"1 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Вимкнено"</item>
-    <item msgid="2969458029344750262">"Буфер журналу: 64 Кб"</item>
-    <item msgid="1342285115665698168">"Буфер журналу: 256 Кб"</item>
-    <item msgid="1314234299552254621">"Буфер журналу: 1 Мб"</item>
-    <item msgid="3606047780792894151">"Буфер журналу: 4 Мб"</item>
-    <item msgid="5431354956856655120">"Буфер журналу: 16 Мб"</item>
+    <item msgid="2969458029344750262">"Буфер журналу: 64 КБ"</item>
+    <item msgid="1342285115665698168">"Буфер журналу: 256 КБ"</item>
+    <item msgid="1314234299552254621">"Буфер журналу: 1 МБ"</item>
+    <item msgid="3606047780792894151">"Буфер журналу: 4 МБ"</item>
+    <item msgid="5431354956856655120">"Буфер журналу: 16 МБ"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Вимкнено"</item>
