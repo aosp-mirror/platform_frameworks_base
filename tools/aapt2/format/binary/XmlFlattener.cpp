@@ -56,9 +56,9 @@ static bool cmp_xml_attribute_by_id(const xml::Attribute* a, const xml::Attribut
   return false;
 }
 
-class XmlFlattenerVisitor : public xml::Visitor {
+class XmlFlattenerVisitor : public xml::ConstVisitor {
  public:
-  using xml::Visitor::Visit;
+  using xml::ConstVisitor::Visit;
 
   StringPool pool;
   std::map<uint8_t, StringPool> package_pools;
@@ -74,7 +74,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
       : buffer_(buffer), options_(options) {
   }
 
-  void Visit(xml::Text* node) override {
+  void Visit(const xml::Text* node) override {
     if (util::TrimWhitespace(node->text).empty()) {
       // Skip whitespace only text nodes.
       return;
@@ -95,7 +95,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
     writer.Finish();
   }
 
-  void Visit(xml::Element* node) override {
+  void Visit(const xml::Element* node) override {
     for (const xml::NamespaceDecl& decl : node->namespace_decls) {
       // Skip dedicated tools namespace.
       if (decl.uri != xml::kSchemaTools) {
@@ -125,7 +125,7 @@ class XmlFlattenerVisitor : public xml::Visitor {
       start_writer.Finish();
     }
 
-    xml::Visitor::Visit(node);
+    xml::ConstVisitor::Visit(node);
 
     {
       ChunkWriter end_writer(buffer_);
@@ -182,12 +182,13 @@ class XmlFlattenerVisitor : public xml::Visitor {
     writer.Finish();
   }
 
-  void WriteAttributes(xml::Element* node, ResXMLTree_attrExt* flat_elem, ChunkWriter* writer) {
+  void WriteAttributes(const xml::Element* node, ResXMLTree_attrExt* flat_elem,
+                       ChunkWriter* writer) {
     filtered_attrs_.clear();
     filtered_attrs_.reserve(node->attributes.size());
 
     // Filter the attributes.
-    for (xml::Attribute& attr : node->attributes) {
+    for (const xml::Attribute& attr : node->attributes) {
       if (attr.namespace_uri != xml::kSchemaTools) {
         filtered_attrs_.push_back(&attr);
       }
@@ -282,12 +283,12 @@ class XmlFlattenerVisitor : public xml::Visitor {
   XmlFlattenerOptions options_;
 
   // Scratch vector to filter attributes. We avoid allocations making this a member.
-  std::vector<xml::Attribute*> filtered_attrs_;
+  std::vector<const xml::Attribute*> filtered_attrs_;
 };
 
 }  // namespace
 
-bool XmlFlattener::Flatten(IAaptContext* context, xml::Node* node) {
+bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
   BigBuffer node_buffer(1024);
   XmlFlattenerVisitor visitor(&node_buffer, options_);
   node->Accept(&visitor);
@@ -341,7 +342,7 @@ bool XmlFlattener::Flatten(IAaptContext* context, xml::Node* node) {
   return true;
 }
 
-bool XmlFlattener::Consume(IAaptContext* context, xml::XmlResource* resource) {
+bool XmlFlattener::Consume(IAaptContext* context, const xml::XmlResource* resource) {
   if (!resource->root) {
     return false;
   }

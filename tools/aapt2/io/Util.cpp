@@ -18,6 +18,8 @@
 
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
+using ::google::protobuf::io::ZeroCopyOutputStream;
+
 namespace aapt {
 namespace io {
 
@@ -89,6 +91,11 @@ bool Copy(OutputStream* out, InputStream* in) {
     in->BackUp(in_len - bytes_to_copy);
   }
   return !in->HadError();
+}
+
+bool Copy(ZeroCopyOutputStream* out, InputStream* in) {
+  OutputStreamAdaptor adaptor(out);
+  return Copy(&adaptor, in);
 }
 
 }  // namespace io

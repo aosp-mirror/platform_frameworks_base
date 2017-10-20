@@ -19,7 +19,7 @@
 #include <string>
 
 #include "format/binary/XmlFlattener.h"
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Test.h"
 
 using ::aapt::io::StringInputStream;

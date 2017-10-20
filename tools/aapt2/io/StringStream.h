@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_IO_STRINGINPUTSTREAM_H
-#define AAPT_IO_STRINGINPUTSTREAM_H
+#ifndef AAPT_IO_STRINGSTREAM_H
+#define AAPT_IO_STRINGSTREAM_H
 
 #include "io/Io.h"
+
+#include <memory>
 
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
@@ -25,7 +27,7 @@
 namespace aapt {
 namespace io {
 
-class StringInputStream : public InputStream {
+class StringInputStream : public KnownSizeInputStream {
  public:
   explicit StringInputStream(const android::StringPiece& str);
 
@@ -43,6 +45,8 @@ class StringInputStream : public InputStream {
     return {};
   }
 
+  size_t TotalSize() const override;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(StringInputStream);
 
@@ -50,7 +54,40 @@ class StringInputStream : public InputStream {
   size_t offset_;
 };
 
+class StringOutputStream : public OutputStream {
+ public:
+  explicit StringOutputStream(std::string* str, size_t buffer_capacity = 4096u);
+
+  ~StringOutputStream();
+
+  bool Next(void** data, size_t* size) override;
+
+  void BackUp(size_t count) override;
+
+  void Flush();
+
+  size_t ByteCount() const override;
+
+  inline bool HadError() const override {
+    return false;
+  }
+
+  inline std::string GetError() const override {
+    return {};
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(StringOutputStream);
+
+  void FlushImpl();
+
+  std::string* str_;
+  size_t buffer_capacity_;
+  size_t buffer_offset_;
+  std::unique_ptr<char[]> buffer_;
+};
+
 }  // namespace io
 }  // namespace aapt
 
-#endif  // AAPT_IO_STRINGINPUTSTREAM_H
+#endif  // AAPT_IO_STRINGSTREAM_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_IO_BIGBUFFERINPUTSTREAM_H
-#define AAPT_IO_BIGBUFFERINPUTSTREAM_H
+#ifndef AAPT_IO_BIGBUFFERSTREAM_H
+#define AAPT_IO_BIGBUFFERSTREAM_H
 
 #include "io/Io.h"
 #include "util/BigBuffer.h"
@@ -23,10 +23,11 @@
 namespace aapt {
 namespace io {
 
-class BigBufferInputStream : public InputStream {
+class BigBufferInputStream : public KnownSizeInputStream {
  public:
   inline explicit BigBufferInputStream(const BigBuffer* buffer)
-      : buffer_(buffer), iter_(buffer->begin()) {}
+      : buffer_(buffer), iter_(buffer->begin()) {
+  }
   virtual ~BigBufferInputStream() = default;
 
   bool Next(const void** data, size_t* size) override;
@@ -41,6 +42,8 @@ class BigBufferInputStream : public InputStream {
 
   bool HadError() const override;
 
+  size_t TotalSize() const override;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(BigBufferInputStream);
 
@@ -50,7 +53,27 @@ class BigBufferInputStream : public InputStream {
   size_t bytes_read_ = 0;
 };
 
+class BigBufferOutputStream : public OutputStream {
+ public:
+  inline explicit BigBufferOutputStream(BigBuffer* buffer) : buffer_(buffer) {
+  }
+  virtual ~BigBufferOutputStream() = default;
+
+  bool Next(void** data, size_t* size) override;
+
+  void BackUp(size_t count) override;
+
+  size_t ByteCount() const override;
+
+  bool HadError() const override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BigBufferOutputStream);
+
+  BigBuffer* buffer_;
+};
+
 }  // namespace io
 }  // namespace aapt
 
-#endif  // AAPT_IO_BIGBUFFERINPUTSTREAM_H
+#endif  // AAPT_IO_BIGBUFFERSTREAM_H

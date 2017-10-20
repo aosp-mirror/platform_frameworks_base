@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "io/BigBufferInputStream.h"
-#include "io/BigBufferOutputStream.h"
+#include "io/BigBufferStream.h"
 
 namespace aapt {
 namespace io {
@@ -54,7 +53,9 @@ void BigBufferInputStream::BackUp(size_t count) {
   }
 }
 
-bool BigBufferInputStream::CanRewind() const { return true; }
+bool BigBufferInputStream::CanRewind() const {
+  return true;
+}
 
 bool BigBufferInputStream::Rewind() {
   iter_ = buffer_->begin();
@@ -63,9 +64,17 @@ bool BigBufferInputStream::Rewind() {
   return true;
 }
 
-size_t BigBufferInputStream::ByteCount() const { return bytes_read_; }
+size_t BigBufferInputStream::ByteCount() const {
+  return bytes_read_;
+}
 
-bool BigBufferInputStream::HadError() const { return false; }
+bool BigBufferInputStream::HadError() const {
+  return false;
+}
+
+size_t BigBufferInputStream::TotalSize() const {
+  return buffer_->size();
+}
 
 //
 // BigBufferOutputStream
@@ -76,11 +85,17 @@ bool BigBufferOutputStream::Next(void** data, size_t* size) {
   return true;
 }
 
-void BigBufferOutputStream::BackUp(size_t count) { buffer_->BackUp(count); }
+void BigBufferOutputStream::BackUp(size_t count) {
+  buffer_->BackUp(count);
+}
 
-size_t BigBufferOutputStream::ByteCount() const { return buffer_->size(); }
+size_t BigBufferOutputStream::ByteCount() const {
+  return buffer_->size();
+}
 
-bool BigBufferOutputStream::HadError() const { return false; }
+bool BigBufferOutputStream::HadError() const {
+  return false;
+}
 
 }  // namespace io
 }  // namespace aapt

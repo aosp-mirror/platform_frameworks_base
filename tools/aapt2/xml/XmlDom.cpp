@@ -215,8 +215,8 @@ std::unique_ptr<XmlResource> Inflate(InputStream* in, IDiagnostics* diag, const 
       return {};
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, StringPool{},
-                                        std::move(stack.root));
+  return util::make_unique<XmlResource>(ResourceFile{{}, {}, ResourceFile::Type::kUnknown, source},
+                                        StringPool{}, std::move(stack.root));
 }
 
 static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPool* out_pool) {

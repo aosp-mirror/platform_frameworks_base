@@ -39,5 +39,9 @@ std::unique_ptr<IData> FileSegment::OpenAsData() {
   return {};
 }
 
+std::unique_ptr<io::InputStream> FileSegment::OpenInputStream() {
+  return OpenAsData();
+}
+
 }  // namespace io
 }  // namespace aapt

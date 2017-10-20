@@ -19,7 +19,7 @@
 #include "android-base/logging.h"
 #include "androidfw/StringPiece.h"
 
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Common.h"
 #include "util/Util.h"
 

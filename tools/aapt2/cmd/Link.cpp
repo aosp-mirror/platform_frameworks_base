@@ -25,7 +25,6 @@
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
-#include "google/protobuf/io/coded_stream.h"
 
 #include "AppInfo.h"
 #include "Debug.h"
@@ -39,13 +38,14 @@
 #include "compile/IdAssigner.h"
 #include "filter/ConfigFilter.h"
 #include "format/Archive.h"
+#include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
 #include "format/proto/ProtoSerialize.h"
-#include "io/BigBufferInputStream.h"
-#include "io/FileInputStream.h"
+#include "io/BigBufferStream.h"
+#include "io/FileStream.h"
 #include "io/FileSystem.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
@@ -71,6 +71,14 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+constexpr static const char kApkResourceTablePath[] = "resources.arsc";
+constexpr static const char kProtoResourceTablePath[] = "resources.pb";
+
+enum class OutputFormat {
+  kApk,
+  kProto,
+};
+
 struct LinkOptions {
   std::string output_path;
   std::string manifest_path;
@@ -79,6 +87,7 @@ struct LinkOptions {
   std::vector<std::string> assets_dirs;
   bool output_to_directory = false;
   bool auto_add_overlay = false;
+  OutputFormat output_format = OutputFormat::kApk;
 
   // Java/Proguard options.
   Maybe<std::string> generate_java_class_path;
@@ -253,26 +262,39 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
   IAaptContext* context_;
 };
 
-static bool FlattenXml(IAaptContext* context, xml::XmlResource* xml_res, const StringPiece& path,
-                       bool keep_raw_values, bool utf16, IArchiveWriter* writer) {
-  BigBuffer buffer(1024);
-  XmlFlattenerOptions options = {};
-  options.keep_raw_values = keep_raw_values;
-  options.use_utf16 = utf16;
-  XmlFlattener flattener(&buffer, options);
-  if (!flattener.Consume(context, xml_res)) {
-    return false;
-  }
-
+static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
+                       const StringPiece& path, bool keep_raw_values, bool utf16,
+                       OutputFormat format, IArchiveWriter* writer) {
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path) << "writing to archive (keep_raw_values="
                                                       << (keep_raw_values ? "true" : "false")
                                                       << ")");
   }
 
-  io::BigBufferInputStream input_stream(&buffer);
-  return io::CopyInputStreamToArchive(context, &input_stream, path.to_string(),
-                                      ArchiveEntry::kCompress, writer);
+  switch (format) {
+    case OutputFormat::kApk: {
+      BigBuffer buffer(1024);
+      XmlFlattenerOptions options = {};
+      options.keep_raw_values = keep_raw_values;
+      options.use_utf16 = utf16;
+      XmlFlattener flattener(&buffer, options);
+      if (!flattener.Consume(context, &xml_res)) {
+        return false;
+      }
+
+      io::BigBufferInputStream input_stream(&buffer);
+      return io::CopyInputStreamToArchive(context, &input_stream, path.to_string(),
+                                          ArchiveEntry::kCompress, writer);
+    } break;
+
+    case OutputFormat::kProto: {
+      pb::XmlNode pb_node;
+      SerializeXmlResourceToPb(xml_res, &pb_node);
+      return io::CopyProtoToArchive(context, &pb_node, path.to_string(), ArchiveEntry::kCompress,
+                                    writer);
+    } break;
+  }
+  return false;
 }
 
 static std::unique_ptr<ResourceTable> LoadTableFromPb(const Source& source, const void* data,
@@ -310,6 +332,7 @@ struct ResourceFileFlattenerOptions {
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
   bool update_proguard_spec = false;
+  OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
 };
 
@@ -467,6 +490,10 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
                                      << "linking " << src.path << " (" << doc->file.name << ")");
   }
 
+  // First, strip out any tools namespace attributes. AAPT stripped them out early, which means
+  // that existing projects have out-of-date references which pass compilation.
+  xml::StripAndroidStudioAttributes(doc->root.get());
+
   XmlReferenceLinker xml_linker;
   if (!xml_linker.Consume(context_, doc)) {
     return {};
@@ -543,9 +570,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           file_op.config = config_value->config;
           file_op.file_to_copy = file;
 
-          const StringPiece src_path = file->GetSource().path;
           if (type->type != ResourceType::kRaw &&
-              (util::EndsWith(src_path, ".xml.flat") || util::EndsWith(src_path, ".xml"))) {
+              (file_ref->type == ResourceFile::Type::kBinaryXml ||
+               file_ref->type == ResourceFile::Type::kProtoXml)) {
             std::unique_ptr<io::IData> data = file->OpenAsData();
             if (!data) {
               context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
@@ -553,11 +580,27 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               return false;
             }
 
-            file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(),
-                                                  context_->GetDiagnostics(), file->GetSource());
+            if (file_ref->type == ResourceFile::Type::kProtoXml) {
+              pb::XmlNode pb_xml_node;
+              if (!pb_xml_node.ParseFromArray(data->data(), static_cast<int>(data->size()))) {
+                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                  << "failed to parse proto xml");
+                return false;
+              }
 
-            if (!file_op.xml_to_flatten) {
-              return false;
+              std::string error;
+              file_op.xml_to_flatten = DeserializeXmlResourceFromPb(pb_xml_node, &error);
+              if (file_op.xml_to_flatten == nullptr) {
+                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                  << "failed to deserialize proto xml: " << error);
+                return false;
+              }
+            } else {
+              file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(),
+                                                    context_->GetDiagnostics(), file->GetSource());
+              if (file_op.xml_to_flatten == nullptr) {
+                return false;
+              }
             }
 
             file_op.xml_to_flatten->file.config = config_value->config;
@@ -607,8 +650,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
                 return false;
               }
             }
-            error |= !FlattenXml(context_, doc.get(), dst_path, options_.keep_raw_values,
-                                 false /*utf16*/, archive_writer);
+
+            error |= !FlattenXml(context_, *doc, dst_path, options_.keep_raw_values,
+                                 false /*utf16*/, options_.output_format, archive_writer);
           }
         } else {
           error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
@@ -907,23 +951,29 @@ class LinkCommand {
     }
   }
 
-  bool FlattenTable(ResourceTable* table, IArchiveWriter* writer) {
-    BigBuffer buffer(1024);
-    TableFlattener flattener(options_.table_flattener_options, &buffer);
-    if (!flattener.Consume(context_, table)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
-      return false;
+  bool FlattenTable(ResourceTable* table, OutputFormat format, IArchiveWriter* writer) {
+    switch (format) {
+      case OutputFormat::kApk: {
+        BigBuffer buffer(1024);
+        TableFlattener flattener(options_.table_flattener_options, &buffer);
+        if (!flattener.Consume(context_, table)) {
+          context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
+          return false;
+        }
+
+        io::BigBufferInputStream input_stream(&buffer);
+        return io::CopyInputStreamToArchive(context_, &input_stream, kApkResourceTablePath,
+                                            ArchiveEntry::kAlign, writer);
+      } break;
+
+      case OutputFormat::kProto: {
+        pb::ResourceTable pb_table;
+        SerializeTableToPb(*table, &pb_table);
+        return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
+                                      ArchiveEntry::kCompress, writer);
+      } break;
     }
-
-    io::BigBufferInputStream input_stream(&buffer);
-    return io::CopyInputStreamToArchive(context_, &input_stream, "resources.arsc",
-                                        ArchiveEntry::kAlign, writer);
-  }
-
-  bool FlattenTableToPb(ResourceTable* table, IArchiveWriter* writer) {
-    pb::ResourceTable pb_table;
-    SerializeTableToPb(*table, &pb_table);
-    return io::CopyProtoToArchive(context_, &pb_table, "resources.arsc.flat", 0, writer);
+    return false;
   }
 
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
@@ -1152,7 +1202,7 @@ class LinkCommand {
   }
 
   std::unique_ptr<ResourceTable> LoadTablePbFromCollection(io::IFileCollection* collection) {
-    io::IFile* file = collection->FindFile("resources.arsc.flat");
+    io::IFile* file = collection->FindFile(kProtoResourceTablePath);
     if (!file) {
       return {};
     }
@@ -1201,11 +1251,7 @@ class LinkCommand {
       // Clear the package name, so as to make the resources look like they are coming from the
       // local package.
       pkg->name = "";
-      if (override) {
-        result = table_merger_->MergeOverlay(Source(input), table.get(), collection.get());
-      } else {
-        result = table_merger_->Merge(Source(input), table.get(), collection.get());
-      }
+      result = table_merger_->Merge(Source(input), table.get(), override, collection.get());
 
     } else {
       // This is the proper way to merge libraries, where the package name is
@@ -1241,49 +1287,34 @@ class LinkCommand {
       return false;
     }
 
-    bool result = false;
-    if (override) {
-      result = table_merger_->MergeOverlay(file->GetSource(), table.get());
-    } else {
-      result = table_merger_->Merge(file->GetSource(), table.get());
-    }
-    return result;
+    return table_merger_->Merge(file->GetSource(), table.get(), override);
   }
 
-  bool MergeCompiledFile(io::IFile* file, ResourceFile* file_desc, bool override) {
+  bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "merging '" << file_desc->name
-                                                     << "' from compiled file "
-                                                     << file->GetSource());
+      context_->GetDiagnostics()->Note(DiagMessage()
+                                       << "merging '" << compiled_file.name
+                                       << "' from compiled file " << compiled_file.source);
     }
 
-    bool result = false;
-    if (override) {
-      result = table_merger_->MergeFileOverlay(*file_desc, file);
-    } else {
-      result = table_merger_->MergeFile(*file_desc, file);
-    }
-
-    if (!result) {
+    if (!table_merger_->MergeFile(compiled_file, override, file)) {
       return false;
     }
 
     // Add the exports of this file to the table.
-    for (SourcedResourceName& exported_symbol : file_desc->exported_symbols) {
-      if (exported_symbol.name.package.empty()) {
-        exported_symbol.name.package = context_->GetCompilationPackage();
+    for (const SourcedResourceName& exported_symbol : compiled_file.exported_symbols) {
+      ResourceName res_name = exported_symbol.name;
+      if (res_name.package.empty()) {
+        res_name.package = context_->GetCompilationPackage();
       }
 
-      ResourceNameRef res_name = exported_symbol.name;
-
-      Maybe<ResourceName> mangled_name =
-          context_->GetNameMangler()->MangleName(exported_symbol.name);
+      Maybe<ResourceName> mangled_name = context_->GetNameMangler()->MangleName(res_name);
       if (mangled_name) {
         res_name = mangled_name.value();
       }
 
       std::unique_ptr<Id> id = util::make_unique<Id>();
-      id->SetSource(file_desc->source.WithLine(exported_symbol.line));
+      id->SetSource(compiled_file.source.WithLine(exported_symbol.line));
       bool result = final_table_.AddResourceAllowMangled(
           res_name, ConfigDescription::DefaultConfig(), std::string(), std::move(id),
           context_->GetDiagnostics());
@@ -1294,15 +1325,11 @@ class LinkCommand {
     return true;
   }
 
-  /**
-   * Takes a path to load as a ZIP file and merges the files within into the
-   * master ResourceTable.
-   * If override is true, conflicting resources are allowed to override each
-   * other, in order of last seen.
-   *
-   * An io::IFileCollection is created from the ZIP file and added to the set of
-   * io::IFileCollections that are open.
-   */
+  // Takes a path to load as a ZIP file and merges the files within into the master ResourceTable.
+  // If override is true, conflicting resources are allowed to override each other, in order of last
+  // seen.
+  // An io::IFileCollection is created from the ZIP file and added to the set of
+  // io::IFileCollections that are open.
   bool MergeArchive(const std::string& input, bool override) {
     if (context_->IsVerbose()) {
       context_->GetDiagnostics()->Note(DiagMessage() << "merging archive " << input);
@@ -1328,18 +1355,11 @@ class LinkCommand {
     return !error;
   }
 
-  /**
-   * Takes a path to load and merge into the master ResourceTable. If override
-   * is true,
-   * conflicting resources are allowed to override each other, in order of last
-   * seen.
-   *
-   * If the file path ends with .flata, .jar, .jack, or .zip the file is treated
-   * as ZIP archive
-   * and the files within are merged individually.
-   *
-   * Otherwise the files is processed on its own.
-   */
+  // Takes a path to load and merge into the master ResourceTable. If override is true,
+  // conflicting resources are allowed to override each other, in order of last seen.
+  // If the file path ends with .flata, .jar, .jack, or .zip the file is treated
+  // as ZIP archive and the files within are merged individually.
+  // Otherwise the file is processed on its own.
   bool MergePath(const std::string& path, bool override) {
     if (util::EndsWith(path, ".flata") || util::EndsWith(path, ".jar") ||
         util::EndsWith(path, ".jack") || util::EndsWith(path, ".zip")) {
@@ -1352,70 +1372,15 @@ class LinkCommand {
     return MergeFile(file, override);
   }
 
-  /**
-   * Takes a file to load and merge into the master ResourceTable. If override
-   * is true,
-   * conflicting resources are allowed to override each other, in order of last
-   * seen.
-   *
-   * If the file ends with .arsc.flat, then it is loaded as a ResourceTable and
-   * merged into the
-   * master ResourceTable. If the file ends with .flat, then it is treated like
-   * a compiled file
-   * and the header data is read and merged into the final ResourceTable.
-   *
-   * All other file types are ignored. This is because these files could be
-   * coming from a zip,
-   * where we could have other files like classes.dex.
-   */
+  // Takes an AAPT Container file (.apc/.flat) to load and merge into the master ResourceTable.
+  // If override is true, conflicting resources are allowed to override each other, in order of last
+  // seen.
+  // All other file types are ignored. This is because these files could be coming from a zip,
+  // where we could have other files like classes.dex.
   bool MergeFile(io::IFile* file, bool override) {
     const Source& src = file->GetSource();
-    if (util::EndsWith(src.path, ".arsc.flat")) {
-      return MergeResourceTable(file, override);
 
-    } else if (util::EndsWith(src.path, ".flat")) {
-      // Try opening the file and looking for an Export header.
-      std::unique_ptr<io::IData> data = file->OpenAsData();
-      if (!data) {
-        context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to open");
-        return false;
-      }
-
-      CompiledFileInputStream input_stream(data->data(), data->size());
-      uint32_t num_files = 0;
-      if (!input_stream.ReadLittleEndian32(&num_files)) {
-        context_->GetDiagnostics()->Error(DiagMessage(src) << "failed read num files");
-        return false;
-      }
-
-      for (uint32_t i = 0; i < num_files; i++) {
-        pb::internal::CompiledFile compiled_file;
-        if (!input_stream.ReadCompiledFile(&compiled_file)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
-                                            << "failed to read compiled file header");
-          return false;
-        }
-
-        uint64_t offset, len;
-        if (!input_stream.ReadDataMetaData(&offset, &len)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to read data meta data");
-          return false;
-        }
-
-        ResourceFile resource_file;
-        std::string error;
-        if (!DeserializeCompiledFileFromPb(compiled_file, &resource_file, &error)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
-                                            << "failed to read compiled header: " << error);
-          return false;
-        }
-
-        if (!MergeCompiledFile(file->CreateFileSegment(offset, len), &resource_file, override)) {
-          return false;
-        }
-      }
-      return true;
-    } else if (util::EndsWith(src.path, ".xml") || util::EndsWith(src.path, ".png")) {
+    if (util::EndsWith(src.path, ".xml") || util::EndsWith(src.path, ".png")) {
       // Since AAPT compiles these file types and appends .flat to them, seeing
       // their raw extensions is a sign that they weren't compiled.
       const StringPiece file_type = util::EndsWith(src.path, ".xml") ? "XML" : "PNG";
@@ -1423,11 +1388,71 @@ class LinkCommand {
                                                          << " file passed as argument. Must be "
                                                             "compiled first into .flat file.");
       return false;
+    } else if (!util::EndsWith(src.path, ".apc") && !util::EndsWith(src.path, ".flat")) {
+      if (context_->IsVerbose()) {
+        context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring unrecognized file");
+        return true;
+      }
     }
 
-    // Ignore non .flat files. This could be classes.dex or something else that
-    // happens
-    // to be in an archive.
+    std::unique_ptr<io::InputStream> input_stream = file->OpenInputStream();
+    if (input_stream == nullptr) {
+      context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to open file");
+      return false;
+    }
+
+    if (input_stream->HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "failed to open file: " << input_stream->GetError());
+      return false;
+    }
+
+    ContainerReaderEntry* entry;
+    ContainerReader reader(input_stream.get());
+    while ((entry = reader.Next()) != nullptr) {
+      if (entry->Type() == ContainerEntryType::kResTable) {
+        pb::ResourceTable pb_table;
+        if (!entry->GetResTable(&pb_table)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to read resource table: "
+                                                             << entry->GetError());
+          return false;
+        }
+
+        ResourceTable table;
+        std::string error;
+        if (!DeserializeTableFromPb(pb_table, &table, &error)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src)
+                                            << "failed to deserialize resource table: " << error);
+          return false;
+        }
+
+        if (!table_merger_->Merge(src, &table, override)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to merge resource table");
+          return false;
+        }
+      } else if (entry->Type() == ContainerEntryType::kResFile) {
+        pb::internal::CompiledFile pb_compiled_file;
+        off64_t offset;
+        size_t len;
+        if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &len)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to get resource file: "
+                                                             << entry->GetError());
+          return false;
+        }
+
+        ResourceFile resource_file;
+        std::string error;
+        if (!DeserializeCompiledFileFromPb(pb_compiled_file, &resource_file, &error)) {
+          context_->GetDiagnostics()->Error(DiagMessage(src)
+                                            << "failed to read compiled header: " << error);
+          return false;
+        }
+
+        if (!MergeCompiledFile(resource_file, file->CreateFileSegment(offset, len), override)) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 
@@ -1471,15 +1496,13 @@ class LinkCommand {
     return true;
   }
 
-  /**
-   * Writes the AndroidManifest, ResourceTable, and all XML files referenced by
-   * the ResourceTable to the IArchiveWriter.
-   */
+  // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
+  // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
-    bool result = FlattenXml(context_, manifest, "AndroidManifest.xml", keep_raw_values,
-                             true /*utf16*/, writer);
+    bool result = FlattenXml(context_, *manifest, "AndroidManifest.xml", keep_raw_values,
+                             true /*utf16*/, options_.output_format, writer);
     if (!result) {
       return false;
     }
@@ -1494,6 +1517,7 @@ class LinkCommand {
     file_flattener_options.no_xml_namespaces = options_.no_xml_namespaces;
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
+    file_flattener_options.output_format = options_.output_format;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
 
@@ -1502,15 +1526,9 @@ class LinkCommand {
       return false;
     }
 
-    if (context_->GetPackageType() == PackageType::kStaticLib) {
-      if (!FlattenTableToPb(table, writer)) {
-        return false;
-      }
-    } else {
-      if (!FlattenTable(table, writer)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc");
-        return false;
-      }
+    if (!FlattenTable(table, options_.output_format, writer)) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resource table");
+      return false;
     }
     return true;
   }
@@ -1874,6 +1892,7 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   bool verbose = false;
   bool shared_lib = false;
   bool static_lib = false;
+  bool proto_format = false;
   Maybe<std::string> stable_id_file_path;
   std::vector<std::string> split_args;
   Flags flags =
@@ -1954,6 +1973,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
                           &shared_lib)
           .OptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib)
+          .OptionalSwitch("--proto-format",
+                          "Generates compiled resources in Protobuf format.\n"
+                          "Suitable as input to the bundle tool for generating an App Bundle.",
+                          &proto_format)
           .OptionalSwitch("--no-static-lib-packages",
                           "Merge all library resources under the app's package.",
                           &options.no_static_lib_packages)
@@ -2040,21 +2063,25 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     context.SetVerbose(verbose);
   }
 
-  if (shared_lib && static_lib) {
-    context.GetDiagnostics()->Error(DiagMessage()
-                                    << "only one of --shared-lib and --static-lib can be defined");
+  if (int{shared_lib} + int{static_lib} + int{proto_format} > 1) {
+    context.GetDiagnostics()->Error(
+        DiagMessage()
+        << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
     return 1;
   }
+
+  // The default build type.
+  context.SetPackageType(PackageType::kApp);
+  context.SetPackageId(kAppPackageId);
 
   if (shared_lib) {
     context.SetPackageType(PackageType::kSharedLib);
     context.SetPackageId(0x00);
   } else if (static_lib) {
     context.SetPackageType(PackageType::kStaticLib);
-    context.SetPackageId(kAppPackageId);
-  } else {
-    context.SetPackageType(PackageType::kApp);
-    context.SetPackageId(kAppPackageId);
+    options.output_format = OutputFormat::kProto;
+  } else if (proto_format) {
+    options.output_format = OutputFormat::kProto;
   }
 
   if (package_id) {

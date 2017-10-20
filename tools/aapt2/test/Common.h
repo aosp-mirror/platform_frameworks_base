@@ -90,6 +90,10 @@ class TestFile : public io::IFile {
     return {};
   }
 
+  std::unique_ptr<io::InputStream> OpenInputStream() override {
+    return OpenAsData();
+  }
+
   const Source& GetSource() const override {
     return source_;
   }

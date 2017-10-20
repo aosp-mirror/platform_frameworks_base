@@ -59,24 +59,18 @@ class TableMerger {
   }
 
   // Merges resources from the same or empty package. This is for local sources.
+  // If overlay is true, the resources are treated as overlays.
   // An io::IFileCollection is optional and used to find the referenced Files and process them.
-  bool Merge(const Source& src, ResourceTable* table, io::IFileCollection* collection = nullptr);
-
-  // Merges resources from an overlay ResourceTable.
-  // An io::IFileCollection is optional and used to find the referenced Files and process them.
-  bool MergeOverlay(const Source& src, ResourceTable* table,
-                    io::IFileCollection* collection = nullptr);
+  bool Merge(const Source& src, ResourceTable* table, bool overlay,
+             io::IFileCollection* collection = nullptr);
 
   // Merges resources from the given package, mangling the name. This is for static libraries.
   // An io::IFileCollection is needed in order to find the referenced Files and process them.
   bool MergeAndMangle(const Source& src, const android::StringPiece& package, ResourceTable* table,
                       io::IFileCollection* collection);
 
-  // Merges a compiled file that belongs to this same or empty package. This is for local sources.
-  bool MergeFile(const ResourceFile& fileDesc, io::IFile* file);
-
-  // Merges a compiled file from an overlay, overriding an existing definition.
-  bool MergeFileOverlay(const ResourceFile& fileDesc, io::IFile* file);
+  // Merges a compiled file that belongs to this same or empty package.
+  bool MergeFile(const ResourceFile& fileDesc, bool overlay, io::IFile* file);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TableMerger);
@@ -90,9 +84,6 @@ class TableMerger {
   TableMergerOptions options_;
   ResourceTablePackage* master_package_;
   std::set<std::string> merged_packages_;
-
-  bool MergeFileImpl(const ResourceFile& file_desc, io::IFile* file,
-                     bool overlay);
 
   bool MergeImpl(const Source& src, ResourceTable* src_table,
                  io::IFileCollection* collection, bool overlay, bool allow_new);

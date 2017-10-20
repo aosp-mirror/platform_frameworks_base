@@ -157,11 +157,21 @@ struct SourcedResourceName {
 };
 
 struct ResourceFile {
+  enum class Type {
+    kUnknown,
+    kPng,
+    kBinaryXml,
+    kProtoXml,
+  };
+
   // Name
   ResourceName name;
 
   // Configuration
   ConfigDescription config;
+
+  // Type
+  Type type;
 
   // Source
   Source source;

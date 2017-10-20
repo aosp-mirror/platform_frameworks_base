@@ -18,7 +18,6 @@
 #define AAPT_FORMAT_PROTO_PROTOSERIALIZE_H
 
 #include "android-base/macros.h"
-#include "google/protobuf/io/coded_stream.h"
 
 #include "ConfigDescription.h"
 #include "Configuration.pb.h"
@@ -28,14 +27,6 @@
 #include "ResourcesInternal.pb.h"
 #include "StringPool.h"
 #include "xml/XmlDom.h"
-
-namespace google {
-namespace protobuf {
-namespace io {
-class ZeroCopyOutputStream;
-}  // namespace io
-}  // namespace protobuf
-}  // namespace google
 
 namespace aapt {
 
@@ -65,24 +56,6 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
 
 // Serializes a ResourceFile into its protobuf representation.
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file);
-
-class CompiledFileOutputStream {
- public:
-  explicit CompiledFileOutputStream(::google::protobuf::io::ZeroCopyOutputStream* out);
-
-  void WriteLittleEndian32(uint32_t value);
-  void WriteCompiledFile(const pb::internal::CompiledFile& compiledFile);
-  void WriteData(const BigBuffer& buffer);
-  void WriteData(const void* data, size_t len);
-  bool HadError();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
-
-  void EnsureAlignedWrite();
-
-  ::google::protobuf::io::CodedOutputStream out_;
-};
 
 }  // namespace aapt
 

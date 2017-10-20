@@ -35,11 +35,11 @@ namespace aapt {
 
 namespace {
 
-class PrintVisitor : public DescendingValueVisitor {
+class PrintVisitor : public ConstValueVisitor {
  public:
-  using DescendingValueVisitor::Visit;
+  using ConstValueVisitor::Visit;
 
-  void Visit(Attribute* attr) override {
+  void Visit(const Attribute* attr) override {
     std::cout << "(attr) type=";
     attr->PrintMask(&std::cout);
     static constexpr uint32_t kMask =
@@ -55,7 +55,7 @@ class PrintVisitor : public DescendingValueVisitor {
     }
   }
 
-  void Visit(Style* style) override {
+  void Visit(const Style* style) override {
     std::cout << "(style)";
     if (style->parent) {
       const Reference& parent_ref = style->parent.value();
@@ -90,15 +90,15 @@ class PrintVisitor : public DescendingValueVisitor {
     }
   }
 
-  void Visit(Array* array) override {
+  void Visit(const Array* array) override {
     array->Print(&std::cout);
   }
 
-  void Visit(Plural* plural) override {
+  void Visit(const Plural* plural) override {
     plural->Print(&std::cout);
   }
 
-  void Visit(Styleable* styleable) override {
+  void Visit(const Styleable* styleable) override {
     std::cout << "(styleable)";
     for (const auto& attr : styleable->entries) {
       std::cout << "\n        ";
@@ -116,17 +116,17 @@ class PrintVisitor : public DescendingValueVisitor {
     }
   }
 
-  void VisitItem(Item* item) override {
+  void VisitItem(const Item* item) override {
     item->Print(&std::cout);
   }
 };
 
 }  // namespace
 
-void Debug::PrintTable(ResourceTable* table, const DebugPrintTableOptions& options) {
+void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions& options) {
   PrintVisitor visitor;
 
-  for (auto& package : table->packages) {
+  for (const auto& package : table.packages) {
     std::cout << "Package name=" << package->name;
     if (package->id) {
       std::cout << " id=" << std::hex << (int)package->id.value() << std::dec;
@@ -261,11 +261,11 @@ void Debug::DumpHex(const void* data, size_t len) {
 
 namespace {
 
-class XmlPrinter : public xml::Visitor {
+class XmlPrinter : public xml::ConstVisitor {
  public:
-  using xml::Visitor::Visit;
+  using xml::ConstVisitor::Visit;
 
-  void Visit(xml::Element* el) override {
+  void Visit(const xml::Element* el) override {
     const size_t previous_size = prefix_.size();
 
     for (const xml::NamespaceDecl& decl : el->namespace_decls) {
@@ -301,11 +301,11 @@ class XmlPrinter : public xml::Visitor {
     }
 
     prefix_ += "  ";
-    xml::Visitor::Visit(el);
+    xml::ConstVisitor::Visit(el);
     prefix_.resize(previous_size);
   }
 
-  void Visit(xml::Text* text) override {
+  void Visit(const xml::Text* text) override {
     std::cerr << prefix_ << "T: '" << text->text << "'\n";
   }
 
@@ -315,9 +315,9 @@ class XmlPrinter : public xml::Visitor {
 
 }  // namespace
 
-void Debug::DumpXml(xml::XmlResource* doc) {
+void Debug::DumpXml(const xml::XmlResource& doc) {
   XmlPrinter printer;
-  doc->root->Accept(&printer);
+  doc.root->Accept(&printer);
 }
 
 }  // namespace aapt

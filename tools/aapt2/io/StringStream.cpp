@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 
 using ::android::StringPiece;
 
@@ -37,13 +37,63 @@ bool StringInputStream::Next(const void** data, size_t* size) {
 
 void StringInputStream::BackUp(size_t count) {
   if (count > offset_) {
-    count = offset_;
+    offset_ = 0u;
+  } else {
+    offset_ -= count;
   }
-  offset_ -= count;
 }
 
 size_t StringInputStream::ByteCount() const {
   return offset_;
+}
+
+size_t StringInputStream::TotalSize() const {
+  return str_.size();
+}
+
+StringOutputStream::StringOutputStream(std::string* str, size_t buffer_capacity)
+    : str_(str),
+      buffer_capacity_(buffer_capacity),
+      buffer_offset_(0u),
+      buffer_(new char[buffer_capacity]) {
+}
+
+StringOutputStream::~StringOutputStream() {
+  Flush();
+}
+
+bool StringOutputStream::Next(void** data, size_t* size) {
+  if (buffer_offset_ == buffer_capacity_) {
+    FlushImpl();
+  }
+
+  *data = buffer_.get() + buffer_offset_;
+  *size = buffer_capacity_ - buffer_offset_;
+  buffer_offset_ = buffer_capacity_;
+  return true;
+}
+
+void StringOutputStream::BackUp(size_t count) {
+  if (count > buffer_offset_) {
+    buffer_offset_ = 0u;
+  } else {
+    buffer_offset_ -= count;
+  }
+}
+
+size_t StringOutputStream::ByteCount() const {
+  return str_->size() + buffer_offset_;
+}
+
+void StringOutputStream::Flush() {
+  if (buffer_offset_ != 0u) {
+    FlushImpl();
+  }
+}
+
+void StringOutputStream::FlushImpl() {
+  str_->append(buffer_.get(), buffer_offset_);
+  buffer_offset_ = 0u;
 }
 
 }  // namespace io
