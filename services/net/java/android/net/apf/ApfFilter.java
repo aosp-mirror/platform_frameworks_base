@@ -33,7 +33,7 @@ import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
-import android.net.ip.IpManager;
+import android.net.ip.IpClient;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
@@ -238,7 +238,7 @@ public class ApfFilter {
     private static final int APF_MAX_ETH_TYPE_BLACK_LIST_LEN = 20;
 
     private final ApfCapabilities mApfCapabilities;
-    private final IpManager.Callback mIpManagerCallback;
+    private final IpClient.Callback mIpClientCallback;
     private final NetworkInterface mNetworkInterface;
     private final IpConnectivityLog mMetricsLog;
 
@@ -262,10 +262,10 @@ public class ApfFilter {
 
     @VisibleForTesting
     ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
-            IpManager.Callback ipManagerCallback, boolean multicastFilter,
+            IpClient.Callback ipClientCallback, boolean multicastFilter,
             boolean ieee802_3Filter, int[] ethTypeBlackList, IpConnectivityLog log) {
         mApfCapabilities = apfCapabilities;
-        mIpManagerCallback = ipManagerCallback;
+        mIpClientCallback = ipClientCallback;
         mNetworkInterface = networkInterface;
         mMulticastFilter = multicastFilter;
         mDrop802_3Frames = ieee802_3Filter;
@@ -275,7 +275,7 @@ public class ApfFilter {
 
         mMetricsLog = log;
 
-        // TODO: ApfFilter should not generate programs until IpManager sends provisioning success.
+        // TODO: ApfFilter should not generate programs until IpClient sends provisioning success.
         maybeStartFilter();
     }
 
@@ -1051,7 +1051,7 @@ public class ApfFilter {
         if (VDBG) {
             hexDump("Installing filter: ", program, program.length);
         }
-        mIpManagerCallback.installPacketFilter(program);
+        mIpClientCallback.installPacketFilter(program);
         logApfProgramEventLocked(now);
         mLastInstallEvent = new ApfProgramEvent();
         mLastInstallEvent.lifetime = programMinLifetime;
@@ -1161,7 +1161,7 @@ public class ApfFilter {
      * filtering using APF programs.
      */
     public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
-            NetworkInterface networkInterface, IpManager.Callback ipManagerCallback,
+            NetworkInterface networkInterface, IpClient.Callback ipClientCallback,
             boolean multicastFilter, boolean ieee802_3Filter, int[] ethTypeBlackList) {
         if (apfCapabilities == null || networkInterface == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
@@ -1178,7 +1178,7 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback,
+        return new ApfFilter(apfCapabilities, networkInterface, ipClientCallback,
                 multicastFilter, ieee802_3Filter, ethTypeBlackList, new IpConnectivityLog());
     }
 
