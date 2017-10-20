@@ -16,6 +16,7 @@
 
 package android.net.wifi.rtt;
 
+import android.net.wifi.aware.PeerHandle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,6 +43,7 @@ public final class RangingResult implements Parcelable {
 
     private final int mStatus;
     private final byte[] mMac;
+    private final PeerHandle mPeerHandle;
     private final int mDistanceCm;
     private final int mDistanceStdDevCm;
     private final int mRssi;
@@ -52,6 +54,19 @@ public final class RangingResult implements Parcelable {
             long timestamp) {
         mStatus = status;
         mMac = mac;
+        mPeerHandle = null;
+        mDistanceCm = distanceCm;
+        mDistanceStdDevCm = distanceStdDevCm;
+        mRssi = rssi;
+        mTimestamp = timestamp;
+    }
+
+    /** @hide */
+    public RangingResult(int status, PeerHandle peerHandle, int distanceCm, int distanceStdDevCm,
+            int rssi, long timestamp) {
+        mStatus = status;
+        mMac = null;
+        mPeerHandle = peerHandle;
         mDistanceCm = distanceCm;
         mDistanceStdDevCm = distanceStdDevCm;
         mRssi = rssi;
@@ -70,10 +85,27 @@ public final class RangingResult implements Parcelable {
      * @return The MAC address of the device whose range measurement was requested. Will correspond
      * to the MAC address of the device in the {@link RangingRequest}.
      * <p>
-     * Always valid (i.e. when {@link #getStatus()} is either SUCCESS or FAIL.
+     * Will return a {@code null} for results corresponding to requests issued using a {@code
+     * PeerHandle}, i.e. using the {@link RangingRequest.Builder#addWifiAwarePeer(PeerHandle)} API.
+     * <p>
+     * Valid whether {@link #getStatus()} is SUCCESS or FAIL.
      */
     public byte[] getMacAddress() {
         return mMac;
+    }
+
+    /**
+     * @return The PeerHandle of the device whose reange measurement was requested. Will correspond
+     * to the PeerHandle of the devices requested using
+     * {@link RangingRequest.Builder#addWifiAwarePeer(PeerHandle)}.
+     * <p>
+     * Will return a {@code null} for results corresponding to requests issued using a MAC address.
+     * <p>
+     *
+     * Valid whether {@link #getStatus()} is SUCCESS or FAIL.
+     */
+    public PeerHandle getPeerHandle() {
+        return mPeerHandle;
     }
 
     /**
@@ -116,11 +148,11 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The timestamp (in us) at which the ranging operation was performed
+     * @return The timestamp, in us since boot, at which the ranging operation was performed.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link RangingResultCallback#STATUS_SUCCESS}.
      */
-    public long getRangingTimestamp() {
+    public long getRangingTimestampUs() {
         return mTimestamp;
     }
 
@@ -135,6 +167,12 @@ public final class RangingResult implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mStatus);
         dest.writeByteArray(mMac);
+        if (mPeerHandle == null) {
+            dest.writeBoolean(false);
+        } else {
+            dest.writeBoolean(true);
+            dest.writeInt(mPeerHandle.peerId);
+        }
         dest.writeInt(mDistanceCm);
         dest.writeInt(mDistanceStdDevCm);
         dest.writeInt(mRssi);
@@ -152,11 +190,22 @@ public final class RangingResult implements Parcelable {
         public RangingResult createFromParcel(Parcel in) {
             int status = in.readInt();
             byte[] mac = in.createByteArray();
+            boolean peerHandlePresent = in.readBoolean();
+            PeerHandle peerHandle = null;
+            if (peerHandlePresent) {
+                peerHandle = new PeerHandle(in.readInt());
+            }
             int distanceCm = in.readInt();
             int distanceStdDevCm = in.readInt();
             int rssi = in.readInt();
             long timestamp = in.readLong();
-            return new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi, timestamp);
+            if (peerHandlePresent) {
+                return new RangingResult(status, peerHandle, distanceCm, distanceStdDevCm, rssi,
+                        timestamp);
+            } else {
+                return new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
+                        timestamp);
+            }
         }
     };
 
@@ -164,7 +213,8 @@ public final class RangingResult implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder("RangingResult: [status=").append(mStatus).append(", mac=").append(
-                mMac == null ? "<null>" : HexEncoding.encodeToString(mMac)).append(
+                mMac == null ? "<null>" : new String(HexEncoding.encodeToString(mMac))).append(
+                ", peerHandle=").append(mPeerHandle == null ? "<null>" : mPeerHandle.peerId).append(
                 ", distanceCm=").append(mDistanceCm).append(", distanceStdDevCm=").append(
                 mDistanceStdDevCm).append(", rssi=").append(mRssi).append(", timestamp=").append(
                 mTimestamp).append("]").toString();
@@ -182,13 +232,15 @@ public final class RangingResult implements Parcelable {
 
         RangingResult lhs = (RangingResult) o;
 
-        return mStatus == lhs.mStatus && Arrays.equals(mMac, lhs.mMac)
-                && mDistanceCm == lhs.mDistanceCm && mDistanceStdDevCm == lhs.mDistanceStdDevCm
-                && mRssi == lhs.mRssi && mTimestamp == lhs.mTimestamp;
+        return mStatus == lhs.mStatus && Arrays.equals(mMac, lhs.mMac) && Objects.equals(
+                mPeerHandle, lhs.mPeerHandle) && mDistanceCm == lhs.mDistanceCm
+                && mDistanceStdDevCm == lhs.mDistanceStdDevCm && mRssi == lhs.mRssi
+                && mTimestamp == lhs.mTimestamp;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mMac, mDistanceCm, mDistanceStdDevCm, mRssi, mTimestamp);
+        return Objects.hash(mStatus, mMac, mPeerHandle, mDistanceCm, mDistanceStdDevCm, mRssi,
+                mTimestamp);
     }
 }
