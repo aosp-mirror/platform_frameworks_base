@@ -219,7 +219,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         strcpy(cmdline, "unknown");
 
         sprintf(proc_path, "/proc/%d/cmdline", pid);
-        fd = open(proc_path, O_RDONLY);
+        fd = open(proc_path, O_RDONLY | O_CLOEXEC);
         if (fd >= 0) {
             int rc = read(fd, cmdline, sizeof(cmdline)-1);
             cmdline[rc] = 0;
@@ -555,7 +555,7 @@ jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
         return false;
     }
 
-    int fd = open(text, O_WRONLY);
+    int fd = open(text, O_WRONLY | O_CLOEXEC);
     if (fd >= 0) {
         sprintf(text, "%" PRId32, pid);
         write(fd, text, strlen(text));
@@ -603,7 +603,7 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong getFreeMemoryImpl(const char* const sums[], const size_t sumsLen[], size_t num)
 {
-    int fd = open("/proc/meminfo", O_RDONLY);
+    int fd = open("/proc/meminfo", O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         ALOGW("Unable to open /proc/meminfo");
@@ -716,7 +716,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         sizesArray[i] = 0;
     }
 
-    int fd = open(file.string(), O_RDONLY);
+    int fd = open(file.string(), O_RDONLY | O_CLOEXEC);
 
     if (fd >= 0) {
         const size_t BUFFER_SIZE = 2048;
@@ -1023,7 +1023,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return JNI_FALSE;
     }
-    int fd = open(file8, O_RDONLY);
+    int fd = open(file8, O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         if (kDebugProc) {
@@ -1157,7 +1157,7 @@ jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
         char data[PATH_MAX];
         snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
 
-        int fd = open(path, O_RDONLY);
+        int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0) {
             continue;
         }

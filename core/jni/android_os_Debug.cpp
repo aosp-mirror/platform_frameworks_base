@@ -755,7 +755,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
         return;
     }
 
-    int fd = open("/proc/meminfo", O_RDONLY);
+    int fd = open("/proc/meminfo", O_RDONLY | O_CLOEXEC);
 
     if (fd < 0) {
         ALOGW("Unable to open /proc/meminfo: %s\n", strerror(errno));
