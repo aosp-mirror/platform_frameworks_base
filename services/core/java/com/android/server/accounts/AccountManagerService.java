@@ -2233,12 +2233,10 @@ public class AccountManagerService
                         Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
                                 + response);
                     }
-                    Bundle result2 = new Bundle();
-                    result2.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, removalAllowed);
                     try {
-                        response.onResult(result2);
+                        response.onResult(result);
                     } catch (RemoteException e) {
-                        // ignore
+                        Slog.e(TAG, "Error calling onResult()", e);
                     }
                 }
             }
