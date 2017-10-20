@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.*;
 import android.content.pm.ServiceInfo;
+import android.telephony.MbmsDownloadSession;
+import android.telephony.MbmsStreamingSession;
 import android.util.Log;
 
 import java.io.File;
@@ -48,24 +50,64 @@ public class MbmsUtils {
         return new ComponentName(ci.packageName, ci.name);
     }
 
+    private static ComponentName getOverrideServiceName(Context context, String serviceAction) {
+        String metaDataKey = null;
+        switch (serviceAction) {
+            case MbmsDownloadSession.MBMS_DOWNLOAD_SERVICE_ACTION:
+                metaDataKey = MbmsDownloadSession.MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA;
+                break;
+            case MbmsStreamingSession.MBMS_STREAMING_SERVICE_ACTION:
+                metaDataKey = MbmsStreamingSession.MBMS_STREAMING_SERVICE_OVERRIDE_METADATA;
+                break;
+        }
+        if (metaDataKey == null) {
+            return null;
+        }
+
+        ApplicationInfo appInfo;
+        try {
+            appInfo = context.getPackageManager()
+                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+        if (appInfo.metaData == null) {
+            return null;
+        }
+        String serviceComponent = appInfo.metaData.getString(metaDataKey);
+        if (serviceComponent == null) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(serviceComponent);
+    }
+
     public static ServiceInfo getMiddlewareServiceInfo(Context context, String serviceAction) {
         // Query for the proper service
         PackageManager packageManager = context.getPackageManager();
         Intent queryIntent = new Intent();
         queryIntent.setAction(serviceAction);
-        List<ResolveInfo> downloadServices = packageManager.queryIntentServices(queryIntent,
-                PackageManager.MATCH_SYSTEM_ONLY);
 
-        if (downloadServices == null || downloadServices.size() == 0) {
-            Log.w(LOG_TAG, "No download services found, cannot get service info");
+        ComponentName overrideService = getOverrideServiceName(context, serviceAction);
+        List<ResolveInfo> services;
+        if (overrideService == null) {
+            services = packageManager.queryIntentServices(queryIntent,
+                    PackageManager.MATCH_SYSTEM_ONLY);
+        } else {
+            queryIntent.setComponent(overrideService);
+            services = packageManager.queryIntentServices(queryIntent,
+                    PackageManager.MATCH_ALL);
+        }
+
+        if (services == null || services.size() == 0) {
+            Log.w(LOG_TAG, "No MBMS services found, cannot get service info");
             return null;
         }
 
-        if (downloadServices.size() > 1) {
-            Log.w(LOG_TAG, "More than one download service found, cannot get unique service");
+        if (services.size() > 1) {
+            Log.w(LOG_TAG, "More than one MBMS service found, cannot get unique service");
             return null;
         }
-        return downloadServices.get(0).serviceInfo;
+        return services.get(0).serviceInfo;
     }
 
     public static int startBinding(Context context, String serviceAction,

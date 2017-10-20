@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
@@ -61,6 +62,14 @@ public class MbmsStreamingSession implements AutoCloseable {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String MBMS_STREAMING_SERVICE_ACTION =
             "android.telephony.action.EmbmsStreaming";
+
+    /**
+     * Metadata key that specifies the component name of the service to bind to for file-download.
+     * @hide
+     */
+    @TestApi
+    public static final String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA =
+            "mbms-streaming-service-override";
 
     private static AtomicBoolean sIsInitialized = new AtomicBoolean(false);
 
