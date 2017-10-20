@@ -544,7 +544,7 @@ namespace PaintGlue {
     static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         ScopedUtfChars localesChars(env, locales);
-        jint minikinLangListId = minikin::FontStyle::registerLanguageList(localesChars.c_str());
+        jint minikinLangListId = minikin::FontStyle::registerLocaleList(localesChars.c_str());
         obj->setMinikinLangListId(minikinLangListId);
         return minikinLangListId;
     }
