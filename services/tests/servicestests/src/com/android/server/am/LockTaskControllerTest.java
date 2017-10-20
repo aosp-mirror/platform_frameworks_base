@@ -189,6 +189,8 @@ public class LockTaskControllerTest {
 
         // THEN lock task mode should be started
         verifyLockTaskStarted(STATUS_BAR_MASK_PINNED);
+        // THEN screen pinning toast should be shown
+        verify(mLockTaskNotify).showPinningStartToast();
     }
 
     @Test
@@ -255,8 +257,6 @@ public class LockTaskControllerTest {
         // WHEN system calls stopLockTaskMode
         mLockTaskController.stopLockTaskMode(true, SYSTEM_UID);
 
-        // THEN a lock tash toast should be shown
-        verify(mLockTaskNotify).showToast(LOCK_TASK_MODE_LOCKED);
         // THEN lock task mode should still be active
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
     }
@@ -302,6 +302,8 @@ public class LockTaskControllerTest {
         verifyLockTaskStopped(times(1));
         // THEN the keyguard should be shown
         verify(mLockPatternUtils).requireCredentialEntry(UserHandle.USER_ALL);
+        // THEN screen pinning toast should be shown
+        verify(mLockTaskNotify).showPinningExitToast();
     }
 
     @Test
