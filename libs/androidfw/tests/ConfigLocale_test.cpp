@@ -185,6 +185,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_TRUE(test.localeScriptWasComputed);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
     EXPECT_EQ(0, test.localeVariant[0]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("eng-419");
     char out[4] = {1, 1, 1, 1};
@@ -198,6 +199,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('4', out[0]);
     EXPECT_EQ('1', out[1]);
     EXPECT_EQ('9', out[2]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("en-Latn-419");
     EXPECT_EQ('e', test.language[0]);
@@ -209,6 +211,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('4', out[0]);
     EXPECT_EQ('1', out[1]);
     EXPECT_EQ('9', out[2]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("de-1901");
     memset(out, 1, 4);
@@ -222,6 +225,7 @@ TEST(ConfigLocaleTest, setLocale) {
     test.unpackRegion(out);
     EXPECT_EQ('\0', out[0]);
     EXPECT_EQ(0, strcmp("1901", test.localeVariant));
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("de-Latn-1901");
     memset(out, 1, 4);
@@ -235,6 +239,44 @@ TEST(ConfigLocaleTest, setLocale) {
     test.unpackRegion(out);
     EXPECT_EQ('\0', out[0]);
     EXPECT_EQ(0, strcmp("1901", test.localeVariant));
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu-latn");
+    EXPECT_EQ('a', test.language[0]);
+    EXPECT_EQ('r', test.language[1]);
+    EXPECT_EQ('E', test.country[0]);
+    EXPECT_EQ('G', test.country[1]);
+    EXPECT_TRUE(test.localeScriptWasComputed);
+    EXPECT_EQ(0, memcmp("Arab", test.localeScript, 4));
+    EXPECT_EQ(0, test.localeVariant[0]);
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-attr-nu-latn");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-ca-gregory-nu-latn");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-nu-latn-ca-gregory");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-nu-toolongnumsys");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu-latn-nu-arab");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-co-nu-latn");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-u-co-abcd-attr-nu-latn");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 }
 
 TEST(ConfigLocaleTest, computeScript) {

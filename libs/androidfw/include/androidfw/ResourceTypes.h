@@ -1179,6 +1179,10 @@ struct ResTable_config
     // tried but could not compute a script.
     bool localeScriptWasComputed;
 
+    // The value of BCP 47 Unicode extension for key 'nu' (numbering system).
+    // Varies in length from 3 to 8 chars. Zero-filled value.
+    char localeNumberingSystem[8];
+
     void copyFromDeviceNoSwap(const ResTable_config& o);
     
     void copyFromDtoH(const ResTable_config& o);
@@ -1256,9 +1260,9 @@ struct ResTable_config
     // variants, it will be a modified bcp47 tag: b+en+Latn+US.
     void appendDirLocale(String8& str) const;
 
-    // Sets the values of language, region, script and variant to the
-    // well formed BCP-47 locale contained in |in|. The input locale is
-    // assumed to be valid and no validation is performed.
+    // Sets the values of language, region, script, variant and numbering
+    // system to the well formed BCP 47 locale contained in |in|.
+    // The input locale is assumed to be valid and no validation is performed.
     void setBcp47Locale(const char* in);
 
     inline void clearLocale() {
@@ -1266,6 +1270,7 @@ struct ResTable_config
         localeScriptWasComputed = false;
         memset(localeScript, 0, sizeof(localeScript));
         memset(localeVariant, 0, sizeof(localeVariant));
+        memset(localeNumberingSystem, 0, sizeof(localeNumberingSystem));
     }
 
     inline void computeScript() {
