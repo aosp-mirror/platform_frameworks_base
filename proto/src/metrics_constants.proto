@@ -4567,6 +4567,10 @@ message MetricsEvent {
     // OS: O MR
     COLOR_MODE_SETTINGS = 1143;
 
+    // Enclosing category for group of APP_TRANSITION_FOO events,
+    // logged when we cancel an app transition.
+    APP_TRANSITION_CANCELLED = 1144;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // Add new aosp constants above this line.
