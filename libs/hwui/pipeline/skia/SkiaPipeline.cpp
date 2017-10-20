@@ -112,7 +112,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
 
             const Rect& layerDamage = layers.entries()[i].damage;
 
-            SkCanvas* layerCanvas = layerNode->getLayerSurface()->getCanvas();
+            SkCanvas* layerCanvas = tryCapture(layerNode->getLayerSurface());
 
             int saveCount = layerCanvas->save();
             SkASSERT(saveCount == 1);
@@ -139,9 +139,11 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
             layerCanvas->restoreToCount(saveCount);
             mLightCenter = savedLightCenter;
 
+            endCapture(layerNode->getLayerSurface());
+
             // cache the current context so that we can defer flushing it until
             // either all the layers have been rendered or the context changes
-            GrContext* currentContext = layerCanvas->getGrContext();
+            GrContext* currentContext = layerNode->getLayerSurface()->getCanvas()->getGrContext();
             if (cachedContext.get() != currentContext) {
                 if (cachedContext.get()) {
                     cachedContext->flush();
@@ -227,6 +229,91 @@ void SkiaPipeline::renderVectorDrawableCache() {
     }
 }
 
+class SkiaPipeline::SavePictureProcessor : public TaskProcessor<bool> {
+public:
+    explicit SavePictureProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
+
+    struct SavePictureTask : public Task<bool> {
+        sk_sp<SkData> data;
+        std::string filename;
+    };
+
+    void savePicture(const sk_sp<SkData>& data, const std::string& filename) {
+        sp<SavePictureTask> task(new SavePictureTask());
+        task->data = data;
+        task->filename = filename;
+        TaskProcessor<bool>::add(task);
+    }
+
+    virtual void onProcess(const sp<Task<bool> >& task) override {
+        SavePictureTask* t = static_cast<SavePictureTask*>(task.get());
+
+        if (0 == access(t->filename.c_str(), F_OK)) {
+            task->setResult(false);
+            return;
+        }
+
+        SkFILEWStream stream(t->filename.c_str());
+        if (stream.isValid()) {
+            stream.write(t->data->data(), t->data->size());
+            stream.flush();
+            SkDebugf("SKP Captured Drawing Output (%d bytes) for frame. %s",
+                    stream.bytesWritten(), t->filename.c_str());
+        }
+
+        task->setResult(true);
+    }
+};
+
+SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
+    if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+        bool recordingPicture = mCaptureSequence > 0;
+        char prop[PROPERTY_VALUE_MAX] = {'\0'};
+        if (!recordingPicture) {
+            property_get(PROPERTY_CAPTURE_SKP_FILENAME, prop, "0");
+            recordingPicture = prop[0] != '0'
+                    && mCapturedFile != prop; //ensure we capture only once per filename
+            if (recordingPicture) {
+                mCapturedFile = prop;
+                mCaptureSequence = property_get_int32(PROPERTY_CAPTURE_SKP_FRAMES, 1);
+            }
+        }
+        if (recordingPicture) {
+            mRecorder.reset(new SkPictureRecorder());
+            return mRecorder->beginRecording(surface->width(), surface->height(), nullptr,
+                    SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
+        }
+    }
+    return surface->getCanvas();
+}
+
+void SkiaPipeline::endCapture(SkSurface* surface) {
+    if (CC_UNLIKELY(mRecorder.get())) {
+        sk_sp<SkPicture> picture = mRecorder->finishRecordingAsPicture();
+        surface->getCanvas()->drawPicture(picture);
+        if (picture->approximateOpCount() > 0) {
+            SkDynamicMemoryWStream stream;
+            PngPixelSerializer serializer;
+            picture->serialize(&stream, &serializer);
+
+            //offload saving to file in a different thread
+            if (!mSavePictureProcessor.get()) {
+                TaskManager* taskManager = getTaskManager();
+                mSavePictureProcessor = new SavePictureProcessor(
+                        taskManager->canRunTasks() ? taskManager : nullptr);
+            }
+            if (1 == mCaptureSequence) {
+                mSavePictureProcessor->savePicture(stream.detachAsData(), mCapturedFile);
+            } else {
+                mSavePictureProcessor->savePicture(stream.detachAsData(),
+                                        mCapturedFile + "_" + std::to_string(mCaptureSequence));
+            }
+            mCaptureSequence--;
+        }
+        mRecorder.reset();
+    }
+}
+
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
         const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
         const Rect &contentDrawBounds, sk_sp<SkSurface> surface) {
@@ -236,44 +323,21 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     // draw all layers up front
     renderLayersImpl(layers, opaque, wideColorGamut);
 
-    // initialize the canvas for the current frame
-    SkCanvas* canvas = surface->getCanvas();
-
+    // initialize the canvas for the current frame, that might be a recording canvas if SKP
+    // capture is enabled.
     std::unique_ptr<SkPictureRecorder> recorder;
-    bool recordingPicture = false;
-    char prop[PROPERTY_VALUE_MAX];
-    if (skpCaptureEnabled()) {
-        property_get("debug.hwui.capture_frame_as_skp", prop, "0");
-        recordingPicture = prop[0] != '0' && access(prop, F_OK) != 0;
-        if (recordingPicture) {
-            recorder.reset(new SkPictureRecorder());
-            canvas = recorder->beginRecording(surface->width(), surface->height(),
-                    nullptr, SkPictureRecorder::kPlaybackDrawPicture_RecordFlag);
-        }
-    }
+    SkCanvas* canvas = tryCapture(surface.get());
 
     renderFrameImpl(layers, clip, nodes, opaque, wideColorGamut, contentDrawBounds, canvas);
 
-    if (skpCaptureEnabled() && recordingPicture) {
-        sk_sp<SkPicture> picture = recorder->finishRecordingAsPicture();
-        if (picture->approximateOpCount() > 0) {
-            SkFILEWStream stream(prop);
-            if (stream.isValid()) {
-                PngPixelSerializer serializer;
-                picture->serialize(&stream, &serializer);
-                stream.flush();
-                SkDebugf("Captured Drawing Output (%d bytes) for frame. %s", stream.bytesWritten(), prop);
-            }
-        }
-        surface->getCanvas()->drawPicture(picture);
-    }
+    endCapture(surface.get());
 
     if (CC_UNLIKELY(Properties::debugOverdraw)) {
         renderOverdraw(layers, clip, nodes, contentDrawBounds, surface);
     }
 
     ATRACE_NAME("flush commands");
-    canvas->flush();
+    surface->getCanvas()->flush();
 }
 
 namespace {

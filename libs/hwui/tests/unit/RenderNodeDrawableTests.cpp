@@ -22,6 +22,7 @@
 #include "IContextFactory.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaPipeline.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
@@ -335,7 +336,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     EXPECT_EQ(3, canvas.getIndex());
 }
 
-RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
     /* R is backward projected on B and C is a layer.
                 A
                / \
@@ -450,7 +451,8 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     LayerUpdateQueue layerUpdateQueue;
     layerUpdateQueue.enqueueLayerWithDamage(child.get(),
             android::uirenderer::Rect(LAYER_WIDTH, LAYER_HEIGHT));
-    SkiaPipeline::renderLayersImpl(layerUpdateQueue, true, false);
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    pipeline->renderLayersImpl(layerUpdateQueue, true, false);
     EXPECT_EQ(1, drawCounter);  //assert index 0 is drawn on the layer
 
     RenderNodeDrawable drawable(parent.get(), surfaceLayer1->getCanvas(), true);

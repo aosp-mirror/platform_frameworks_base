@@ -21,6 +21,8 @@
 #include "renderthread/IRenderPipeline.h"
 #include <SkSurface.h>
 
+class SkPictureRecorder;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
@@ -56,9 +58,7 @@ public:
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
 
-    static void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque, bool wideColorGamut);
-
-    static bool skpCaptureEnabled() { return false; }
+    void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque, bool wideColorGamut);
 
     static float getLightRadius() {
         if (CC_UNLIKELY(Properties::overrideLightRadius > 0)) {
@@ -127,12 +127,38 @@ private:
      */
     void renderVectorDrawableCache();
 
+    SkCanvas* tryCapture(SkSurface* surface);
+    void endCapture(SkSurface* surface);
+
     std::vector<sk_sp<SkImage>> mPinnedImages;
 
     /**
      *  populated by prepareTree with dirty VDs
      */
     std::vector<VectorDrawableRoot*> mVectorDrawables;
+
+
+    // Block of properties used only for debugging to record a SkPicture and save it in a file.
+    /**
+     * mCapturedFile is used to enforce we don't capture more than once for a given name (cause
+     * permissions don't allow to reset a property from render thread).
+     */
+    std::string mCapturedFile;
+    /**
+     *  mCaptureSequence counts how many frames are left to take in the sequence.
+     */
+    int mCaptureSequence = 0;
+    /**
+     *  mSavePictureProcessor is used to run the file saving code in a separate thread.
+     */
+    class SavePictureProcessor;
+    sp<SavePictureProcessor> mSavePictureProcessor;
+    /**
+     *  mRecorder holds the current picture recorder. We could store it on the stack to support
+     *  parallel tryCapture calls (not really needed).
+     */
+    std::unique_ptr<SkPictureRecorder> mRecorder;
+
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;
     static uint8_t mSpotShadowAlpha;
