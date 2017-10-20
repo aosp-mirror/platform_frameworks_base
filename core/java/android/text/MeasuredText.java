@@ -39,7 +39,6 @@ class MeasuredText {
 
     private int mPos;
     private TextPaint mWorkPaint;
-    private StaticLayout.Builder mBuilder;
 
     private MeasuredText() {
         mWorkPaint = new TextPaint();
@@ -82,7 +81,6 @@ class MeasuredText {
 
     void finish() {
         mText = null;
-        mBuilder = null;
         if (mLen > 1000) {
             mWidths = null;
             mChars = null;
@@ -93,9 +91,7 @@ class MeasuredText {
     /**
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
-    void setPara(CharSequence text, int start, int end, TextDirectionHeuristic textDir,
-            StaticLayout.Builder builder) {
-        mBuilder = builder;
+    void setPara(CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
         mText = text;
         mTextStart = start;
 
@@ -159,12 +155,12 @@ class MeasuredText {
     /**
      * Apply the style.
      *
-     * If StaticLyaout.Builder is not provided in setPara() method, this method measures the styled
-     * text width.
-     * If StaticLayout.Builder is provided in setPara() method, this method just passes the style
-     * information to native code by calling StaticLayout.Builder.addstyleRun() and returns 0.
+     * If nativeStaticLayoutPtr is 0, this method measures the styled text width.
+     * If nativeStaticLayoutPtr is not 0, this method just passes the style information to native
+     * code by calling StaticLayout.addstyleRun() and returns 0.
      */
-    float addStyleRun(TextPaint paint, int len, Paint.FontMetricsInt fm) {
+    float addStyleRun(TextPaint paint, int len, Paint.FontMetricsInt fm,
+            long nativeStaticLayoutPtr) {
         if (fm != null) {
             paint.getFontMetricsInt(fm);
         }
@@ -174,10 +170,10 @@ class MeasuredText {
 
         if (mEasy) {
             final boolean isRtl = mDir != Layout.DIR_LEFT_TO_RIGHT;
-            if (mBuilder == null) {
+            if (nativeStaticLayoutPtr == 0) {
                 return paint.getTextRunAdvances(mChars, p, len, p, len, isRtl, mWidths, p);
             } else {
-                mBuilder.addStyleRun(paint, p, p + len, isRtl);
+                StaticLayout.addStyleRun(nativeStaticLayoutPtr, paint, p, p + len, isRtl);
                 return 0.0f;  // Builder.addStyleRun doesn't return the width.
             }
         }
@@ -187,12 +183,12 @@ class MeasuredText {
         for (int q = p, i = p + 1, e = p + len;; ++i) {
             if (i == e || mLevels[i] != level) {
                 final boolean isRtl = (level & 0x1) != 0;
-                if (mBuilder == null) {
+                if (nativeStaticLayoutPtr == 0) {
                     totalAdvance +=
                             paint.getTextRunAdvances(mChars, q, i - q, q, i - q, isRtl, mWidths, q);
                 } else {
                     // Builder.addStyleRun doesn't return the width.
-                    mBuilder.addStyleRun(paint, q, i, isRtl);
+                    StaticLayout.addStyleRun(nativeStaticLayoutPtr, paint, q, i, isRtl);
                 }
                 if (i == e) {
                     break;
@@ -201,11 +197,15 @@ class MeasuredText {
                 level = mLevels[i];
             }
         }
-        return totalAdvance;  // If mBuilder is null, the result is zero.
+        return totalAdvance;  // If nativeStaticLayoutPtr is 0, the result is zero.
+    }
+
+    float addStyleRun(TextPaint paint, int len, Paint.FontMetricsInt fm) {
+        return addStyleRun(paint, len, fm, 0 /* native ptr */);
     }
 
     float addStyleRun(TextPaint paint, MetricAffectingSpan[] spans, int len,
-            Paint.FontMetricsInt fm) {
+            Paint.FontMetricsInt fm, long nativeStaticLayoutPtr) {
 
         TextPaint workPaint = mWorkPaint;
         workPaint.set(paint);
@@ -224,18 +224,18 @@ class MeasuredText {
 
         float wid;
         if (replacement == null) {
-            wid = addStyleRun(workPaint, len, fm);
+            wid = addStyleRun(workPaint, len, fm, nativeStaticLayoutPtr);
         } else {
             // Use original text.  Shouldn't matter.
             wid = replacement.getSize(workPaint, mText, mTextStart + mPos,
                     mTextStart + mPos + len, fm);
-            if (mBuilder == null) {
+            if (nativeStaticLayoutPtr == 0) {
                 float[] w = mWidths;
                 w[mPos] = wid;
                 for (int i = mPos + 1, e = mPos + len; i < e; i++)
                     w[i] = 0;
             } else {
-                mBuilder.addReplacementRun(paint, mPos, mPos + len, wid);
+                StaticLayout.addReplacementRun(nativeStaticLayoutPtr, paint, mPos, mPos + len, wid);
             }
             mPos += len;
         }
@@ -251,6 +251,11 @@ class MeasuredText {
         }
 
         return wid;
+    }
+
+    float addStyleRun(TextPaint paint, MetricAffectingSpan[] spans, int len,
+            Paint.FontMetricsInt fm) {
+        return addStyleRun(paint, spans, len, fm, 0 /* native ptr */);
     }
 
     int breakText(int limit, boolean forwards, float width) {
