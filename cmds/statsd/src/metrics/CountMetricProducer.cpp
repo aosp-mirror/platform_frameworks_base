@@ -124,52 +124,23 @@ void CountMetricProducer::onConditionChanged(const bool conditionMet) {
     mCondition = conditionMet;
 }
 
-void CountMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
+void CountMetricProducer::onMatchedLogEventInternal(
+        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const map<string, HashableDimensionKey>& conditionKey, bool condition,
+        const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
-    // this is old event, maybe statsd restarted?
-    if (eventTimeNs < mStartTimeNs) {
-        return;
-    }
 
     flushCounterIfNeeded(eventTimeNs);
 
-    if (mConditionSliced) {
-        map<string, HashableDimensionKey> conditionKeys;
-        for (const auto& link : mConditionLinks) {
-            VLOG("Condition link key_in_main size %d", link.key_in_main_size());
-            HashableDimensionKey conditionKey = getDimensionKeyForCondition(event, link);
-            conditionKeys[link.condition()] = conditionKey;
-        }
-        if (mWizard->query(mConditionTrackerIndex, conditionKeys) != ConditionState::kTrue) {
-            VLOG("metric %lld sliced condition not met", mMetric.metric_id());
-            return;
-        }
-    } else {
-        if (!mCondition) {
-            VLOG("metric %lld condition not met", mMetric.metric_id());
-            return;
-        }
+    if (condition == false) {
+        return;
     }
 
-    HashableDimensionKey hashableKey;
-
-    if (mDimension.size() > 0) {
-        vector<KeyValuePair> key = getDimensionKey(event, mDimension);
-        hashableKey = getHashableKey(key);
-        // Add the HashableDimensionKey->vector<KeyValuePair> to the map, because StatsLogReport
-        // expects vector<KeyValuePair>.
-        if (mDimensionKeyMap.find(hashableKey) == mDimensionKeyMap.end()) {
-            mDimensionKeyMap[hashableKey] = key;
-        }
-    } else {
-        hashableKey = DEFAULT_DIMENSION_KEY;
-    }
-
-    auto it = mCurrentSlicedCounter.find(hashableKey);
+    auto it = mCurrentSlicedCounter.find(eventKey);
 
     if (it == mCurrentSlicedCounter.end()) {
         // create a counter for the new key
-        mCurrentSlicedCounter[hashableKey] = 1;
+        mCurrentSlicedCounter[eventKey] = 1;
 
     } else {
         // increment the existing value
@@ -177,8 +148,8 @@ void CountMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const Log
         count++;
     }
 
-    VLOG("metric %lld %s->%d", mMetric.metric_id(), hashableKey.c_str(),
-         mCurrentSlicedCounter[hashableKey]);
+    VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
+         mCurrentSlicedCounter[eventKey]);
 }
 
 // When a new matched event comes in, we check if event falls into the current
