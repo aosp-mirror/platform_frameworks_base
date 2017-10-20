@@ -16,12 +16,17 @@
 
 package android.service.settings.suggestions;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.rule.ServiceTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,9 +50,36 @@ public class SuggestionServiceTest {
                 MockSuggestionService.class);
     }
 
+    @After
+    public void tearUp() {
+        MockSuggestionService.reset();
+    }
+
     @Test
     public void canStartService() throws TimeoutException {
         mServiceTestRule.startService(mMockServiceIntent);
         // Do nothing after starting service.
+    }
+
+    @Test
+    public void dismissSuggestion_shouldCallImplementation()
+            throws TimeoutException, RemoteException {
+        MockSuggestionService service = new MockSuggestionService();
+        IBinder binder = mServiceTestRule.bindService(mMockServiceIntent);
+        ISuggestionService serviceBinder = ISuggestionService.Stub.asInterface(binder);
+        serviceBinder.dismissSuggestion(null);
+
+        assertThat(service.sOnSuggestionDismissedCalled).isTrue();
+    }
+
+    @Test
+    public void launchSuggestion_shouldCallImplementation()
+            throws TimeoutException, RemoteException {
+        MockSuggestionService service = new MockSuggestionService();
+        IBinder binder = mServiceTestRule.bindService(mMockServiceIntent);
+        ISuggestionService serviceBinder = ISuggestionService.Stub.asInterface(binder);
+        serviceBinder.launchSuggestion(null);
+
+        assertThat(service.sOnSuggestionLaunchedCalled).isTrue();
     }
 }
