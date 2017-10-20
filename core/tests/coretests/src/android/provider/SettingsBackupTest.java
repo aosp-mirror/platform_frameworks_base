@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
@@ -177,6 +178,7 @@ public class SettingsBackupTest {
                     Settings.Global.DNS_RESOLVER_MIN_SAMPLES,
                     Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
                     Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
+                    Settings.Global.DNS_TLS_DISABLED,
                     Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY,
                     Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
                     Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
