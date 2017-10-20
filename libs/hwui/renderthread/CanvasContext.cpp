@@ -331,6 +331,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     info.layerUpdateQueue = &mLayerUpdateQueue;
 
     mAnimationContext->startFrame(info.mode);
+    mRenderPipeline->onPrepareTree();
     for (const sp<RenderNode>& node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
         // real time mode. In case of a window, the primary node is the window content and the other

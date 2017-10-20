@@ -37,6 +37,7 @@ public:
     bool pinImages(std::vector<SkImage*>& mutableImages) override;
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
     void unpinImages() override;
+    void onPrepareTree() override;
 
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
             LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,

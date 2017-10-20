@@ -75,6 +75,12 @@ void SkiaPipeline::unpinImages() {
     mPinnedImages.clear();
 }
 
+void SkiaPipeline::onPrepareTree() {
+    // The only time mVectorDrawables is not empty is if prepare tree was called 2 times without
+    // a renderFrame in the middle.
+    mVectorDrawables.clear();
+}
+
 void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
         LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
         const BakedOpRenderer::LightInfo& lightInfo) {
