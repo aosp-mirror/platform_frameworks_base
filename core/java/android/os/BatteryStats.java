@@ -6453,7 +6453,7 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println();
             }
         }
-        if (!filtering || (flags&(DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0) {
+        if (!filtering || (flags & DUMP_DAILY_ONLY) != 0) {
             pw.println("Daily stats:");
             pw.print("  Current start time: ");
             pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",

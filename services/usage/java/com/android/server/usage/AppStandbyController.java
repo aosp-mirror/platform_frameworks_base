@@ -873,9 +873,9 @@ public class AppStandbyController {
         }
     }
 
-    void dumpUser(IndentingPrintWriter idpw, int userId) {
+    void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.dump(idpw, userId);
+            mAppIdleHistory.dump(idpw, userId, pkg);
         }
     }
 

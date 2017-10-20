@@ -46,6 +46,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -3885,21 +3886,36 @@ public class ActivityManager {
         IBinder service = ServiceManager.checkService(name);
         if (service == null) {
             pw.println("  (Service not found)");
+            pw.flush();
             return;
         }
-        TransferPipe tp = null;
-        try {
-            pw.flush();
-            tp = new TransferPipe();
-            tp.setBufferPrefix("  ");
-            service.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
-            tp.go(fd, 10000);
-        } catch (Throwable e) {
-            if (tp != null) {
-                tp.kill();
+        pw.flush();
+        if (service instanceof Binder) {
+            // If this is a local object, it doesn't make sense to do an async dump with it,
+            // just directly dump.
+            try {
+                service.dump(fd, args);
+            } catch (Throwable e) {
+                pw.println("Failure dumping service:");
+                e.printStackTrace(pw);
+                pw.flush();
             }
-            pw.println("Failure dumping service:");
-            e.printStackTrace(pw);
+        } else {
+            // Otherwise, it is remote, do the dump asynchronously to avoid blocking.
+            TransferPipe tp = null;
+            try {
+                pw.flush();
+                tp = new TransferPipe();
+                tp.setBufferPrefix("  ");
+                service.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
+                tp.go(fd, 10000);
+            } catch (Throwable e) {
+                if (tp != null) {
+                    tp.kill();
+                }
+                pw.println("Failure dumping service:");
+                e.printStackTrace(pw);
+            }
         }
     }
 

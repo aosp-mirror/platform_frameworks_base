@@ -15626,7 +15626,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mPreviousProcess: " + mPreviousProcess);
         }
-        if (dumpAll) {
+        if (dumpAll && (mPreviousProcess == null || dumpPackage == null
+                || mPreviousProcess.pkgList.containsKey(dumpPackage))) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("  mPreviousProcessVisibleTime: ");
             TimeUtils.formatDuration(mPreviousProcessVisibleTime, sb);
@@ -15645,7 +15646,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.dumpDisplayConfigs(pw, "  ");
         }
         if (dumpAll) {
-            pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
+            if (dumpPackage == null) {
+                pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
+            }
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
                 for (Map.Entry<String, Integer> entry
@@ -15725,8 +15728,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mRunningVoice=" + mRunningVoice);
                 pw.println("  mVoiceWakeLock" + mVoiceWakeLock);
             }
+            pw.println("  mVrController=" + mVrController);
         }
-        pw.println("  mVrController=" + mVrController);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
             if (dumpPackage == null || dumpPackage.equals(mDebugApp)
