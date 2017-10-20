@@ -76,6 +76,14 @@ $(LOCAL_BUILT_MODULE): $(built_oj_dep) \
 	$(hide) ls -l $(built_framework_classes)
 
 
+my_link_type := java
+my_warn_types :=
+my_allowed_types :=
+my_link_deps :=
+my_2nd_arch_prefix :=
+my_common := COMMON
+include $(BUILD_SYSTEM)/link_type.mk
+
 #
 # Include the subdir makefiles.
 #
