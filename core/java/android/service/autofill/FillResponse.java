@@ -71,7 +71,7 @@ public final class FillResponse implements Parcelable {
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
         mSaveInfo = builder.mSaveInfo;
-        mClientState = builder.mCLientState;
+        mClientState = builder.mClientState;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
@@ -145,7 +145,7 @@ public final class FillResponse implements Parcelable {
     public static final class Builder {
         private ArrayList<Dataset> mDatasets;
         private SaveInfo mSaveInfo;
-        private Bundle mCLientState;
+        private Bundle mClientState;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
@@ -288,7 +288,7 @@ public final class FillResponse implements Parcelable {
          */
         public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
-            mCLientState = clientState;
+            mClientState = clientState;
             return this;
         }
 
