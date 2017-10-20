@@ -60,34 +60,20 @@
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (இயல்பு)"</item>
-    <item msgid="2089555299377409443">"AVRCP 1.5"</item>
-    <item msgid="2895327394279434278">"AVRCP 1.6"</item>
+    <item msgid="2809759619990248160">"AVRCP 1.3"</item>
+    <item msgid="6199178154704729352">"AVRCP 1.5"</item>
+    <item msgid="5172170854953034852">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
     <item msgid="2838624067805073303">"avrcp14"</item>
-    <item msgid="1913619118958233129">"avrcp15"</item>
-    <item msgid="7142710449249088270">"avrcp16"</item>
+    <item msgid="3011533352527449572">"avrcp13"</item>
+    <item msgid="8837606198371920819">"avrcp15"</item>
+    <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"சாதனத் தேர்வைப் பயன்படுத்து (இயல்பு)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="686685526567131661">"AAC"</item>
-    <item msgid="8910200421843557332">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="8434403964359457768">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"கட்டாயமில்லா கோடெக்குகளை இயக்கு"</item>
-    <item msgid="3304843301758635896">"கட்டாயமில்லா கோடெக்குகளை முடக்கு"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"சாதனத் தேர்வைப் பயன்படுத்து (இயல்பு)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="6839647709301342559">"AAC"</item>
-    <item msgid="2279916056363477395">"<xliff:g id="APTX">Qualcomm(R) aptX(TM) audio</xliff:g>"</item>
-    <item msgid="6641171061200063516">"<xliff:g id="APTX_HD">Qualcomm(R) aptX(TM) HD audio</xliff:g>"</item>
-    <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"கட்டாயமில்லா கோடெக்குகளை இயக்கு"</item>
-    <item msgid="741805482892725657">"கட்டாயமில்லா கோடெக்குகளை முடக்கு"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (965655874372831982) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (1736964107585972103) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3558743545747527853) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (9167103241281353659) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"சாதனத் தேர்வைப் பயன்படுத்து (இயல்பு)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -137,7 +123,7 @@
     <item msgid="364670732877872677">"சிறந்த முறை (அடாப்டிவ் பிட் வீதம்)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"முடக்கு"</item>
+    <item msgid="8665206199209698501">"ஆஃப்"</item>
     <item msgid="1593289376502312923">"64K"</item>
     <item msgid="487545340236145324">"256K"</item>
     <item msgid="2423528675294333831">"1M"</item>
@@ -145,13 +131,13 @@
     <item msgid="2803199102589126938">"16M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"முடக்கு"</item>
+    <item msgid="6089470720451068364">"ஆஃப்"</item>
     <item msgid="4622460333038586791">"64K"</item>
     <item msgid="2212125625169582330">"256K"</item>
     <item msgid="1704946766699242653">"1M"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"முடக்கத்தில்"</item>
+    <item msgid="6921048829791179331">"ஆஃப்"</item>
     <item msgid="2969458029344750262">"64K / லாக் பஃபர்"</item>
     <item msgid="1342285115665698168">"256K / லாக் பஃபர்"</item>
     <item msgid="1314234299552254621">"1M / லாக் பஃபர்"</item>
@@ -159,13 +145,13 @@
     <item msgid="5431354956856655120">"16M / லாக் பஃபர்"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"முடக்கத்தில்"</item>
+    <item msgid="1744840221860799971">"ஆஃப்"</item>
     <item msgid="3054662377365844197">"எல்லாம்"</item>
     <item msgid="688870735111627832">"எல்லாம் (ரேடியோ தவிர்த்து)"</item>
     <item msgid="2850427388488887328">"கெர்னல் மட்டும்"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"முடக்கத்தில்"</item>
+    <item msgid="2216470072500521830">"ஆஃப்"</item>
     <item msgid="172978079776521897">"தற்காலிகமாகச் சேமித்த எல்லா பதிவுகளும்"</item>
     <item msgid="3873873912383879240">"எல்லாம் (தற்காலிகமாகச் சேமித்த ரேடியோ பதிவுகள் தவிர்த்து)"</item>
     <item msgid="8489661142527693381">"கெர்னல் லாக் பஃபர் மட்டும்"</item>
@@ -218,17 +204,17 @@
     <item msgid="1340692776955662664">"glGetError இல் அழைப்பின் அடுக்கு"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"முடக்கத்தில்"</item>
+    <item msgid="993742912147090253">"ஆஃப்"</item>
     <item msgid="675719912558941285">"செவ்வகம் அல்லாத கிளிப் பகுதியை நீல நிறத்தில் வரையவும்"</item>
     <item msgid="1064373276095698656">"சோதிக்கப்பட்ட வரைதல் கட்டளைகளைப் பச்சை நிறத்தில் தனிப்படுத்தவும்"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"முடக்கத்தில்"</item>
+    <item msgid="2193584639058893150">"ஆஃப்"</item>
     <item msgid="2751513398307949636">"திரையில் பட்டிகளாக"</item>
     <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> இல்"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"முடக்கத்தில்"</item>
+    <item msgid="8190572633763871652">"ஆஃப்"</item>
     <item msgid="7688197031296835369">"ஓவர்டிரா பகுதிகளைக் காட்டு"</item>
     <item msgid="2290859360633824369">"நிறக்குருடின் பகுதிகளைக் காட்டு"</item>
   </string-array>
@@ -245,7 +231,7 @@
     <item msgid="7899496259191969307">"அதிகபட்சமாக 4 செயல்முறைகள்"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"சார்ஜ் ஏறுகிறது"</item>
+    <item msgid="488237561639712799">"சார்ஜ் ஆகிறது"</item>
     <item msgid="5220695614993094977">"MTP (மீடியா பரிமாற்ற நெறிமுறை)"</item>
     <item msgid="2086000968159047375">"PTP (படப் பரிமாற்ற நெறிமுறை)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB ஈத்தர்நெட்)"</item>

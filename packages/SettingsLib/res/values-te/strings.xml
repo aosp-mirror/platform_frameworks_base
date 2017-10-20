@@ -28,27 +28,24 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"తక్కువ నాణ్యతా నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi కనెక్షన్ వైఫల్యం"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ప్రామాణీకరణ సమస్య"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'కు కనెక్ట్ చేయడం సాధ్యపడదు"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"పాస్‌వర్డ్‌ను తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"పరిధిలో లేదు"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"స్వయంచాలకంగా కనెక్ట్ కాదు"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"ఇంటర్నెట్ ప్రాప్యత లేదు"</string>
+    <string name="wifi_no_internet" msgid="3880396223819116454">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ద్వారా సేవ్ చేయబడింది"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"నెట్‌వర్క్ రేటింగ్ ప్రదాత ద్వారా స్వయంచాలకంగా కనెక్ట్ చేయబడింది"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"కనెక్ట్ చేయబడింది, ఇంటర్నెట్ లేదు"</string>
-    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
-    <skip />
-    <!-- no translation found for speed_label_slow (813109590815810235) -->
-    <skip />
-    <!-- no translation found for speed_label_okay (5941436233638654215) -->
-    <skip />
-    <!-- no translation found for speed_label_medium (3175763313268941953) -->
-    <skip />
-    <!-- no translation found for speed_label_fast (7715732164050975057) -->
-    <skip />
-    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
-    <skip />
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"చాలా నెమ్మది"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"నెమ్మది"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"సరే"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"మధ్యస్థం"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"వేగవంతం"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"చాలా వేగవంతం"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"డిస్‌కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"డిస్‌కనెక్ట్ చేస్తోంది..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"కనెక్ట్ చేస్తోంది..."</string>
@@ -56,24 +53,24 @@
     <string name="bluetooth_pairing" msgid="1426882272690346242">"జత చేస్తోంది..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"కనెక్ట్ చేయబడింది (ఫోన్‌ కాదు)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"కనెక్ట్ చేయబడింది (మీడియా కాదు)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"కనెక్ట్ చేయబడింది (సందేశ ప్రాప్యత లేదు)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"కనెక్ట్ చేయబడింది (సందేశ యాక్సెస్ లేదు)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"కనెక్ట్ చేయబడింది (ఫోన్ లేదా మీడియా కాకుండా)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"కనెక్ట్ చేయబడింది, బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"కనెక్ట్ చేయబడింది (ఫోన్ కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"కనెక్ట్ చేయబడింది (మీడియా కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"కనెక్ట్ చేయబడింది (ఫోన్ లేదా మీడియా కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"మీడియా ఆడియో"</string>
-    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
-    <skip />
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ఫోన్ కాల్‌లు"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ఫైల్ బదిలీ"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ఇన్‌పుట్ పరికరం"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ఇంటర్నెట్ ప్రాప్యత"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ఇంటర్నెట్ యాక్సెస్"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"పరిచయ భాగస్వామ్యం"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"పరిచయ భాగస్వామ్యం కోసం ఉపయోగించు"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ఇంటర్నెట్ కనెక్షన్ భాగస్వామ్యం"</string>
-    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
-    <skip />
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ప్రాప్యత"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
-    <skip />
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"వచన సందేశాలు"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM యాక్సెస్"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ఆడియో: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ఆడియో"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"మీడియా ఆడియోకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ఫోన్ ఆడియోకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ఫైల్ బదిలీ సర్వర్‌కు కనెక్ట్ చేయబడింది"</string>
@@ -81,11 +78,11 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAPకి కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ఫైల్ బదిలీ సర్వర్‌కు కనెక్ట్ చేయబడలేదు"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ఇన్‌పుట్ పరికరానికి కనెక్ట్ చేయబడింది"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ఇంటర్నెట్ ప్రాప్యత కోసం పరికరానికి కనెక్ట్ చేయబడింది"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"ఇంటర్నెట్ యాక్సెస్ కోసం పరికరానికి కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"స్థానిక ఇంటర్నెట్ కనెక్షన్‌ను పరికరంతో భాగస్వామ్యం చేయడం"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ఇంటర్నెట్ ప్రాప్యత కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ఇంటర్నెట్ యాక్సెస్ కోసం ఉపయోగించు"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"మ్యాప్ కోసం ఉపయోగించు"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ప్రాప్యత కోసం ఉపయోగించబడుతుంది"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM యాక్సెస్ కోసం ఉపయోగించబడుతుంది"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"మీడియా ఆడియో కోసం ఉపయోగించు"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ఫోన్ ఆడియో కోసం ఉపయోగించు"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ఫైల్ బదిలీ కోసం ఉపయోగించు"</string>
@@ -95,7 +92,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"రద్దు చేయి"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"జత చేయడం వలన కనెక్ట్ చేయబడినప్పుడు మీ పరిచయాలకు మరియు కాల్ చరిత్రకు ప్రాప్యతను మంజూరు చేస్తుంది."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"పిన్‌ లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"పిన్ లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో కమ్యూనికేట్ చేయడం సాధ్యపడదు."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> జత చేయడాన్ని తిరస్కరించింది."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi ఆఫ్‌లో ఉంది."</string>
@@ -166,11 +163,11 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"ఈ వినియోగదారు కోసం డెవలపర్ ఎంపికలు అందుబాటులో లేవు"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN సెట్టింగ్‌లు ఈ వినియోగదారుకి అందుబాటులో లేవు"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"టీథరింగ్ సెట్టింగ్‌లు ఈ వినియోగదారుకి అందుబాటులో లేవు"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"ప్రాప్యత స్థానం పేరు సెట్టింగ్‌లు ఈ వినియోగదారుకి అందుబాటులో లేవు"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"యాక్సెస్ స్థానం పేరు సెట్టింగ్‌లు ఈ వినియోగదారుకి అందుబాటులో లేవు"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB డీబగ్గింగ్"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB కనెక్ట్ చేయబడినప్పుడు డీబగ్ మోడ్"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB డీబగ్ ప్రామాణీకరణలను ఉపసంహరించు"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"బగ్ నివేదిక సత్వరమార్గం"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"బగ్ నివేదిక షార్ట్‌కట్"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"బగ్ నివేదికను తీసుకోవడానికి పవర్ మెనులో బటన్‌ను చూపు"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"సక్రియంగా ఉంచు"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ఛార్జ్ చేస్తున్నప్పుడు స్క్రీన్ ఎప్పటికీ నిద్రావస్థలోకి వెళ్లదు"</string>
@@ -181,17 +178,18 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM అన్‌లాకింగ్‌ను అనుమతించాలా?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"హెచ్చరిక: ఈ సెట్టింగ్ ఆన్ చేయబడినప్పుడు పరికరం రక్షణ లక్షణాలు ఈ పరికరంలో పని చేయవు."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"అనుకృత స్థాన అనువర్తనాన్ని ఎంచుకోండి"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"అనుకృత స్థాన అనువర్తనం ఏదీ సెట్ చేయబడలేదు"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"అనుకృత స్థాన అనువర్తనం: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"అనుకృత స్థాన యాప్ ఏదీ సెట్ చేయబడలేదు"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"అనుకృత స్థాన యాప్: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రమాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"మొబైల్‌కి మార్చేలా చురుకైన Wi‑Fi"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi సంచార స్కాన్‌లను ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ సక్రియంగా ఉంచు"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ఇన్-బ్యాండ్ రింగింగ్‌ని ప్రారంభించండి"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP సంస్కరణ"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"బ్లూటూత్ ఆడియో కోడెక్‌ని ఎంచుకోండి"</string>
@@ -204,7 +202,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"బ్లూటూత్ ఆడియో LDAC కోడెక్: ప్లేబ్యాక్ నాణ్యత"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"బ్లూటూత్ ఆడియో LDAC కోడెక్‌ని ఎంచుకోండి:\nప్లేబ్యాక్ నాణ్యత"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ప్రసారం చేస్తోంది: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన ప్రమాణపత్రం కోసం ఎంపికలను చూపు"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ప్రారంభించబడినప్పుడు, Wi‑Fi సిగ్నల్ బలహీనంగా ఉంటే డేటా కనెక్షన్‌ను మొబైల్‌కి మార్చేలా Wi‑Fi చురుగ్గా వ్యవహరిస్తుంది"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ఇంటర్‌ఫేస్‌లో ఉండే డేటా ట్రాఫిక్ పరిమాణం ఆధారంగా Wi‑Fi సంచార స్కాన్‌లను అనుమతించు/నిరాకరించు"</string>
@@ -220,11 +218,12 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"అనుకృత స్థానాలను అనుమతించు"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"వీక్షణ లక్షణ పర్యవేక్షణను ప్రారంభించు"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ఎల్లప్పుడూ మొబైల్ డేటాను సక్రియంగా ఉంచు, Wi‑Fi సక్రియంగా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"అందుబాటులో ఉంటే టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధిని ఉపయోగించండి"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో అనువర్తనాలను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"మీరు గతంలో ప్రామాణీకరించిన అన్ని కంప్యూటర్‌ల నుండి USB డీబగ్గింగ్‌కు ప్రాప్యతను ఉపసంహరించాలా?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"అభివృద్ధి సెట్టింగ్‌లను అనుమతించాలా?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని అనువర్తనాలు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని యాప్‌లు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా అనువర్తనాలను ధృవీకరించు"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ లక్షణాన్ని నిలిపివేస్తుంది."</string>
@@ -235,12 +234,12 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP తనిఖీ ప్రవర్తనను సెట్ చేయండి"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"డీబగ్గింగ్"</string>
     <string name="debug_app" msgid="8349591734751384446">"డీబగ్ అనువర్తనాన్ని ఎంచుకోండి"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"డీబగ్ అనువర్తనం సెట్ చేయబడలేదు"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"డీబగ్గింగ్ అనువర్తనం: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"డీబగ్ యాప్ సెట్ చేయబడలేదు"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"డీబగ్గింగ్ యాప్: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"అనువర్తనాన్ని ఎంచుకోండి"</string>
     <string name="no_application" msgid="2813387563129153880">"ఏదీ వద్దు"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"డీబగ్గర్ కోసం వేచి ఉండండి"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"డీబగ్ చేయబడిన అనువర్తనం అమలు కావడానికి ముందు జోడించాల్సిన డీబగ్గర్ కోసం వేచి ఉంటుంది"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"డీబగ్ చేయబడిన యాప్ అమలు కావడానికి ముందు జోడించాల్సిన డీబగ్గర్ కోసం వేచి ఉంటుంది"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"టెలిఫోనీ మానిటర్"</string>
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"టెలిఫోనీ/మోడెమ్ కార్యాచరణలో సమస్యను గుర్తించినప్పుడు TelephonyMonitor లాగ్‌లను సేకరిస్తుంది మరియు బగ్‌ని ఫైల్ చేయమని వినియోగదారును ప్రోత్సహిస్తుంది"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ఇన్‌పుట్"</string>
@@ -254,11 +253,11 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"ప్రస్తుత స్పర్శ డేటాను చూపేలా స్క్రీన్ అతివ్యాప్తి చేయండి"</string>
     <string name="show_touches" msgid="2642976305235070316">"నొక్కినవి చూపు"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"నొక్కినవాటికి సంబంధించిన దృశ్య అభిప్రాయాన్ని చూపు"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"సర్ఫేస్ నవీకరణలను చూపండి"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"సర్ఫేస్ అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"పూర్తి విండో ఉపరితలాలు నవీకరించబడినప్పుడు వాటిని ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ నవీకరణలను చూపండి"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPUతో గీసినప్పుడు విండోల లోపల వీక్షణలను ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల నవీకరణలను చూపండి"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల అప్‌డేట్‌లను చూపండి"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు నవీకరించబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయండి"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"GPU Rendererని సెట్ చేయండి"</string>
@@ -282,14 +281,14 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"పరివర్తన యానిమేషన్ ప్రమాణం"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"యానిమేటర్ వ్యవధి ప్రమాణం"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ప్రత్యామ్నాయ ప్రదర్శనలను అనుకరించండి"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"అనువర్తనాలు"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"యాప్‌లు"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"కార్యాచరణలను ఉంచవద్దు"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ప్రతి కార్యాచరణను వినియోగదారు నిష్క్రమించిన వెంటనే తొలగించండి"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"నేపథ్య ప్రాసెస్ పరిమితి"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"అన్ని ANRలను చూపు"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"నేపథ్య అనువర్తనాల కోసం అనువర్తనం ప్రతిస్పందించడం లేదు డైలాగ్‌ను చూపు"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు డైలాగ్‌ను చూపు"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా అనువర్తనం నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"అనువర్తనాలను బాహ్య నిల్వలో నిర్బంధంగా అనుమతించు"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ఏ అనువర్తనాన్ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో వ్రాయడానికి అనుమతిస్తుంది"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"కార్యాచరణలను పరిమాణం మార్చగలిగేలా నిర్బంధించు"</string>
@@ -336,17 +335,17 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"రంగు సవరణ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ఈ లక్షణం ప్రయోగాత్మకమైనది మరియు పనితీరుపై ప్రభావం చూపవచ్చు."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"మిగిలి ఉన్న సమయం, <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"పూర్తిగా ఛార్జ్ కావడానికి <xliff:g id="TIME">%1$s</xliff:g> పడుతుంది"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> మిగిలి ఉంది"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"మీ వినియోగం ఆధారంగా <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> పని చేస్తుంది"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">%2$s</xliff:g> సమయం మిగిలి ఉంది"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> మిగిలి ఉంది"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"మిగిలి ఉన్న సమయం, <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">^1</xliff:g> సమయం మిగిలి ఉంది"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"పూర్తిగా ఛార్జ్ కావడానికి <xliff:g id="TIME">^1</xliff:g> పడుతుంది"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> మిగిలి ఉంది"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"మీ వినియోగం ఆధారంగా <xliff:g id="TIME">^1</xliff:g> సమయం మిగిలి ఉంది"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> పని చేస్తుంది"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">^2</xliff:g> సమయం మిగిలి ఉంది"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> మిగిలి ఉంది"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"తెలియదు"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ఛార్జ్ అవుతోంది"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ఛార్జ్ అవుతోంది"</string>
@@ -356,6 +355,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"నిర్వాహకుని ద్వారా నియంత్రించబడింది"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"నిర్వాహకులు ప్రారంభించారు"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"నిర్వాహకులు నిలిపివేసారు"</string>
+    <string name="disabled" msgid="9206776641295849915">"నిలిపివేయబడింది"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"అనుమతించినవి"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"అనుమతించబడలేదు"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="home" msgid="3256884684164448244">"సెట్టింగ్‌ల హోమ్"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -374,11 +377,11 @@
     <string name="content_description_menu_button" msgid="8182594799812351266">"మెను"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"డెమో మోడ్‌లో ఫ్యాక్టరీ రీసెట్‌ను నిర్వహించడానికి పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"తదుపరి"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"తర్వాత"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"పాస్‌వర్డ్ అవసరం"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"సక్రియ ఇన్‌పుట్ పద్ధతులు"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"సిస్టమ్ భాషలను ఉపయోగించు"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> యొక్క సెట్టింగ్‌లను తెరవడం విఫలమైంది"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ఈ ఇన్‌పుట్ పద్ధతి మీరు టైప్ చేసే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ్‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> అనువర్తనంలో అందించబడుతుంది. ఈ ఇన్‌పుట్ పద్ధతిని ఉపయోగించాలా?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"గమనిక: రీబూట్ చేసాక, మీరు మీ ఫోన్‌ను అన్‌లాక్ చేసే వరకు ఈ అనువర్తనం ప్రారంభం కాదు"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"గమనిక: రీబూట్ చేసాక, మీరు మీ ఫోన్‌ను అన్‌లాక్ చేసే వరకు ఈ యాప్ ప్రారంభం కాదు"</string>
 </resources>
