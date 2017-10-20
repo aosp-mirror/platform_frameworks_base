@@ -442,7 +442,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mTmpRect2.set(mBounds);
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (inSplitScreenPrimaryWindowingMode()) {
-            repositionDockedStackAfterRotation(mTmpRect2);
+            repositionPrimarySplitScreenStackAfterRotation(mTmpRect2);
             snapDockedStackAfterRotation(mTmpRect2);
             final int newDockSide = getDockSide(mTmpRect2);
 
@@ -466,14 +466,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     /**
-     * Some dock sides are not allowed by the policy. This method queries the policy and moves
-     * the docked stack around if needed.
+     * Some primary split screen sides are not allowed by the policy. This method queries the policy
+     * and moves the primary stack around if needed.
      *
-     * @param inOutBounds the bounds of the docked stack to adjust
+     * @param inOutBounds the bounds of the primary stack to adjust
      */
-    private void repositionDockedStackAfterRotation(Rect inOutBounds) {
+    private void repositionPrimarySplitScreenStackAfterRotation(Rect inOutBounds) {
         int dockSide = getDockSide(inOutBounds);
-        if (mService.mPolicy.isDockSideAllowed(dockSide)) {
+        if (mDisplayContent.getDockedDividerController().canPrimaryStackDockTo(dockSide)) {
             return;
         }
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
