@@ -54,6 +54,7 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillContext;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.InternalSanitizer;
@@ -90,6 +91,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -837,6 +839,194 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private SaveInfo getSaveInfoLocked() {
         final FillResponse response = getLastResponseLocked(null);
         return response == null ? null : response.getSaveInfo();
+    }
+
+    /**
+     * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
+     * when necessary.
+     */
+    public void logContextCommittedLocked() {
+        if (mResponses == null) {
+            if (sVerbose) Slog.v(TAG, "logContextCommittedLocked(): skipped (no responses)");
+            return;
+        }
+
+        final FillResponse lastResponse = mResponses.valueAt(mResponses.size() -1);
+        final int flags = lastResponse.getFlags();
+        if ((flags & FillResponse.FLAG_TRACK_CONTEXT_COMMITED) == 0) {
+            if (sDebug) Slog.d(TAG, "logContextCommittedLocked(): ignored by flags " + flags);
+            return;
+        }
+
+        ArraySet<String> ignoredDatasets = null;
+        ArrayList<AutofillId> changedFieldIds = null;
+        ArrayList<String> changedDatasetIds = null;
+        ArrayMap<AutofillId, ArraySet<String>> manuallyFilledIds = null;
+
+        boolean hasAtLeastOneDataset = false;
+        final int responseCount = mResponses.size();
+        for (int i = 0; i < responseCount; i++) {
+            final FillResponse response = mResponses.valueAt(i);
+            final List<Dataset> datasets = response.getDatasets();
+            if (datasets == null || datasets.isEmpty()) {
+                if (sVerbose) Slog.v(TAG,  "logContextCommitted() no datasets at " + i);
+            } else {
+                for (int j = 0; j < datasets.size(); j++) {
+                    final Dataset dataset = datasets.get(j);
+                    final String datasetId = dataset.getId();
+                    if (datasetId == null) {
+                        if (sVerbose) {
+                            Slog.v(TAG, "logContextCommitted() skipping idless dataset " + dataset);
+                        }
+                    } else {
+                        hasAtLeastOneDataset = true;
+                        if (mSelectedDatasetIds == null
+                                || !mSelectedDatasetIds.contains(datasetId)) {
+                            if (sVerbose) Slog.v(TAG, "adding ignored dataset " + datasetId);
+                            if (ignoredDatasets == null) {
+                                ignoredDatasets = new ArraySet<>();
+                            }
+                            ignoredDatasets.add(datasetId);
+                        }
+                    }
+                }
+            }
+        }
+        if (!hasAtLeastOneDataset) {
+            if (sVerbose) Slog.v(TAG, "logContextCommittedLocked(): skipped (no datasets)");
+            return;
+        }
+
+        for (int i = 0; i < mViewStates.size(); i++) {
+            final ViewState viewState = mViewStates.valueAt(i);
+            final int state = viewState.getState();
+
+            // When value changed, we need to log if it was:
+            // - autofilled -> changedDatasetIds
+            // - not autofilled but matches a dataset value -> manuallyFilledIds
+            if ((state & ViewState.STATE_CHANGED) != 0) {
+
+                // Check if autofilled value was changed
+                if ((state & ViewState.STATE_AUTOFILLED) != 0) {
+                    final String datasetId = viewState.getDatasetId();
+                    if (datasetId == null) {
+                        // Sanity check - should never happen.
+                        Slog.w(TAG, "logContextCommitted(): no dataset id on " + viewState);
+                        continue;
+                    }
+
+                    // Must first check if final changed value is not the same as value sent by
+                    // service.
+                    final AutofillValue autofilledValue = viewState.getAutofilledValue();
+                    final AutofillValue currentValue = viewState.getCurrentValue();
+                    if (autofilledValue != null && autofilledValue.equals(currentValue)) {
+                        if (sDebug) {
+                            Slog.d(TAG, "logContextCommitted(): ignoring changed " + viewState
+                                    + " because it has same value that was autofilled");
+                        }
+                        continue;
+                    }
+
+                    if (sDebug) {
+                        Slog.d(TAG, "logContextCommitted() found changed state: " + viewState);
+                    }
+                    if (changedFieldIds == null) {
+                        changedFieldIds = new ArrayList<>();
+                        changedDatasetIds = new ArrayList<>();
+                    }
+                    changedFieldIds.add(viewState.id);
+                    changedDatasetIds.add(datasetId);
+                } else {
+                    // Check if value match a dataset.
+                    final AutofillValue currentValue = viewState.getCurrentValue();
+                    if (currentValue == null) {
+                        if (sDebug) {
+                            Slog.d(TAG, "logContextCommitted(): skipping view witout current value "
+                                    + "( " + viewState + ")");
+                        }
+                        continue;
+                    }
+                    for (int j = 0; j < responseCount; j++) {
+                        final FillResponse response = mResponses.valueAt(j);
+                        final List<Dataset> datasets = response.getDatasets();
+                        if (datasets == null || datasets.isEmpty()) {
+                            if (sVerbose) Slog.v(TAG,  "logContextCommitted() no datasets at " + j);
+                        } else {
+                            for (int k = 0; k < datasets.size(); k++) {
+                                final Dataset dataset = datasets.get(k);
+                                final String datasetId = dataset.getId();
+                                if (datasetId == null) {
+                                    if (sVerbose) {
+                                        Slog.v(TAG, "logContextCommitted() skipping idless dataset "
+                                                + dataset);
+                                    }
+                                } else {
+                                    final ArrayList<AutofillValue> values = dataset.getFieldValues();
+                                    for (int l = 0; l < values.size(); l++) {
+                                        final AutofillValue candidate = values.get(l);
+                                        if (currentValue.equals(candidate)) {
+                                            if (sDebug) {
+                                                Slog.d(TAG, "field " + viewState.id
+                                                        + " was manually filled with value set by "
+                                                        + "dataset " + datasetId);
+                                            }
+                                            if (manuallyFilledIds == null) {
+                                                manuallyFilledIds = new ArrayMap<>();
+                                            }
+                                            ArraySet<String> datasetIds =
+                                                    manuallyFilledIds.get(viewState.id);
+                                            if (datasetIds == null) {
+                                                datasetIds = new ArraySet<>(1);
+                                                manuallyFilledIds.put(viewState.id, datasetIds);
+                                            }
+                                            datasetIds.add(datasetId);
+                                        }
+                                    }
+                                    if (mSelectedDatasetIds == null
+                                            || !mSelectedDatasetIds.contains(datasetId)) {
+                                        if (sVerbose) {
+                                            Slog.v(TAG, "adding ignored dataset " + datasetId);
+                                        }
+                                        if (ignoredDatasets == null) {
+                                            ignoredDatasets = new ArraySet<>();
+                                        }
+                                        ignoredDatasets.add(datasetId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (sVerbose) {
+            Slog.v(TAG, "logContextCommitted(): id=" + id
+                    + ", selectedDatasetids=" + mSelectedDatasetIds
+                    + ", ignoredDatasetIds=" + ignoredDatasets
+                    + ", changedAutofillIds=" + changedFieldIds
+                    + ", changedDatasetIds=" + changedDatasetIds
+                    + ", manuallyFilledIds=" + manuallyFilledIds);
+        }
+
+        ArrayList<AutofillId> manuallyFilledFieldIds = null;
+        ArrayList<ArrayList<String>> manuallyFilledDatasetIds = null;
+
+        // Must "flatten" the map to the parcellable collection primitives
+        if (manuallyFilledIds != null) {
+            final int size = manuallyFilledIds.size();
+            manuallyFilledFieldIds = new ArrayList<>(size);
+            manuallyFilledDatasetIds = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                final AutofillId fieldId = manuallyFilledIds.keyAt(i);
+                final ArraySet<String> datasetIds = manuallyFilledIds.valueAt(i);
+                manuallyFilledFieldIds.add(fieldId);
+                manuallyFilledDatasetIds.add(new ArrayList<>(datasetIds));
+            }
+        }
+        mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
+                changedFieldIds, changedDatasetIds,
+                manuallyFilledFieldIds, manuallyFilledDatasetIds);
     }
 
     /**
@@ -1601,7 +1791,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if (mResponses == null) {
-            mResponses = new SparseArray<>(4);
+            // Set initial capacity as 2 to handle cases where service always requires auth.
+            // TODO: add a metric for number of responses set by server, so we can use its average
+            // as the initial array capacitiy.
+            mResponses = new SparseArray<>(2);
         }
         mResponses.put(requestId, newResponse);
         mClientState = newClientState != null ? newClientState : newResponse.getClientState();
@@ -1677,6 +1870,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final AutofillId id = ids.get(j);
             final AutofillValue value = values.get(j);
             final ViewState viewState = createOrUpdateViewStateLocked(id, state, value);
+            final String datasetId = dataset.getId();
+            if (datasetId != null) {
+                viewState.setDatasetId(datasetId);
+            }
             if (response != null) {
                 viewState.setResponse(response);
             } else if (clearResponse) {
