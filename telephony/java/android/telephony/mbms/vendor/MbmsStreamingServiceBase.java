@@ -70,14 +70,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
         }
 
         final int uid = Binder.getCallingUid();
-        callback.asBinder().linkToDeath(new DeathRecipient() {
-            @Override
-            public void binderDied() {
-                onAppCallbackDied(uid, subscriptionId);
-            }
-        }, 0);
 
-        return initialize(new MbmsStreamingSessionCallback() {
+        int result = initialize(new MbmsStreamingSessionCallback() {
             @Override
             public void onError(final int errorCode, final String message) {
                 try {
@@ -105,6 +99,17 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
                 }
             }
         }, subscriptionId);
+
+        if (result == MbmsErrors.SUCCESS) {
+            callback.asBinder().linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }, 0);
+        }
+
+        return result;
     }
 
 
@@ -161,14 +166,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
         }
 
         final int uid = Binder.getCallingUid();
-        callback.asBinder().linkToDeath(new DeathRecipient() {
-            @Override
-            public void binderDied() {
-                onAppCallbackDied(uid, subscriptionId);
-            }
-        }, 0);
 
-        return startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
+        int result = startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
             @Override
             public void onError(final int errorCode, final String message) {
                 try {
@@ -215,6 +214,17 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
                 }
             }
         });
+
+        if (result == MbmsErrors.SUCCESS) {
+            callback.asBinder().linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }, 0);
+        }
+
+        return result;
     }
 
     /**

@@ -118,14 +118,8 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
         }
 
         final int uid = Binder.getCallingUid();
-        callback.asBinder().linkToDeath(new DeathRecipient() {
-            @Override
-            public void binderDied() {
-                onAppCallbackDied(uid, subscriptionId);
-            }
-        }, 0);
 
-        return initialize(subscriptionId, new MbmsDownloadSessionCallback() {
+        int result = initialize(subscriptionId, new MbmsDownloadSessionCallback() {
             @Override
             public void onError(int errorCode, String message) {
                 try {
@@ -153,6 +147,17 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
                 }
             }
         });
+
+        if (result == MbmsErrors.SUCCESS) {
+            callback.asBinder().linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    onAppCallbackDied(uid, subscriptionId);
+                }
+            }, 0);
+        }
+
+        return result;
     }
 
     /**
@@ -251,17 +256,6 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             throw new NullPointerException("Callback must not be null");
         }
 
-        DeathRecipient deathRecipient = new DeathRecipient() {
-            @Override
-            public void binderDied() {
-                onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
-                mDownloadCallbackBinderMap.remove(callback.asBinder());
-                mDownloadCallbackDeathRecipients.remove(callback.asBinder());
-            }
-        };
-        mDownloadCallbackDeathRecipients.put(callback.asBinder(), deathRecipient);
-        callback.asBinder().linkToDeath(deathRecipient, 0);
-
         DownloadStateCallback exposedCallback = new FilteredDownloadStateCallback(callback, flags) {
             @Override
             protected void onRemoteException(RemoteException e) {
@@ -269,9 +263,23 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             }
         };
 
-        mDownloadCallbackBinderMap.put(callback.asBinder(), exposedCallback);
+        int result = registerStateCallback(downloadRequest, exposedCallback);
 
-        return registerStateCallback(downloadRequest, exposedCallback);
+        if (result == MbmsErrors.SUCCESS) {
+            DeathRecipient deathRecipient = new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    onAppCallbackDied(uid, downloadRequest.getSubscriptionId());
+                    mDownloadCallbackBinderMap.remove(callback.asBinder());
+                    mDownloadCallbackDeathRecipients.remove(callback.asBinder());
+                }
+            };
+            mDownloadCallbackDeathRecipients.put(callback.asBinder(), deathRecipient);
+            callback.asBinder().linkToDeath(deathRecipient, 0);
+            mDownloadCallbackBinderMap.put(callback.asBinder(), exposedCallback);
+        }
+
+        return result;
     }
 
     /**
