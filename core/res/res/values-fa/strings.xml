@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"سرویس دارای مجوز نیست."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"‏شما می‎توانید تنظیم شناسه تماس‌گیرنده را تغییر دهید."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"سرویس داده دردسترس نیست"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"سرویس اضطراری دردسترس نیست"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"بدون تماس اضطراری"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"سرویس صوتی دردسترس نیست"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"سرویس صوتی/اضطراری دردسترس نیست"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"شرکت مخابراتی شما موقتاً سرویس داده را در این مکان به حالت تعلیق درآورده است"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"شرکت مخابراتی شما موقتاً تماس‌های اضطراری را در این مکان به حالت تعلیق درآورده است"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"شرکت مخابراتی شما موقتاً تماس‌های صوتی را در این مکان به حالت تعلیق درآورده است"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"شرکت مخابراتی شما موقتاً تماس‌های صوتی و اضطراری را در این مکان به حالت تعلیق درآورده است"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"موقتاً توسط شبکه داده دستگاه همراه در مکان شما ارائه نمی‌شود"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"برای بهبود دریافت، نوع شبکه‌ای را که انتخاب کرده‌اید در «سیستم» &gt; «شبکه‌ و اینترنت» &gt; «شبکه‌های تلفن همراه» &gt; «نوع شبکه ترجیحی» تغییر دهید."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"هشدارها"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"جستجوی سرویس"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏تماس از طریق Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"‏برای برقراری تماس و ارسال پیام از طریق Wi-Fi، ابتدا از شرکت مخابراتی‌تان درخواست کنید این سرویس را راه‌اندازی کند. سپس دوباره از تنظیمات، تماس Wi-Fi را روشن کنید."</item>
+    <item msgid="3910386316304772394">"‏برای برقراری تماس و ارسال پیام ازطریق Wi-Fi، ابتدا از شرکت مخابراتی خود بخواهید این سرویس را تنظیم کند. سپس در «تنظیمات»۷ دوباره «تماس ازطریق Wi-Fi» را روشن کنید. (کد خطا: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"ثبت‌نام با شرکت مخابراتی شما"</item>
+    <item msgid="7472393097168811593">"ازطریق شرکت مخابراتی‌تان ثبت‌نام کنید (کد خطا: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -248,9 +245,8 @@
     <string name="global_action_assist" msgid="3892832961594295030">"دستیار"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"دستیار صوتی"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"اکنون قفل شود"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"بیشتر از 999"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"محتوا بر اساس خط‌مشی پنهان شده است"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"۹۹۹+"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"اعلان جدید"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"صفحه‌‌کلید مجازی"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"صفحه‌کلید فیزیکی"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"امنیت"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"هشدارها"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"نمونه برای خرده‌فروشان"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏اتصال USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"برنامه‌هایی که در پس‌زمینه اجرا می‌شوند"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> در پس‌زمینه درحال اجرا شدن است"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> برنامه در پس‌زمینه درحال اجرا شدن هستند"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"برنامه‌های مصرف‌کننده باتری"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال استفاده کردن از باتری است"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> برنامه درحال استفاده کردن از باتری هستند"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"برای جزئیات مربوط به مصرف باتری و داده، ضربه بزنید"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"حالت ایمن"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="one">‏شبکه Wi-Fi باز در دسترس</item>
       <item quantity="other">‏شبکه‌ Wi-Fi باز در دسترس</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"‏اتصال به شبکه Wi‑Fi باز"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"‏درحال اتصال به شبکه Wi‑Fi باز"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏به شبکه Wi‑Fi متصل شد"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏به شبکه Wi-Fi متصل نشد"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"برای دیدن همه شبکه‌ها ضربه بزنید"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"همه شبکه‌ها"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏ورود به شبکه Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ورود به سیستم شبکه"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1188,8 +1191,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB برای MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"برای گزینه‌های بیشتر ضربه بزنید."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"وسیله جانبی صوتی پشتیبانی نمی‌شود"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"برای اطلاعات بیشتر ضربه بزنید"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"لوازم جانبی صوتی آنالوگ شناسایی شد"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"دستگاه متصل‌شده با این تلفن سازگار نیست. روی اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"‏برای غیرفعال کردن اشکال‌زدایی USB ضربه بزنید."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"‏انتخاب کنید تا رفع عیب USB غیرفعال شود."</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"نمایش روی سایر برنامه‌ها"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"اگر نمی‌خواهید <xliff:g id="NAME">%s</xliff:g> از این قابلیت استفاده کند، با ضربه زدن، تنظیمات را باز کنید و قابلیت را خاموش کنید."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"به <xliff:g id="SESSION">%s</xliff:g> متصل شد. برای مدیریت شبکه ضربه بزنید."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏در حال اتصال VPN همیشه فعال…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏VPN همیشه فعال متصل شد"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏ارتباط VPN همیشه روشن قطع شد"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"‏ارتباط VPN همیشه روشن قطع شد"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطای VPN همیشه فعال"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"برای راه‌اندازی ضربه بزنید"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏تغییر شبکه یا تنظیمات VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"انتخاب فایل"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"هیچ فایلی انتخاب نشد"</string>
     <string name="reset" msgid="2448168080964209908">"بازنشانی"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"برداشتن پین"</string>
     <string name="app_info" msgid="6856026610594615344">"اطلاعات برنامه"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"دستگاه بازنشانی شود؟"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"برای بازنشانی دستگاه، ضربه بزنید"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"در حال شروع نسخه نمایشی…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"در حال بازنشانی دستگاه…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"دستگاه بازنشانی شود؟"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"همه تغییرات را از دست خواهید داد و نسخه نمایشی دوباره تا <xliff:g id="TIMEOUT">%1$s</xliff:g> ثانیه دیگر شروع می‌شود…‏"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"لغو"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"بازنشانی در این لحظه"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> غیرفعال شد"</string>
     <string name="conference_call" msgid="3751093130790472426">"تماس کنفرانسی"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"نکته‌ابزار"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"فوراً مناطق ساحلی و محدوده رودخانه را ترک کنید و به جایی امن، مثل ارتفاعات بروید."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"آرام باشید و پناهگاهی در این اطراف پیدا کنید."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"آزمایش پیام‌های اضطراری"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"پاسخ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"سیم‌کارت مجاز نیست"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"سیم‌کارت مجوز لازم را ندارد"</string>

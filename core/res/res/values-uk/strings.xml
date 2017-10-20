@@ -21,10 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"б"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"Кб"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Мб"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Гб"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"Тб"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"КБ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"МБ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"ТБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> дн."</string>
@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Службу не ініціалізовано."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ви не можете змінювати налаштування ідентифікатора абонента."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Немає мобільного Інтернету"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Немає екстреної служби"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Екстрені виклики заблоковано"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Немає голосової служби"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Немає голосової/екстреної служби"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Оператор тимчасово заблокував передавання даних у цьому місці"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Оператор тимчасово заблокував екстрені виклики в цьому місці"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Оператор тимчасово заблокував голосові виклики в цьому місці"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Оператор тимчасово заблокував голосові й екстрені виклики в цьому місці"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Тимчасово не пропонується мобільною мережею у вашому місцезнаходженні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Щоб покращити якість сигналу, змініть тип у меню \"Система\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сповіщення"</string>
@@ -136,10 +133,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пошук служби"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Дзвінок через Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Щоб телефонувати або надсилати повідомлення через Wi-Fi, спочатку попросіть свого оператора налаштувати цю послугу. Після цього ввімкніть дзвінки через Wi-Fi у налаштуваннях."</item>
+    <item msgid="3910386316304772394">"Щоб телефонувати або надсилати повідомлення через Wi-Fi, спершу попросіть свого оператора налаштувати цю послугу. Після цього знову ввімкніть дзвінки через Wi-Fi у налаштуваннях. (Код помилки: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Зареєструйтеся в оператора"</item>
+    <item msgid="7472393097168811593">"Зареєструйтеся в оператора (код помилки: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -255,8 +252,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Голос. підказки"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Блокувати зараз"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Вміст сховано"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Вміст сховано згідно з правилом"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Нове сповіщення"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Віртуальна клавіатура"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Фізична клавіатура"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Безпека"</string>
@@ -272,9 +268,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сповіщення"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Демо-режим для роздрібної торгівлі"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"З’єднання USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Додатки, які працюють у фоновому режимі"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> працює у фоновому режимі"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Додатки, які працюють у фоновому режимі: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Додатки, що використовують заряд акумулятора"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
@@ -1030,7 +1026,7 @@
     <string name="browse" msgid="6993590095938149861">"Веб-переглядач"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Деякі системні функції можуть не працювати"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 Мб вільного місця, і повторіть спробу."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> працює"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Торкніться, щоб дізнатися більше або зупинити додаток."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1067,7 +1063,7 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Очистити налаштування за умовчанням у меню Налаштування системи &gt; Програми &gt; Завантажені."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Виберіть дію"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Вибрати програму для пристрою USB"</string>
-    <string name="noApplications" msgid="2991814273936504689">"Жодна програма не може виконати цю дію."</string>
+    <string name="noApplications" msgid="2991814273936504689">"Жодний додаток не може виконати цю дію."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>: збій у роботі"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g>: збій у роботі"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> періодично перестає працювати"</string>
@@ -1153,6 +1149,13 @@
       <item quantity="many">Відкриті мережі Wi-Fi доступні</item>
       <item quantity="other">Відкриті мережі Wi-Fi доступні</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Під’єднайтеся до відкритої мережі Wi-Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Під’єднання до відкритої мережі Wi-Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Під’єднано до мережі Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Торкніться, щоб побачити всі мережі"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Під’єднатися"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Усі мережі"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Вхід у мережу Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1232,11 +1235,11 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB для режиму MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Під’єднано до аксесуара USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Торкніться, щоб переглянути більше опцій."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Аксесуар для аудіо не підтримується"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Торкніться, щоб дізнатися більше"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Виявлено аналоговий аксесуар для аудіо"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Під’єднаний пристрій несумісний із цим телефоном. Торкніться, щоб дізнатися більше."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB завершено"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Торкніться, щоб вимкнути налагодження USB."</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Вибер., щоб вимкн. налагодж. USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Виберіть, щоб вимкнути налагодження за USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Створюється повідомлення про помилку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Надіслати звіт про помилку?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Надсилається звіт про помилку…"</string>
@@ -1250,8 +1253,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Торкніться, щоб вибрати мову та розкладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Показувати поверх додатків"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Додаток <xliff:g id="NAME">%s</xliff:g> відображається поверх інших додатків"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> відображається поверх інших додатків"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Щоб у додатку <xliff:g id="NAME">%s</xliff:g> не працювала ця функція, вимкніть її в налаштуваннях."</string>
@@ -1340,9 +1342,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Під’єднано до <xliff:g id="SESSION">%s</xliff:g>. Торкніться, щоб керувати мережею."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Під’єднання до постійної мережі VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Під’єднано до постійної мережі VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Постійну мережу VPN від’єднано"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Від’єднано від постійної мережі VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Помилка постійної мережі VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Торкніться, щоб налаштувати"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Змінити налаштування мережі або VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Виберіть файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Не вибрано файл"</string>
     <string name="reset" msgid="2448168080964209908">"Скинути"</string>
@@ -1793,14 +1795,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Відкріпити"</string>
     <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Скинути налаштування пристрою?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Торкніться, щоб скинути налаштування пристрою"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Запуск демонстрації…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Скидання налаштувань пристрою…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Скинути налаштування пристрою?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Ви втратите всі зміни, а демонстрація знову почнеться через <xliff:g id="TIMEOUT">%1$s</xliff:g> с…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Скасувати"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Скинути"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> вимкнено"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конференц-виклик"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Спливаюча підказка"</string>
@@ -1846,6 +1842,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Негайно евакуюйтеся з прибережних районів і територій поблизу річок у безпечніше місце, як-от на територію на підвищенні."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Не хвилюйтеся та знайдіть прихисток поблизу."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Перевірка екстрених повідомлень"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Відповісти"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-карта заборонена"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-карту не затверджено"</string>

@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Du kan ikke endre innstillingen for anrops-ID."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Ingen datatjeneste"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Ingen nødtjeneste"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Ingen nødanrop"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ingen taletjeneste"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ingen tale-/nødtjeneste"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operatøren din har midlertidig suspendert datatjeneste på dette stedet"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operatøren din har midlertidig suspendert nødanrop på dette stedet"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operatøren din har midlertidig suspendert taleanrop på dette stedet"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operatøren din har midlertidig suspendert tale- og nødanrop på dette stedet"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbys midlertidig ikke gjennom mobilnettverket der du er"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"For å forbedre signalet, prøv å endre valgt nettverkstype i System &gt; Nettverk og Internett &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Varsler"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leter etter tjeneste"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"For å ringe og sende meldinger over Wi-Fi må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger."</item>
+    <item msgid="3910386316304772394">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Registrer deg hos operatøren din"</item>
+    <item msgid="7472393097168811593">"Registrer deg hos operatøren din (feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Talehjelp"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nå"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Innholdet er skjult"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Innholdet er skjult i henhold til retningslinjene"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Nytt varsel"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuelt tastatur"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fysisk tastatur"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Sikkerhet"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Varsler"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Butikkdemo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-tilkobling"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apper kjører i bakgrunnen"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> kjører i bakgrunnen"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> apper kjører i bakgrunnen"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Apper bruker batteri"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruker batteri"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> apper bruker batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Trykk for detaljer om batteri- og databruk"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">Åpne Wi-Fi-nettverk er tilgjengelig</item>
       <item quantity="one">Åpent Wi-Fi-nettverk er tilgjengelig</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Koble til et åpent Wi‑Fi-nettverk"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Kobler til åpent Wi-Fi-nettverk"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Koblet til Wi-Fi-nettverk"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kunne ikke koble til Wi-Fi-nettverket"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trykk for å se alle nettverkene"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Koble til"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle nettverk"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Logg på Wi-Fi-nettverket"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logg på nettverk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1188,8 +1191,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB for MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Koblet til et USB-tilbehør"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Trykk for å få flere alternativ."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Lydtilbehøret støttes ikke"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Trykk for mer informasjon"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analogt lydtilbehør ble oppdaget"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Den tilkoblede enheten er ikke kompatibel med denne telefonen. Trykk for å finne ut mer."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-feilsøking tilkoblet"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Trykk for å slå av feilsøking via USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Velg for å deaktivere USB-debugging."</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Trykk for å velge språk og layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Vis over andre apper"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> vises over andre apper"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> vises over andre apper"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Koblet til <xliff:g id="SESSION">%s</xliff:g>. Trykk for å administrere nettverket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Alltid-på VPN kobler til ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Alltid-på VPN er tilkoblet"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Alltid på-VPN er frakoblet"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Koble fra alltid på-VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Alltid-på VPN-feil"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Trykk for å konfigurere"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Endre nettverks- eller VPN-innstillingene"</string>
     <string name="upload_file" msgid="2897957172366730416">"Velg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Tilbakestill"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Løsne"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Tilbakestille enheten?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Trykk for å tilbakestille enheten"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Starter demo …"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Tilbakestiller enheten …"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Tilbakestille enheten?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Du mister eventuelle endringer, og demoen starter på nytt om <xliff:g id="TIMEOUT">%1$s</xliff:g> sekunder."</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Avbryt"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Tilbakestill nå"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferansesamtale"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Verktøytips"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakuer umiddelbart fra kyst- og elveområder til et tryggere sted, for eksempel høyt terreng."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Hold deg rolig og søk ly i nærheten."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test av nødmeldinger"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svar"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-kortet er ikke tillatt"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kortet er ikke klargjort"</string>

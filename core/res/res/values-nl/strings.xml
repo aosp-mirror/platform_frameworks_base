@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service niet voorzien."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Geen gegevensservice"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Geen service voor noodoproepen"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Geen noodoproepen"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen service voor spraakoproepen"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Geen service voor spraak-/noodoproepen"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Je provider heeft de gegevensservice tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Je provider heeft noodoproepen tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Je provider heeft spraakoproepen tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Je provider heeft spraak- en noodoproepen tijdelijk opgeschort op deze locatie"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Tijdelijk niet aangeboden door het mobiele netwerk op je locatie"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk niet bereiken"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Als je de ontvangst wilt verbeteren, kun je het netwerktype wijzigen dat is geselecteerd bij Systeem &gt; Netwerk en internet &gt; Mobiele netwerken &gt; Voorkeursnetwerktype."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Meldingen"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Service zoeken"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Bellen via wifi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via \'Instellingen\'."</item>
+    <item msgid="3910386316304772394">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via Instellingen. (Foutcode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Registreren bij je provider"</item>
+    <item msgid="7472393097168811593">"Registreer bij je provider (foutcode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Content verborgen"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Content verborgen op basis van beleid"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Nieuwe melding"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtueel toetsenbord"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fysiek toetsenbord"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Beveiliging"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo voor de detailhandel"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-verbinding"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apps uitgevoerd op achtergrond"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> is op de achtergrond actief"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> apps worden uitgevoerd op de achtergrond"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Apps die de batterij gebruiken"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruikt de batterij"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> apps gebruiken de batterij"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tik voor batterij- en datagebruik"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">Open wifi-netwerken beschikbaar</item>
       <item quantity="one">Open wifi-netwerk beschikbaar</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Verbinding maken met een open wifi-netwerk"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Verbinding maken met een open wifi-netwerk…"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Verbonden met een wifi-netwerk"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kan geen verbinding maken met het wifi-netwerk"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle netwerken"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inloggen bij wifi-netwerk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1158,7 +1161,7 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Verzenden"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annuleren"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Mijn keuze onthouden"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"U kunt dit later wijzigen in \'Instellingen\' &gt; \'Apps\'"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"U kunt dit later wijzigen in Instellingen &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Altijd toestaan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nooit toestaan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Simkaart verwijderd"</string>
@@ -1188,8 +1191,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB voor MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Aangesloten op een USB-accessoire"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Tik voor meer opties."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Audioaccessoire niet ondersteund"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Tik voor meer informatie"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analoog audioaccessoire gedetecteerd"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Het aangesloten apparaat werkt niet met deze telefoon. Tik voor meer informatie."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tik om USB-foutopsporing uit te schakelen."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecteer deze optie om USB-foutopsporing uit te schakelen."</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Weergeven vóór andere apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over andere apps"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Verbonden met <xliff:g id="SESSION">%s</xliff:g>. Tik om het netwerk te beheren."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Always-on VPN-verbinding maken…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN-verbinding"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Always-on VPN-verbinding ontkoppeld"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Verbinding met Always-on VPN verbroken"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Fout met Always-on VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tik om in te stellen"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Netwerk- of VPN-instellingen wijzigen"</string>
     <string name="upload_file" msgid="2897957172366730416">"Bestand kiezen"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Geen bestand geselecteerd"</string>
     <string name="reset" msgid="2448168080964209908">"Resetten"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Losmaken"</string>
     <string name="app_info" msgid="6856026610594615344">"App-info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Apparaat resetten?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Tik om apparaat te resetten"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo starten…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Apparaat resetten…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Apparaat resetten?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Je wijzigingen gaan verloren. De demo wordt opnieuw gestart over <xliff:g id="TIMEOUT">%1$s</xliff:g> seconden…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Annuleren"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Nu resetten"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonische vergadering"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Knopinfo"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Verlaat kustgebieden en rivieroevers onmiddellijk en zoek een hoger gelegen gebied op."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Blijf kalm en zoek onderdak in de buurt."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test voor noodberichten"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Beantwoorden"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Simkaart niet toegestaan"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Simkaart niet geregistreerd"</string>
