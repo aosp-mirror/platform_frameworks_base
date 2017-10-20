@@ -48,11 +48,19 @@ public abstract class SuggestionService extends Service {
             }
 
             @Override
-            public  void dismissSuggestion(Suggestion suggestion) {
+            public void dismissSuggestion(Suggestion suggestion) {
                 if (DEBUG) {
                     Log.d(TAG, "dismissSuggestion() " + getPackageName());
                 }
                 onSuggestionDismissed(suggestion);
+            }
+
+            @Override
+            public void launchSuggestion(Suggestion suggestion) {
+                if (DEBUG) {
+                    Log.d(TAG, "launchSuggestion() " + getPackageName());
+                }
+                onSuggestionLaunched(suggestion);
             }
         };
     }
@@ -65,7 +73,12 @@ public abstract class SuggestionService extends Service {
     /**
      * Dismiss a suggestion. The suggestion will not be included in future
      * {@link #onGetSuggestions()} calls.
-     * @param suggestion
      */
     public abstract void onSuggestionDismissed(Suggestion suggestion);
+
+    /**
+     * This is the opposite signal to {@link #onSuggestionDismissed}, indicating a suggestion has
+     * been launched.
+     */
+    public abstract void onSuggestionLaunched(Suggestion suggestion);
 }
