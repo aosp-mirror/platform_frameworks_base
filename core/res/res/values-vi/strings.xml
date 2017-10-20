@@ -90,15 +90,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Dịch vụ không được cấp phép."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Bạn không thể thay đổi cài đặt ID người gọi."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Không có dịch vụ dữ liệu"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Không có dịch vụ khẩn cấp"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Không gọi điện khẩn cấp được"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Không có dịch vụ thoại"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Không có dịch vụ thoại/khẩn cấp"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Nhà cung cấp dịch vụ của bạn đã tạm ngưng dịch vụ dữ liệu ở vị trí này"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Nhà cung cấp dịch vụ của bạn đã tạm ngưng các cuộc gọi khẩn cấp ở vị trí này"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Nhà cung cấp dịch vụ của bạn đã tạm ngưng các cuộc gọi thoại ở vị trí này"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Nhà cung cấp dịch vụ của bạn đã tạm ngưng các cuộc gọi thoại và cuộc gọi khẩn cấp ở vị trí này"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Tạm thời không được cung cấp bởi mạng di động tại vị trí của bạn"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Hệ thống &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại mạng được chọn trong Hệ thống &gt; Mạng và Internet &gt; Mạng di động &gt; Loại mạng ưu tiên."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Thông báo"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Chuyển tiếp cuộc gọi"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Chế độ gọi lại khẩn cấp"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Đang tìm kiếm Dịch vụ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Gọi qua Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Để gọi điện và gửi tin nhắn qua Wi-Fi, trước tiên hãy yêu cầu nhà cung cấp dịch vụ của bạn thiết lập dịch vụ này. Sau đó, bật lại gọi qua Wi-Fi từ Cài đặt."</item>
+    <item msgid="3910386316304772394">"Để gọi điện và gửi tin nhắn qua Wi-Fi, trước tiên hãy yêu cầu nhà cung cấp dịch vụ của bạn thiết lập dịch vụ này. Sau đó, bật lại gọi qua Wi-Fi từ Cài đặt. (Mã lỗi: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Đăng ký với nhà cung cấp dịch vụ của bạn"</item>
+    <item msgid="7472393097168811593">"Đăng ký với nhà cung cấp dịch vụ của bạn (Mã lỗi: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Trợ lý thoại"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Khóa ngay"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Nội dung bị ẩn"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Nội dung bị ẩn theo chính sách"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Thông báo mới"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bàn phím ảo"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Bàn phím thực"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Bảo mật"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Cảnh báo"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Giới thiệu bán lẻ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Kết nối USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Ứng dụng đang chạy trong nền"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang chạy ẩn"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang chạy trong nền"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Các ứng dụng tiêu thụ pin"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang sử dụng pin"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">Mở các mạng Wi-Fi khả dụng</item>
       <item quantity="one">Mở mạng Wi-Fi khả dụng</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Kết nối với mạng Wi-Fi đang mở"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Đang kết nối với mạng Wi‑Fi đang mở"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Đã kết nối với mạng Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Không thể kết nối với mạng Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Nhấn để xem tất cả các mạng"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kết nối"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Tất cả các mạng"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Đăng nhập vào mạng Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Đăng nhập vào mạng"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1188,9 +1191,9 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB cho MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Đã kết nối với phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Nhấn để biết thêm tùy chọn."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Phụ kiện âm thanh không được hỗ trợ"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Nhấn để biết thêm thông tin"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Gỡ lỗi USB đã được kết nối"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Đã phát hiện phụ kiện âm thanh analog"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Thiết bị được kết nối không tương thích với điện thoại này. Nhấn để tìm hiểu thêm."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối gỡ lỗi USB"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Nhấn để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chọn để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Đang thu thập báo cáo lỗi…"</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Nhấn để chọn ngôn ngữ và bố cục"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Hiển thị trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên các ứng dụng khác"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> hiển thị trên ứng dụng khác"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Nếu bạn không muốn <xliff:g id="NAME">%s</xliff:g> sử dụng tính năng này, hãy nhấn để mở cài đặt và tắt tính năng này."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Đã kết nối với <xliff:g id="SESSION">%s</xliff:g>. Chạm để quản lý mạng."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Đang kết nối VPN luôn bật…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Đã kết nối VPN luôn bật"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Đã ngắt kết nối VPN luôn bật"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Đã ngắt kết nối khỏi VPN luôn bật"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Lỗi VPN luôn bật"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Nhấn để thiết lập"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Thay đổi cài đặt mạng hoặc VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Chọn tệp"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Không có tệp nào được chọn"</string>
     <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
@@ -1604,7 +1606,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Xem toàn màn hình"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt xuống từ trên cùng."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Xong"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Thanh trượt giờ hình tròn"</string>
@@ -1627,8 +1629,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Do quản trị viên của bạn cài đặt"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Do quản trị viên của bạn xóa"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví như, hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng thời lượng pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Ứng dụng email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Bỏ ghim"</string>
     <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Đặt lại thiết bị?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Nhấn để đặt lại thiết bị"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Đang bắt đầu bản trình diễn..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Đang đặt lại thiết bị..."</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Đặt lại thiết bị?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Bạn sẽ bị mất mọi thay đổi và bản trình diễn sẽ bắt đầu lại sau <xliff:g id="TIMEOUT">%1$s</xliff:g> giây…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Hủy"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Đặt lại ngay bây giờ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Đã tắt <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Cuộc gọi nhiều bên"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Chú giải công cụ"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ngay lập tức sơ tán khỏi các vùng ven biển và khu vực ven sông để tới một nơi an toàn hơn như vùng đất cao."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Hãy bình tĩnh và tìm kiếm nơi trú ẩn gần đó."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Kiểm tra thông báo khẩn cấp"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Trả lời"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM không được cho phép"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM không được cấp phép"</string>

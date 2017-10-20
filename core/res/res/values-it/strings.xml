@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Nessun servizio dati"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Nessun servizio di emergenza"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Chiamate di emergenza non disponibili"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Nessun servizio di telefonia"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nessun servizio di telefonia/emergenza"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Il tuo operatore ha sospeso temporaneamente il servizio dati per questa località"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Il tuo operatore ha sospeso temporaneamente le chiamate di emergenza per questa località"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Il tuo operatore ha sospeso temporaneamente le telefonate per questa località"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Il tuo operatore ha sospeso temporaneamente le telefonate e le chiamate di emergenza per questa località"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Servizio temporaneamente non offerto dalla rete mobile nella tua località"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossibile raggiungere la rete"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Sistema &gt; Rete e Internet &gt; Reti mobili &gt; Tipo di rete preferito."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Avvisi"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ricerca servizio"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chiamate Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Per effettuare chiamate e inviare messaggi tramite Wi-Fi, è necessario prima chiedere all\'operatore telefonico di attivare il servizio. Successivamente, riattiva le chiamate Wi-Fi dalle Impostazioni."</item>
+    <item msgid="3910386316304772394">"Per effettuare chiamate e inviare messaggi tramite Wi-Fi, chiedi prima al tuo operatore di impostare questo servizio. Dopodiché, attiva di nuovo la funzione Chiamate Wi-Fi nelle impostazioni. (Codice di errore: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Registrati con il tuo operatore"</item>
+    <item msgid="7472393097168811593">"Registra con il tuo operatore (codice di errore: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Blocca ora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Contenuti nascosti"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contenuti nascosti in base alle norme"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Nuova notifica"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Tastiera virtuale"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Tastiera fisica"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Sicurezza"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Avvisi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo retail"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connessione USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"App in esecuzione in background"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> è in esecuzione in background"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> app sono in esecuzione in background"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"App che consumano la batteria"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> sta consumando la batteria"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> app stanno consumando la batteria"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
@@ -277,7 +273,7 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">Apri reti Wi-Fi disponibili</item>
       <item quantity="one">Apri rete Wi-Fi disponibile</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Stabilisci la connessione per aprire la rete Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Connessione per aprire la rete Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Connessione alla rete Wi-Fi stabilita"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Impossibile connettersi alla rete Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tocca per vedere tutte le reti"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connetti"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Tutte le reti"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accedi a rete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1188,8 +1191,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB per la modalità MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Collegato a un accessorio USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Tocca per altre opzioni."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Accessorio audio non supportato"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Tocca per ulteriori informazioni"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Accessorio audio analogico rilevato"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Il dispositivo collegato non è compatibile con questo telefono. Tocca per avere ulteriori informazioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tocca per disattivare il debug USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleziona per disattivare il debug USB."</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostra sopra altre app"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"App <xliff:g id="NAME">%s</xliff:g> visualizzata sopra altre app"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"App <xliff:g id="NAME">%s</xliff:g> mostrata sopra altre app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Collegata a <xliff:g id="SESSION">%s</xliff:g>. Tocca per gestire la rete."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Connessione a VPN sempre attiva…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN sempre attiva connessa"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"VPN sempre attiva disconnessa"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Disconnesso da VPN sempre attiva"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Errore VPN sempre attiva"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tocca per configurare"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Cambia le impostazioni VPN o di rete"</string>
     <string name="upload_file" msgid="2897957172366730416">"Scegli file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nessun file è stato scelto"</string>
     <string name="reset" msgid="2448168080964209908">"Reimposta"</string>
@@ -1373,7 +1375,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Archivio condiviso interno"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Memoria condivisa interna"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Scheda SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Scheda SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Unità USB"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Sblocca"</string>
     <string name="app_info" msgid="6856026610594615344">"Informazioni app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Ripristinare il dispositivo?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Tocca per ripristinare il dispositivo"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Avvio della demo…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Ripristino del dispositivo…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Ripristinare il dispositivo?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Perderai tutte le modifiche e la demo verrà riavviata tra <xliff:g id="TIMEOUT">%1$s</xliff:g> secondi…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Annulla"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Ripristina ora"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
     <string name="conference_call" msgid="3751093130790472426">"Audioconferenza"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Descrizione comando"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evacuare immediatamente le zone costiere e in riva ai fiumi e recarsi in un luogo più sicuro, ad esempio un\'altura."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantieni la calma e cerca riparo nelle vicinanze."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Testo messaggi di emergenza"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Rispondi"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Scheda SIM non consentita"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Scheda SIM non predisposta"</string>

@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"គ្មាន​សេវាកម្ម​ទិន្នន័យ​ទេ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"គ្មាន​សេវាកម្ម​សង្រ្គោះបន្ទាន់​ទេ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"មិនមាន​ការហៅបន្ទាន់ទេ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"គ្មាន​សេវាកម្ម​ជា​សំឡេង​ទេ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"គ្មាន​សេវាកម្ម​សំឡេង/សង្រ្គោះបន្ទាន់​ទេ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់​អ្នក​បានផ្អាក​សេវាកម្ម​ទិន្នន័យ​ជាបណ្តោះអាសន្ន​នៅ​ទីតាំង​នេះ"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​បន្ទាន់​ជាបណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ក្រុមហ៊ុន​បម្រើសេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង​ជាបណ្តោះអាសន្ន​នៅទី​តាំងនេះ"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង និង​ការហៅ​បន្ទាន់​ជា​បណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ដើម្បីកែលម្អការទទួលយក សាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ប្រព័ន្ធ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi ដំបូងឡើយអ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនរបស់អ្នកដំឡើងសេវាកម្មនេះសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតចេញពីការកំណត់។"</item>
+    <item msgid="3910386316304772394">"ដើម្បីហៅទូរសព្ទ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
+    <item msgid="7472393097168811593">"ចុះឈ្មោះ​ជាមួយ​ក្រុមហ៊ុន​បម្រើសេវា​ទូរសព្ទរបស់អ្នក (លេខកូដ​មានបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ជំនួយសម្លេង"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ចាក់សោ​ឥឡូវនេះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"បាន​លាក់​មាតិកា"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"មាតិកាត្រូវបានលាក់ដោយផ្អែកលើគោលការណ៍"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"ការជូនដំណឹងថ្មី"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ក្ដារ​ចុច​និម្មិត"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ក្ដារចុច​រូបវន្ត"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"សុវត្ថិភាព"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ការ​ជូនដំណឹង"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"របៀបដាក់បង្ហាញក្នុងហាង"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"ការ​តភ្ជាប់ USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"កម្មវិធី <xliff:g id="NUMBER">%1$d</xliff:g> កំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"កម្មវិធីដែល​កំពុងប្រើថ្ម"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងប្រើថ្ម"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"កម្មវិធីចំនួន <xliff:g id="NUMBER">%1$d</xliff:g> កំពុងប្រើថ្ម"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"របៀប​​​សុវត្ថិភាព"</string>
@@ -1111,6 +1107,13 @@
       <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
       <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"ភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"កំពុងភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"បានភ្ជាប់ទៅបណ្តាញ Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"មិនអាចភ្ជាប់ទៅបណ្តាញ Wi‑Fi បានទេ"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"បណ្តាញទាំងអស់"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1190,10 +1193,10 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"មិនស្គាល់គ្រឿងបរិក្ខារសំឡេងទេ"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"ចុចដើម្បីទទួលព័ត៌មានបន្ថែម"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុសយូអេសប៊ី"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​ USB"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុស USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
@@ -1208,8 +1211,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"បង្ហាញនៅលើកម្មវិធីផ្សេងទៀត"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញ​ពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
@@ -1298,9 +1300,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"បាន​ភ្ជាប់​ទៅ <xliff:g id="SESSION">%s</xliff:g> ។ ប៉ះ ដើម្បី​គ្រប់គ្រង​បណ្ដាញ។"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"បើក​ការ​តភ្ជាប់ VPN ជា​និច្ច..។"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ភ្ជាប់ VPN ជា​និច្ច"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"បានផ្តាច់ VPN ដែលបើកជានិច្ច"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"បានផ្ដាច់ពី VPN បើកជានិច្ច"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"បើក​កំហុស VPN ជា​និច្ច"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ប៉ះដើម្បីដំឡើង"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"ប្ដូរការកំណត់បណ្ដាញ ឬការកំណត់ VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"ជ្រើស​​ឯកសារ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"គ្មាន​ឯកសារ​បាន​ជ្រើស"</string>
     <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
@@ -1729,14 +1731,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"មិនខ្ទាស់"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"ប៉ះដើម្បីកំណត់ឧបករណ៍ឡើងវិញ"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"កំពុងចាប់ផ្តើមការបង្ហាញសាកល្បង…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"កំពុងកំណត់ឧបករណ៍ឡើងវិញ…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"អ្នកនឹងបាត់បង់ការផ្លាស់ប្តូរណាមួយ ហើយការបង្ហាញសាកល្បងនឹងចាប់ផ្តើមម្តងទៀតក្នុងរយៈពេល <xliff:g id="TIMEOUT">%1$s</xliff:g> វិនាទីទៀត…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"បោះបង់"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"កំណត់ឡើងវិញឥឡូវនេះ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ដែលបានបិទដំណើរការ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ការហៅជាក្រុម"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ផ្ទាំងលោត"</string>
@@ -1780,6 +1776,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ភៀសខ្លួនជាបន្ទាន់ពីតំបន់ឆ្នេរ និងតំបន់តាមមាត់ទន្លេទៅកាន់កន្លែងដែលមានសុវត្ថិភាពជាងនេះ ដូចជាទីទួលណាមួយ។"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"សារសាកល្បងពេលមានអាសន្ន"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ឆ្លើយតប"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"មិន​អនុញ្ញាត​សីុមកាត​ទេ"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"សីុម​មិន​ត្រូវបាន​ផ្តល់ជូន​ទេ"</string>

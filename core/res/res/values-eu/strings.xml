@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ezin duzu deien identifikazio-zerbitzuaren ezarpena aldatu."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Ez dago datu-zerbitzurik"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Ez dago larrialdi-zerbitzurik"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Ezin da egin larrialdi-deirik"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ez dago ahots-deien zerbitzurik"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ez dago ahots- edo larrialdi-deien zerbitzurik"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operadoreak aldi baterako eten du datu-zerbitzua kokapen honetan"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operadoreak aldi baterako eten ditu larrialdi-deiak kokapen honetan"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operadoreak aldi baterako eten ditu ahots-deiak kokapen honetan"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operadoreak aldi baterako eten ditu ahots- eta larrialdi-deiak kokapen honetan"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Zauden tokiko sare mugikorrak ez du eskaintzen aukera hori une honetan"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ezin da konektatu sarera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Seinalea hobea izan dadin, aldatu hautatutako sare mota Sistema &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Abisuak"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Zerbitzu bila"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi bidezko deiak"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wi-Fi bidezko deiak Ezarpenak atalean."</item>
+    <item msgid="3910386316304772394">"Wi-Fi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wi-Fi bidezko deiak Ezarpenak atalean. (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Erregistratu operadorearekin"</item>
+    <item msgid="7472393097168811593">"Erregistratu operadorearekin (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ahots-laguntza"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Blokeatu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Edukiak ezkutatuta daude"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Gidalerro batzuk ezkutatu dira, gidalerroei jarraiki"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Jakinarazpen berria"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Teklatu birtuala"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Teklatu fisikoa"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Segurtasuna"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Saltzaileentzako demoa"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB konexioa"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> exekutatzen ari da atzeko planoan"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> exekutatzen ari dira atzeko planoan"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Bateria kontsumitzen ari diren aplikazioak"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ari da bateria erabiltzen"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikazio ari dira bateria erabiltzen"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modu segurua"</string>
@@ -591,7 +587,7 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Etxekoa"</item>
     <item msgid="869923650527136615">"Mugikorra"</item>
-    <item msgid="7897544654242874543">"Lanekoa"</item>
+    <item msgid="7897544654242874543">"Lantokia"</item>
     <item msgid="1103601433382158155">"Laneko faxa"</item>
     <item msgid="1735177144948329370">"Etxeko faxa"</item>
     <item msgid="603878674477207394">"Bilagailua"</item>
@@ -600,24 +596,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Etxekoa"</item>
-    <item msgid="7084237356602625604">"Lanekoa"</item>
+    <item msgid="7084237356602625604">"Lantokia"</item>
     <item msgid="1112044410659011023">"Beste bat"</item>
     <item msgid="2374913952870110618">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Etxekoa"</item>
-    <item msgid="5629153956045109251">"Lanekoa"</item>
+    <item msgid="5629153956045109251">"Lantokia"</item>
     <item msgid="4966604264500343469">"Beste bat"</item>
     <item msgid="4932682847595299369">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Etxekoa"</item>
-    <item msgid="1359644565647383708">"Lanekoa"</item>
+    <item msgid="1359644565647383708">"Lantokia"</item>
     <item msgid="7868549401053615677">"Beste bat"</item>
     <item msgid="3145118944639869809">"Pertsonalizatua"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Lanekoa"</item>
+    <item msgid="7546335612189115615">"Lantokia"</item>
     <item msgid="4378074129049520373">"Beste bat"</item>
     <item msgid="3455047468583965104">"Pertsonalizatua"</item>
   </string-array>
@@ -634,7 +630,7 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Pertsonalizatua"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Etxekoa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mugikorra"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Lanekoa"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Lantokia"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Laneko faxa"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Etxeko faxa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Bilagailua"</string>
@@ -658,16 +654,16 @@
     <string name="eventTypeOther" msgid="7388178939010143077">"Beste bat"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Pertsonalizatua"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Etxekoa"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Lanekoa"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Lantokia"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Beste bat"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mugikorra"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Pertsonalizatua"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Etxekoa"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Lanekoa"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Lantokia"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Beste bat"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Pertsonalizatua"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Orri nagusia"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Lanekoa"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Lantokia"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Beste bat"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Pertsonalizatua"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -679,7 +675,7 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"Lanekoa"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Lantokia"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Bestelakoa"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Pertsonalizatua"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Pertsonalizatua"</string>
@@ -699,7 +695,7 @@
     <string name="relationTypeSpouse" msgid="394136939428698117">"Ezkonlaguna"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Pertsonalizatua"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Etxekoa"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Lanekoa"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Lantokia"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Beste bat"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Ez da kontaktua ikusteko aplikaziorik aurkitu."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Idatzi PIN kodea"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">Wi-Fi sare irekiak erabilgarri</item>
       <item quantity="one">Wi-Fi sare irekia erabilgarri</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Konektatu Wi‑Fi sare irekira"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Wi‑Fi sare irekira konektatzen"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi sare irekira konektatuta"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Ezin izan da konektatu Wi‑Fi sare irekira"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Sakatu hau sare guztiak ikusteko"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Konektatu"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Sare guztiak"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Hasi saioa Wi-Fi sarean"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1141,7 +1144,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Gonbidapena bidali da"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Konektatzeko gonbidapena"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Igorlea:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Nori:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Hartzailea:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Idatzi beharrezko PINa:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PINa:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tableta Wi-Fi saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
@@ -1188,12 +1191,11 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI modurako USBa"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB osagarri batera konektatuta"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Sakatu aukera gehiago ikusteko."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Ez da onartzen audio-osagarri hori"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Informazio gehiago lortzeko, sakatu hau"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Audio-osagarri analogiko bat hauteman da"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Erantsitako gailua ez da telefono honekin bateragarria. Sakatu informazio gehiago lortzeko."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB arazketa konektatuta"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Sakatu USB arazketa desgaitzeko."</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Hautatu USB arazketa desgaitzeko."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Akatsen txostena sortzen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Akatsen txostena partekatzen…"</string>
@@ -1207,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Bistaratu beste aplikazioen gainean"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> aplikazioen gainean agertzea"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
@@ -1297,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Beti aktibatuta dagoen VPNa konektatu da"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Deskonektatu egin da beti aktibatuta dagoen VPN konexioa"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Beti aktibatuta dagoen VPN sarea deskonektatuta dago"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Beti aktibatuta dagoen VPN errorea"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Konfiguratzeko, sakatu hau"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Aldatu sarearen edo VPN sarearen ezarpenak"</string>
     <string name="upload_file" msgid="2897957172366730416">"Aukeratu fitxategia"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ez da fitxategirik aukeratu"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
@@ -1381,7 +1382,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB unitatea"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datu-erabilerari buruzko abisua"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datuen erabilerari buruzko abisua"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
@@ -1604,7 +1605,7 @@
       <item quantity="one">Saiatu berriro segundo bat igarotakoan</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Saiatu berriro geroago"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Pantaila osoan ikusten"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Pantaila osoko ikuspegia"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Irteteko, pasatu hatza goitik behera."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Ados"</string>
     <string name="done_label" msgid="2093726099505892398">"Eginda"</string>
@@ -1728,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Kendu aingura"</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Gailua berrezarri nahi duzu?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Gailua berrezartzeko, sakatu hau"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demoa abiarazten…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Gailua berrezartzen…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gailua berrezarri nahi duzu?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Aldaketak galduko dituzu eta <xliff:g id="TIMEOUT">%1$s</xliff:g> segundo barru hasiko da berriro demoa…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Utzi"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Berrezarri"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> desgaituta dago"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferentzia-deia"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Aholkua"</string>
@@ -1779,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ebakuatu kostaldeak eta ibaialdeak berehala eta joan toki seguru batera, adibidez, toki garai batera."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ez larritu eta bilatu babesleku bat inguruan."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Larrialdi-mezuen proba"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Erantzun"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Ez da onartzen SIM txartela"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Ez dago SIM txartelik"</string>

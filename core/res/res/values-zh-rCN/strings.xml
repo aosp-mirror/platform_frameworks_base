@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"无法使用数据服务"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"无法使用紧急呼救服务"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"无法进行紧急呼救"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"无法使用语音通话服务"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"无法使用语音通话/紧急呼救服务"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"您的运营商在此位置暂时不提供数据服务"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"您的运营商在此位置暂时不提供紧急呼救服务"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"您的运营商在此位置暂时不提供语音通话服务"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"您的运营商在此位置暂时不提供语音通话和紧急呼救服务"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"您所在位置的移动网络暂时不提供这项服务"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"无法连接网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"要改善信号情况，请尝试更改在“系统”&gt;“网络和互联网”&gt;“移动网络”&gt;“首选网络类型”中选择的类型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"提醒"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN 通话"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"要通过 WLAN 打电话和发信息，请先让您的运营商开通此服务，然后再到“设置”中重新开启 WLAN 通话功能。"</item>
+    <item msgid="3910386316304772394">"要通过 WLAN 打电话和发信息，请先让您的运营商开通此服务，然后再到“设置”中重新开启 WLAN 通话功能（错误代码：<xliff:g id="CODE">%1$s</xliff:g>）。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"向您的运营商注册"</item>
+    <item msgid="7472393097168811593">"向您的运营商注册（错误代码：<xliff:g id="CODE">%1$s</xliff:g>）"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"内容已隐藏（根据政策规定）"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"新通知"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"虚拟键盘"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"实体键盘"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"安全性"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"零售演示模式"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 连接"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"在后台运行的应用"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g>正在后台运行"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> 个应用正在后台运行"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"消耗电量的应用"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g>正在消耗电量"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> 个应用正在消耗电量"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"点按即可详细了解电量和流量消耗情况"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
@@ -876,7 +872,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"上个月"</string>
     <string name="older" msgid="5211975022815554840">"往前"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"日期：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"年份：<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
@@ -1014,7 +1010,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"使用%1$s分享"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"分享"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"通过以下应用发送"</string>
-    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过1$s发送"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过%1$s发送"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"发送"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"选择主屏幕应用"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"将“%1$s”设为主屏幕应用"</string>
@@ -1109,6 +1105,13 @@
       <item quantity="other">有可用的开放 WLAN 网络</item>
       <item quantity="one">有可用的开放 WLAN 网络</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"连接到开放的 WLAN 网络"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"正在连接到开放的 WLAN 网络"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"已连接到 WLAN 网络"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"无法连接到 WLAN 网络"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"点按即可查看所有网络"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"连接"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"所有网络"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1131,14 +1134,14 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"要允许连接吗？"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"“%1$s”应用想要连接到 WLAN 网络“%2$s”"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"一款应用"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN直连"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN 直连"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动WLAN直连。此操作将会关闭WLAN客户端/热点。"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动WLAN直连。"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用WLAN直连"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"点按即可查看相关设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"邀请已发送"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"已发出邀请"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"连接邀请"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"发件人："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>
@@ -1188,11 +1191,11 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"正在通过 USB 连接到 MIDI 接口"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"点按即可查看更多选项。"</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"音频配件不受支持"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"点按即可了解详情"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"检测到模拟音频配件"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"连接的设备与此手机不兼容。点按即可了解详情。"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到 USB 调试"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"点按即可停用 USB 调试功能。"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"选择停用USB调试。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"选择即可停用 USB 调试功能。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在生成错误报告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享错误报告…"</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"显示在其他应用的上层"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已连接到<xliff:g id="SESSION">%s</xliff:g>。点按即可管理网络。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"始终开启的 VPN 已断开连接"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"始终开启的 VPN 已断开连接"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的 VPN 出现错误"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"点按即可进行设置"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"更改网络或 VPN 设置"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
     <string name="reset" msgid="2448168080964209908">"重置"</string>
@@ -1603,7 +1605,7 @@
       <item quantity="one">1 秒后重试</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"正在全屏模式下查看"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"目前处于全屏模式"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"要重置设备吗？"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"点按即可重置设备"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"正在启动演示模式…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"正在重置设备…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"要重置设备吗？"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"您将丢失所有更改，而且演示模式将在 <xliff:g id="TIMEOUT">%1$s</xliff:g> 秒后重新启动…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"取消"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"立即重置"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"已停用的<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"电话会议"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"提示"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"请立即从沿海和河滨区域撤离到高地等较安全的地方。"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"请保持冷静，并寻找附近的避难地点。"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"紧急消息测试"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"回复"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"不受允许的 SIM 卡"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"未配置的 SIM 卡"</string>

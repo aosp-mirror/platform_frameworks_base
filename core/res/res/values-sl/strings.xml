@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Storitev ni nastavljena in omogočena."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ne morete spremeniti nastavitve ID-ja klicatelja."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Ni storitve za prenos podatkov"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Ni storitve za klice v sili"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Brez možnosti klicanja v sili"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ni storitve za glasovne klice"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ni storitve za glasovne klice / klice v sili"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Vaš operater je na tej lokaciji začasno onemogočil storitev za prenos podatkov"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Vaš operater je na tej lokaciji začasno onemogočil klice v sili"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Vaš operater je na tej lokaciji začasno onemogočil glasovne klice"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Vaš operater je na tej lokaciji začasno onemogočil glasovne klice in klice v sili"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Ta storitev trenutno ni na voljo v mobilnem omrežju na vaši lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezave z omrežjem ni mogoče vzpostaviti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Če želite izboljšati sprejem, poskusite zamenjati vrsto omrežja v možnostih »Sistem« &gt; »Omrežje in internet« &gt; »Mobilna omrežja« &gt; »Prednostna vrsta omrežja«."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Opozorila"</string>
@@ -136,10 +133,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Iskanje storitve"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Klicanje prek Wi-Fi-ja"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Če želite klicati ali pošiljati sporočila prek omrežja Wi-Fi, se najprej obrnite na operaterja, da nastavi to storitev. Nato v nastavitvah znova vklopite klicanje prek omrežja Wi-Fi."</item>
+    <item msgid="3910386316304772394">"Če želite klicati ali pošiljati sporočila prek omrežja Wi-Fi, se najprej obrnite na operaterja, da nastavi to storitev. Nato v nastavitvah znova vklopite klicanje prek omrežja Wi-Fi. (Koda napake: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Registracija pri operaterju"</item>
+    <item msgid="7472393097168811593">"Registracija pri operaterju (koda napake: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -255,8 +252,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Glas. pomočnik"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Zakleni zdaj"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Vsebina je skrita"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Pravilnik je skril vsebino"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Novo obvestilo"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Navidezna tipkovnica"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Fizična tipkovnica"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Varnost"</string>
@@ -272,9 +268,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Opozorila"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Predstavitev za maloprodajo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Povezava USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikacije se izvajajo v ozadju"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> se izvaja v ozadju"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Več aplikacij (<xliff:g id="NUMBER">%1$d</xliff:g>) se izvaja v ozadju"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacije, ki porabljajo energijo akumulatorja"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo akumulatorja"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Toliko aplikacij porablja energijo akumulatorja: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Dotaknite se za prikaz podrobnosti porabe akumulatorja in prenosa podatkov"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Varni način"</string>
@@ -285,11 +281,11 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostop do stikov"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostop do lokacije te naprave"</string>
-    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Google Koledar"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Koledar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"pošiljanje in ogled sporočil SMS"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za shranjevanje"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Shramba"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostop do fotografij, predstavnosti in datotek v napravi"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snemanje zvoka"</string>
@@ -1153,6 +1149,13 @@
       <item quantity="few">Na voljo so odprta omrežja Wi-Fi</item>
       <item quantity="other">Na voljo so odprta omrežja Wi-Fi</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Vzpostavite povezavo z odprtim omrežjem Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Vzpostavljanje povezave z odprtim omrežjem Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Povezava z omrežjem Wi-Fi je vzpostavljena"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Povezave z omrežjem Wi-Fi ni bilo mogoče vzpostaviti"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dotaknite se, če si želite ogledati vsa omrežja"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Vsa omrežja"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prijavite se v omrežje Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava v omrežje"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1232,8 +1235,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Priključen na dodatek USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dotaknite se za več možnosti."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Zvočna oprema ni podprta"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Dotaknite se za več informacij"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Zaznana je analogna dodatna zvočna oprema"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Priključena naprava ni združljiva s tem telefonom. Dotaknite se za več informacij."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje napak prek USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Dotaknite se za izklop odpravljanja napak prek USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izberite, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
@@ -1250,8 +1253,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dotaknite se, če želite izbrati jezik in postavitev."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Prekrivanje drugih aplikacij"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> prekriva druge aplikacije"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> prekriva druge aplikacije"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Če ne želite, da aplikacija <xliff:g id="NAME">%s</xliff:g> uporablja to funkcijo, se dotaknite, da odprete nastavitve, in funkcijo izklopite."</string>
@@ -1340,9 +1342,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Povezan z mestom <xliff:g id="SESSION">%s</xliff:g>. Tapnite za upravljanje omrežja."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezovanje v stalno vklopljeno navidezno zasebno omrežje ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Vzpostavljena povezava v stalno vklopljeno navidezno zasebno omrežje"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Povezava s stalno vklopljenim VPN-jem je prekinjena"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Prekinjena povezava s stalno vklopljenim VPN-jem"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Napaka stalno vklopljenega navideznega zasebnega omrežja"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Dotaknite se, če želite nastaviti"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Spremenite omrežne nastavitve ali nastavitve omrežja VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Izberi datoteko"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nobena datoteka ni izbrana"</string>
     <string name="reset" msgid="2448168080964209908">"Ponastavi"</string>
@@ -1651,8 +1653,8 @@
       <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Celozaslonski način"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vklopljen je celozaslonski način"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete ga tako, da z vrha s prstom povlečete navzdol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumem"</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>
@@ -1793,14 +1795,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Odpenjanje"</string>
     <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Želite ponastaviti napravo?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Dotaknite se, če želite ponastaviti napravo"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Začenjanje predstavitve …"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Ponastavljanje naprave …"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Želite ponastaviti napravo?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Morebitne spremembe bodo izgubljene in predstavitev se bo začela znova čez <xliff:g id="TIMEOUT">%1$s</xliff:g> s …"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Prekliči"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Ponastavi"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> – onemogočeno"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenčni klic"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Opis orodja"</string>
@@ -1846,6 +1842,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Takoj se umaknite z obalnih območij in bregov rek na varnejše mesto, na primer na višje ležeča mesta."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ostanite mirni in poiščite zavetje v bližini."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Preskus sporočil v sili"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovor"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Kartica SIM ni dovoljena"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Kartica SIM ni omogočena za uporabo"</string>

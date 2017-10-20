@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Du kannst die Einstellung für die Anrufer-ID nicht ändern."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Kein Datendienst"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Keine Notrufe"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Keine Notrufe möglich"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Keine Anrufe"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Keine Anrufe/Notrufe"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Dein Anbieter hat den Datendienst an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Dein Anbieter hat Notrufe an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Dein Anbieter hat Anrufe an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Dein Anbieter hat Anrufe und Notrufe an diesem Standort vorübergehend ausgesetzt"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Derzeit nicht im Mobilfunknetz in deiner Region verfügbar"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Netzwerk nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Der Empfang lässt sich möglicherweise verbessern, indem du unter \"System\" &gt; \"Netzwerk\" &amp; \"Internet\" &gt; \"Mobilfunknetze\" &gt; \"Bevorzugter Netzwerktyp\" einen anderen Typ auswählst."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Warnmeldungen"</string>
@@ -134,10 +131,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Anrufe über WLAN"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann erneut über die Einstellungen."</item>
+    <item msgid="3910386316304772394">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann noch einmal über die Einstellungen. (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Registriere dich bei deinem Mobilfunkanbieter."</item>
+    <item msgid="7472393097168811593">"Registriere dich bei deinem Mobilfunkanbieter (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -249,8 +246,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Sprachassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Jetzt sperren"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Inhalte ausgeblendet"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Inhalte aufgrund der Richtlinien ausgeblendet"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Neue Benachrichtigung"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bildschirmtastatur"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Physische Tastatur"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Sicherheit"</string>
@@ -266,9 +262,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Warnmeldungen"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo für Einzelhandel"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-Verbindung"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Apps, die im Hintergrund ausgeführt werden"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird im Hintergrund ausgeführt"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> Apps werden im Hintergrund ausgeführt"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Strom verbrauchende Apps"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> verbraucht Strom"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> Apps verbrauchen Strom"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Für Details zur Akku- und Datennutzung tippen"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
@@ -450,9 +446,9 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Tethering-Konnektivität ändern"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Ermöglicht der App, den Status der Tethering-Konnektivität zu ändern"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"WLAN-Verbindungen abrufen"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLANs abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLAN-Netzwerken abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"WLAN-Verbindungen herstellen und trennen"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugangspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLAN-Netzwerke vorzunehmen."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugangspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLANs vorzunehmen."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"WLAN-Multicast-Empfang zulassen"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Ermöglicht der App, Pakete zu empfangen, die mithilfe von Multicast-Adressen an sämtliche Geräte in einem WLAN versendet wurden, nicht nur an dein Tablet. Dies nicht mehr Leistung in Anspruch als der Nicht-Multicast-Modus."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Ermöglicht der App, Pakete zu empfangen, die mithilfe von Multicast-Adressen an sämtliche Geräte in einem WLAN gesendet wurden, nicht nur an deinen Fernseher. Dies nimmt mehr Leistung in Anspruch als der Nicht-Multicast-Modus."</string>
@@ -1102,14 +1098,21 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Benachrichtigungstöne"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Unbekannt"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WLAN-Netzwerke verfügbar</item>
-      <item quantity="one">WLAN-Netzwerk verfügbar</item>
+      <item quantity="other">WLANs verfügbar</item>
+      <item quantity="one">WLAN verfügbar</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Verfügbare WLAN-Netzwerke öffnen</item>
-      <item quantity="one">Verfügbares WLAN-Netzwerk öffnen</item>
+      <item quantity="other">Verfügbare WLANs öffnen</item>
+      <item quantity="one">Verfügbares WLAN öffnen</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN-Netzwerk anmelden"</string>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Mit offenem WLAN verbinden"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Verbindung mit offenem WLAN wird hergestellt"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Mit WLAN verbunden"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"WLAN-Verbindung konnte nicht hergestellt werden"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinden"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle Netzwerke"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN anmelden"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
@@ -1129,7 +1132,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Verbindung zulassen?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Die App \"%1$s\" möchte eine Verbindung zum WLAN-Netzwerk %2$s herstellen."</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Die App \"%1$s\" möchte eine Verbindung zum WLAN %2$s herstellen."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Eine App"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct-Betrieb starten. Hierdurch wird der WLAN-Client-/-Hotspot-Betrieb deaktiviert."</string>
@@ -1188,10 +1191,10 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB für MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Für weitere Optionen tippen."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Audiozubehör wird nicht unterstützt"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Tippen, um weitere Informationen zu erhalten"</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analoges Audiozubehör erkannt"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Das angeschlossene Gerät ist nicht mit diesem Smartphone kompatibel. Für weitere Informationen tippen."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging aktiviert"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Zum Deaktivieren von USB-Debugging tippen."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Zum Deaktivieren von USB-Debugging tippen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB-Debugging deaktivieren: auswählen"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Fehlerbericht wird abgerufen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Fehlerbericht teilen?"</string>
@@ -1206,8 +1209,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Zum Auswählen von Sprache und Layout tippen"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Über anderen Apps einblenden"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> wird über anderen Apps angezeigt"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wird über anderen Apps angezeigt"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
@@ -1296,9 +1298,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Verbunden mit <xliff:g id="SESSION">%s</xliff:g>. Zum Verwalten des Netzwerks tippen"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Verbindung zu durchgehend aktivem VPN wird hergestellt…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Mit durchgehend aktivem VPN verbunden"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Verbindung zu durchgehend aktivem VPN getrennt"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Verbindung mit dauerhaft aktivem VPN getrennt"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Durchgehend aktives VPN – Verbindungsfehler"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Zum Einrichten tippen"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Netzwerk- oder VPN-Einstellungen ändern"</string>
     <string name="upload_file" msgid="2897957172366730416">"Datei auswählen"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Keine ausgewählt"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
@@ -1727,14 +1729,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Markierung entfernen"</string>
     <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Gerät zurücksetzen?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Zum Zurücksetzen des Geräts tippen"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo wird gestartet…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Gerät wird zurückgesetzt…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gerät zurücksetzen?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Alle Änderungen gehen verloren und Demo wird in <xliff:g id="TIMEOUT">%1$s</xliff:g> Sekunden neu gestartet…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Abbrechen"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Jetzt zurücksetzen"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> deaktiviert"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonkonferenz"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Kurzinfo"</string>
@@ -1778,6 +1774,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Verlasse so schnell wie möglich Flussufer und Küstengebiete und suche in einer höher gelegenen Umgebung Schutz."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Bleibe ruhig und suche in der Nähe Schutz."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test der Notfallwarnungen"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Antworten"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-Karte nicht zulässig"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM nicht eingerichtet"</string>
