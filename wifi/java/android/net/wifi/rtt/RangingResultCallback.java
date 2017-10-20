@@ -16,35 +16,43 @@
 
 package android.net.wifi.rtt;
 
+import android.annotation.IntDef;
 import android.os.Handler;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
  * Base class for ranging result callbacks. Should be extended by applications and set when calling
- * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}. A single
- * result from a range request will be called in this object.
+ * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}. If the
+ * ranging operation fails in whole (not attempted) then {@link #onRangingFailure(int)} will be
+ * called with a failure code. If the ranging operation is performed for each of the requested
+ * peers then the {@link #onRangingResults(List)} will be called with the set of results (@link
+ * {@link RangingResult}, each of which has its own success/failure code
+ * {@link RangingResult#getStatus()}.
  *
  * @hide RTT_API
  */
 public abstract class RangingResultCallback {
-    /**
-     * Individual range request status, {@link RangingResult#getStatus()}. Indicates ranging
-     * operation was successful and distance value is valid.
-     */
-    public static final int STATUS_SUCCESS = 0;
+    /** @hide */
+    @IntDef({STATUS_CODE_FAIL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RangingOperationStatus {
+    }
 
     /**
-     * Individual range request status, {@link RangingResult#getStatus()}. Indicates ranging
-     * operation failed and the distance value is invalid.
+     * A failure code for the whole ranging request operation. Indicates a failure.
      */
-    public static final int STATUS_FAIL = 1;
+    public static final int STATUS_CODE_FAIL = 1;
 
     /**
      * Called when a ranging operation failed in whole - i.e. no ranging operation to any of the
      * devices specified in the request was attempted.
+     *
+     * @param code A status code indicating the type of failure.
      */
-    public abstract void onRangingFailure();
+    public abstract void onRangingFailure(@RangingOperationStatus int code);
 
     /**
      * Called when a ranging operation was executed. The list of results corresponds to devices

@@ -79,9 +79,7 @@ public class WifiRttManagerTest {
     public void testRangeSuccess() throws Exception {
         RangingRequest request = new RangingRequest.Builder().build();
         List<RangingResult> results = new ArrayList<>();
-        results.add(
-                new RangingResult(RangingResultCallback.STATUS_SUCCESS, (byte[]) null, 15, 5, 10,
-                        666));
+        results.add(new RangingResult(RangingResult.STATUS_SUCCESS, (byte[]) null, 15, 5, 10, 666));
         RangingResultCallback callbackMock = mock(RangingResultCallback.class);
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
@@ -91,7 +89,7 @@ public class WifiRttManagerTest {
                 callbackCaptor.capture());
 
         // service calls back with success
-        callbackCaptor.getValue().onRangingResults(RangingResultCallback.STATUS_SUCCESS, results);
+        callbackCaptor.getValue().onRangingResults(results);
         mMockLooper.dispatchAll();
         verify(callbackMock).onRangingResults(results);
 
@@ -103,6 +101,8 @@ public class WifiRttManagerTest {
      */
     @Test
     public void testRangeFail() throws Exception {
+        int failureCode = RangingResultCallback.STATUS_CODE_FAIL;
+
         RangingRequest request = new RangingRequest.Builder().build();
         RangingResultCallback callbackMock = mock(RangingResultCallback.class);
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
@@ -113,9 +113,9 @@ public class WifiRttManagerTest {
                 callbackCaptor.capture());
 
         // service calls back with failure code
-        callbackCaptor.getValue().onRangingResults(RangingResultCallback.STATUS_FAIL, null);
+        callbackCaptor.getValue().onRangingFailure(failureCode);
         mMockLooper.dispatchAll();
-        verify(callbackMock).onRangingFailure();
+        verify(callbackMock).onRangingFailure(failureCode);
 
         verifyNoMoreInteractions(mockRttService, callbackMock);
     }
@@ -227,7 +227,7 @@ public class WifiRttManagerTest {
     @Test
     public void testRangingResultsParcel() {
         // Note: not validating parcel code of ScanResult (assumed to work)
-        int status = RangingResultCallback.STATUS_SUCCESS;
+        int status = RangingResult.STATUS_SUCCESS;
         final byte[] mac = HexEncoding.decode("000102030405".toCharArray(), false);
         PeerHandle peerHandle = new PeerHandle(10);
         int distanceCm = 105;
