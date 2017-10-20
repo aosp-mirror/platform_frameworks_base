@@ -9347,7 +9347,7 @@ public final class Settings {
          * Get the key that retrieves a bluetooth Input Device's priority.
          * @hide
          */
-        public static final String getBluetoothInputDevicePriorityKey(String address) {
+        public static final String getBluetoothHidHostPriorityKey(String address) {
             return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
