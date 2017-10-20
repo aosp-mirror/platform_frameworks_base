@@ -869,6 +869,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.WAIT_FOR_DEBUGGER,
                 GlobalSettingsProto.WAIT_FOR_DEBUGGER);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_GPU_DEBUG_LAYERS,
+                GlobalSettingsProto.ENABLE_GPU_DEBUG_LAYERS);
+        dumpSetting(s, p,
+                Settings.Global.GPU_DEBUG_APP,
+                GlobalSettingsProto.GPU_DEBUG_APP);
+        dumpSetting(s, p,
+                Settings.Global.GPU_DEBUG_LAYERS,
+                GlobalSettingsProto.GPU_DEBUG_LAYERS);
         // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE,

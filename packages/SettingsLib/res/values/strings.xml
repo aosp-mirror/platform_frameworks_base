@@ -732,6 +732,11 @@
     <!-- UI debug setting: profile time taken by hardware acceleration to render apps [CHAR LIMIT=25] -->
     <string name="track_frame_time">Profile GPU rendering</string>
 
+    <!-- UI debug setting: enable gpu debug layers [CHAR LIMIT=25] -->
+    <string name="enable_gpu_debug_layers">Enable GPU debug layers</string>
+    <!-- UI debug setting: enable gpu debug layers summary [CHAR LIMIT=50] -->
+    <string name="enable_gpu_debug_layers_summary">Allow loading GPU debug layers for debug apps</string>
+
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
 
