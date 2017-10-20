@@ -84,10 +84,15 @@ public class ViewConfiguration {
 
     /**
      * Defines the duration in milliseconds a user needs to hold down the
-     * appropriate button to bring up the accessibility shortcut (first time) or enable it
-     * (once shortcut is configured).
+     * appropriate button to bring up the accessibility shortcut for the first time
      */
     private static final int A11Y_SHORTCUT_KEY_TIMEOUT = 3000;
+
+    /**
+     * Defines the duration in milliseconds a user needs to hold down the
+     * appropriate button to enable the accessibility shortcut once it's configured.
+     */
+    private static final int A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION = 1500;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
@@ -848,6 +853,15 @@ public class ViewConfiguration {
      */
     public long getAccessibilityShortcutKeyTimeout() {
         return A11Y_SHORTCUT_KEY_TIMEOUT;
+    }
+
+    /**
+     * @return The amount of time a user needs to press the relevant keys to activate the
+     *   accessibility shortcut after it's confirmed that accessibility shortcut is used.
+     * @hide
+     */
+    public long getAccessibilityShortcutKeyTimeoutAfterConfirmation() {
+        return A11Y_SHORTCUT_KEY_TIMEOUT_AFTER_CONFIRMATION;
     }
 
     /**
