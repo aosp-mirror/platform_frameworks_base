@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <log/log_event_list.h>
 #include "stats_util.h"
+#include <log/log_event_list.h>
 
 namespace android {
 namespace os {
@@ -126,6 +126,35 @@ EventMetricData parse(log_msg msg) {
     }
 
     return eventMetricData;
+}
+
+// There is no existing hash function for the dimension key ("repeated KeyValuePair").
+// Temporarily use a string concatenation as the hashable key.
+// TODO: Find a better hash function for std::vector<KeyValuePair>.
+HashableDimensionKey getHashableKey(std::vector<KeyValuePair> keys) {
+    std::string flattened;
+    for (const KeyValuePair& pair : keys) {
+        flattened += std::to_string(pair.key());
+        flattened += ":";
+        switch (pair.value_case()) {
+            case KeyValuePair::ValueCase::kValueStr:
+                flattened += pair.value_str();
+                break;
+            case KeyValuePair::ValueCase::kValueInt:
+                flattened += std::to_string(pair.value_int());
+                break;
+            case KeyValuePair::ValueCase::kValueBool:
+                flattened += std::to_string(pair.value_bool());
+                break;
+            case KeyValuePair::ValueCase::kValueFloat:
+                flattened += std::to_string(pair.value_float());
+                break;
+            default:
+                break;
+        }
+        flattened += "|";
+    }
+    return flattened;
 }
 
 }  // namespace statsd

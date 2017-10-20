@@ -18,6 +18,7 @@
 #define CONDITION_UTIL_H
 
 #include <vector>
+#include "../matchers/matcher_util.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
@@ -35,6 +36,9 @@ enum ConditionState {
 ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const LogicalOperation& operation,
                                             const std::vector<ConditionState>& conditionCache);
+
+HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
+                                                 const EventConditionLink& link);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

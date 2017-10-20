@@ -33,13 +33,16 @@ namespace statsd {
 
 class StatsLogProcessor : public ConfigListener {
 public:
-    StatsLogProcessor(const sp<UidMap> &uidMap);
+    StatsLogProcessor(const sp<UidMap>& uidMap);
     virtual ~StatsLogProcessor();
 
     virtual void OnLogEvent(const LogEvent& event);
 
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);
+
+    // TODO: Once we have the ProtoOutputStream in c++, we can just return byte array.
+    std::vector<StatsLogReport> onDumpReport(const ConfigKey& key);
 
 private:
     // TODO: use EventMetrics to log the events.

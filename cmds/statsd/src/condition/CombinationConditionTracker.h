@@ -39,7 +39,14 @@ public:
                            const std::vector<MatchingState>& eventMatcherValues,
                            const std::vector<sp<ConditionTracker>>& mAllConditions,
                            std::vector<ConditionState>& conditionCache,
-                           std::vector<bool>& changedCache) override;
+                           std::vector<bool>& changedCache,
+                           std::vector<bool>& slicedConditionMayChanged) override;
+
+    void isConditionMet(const std::map<std::string, HashableDimensionKey>& conditionParameters,
+                        const std::vector<sp<ConditionTracker>>& allConditions,
+                        std::vector<ConditionState>& conditionCache) override;
+
+    void addDimensions(const std::vector<KeyMatcher>& keyMatchers) override{};
 
 private:
     LogicalOperation mLogicalOperation;

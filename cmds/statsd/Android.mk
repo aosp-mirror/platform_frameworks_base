@@ -24,6 +24,7 @@ statsd_common_src := \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \
+    src/condition/ConditionWizard.cpp \
     src/config/ConfigKey.cpp \
     src/config/ConfigListener.cpp \
     src/config/ConfigManager.cpp \
@@ -37,6 +38,7 @@ statsd_common_src := \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/CountAnomalyTracker.cpp \
     src/metrics/CountMetricProducer.cpp \
+    src/metrics/DurationMetricProducer.cpp \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \

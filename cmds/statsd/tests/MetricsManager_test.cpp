@@ -45,7 +45,7 @@ StatsdConfig buildGoodConfig() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
@@ -55,7 +55,7 @@ StatsdConfig buildGoodConfig() {
     eventMatcher->set_name("SCREEN_IS_OFF");
 
     simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
@@ -80,7 +80,7 @@ StatsdConfig buildCircleMatchers() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
@@ -106,7 +106,7 @@ StatsdConfig buildMissingMatchers() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
@@ -132,7 +132,7 @@ StatsdConfig buildCircleConditions() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
@@ -142,7 +142,7 @@ StatsdConfig buildCircleConditions() {
     eventMatcher->set_name("SCREEN_IS_OFF");
 
     simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
+    simpleLogEntryMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
     simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
     simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(

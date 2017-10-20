@@ -106,7 +106,7 @@ message StatsLogReport {
     repeated CountMetricData data = 1;
   }
   message DurationMetricDataWrapper {
-    repeated CountMetricData data = 1;
+    repeated DurationMetricData data = 1;
   }
   oneof data {
     EventMetricDataWrapper event_metrics = 4;

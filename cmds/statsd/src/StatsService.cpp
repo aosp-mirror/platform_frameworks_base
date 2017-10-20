@@ -64,7 +64,6 @@ void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
 // ======================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
     : mStatsPullerManager(),
-
       mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
 {
     mUidMap = new UidMap();
@@ -89,7 +88,7 @@ void StatsService::init_system_properties() {
 
 void StatsService::init_build_type_callback(void* cookie, const char* /*name*/, const char* value,
                                             uint32_t serial) {
-    if (0 == strcmp("eng", value)) {
+    if (0 == strcmp("eng", value) || 0 == strcmp("userdebug", value)) {
         reinterpret_cast<StatsService*>(cookie)->mEngBuild = true;
     }
 }
@@ -187,9 +186,12 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
             return cmd_print_stats_log(out, args);
         }
 
-        // adb shell cmd stats print-stats-log
         if (!args[0].compare(String8("print-uid-map"))) {
             return cmd_print_uid_map(out);
+        }
+
+        if (!args[0].compare(String8("dump-report"))) {
+            return cmd_dump_report(out, err, args);
         }
     }
 
@@ -248,7 +250,9 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
                         }
                     }
                 } else {
-                    fprintf(err, "The config can only be set for other UIDs on eng builds.\n");
+                    fprintf(err,
+                            "The config can only be set for other UIDs on eng or userdebug "
+                            "builds.\n");
                 }
             }
 
@@ -285,6 +289,54 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
     }
     print_cmd_help(out);
     return UNKNOWN_ERROR;
+}
+
+status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String8>& args) {
+    if (mProcessor != nullptr) {
+        const int argCount = args.size();
+        bool good = false;
+        int uid;
+        string name;
+        if (argCount == 2) {
+            // Automatically pick the UID
+            uid = IPCThreadState::self()->getCallingUid();
+            // TODO: What if this isn't a binder call? Should we fail?
+            name.assign(args[2].c_str(), args[2].size());
+            good = true;
+        } else if (argCount == 3) {
+            // If it's a userdebug or eng build, then the shell user can
+            // impersonate other uids.
+            if (mEngBuild) {
+                const char* s = args[1].c_str();
+                if (*s != '\0') {
+                    char* end = NULL;
+                    uid = strtol(s, &end, 0);
+                    if (*end == '\0') {
+                        name.assign(args[2].c_str(), args[2].size());
+                        good = true;
+                    }
+                }
+            } else {
+                fprintf(out,
+                        "The metrics can only be dumped for other UIDs on eng or userdebug "
+                        "builds.\n");
+            }
+        }
+        if (good) {
+            mProcessor->onDumpReport(ConfigKey(uid, name));
+            // TODO: print the returned StatsLogReport to file instead of printing to logcat.
+            fprintf(out, "Dump report for Config [%d,%s]\n", uid, name.c_str());
+            fprintf(out, "See the StatsLogReport in logcat...\n");
+            return android::OK;
+        } else {
+            // If arg parsing failed, print the help text and return an error.
+            print_cmd_help(out);
+            return UNKNOWN_ERROR;
+        }
+    } else {
+        fprintf(out, "Log processor does not exist...\n");
+        return UNKNOWN_ERROR;
+    }
 }
 
 status_t StatsService::cmd_print_stats_log(FILE* out, const Vector<String8>& args) {

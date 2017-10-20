@@ -73,6 +73,16 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     }
 }
 
+vector<StatsLogReport> StatsLogProcessor::onDumpReport(const ConfigKey& key) {
+    auto it = mMetricsManagers.find(key);
+    if (it == mMetricsManagers.end()) {
+        ALOGW("Config source %s does not exist", key.ToString().c_str());
+        return vector<StatsLogReport>();
+    }
+
+    return it->second->onDumpReport();
+}
+
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {

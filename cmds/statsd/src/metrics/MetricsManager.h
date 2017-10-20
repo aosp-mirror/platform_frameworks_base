@@ -43,17 +43,19 @@ public:
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
 
+    // Config source owner can call onDumpReport() to get all the metrics collected.
+    std::vector<StatsLogReport> onDumpReport();
+
 private:
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
 
     // We only store the sp of LogMatchingTracker, MetricProducer, and ConditionTracker in
     // MetricManager. There are relationship between them, and the relationship are denoted by index
-    // instead of poiters. The reasons for this are: (1) the relationship between them are
+    // instead of pointers. The reasons for this are: (1) the relationship between them are
     // complicated, store index instead of pointers reduce the risk of A holds B's sp, and B holds
     // A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get the
     // related results from a cache using the index.
-    // TODO: using unique_ptr may be more appriopreate?
 
     // Hold all the log entry matchers from the config.
     std::vector<sp<LogMatchingTracker>> mAllLogEntryMatchers;

@@ -30,9 +30,9 @@
 #include <sstream>
 #include <unordered_map>
 
+using std::ostringstream;
 using std::set;
 using std::string;
-using std::ostringstream;
 using std::unordered_map;
 using std::vector;
 
@@ -91,109 +91,103 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
 
 bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& event) {
     const int tagId = event.GetTagId();
-    /*
-    const unordered_map<int, long>& intMap = event.intMap;
-    const unordered_map<int, string>& strMap = event.strMap;
-    const unordered_map<int, float>& floatMap = event.floatMap;
-    const unordered_map<int, bool>& boolMap = event.boolMap;
-    */
 
-    for (int i = 0; i < simpleMatcher.tag_size(); i++) {
-        if (simpleMatcher.tag(i) != tagId) {
-            continue;
-        }
+    if (simpleMatcher.tag() != tagId) {
+        return false;
+    }
+    // now see if this event is interesting to us -- matches ALL the matchers
+    // defined in the metrics.
+    bool allMatched = true;
+    for (int j = 0; allMatched && j < simpleMatcher.key_value_matcher_size(); j++) {
+        auto cur = simpleMatcher.key_value_matcher(j);
 
-        // TODO Is this right? Shouldn't this second loop be outside the outer loop?
-        // If I understand correctly, the event matches if one of the tags match,
-        // and ALL of the key-value matchers match. --joeo
+        // TODO: Check if this key is a magic key (eg package name).
+        // TODO: Maybe make packages a different type in the config?
+        int key = cur.key_matcher().key();
 
-        // now see if this event is interesting to us -- matches ALL the matchers
-        // defined in the metrics.
-        bool allMatched = true;
-        for (int j = 0; allMatched && j < simpleMatcher.key_value_matcher_size(); j++) {
-            auto cur = simpleMatcher.key_value_matcher(j);
-
-            // TODO: Check if this key is a magic key (eg package name).
-            // TODO: Maybe make packages a different type in the config?
-            int key = cur.key_matcher().key();
-
-            const KeyValueMatcher::ValueMatcherCase matcherCase = cur.value_matcher_case();
-            if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqString) {
-                // String fields
-                status_t err = NO_ERROR;
-                const char* val = event.GetString(key, &err);
-                if (err == NO_ERROR && val != NULL) {
-                    if (!(cur.eq_string() == val)) {
-                        allMatched = false;
-                    }
+        const KeyValueMatcher::ValueMatcherCase matcherCase = cur.value_matcher_case();
+        if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqString) {
+            // String fields
+            status_t err = NO_ERROR;
+            const char* val = event.GetString(key, &err);
+            if (err == NO_ERROR && val != NULL) {
+                if (!(cur.eq_string() == val)) {
+                    allMatched = false;
                 }
-            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt
-                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt
-                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt
-                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt
-                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
-                // Integer fields
-                status_t err = NO_ERROR;
-                int64_t val = event.GetLong(key, &err);
-                if (err == NO_ERROR) {
-                    if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt) {
-                        if (!(val == cur.eq_int())) {
-                            allMatched = false;
-                        }
-                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt) {
-                        if (!(val < cur.lt_int())) {
-                            allMatched = false;
-                        }
-                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt) {
-                        if (!(val > cur.gt_int())) {
-                            allMatched = false;
-                        }
-                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt) {
-                        if (!(val <= cur.lte_int())) {
-                            allMatched = false;
-                        }
-                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
-                        if (!(val >= cur.gte_int())) {
-                            allMatched = false;
-                        }
-                    }
-                }
-                break;
-            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqBool) {
-                // Boolean fields
-                status_t err = NO_ERROR;
-                bool val = event.GetBool(key, &err);
-                if (err == NO_ERROR) {
-                    if (!(cur.eq_bool() == val)) {
-                        allMatched = false;
-                    }
-                }
-            } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat
-                    || matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
-                // Float fields
-                status_t err = NO_ERROR;
-                bool val = event.GetFloat(key, &err);
-                if (err == NO_ERROR) {
-                    if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat) {
-                        if (!(cur.lt_float() <= val)) {
-                            allMatched = false;
-                        }
-                    } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
-                        if (!(cur.gt_float() >= val)) {
-                            allMatched = false;
-                        }
-                    }
-                }
-            } else {
-                // If value matcher is not present, assume that we match.
             }
-        }
-
-        if (allMatched) {
-            return true;
+        } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt ||
+                   matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt ||
+                   matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt ||
+                   matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt ||
+                   matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
+            // Integer fields
+            status_t err = NO_ERROR;
+            int64_t val = event.GetLong(key, &err);
+            if (err == NO_ERROR) {
+                if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt) {
+                    if (!(val == cur.eq_int())) {
+                        allMatched = false;
+                    }
+                } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt) {
+                    if (!(val < cur.lt_int())) {
+                        allMatched = false;
+                    }
+                } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtInt) {
+                    if (!(val > cur.gt_int())) {
+                        allMatched = false;
+                    }
+                } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLteInt) {
+                    if (!(val <= cur.lte_int())) {
+                        allMatched = false;
+                    }
+                } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGteInt) {
+                    if (!(val >= cur.gte_int())) {
+                        allMatched = false;
+                    }
+                }
+            }
+            break;
+        } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqBool) {
+            // Boolean fields
+            status_t err = NO_ERROR;
+            bool val = event.GetBool(key, &err);
+            if (err == NO_ERROR) {
+                if (!(cur.eq_bool() == val)) {
+                    allMatched = false;
+                }
+            }
+        } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat ||
+                   matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
+            // Float fields
+            status_t err = NO_ERROR;
+            bool val = event.GetFloat(key, &err);
+            if (err == NO_ERROR) {
+                if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat) {
+                    if (!(cur.lt_float() <= val)) {
+                        allMatched = false;
+                    }
+                } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
+                    if (!(cur.gt_float() >= val)) {
+                        allMatched = false;
+                    }
+                }
+            }
+        } else {
+            // If value matcher is not present, assume that we match.
         }
     }
-    return false;
+    return allMatched;
+}
+
+vector<KeyValuePair> getDimensionKey(const LogEvent& event,
+                                     const std::vector<KeyMatcher>& dimensions) {
+    vector<KeyValuePair> key;
+    key.reserve(dimensions.size());
+    for (const KeyMatcher& dimension : dimensions) {
+        KeyValuePair k = event.GetKeyValueProto(dimension.key());
+        key.push_back(k);
+    }
+    return key;
 }
 
 }  // namespace statsd

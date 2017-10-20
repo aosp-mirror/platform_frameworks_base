@@ -19,6 +19,7 @@
 
 #include "ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "stats_util.h"
 
 namespace android {
 namespace os {
@@ -26,6 +27,8 @@ namespace statsd {
 
 class SimpleConditionTracker : public virtual ConditionTracker {
 public:
+    // dimensions is a vector of vector because for one single condition, different metrics may be
+    // interested in slicing in different ways. one vector<KeyMatcher> defines one type of slicing.
     SimpleConditionTracker(const std::string& name, const int index,
                            const SimpleCondition& simpleCondition,
                            const std::unordered_map<std::string, int>& trackerNameIndexMap);
@@ -41,7 +44,14 @@ public:
                            const std::vector<MatchingState>& eventMatcherValues,
                            const std::vector<sp<ConditionTracker>>& mAllConditions,
                            std::vector<ConditionState>& conditionCache,
-                           std::vector<bool>& changedCache) override;
+                           std::vector<bool>& changedCache,
+                           std::vector<bool>& slicedChangedCache) override;
+
+    void isConditionMet(const std::map<std::string, HashableDimensionKey>& conditionParameters,
+                        const std::vector<sp<ConditionTracker>>& allConditions,
+                        std::vector<ConditionState>& conditionCache) override;
+
+    void addDimensions(const std::vector<KeyMatcher>& keyMatchers) override;
 
 private:
     // The index of the LogEventMatcher which defines the start.
@@ -55,6 +65,13 @@ private:
 
     // The index of the LogEventMatcher which defines the stop all.
     int mStopAllLogMatcherIndex;
+
+    // Different metrics may subscribe to different types of slicings. So it's a vector of vector.
+    std::vector<std::vector<KeyMatcher>> mDimensionsList;
+
+    // Keep the map from the internal HashableDimensionKey to std::vector<KeyValuePair>
+    // that StatsLogReport wants.
+    std::unordered_map<HashableDimensionKey, ConditionState> mSlicedConditionState;
 };
 
 }  // namespace statsd

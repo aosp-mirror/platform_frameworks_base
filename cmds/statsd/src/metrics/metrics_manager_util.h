@@ -59,7 +59,8 @@ bool initConditions(const StatsdConfig& config,
                     const std::unordered_map<std::string, int>& logTrackerMap,
                     std::unordered_map<std::string, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
-                    std::unordered_map<int, std::vector<int>>& trackerToConditionMap);
+                    std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
+                    std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks);
 
 // Initialize MetricProducers.
 // input:
@@ -71,12 +72,14 @@ bool initConditions(const StatsdConfig& config,
 // [conditionToMetricMap]: contains the mapping from condition tracker index to
 //                          the list of MetricProducer index
 // [trackerToMetricMap]: contains the mapping from log tracker to MetricProducer index.
-bool initMetrics(const StatsdConfig& config,
-                 const std::unordered_map<std::string, int>& logTrackerMap,
-                 const std::unordered_map<std::string, int>& conditionTrackerMap,
-                 std::vector<sp<MetricProducer>>& allMetricProducers,
-                 std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
-                 std::unordered_map<int, std::vector<int>>& trackerToMetricMap);
+bool initMetrics(
+        const StatsdConfig& config, const std::unordered_map<std::string, int>& logTrackerMap,
+        const std::unordered_map<std::string, int>& conditionTrackerMap,
+        const std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks,
+        vector<sp<ConditionTracker>>& allConditionTrackers,
+        std::vector<sp<MetricProducer>>& allMetricProducers,
+        std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
+        std::unordered_map<int, std::vector<int>>& trackerToMetricMap);
 
 // Initialize MetricManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
@@ -87,6 +90,8 @@ bool initStatsdConfig(const StatsdConfig& config, std::set<int>& allTagIds,
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap);
+
+int getTrackerIndex(const std::string& name, const std::unordered_map<string, int>& logTrackerMap);
 
 }  // namespace statsd
 }  // namespace os
