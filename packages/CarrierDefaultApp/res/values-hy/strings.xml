@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Ձեր բջջային ինտերնետն ապակտիվացված է"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Հպեք՝ %s կայք այցելելու համար"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Դիմեք ձեր ծառայություններ մատուցողին %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Բջջային տվյալների կապ չկա"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Ավելացնել տվյալներ ռոումինգի սակագնային փաթեթին %s միջոցով"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Բջջային ինտերնետի կարգավիճակը"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Մուտք գործել բջջային ցանց"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Ցանցը, որին փորձում եք միանալ, անվտանգության խնդիրներ ունի:"</string>
