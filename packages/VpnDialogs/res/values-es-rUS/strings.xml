@@ -19,11 +19,18 @@
     <string name="prompt" msgid="3183836924226407828">"Solicitud de conexión"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN que permite controlar el tráfico de la red. Acéptala solo si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece en la parte superior de la pantalla cuando la VPN está activa."</string>
     <string name="legacy_title" msgid="192936250066580964">"La VPN está conectada."</string>
-    <string name="configure" msgid="4905518375574791375">"Configurar"</string>
-    <string name="disconnect" msgid="971412338304200056">"Desconectar"</string>
     <string name="session" msgid="6470628549473641030">"Sesión:"</string>
     <string name="duration" msgid="3584782459928719435">"Duración:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Enviados:"</string>
     <string name="data_received" msgid="4062776929376067820">"Recibidos:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bytes / <xliff:g id="NUMBER_1">%2$s</xliff:g> paquetes"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"No se puede conectar a la VPN siempre activa"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"Se configuró <xliff:g id="VPN_APP_0">%1$s</xliff:g> para que permaneciera activa, pero no puede establecer conexión en este momento. Tu teléfono usará una red pública hasta que pueda volver a conectarse a <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Se configuró <xliff:g id="VPN_APP">%1$s</xliff:g> para que permaneciera activa, pero no puede establecer conexión en este momento. No podrás conectarte hasta que la VPN vuelva a establecer la conexión."</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Cambiar configuración de VPN"</string>
+    <string name="configure" msgid="4905518375574791375">"Configurar"</string>
+    <string name="disconnect" msgid="971412338304200056">"Desconectar"</string>
+    <string name="open_app" msgid="3717639178595958667">"Abrir app"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Descartar"</string>
 </resources>
