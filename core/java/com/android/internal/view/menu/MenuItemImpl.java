@@ -658,7 +658,7 @@ public final class MenuItemImpl implements MenuItem {
 
     @Override
     public boolean requiresOverflow() {
-        return (mShowAsAction & SHOW_AS_OVERFLOW_ALWAYS) == SHOW_AS_OVERFLOW_ALWAYS;
+        return !requiresActionButton() && !requestsActionButton();
     }
 
     public void setIsActionButton(boolean isActionButton) {

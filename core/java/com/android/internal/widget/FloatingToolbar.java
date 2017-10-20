@@ -64,6 +64,7 @@ import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -115,6 +116,36 @@ public final class FloatingToolbar {
                 updateLayout();
             }
         }
+    };
+
+    /**
+     * Sorts the list of menu items to conform to certain requirements.
+     */
+    private final Comparator<MenuItem> mMenuItemComparator = (menuItem1, menuItem2) -> {
+        // Ensure the assist menu item is always the first item:
+        if (menuItem1.getItemId() == android.R.id.textAssist) {
+            return menuItem2.getItemId() == android.R.id.textAssist ? 0 : -1;
+        }
+        if (menuItem2.getItemId() == android.R.id.textAssist) {
+            return 1;
+        }
+
+        // Order by SHOW_AS_ACTION type:
+        if (menuItem1.requiresActionButton()) {
+            return menuItem2.requiresActionButton() ? 0 : -1;
+        }
+        if (menuItem2.requiresActionButton()) {
+            return 1;
+        }
+        if (menuItem1.requiresOverflow()) {
+            return menuItem2.requiresOverflow() ? 0 : 1;
+        }
+        if (menuItem2.requiresOverflow()) {
+            return -1;
+        }
+
+        // Order by order value:
+        return menuItem1.getOrder() - menuItem2.getOrder();
     };
 
     /**
@@ -230,7 +261,7 @@ public final class FloatingToolbar {
 
     private void doShow() {
         List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
-        tidy(menuItems);
+        menuItems.sort(mMenuItemComparator);
         if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
             mPopup.dismiss();
             mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
@@ -286,36 +317,6 @@ public final class FloatingToolbar {
             }
         }
         return menuItems;
-    }
-
-    /**
-     * Update the list of menu items to conform to certain requirements.
-     */
-    private void tidy(List<MenuItem> menuItems) {
-        int assistItemIndex = -1;
-        Drawable assistItemDrawable = null;
-
-        final int size = menuItems.size();
-        for (int i = 0; i < size; i++) {
-            final MenuItem menuItem = menuItems.get(i);
-
-            if (menuItem.getItemId() == android.R.id.textAssist) {
-                assistItemIndex = i;
-                assistItemDrawable = menuItem.getIcon();
-            }
-
-            // Remove icons for all menu items with text.
-            if (!TextUtils.isEmpty(menuItem.getTitle())) {
-                menuItem.setIcon(null);
-            }
-        }
-        if (assistItemIndex > -1) {
-            final MenuItem assistMenuItem = menuItems.remove(assistItemIndex);
-            // Ensure the assist menu item preserves its icon.
-            assistMenuItem.setIcon(assistItemDrawable);
-            // Ensure the assist menu item is always the first item.
-            menuItems.add(0, assistMenuItem);
-        }
     }
 
     private void registerOrientationHandler() {
@@ -1148,7 +1149,8 @@ public final class FloatingToolbar {
             // add the overflow menu items to the end of the remainingMenuItems list.
             final LinkedList<MenuItem> overflowMenuItems = new LinkedList();
             for (MenuItem menuItem : menuItems) {
-                if (menuItem.requiresOverflow()) {
+                if (menuItem.getItemId() != android.R.id.textAssist
+                        && menuItem.requiresOverflow()) {
                     overflowMenuItems.add(menuItem);
                 } else {
                     remainingMenuItems.add(menuItem);
@@ -1171,7 +1173,9 @@ public final class FloatingToolbar {
                     break;
                 }
 
-                View menuItemButton = createMenuItemButton(mContext, menuItem, mIconTextSpacing);
+                final boolean showIcon = isFirstItem && menuItem.getItemId() == R.id.textAssist;
+                final View menuItemButton = createMenuItemButton(
+                        mContext, menuItem, mIconTextSpacing, showIcon);
 
                 // Adding additional start padding for the first button to even out button spacing.
                 if (isFirstItem) {
@@ -1193,16 +1197,17 @@ public final class FloatingToolbar {
                 }
 
                 menuItemButton.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-                final int menuItemButtonWidth = Math.min(menuItemButton.getMeasuredWidth(), toolbarWidth);
+                final int menuItemButtonWidth = Math.min(
+                        menuItemButton.getMeasuredWidth(), toolbarWidth);
 
                 final boolean isNewGroup = !isFirstItem && lastGroupId != menuItem.getGroupId();
                 final int extraPadding = isNewGroup ? menuItemButton.getPaddingEnd() * 2 : 0;
 
                 // Check if we can fit an item while reserving space for the overflowButton.
-                boolean canFitWithOverflow =
+                final boolean canFitWithOverflow =
                         menuItemButtonWidth <=
                                 availableWidth - mOverflowButtonSize.getWidth() - extraPadding;
-                boolean canFitNoOverflow =
+                final boolean canFitNoOverflow =
                         isLastItem && menuItemButtonWidth <= availableWidth - extraPadding;
                 if (canFitWithOverflow || canFitNoOverflow) {
                     if (isNewGroup) {
@@ -1211,7 +1216,8 @@ public final class FloatingToolbar {
 
                         // Add extra padding to the end of the previous button.
                         // Half of the extra padding (less borderWidth) goes to the previous button.
-                        View previousButton = mMainPanel.getChildAt(mMainPanel.getChildCount() - 1);
+                        final View previousButton = mMainPanel.getChildAt(
+                                mMainPanel.getChildCount() - 1);
                         final int prevPaddingEnd = previousButton.getPaddingEnd()
                                 + extraPadding / 2 - dividerWidth;
                         previousButton.setPaddingRelative(
@@ -1612,7 +1618,8 @@ public final class FloatingToolbar {
             public View getView(MenuItem menuItem, int minimumWidth, View convertView) {
                 Preconditions.checkNotNull(menuItem);
                 if (convertView != null) {
-                    updateMenuItemButton(convertView, menuItem, mIconTextSpacing);
+                    updateMenuItemButton(
+                            convertView, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));
                 } else {
                     convertView = createMenuButton(menuItem);
                 }
@@ -1621,16 +1628,25 @@ public final class FloatingToolbar {
             }
 
             public int calculateWidth(MenuItem menuItem) {
-                updateMenuItemButton(mCalculator, menuItem, mIconTextSpacing);
+                updateMenuItemButton(
+                        mCalculator, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));
                 mCalculator.measure(
                         View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
                 return mCalculator.getMeasuredWidth();
             }
 
             private View createMenuButton(MenuItem menuItem) {
-                View button = createMenuItemButton(mContext, menuItem, mIconTextSpacing);
+                View button = createMenuItemButton(
+                        mContext, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));
                 button.setPadding(mSidePadding, 0, mSidePadding, 0);
                 return button;
+            }
+
+            private boolean shouldShowIcon(MenuItem menuItem) {
+                if (menuItem != null) {
+                    return menuItem.getGroupId() == android.R.id.textAssist;
+                }
+                return false;
             }
         }
     }
@@ -1639,11 +1655,11 @@ public final class FloatingToolbar {
      * Creates and returns a menu button for the specified menu item.
      */
     private static View createMenuItemButton(
-            Context context, MenuItem menuItem, int iconTextSpacing) {
+            Context context, MenuItem menuItem, int iconTextSpacing, boolean showIcon) {
         final View menuItemButton = LayoutInflater.from(context)
                 .inflate(R.layout.floating_popup_menu_button, null);
         if (menuItem != null) {
-            updateMenuItemButton(menuItemButton, menuItem, iconTextSpacing);
+            updateMenuItemButton(menuItemButton, menuItem, iconTextSpacing, showIcon);
         }
         return menuItemButton;
     }
@@ -1652,18 +1668,19 @@ public final class FloatingToolbar {
      * Updates the specified menu item button with the specified menu item data.
      */
     private static void updateMenuItemButton(
-            View menuItemButton, MenuItem menuItem, int iconTextSpacing) {
-        final TextView buttonText = (TextView) menuItemButton.findViewById(
+            View menuItemButton, MenuItem menuItem, int iconTextSpacing, boolean showIcon) {
+        final TextView buttonText = menuItemButton.findViewById(
                 R.id.floating_toolbar_menu_item_text);
+        buttonText.setEllipsize(null);
         if (TextUtils.isEmpty(menuItem.getTitle())) {
             buttonText.setVisibility(View.GONE);
         } else {
             buttonText.setVisibility(View.VISIBLE);
             buttonText.setText(menuItem.getTitle());
         }
-        final ImageView buttonIcon = (ImageView) menuItemButton
-                .findViewById(R.id.floating_toolbar_menu_item_image);
-        if (menuItem.getIcon() == null) {
+        final ImageView buttonIcon = menuItemButton.findViewById(
+                R.id.floating_toolbar_menu_item_image);
+        if (menuItem.getIcon() == null || !showIcon) {
             buttonIcon.setVisibility(View.GONE);
             if (buttonText != null) {
                 buttonText.setPaddingRelative(0, 0, 0, 0);
