@@ -302,6 +302,8 @@ class Theme {
   friend class AssetManager2;
 
  public:
+  ~Theme();
+
   // Applies the style identified by `resid` to this theme. This can be called
   // multiple times with different styles. By default, any theme attributes that
   // are already defined before this call are not overridden. If `force` is set
@@ -316,27 +318,31 @@ class Theme {
 
   void Clear();
 
-  inline const AssetManager2* GetAssetManager() const { return asset_manager_; }
+  inline const AssetManager2* GetAssetManager() const {
+    return asset_manager_;
+  }
 
-  inline AssetManager2* GetAssetManager() { return asset_manager_; }
+  inline AssetManager2* GetAssetManager() {
+    return asset_manager_;
+  }
 
   // Returns a bit mask of configuration changes that will impact this
   // theme (and thus require completely reloading it).
-  inline uint32_t GetChangingConfigurations() const { return type_spec_flags_; }
+  inline uint32_t GetChangingConfigurations() const {
+    return type_spec_flags_;
+  }
 
-  // Retrieve a value in the theme. If the theme defines this value,
-  // returns an asset cookie indicating which ApkAssets it came from
-  // and populates `out_value` with the value. If `out_flags` is non-null,
-  // populates it with a bitmask of the configuration axis the resource
-  // varies with.
+  // Retrieve a value in the theme. If the theme defines this value, returns an asset cookie
+  // indicating which ApkAssets it came from and populates `out_value` with the value.
+  // `out_flags` is populated with a bitmask of the configuration axis with which the resource
+  // varies.
   //
   // If the attribute is not found, returns kInvalidCookie.
   //
-  // NOTE: This function does not do reference traversal. If you want
-  // to follow references to other resources to get the "real" value to
-  // use, you need to call ResolveReference() after this function.
-  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value,
-                               uint32_t* out_flags = nullptr) const;
+  // NOTE: This function does not do reference traversal. If you want to follow references to other
+  // resources to get the "real" value to use, you need to call ResolveReference() after this
+  // function.
+  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value, uint32_t* out_flags) const;
 
   // This is like AssetManager2::ResolveReference(), but also takes
   // care of resolving attribute references to the theme.
@@ -349,36 +355,21 @@ class Theme {
   DISALLOW_COPY_AND_ASSIGN(Theme);
 
   // Called by AssetManager2.
-  explicit inline Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {}
-
-  struct Entry {
-    ApkAssetsCookie cookie;
-    uint32_t type_spec_flags;
-    Res_value value;
-  };
-
-  struct Type {
-    // Use uint32_t for fewer cycles when loading from memory.
-    uint32_t entry_count;
-    uint32_t entry_capacity;
-    Entry entries[0];
-  };
-
-  static constexpr const size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
-  static constexpr const size_t kTypeCount = std::numeric_limits<uint8_t>::max() + 1;
-
-  struct Package {
-    // Each element of Type will be a dynamically sized object
-    // allocated to have the entries stored contiguously with the Type.
-    std::array<util::unique_cptr<Type>, kTypeCount> types;
-  };
+  explicit Theme(AssetManager2* asset_manager);
 
   AssetManager2* asset_manager_;
   uint32_t type_spec_flags_ = 0u;
+
+  // Defined in the cpp.
+  struct Package;
+
+  constexpr static size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
   std::array<std::unique_ptr<Package>, kPackageCount> packages_;
 };
 
-inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) { return bag->entries; }
+inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) {
+  return bag->entries;
+}
 
 inline const ResolvedBag::Entry* end(const ResolvedBag* bag) {
   return bag->entries + bag->entry_count;

@@ -18,6 +18,7 @@
 
 #include "androidfw/AssetManager2.h"
 
+#include <iterator>
 #include <set>
 
 #include "android-base/logging.h"
@@ -506,10 +507,17 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
         }
       }
       new_entry->cookie = cookie;
-      new_entry->value.copyFrom_dtoh(map_entry->value);
       new_entry->key = new_key;
       new_entry->key_pool = nullptr;
       new_entry->type_pool = nullptr;
+      new_entry->value.copyFrom_dtoh(map_entry->value);
+      status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
+      if (err != NO_ERROR) {
+        LOG(ERROR) << base::StringPrintf(
+            "Failed to resolve value t=0x%02x d=0x%08x for key 0x%08x.", new_entry->value.dataType,
+            new_entry->value.data, new_key);
+        return nullptr;
+      }
       ++new_entry;
     }
     new_bag->type_spec_flags = flags;
@@ -557,10 +565,17 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
       // Use the child key if it comes before the parent
       // or is equal to the parent (overrides).
       new_entry->cookie = cookie;
-      new_entry->value.copyFrom_dtoh(map_entry->value);
       new_entry->key = child_key;
       new_entry->key_pool = nullptr;
       new_entry->type_pool = nullptr;
+      new_entry->value.copyFrom_dtoh(map_entry->value);
+      status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
+      if (err != NO_ERROR) {
+        LOG(ERROR) << base::StringPrintf(
+            "Failed to resolve value t=0x%02x d=0x%08x for key 0x%08x.", new_entry->value.dataType,
+            new_entry->value.data, child_key);
+        return nullptr;
+      }
       ++map_entry;
     } else {
       // Take the parent entry as-is.
@@ -585,10 +600,16 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
       }
     }
     new_entry->cookie = cookie;
-    new_entry->value.copyFrom_dtoh(map_entry->value);
     new_entry->key = new_key;
     new_entry->key_pool = nullptr;
     new_entry->type_pool = nullptr;
+    new_entry->value.copyFrom_dtoh(map_entry->value);
+    status_t err = entry.dynamic_ref_table->lookupResourceValue(&new_entry->value);
+    if (err != NO_ERROR) {
+      LOG(ERROR) << base::StringPrintf("Failed to resolve value t=0x%02x d=0x%08x for key 0x%08x.",
+                                       new_entry->value.dataType, new_entry->value.data, new_key);
+      return nullptr;
+    }
     ++map_entry;
     ++new_entry;
   }
@@ -701,7 +722,37 @@ void AssetManager2::InvalidateCaches(uint32_t diff) {
   }
 }
 
-std::unique_ptr<Theme> AssetManager2::NewTheme() { return std::unique_ptr<Theme>(new Theme(this)); }
+std::unique_ptr<Theme> AssetManager2::NewTheme() {
+  return std::unique_ptr<Theme>(new Theme(this));
+}
+
+Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
+}
+
+Theme::~Theme() = default;
+
+namespace {
+
+struct ThemeEntry {
+  ApkAssetsCookie cookie;
+  uint32_t type_spec_flags;
+  Res_value value;
+};
+
+struct ThemeType {
+  int entry_count;
+  ThemeEntry entries[0];
+};
+
+constexpr size_t kTypeCount = std::numeric_limits<uint8_t>::max() + 1;
+
+}  // namespace
+
+struct Theme::Package {
+  // Each element of Type will be a dynamically sized object
+  // allocated to have the entries stored contiguously with the Type.
+  std::array<util::unique_cptr<ThemeType>, kTypeCount> types;
+};
 
 bool Theme::ApplyStyle(uint32_t resid, bool force) {
   ATRACE_CALL();
@@ -714,71 +765,69 @@ bool Theme::ApplyStyle(uint32_t resid, bool force) {
   // Merge the flags from this style.
   type_spec_flags_ |= bag->type_spec_flags;
 
-  // On the first iteration, verify the attribute IDs and
-  // update the entry count in each type.
-  const auto bag_iter_end = end(bag);
-  for (auto bag_iter = begin(bag); bag_iter != bag_iter_end; ++bag_iter) {
+  int last_type_idx = -1;
+  int last_package_idx = -1;
+  Package* last_package = nullptr;
+  ThemeType* last_type = nullptr;
+
+  // Iterate backwards, because each bag is sorted in ascending key ID order, meaning we will only
+  // need to perform one resize per type.
+  using reverse_bag_iterator = std::reverse_iterator<const ResolvedBag::Entry*>;
+  const auto bag_iter_end = reverse_bag_iterator(begin(bag));
+  for (auto bag_iter = reverse_bag_iterator(end(bag)); bag_iter != bag_iter_end; ++bag_iter) {
     const uint32_t attr_resid = bag_iter->key;
 
-    // If the resource ID passed in is not a style, the key can be
-    // some other identifier that is not a resource ID.
+    // If the resource ID passed in is not a style, the key can be some other identifier that is not
+    // a resource ID. We should fail fast instead of operating with strange resource IDs.
     if (!is_valid_resid(attr_resid)) {
       return false;
     }
 
-    const uint32_t package_idx = get_package_id(attr_resid);
+    // We don't use the 0-based index for the type so that we can avoid doing ID validation
+    // upon lookup. Instead, we keep space for the type ID 0 in our data structures. Since
+    // the construction of this type is guarded with a resource ID check, it will never be
+    // populated, and querying type ID 0 will always fail.
+    const int package_idx = get_package_id(attr_resid);
+    const int type_idx = get_type_id(attr_resid);
+    const int entry_idx = get_entry_id(attr_resid);
 
-    // The type ID is 1-based, so subtract 1 to get an index.
-    const uint32_t type_idx = get_type_id(attr_resid) - 1;
-    const uint32_t entry_idx = get_entry_id(attr_resid);
-
-    std::unique_ptr<Package>& package = packages_[package_idx];
-    if (package == nullptr) {
-      package.reset(new Package());
-    }
-
-    util::unique_cptr<Type>& type = package->types[type_idx];
-    if (type == nullptr) {
-      // Set the initial capacity to take up a total amount of 1024 bytes.
-      constexpr uint32_t kInitialCapacity = (1024u - sizeof(Type)) / sizeof(Entry);
-      const uint32_t initial_capacity = std::max(entry_idx, kInitialCapacity);
-      type.reset(
-          reinterpret_cast<Type*>(calloc(sizeof(Type) + (initial_capacity * sizeof(Entry)), 1)));
-      type->entry_capacity = initial_capacity;
-    }
-
-    // Set the entry_count to include this entry. We will populate
-    // and resize the array as necessary in the next pass.
-    if (entry_idx + 1 > type->entry_count) {
-      // Increase the entry count to include this.
-      type->entry_count = entry_idx + 1;
-    }
-  }
-
-  // On the second pass, we will realloc to fit the entry counts
-  // and populate the structures.
-  for (auto bag_iter = begin(bag); bag_iter != bag_iter_end; ++bag_iter) {
-    const uint32_t attr_resid = bag_iter->key;
-    const uint32_t package_idx = get_package_id(attr_resid);
-    const uint32_t type_idx = get_type_id(attr_resid) - 1;
-    const uint32_t entry_idx = get_entry_id(attr_resid);
-    Package* package = packages_[package_idx].get();
-    util::unique_cptr<Type>& type = package->types[type_idx];
-    if (type->entry_count != type->entry_capacity) {
-      // Resize to fit the actual entries that will be included.
-      Type* type_ptr = type.release();
-      type.reset(reinterpret_cast<Type*>(
-          realloc(type_ptr, sizeof(Type) + (type_ptr->entry_count * sizeof(Entry)))));
-      if (type->entry_capacity < type->entry_count) {
-        // Clear the newly allocated memory (which does not get zero initialized).
-        // We need to do this because we |= type_spec_flags.
-        memset(type->entries + type->entry_capacity, 0,
-               sizeof(Entry) * (type->entry_count - type->entry_capacity));
+    if (last_package_idx != package_idx) {
+      std::unique_ptr<Package>& package = packages_[package_idx];
+      if (package == nullptr) {
+        package.reset(new Package());
       }
-      type->entry_capacity = type->entry_count;
+      last_package_idx = package_idx;
+      last_package = package.get();
+      last_type_idx = -1;
     }
-    Entry& entry = type->entries[entry_idx];
-    if (force || entry.value.dataType == Res_value::TYPE_NULL) {
+
+    if (last_type_idx != type_idx) {
+      util::unique_cptr<ThemeType>& type = last_package->types[type_idx];
+      if (type == nullptr) {
+        // Allocate enough memory to contain this entry_idx. Since we're iterating in reverse over
+        // a sorted list of attributes, this shouldn't be resized again during this method call.
+        type.reset(reinterpret_cast<ThemeType*>(
+            calloc(sizeof(ThemeType) + (entry_idx + 1) * sizeof(ThemeEntry), 1)));
+        type->entry_count = entry_idx + 1;
+      } else if (entry_idx >= type->entry_count) {
+        // Reallocate the memory to contain this entry_idx. Since we're iterating in reverse over
+        // a sorted list of attributes, this shouldn't be resized again during this method call.
+        const int new_count = entry_idx + 1;
+        type.reset(reinterpret_cast<ThemeType*>(
+            realloc(type.release(), sizeof(ThemeType) + (new_count * sizeof(ThemeEntry)))));
+
+        // Clear out the newly allocated space (which isn't zeroed).
+        memset(type->entries + type->entry_count, 0,
+               (new_count - type->entry_count) * sizeof(ThemeEntry));
+        type->entry_count = new_count;
+      }
+      last_type_idx = type_idx;
+      last_type = type.get();
+    }
+
+    ThemeEntry& entry = last_type->entries[entry_idx];
+    if (force || (entry.value.dataType == Res_value::TYPE_NULL &&
+                  entry.value.data != Res_value::DATA_NULL_EMPTY)) {
       entry.cookie = bag_iter->cookie;
       entry.type_spec_flags |= bag->type_spec_flags;
       entry.value = bag_iter->value;
@@ -789,88 +838,46 @@ bool Theme::ApplyStyle(uint32_t resid, bool force) {
 
 ApkAssetsCookie Theme::GetAttribute(uint32_t resid, Res_value* out_value,
                                     uint32_t* out_flags) const {
-  constexpr const int kMaxIterations = 20;
+  int cnt = 20;
 
   uint32_t type_spec_flags = 0u;
 
-  for (int iterations_left = kMaxIterations; iterations_left > 0; iterations_left--) {
-    if (!is_valid_resid(resid)) {
-      return kInvalidCookie;
-    }
-
-    const uint32_t package_idx = get_package_id(resid);
-
-    // Type ID is 1-based, subtract 1 to get the index.
-    const uint32_t type_idx = get_type_id(resid) - 1;
-    const uint32_t entry_idx = get_entry_id(resid);
-
+  do {
+    const int package_idx = get_package_id(resid);
     const Package* package = packages_[package_idx].get();
-    if (package == nullptr) {
-      return kInvalidCookie;
-    }
+    if (package != nullptr) {
+      // The themes are constructed with a 1-based type ID, so no need to decrement here.
+      const int type_idx = get_type_id(resid);
+      const ThemeType* type = package->types[type_idx].get();
+      if (type != nullptr) {
+        const int entry_idx = get_entry_id(resid);
+        if (entry_idx < type->entry_count) {
+          const ThemeEntry& entry = type->entries[entry_idx];
+          type_spec_flags |= entry.type_spec_flags;
 
-    const Type* type = package->types[type_idx].get();
-    if (type == nullptr) {
-      return kInvalidCookie;
-    }
+          if (entry.value.dataType == Res_value::TYPE_ATTRIBUTE) {
+            if (cnt > 0) {
+              cnt--;
+              resid = entry.value.data;
+              continue;
+            }
+            return kInvalidCookie;
+          }
 
-    if (entry_idx >= type->entry_count) {
-      return kInvalidCookie;
-    }
+          // @null is different than @empty.
+          if (entry.value.dataType == Res_value::TYPE_NULL &&
+              entry.value.data != Res_value::DATA_NULL_EMPTY) {
+            return kInvalidCookie;
+          }
 
-    const Entry& entry = type->entries[entry_idx];
-    type_spec_flags |= entry.type_spec_flags;
-
-    switch (entry.value.dataType) {
-      case Res_value::TYPE_NULL:
-        return kInvalidCookie;
-
-      case Res_value::TYPE_ATTRIBUTE:
-        resid = entry.value.data;
-        break;
-
-      case Res_value::TYPE_DYNAMIC_ATTRIBUTE: {
-        // Resolve the dynamic attribute to a normal attribute
-        // (with the right package ID).
-        resid = entry.value.data;
-        const DynamicRefTable* ref_table =
-            asset_manager_->GetDynamicRefTableForPackage(package_idx);
-        if (ref_table == nullptr || ref_table->lookupResourceId(&resid) != NO_ERROR) {
-          LOG(ERROR) << base::StringPrintf("Failed to resolve dynamic attribute 0x%08x", resid);
-          return kInvalidCookie;
-        }
-      } break;
-
-      case Res_value::TYPE_DYNAMIC_REFERENCE: {
-        // Resolve the dynamic reference to a normal reference
-        // (with the right package ID).
-        out_value->dataType = Res_value::TYPE_REFERENCE;
-        out_value->data = entry.value.data;
-        const DynamicRefTable* ref_table =
-            asset_manager_->GetDynamicRefTableForPackage(package_idx);
-        if (ref_table == nullptr || ref_table->lookupResourceId(&out_value->data) != NO_ERROR) {
-          LOG(ERROR) << base::StringPrintf("Failed to resolve dynamic reference 0x%08x",
-                                           out_value->data);
-          return kInvalidCookie;
-        }
-
-        if (out_flags != nullptr) {
+          *out_value = entry.value;
           *out_flags = type_spec_flags;
+          return entry.cookie;
         }
-        return entry.cookie;
       }
-
-      default:
-        *out_value = entry.value;
-        if (out_flags != nullptr) {
-          *out_flags = type_spec_flags;
-        }
-        return entry.cookie;
     }
-  }
-
-  LOG(WARNING) << base::StringPrintf("Too many (%d) attribute references, stopped at: 0x%08x",
-                                     kMaxIterations, resid);
+    break;
+  } while (true);
   return kInvalidCookie;
 }
 
@@ -923,7 +930,7 @@ bool Theme::SetTo(const Theme& o) {
     }
 
     for (size_t t = 0; t < package->types.size(); t++) {
-      const Type* type = package->types[t].get();
+      const ThemeType* type = package->types[t].get();
       if (type == nullptr) {
         // The other theme doesn't have this type, clear ours.
         packages_[p]->types[t].reset();
@@ -931,10 +938,10 @@ bool Theme::SetTo(const Theme& o) {
       }
 
       // Create a new type and update it to theirs.
-      const size_t type_alloc_size = sizeof(Type) + (type->entry_capacity * sizeof(Entry));
+      const size_t type_alloc_size = sizeof(ThemeType) + (type->entry_count * sizeof(ThemeEntry));
       void* copied_data = malloc(type_alloc_size);
       memcpy(copied_data, type, type_alloc_size);
-      packages_[p]->types[t].reset(reinterpret_cast<Type*>(copied_data));
+      packages_[p]->types[t].reset(reinterpret_cast<ThemeType*>(copied_data));
     }
   }
   return true;
