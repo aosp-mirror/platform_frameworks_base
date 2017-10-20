@@ -3124,4 +3124,7 @@
   <java-symbol type="string" name="shortcut_restore_not_supported" />
   <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
   <java-symbol type="string" name="shortcut_restore_unknown_issue" />
+
+  <!-- From media projection -->
+  <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
 </resources>
