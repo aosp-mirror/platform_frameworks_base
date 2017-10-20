@@ -2506,6 +2506,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.widgetCategory = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_widgetCategory,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+            info.widgetFeatures = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures, 0);
 
             sa.recycle();
         } catch (IOException | PackageManager.NameNotFoundException | XmlPullParserException e) {
