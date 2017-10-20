@@ -6,6 +6,7 @@ LOCAL_MODULE := services.core
 
 LOCAL_AIDL_INCLUDES := \
     frameworks/native/aidl/binder \
+    system/core/storaged/binder \
     system/netd/server/binder \
     system/vold/binder
 
@@ -13,6 +14,7 @@ LOCAL_SRC_FILES += \
     $(call all-java-files-under,java) \
     java/com/android/server/EventLogTags.logtags \
     java/com/android/server/am/EventLogTags.logtags \
+    ../../../../system/core/storaged/binder/android/os/IStoraged.aidl \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
     ../../../../system/netd/server/binder/android/net/metrics/INetdEventListener.aidl \
     ../../../../system/vold/binder/android/os/IVold.aidl \

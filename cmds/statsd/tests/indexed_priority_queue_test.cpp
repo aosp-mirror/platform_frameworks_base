@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../src/indexed_priority_queue.h"
+#include "src/anomaly/indexed_priority_queue.h"
 
 #include <gtest/gtest.h>
 

@@ -370,7 +370,7 @@ public abstract class ViewStructure {
      * <p>Should only be set when the node is used for autofill purposes - it will be ignored
      * when used for Assist.
      */
-    public abstract void setMinTextEms(int minEms);
+    public void setMinTextEms(@SuppressWarnings("unused") int minEms) {}
 
     /**
      * Sets the maximum width in ems of the text associated with this view, when supported.
@@ -378,7 +378,7 @@ public abstract class ViewStructure {
      * <p>Should only be set when the node is used for autofill purposes - it will be ignored
      * when used for Assist.
      */
-    public abstract void setMaxTextEms(int maxEms);
+    public void setMaxTextEms(@SuppressWarnings("unused") int maxEms) {}
 
     /**
      * Sets the maximum length of the text associated with this view, when supported.
@@ -386,7 +386,7 @@ public abstract class ViewStructure {
      * <p>Should only be set when the node is used for autofill purposes - it will be ignored
      * when used for Assist.
      */
-    public abstract void setMaxTextLength(int maxLength);
+    public void setMaxTextLength(@SuppressWarnings("unused") int maxLength) {}
 
     /**
      * Call when done populating a {@link ViewStructure} returned by

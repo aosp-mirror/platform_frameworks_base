@@ -17,6 +17,8 @@
 #ifndef MATCHER_UTIL_H
 #define MATCHER_UTIL_H
 
+#include "logd/LogEvent.h"
+
 #include <log/log_read.h>
 #include <log/logprint.h>
 #include <set>
@@ -25,21 +27,11 @@
 #include <vector>
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "stats_util.h"
 
 namespace android {
 namespace os {
 namespace statsd {
-
-typedef struct {
-    int tagId;
-    long timestamp_ns;
-    std::unordered_map<int, long> intMap;
-    std::unordered_map<int, std::string> strMap;
-    std::unordered_map<int, bool> boolMap;
-    std::unordered_map<int, float> floatMap;
-
-    std::string toString() const;
-} LogEventWrapper;
 
 enum MatchingState {
     kNotComputed = -1,
@@ -47,12 +39,13 @@ enum MatchingState {
     kMatched = 1,
 };
 
-LogEventWrapper parseLogEvent(log_msg msg);
-
 bool combinationMatch(const std::vector<int>& children, const LogicalOperation& operation,
                       const std::vector<MatchingState>& matcherResults);
 
-bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEventWrapper& wrapper);
+bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& wrapper);
+
+std::vector<KeyValuePair> getDimensionKey(const LogEvent& event,
+                                          const std::vector<KeyMatcher>& dimensions);
 
 }  // namespace statsd
 }  // namespace os

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <log/log_event_list.h>
 #include "stats_util.h"
+#include <log/log_event_list.h>
 
 namespace android {
 namespace os {
@@ -128,161 +128,34 @@ EventMetricData parse(log_msg msg) {
     return eventMetricData;
 }
 
-StatsdConfig buildFakeConfig() {
-    // HACK: Hard code a test metric for counting screen on events...
-    StatsdConfig config;
-    config.set_config_id(12345L);
-
-    // One count metric to count screen on
-    CountMetric* metric = config.add_count_metric();
-    metric->set_metric_id(20150717L);
-    metric->set_what("SCREEN_IS_ON");
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-
-    // One count metric to count PHOTO_CHANGE_OR_CHROME_CRASH
-    metric = config.add_count_metric();
-    metric->set_metric_id(20150718L);
-    metric->set_what("PHOTO_PROCESS_STATE_CHANGE");
-    metric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
-    metric->set_condition("SCREEN_IS_ON");
-
-
-    LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
-    eventMatcher->set_name("SCREEN_IS_ON");
-
-    SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
-            2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-
-
-
-    eventMatcher = config.add_log_entry_matcher();
-    eventMatcher->set_name("SCREEN_IS_OFF");
-
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->add_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleLogEntryMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleLogEntryMatcher->mutable_key_value_matcher(0)->set_eq_int(
-            1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
-
-
-
-    LogEntryMatcher* procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_CRASH");
-
-    SimpleLogEntryMatcher* simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    KeyValueMatcher* keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.google.android.apps.photos" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                                   1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    keyValueMatcher->set_eq_int(2);
-
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_START");
-
-    simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.google.android.apps.photos" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                                   1 /*STATE*/);
-    keyValueMatcher->set_eq_int(1);
-
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_PROCESS_STATE_CHANGE");
-    LogEntryMatcher_Combination* combinationMatcher = procEventMatcher->mutable_combination();
-    combinationMatcher->set_operation(LogicalOperation::OR);
-    combinationMatcher->add_matcher("PHOTO_START");
-    combinationMatcher->add_matcher("PHOTO_CRASH");
-
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("CHROME_CRASH");
-
-    simpleLogMatcher2 = procEventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogMatcher2->add_tag(1112 /*PROCESS_STATE_CHANGE*/);
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                1002 /*pkg*/);
-    keyValueMatcher->set_eq_string(
-            "com.android.chrome" /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
-
-    keyValueMatcher = simpleLogMatcher2->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(
-                                   1 /*STATE*/);
-    keyValueMatcher->set_eq_int(2);
-
-
-
-    procEventMatcher = config.add_log_entry_matcher();
-    procEventMatcher->set_name("PHOTO_CHANGE_OR_CHROME_CRASH");
-    combinationMatcher = procEventMatcher->mutable_combination();
-    combinationMatcher->set_operation(LogicalOperation::OR);
-    combinationMatcher->add_matcher("PHOTO_PROCESS_STATE_CHANGE");
-    combinationMatcher->add_matcher("CHROME_CRASH");
-
-
-
-    Condition* condition = config.add_condition();
-    condition->set_name("SCREEN_IS_ON");
-    SimpleCondition* simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_IS_ON");
-    simpleCondition->set_stop("SCREEN_IS_OFF");
-
-
-    condition = config.add_condition();
-        condition->set_name("PHOTO_STARTED");
-
-        simpleCondition = condition->mutable_simple_condition();
-        simpleCondition->set_start("PHOTO_START");
-        simpleCondition->set_stop("PHOTO_CRASH");
-
-
-    condition = config.add_condition();
-    condition->set_name("SCREEN_IS_OFF");
-
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_IS_OFF");
-    simpleCondition->set_stop("SCREEN_IS_ON");
-
-
-    condition = config.add_condition();
-    condition->set_name("SCREEN_IS_EITHER_ON_OFF");
-
-    Condition_Combination* combination = condition->mutable_combination();
-    combination->set_operation(LogicalOperation::OR);
-    combination->add_condition("SCREEN_IS_ON");
-    combination->add_condition("SCREEN_IS_OFF");
-
-
-    condition = config.add_condition();
-    condition->set_name("SCREEN_IS_NEITHER_ON_OFF");
-
-    combination = condition->mutable_combination();
-    combination->set_operation(LogicalOperation::NOR);
-    combination->add_condition("SCREEN_IS_ON");
-    combination->add_condition("SCREEN_IS_OFF");
-
-    return config;
+// There is no existing hash function for the dimension key ("repeated KeyValuePair").
+// Temporarily use a string concatenation as the hashable key.
+// TODO: Find a better hash function for std::vector<KeyValuePair>.
+HashableDimensionKey getHashableKey(std::vector<KeyValuePair> keys) {
+    std::string flattened;
+    for (const KeyValuePair& pair : keys) {
+        flattened += std::to_string(pair.key());
+        flattened += ":";
+        switch (pair.value_case()) {
+            case KeyValuePair::ValueCase::kValueStr:
+                flattened += pair.value_str();
+                break;
+            case KeyValuePair::ValueCase::kValueInt:
+                flattened += std::to_string(pair.value_int());
+                break;
+            case KeyValuePair::ValueCase::kValueBool:
+                flattened += std::to_string(pair.value_bool());
+                break;
+            case KeyValuePair::ValueCase::kValueFloat:
+                flattened += std::to_string(pair.value_float());
+                break;
+            default:
+                break;
+        }
+        flattened += "|";
+    }
+    return flattened;
 }
-
 
 }  // namespace statsd
 }  // namespace os

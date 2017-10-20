@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "MetricManager"
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "MetricsManager.h"
-#include <cutils/log.h>
 #include <log/logprint.h>
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
@@ -59,20 +56,31 @@ void MetricsManager::finish() {
     }
 }
 
+vector<StatsLogReport> MetricsManager::onDumpReport() {
+    VLOG("=========================Metric Reports Start==========================");
+    // one StatsLogReport per MetricProduer
+    vector<StatsLogReport> reportList;
+    for (auto& metric : mAllMetricProducers) {
+        reportList.push_back(metric->onDumpReport());
+    }
+    VLOG("=========================Metric Reports End==========================");
+    return reportList;
+}
+
 // Consume the stats log if it's interesting to this metric.
-void MetricsManager::onLogEvent(const log_msg& logMsg) {
+void MetricsManager::onLogEvent(const LogEvent& event) {
     if (!mConfigValid) {
         return;
     }
 
-    int tagId = getTagId(logMsg);
+    int tagId = event.GetTagId();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
     }
 
     // Since at least one of the metrics is interested in this event, we parse it now.
-    LogEventWrapper event = parseLogEvent(logMsg);
+    ALOGD("%s", event.ToString().c_str());
     vector<MatchingState> matcherCache(mAllLogEntryMatchers.size(), MatchingState::kNotComputed);
 
     for (auto& matcher : mAllLogEntryMatchers) {
@@ -95,20 +103,34 @@ void MetricsManager::onLogEvent(const log_msg& logMsg) {
                                           ConditionState::kNotEvaluated);
     // A bitmap to track if a condition has changed value.
     vector<bool> changedCache(mAllConditionTrackers.size(), false);
+    vector<bool> slicedChangedCache(mAllConditionTrackers.size(), false);
     for (size_t i = 0; i < mAllConditionTrackers.size(); i++) {
         if (conditionToBeEvaluated[i] == false) {
             continue;
         }
-
         sp<ConditionTracker>& condition = mAllConditionTrackers[i];
         condition->evaluateCondition(event, matcherCache, mAllConditionTrackers, conditionCache,
-                                     changedCache);
-        if (changedCache[i]) {
-            auto pair = mConditionToMetricMap.find(i);
-            if (pair != mConditionToMetricMap.end()) {
-                auto& metricList = pair->second;
-                for (auto metricIndex : metricList) {
+                                     changedCache, slicedChangedCache);
+    }
+
+    for (size_t i = 0; i < mAllConditionTrackers.size(); i++) {
+        if (changedCache[i] == false && slicedChangedCache[i] == false) {
+            continue;
+        }
+        auto pair = mConditionToMetricMap.find(i);
+        if (pair != mConditionToMetricMap.end()) {
+            auto& metricList = pair->second;
+            for (auto metricIndex : metricList) {
+                // metric cares about non sliced condition, and it's changed.
+                // Push the new condition to it directly.
+                if (!mAllMetricProducers[metricIndex]->isConditionSliced() && changedCache[i]) {
                     mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i]);
+                    // metric cares about sliced conditions, and it may have changed. Send
+                    // notification, and the metric can query the sliced conditions that are
+                    // interesting to it.
+                } else if (mAllMetricProducers[metricIndex]->isConditionSliced() &&
+                           slicedChangedCache[i]) {
+                    mAllMetricProducers[metricIndex]->onSlicedConditionMayChange();
                 }
             }
         }
@@ -121,7 +143,7 @@ void MetricsManager::onLogEvent(const log_msg& logMsg) {
             if (pair != mTrackerToMetricMap.end()) {
                 auto& metricList = pair->second;
                 for (const int metricIndex : metricList) {
-                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(event);
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event);
                 }
             }
         }

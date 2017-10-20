@@ -2845,6 +2845,7 @@
 
     <public-group type="attr" first-id="0x0101056e">
       <public name="cantSaveState" />
+      <public name="ttcIndex" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

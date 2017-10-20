@@ -72,7 +72,7 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jbo
     const char *deviceInfoDeviceVersionStr = env->GetStringUTFChars(deviceInfoDeviceVersion, NULL);
     const char *deviceInfoSerialNumberStr = env->GetStringUTFChars(deviceInfoSerialNumber, NULL);
     MtpServer* server = new MtpServer(getMtpDatabase(env, javaDatabase),
-            usePtp, AID_MEDIA_RW, 0664, 0775,
+            usePtp,
             MtpString((deviceInfoManufacturerStr != NULL) ? deviceInfoManufacturerStr : ""),
             MtpString((deviceInfoModelStr != NULL) ? deviceInfoModelStr : ""),
             MtpString((deviceInfoDeviceVersionStr != NULL) ? deviceInfoDeviceVersionStr : ""),

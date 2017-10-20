@@ -4711,11 +4711,11 @@
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
     <string name="etws_primary_default_message_others"></string>
 
-    <!-- Title of notification when UE fails to register network with MM reject cause code. -->
-    <string name="mmcc_authentication_reject">SIM not allowed</string>
-    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned</string>
-    <string name="mmcc_illegal_ms">SIM not allowed</string>
-    <string name="mmcc_illegal_me">Phone not allowed</string>
+    <!-- Title of notification when UE fails CS registration with MM reject cause code from network. -->
+    <string name="mmcc_authentication_reject">SIM not allowed for voice</string>
+    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned for voice</string>
+    <string name="mmcc_illegal_ms">SIM not allowed for voice</string>
+    <string name="mmcc_illegal_me">Phone not allowed for voice</string>
 
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>

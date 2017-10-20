@@ -52,6 +52,7 @@ import org.xmlpull.v1.XmlSerializer;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -3190,6 +3191,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @MainThread
     @Override
     public boolean handleMessage(Message msg) {
         SomeArgs args;

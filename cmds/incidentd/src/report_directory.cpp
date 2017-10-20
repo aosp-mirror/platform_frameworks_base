@@ -97,7 +97,8 @@ create_directory(const char* directory)
         err = BAD_VALUE;
         goto done;
     }
-    if (st.st_uid != AID_SYSTEM || st.st_gid != AID_SYSTEM) {
+    if ((st.st_uid != AID_SYSTEM && st.st_uid != AID_ROOT) ||
+        (st.st_gid != AID_SYSTEM && st.st_gid != AID_ROOT)) {
         ALOGE("No incident reports today. Owner is %d and group is %d on report directory %s",
                 st.st_uid, st.st_gid, directory);
         err = BAD_VALUE;

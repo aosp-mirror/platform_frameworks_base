@@ -42,7 +42,7 @@ public:
               const std::unordered_map<std::string, int>& matcherMap,
               std::vector<bool>& stack) override;
 
-    void onLogEvent(const LogEventWrapper& event,
+    void onLogEvent(const LogEvent& event,
                     const std::vector<sp<LogMatchingTracker>>& allTrackers,
                     std::vector<MatchingState>& matcherResults) override;
 

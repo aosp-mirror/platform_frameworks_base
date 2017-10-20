@@ -55,7 +55,7 @@ enum LogicalOperation {
 }
 
 message SimpleLogEntryMatcher {
-  repeated int32 tag = 1;
+  optional int32 tag = 1;
 
   repeated KeyValueMatcher key_value_matcher = 2;
 }
@@ -103,12 +103,28 @@ message Bucket {
   optional int64 bucket_size_millis = 1;
 }
 
+message Alert {
+  message IncidentdDetails {
+    optional string alert_name = 1;
+    repeated int32 incidentd_sections = 2;
+  }
+  optional IncidentdDetails incidentd_details = 1;
+
+  optional int32 number_of_buckets = 3;
+
+  optional int32 refractory_period_secs = 4;
+
+  optional int64 trigger_if_gt = 5;
+}
+
 message EventMetric {
   optional int64 metric_id = 1;
 
   optional string what = 2;
 
   optional string condition = 3;
+
+  repeated EventConditionLink links = 4;
 }
 
 message CountMetric {
@@ -121,10 +137,22 @@ message CountMetric {
   repeated KeyMatcher dimension = 4;
 
   optional Bucket bucket = 5;
+
+  repeated Alert alerts = 6;
+
+  optional bool include_in_output = 7;
+
+  repeated EventConditionLink links = 8;
 }
 
 message DurationMetric {
   optional int64 metric_id = 1;
+
+  optional string start = 2;
+
+  optional string stop = 3;
+
+  optional string stop_all = 4;
 
   enum AggregationType {
     DURATION_SUM = 1;
@@ -132,14 +160,49 @@ message DurationMetric {
     DURATION_MAX_SPARSE = 2;
     DURATION_MIN_SPARSE = 3;
   }
-  optional AggregationType type = 2;
+  optional AggregationType type = 5;
 
-  optional string predicate = 3;
+  optional string predicate = 6;
 
-  repeated KeyMatcher dimension = 4;
+  repeated KeyMatcher dimension = 7;
 
-  optional Bucket bucket = 5;
+  optional Bucket bucket = 8;
+
+  repeated EventConditionLink links = 9;
 }
+
+message ValueMetric {
+  optional int64 metric_id = 1;
+
+  optional string what = 2;
+
+  optional int32 value_field = 3;
+
+  optional string condition = 4;
+
+  repeated KeyMatcher dimension = 5;
+
+  optional Bucket bucket = 6;
+
+  enum Operation {
+    SUM_DIFF = 1;
+    MIN_DIFF = 2;
+    MAX_DIFF = 3;
+    SUM = 4;
+    MIN = 5;
+    MAX = 6;
+    FIRST = 7;
+    LAST = 8;
+  }
+  optional Operation operation = 7;
+}
+
+message EventConditionLink {
+    optional string condition = 1;
+
+    repeated KeyMatcher key_in_main = 2;
+    repeated KeyMatcher key_in_condition = 3;
+};
 
 message StatsdConfig {
   optional int64 config_id = 1;
@@ -148,7 +211,11 @@ message StatsdConfig {
 
   repeated CountMetric count_metric = 3;
 
-  repeated LogEntryMatcher log_entry_matcher = 4;
+  repeated ValueMetric value_metric = 4;
 
-  repeated Condition condition = 5;
+  repeated DurationMetric duration_metric = 5;
+
+  repeated LogEntryMatcher log_entry_matcher = 6;
+
+  repeated Condition condition = 7;
 }

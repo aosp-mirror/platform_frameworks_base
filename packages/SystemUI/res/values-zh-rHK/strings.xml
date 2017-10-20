@@ -182,7 +182,6 @@
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"所有最近使用的應用程式均已關閉。"</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"開啟「<xliff:g id="APP">%s</xliff:g>」應用程式的資料。"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"正在啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
-    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g><xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"通知已關閉。"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知欄。"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速設定。"</string>
@@ -345,8 +344,6 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"將分割畫面顯示喺頂部"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"將分割畫面顯示喺左邊"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"將分割畫面顯示喺右邊"</string>
-  <string-array name="recents_blacklist_array">
-  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>

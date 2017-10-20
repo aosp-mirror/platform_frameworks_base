@@ -26,7 +26,12 @@ import android.net.wifi.rtt.RangingResult;
 oneway interface IRttCallback
 {
     /**
-     * Service to manager callback providing RTT status and results.
+     * Service to manager callback indicating failure.
      */
-    void onRangingResults(int status, in List<RangingResult> results);
+    void onRangingFailure(int status);
+
+    /**
+     * Service to manager callback indicating success and providing results.
+     */
+    void onRangingResults(in List<RangingResult> results);
 }

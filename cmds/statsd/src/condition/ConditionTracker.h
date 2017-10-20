@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef CONDITION_TRACKER_H
-#define CONDITION_TRACKER_H
+#pragma once
 
-#include <cutils/log.h>
+#include "Log.h"
+
+#include "condition/condition_util.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/LogMatchingTracker.h"
+#include "matchers/matcher_util.h"
+
 #include <log/logprint.h>
 #include <utils/RefBase.h>
+
 #include <unordered_map>
-#include "../matchers/LogMatchingTracker.h"
-#include "../matchers/matcher_util.h"
-#include "condition_util.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
@@ -36,8 +38,9 @@ public:
         : mName(name),
           mIndex(index),
           mInitialized(false),
-          mConditionState(ConditionState::kUnknown),
-          mTrackerIndex(){};
+          mTrackerIndex(),
+          mNonSlicedConditionState(ConditionState::kUnknown),
+          mSliced(false){};
 
     virtual ~ConditionTracker(){};
 
@@ -61,24 +64,46 @@ public:
     //                     event before ConditionTrackers, because ConditionTracker depends on
     //                     LogMatchingTrackers.
     // mAllConditions: the list of all ConditionTracker
-    // conditionCache: the cached results of the ConditionTrackers for this new event.
-    // changedCache: the bit map to record whether the condition has changed.
-    virtual bool evaluateCondition(const LogEventWrapper& event,
+    // conditionCache: the cached non-sliced condition of the ConditionTrackers for this new event.
+    // nonSlicedConditionChanged: the bit map to record whether non-sliced condition has changed.
+    // slicedConditionMayChanged: the bit map to record whether sliced condition may have changed.
+    //      Because sliced condition needs parameters to determine the value. So the sliced
+    //      condition is not pushed to metrics. We only inform the relevant metrics that the sliced
+    //      condition may have changed, and metrics should pull the conditions that they are
+    //      interested in.
+    virtual bool evaluateCondition(const LogEvent& event,
                                    const std::vector<MatchingState>& eventMatcherValues,
                                    const std::vector<sp<ConditionTracker>>& mAllConditions,
                                    std::vector<ConditionState>& conditionCache,
-                                   std::vector<bool>& changedCache) = 0;
+                                   std::vector<bool>& nonSlicedConditionChanged,
+                                   std::vector<bool>& slicedConditionMayChanged) = 0;
 
     // Return the current condition state.
     virtual ConditionState isConditionMet() {
-        ALOGW("Condition %s value %d", mName.c_str(), mConditionState);
-        return mConditionState;
+        return mNonSlicedConditionState;
     };
+
+    // Query the condition with parameters.
+    // [conditionParameters]: a map from condition name to the HashableDimensionKey to query the
+    //                       condition.
+    // [allConditions]: all condition trackers. This is needed because the condition evaluation is
+    //                  done recursively
+    // [conditionCache]: the cache holding the condition evaluation values.
+    virtual void isConditionMet(
+            const std::map<std::string, HashableDimensionKey>& conditionParameters,
+            const std::vector<sp<ConditionTracker>>& allConditions,
+            std::vector<ConditionState>& conditionCache) = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {
         return mTrackerIndex;
     }
+
+    virtual void setSliced(bool sliced) {
+        mSliced = mSliced | sliced;
+    }
+
+    virtual void addDimensions(const std::vector<KeyMatcher>& keyMatchers) = 0;
 
 protected:
     // We don't really need the string name, but having a name here makes log messages
@@ -91,15 +116,15 @@ protected:
     // if it's properly initialized.
     bool mInitialized;
 
-    // current condition state.
-    ConditionState mConditionState;
-
     // the list of LogMatchingTracker index that this ConditionTracker uses.
     std::set<int> mTrackerIndex;
+
+    ConditionState mNonSlicedConditionState;
+
+    bool mSliced;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
 
-#endif  // CONDITION_TRACKER_H

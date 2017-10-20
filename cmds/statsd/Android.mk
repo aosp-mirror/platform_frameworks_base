@@ -14,34 +14,39 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-
 statsd_common_src := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \
     src/statsd_config.proto \
     src/stats_events_copy.proto \
+    src/anomaly/AnomalyMonitor.cpp \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \
+    src/condition/ConditionWizard.cpp \
+    src/config/ConfigKey.cpp \
+    src/config/ConfigListener.cpp \
+    src/config/ConfigManager.cpp \
+    src/external/KernelWakelockPuller.cpp \
+    src/external/StatsPullerManager.cpp \
+    src/logd/LogEvent.cpp \
+    src/logd/LogListener.cpp \
+    src/logd/LogReader.cpp \
     src/matchers/CombinationLogMatchingTracker.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/CountAnomalyTracker.cpp \
     src/metrics/CountMetricProducer.cpp \
+    src/metrics/DurationMetricProducer.cpp \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
-    src/AnomalyMonitor.cpp \
-    src/DropboxReader.cpp \
-    src/DropboxWriter.cpp \
-    src/KernelWakelockPuller.cpp \
-    src/LogEntryPrinter.cpp \
-    src/LogReader.cpp \
+    src/packages/UidMap.cpp \
+    src/storage/DropboxReader.cpp \
+    src/storage/DropboxWriter.cpp \
     src/StatsLogProcessor.cpp \
-    src/StatsPullerManager.cpp \
     src/StatsService.cpp \
-    src/stats_util.cpp \
-    src/UidMap.cpp
+    src/stats_util.cpp
 
 statsd_common_c_includes := \
     $(LOCAL_PATH)/src
@@ -125,13 +130,15 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
+    tests/AnomalyMonitor_test.cpp \
+    tests/ConditionTracker_test.cpp \
+    tests/ConfigManager_test.cpp \
     tests/indexed_priority_queue_test.cpp \
+    tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \
     tests/MetricsManager_test.cpp \
-    tests/UidMap_test.cpp \
-    tests/LogEntryMatcher_test.cpp \
-    tests/AnomalyMonitor_test.cpp \
-    tests/ConditionTracker_test.cpp
+    tests/UidMap_test.cpp
+
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock

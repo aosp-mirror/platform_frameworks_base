@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
+#include "Log.h"
+
 #include "condition_util.h"
 
-#include <cutils/log.h>
 #include <log/event_tag_map.h>
 #include <log/log_event_list.h>
 #include <log/logprint.h>
 #include <utils/Errors.h>
 #include <unordered_map>
+#include "../matchers/matcher_util.h"
 #include "ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
+
+namespace android {
+namespace os {
+namespace statsd {
 
 using std::set;
 using std::string;
 using std::unordered_map;
 using std::vector;
 
-namespace android {
-namespace os {
-namespace statsd {
 
 ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const LogicalOperation& operation,
@@ -86,6 +89,25 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
             break;
     }
     return newCondition;
+}
+
+HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
+                                                 const EventConditionLink& link) {
+    vector<KeyMatcher> eventKey;
+    eventKey.reserve(link.key_in_main().size());
+
+    for (const auto& key : link.key_in_main()) {
+        eventKey.push_back(key);
+    }
+
+    vector<KeyValuePair> dimensionKey = getDimensionKey(event, eventKey);
+
+    for (int i = 0; i < link.key_in_main_size(); i++) {
+        auto& kv = dimensionKey[i];
+        kv.set_key(link.key_in_condition(i).key());
+    }
+
+    return getHashableKey(dimensionKey);
 }
 
 }  // namespace statsd

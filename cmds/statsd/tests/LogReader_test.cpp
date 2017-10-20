@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define LOG_TAG "statsd_test"
-
 #include <gtest/gtest.h>
 
 #include <stdio.h>

@@ -979,16 +979,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"စာတို လုပ်ဆောင်ချက်"</string>
     <string name="email" msgid="4560673117055050403">"အီးမေးလ်"</string>
-    <!-- no translation found for dial (1253998302767701559) -->
-    <skip />
-    <!-- no translation found for map (6521159124535543457) -->
-    <skip />
-    <!-- no translation found for browse (1245903488306147205) -->
-    <skip />
-    <!-- no translation found for sms (4560537514610063430) -->
-    <skip />
-    <!-- no translation found for add_contact (7867066569670597203) -->
-    <skip />
+    <string name="dial" msgid="1253998302767701559">"ခေါ်ဆိုရန်"</string>
+    <string name="map" msgid="6521159124535543457">"တည်နေရာ"</string>
+    <string name="browse" msgid="1245903488306147205">"ဖွင့်ရန်"</string>
+    <string name="sms" msgid="4560537514610063430">"စာပို့ရန်"</string>
+    <string name="add_contact" msgid="7867066569670597203">"ထည့်ရန်"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
@@ -998,7 +993,6 @@
     <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့"</string>
     <string name="yes" msgid="5362982303337969312">"အိုကေ"</string>
     <string name="no" msgid="5141531044935541497">"မလုပ်တော့"</string>
-    <string name="close" msgid="2318214661230355730">"ပိတ်ရန်"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"သတိပြုရန်"</string>
     <string name="loading" msgid="7933681260296021180">"တင်နေ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ဖွင့်ရန်"</string>
@@ -1055,8 +1049,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"စကေး"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"အမြဲပြသရန်"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ဒါကို စနစ် ဆက်တင်များထဲ ပြန်ဖွင့်ပေးရန် &gt; Apps &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"အက်ပ်က တုံ့ပြန်မှုမရှိပါ"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"<xliff:g id="APP_NAME">%1$s</xliff:g> က နေရာအလွန်အကျွံ ယူထားပုံရပါသည်။"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ မျက်နှာပြင်အရွယ်အစားကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"အမြဲပြပါ"</string>
     <string name="smv_application" msgid="3307209192155442829">"app <xliff:g id="APPLICATION">%1$s</xliff:g> (လုပ်ငန်းစဉ် <xliff:g id="PROCESS">%2$s</xliff:g>) က ကိုယ်တိုင် ပြဌာန်းခဲ့သည့် StrictMode မူဝါဒကို ချိုးဖောက်ခဲ့သည်။"</string>
@@ -1790,18 +1782,18 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"အရေးပေါ် မက်ဆေ့ဂျ် စမ်းသပ်မှု"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"စာပြန်ရန်"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"ဖုန်းကို ခွင့်မပြုပါ"</string>
+    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (5270675146351613828) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_not_supported (5028808567940014190) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_signature_mismatch (2406209324521327518) -->
-    <skip />
-    <!-- no translation found for shortcut_restore_unknown_issue (8703738064603262597) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ဤဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုနိုင်ရန် နောက်ဆုံးထွက်အက်ပ် လိုအပ်ပါသည်"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"အက်ပ်သည် မိတ္တူကူးခြင်းနှင့် ပြန်ယူခြင်းကို ပံ့ပိုးခြင်းမရှိသည့်အတွက် ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"အက်ပ်လက်မှတ် မတူညီသည့်အတွက် ဖြတ်လမ်းလင့်ခ်များကို ပြန်ယူ၍မရပါ"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
 </resources>

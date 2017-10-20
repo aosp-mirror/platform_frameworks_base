@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef METRICS_MANAGER_H
-#define METRICS_MANAGER_H
+#pragma once
 
-#include <cutils/log.h>
-#include <log/logprint.h>
-#include <unordered_map>
-#include "../condition/ConditionTracker.h"
-#include "../matchers/LogMatchingTracker.h"
-#include "MetricProducer.h"
+#include "condition/ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "logd/LogEvent.h"
+#include "matchers/LogMatchingTracker.h"
+#include "metrics/MetricProducer.h"
+
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -39,10 +38,13 @@ public:
     // Return whether the configuration is valid.
     bool isConfigValid() const;
 
-    void onLogEvent(const log_msg& logMsg);
+    void onLogEvent(const LogEvent& event);
 
     // Called when everything should wrap up. We are about to finish (e.g., new config comes).
     void finish();
+
+    // Config source owner can call onDumpReport() to get all the metrics collected.
+    std::vector<StatsLogReport> onDumpReport();
 
 private:
     // All event tags that are interesting to my metrics.
@@ -50,11 +52,10 @@ private:
 
     // We only store the sp of LogMatchingTracker, MetricProducer, and ConditionTracker in
     // MetricManager. There are relationship between them, and the relationship are denoted by index
-    // instead of poiters. The reasons for this are: (1) the relationship between them are
+    // instead of pointers. The reasons for this are: (1) the relationship between them are
     // complicated, store index instead of pointers reduce the risk of A holds B's sp, and B holds
     // A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get the
     // related results from a cache using the index.
-    // TODO: using unique_ptr may be more appriopreate?
 
     // Hold all the log entry matchers from the config.
     std::vector<sp<LogMatchingTracker>> mAllLogEntryMatchers;
@@ -94,4 +95,3 @@ private:
 }  // namespace os
 }  // namespace android
 
-#endif  // METRICS_MANAGER_H

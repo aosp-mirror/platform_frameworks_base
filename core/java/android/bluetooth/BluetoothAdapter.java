@@ -2277,6 +2277,8 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean enableNoAutoConnect() {
         if (isEnabled()) {
             if (DBG) Log.d(TAG, "enableNoAutoConnect(): BT already enabled!");

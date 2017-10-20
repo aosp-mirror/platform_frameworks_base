@@ -191,6 +191,13 @@ StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& c
   return Ref(borrow);
 }
 
+StringPool::Ref StringPool::MakeRef(const Ref& ref) {
+  if (ref.entry_->pool_ == this) {
+    return ref;
+  }
+  return MakeRef(ref.entry_->value, ref.entry_->context);
+}
+
 StringPool::StyleRef StringPool::MakeRef(const StyleString& str) {
   return MakeRef(str, Context{});
 }

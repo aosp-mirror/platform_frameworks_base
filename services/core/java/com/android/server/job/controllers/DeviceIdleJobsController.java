@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -55,6 +56,9 @@ public final class DeviceIdleJobsController extends StateController {
      */
     private boolean mDeviceIdleMode;
     private int[] mDeviceIdleWhitelistAppIds;
+    private int[] mPowerSaveTempWhitelistAppIds;
+    // These jobs were added when the app was in temp whitelist, these should be exempted from doze
+    private final ArraySet<JobStatus> mTempWhitelistedJobs;
 
     final JobStore.JobStatusFunctor mUpdateFunctor = new JobStore.JobStatusFunctor() {
         @Override public void process(JobStatus jobStatus) {
@@ -79,15 +83,39 @@ public final class DeviceIdleJobsController extends StateController {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(action)
-                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
-                updateIdleMode(mPowerManager != null
-                        ? (mPowerManager.isDeviceIdleMode()
-                                || mPowerManager.isLightDeviceIdleMode())
-                        : false);
-            } else if (PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED.equals(action)) {
-                updateWhitelist();
+            switch (intent.getAction()) {
+                case PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED:
+                case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                    updateIdleMode(mPowerManager != null && (mPowerManager.isDeviceIdleMode()
+                            || mPowerManager.isLightDeviceIdleMode()));
+                    break;
+                case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
+                    synchronized (mLock) {
+                        mDeviceIdleWhitelistAppIds =
+                                mLocalDeviceIdleController.getPowerSaveWhitelistUserAppIds();
+                        if (LOG_DEBUG) {
+                            Slog.d(LOG_TAG, "Got whitelist "
+                                    + Arrays.toString(mDeviceIdleWhitelistAppIds));
+                        }
+                    }
+                    break;
+                case PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED:
+                    synchronized (mLock) {
+                        mPowerSaveTempWhitelistAppIds =
+                                mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
+                        if (LOG_DEBUG) {
+                            Slog.d(LOG_TAG, "Got temp whitelist "
+                                    + Arrays.toString(mPowerSaveTempWhitelistAppIds));
+                        }
+                        boolean changed = false;
+                        for (int i = 0; i < mTempWhitelistedJobs.size(); i ++) {
+                            changed |= updateTaskStateLocked(mTempWhitelistedJobs.valueAt(i));
+                        }
+                        if (changed) {
+                            mStateChangedListener.onControllerStateChanged();
+                        }
+                    }
+                    break;
             }
         }
     };
@@ -101,20 +129,21 @@ public final class DeviceIdleJobsController extends StateController {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mLocalDeviceIdleController =
                 LocalServices.getService(DeviceIdleController.LocalService.class);
+        mDeviceIdleWhitelistAppIds = mLocalDeviceIdleController.getPowerSaveWhitelistUserAppIds();
+        mPowerSaveTempWhitelistAppIds =
+                mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
+        mTempWhitelistedJobs = new ArraySet<>();
         final IntentFilter filter = new IntentFilter();
         filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         mContext.registerReceiverAsUser(
                 mBroadcastReceiver, UserHandle.ALL, filter, null, null);
     }
 
     void updateIdleMode(boolean enabled) {
         boolean changed = false;
-        // Need the whitelist to be ready when going into idle
-        if (mDeviceIdleWhitelistAppIds == null) {
-            updateWhitelist();
-        }
         synchronized (mLock) {
             if (mDeviceIdleMode != enabled) {
                 changed = true;
@@ -130,46 +159,42 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     /**
-     * Fetches the latest whitelist from the device idle controller.
-     */
-    void updateWhitelist() {
-        synchronized (mLock) {
-            if (mLocalDeviceIdleController != null) {
-                mDeviceIdleWhitelistAppIds =
-                        mLocalDeviceIdleController.getPowerSaveWhitelistUserAppIds();
-                if (LOG_DEBUG) {
-                    Slog.d(LOG_TAG, "Got whitelist " + Arrays.toString(mDeviceIdleWhitelistAppIds));
-                }
-            }
-        }
-    }
-
-    /**
      * Checks if the given job's scheduling app id exists in the device idle user whitelist.
      */
     boolean isWhitelistedLocked(JobStatus job) {
-        if (mDeviceIdleWhitelistAppIds != null
-                && ArrayUtils.contains(mDeviceIdleWhitelistAppIds,
-                        UserHandle.getAppId(job.getSourceUid()))) {
-            return true;
-        }
-        return false;
+        return ArrayUtils.contains(mDeviceIdleWhitelistAppIds,
+                UserHandle.getAppId(job.getSourceUid()));
     }
 
-    private void updateTaskStateLocked(JobStatus task) {
-        final boolean whitelisted = isWhitelistedLocked(task);
+    /**
+     * Checks if the given job's scheduling app id exists in the device idle temp whitelist.
+     */
+    boolean isTempWhitelistedLocked(JobStatus job) {
+        return ArrayUtils.contains(mPowerSaveTempWhitelistAppIds,
+                UserHandle.getAppId(job.getSourceUid()));
+    }
+
+    private boolean updateTaskStateLocked(JobStatus task) {
+        final boolean whitelisted = isWhitelistedLocked(task)
+                || (mTempWhitelistedJobs.contains(task) && isTempWhitelistedLocked(task));
         final boolean enableTask = !mDeviceIdleMode || whitelisted;
-        task.setDeviceNotDozingConstraintSatisfied(enableTask, whitelisted);
+        return task.setDeviceNotDozingConstraintSatisfied(enableTask, whitelisted);
     }
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        updateTaskStateLocked(jobStatus);
+        if (isTempWhitelistedLocked(jobStatus)) {
+            mTempWhitelistedJobs.add(jobStatus);
+            jobStatus.setDeviceNotDozingConstraintSatisfied(true, true);
+        } else {
+            updateTaskStateLocked(jobStatus);
+        }
     }
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
+        mTempWhitelistedJobs.remove(jobStatus);
     }
 
     @Override

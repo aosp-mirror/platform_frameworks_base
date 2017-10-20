@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SimpleLogMatchingTracker"
-#define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#define DEBUG false  // STOPSHIP if true
+#include "Log.h"
 
 #include "SimpleLogMatchingTracker.h"
-#include <cutils/log.h>
+
 #include <log/logprint.h>
+
+namespace android {
+namespace os {
+namespace statsd {
 
 using std::string;
 using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
-namespace android {
-namespace os {
-namespace statsd {
 
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
                                                    const SimpleLogEntryMatcher& matcher)
     : LogMatchingTracker(name, index), mMatcher(matcher) {
-    for (int i = 0; i < matcher.tag_size(); i++) {
-        mTagIds.insert(matcher.tag(i));
+    if (!matcher.has_tag()) {
+        mInitialized = false;
+    } else {
+        mTagIds.insert(matcher.tag());
+        mInitialized = true;
     }
-    mInitialized = true;
 }
 
 SimpleLogMatchingTracker::~SimpleLogMatchingTracker() {
@@ -49,10 +50,10 @@ bool SimpleLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMatcher
                                     const unordered_map<string, int>& matcherMap,
                                     vector<bool>& stack) {
     // no need to do anything.
-    return true;
+    return mInitialized;
 }
 
-void SimpleLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
+void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,
                                           const vector<sp<LogMatchingTracker>>& allTrackers,
                                           vector<MatchingState>& matcherResults) {
     if (matcherResults[mIndex] != MatchingState::kNotComputed) {
@@ -60,7 +61,7 @@ void SimpleLogMatchingTracker::onLogEvent(const LogEventWrapper& event,
         return;
     }
 
-    if (mTagIds.find(event.tagId) == mTagIds.end()) {
+    if (mTagIds.find(event.GetTagId()) == mTagIds.end()) {
         matcherResults[mIndex] = MatchingState::kNotMatched;
         return;
     }

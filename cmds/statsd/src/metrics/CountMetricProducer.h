@@ -19,12 +19,13 @@
 
 #include <unordered_map>
 
-#include "CountAnomalyTracker.h"
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
+#include "CountAnomalyTracker.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "stats_util.h"
 
 using namespace std;
 
@@ -34,38 +35,37 @@ namespace statsd {
 
 class CountMetricProducer : public MetricProducer {
 public:
-    CountMetricProducer(const CountMetric& countMetric, const bool hasCondition);
+    // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
+    CountMetricProducer(const CountMetric& countMetric, const int conditionIndex,
+                        const sp<ConditionWizard>& wizard);
 
     virtual ~CountMetricProducer();
 
-    void onMatchedLogEvent(const LogEventWrapper& event) override;
+    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) override;
 
     void onConditionChanged(const bool conditionMet) override;
 
     void finish() override;
 
-    void onDumpReport() override;
+    StatsLogReport onDumpReport() override;
+
+    void onSlicedConditionMayChange() override;
 
     // TODO: Implement this later.
-    virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override {};
+    virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
 
 private:
     const CountMetric mMetric;
 
-    const time_t mStartTime;
-    // TODO: Add dimensions.
-    // Counter value for the current bucket.
-    int mCounter;
-
-    time_t mCurrentBucketStartTime;
-
-    long mBucketSize_sec;
-
     CountAnomalyTracker mAnomalyTracker;
 
-    bool mCondition;
+    // Save the past buckets and we can clear when the StatsLogReport is dumped.
+    std::unordered_map<HashableDimensionKey, std::vector<CountBucketInfo>> mPastBuckets;
 
-    void flushCounterIfNeeded(const time_t& newEventTime);
+    // The current bucket.
+    std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
+
+    void flushCounterIfNeeded(const uint64_t newEventTime);
 };
 
 }  // namespace statsd

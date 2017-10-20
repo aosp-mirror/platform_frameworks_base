@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "CountAnomaly"
 #define DEBUG true  // STOPSHIP if true
+#include "Log.h"
+
 #define VLOG(...) \
     if (DEBUG) ALOGD(__VA_ARGS__);
 
 #include "CountAnomalyTracker.h"
-
-#include <cutils/log.h>
 
 namespace android {
 namespace os {

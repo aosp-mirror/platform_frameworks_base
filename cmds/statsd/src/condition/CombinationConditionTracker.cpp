@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "CombinationConditionTracker"
+
 #define DEBUG true  // STOPSHIP if true
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
+#include "Log.h"
 
 #include "CombinationConditionTracker.h"
-#include <cutils/log.h>
+
 #include <log/logprint.h>
-using std::string;
-using std::unique_ptr;
-using std::unordered_map;
-using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
+
+using std::map;
+using std::string;
+using std::unique_ptr;
+using std::unordered_map;
+using std::vector;
 
 CombinationConditionTracker::CombinationConditionTracker(const string& name, const int index)
     : ConditionTracker(name, index) {
@@ -102,33 +103,62 @@ bool CombinationConditionTracker::init(const vector<Condition>& allConditionConf
     return true;
 }
 
+void CombinationConditionTracker::isConditionMet(
+        const map<string, HashableDimensionKey>& conditionParameters,
+        const vector<sp<ConditionTracker>>& allConditions, vector<ConditionState>& conditionCache) {
+    for (const int childIndex : mChildren) {
+        if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
+            allConditions[childIndex]->isConditionMet(conditionParameters, allConditions,
+                                                      conditionCache);
+        }
+    }
+    conditionCache[mIndex] =
+            evaluateCombinationCondition(mChildren, mLogicalOperation, conditionCache);
+}
+
 bool CombinationConditionTracker::evaluateCondition(
-        const LogEventWrapper& event, const std::vector<MatchingState>& eventMatcherValues,
+        const LogEvent& event, const std::vector<MatchingState>& eventMatcherValues,
         const std::vector<sp<ConditionTracker>>& mAllConditions,
-        std::vector<ConditionState>& conditionCache, std::vector<bool>& changedCache) {
+        std::vector<ConditionState>& nonSlicedConditionCache,
+        std::vector<bool>& nonSlicedChangedCache, vector<bool>& slicedConditionChanged) {
     // value is up to date.
-    if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
+    if (nonSlicedConditionCache[mIndex] != ConditionState::kNotEvaluated) {
         return false;
     }
 
     for (const int childIndex : mChildren) {
-        if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
+        if (nonSlicedConditionCache[childIndex] == ConditionState::kNotEvaluated) {
             const sp<ConditionTracker>& child = mAllConditions[childIndex];
-            child->evaluateCondition(event, eventMatcherValues, mAllConditions, conditionCache,
-                                     changedCache);
+            child->evaluateCondition(event, eventMatcherValues, mAllConditions,
+                                     nonSlicedConditionCache, nonSlicedChangedCache,
+                                     slicedConditionChanged);
         }
     }
 
     ConditionState newCondition =
-            evaluateCombinationCondition(mChildren, mLogicalOperation, conditionCache);
+            evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
 
-    bool changed = (mConditionState != newCondition);
-    mConditionState = newCondition;
+    bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
+    mNonSlicedConditionState = newCondition;
 
-    conditionCache[mIndex] = mConditionState;
+    nonSlicedConditionCache[mIndex] = mNonSlicedConditionState;
 
-    changedCache[mIndex] = changed;
-    return changed;
+    nonSlicedChangedCache[mIndex] = nonSlicedChanged;
+
+    if (mSliced) {
+        for (const int childIndex : mChildren) {
+            // If any of the sliced condition in children condition changes, the combination
+            // condition may be changed too.
+            if (slicedConditionChanged[childIndex]) {
+                slicedConditionChanged[mIndex] = true;
+                break;
+            }
+        }
+        ALOGD("CombinationCondition %s sliced may changed? %d", mName.c_str(),
+              slicedConditionChanged[mIndex] == true);
+    }
+
+    return nonSlicedChanged;
 }
 
 }  // namespace statsd

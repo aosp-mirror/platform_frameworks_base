@@ -17,10 +17,13 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
+#include "condition/ConditionWizard.h"
+#include "matchers/matcher_util.h"
+#include "packages/PackageInfoListener.h"
+
 #include <log/logprint.h>
 #include <utils/RefBase.h>
-#include "../matchers/matcher_util.h"
-#include "PackageInfoListener.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 namespace android {
 namespace os {
@@ -32,18 +35,57 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
+    MetricProducer(const int64_t startTimeNs, const int conditionIndex,
+                   const sp<ConditionWizard>& wizard)
+        : mStartTimeNs(startTimeNs),
+          mCurrentBucketStartTimeNs(startTimeNs),
+          mCondition(conditionIndex >= 0 ? false : true),
+          mWizard(wizard),
+          mConditionTrackerIndex(conditionIndex) {
+        // reuse the same map for non-sliced metrics too. this way, we avoid too many if-else.
+        mDimensionKeyMap[DEFAULT_DIMENSION_KEY] = std::vector<KeyValuePair>();
+    };
     virtual ~MetricProducer(){};
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    virtual void onMatchedLogEvent(const LogEventWrapper& event) = 0;
+    virtual void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) = 0;
 
     virtual void onConditionChanged(const bool condition) = 0;
+
+    virtual void onSlicedConditionMayChange() = 0;
 
     // This is called when the metric collecting is done, e.g., when there is a new configuration
     // coming. MetricProducer should do the clean up, and dump existing data to dropbox.
     virtual void finish() = 0;
 
-    virtual void onDumpReport() = 0;
+    virtual StatsLogReport onDumpReport() = 0;
+
+    virtual bool isConditionSliced() const {
+        return mConditionSliced;
+    };
+
+protected:
+    const uint64_t mStartTimeNs;
+
+    uint64_t mCurrentBucketStartTimeNs;
+
+    int64_t mBucketSizeNs;
+
+    bool mCondition;
+
+    bool mConditionSliced;
+
+    sp<ConditionWizard> mWizard;
+
+    int mConditionTrackerIndex;
+
+    std::vector<KeyMatcher> mDimension;  // The dimension defined in statsd_config
+
+    // Keep the map from the internal HashableDimensionKey to std::vector<KeyValuePair>
+    // that StatsLogReport wants.
+    std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
+
+    std::vector<EventConditionLink> mConditionLinks;
 };
 
 }  // namespace statsd
