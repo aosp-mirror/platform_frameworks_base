@@ -157,6 +157,11 @@ final class FillUi {
                 final int index = dataset.getFieldIds().indexOf(focusedViewId);
                 if (index >= 0) {
                     final RemoteViews presentation = dataset.getFieldPresentation(index);
+                    if (presentation == null) {
+                        Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "
+                                + "service didn't provide a presentation for it on " + dataset);
+                        continue;
+                    }
                     final View view;
                     try {
                         if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);

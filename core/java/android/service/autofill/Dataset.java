@@ -281,19 +281,24 @@ public final class Dataset implements Parcelable {
         /**
          * Sets the value of a field.
          *
+         * <b>Note:</b> Prior to Android {@link android.os.Build.VERSION_CODES#P}, this method would
+         * throw an {@link IllegalStateException} if this builder was constructed without a
+         * {@link RemoteViews presentation}. Android {@link android.os.Build.VERSION_CODES#P} and
+         * higher removed this restriction because datasets used as an
+         * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT
+         * authentication result} do not need a presentation. But if you don't set the presentation
+         * in the constructor in a dataset that is meant to be shown to the user, the autofill UI
+         * for this field will not be displayed.
+         *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param value value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs authentication and you have no access to the value.
          * @return this builder.
-         * @throws IllegalStateException if the builder was constructed without a
-         * {@link RemoteViews presentation}.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
             throwIfDestroyed();
-            Preconditions.checkState(mPresentation != null,
-                    "Dataset presentation not set on constructor");
             setLifeTheUniverseAndEverything(id, value, null, null);
             return this;
         }
@@ -335,7 +340,7 @@ public final class Dataset implements Parcelable {
          *
          * @return this builder.
          * @throws IllegalStateException if the builder was constructed without a
-         * {@link RemoteViews presentation}.
+         *         {@link RemoteViews presentation}.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull Pattern filter) {
