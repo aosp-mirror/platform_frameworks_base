@@ -706,7 +706,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     TaskRecord anyTaskForIdLocked(int id, @AnyTaskForIdMatchTaskMode int matchMode) {
-        return anyTaskForIdLocked(id, matchMode, null);
+        return anyTaskForIdLocked(id, matchMode, null, !ON_TOP);
     }
 
     /**
@@ -714,11 +714,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param id Id of the task we would like returned.
      * @param matchMode The mode to match the given task id in.
      * @param aOptions The activity options to use for restoration. Can be null.
+     * @param onTop If the stack for the task should be the topmost on the display.
      */
     TaskRecord anyTaskForIdLocked(int id, @AnyTaskForIdMatchTaskMode int matchMode,
-            @Nullable ActivityOptions aOptions) {
-        // If there is a stack id set, ensure that we are attempting to actually restore a task
-        // TODO: Don't really know if this is needed...
+            @Nullable ActivityOptions aOptions, boolean onTop) {
+        // If options are set, ensure that we are attempting to actually restore a task
         if (matchMode != MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE && aOptions != null) {
             throw new IllegalArgumentException("Should not specify activity options for non-restore"
                     + " lookup");
@@ -730,9 +730,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 final TaskRecord task = stack.taskForIdLocked(id);
-                if (task != null) {
-                    return task;
+                if (task == null) {
+                    continue;
                 }
+                if (aOptions != null) {
+                    // Resolve the stack the task should be placed in now based on options
+                    // and reparent if needed.
+                    final ActivityStack launchStack = getLaunchStack(null, aOptions, task, onTop);
+                    if (launchStack != null && stack != launchStack) {
+                        final int reparentMode = onTop
+                                ? REPARENT_MOVE_STACK_TO_FRONT : REPARENT_LEAVE_STACK_IN_PLACE;
+                        task.reparent(launchStack, onTop, reparentMode, ANIMATE, DEFER_RESUME,
+                                "anyTaskForIdLocked");
+                    }
+                }
+                return task;
             }
         }
 
@@ -759,7 +771,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Implicitly, this case is MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE
-        if (!restoreRecentTaskLocked(task, aOptions)) {
+        if (!restoreRecentTaskLocked(task, aOptions, onTop)) {
             if (DEBUG_RECENTS) Slog.w(TAG_RECENTS,
                     "Couldn't restore task id=" + id + " found in recents");
             return null;
@@ -2248,11 +2260,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        if (isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
+        if (windowingMode != WINDOWING_MODE_UNDEFINED
+                && isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
                 supportsFreeform, supportsPip, activityType)) {
             return windowingMode;
         }
-        return WINDOWING_MODE_FULLSCREEN;
+        // Return root/systems windowing mode
+        return getWindowingMode();
     }
 
     int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
@@ -2266,7 +2280,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (activityType != ACTIVITY_TYPE_UNDEFINED) {
             return activityType;
         }
-        return options != null ? options.getLaunchActivityType() : ACTIVITY_TYPE_UNDEFINED;
+        if (options != null) {
+            activityType = options.getLaunchActivityType();
+        }
+        return activityType != ACTIVITY_TYPE_UNDEFINED ? activityType : ACTIVITY_TYPE_STANDARD;
     }
 
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
@@ -2304,7 +2321,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Temporarily set the task id to invalid in case in re-entry.
             options.setLaunchTaskId(INVALID_TASK_ID);
             final TaskRecord task = anyTaskForIdLocked(taskId,
-                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, options);
+                    MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
             options.setLaunchTaskId(taskId);
             if (task != null) {
                 return task.getStack();
@@ -2330,13 +2347,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             final ActivityDisplay display = getActivityDisplayOrCreateLocked(displayId);
             if (display != null) {
-                for (int i = display.getChildCount() - 1; i >= 0; --i) {
-                    stack = (T) display.getChildAt(i);
-                    if (stack.isCompatible(windowingMode, activityType)) {
-                        return stack;
-                    }
+                stack = display.getOrCreateStack(windowingMode, activityType, onTop);
+                if (stack != null) {
+                    return stack;
                 }
-                // TODO: We should create the stack we want on the display at this point.
             }
         }
 
@@ -2365,18 +2379,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             display = getDefaultDisplay();
         }
 
-        stack = display.getOrCreateStack(windowingMode, activityType, onTop);
-        if (stack != null) {
-            return stack;
-        }
-
-        // Whatever...return some default for now.
-        if (candidateTask != null && candidateTask.mBounds != null
-                && mService.mSupportsFreeformWindowManagement) {
-            windowingMode = WINDOWING_MODE_FREEFORM;
-        } else {
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
-        }
         return display.getOrCreateStack(windowingMode, activityType, onTop);
     }
 
@@ -2967,10 +2969,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      *
      * @param task The recent task to be restored.
      * @param aOptions The activity options to use for restoration.
+     * @param onTop If the stack for the task should be the topmost on the display.
      * @return true if the task has been restored successfully.
      */
-    boolean restoreRecentTaskLocked(TaskRecord task, ActivityOptions aOptions) {
-        final ActivityStack stack = getLaunchStack(null, aOptions, task, !ON_TOP);
+    boolean restoreRecentTaskLocked(TaskRecord task, ActivityOptions aOptions, boolean onTop) {
+        final ActivityStack stack = getLaunchStack(null, aOptions, task, onTop);
         final ActivityStack currentStack = task.getStack();
         if (currentStack != null) {
             // Task has already been restored once. See if we need to do anything more
@@ -2983,9 +2986,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             currentStack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
         }
 
-        stack.addTask(task, !ON_TOP, "restoreRecentTask");
+        stack.addTask(task, onTop, "restoreRecentTask");
         // TODO: move call for creation here and other place into Stack.addTask()
-        task.createWindowContainer(!ON_TOP, true /* showForAllUsers */);
+        task.createWindowContainer(onTop, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -4567,7 +4570,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         task.setTaskDockedResizing(true);
     }
 
-    final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
+    int startActivityFromRecents(int taskId, Bundle bOptions) {
         final TaskRecord task;
         final int callingUid;
         final String callingPackage;
@@ -4582,7 +4585,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             windowingMode = activityOptions.getLaunchWindowingMode();
         }
         if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
-            throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
+            throw new IllegalArgumentException("startActivityFromRecents: Task "
                     + taskId + " can't be launch in the home/recents stack.");
         }
 
@@ -4600,21 +4603,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
 
             task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
-                    activityOptions);
+                    activityOptions, ON_TOP);
             if (task == null) {
                 continueUpdateBounds(ACTIVITY_TYPE_RECENTS);
                 mWindowManager.executeAppTransition();
                 throw new IllegalArgumentException(
-                        "startActivityFromRecentsInner: Task " + taskId + " not found.");
-            }
-
-            // Since we don't have an actual source record here, we assume that the currently
-            // focused activity was the source.
-            final ActivityStack stack = getLaunchStack(null, activityOptions, task, ON_TOP);
-
-            if (stack != null && task.getStack() != stack) {
-                task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
-                        "startActivityFromRecents");
+                        "startActivityFromRecents: Task " + taskId + " not found.");
             }
 
             // If the user must confirm credentials (e.g. when first launching a work app and the

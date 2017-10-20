@@ -4877,7 +4877,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                return mStackSupervisor.startActivityFromRecentsInner(taskId, bOptions);
+                return mStackSupervisor.startActivityFromRecents(taskId, bOptions);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -14890,6 +14890,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     dumpActivityStarterLocked(pw, dumpPackage);
                 }
+            } else if ("containers".equals(cmd)) {
+                synchronized (this) {
+                    dumpActivityContainersLocked(pw);
+                }
             } else if ("recents".equals(cmd) || "r".equals(cmd)) {
                 synchronized (this) {
                     if (mRecentTasks != null) {
@@ -15132,6 +15136,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
+                dumpActivityContainersLocked(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
                 dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 if (mAssociations.size() > 0) {
                     pw.println();
@@ -15204,6 +15213,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
+                dumpActivityContainersLocked(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
                 dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 if (mAssociations.size() > 0) {
                     pw.println();
@@ -15234,6 +15248,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         } else {
             pw.println(mLastANRState);
         }
+    }
+
+    private void dumpActivityContainersLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER STARTER (dumpsys activity containers)");
+        mStackSupervisor.dumpChildrenNames(pw, " ");
+        pw.println(" ");
     }
 
     private void dumpActivityStarterLocked(PrintWriter pw, String dumpPackage) {

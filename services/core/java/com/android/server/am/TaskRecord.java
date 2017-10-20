@@ -60,6 +60,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.proto.TaskRecordProto.ACTIVITIES;
@@ -512,7 +513,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             updateOverrideConfiguration(bounds);
             if (!inFreeformWindowingMode()) {
                 // re-restore the task so it can have the proper stack association.
-                mService.mStackSupervisor.restoreRecentTaskLocked(this, null);
+                mService.mStackSupervisor.restoreRecentTaskLocked(this, null, !ON_TOP);
             }
             return true;
         }

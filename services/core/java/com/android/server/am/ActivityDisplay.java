@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -168,9 +169,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             return (T) mSplitScreenPrimaryStack;
         }
+
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack stack = mStacks.get(i);
-            // TODO: Should undefined windowing and activity type be compatible with standard type?
             if (stack.isCompatible(windowingMode, activityType)) {
                 return (T) stack;
             }
@@ -178,15 +179,28 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         return null;
     }
 
+    private boolean alwaysCreateStack(int windowingMode, int activityType) {
+        // Always create a stack for fullscreen, freeform, and split-screen-secondary windowing
+        // modes so that we can manage visual ordering and return types correctly.
+        return activityType == ACTIVITY_TYPE_STANDARD
+                && (windowingMode == WINDOWING_MODE_FULLSCREEN
+                || windowingMode == WINDOWING_MODE_FREEFORM
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+    }
+
     /**
+     * Returns an existing stack compatible with the windowing mode and activity type or creates one
+     * if a compatible stack doesn't exist.
      * @see #getStack(int, int)
      * @see #createStack(int, int, boolean)
      */
     <T extends ActivityStack> T getOrCreateStack(int windowingMode, int activityType,
             boolean onTop) {
-        T stack = getStack(windowingMode, activityType);
-        if (stack != null) {
-            return stack;
+        if (!alwaysCreateStack(windowingMode, activityType)) {
+            T stack = getStack(windowingMode, activityType);
+            if (stack != null) {
+                return stack;
+            }
         }
         return createStack(windowingMode, activityType, onTop);
     }
@@ -238,17 +252,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             }
         }
 
-        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
-        if (!inSplitScreenMode
-                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
-            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
-            // trying to launch in split-screen secondary.
-            windowingMode = WINDOWING_MODE_FULLSCREEN;
-        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
-                && WindowConfiguration.supportSplitScreenWindowingMode(
-                        windowingMode, activityType)) {
-            windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-        }
+        windowingMode = updateWindowingModeForSplitScreenIfNeeded(windowingMode, activityType);
 
         final int stackId = mSupervisor.getNextStackId();
 
@@ -418,6 +422,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     boolean hasPinnedStack() {
         return mPinnedStack != null;
+    }
+
+    int updateWindowingModeForSplitScreenIfNeeded(int windowingMode, int activityType) {
+        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
+        if (!inSplitScreenMode
+                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
+            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
+            // trying to launch in split-screen secondary.
+            return WINDOWING_MODE_FULLSCREEN;
+        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+                && WindowConfiguration.supportSplitScreenWindowingMode(
+                windowingMode, activityType)) {
+            return WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+        }
+        return windowingMode;
     }
 
     @Override
