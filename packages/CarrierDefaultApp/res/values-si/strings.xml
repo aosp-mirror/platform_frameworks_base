@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"ඔබගේ ජංගම දත්ත අක්‍රිය කර ඇත"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s වෙබ් අඩවිය වෙත යාමට තට්ටු කරන්න"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"කරුණාකර ඔබගේ සේවා සැපයුම්කරු %s අමතන්න"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"ජංගම දත්ත සබැඳුමක් නැත"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s හරහා දත්ත හෝ රෝමිං සැලසුම එක් කරන්න"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ජංගම දත්ත තත්ත්වය"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"ජංගම ජාලය වෙත පුරනය වෙන්න"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"ඔබ සම්බන්ධ වීමට උත්සහ කරන ජාලයේ ආරක්ෂක ගැටළු ඇත."</string>
