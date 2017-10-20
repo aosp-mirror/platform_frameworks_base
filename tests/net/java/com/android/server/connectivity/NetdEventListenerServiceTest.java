@@ -82,9 +82,8 @@ public class NetdEventListenerServiceTest {
     public void testWakeupEventLogging() throws Exception {
         final int BUFFER_LENGTH = NetdEventListenerService.WAKEUP_EVENT_BUFFER_LENGTH;
 
-        // Assert no events
-        String[] events1 = listNetdEvent();
-        assertEquals(new String[]{""}, events1);
+        // Baseline without any event
+        String[] baseline = listNetdEvent();
 
         long now = System.currentTimeMillis();
         String prefix = "iface:wlan0";
@@ -93,7 +92,7 @@ public class NetdEventListenerServiceTest {
             mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
         }
 
-        String[] events2 = listNetdEvent();
+        String[] events2 = remove(listNetdEvent(), baseline);
         int expectedLength2 = uids.length + 1; // +1 for the WakeupStats line
         assertEquals(expectedLength2, events2.length);
         assertContains(events2[0], "WakeupStats");
@@ -111,7 +110,7 @@ public class NetdEventListenerServiceTest {
             mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, ts);
         }
 
-        String[] events3 = listNetdEvent();
+        String[] events3 = remove(listNetdEvent(), baseline);
         int expectedLength3 = BUFFER_LENGTH + 1; // +1 for the WakeupStats line
         assertEquals(expectedLength3, events3.length);
         assertContains(events2[0], "WakeupStats");
@@ -126,7 +125,7 @@ public class NetdEventListenerServiceTest {
         uid = 45678;
         mNetdEventListenerService.onWakeupEvent(prefix, uid, uid, now);
 
-        String[] events4 = listNetdEvent();
+        String[] events4 = remove(listNetdEvent(), baseline);
         String lastEvent = events4[events4.length - 1];
         assertContains(lastEvent, "WakeupEvent");
         assertContains(lastEvent, "wlan0");
@@ -423,7 +422,7 @@ public class NetdEventListenerServiceTest {
         final PrintWriter pw = new PrintWriter(new FileOutputStream("/dev/null"));
         new Thread(() -> {
             while (System.currentTimeMillis() < stop) {
-                mNetdEventListenerService.dump(pw);
+                mNetdEventListenerService.list(pw);
             }
         }).start();
     }
@@ -460,5 +459,17 @@ public class NetdEventListenerServiceTest {
 
     static void assertContains(String got, String want) {
         assertTrue(got + " did not contain \"" + want + "\"", got.contains(want));
+    }
+
+    static <T> T[] remove(T[] array, T[] filtered) {
+        List<T> c = Arrays.asList(filtered);
+        int next = 0;
+        for (int i = 0; i < array.length; i++) {
+            if (c.contains(array[i])) {
+                continue;
+            }
+            array[next++] = array[i];
+        }
+        return Arrays.copyOf(array, next);
     }
 }

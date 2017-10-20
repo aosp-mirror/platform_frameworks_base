@@ -2109,9 +2109,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         final boolean valid =
                                 (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
                         final boolean wasValidated = nai.lastValidated;
+                        final boolean wasDefault = isDefaultNetwork(nai);
                         if (DBG) log(nai.name() + " validation " + (valid ? "passed" : "failed") +
                                 (msg.obj == null ? "" : " with redirect to " + (String)msg.obj));
                         if (valid != nai.lastValidated) {
+                            if (wasDefault) {
+                                metricsLogger().defaultNetworkMetrics().logDefaultNetworkValidity(
+                                        SystemClock.elapsedRealtime(), valid);
+                            }
                             final int oldScore = nai.getCurrentScore();
                             nai.lastValidated = valid;
                             nai.everValidated |= valid;
@@ -2283,7 +2288,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // Let rematchAllNetworksAndRequests() below record a new default network event
                 // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
                 // whose timestamps tell how long it takes to recover a default network.
-                metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(null, nai);
+                long now = SystemClock.elapsedRealtime();
+                metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(now, null, nai);
             }
             notifyIfacesChangedForNetworkStats();
             // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -5013,7 +5019,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             makeDefault(newNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
             metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
-                    newNetwork, oldDefaultNetwork);
+                    now, newNetwork, oldDefaultNetwork);
             // Have a new default network, release the transition wakelock in
             scheduleReleaseNetworkTransitionWakelock();
         }
