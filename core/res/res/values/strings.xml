@@ -4346,8 +4346,6 @@
     <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview
         buttons</string>
 
-    <!-- Notify user that they are locked in lock-to-app mode -->
-    <string name="lock_to_app_toast_locked">This app can\'t be unpinned</string>
     <!-- Starting lock-to-app indication. -->
     <string name="lock_to_app_start">Screen pinned</string>
     <!-- Exting lock-to-app indication. -->
