@@ -1980,7 +1980,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         final String[] domainStrs = domains == null ? new String[0] : domains.split(" ");
         final int[] params = { sampleValidity, successThreshold, minSamples, maxSamples };
-        final boolean useTls = false;
+        final boolean useTls = Settings.Global.getInt(resolver,
+                Settings.Global.DNS_TLS_DISABLED, 0) == 0;
         final String tlsHostname = "";
         final String[] tlsFingerprints = new String[0];
         try {
