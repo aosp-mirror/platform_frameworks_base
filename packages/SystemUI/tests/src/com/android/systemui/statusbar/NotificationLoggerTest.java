@@ -55,6 +55,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private static final int TEST_UID = 0;
 
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationListener mListener;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private IStatusBarService mBarService;
@@ -69,7 +70,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mPresenter.getNotificationData()).thenReturn(mNotificationData);
+        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);

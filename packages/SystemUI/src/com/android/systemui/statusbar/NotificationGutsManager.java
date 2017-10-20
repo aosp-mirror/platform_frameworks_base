@@ -168,7 +168,8 @@ public class NotificationGutsManager implements Dumpable {
             String key = sbn.getKey();
             if (key.equals(mKeyToRemoveOnGutsClosed)) {
                 mKeyToRemoveOnGutsClosed = null;
-                mPresenter.removeNotification(key, mPresenter.getLatestRankingMap());
+                mPresenter.getEntryManager().removeNotification(key,
+                        mPresenter.getEntryManager().getLatestRankingMap());
             }
         });
 

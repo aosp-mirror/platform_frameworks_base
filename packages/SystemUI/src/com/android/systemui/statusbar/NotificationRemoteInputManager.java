@@ -282,7 +282,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             @Override
             public void onRemoteInputSent(NotificationData.Entry entry) {
                 if (FORCE_REMOTE_INPUT_HISTORY && mKeysKeptForRemoteInput.contains(entry.key)) {
-                    mPresenter.removeNotification(entry.key, null);
+                    mPresenter.getEntryManager().removeNotification(entry.key, null);
                 } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
                     // We're currently holding onto this notification, but from the apps point of
                     // view it is already canceled, so we'll need to cancel it on the apps behalf
@@ -290,7 +290,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                     // bit.
                     mPresenter.getHandler().postDelayed(() -> {
                         if (mRemoteInputEntriesToRemoveOnCollapse.remove(entry)) {
-                            mPresenter.removeNotification(entry.key, null);
+                            mPresenter.getEntryManager().removeNotification(entry.key, null);
                         }
                     }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
@@ -336,7 +336,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
             NotificationData.Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
             mRemoteInputController.removeRemoteInput(entry, null);
-            mPresenter.removeNotification(entry.key, mPresenter.getLatestRankingMap());
+            mPresenter.getEntryManager().removeNotification(entry.key,
+                    mPresenter.getEntryManager().getLatestRankingMap());
         }
         mRemoteInputEntriesToRemoveOnCollapse.clear();
     }

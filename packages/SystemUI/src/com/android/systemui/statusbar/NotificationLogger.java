@@ -99,7 +99,7 @@ public class NotificationLogger {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            ArrayList<NotificationData.Entry> activeNotifications = mPresenter.
+            ArrayList<NotificationData.Entry> activeNotifications = mPresenter.getEntryManager().
                     getNotificationData().getActiveNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {

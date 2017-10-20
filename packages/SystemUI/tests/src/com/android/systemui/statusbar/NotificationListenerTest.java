@@ -57,6 +57,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     private Set<String> mKeysKeptForRemoteInput;
     private NotificationData mNotificationData;
     private NotificationRemoteInputManager mRemoteInputManager;
+    private NotificationEntryManager mEntryManager;
 
     @Before
     public void setUp() {
@@ -65,10 +66,12 @@ public class NotificationListenerTest extends SysuiTestCase {
         mNotificationData = mock(NotificationData.class);
         mRanking = mock(NotificationListenerService.RankingMap.class);
         mRemoteInputManager = mock(NotificationRemoteInputManager.class);
+        mEntryManager = mock(NotificationEntryManager.class);
         mKeysKeptForRemoteInput = new HashSet<>();
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getNotificationData()).thenReturn(mNotificationData);
+        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
         mListener = new NotificationListener(mRemoteInputManager, mContext);
@@ -82,7 +85,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).addNotification(mSbn, mRanking);
+        verify(mEntryManager).addNotification(mSbn, mRanking);
     }
 
     @Test
@@ -98,14 +101,14 @@ public class NotificationListenerTest extends SysuiTestCase {
         when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationData.Entry(mSbn));
         mListener.onNotificationPosted(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).updateNotification(mSbn, mRanking);
+        verify(mEntryManager).updateNotification(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).removeNotification(mSbn.getKey(), mRanking);
+        verify(mEntryManager).removeNotification(mSbn.getKey(), mRanking);
     }
 
     @Test
@@ -113,6 +116,6 @@ public class NotificationListenerTest extends SysuiTestCase {
         mListener.onNotificationRankingUpdate(mRanking);
         waitForIdleSync(mHandler);
         // RankingMap may be modified by plugins.
-        verify(mPresenter).updateNotificationRanking(any());
+        verify(mEntryManager).updateNotificationRanking(any());
     }
 }

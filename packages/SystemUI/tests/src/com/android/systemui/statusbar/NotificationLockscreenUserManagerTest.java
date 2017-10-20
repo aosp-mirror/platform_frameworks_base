@@ -55,6 +55,7 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationPresenter mPresenter;
+    private NotificationEntryManager mEntryManager;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
     private DeviceProvisionedController mDeviceProvisionedController;
     private int mCurrentUserId;
@@ -64,27 +65,30 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mUserManager = mock(UserManager.class);
-        mContext.addMockSystemService(UserManager.class, mUserManager);
-        mHandler = new Handler(Looper.getMainLooper());
+        mPresenter = mock(NotificationPresenter.class);
+        mEntryManager = mock(NotificationEntryManager.class);
         mDependency.injectMockDependency(DeviceProvisionedController.class);
         mDeviceProvisionedController = mDependency.get(DeviceProvisionedController.class);
-        mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
-        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
-                mLockscreenUserManager);
+
+        mHandler = new Handler(Looper.getMainLooper());
+        mContext.addMockSystemService(UserManager.class, mUserManager);
+        mCurrentUserId = ActivityManager.getCurrentUser();
 
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
-
-        mPresenter = mock(NotificationPresenter.class);
         when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
+
+        mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
+        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
+                mLockscreenUserManager);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
-        mCurrentUserId = ActivityManager.getCurrentUser();
     }
 
     @Test
     public void testLockScreenShowNotificationsChangeUpdatesNotifications() {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        verify(mPresenter, times(1)).updateNotifications();
+        verify(mEntryManager, times(1)).updateNotifications();
     }
 
     @Test
@@ -123,7 +127,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void testSettingsObserverUpdatesNotifications() {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         mLockscreenUserManager.getSettingsObserverForTest().onChange(false);
-        verify(mPresenter, times(1)).updateNotifications();
+        verify(mEntryManager, times(1)).updateNotifications();
     }
 
     @Test

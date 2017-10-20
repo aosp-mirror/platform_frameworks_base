@@ -40,6 +40,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private NotificationData.Entry mEntry;
 
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationEntryManager mEntryManager;
     @Mock private RemoteInputController.Delegate mDelegate;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
@@ -53,7 +54,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mHandler = new Handler(Looper.getMainLooper());
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getLatestRankingMap()).thenReturn(mRanking);
+        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
+        when(mEntryManager.getLatestRankingMap()).thenReturn(mRanking);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mLockscreenUserManager,
                 mContext);
@@ -97,7 +99,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         assertTrue(mRemoteInputManager.getRemoteInputEntriesToRemoveOnCollapse().isEmpty());
         verify(mController).removeRemoteInput(mEntry, null);
-        verify(mPresenter).removeNotification(mEntry.key, mRanking);
+        verify(mEntryManager).removeNotification(mEntry.key, mRanking);
     }
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {

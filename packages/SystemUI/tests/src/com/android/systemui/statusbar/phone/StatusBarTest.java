@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -61,6 +62,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
@@ -72,10 +74,16 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationEntryManager;
+import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLogger;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -113,12 +121,19 @@ public class StatusBarTest extends SysuiTestCase {
     ArrayList<Entry> mNotificationList;
     FingerprintUnlockController mFingerprintUnlockController;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private TestableNotificationEntryManager mEntryManager;
 
     @Before
     public void setup() throws Exception {
         mContext.setTheme(R.style.Theme_SystemUI_Light);
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(DeviceProvisionedController.class);
+        mDependency.injectMockDependency(NotificationGroupManager.class);
+        mDependency.injectMockDependency(NotificationGutsManager.class);
+        mDependency.injectMockDependency(NotificationRemoteInputManager.class);
+        mDependency.injectMockDependency(NotificationMediaManager.class);
+        mDependency.injectMockDependency(ForegroundServiceController.class);
+        mDependency.injectMockDependency(NotificationListener.class);
         mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
         CommandQueue commandQueue = mock(CommandQueue.class);
         when(commandQueue.asBinder()).thenReturn(new Binder());
@@ -151,11 +166,16 @@ public class StatusBarTest extends SysuiTestCase {
                 UiOffloadThread.class));
 
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+
+        mNotificationListener = mDependency.get(NotificationListener.class);
+        mNotificationLogger =  mDependency.get(NotificationLogger.class);
+        mEntryManager = new TestableNotificationEntryManager(mMetricsLogger,
+                mSystemServicesProxy, mPowerManager, mContext);
+
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
-                mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
-                mBarService, mNotificationListener, mNotificationLogger, mScrimController,
-                mFingerprintUnlockController);
+                mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
+                mNotificationLogger, mEntryManager, mScrimController, mFingerprintUnlockController);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         doAnswer(invocation -> {
@@ -170,6 +190,8 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
+        mEntryManager.setUpForTest(mStatusBar, mStackScroller, mStatusBar,
+                mock(VisualStabilityManager.class), mHeadsUpManager, mNotificationData);
         mNotificationLogger.setUpWithPresenter(mStatusBar, mStackScroller);
 
         when(mStackScroller.getActivatedChild()).thenReturn(null);
@@ -334,7 +356,7 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+        assertTrue(mEntryManager.shouldPeek(entry, sbn));
     }
 
     @Test
@@ -355,7 +377,7 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+        assertFalse(mEntryManager.shouldPeek(entry, sbn));
     }
 
     @Test
@@ -375,7 +397,7 @@ public class StatusBarTest extends SysuiTestCase {
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
 
-        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+        assertTrue(mEntryManager.shouldPeek(entry, sbn));
     }
 
     @Test
@@ -394,7 +416,7 @@ public class StatusBarTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+        assertFalse(mEntryManager.shouldPeek(entry, sbn));
     }
     @Test
     public void testShouldPeek_suppressedScreenOff_dozing() {
@@ -412,7 +434,7 @@ public class StatusBarTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+        assertFalse(mEntryManager.shouldPeek(entry, sbn));
     }
 
     @Test
@@ -431,7 +453,7 @@ public class StatusBarTest extends SysuiTestCase {
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
                 UserHandle.of(0), null, 0);
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+        assertTrue(mEntryManager.shouldPeek(entry, sbn));
     }
 
 
@@ -564,25 +586,24 @@ public class StatusBarTest extends SysuiTestCase {
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
-                NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
-                PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView,
+                NotificationStackScrollLayout stack, HeadsUpManager hum,
+                PowerManager pm, NotificationPanelView panelView,
                 IStatusBarService barService, NotificationListener notificationListener,
-                NotificationLogger notificationLogger, ScrimController scrimController,
+                NotificationLogger notificationLogger,
+                TestableNotificationEntryManager entryManager, ScrimController scrimController,
                 FingerprintUnlockController fingerprintUnlockController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
             mHeadsUpManager = hum;
-            mNotificationData = nd;
-            mUseHeadsUp = true;
             mPowerManager = pm;
-            mSystemServicesProxy = ssp;
             mNotificationPanel = panelView;
             mBarService = barService;
             mNotificationListener = notificationListener;
             mNotificationLogger = notificationLogger;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
+            mEntryManager = entryManager;
             mScrimController = scrimController;
             mFingerprintUnlockController = fingerprintUnlockController;
         }
@@ -605,6 +626,40 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setUserSetupForTest(boolean userSetup) {
             mUserSetup = userSetup;
+        }
+
+    }
+
+    private class TestableNotificationEntryManager extends NotificationEntryManager {
+
+        public TestableNotificationEntryManager(MetricsLogger metricsLogger,
+                SystemServicesProxy systemServicesProxy, PowerManager powerManager,
+                Context context) {
+            super(mDependency.get(NotificationLockscreenUserManager.class),
+                    mDependency.get(NotificationGroupManager.class),
+                    mDependency.get(NotificationGutsManager.class),
+                    mDependency.get(NotificationRemoteInputManager.class),
+                    mDependency.get(NotificationMediaManager.class),
+                    mDependency.get(ForegroundServiceController.class),
+                    mDependency.get(NotificationListener.class),
+                    metricsLogger,
+                    mDependency.get(DeviceProvisionedController.class),
+                    mDependency.get(UiOffloadThread.class),
+                    context);
+            mSystemServicesProxy = systemServicesProxy;
+            mPowerManager = powerManager;
+        }
+
+        public void setUpForTest(NotificationPresenter presenter,
+                NotificationStackScrollLayout stackScroller,
+                Callback callback,
+                VisualStabilityManager visualStabilityManager,
+                HeadsUpManager headsUpManager,
+                NotificationData notificationData) {
+            super.setUpWithPresenter(presenter, stackScroller, callback, visualStabilityManager,
+                    headsUpManager);
+            mNotificationData = notificationData;
+            mUseHeadsUp = true;
         }
     }
 }

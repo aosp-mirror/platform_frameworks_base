@@ -23,16 +23,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLogger;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -46,6 +49,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.util.function.Consumer;
 
@@ -119,6 +123,7 @@ public class SystemUIFactory {
         providers.put(NotificationLockscreenUserManager.class,
                 () -> new NotificationLockscreenUserManager(context));
         providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
+        providers.put(NotificationMediaManager.class, () -> new NotificationMediaManager(context));
         providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(
                 Dependency.get(NotificationLockscreenUserManager.class), context));
         providers.put(NotificationRemoteInputManager.class,
@@ -129,5 +134,20 @@ public class SystemUIFactory {
         providers.put(NotificationLogger.class, () -> new NotificationLogger(
                 Dependency.get(NotificationListener.class),
                 Dependency.get(UiOffloadThread.class)));
+        providers.put(NotificationEntryManager.class, () ->
+                new NotificationEntryManager(
+                        Dependency.get(NotificationLockscreenUserManager.class),
+                        Dependency.get(NotificationGroupManager.class),
+                        Dependency.get(NotificationGutsManager.class),
+                        Dependency.get(NotificationRemoteInputManager.class),
+                        Dependency.get(NotificationMediaManager.class),
+                        Dependency.get(ForegroundServiceController.class),
+                        Dependency.get(NotificationListener.class),
+                        Dependency.get(MetricsLogger.class),
+                        Dependency.get(DeviceProvisionedController.class),
+                        Dependency.get(UiOffloadThread.class),
+                        context));
+        providers.put(NotificationListener.class, () -> new NotificationListener(
+                Dependency.get(NotificationRemoteInputManager.class), context));
     }
 }
