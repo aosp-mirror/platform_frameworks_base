@@ -22,6 +22,7 @@ import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
 import android.content.Context;
+import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,7 +36,6 @@ import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,6 +170,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveColorMode;
         private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
+        private boolean mSidekickActive;
+        private SidekickInternal mSidekickInternal;
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
@@ -181,6 +183,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
                     colorModes, activeColorMode);
             updateColorModesLocked(colorModes, activeColorMode);
+            mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
@@ -510,15 +513,39 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
+                        // We must tell sidekick to stop controlling the display before we
+                        // can change its power mode, so do that first.
+                        if (mSidekickActive) {
+                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                    "SidekickInternal#endDisplayControl");
+                            try {
+                                mSidekickInternal.endDisplayControl();
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                            }
+                            mSidekickActive = false;
+                        }
+                        final int mode = getPowerModeForState(state);
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
                                 + "id=" + displayId
                                 + ", state=" + Display.stateToString(state) + ")");
                         try {
-                            final int mode = getPowerModeForState(state);
                             SurfaceControl.setDisplayPowerMode(token, mode);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER, "DisplayPowerMode", mode);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        }
+                        // If we're entering a suspended (but not OFF) power state and we
+                        // have a sidekick available, tell it now that it can take control.
+                        if (Display.isSuspendedState(state) && state != Display.STATE_OFF
+                                && mSidekickInternal != null && !mSidekickActive) {
+                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                    "SidekickInternal#startDisplayControl");
+                            try {
+                                mSidekickActive = mSidekickInternal.startDisplayControl(state);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                            }
                         }
                     }
 
