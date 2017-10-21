@@ -150,8 +150,16 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return new StringBuilder("Dataset " + mId + " [")
-                .append("fieldIds=").append(mFieldIds)
+        final StringBuilder builder = new StringBuilder("Dataset[id=");
+        if (mId == null) {
+            builder.append("null");
+        } else {
+            // Cannot disclose id because it could contain PII.
+            builder.append(mId.length()).append("_chars");
+        }
+
+        return builder
+                .append(", fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
                 .append(", fieldPresentations=")
                 .append(mFieldPresentations == null ? 0 : mFieldPresentations.size())

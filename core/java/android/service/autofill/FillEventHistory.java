@@ -129,6 +129,11 @@ public final class FillEventHistory implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return mEvents == null ? "no events" : mEvents.toString();
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

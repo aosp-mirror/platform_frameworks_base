@@ -846,12 +846,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * when necessary.
      */
     public void logContextCommittedLocked() {
-        if (mResponses == null) {
-            if (sVerbose) Slog.v(TAG, "logContextCommittedLocked(): skipped (no responses)");
-            return;
-        }
+        final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
+        if (lastResponse == null) return;
 
-        final FillResponse lastResponse = mResponses.valueAt(mResponses.size() -1);
         final int flags = lastResponse.getFlags();
         if ((flags & FillResponse.FLAG_TRACK_CONTEXT_COMMITED) == 0) {
             if (sDebug) Slog.d(TAG, "logContextCommittedLocked(): ignored by flags " + flags);
@@ -1599,11 +1596,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Checks whether a view should be ignored.
      */
     private boolean isIgnoredLocked(AutofillId id) {
-        if (mResponses == null || mResponses.size() == 0) {
-            return false;
-        }
         // Always check the latest response only
-        final FillResponse response = mResponses.valueAt(mResponses.size() - 1);
+        final FillResponse response = getLastResponseLocked(null);
+        if (response == null) return false;
+
         return ArrayUtils.contains(response.getIgnoredIds(), id);
     }
 
@@ -1680,13 +1676,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void updateTrackedIdsLocked() {
-        if (mResponses == null || mResponses.size() == 0) {
-            return;
-        }
-
         // Only track the views of the last response as only those are reported back to the
         // service, see #showSaveLocked
-        final FillResponse response = mResponses.valueAt(getLastResponseIndexLocked());
+        final FillResponse response = getLastResponseLocked(null);
+        if (response == null) return;
 
         ArraySet<AutofillId> trackedViews = null;
         boolean saveOnAllViewsInvisible = false;
