@@ -20,17 +20,19 @@ import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
+import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -1051,43 +1053,23 @@ public class AppWidgetManager {
      * The appWidgetId specified must already be bound to the calling AppWidgetHost via
      * {@link android.appwidget.AppWidgetManager#bindAppWidgetId AppWidgetManager.bindAppWidgetId()}.
      *
-     * @param packageName   The package from which the binding is requested.
      * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
      * @param intent        The intent of the service which will be providing the data to the
      *                      RemoteViewsAdapter.
      * @param connection    The callback interface to be notified when a connection is made or lost.
+     * @param flags         Flags used for binding to the service
+     *
+     * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
      * @hide
      */
-    public void bindRemoteViewsService(String packageName, int appWidgetId, Intent intent,
-            IBinder connection) {
+    public boolean bindRemoteViewsService(Context context, int appWidgetId, Intent intent,
+            IServiceConnection connection, @Context.BindServiceFlags int flags) {
         if (mService == null) {
-            return;
+            return false;
         }
         try {
-            mService.bindRemoteViewsService(packageName, appWidgetId, intent, connection);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Unbinds the RemoteViewsService for a given appWidgetId and intent.
-     *
-     * The appWidgetId specified muse already be bound to the calling AppWidgetHost via
-     * {@link android.appwidget.AppWidgetManager#bindAppWidgetId AppWidgetManager.bindAppWidgetId()}.
-     *
-     * @param packageName   The package from which the binding is requested.
-     * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
-     * @param intent        The intent of the service which will be providing the data to the
-     *                      RemoteViewsAdapter.
-     * @hide
-     */
-    public void unbindRemoteViewsService(String packageName, int appWidgetId, Intent intent) {
-        if (mService == null) {
-            return;
-        }
-        try {
-            mService.unbindRemoteViewsService(packageName, appWidgetId, intent);
+            return mService.bindRemoteViewsService(context.getOpPackageName(), appWidgetId, intent,
+                    context.getIApplicationThread(), context.getActivityToken(), connection, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
