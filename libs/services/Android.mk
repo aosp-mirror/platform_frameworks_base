@@ -21,7 +21,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libservices
 LOCAL_SRC_FILES := \
     ../../core/java/com/android/internal/os/IDropBoxManagerService.aidl \
-    src/os/DropBoxManager.cpp
+    src/os/DropBoxManager.cpp \
+    src/os/StatsLogEventWrapper.cpp
 
 LOCAL_AIDL_INCLUDES := \
     $(LOCAL_PATH)/../../core/java

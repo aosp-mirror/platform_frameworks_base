@@ -13,30 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef STATSD_STATSPULLER_H
-#define STATSD_STATSPULLER_H
-
 #include <android/os/StatsLogEventWrapper.h>
-#include <utils/String16.h>
+
+#include <binder/Parcel.h>
+#include <binder/Parcelable.h>
+#include <binder/Status.h>
+#include <utils/RefBase.h>
 #include <vector>
 
-using android::os::StatsLogEventWrapper;
+using android::Parcel;
+using android::Parcelable;
+using android::status_t;
 using std::vector;
 
 namespace android {
 namespace os {
-namespace statsd {
 
-class StatsPuller {
-public:
-    virtual ~StatsPuller(){};
+StatsLogEventWrapper::StatsLogEventWrapper(){};
 
-    virtual vector<StatsLogEventWrapper> pull() = 0;
+status_t StatsLogEventWrapper::writeToParcel(Parcel* out) const {
+    out->writeByteVector(bytes);
+    return ::android::NO_ERROR;
 };
 
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
+status_t StatsLogEventWrapper::readFromParcel(const Parcel* in) {
+    in->readByteVector(&bytes);
+    return ::android::NO_ERROR;
+};
 
-#endif  // STATSD_STATSPULLER_H
+} // Namespace os
+} // Namespace android

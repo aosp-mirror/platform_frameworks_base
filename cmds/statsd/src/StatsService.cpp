@@ -63,9 +63,9 @@ void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
 
 // ======================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mStatsPullerManager(),
-      mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
+    : mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
 {
+    mStatsPullerManager = new StatsPullerManager();
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap);
@@ -193,6 +193,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("dump-report"))) {
             return cmd_dump_report(out, err, args);
         }
+
+        if (!args[0].compare(String8("pull-source")) && args.size() > 1) {
+            return cmd_print_pulled_metrics(out, args);
+        }
     }
 
     print_cmd_help(out);
@@ -208,6 +212,11 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd stats print-uid-map \n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the UID, app name, version mapping.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmds stats pull-source [int] \n");
+    fprintf(out, "\n");
+    fprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats config remove [UID] NAME\n");
@@ -353,6 +362,16 @@ status_t StatsService::cmd_print_uid_map(FILE* out) {
     return NO_ERROR;
 }
 
+status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
+    int s = atoi(args[1].c_str());
+    auto stats = mStatsPullerManager->Pull(s);
+    for (const auto& it : stats) {
+        fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
+    }
+    fprintf(out, "Pull from %d: Received %zu elements\n", s, stats.size());
+    return NO_ERROR;
+}
+
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
                                       const vector<String16>& app) {
     if (DEBUG) ALOGD("StatsService::informAllUidData was called");
@@ -414,10 +433,6 @@ Status StatsService::informPollAlarmFired() {
 
     if (DEBUG) ALOGD("StatsService::informPollAlarmFired succeeded");
     // TODO: determine what services to poll and poll (or ask StatsCompanionService to poll) them.
-    String16 output = mStatsPullerManager.pull(StatsPullerManager::KERNEL_WAKELOCKS);
-    // TODO: do something useful with the output instead of writing a string to screen.
-    ALOGD("%s", String8(output).string());
-    ALOGD("%d", int(output.size()));
 
     return Status::ok();
 }

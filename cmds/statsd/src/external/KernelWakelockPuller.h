@@ -29,7 +29,7 @@ public:
     // a number of stats need to be pulled from StatsCompanionService
     //
     const static int PULL_CODE_KERNEL_WAKELOCKS;
-    String16 pull() override;
+    vector<StatsLogEventWrapper> pull() override;
 };
 
 }  // namespace statsd
