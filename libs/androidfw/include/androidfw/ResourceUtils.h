@@ -40,7 +40,9 @@ inline uint8_t get_type_id(uint32_t resid) {
   return static_cast<uint8_t>((resid >> 16) & 0x000000ffu);
 }
 
-inline uint16_t get_entry_id(uint32_t resid) { return static_cast<uint16_t>(resid & 0x0000ffffu); }
+inline uint16_t get_entry_id(uint32_t resid) {
+  return static_cast<uint16_t>(resid & 0x0000ffffu);
+}
 
 inline bool is_internal_resid(uint32_t resid) {
   return (resid & 0xffff0000u) != 0 && (resid & 0x00ff0000u) == 0;

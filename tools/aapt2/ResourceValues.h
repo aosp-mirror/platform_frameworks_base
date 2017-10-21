@@ -249,6 +249,10 @@ struct FileReference : public BaseItem<FileReference> {
   // This field is NOT persisted in any format. It is transient.
   io::IFile* file = nullptr;
 
+  // FileType of the file pointed to by `file`. This is used to know how to inflate the file,
+  // or if to inflate at all (just copy).
+  ResourceFile::Type type = ResourceFile::Type::kUnknown;
+
   FileReference() = default;
   explicit FileReference(const StringPool::Ref& path);
 

@@ -22,6 +22,7 @@
 #include <log/log_event_list.h>
 #include <log/log_read.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -40,12 +41,16 @@ public:
     /**
      * Read a LogEvent from a log_msg.
      */
-    explicit LogEvent(const log_msg& msg);
+    explicit LogEvent(log_msg msg);
 
     /**
-     * Read a LogEvent from an android_log_context.
+     * Constructs a LogEvent with the specified tag and creates an android_log_event_list in write
+     * mode. Obtain this list with the getter. Make sure to call init() before attempting to read
+     * any of the values. This constructor is useful for unit-testing since we can't pass in an
+     * android_log_event_list since there is no copy constructor or assignment operator available.
      */
-    explicit LogEvent(int64_t timestampNs, android_log_event_list* reader);
+    explicit LogEvent(int tag);
+
     ~LogEvent();
 
     /**
@@ -85,6 +90,19 @@ public:
      */
     KeyValuePair GetKeyValueProto(size_t key) const;
 
+    /**
+     * A pointer to the contained log_event_list.
+     *
+     * @return The android_log_event_list contained within.
+     */
+    android_log_event_list* GetAndroidLogEventList();
+
+    /**
+     * Used with the constructor where tag is passed in. Converts the log_event_list to read mode
+     * and prepares the list for reading.
+     */
+    void init();
+
 private:
     /**
      * Don't copy, it's slower. If we really need this we can add it but let's try to
@@ -103,6 +121,8 @@ private:
     void init(int64_t timestampNs, android_log_event_list* reader);
 
     vector<android_log_list_element> mElements;
+    // Need a copy of the android_log_event_list so the strings are not cleared.
+    android_log_event_list mList;
     long mTimestampNs;
     int mTagId;
 };

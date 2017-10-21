@@ -122,9 +122,180 @@ class TypeSpecPtrBuilder {
 
 }  // namespace
 
+LoadedPackage::LoadedPackage() = default;
+LoadedPackage::~LoadedPackage() = default;
+
+// Precondition: The header passed in has already been verified, so reading any fields and trusting
+// the ResChunk_header is safe.
+static bool VerifyResTableType(const ResTable_type* header) {
+  const size_t entry_count = dtohl(header->entryCount);
+  if (entry_count > std::numeric_limits<uint16_t>::max()) {
+    LOG(ERROR) << "Too many entries in RES_TABLE_TYPE_TYPE.";
+    return false;
+  }
+
+  // Make sure that there is enough room for the entry offsets.
+  const size_t offsets_offset = dtohs(header->header.headerSize);
+  const size_t entries_offset = dtohl(header->entriesStart);
+  const size_t offsets_length = sizeof(uint32_t) * entry_count;
+
+  if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
+    LOG(ERROR) << "Entry offsets overlap actual entry data.";
+    return false;
+  }
+
+  if (entries_offset > dtohl(header->header.size)) {
+    LOG(ERROR) << "Entry offsets extend beyond chunk.";
+    return false;
+  }
+
+  if (entries_offset & 0x03) {
+    LOG(ERROR) << "Entries start at unaligned address.";
+    return false;
+  }
+  return true;
+}
+
+static bool VerifyResTableEntry(const ResTable_type* type, uint32_t entry_offset,
+                                size_t entry_idx) {
+  // Check that the offset is aligned.
+  if (entry_offset & 0x03) {
+    LOG(ERROR) << "Entry offset at index " << entry_idx << " is not 4-byte aligned.";
+    return false;
+  }
+
+  // Check that the offset doesn't overflow.
+  if (entry_offset > std::numeric_limits<uint32_t>::max() - dtohl(type->entriesStart)) {
+    // Overflow in offset.
+    LOG(ERROR) << "Entry offset at index " << entry_idx << " is too large.";
+    return false;
+  }
+
+  const size_t chunk_size = dtohl(type->header.size);
+
+  entry_offset += dtohl(type->entriesStart);
+  if (entry_offset > chunk_size - sizeof(ResTable_entry)) {
+    LOG(ERROR) << "Entry offset at index " << entry_idx
+               << " is too large. No room for ResTable_entry.";
+    return false;
+  }
+
+  const ResTable_entry* entry = reinterpret_cast<const ResTable_entry*>(
+      reinterpret_cast<const uint8_t*>(type) + entry_offset);
+
+  const size_t entry_size = dtohs(entry->size);
+  if (entry_size < sizeof(*entry)) {
+    LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << entry_idx
+               << " is too small.";
+    return false;
+  }
+
+  if (entry_size > chunk_size || entry_offset > chunk_size - entry_size) {
+    LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << entry_idx
+               << " is too large.";
+    return false;
+  }
+
+  if (entry_size < sizeof(ResTable_map_entry)) {
+    // There needs to be room for one Res_value struct.
+    if (entry_offset + entry_size > chunk_size - sizeof(Res_value)) {
+      LOG(ERROR) << "No room for Res_value after ResTable_entry at index " << entry_idx
+                 << " for type " << (int)type->id << ".";
+      return false;
+    }
+
+    const Res_value* value =
+        reinterpret_cast<const Res_value*>(reinterpret_cast<const uint8_t*>(entry) + entry_size);
+    const size_t value_size = dtohs(value->size);
+    if (value_size < sizeof(Res_value)) {
+      LOG(ERROR) << "Res_value at index " << entry_idx << " is too small.";
+      return false;
+    }
+
+    if (value_size > chunk_size || entry_offset + entry_size > chunk_size - value_size) {
+      LOG(ERROR) << "Res_value size " << value_size << " at index " << entry_idx
+                 << " is too large.";
+      return false;
+    }
+  } else {
+    const ResTable_map_entry* map = reinterpret_cast<const ResTable_map_entry*>(entry);
+    const size_t map_entry_count = dtohl(map->count);
+    size_t map_entries_start = entry_offset + entry_size;
+    if (map_entries_start & 0x03) {
+      LOG(ERROR) << "Map entries at index " << entry_idx << " start at unaligned offset.";
+      return false;
+    }
+
+    // Each entry is sizeof(ResTable_map) big.
+    if (map_entry_count > ((chunk_size - map_entries_start) / sizeof(ResTable_map))) {
+      LOG(ERROR) << "Too many map entries in ResTable_map_entry at index " << entry_idx << ".";
+      return false;
+    }
+  }
+  return true;
+}
+
+template <bool Verified>
+bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_idx,
+                              const ResTable_config& config, FindEntryResult* out_entry) const {
+  const ResTable_config* best_config = nullptr;
+  const ResTable_type* best_type = nullptr;
+  uint32_t best_offset = 0;
+
+  for (uint32_t i = 0; i < type_spec_ptr->type_count; i++) {
+    const Type* type = &type_spec_ptr->types[i];
+
+    if (type->configuration.match(config) &&
+        (best_config == nullptr || type->configuration.isBetterThan(*best_config, &config))) {
+      // The configuration matches and is better than the previous selection.
+      // Find the entry value if it exists for this configuration.
+      const size_t entry_count = dtohl(type->type->entryCount);
+      const size_t offsets_offset = dtohs(type->type->header.headerSize);
+      if (entry_idx < entry_count) {
+        // If the package hasn't been verified, do bounds checking.
+        if (!Verified) {
+          if (!VerifyResTableType(type->type)) {
+            continue;
+          }
+        }
+
+        const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
+            reinterpret_cast<const uint8_t*>(type->type) + offsets_offset);
+        const uint32_t offset = dtohl(entry_offsets[entry_idx]);
+        if (offset != ResTable_type::NO_ENTRY) {
+          // There is an entry for this resource, record it.
+          best_config = &type->configuration;
+          best_type = type->type;
+          best_offset = offset;
+        }
+      }
+    }
+  }
+
+  if (best_type == nullptr) {
+    return false;
+  }
+
+  if (!Verified) {
+    if (!VerifyResTableEntry(best_type, best_offset, entry_idx)) {
+      return false;
+    }
+  }
+
+  const ResTable_entry* best_entry = reinterpret_cast<const ResTable_entry*>(
+      reinterpret_cast<const uint8_t*>(best_type) + best_offset + dtohl(best_type->entriesStart));
+
+  const uint32_t* flags = reinterpret_cast<const uint32_t*>(type_spec_ptr->type_spec + 1);
+  out_entry->type_flags = dtohl(flags[entry_idx]);
+  out_entry->entry = best_entry;
+  out_entry->config = best_config;
+  out_entry->type_string_ref = StringPoolRef(&type_string_pool_, best_type->id - 1);
+  out_entry->entry_string_ref = StringPoolRef(&key_string_pool_, dtohl(best_entry->key.index));
+  return true;
+}
+
 bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTable_config& config,
-                              LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                              uint32_t* out_flags) const {
+                              FindEntryResult* out_entry) const {
   ATRACE_CALL();
 
   // If the type IDs are offset in this package, we need to take that into account when searching
@@ -142,120 +313,27 @@ bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTab
     }
   }
 
-  // Don't bother checking if the entry ID is larger than
-  // the number of entries.
+  // Don't bother checking if the entry ID is larger than the number of entries.
   if (entry_idx >= dtohl(ptr->type_spec->entryCount)) {
     return false;
   }
 
-  const ResTable_config* best_config = nullptr;
-  const ResTable_type* best_type = nullptr;
-  uint32_t best_offset = 0;
-
-  for (uint32_t i = 0; i < ptr->type_count; i++) {
-    const Type* type = &ptr->types[i];
-
-    if (type->configuration.match(config) &&
-        (best_config == nullptr || type->configuration.isBetterThan(*best_config, &config))) {
-      // The configuration matches and is better than the previous selection.
-      // Find the entry value if it exists for this configuration.
-      size_t entry_count = dtohl(type->type->entryCount);
-      if (entry_idx < entry_count) {
-        const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
-            reinterpret_cast<const uint8_t*>(type->type) + dtohs(type->type->header.headerSize));
-        const uint32_t offset = dtohl(entry_offsets[entry_idx]);
-        if (offset != ResTable_type::NO_ENTRY) {
-          // There is an entry for this resource, record it.
-          best_config = &type->configuration;
-          best_type = type->type;
-          best_offset = offset + dtohl(type->type->entriesStart);
-        }
-      }
-    }
+  if (verified_) {
+    return FindEntry<true>(ptr, entry_idx, config, out_entry);
   }
-
-  if (best_type == nullptr) {
-    return false;
-  }
-
-  const uint32_t* flags = reinterpret_cast<const uint32_t*>(ptr->type_spec + 1);
-  *out_flags = dtohl(flags[entry_idx]);
-  *out_selected_config = *best_config;
-
-  const ResTable_entry* best_entry = reinterpret_cast<const ResTable_entry*>(
-      reinterpret_cast<const uint8_t*>(best_type) + best_offset);
-  out_entry->entry = best_entry;
-  out_entry->type_string_ref = StringPoolRef(&type_string_pool_, best_type->id - 1);
-  out_entry->entry_string_ref = StringPoolRef(&key_string_pool_, dtohl(best_entry->key.index));
-  return true;
-}
-
-// The destructor gets generated into arbitrary translation units
-// if left implicit, which causes the compiler to complain about
-// forward declarations and incomplete types.
-LoadedArsc::~LoadedArsc() {}
-
-bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
-                           LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                           uint32_t* out_flags) const {
-  ATRACE_CALL();
-  const uint8_t package_id = get_package_id(resid);
-  const uint8_t type_id = get_type_id(resid);
-  const uint16_t entry_id = get_entry_id(resid);
-
-  if (type_id == 0) {
-    LOG(ERROR) << "Invalid ID 0x" << std::hex << resid << std::dec << ".";
-    return false;
-  }
-
-  for (const auto& loaded_package : packages_) {
-    if (loaded_package->package_id_ == package_id) {
-      return loaded_package->FindEntry(type_id - 1, entry_id, config, out_entry,
-                                       out_selected_config, out_flags);
-    }
-  }
-  return false;
-}
-
-const LoadedPackage* LoadedArsc::GetPackageForId(uint32_t resid) const {
-  const uint8_t package_id = get_package_id(resid);
-  for (const auto& loaded_package : packages_) {
-    if (loaded_package->package_id_ == package_id) {
-      return loaded_package.get();
-    }
-  }
-  return nullptr;
+  return FindEntry<false>(ptr, entry_idx, config, out_entry);
 }
 
 static bool VerifyType(const Chunk& chunk) {
   ATRACE_CALL();
   const ResTable_type* header = chunk.header<ResTable_type, kResTableTypeMinSize>();
 
+  if (!VerifyResTableType(header)) {
+    return false;
+  }
+
   const size_t entry_count = dtohl(header->entryCount);
-  if (entry_count > std::numeric_limits<uint16_t>::max()) {
-    LOG(ERROR) << "Too many entries in RES_TABLE_TYPE_TYPE.";
-    return false;
-  }
-
-  // Make sure that there is enough room for the entry offsets.
   const size_t offsets_offset = chunk.header_size();
-  const size_t entries_offset = dtohl(header->entriesStart);
-  const size_t offsets_length = sizeof(uint32_t) * entry_count;
-
-  if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
-    LOG(ERROR) << "Entry offsets overlap actual entry data.";
-    return false;
-  }
-
-  if (entries_offset > chunk.size()) {
-    LOG(ERROR) << "Entry offsets extend beyond chunk.";
-    return false;
-  }
-
-  if (entries_offset & 0x03) {
-    LOG(ERROR) << "Entries start at unaligned address.";
-    return false;
-  }
 
   // Check each entry offset.
   const uint32_t* offsets =
@@ -263,78 +341,8 @@ static bool VerifyType(const Chunk& chunk) {
   for (size_t i = 0; i < entry_count; i++) {
     uint32_t offset = dtohl(offsets[i]);
     if (offset != ResTable_type::NO_ENTRY) {
-      // Check that the offset is aligned.
-      if (offset & 0x03) {
-        LOG(ERROR) << "Entry offset at index " << i << " is not 4-byte aligned.";
+      if (!VerifyResTableEntry(header, offset, i)) {
         return false;
-      }
-
-      // Check that the offset doesn't overflow.
-      if (offset > std::numeric_limits<uint32_t>::max() - entries_offset) {
-        // Overflow in offset.
-        LOG(ERROR) << "Entry offset at index " << i << " is too large.";
-        return false;
-      }
-
-      offset += entries_offset;
-      if (offset > chunk.size() - sizeof(ResTable_entry)) {
-        LOG(ERROR) << "Entry offset at index " << i << " is too large. No room for ResTable_entry.";
-        return false;
-      }
-
-      const ResTable_entry* entry = reinterpret_cast<const ResTable_entry*>(
-          reinterpret_cast<const uint8_t*>(header) + offset);
-      const size_t entry_size = dtohs(entry->size);
-      if (entry_size < sizeof(*entry)) {
-        LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << i << " is too small.";
-        return false;
-      }
-
-      // Check the declared entrySize.
-      if (entry_size > chunk.size() || offset > chunk.size() - entry_size) {
-        LOG(ERROR) << "ResTable_entry size " << entry_size << " at index " << i << " is too large.";
-        return false;
-      }
-
-      // If this is a map entry, then keep validating.
-      if (entry_size >= sizeof(ResTable_map_entry)) {
-        const ResTable_map_entry* map = reinterpret_cast<const ResTable_map_entry*>(entry);
-        const size_t map_entry_count = dtohl(map->count);
-
-        size_t map_entries_start = offset + entry_size;
-        if (map_entries_start & 0x03) {
-          LOG(ERROR) << "Map entries at index " << i << " start at unaligned offset.";
-          return false;
-        }
-
-        // Each entry is sizeof(ResTable_map) big.
-        if (map_entry_count > ((chunk.size() - map_entries_start) / sizeof(ResTable_map))) {
-          LOG(ERROR) << "Too many map entries in ResTable_map_entry at index " << i << ".";
-          return false;
-        }
-
-        // Great, all the map entries fit!.
-      } else {
-        // There needs to be room for one Res_value struct.
-        if (offset + entry_size > chunk.size() - sizeof(Res_value)) {
-          LOG(ERROR) << "No room for Res_value after ResTable_entry at index " << i << " for type "
-                     << (int)header->id << " with config " << header->config.toString().string()
-                     << ".";
-          return false;
-        }
-
-        const Res_value* value = reinterpret_cast<const Res_value*>(
-            reinterpret_cast<const uint8_t*>(entry) + entry_size);
-        const size_t value_size = dtohs(value->size);
-        if (value_size < sizeof(Res_value)) {
-          LOG(ERROR) << "Res_value at index " << i << " is too small.";
-          return false;
-        }
-
-        if (value_size > chunk.size() || offset + entry_size > chunk.size() - value_size) {
-          LOG(ERROR) << "Res_value size " << value_size << " at index " << i << " is too large.";
-          return false;
-        }
       }
     }
   }
@@ -431,10 +439,21 @@ uint32_t LoadedPackage::FindEntryByName(const std::u16string& type_name,
   return 0u;
 }
 
-std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
-                                                   const LoadedIdmap* loaded_idmap) {
+const LoadedPackage* LoadedArsc::GetPackageForId(uint32_t resid) const {
+  const uint8_t package_id = get_package_id(resid);
+  for (const auto& loaded_package : packages_) {
+    if (loaded_package->GetPackageId() == package_id) {
+      return loaded_package.get();
+    }
+  }
+  return nullptr;
+}
+
+std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
+                                                         const LoadedIdmap* loaded_idmap,
+                                                         bool system, bool load_as_shared_library) {
   ATRACE_CALL();
-  std::unique_ptr<LoadedPackage> loaded_package{new LoadedPackage()};
+  std::unique_ptr<LoadedPackage> loaded_package(new LoadedPackage());
 
   // typeIdOffset was added at some point, but we still must recognize apps built before this
   // was added.
@@ -446,8 +465,11 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
     return {};
   }
 
+  loaded_package->system_ = system;
+
   loaded_package->package_id_ = dtohl(header->id);
-  if (loaded_package->package_id_ == 0) {
+  if (loaded_package->package_id_ == 0 ||
+      (loaded_package->package_id_ == kAppPackageId && load_as_shared_library)) {
     // Package ID of 0 means this is a shared library.
     loaded_package->dynamic_ = true;
   }
@@ -593,13 +615,16 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
         // Type chunks must be preceded by their TypeSpec chunks.
         if (!types_builder || type->id - 1 != last_type_idx) {
-          LOG(ERROR) << "Found RES_TABLE_TYPE_TYPE chunk without "
-                        "RES_TABLE_TYPE_SPEC_TYPE.";
+          LOG(ERROR) << "Found RES_TABLE_TYPE_TYPE chunk without RES_TABLE_TYPE_SPEC_TYPE.";
           return {};
         }
 
-        if (!VerifyType(child_chunk)) {
-          return {};
+        // Only verify the type if we haven't already failed verification.
+        if (loaded_package->verified_) {
+          if (!VerifyType(child_chunk)) {
+            LOG(WARNING) << "Package failed verification, resource retrieval may be slower";
+            loaded_package->verified_ = false;
+          }
         }
 
         types_builder->AddType(type);
@@ -669,7 +694,28 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
     LOG(ERROR) << iter.GetLastError();
     return {};
   }
-  return loaded_package;
+  return std::move(loaded_package);
+}
+
+bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
+                           FindEntryResult* out_entry) const {
+  ATRACE_CALL();
+
+  const uint8_t package_id = get_package_id(resid);
+  const uint8_t type_id = get_type_id(resid);
+  const uint16_t entry_id = get_entry_id(resid);
+
+  if (type_id == 0) {
+    LOG(ERROR) << base::StringPrintf("Invalid ID 0x%08x.", resid);
+    return false;
+  }
+
+  for (const auto& loaded_package : packages_) {
+    if (loaded_package->GetPackageId() == package_id) {
+      return loaded_package->FindEntry(type_id - 1, entry_id, config, out_entry);
+    }
+  }
+  return false;
 }
 
 bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
@@ -712,17 +758,11 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
         }
         packages_seen++;
 
-        std::unique_ptr<LoadedPackage> loaded_package =
-            LoadedPackage::Load(child_chunk, loaded_idmap);
+        std::unique_ptr<const LoadedPackage> loaded_package =
+            LoadedPackage::Load(child_chunk, loaded_idmap, system_, load_as_shared_library);
         if (!loaded_package) {
           return false;
         }
-
-        // Mark the package as dynamic if we are forcefully loading the Apk as a shared library.
-        if (loaded_package->package_id_ == kAppPackageId) {
-          loaded_package->dynamic_ = load_as_shared_library;
-        }
-        loaded_package->system_ = system_;
         packages_.push_back(std::move(loaded_package));
       } break;
 

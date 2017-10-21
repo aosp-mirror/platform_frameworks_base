@@ -19,6 +19,7 @@ package android.service.autofill;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.Helper.sDebug;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -30,6 +31,8 @@ import android.os.Parcelable;
 import android.view.autofill.AutofillId;
 import android.widget.RemoteViews;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +45,19 @@ import java.util.List;
  */
 public final class FillResponse implements Parcelable {
 
+    /**
+     * Must be set in the last response to generate
+     * {@link FillEventHistory.Event#TYPE_CONTEXT_COMMITTED} events.
+     */
+    public static final int FLAG_TRACK_CONTEXT_COMMITED = 0x1;
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_TRACK_CONTEXT_COMMITED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FillResponseFlags {}
+
     private final @Nullable ParceledListSlice<Dataset> mDatasets;
     private final @Nullable SaveInfo mSaveInfo;
     private final @Nullable Bundle mClientState;
@@ -49,16 +65,18 @@ public final class FillResponse implements Parcelable {
     private final @Nullable IntentSender mAuthentication;
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
+    private final int mFlags;
     private int mRequestId;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
         mSaveInfo = builder.mSaveInfo;
-        mClientState = builder.mCLientState;
+        mClientState = builder.mClientState;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
+        mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
     }
 
@@ -97,6 +115,11 @@ public final class FillResponse implements Parcelable {
         return mIgnoredIds;
     }
 
+    /** @hide */
+    public int getFlags() {
+        return mFlags;
+    }
+
     /**
      * Associates a {@link FillResponse} to a request.
      *
@@ -122,11 +145,12 @@ public final class FillResponse implements Parcelable {
     public static final class Builder {
         private ArrayList<Dataset> mDatasets;
         private SaveInfo mSaveInfo;
-        private Bundle mCLientState;
+        private Bundle mClientState;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
         private AutofillId[] mIgnoredIds;
+        private int mFlags;
         private boolean mDestroyed;
 
         /**
@@ -264,7 +288,20 @@ public final class FillResponse implements Parcelable {
          */
         public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
-            mCLientState = clientState;
+            mClientState = clientState;
+            return this;
+        }
+
+        /**
+         * Sets flags changing the response behavior.
+         *
+         * @param flags {@link #FLAG_TRACK_CONTEXT_COMMITED}, or {@code 0}.
+         *
+         * @return This builder.
+         */
+        public Builder setFlags(@FillResponseFlags int flags) {
+            throwIfDestroyed();
+            mFlags = flags;
             return this;
         }
 
@@ -311,6 +348,7 @@ public final class FillResponse implements Parcelable {
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
                 .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
+                .append(", flags=").append(mFlags)
                 .append("]")
                 .toString();
     }
@@ -333,6 +371,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
+        parcel.writeInt(mFlags);
         parcel.writeInt(mRequestId);
     }
 
@@ -363,8 +402,9 @@ public final class FillResponse implements Parcelable {
             }
 
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
-            final FillResponse response = builder.build();
+            builder.setFlags(parcel.readInt());
 
+            final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());
 
             return response;

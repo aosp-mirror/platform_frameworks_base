@@ -6921,9 +6921,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             } else if ("containers".equals(cmd)) {
                 synchronized(mWindowMap) {
-                    StringBuilder output = new StringBuilder();
-                    mRoot.dumpChildrenNames(output, " ");
-                    pw.println(output.toString());
+                    mRoot.dumpChildrenNames(pw, " ");
                     pw.println(" ");
                     mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
                 }

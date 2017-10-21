@@ -41,13 +41,13 @@ message CompiledFile {
   // The configuration for which the resource is defined.
   aapt.pb.Configuration config = 2;
 
+  // The type of the file.
+  aapt.pb.FileReference.Type type = 3;
+
   // The filesystem path to where the source file originated.
   // Mainly used to display helpful error messages.
-  string source_path = 3;
+  string source_path = 4;
 
   // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
-  repeated Symbol exported_symbol = 4;
-
-  // If this is a compiled XML file, this is the root node.
-  aapt.pb.XmlNode xml_root = 5;
+  repeated Symbol exported_symbol = 5;
 }

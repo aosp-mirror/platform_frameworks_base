@@ -165,6 +165,22 @@ enum DebugLevel {
  */
 #define PROPERTY_RENDERER "debug.hwui.renderer"
 
+/**
+ * Allows to collect a recording of Skia drawing commands.
+ */
+#define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
+
+
+/**
+ * Defines how many frames in a sequence to capture.
+ */
+#define PROPERTY_CAPTURE_SKP_FRAMES  "debug.hwui.capture_skp_frames"
+
+/**
+ * File name and location, where a SKP recording will be saved.
+ */
+#define PROPERTY_CAPTURE_SKP_FILENAME "debug.hwui.skp_filename"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,6 +269,8 @@ public:
     // Any existing RenderProxy & Surface combination will be unaffected, only things
     // created after changing this.
     static bool disableVsync;
+
+    static bool skpCaptureEnabled;
 
     // Used for testing only to change the render pipeline.
 #ifdef HWUI_GLES_WRAP_ENABLED

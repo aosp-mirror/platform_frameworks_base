@@ -19,6 +19,8 @@ option java_multiple_files = true;
 
 package android.os;
 
+import "frameworks/base/core/proto/android/app/jobparameters.proto";
+import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/telephony/signalstrength.proto";
 
 message BatteryStatsProto {
@@ -356,11 +358,12 @@ message SystemProto {
   optional PowerUseSummary power_use_summary = 18;
 
   message ResourcePowerManager {
+    // Either StateName or StateName.VoterName.
     optional string name = 1;
     optional TimerProto total = 2;
     optional TimerProto screen_off = 3;
   }
-  optional ResourcePowerManager resource_power_manager = 19;
+  repeated ResourcePowerManager resource_power_manager = 19;
 
   message ScreenBrightness {
     enum Name {
@@ -436,12 +439,332 @@ message SystemProto {
 }
 
 message TimerProto {
+  // This may be an apportioned time.
   optional int64 duration_ms = 1;
   optional int64 count = 2;
+  // The max duration if it is being tracked. Not all Timer subclasses
+  // track the max duration.
+  optional int64 max_duration_ms = 3;
+  // The current time the timer has been active, if it is being tracked.
+  // Not all Timer subclasses track the current duration.
+  optional int64 current_duration_ms = 4;
+  // The total cumulative duration (i.e. sum of past durations) that this timer
+  // has been on since reset. This may differ from duration_ms since, depending
+  // on the Timer, getTotalTimeLocked may represent the total 'blamed' or
+  // 'pooled' time, rather than the actual time. By contrast, total_duration_ms
+  // always gives the actual total time. Not all Timer subclasses track the
+  // total duration.
+  optional int64 total_duration_ms = 5;
 }
 
 message UidProto {
   // Combination of app ID and user ID.
   optional int32 uid = 1;
-  repeated string package_names = 2;
+
+  // The statistics associated with a particular package.
+  message Package {
+    optional string name = 1;
+
+    message Service {
+      optional string name = 1;
+      // Time spent started.
+      optional int64 start_duration_ms = 2;
+      optional int32 start_count = 3;
+      optional int32 launch_count = 4;
+    }
+    repeated Service services = 2;
+  }
+  repeated Package packages = 2;
+
+  optional ControllerActivityProto bluetooth_controller = 3;
+  optional ControllerActivityProto modem_controller = 4;
+  optional ControllerActivityProto wifi_controller = 5;
+
+  // Bluetooth misc data.
+  message BluetoothMisc {
+    // Duration spent BLE scanning blamed on this App (i.e. apportioned to this
+    // app amongst all apps doing BLE scanning; see explanation of 'apportioned'
+    // in App's comment).
+    optional TimerProto apportioned_ble_scan = 1;
+    // Background times aren't apportioned.
+    optional TimerProto background_ble_scan = 2;
+    // Running unoptimized BLE scanning, as defined by Bluetooth's
+    // AppScanStats.recordScanStart. As of May 2017, these are unfiltered,
+    // non-opportunistic, non-first-match scans. Durations are not
+    // pooled/apportioned.
+    optional TimerProto unoptimized_ble_scan = 3;
+    // Running unoptimized BLE scanning when app is in background. Durations are
+    // not pooled/apportioned.
+    optional TimerProto background_unoptimized_ble_scan = 4;
+    // Count of results returned by BLE scanning.
+    optional int32 ble_scan_result_count = 5;
+    // Count of results returned by BLE scans when app is in background.
+    // (Included in ble_scan_result_count.)
+    optional int32 background_ble_scan_result_count = 6;
+  }
+  optional BluetoothMisc bluetooth_misc = 6;
+
+  message Cpu {
+    // Total CPU time with processes executing in userspace. Summed up across
+    // multiple cores.
+    optional int64 user_duration_ms = 1;
+    // Total CPU time with processes executing kernel syscalls. Summed up across
+    // multiple cores.
+    optional int64 system_duration_ms = 2;
+
+    // CPU time broken down by CPU frequency (go/cpu-battery-metrics).
+    //
+    // These are real CPU time measurement from the kernel, so their sum can
+    // be different from the sum of user_duration_millis and
+    // system_duration_millis, which are just approximations. Data is not
+    // tracked when device is charging.
+    message ByFrequency {
+      // Index of the frequency in system.cpu_frequency. It starts from 1, to
+      // make it easier to analyze.
+      optional int32 frequency_index = 1;
+      // CPU time in milliseconds.
+      optional int64 total_duration_ms = 2;
+      // Screen-off CPU time in milliseconds.
+      optional int64 screen_off_duration_ms = 3;
+    }
+    repeated ByFrequency by_frequency = 3;
+  }
+  optional Cpu cpu = 7;
+
+  // Duration is pooled/apportioned.
+  optional TimerProto audio = 8;
+  // Duration is pooled/apportioned.
+  optional TimerProto camera = 9;
+  // Duration is pooled/apportioned.
+  optional TimerProto flashlight = 10;
+  // Duration is not pooled/apportioned.
+  optional TimerProto foreground_activity = 11;
+  // Duration is not pooled/apportioned.
+  optional TimerProto foreground_service = 12;
+  // Duration is not pooled/apportioned.
+  optional TimerProto vibrator = 13;
+  // Duration is pooled/apportioned.
+  optional TimerProto video = 14;
+
+  message Job {
+    optional string name = 1;
+    // Job times aren't apportioned.
+    optional TimerProto total = 2;
+    optional TimerProto background = 3;
+  }
+  repeated Job jobs = 15;
+
+  message JobCompletion {
+    // Job name.
+    optional string name = 1;
+
+    message ReasonCount {
+      optional android.app.JobParametersProto.CancelReason name = 1;
+      optional int32 count = 2;
+    }
+    repeated ReasonCount reason_count = 2;
+  };
+  repeated JobCompletion job_completion = 16;
+
+  message Network {
+    // Mobile data traffic (total, background + foreground).
+    optional int64 mobile_bytes_rx = 1;
+    optional int64 mobile_bytes_tx = 2;
+    // Wifi data traffic (total, background + foreground).
+    optional int64 wifi_bytes_rx = 3;
+    optional int64 wifi_bytes_tx = 4;
+    // Bluetooth data traffic (total, background + foreground).
+    optional int64 bt_bytes_rx = 5;
+    optional int64 bt_bytes_tx = 6;
+    // In packets (total, background + foreground).
+    optional int64 mobile_packets_rx = 7;
+    optional int64 mobile_packets_tx = 8;
+    optional int64 wifi_packets_rx = 9;
+    optional int64 wifi_packets_tx = 10;
+    // Radio active duration.
+    optional int64 mobile_active_duration_ms = 11;
+    optional int32 mobile_active_count = 12;
+    // Number of times the app woke up the mobile radio.
+    optional int32 mobile_wakeup_count = 13;
+    // Number of times the app woke up the wifi radio.
+    optional int32 wifi_wakeup_count = 14;
+    // Mobile data traffic in the background only, included in total above.
+    optional int64 mobile_bytes_bg_rx = 15;
+    optional int64 mobile_bytes_bg_tx = 16;
+    // Wifi data traffic in the background only, included in total above.
+    optional int64 wifi_bytes_bg_rx = 17;
+    optional int64 wifi_bytes_bg_tx = 18;
+    // In packets (background only, included in total packets above).
+    optional int64 mobile_packets_bg_rx = 19;
+    optional int64 mobile_packets_bg_tx = 20;
+    optional int64 wifi_packets_bg_rx = 21;
+    optional int64 wifi_packets_bg_tx = 22;
+  };
+  optional Network network = 17;
+
+  // TODO: combine System and App messages?
+  message PowerUseItem {
+    // Estimated power use in mAh.
+    optional double computed_power_mah = 1;
+    // Starting in Oreo, Battery Settings has two modes to display the battery
+    // info. The first is "app usage list". In this mode, items with should_hide
+    // enabled are hidden.
+    optional bool should_hide = 2;
+    // Smeared power from screen usage. Screen usage power is split and smeared
+    // among apps, based on activity time.
+    optional double screen_power_mah = 3;
+    // Smeared power using proportional method. Power usage from hidden sippers
+    // is smeared to all apps proportionally (except for screen usage).
+    optional double proportional_smear_mah = 4;
+  };
+  optional PowerUseItem power_use_item = 18;
+
+  // Durations are not pooled/apportioned.
+  message Process {
+    optional string name = 1;
+    // Time spent executing in user code.
+    optional int64 user_duration_ms = 2;
+    // Time spent executing in kernel code.
+    optional int64 system_duration_ms = 3;
+    // Time the process was running in the foreground.
+    optional int64 foreground_duration_ms = 4;
+    // Number of times the process has been started.
+    optional int32 start_count = 5;
+    // Number of times the process has had an ANR.
+    optional int32 anr_count = 6;
+    // Number of times the process has crashed.
+    optional int32 crash_count = 7;
+  };
+  repeated Process process = 19;
+
+  message StateTime {
+    // All of these (non-deprecated) states are mutually exclusive and can be
+    // added together to find the total time a uid has had any processes running
+    // at all.
+
+    // In approximate order or priority (top being what the framework considers
+    // most important and is thus least likely to kill when resources are
+    // needed:
+    // top > foreground service > top sleeping > foreground > background > cache
+    enum State {
+      // Time this uid has any processes in the top state (or above such as
+      // persistent).
+      PROCESS_STATE_TOP = 0;
+      // Time this uid has any process with a started out bound foreground
+      // service, but none in the "top" state.
+      PROCESS_STATE_FOREGROUND_SERVICE = 1;
+      // Time this uid has any process that is top while the device is sleeping,
+      // but none in the "foreground service" or better state. Sleeping is
+      // mostly screen off, but also includes the time when the screen is on but
+      // the device has not yet been unlocked.
+      PROCESS_STATE_TOP_SLEEPING = 2;
+      // Time this uid has any process in an active foreground state, but none
+      // in the "top sleeping" or better state.
+      PROCESS_STATE_FOREGROUND = 3;
+      // Time this uid has any process in an active background state, but none
+      // in the "foreground" or better state.
+      PROCESS_STATE_BACKGROUND = 4;
+      // Time this uid has any processes that are sitting around cached, not in
+      // one of the other active states.
+      PROCESS_STATE_CACHED = 5;
+    }
+    optional State state = 1;
+    optional int64 duration_ms = 2;
+  }
+  repeated StateTime states = 20;
+
+  message Sensor {
+    optional int32 id = 1;
+    optional TimerProto apportioned = 2;
+    // Background times aren't apportioned.
+    optional TimerProto background = 3;
+  }
+  repeated Sensor sensors = 21;
+
+  message Sync {
+    optional string name = 1;
+    // Sync times aren't apportioned.
+    optional TimerProto total = 2;
+    optional TimerProto background = 3;
+  }
+  repeated Sync syncs = 22;
+
+  message UserActivity {
+    optional android.os.PowerManagerProto.UserActivityEvent name = 1;
+    optional int32 count = 2;
+  };
+  repeated UserActivity user_activity = 23;
+
+  // Aggregated wakelock data for an app overall, across all of its wakelocks.
+  // The Wakelock message holds data about each *individual* wakelock, but it
+  // cannot be used to ascertain the aggregated time the app spent holding
+  // wakelocks, since merely summing Wakelock data will either underestimate (in
+  // the case of wakelock.partial.duration_ms) or overestimate (in the case of
+  // wakelock.partial.total_duration_ms) the total time, due to overlapping
+  // wakelocks. AggregatedWakelock, on the other hand, holds overall per-app
+  // wakelock data.
+  message AggregatedWakelock {
+    // The total duration that the app spent holding partial wakelocks.
+    // It includes both foreground + background use.
+    optional int64 partial_duration_ms = 1;
+    // The total duration that the app spent holding partial wakelocks while the
+    // app was in the background. Subtracting from partial_duration_ms will
+    // yield foreground usage.
+    optional int64 background_partial_duration_ms = 2;
+  };
+  optional AggregatedWakelock aggregated_wakelock = 24;
+
+  message Wakelock {
+    optional string name = 1;
+
+    // Full wakelocks keep the screen on. Based on
+    // PowerManager.SCREEN_BRIGHT_WAKE_LOCK (deprecated in API 13) and
+    // PowerManager.SCREEN_DIM_WAKE_LOCK (deprecated in API 17). Current, max,
+    // and total durations are not tracked for full wakelocks.
+    optional TimerProto full = 2;
+
+    // Partial wakelocks ensure the CPU is running while allowing the screen
+    // to turn off. Based on PowerManager.PARTIAL_WAKE_LOCK.
+    // Partial wakelock metrics are only recorded when the device is unplugged
+    // *and* the screen is off. Current, max, and total durations are tracked
+    // for partial wakelocks.
+    optional TimerProto partial = 3;
+
+    // These fields are for tracking partial wakelocks (see above), but only
+    // the time the wakelock was held while the app was in a background state.
+    // Since all background tracking is 'actual', not 'apportioned',
+    // background_partial.duration_ms is identical to
+    // background_partial.total_duration_ms.
+    optional TimerProto background_partial = 4;
+
+    // Window wakelocks keep the screen on. Current, max, and total durations
+    // are not tracked for window wakelocks.
+    optional TimerProto window = 5;
+  };
+  repeated Wakelock wakelocks = 25;
+
+  message WakeupAlarm {
+    // Wakeup alarm name.
+    optional string name = 1;
+    // Only includes counts when screen-off (& on battery).
+    optional int32 count = 2;
+  }
+  repeated WakeupAlarm wakeup_alarm = 26;
+
+  message Wifi {
+    // Duration holding Wifi-lock. This time is apportioned.
+    optional int64 full_wifi_lock_duration_ms = 1;
+    // Duration running Wifi. This time is apportioned.
+    optional int64 running_duration_ms = 2;
+    // Duration performing Wifi-scan blamed on this App (i.e. apportioned to
+    // this app amongst all apps doing Wifi-scanning; see explanation of
+    // 'apportioned' in App's comment).
+    optional TimerProto apportioned_scan = 3;
+    // Scans performed when app is in background. (Included in
+    // apportioned_scan). This value is not apportioned. Subtracting
+    // background_scan.total_duration_ms from apportioned_scan.total_duration_ms
+    // will yield foreground usage.
+    optional TimerProto background_scan = 4;
+  };
+  optional Wifi wifi = 27;
 }

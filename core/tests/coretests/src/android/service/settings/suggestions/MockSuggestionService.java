@@ -16,10 +16,22 @@
 
 package android.service.settings.suggestions;
 
+import android.support.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MockSuggestionService extends SuggestionService {
+
+    @VisibleForTesting
+    static boolean sOnSuggestionLaunchedCalled;
+    @VisibleForTesting
+    static boolean sOnSuggestionDismissedCalled;
+
+    public static void reset() {
+        sOnSuggestionLaunchedCalled = false;
+        sOnSuggestionDismissedCalled = false;
+    }
 
     @Override
     public List<Suggestion> onGetSuggestions() {
@@ -34,5 +46,11 @@ public class MockSuggestionService extends SuggestionService {
 
     @Override
     public void onSuggestionDismissed(Suggestion suggestion) {
+        sOnSuggestionDismissedCalled = true;
+    }
+
+    @Override
+    public void onSuggestionLaunched(Suggestion suggestion) {
+        sOnSuggestionLaunchedCalled = true;
     }
 }

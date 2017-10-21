@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
+
+#include "io/Util.h"
 
 #include "test/Test.h"
 
@@ -66,6 +68,17 @@ TEST(StringInputStreamTest, BackUp) {
   ASSERT_THAT(buffer, NotNull());
   ASSERT_THAT(buffer, StrEq("string"));
   EXPECT_THAT(in.ByteCount(), Eq(input.size()));
+}
+
+TEST(StringOutputStreamTest, NextAndBackUp) {
+  std::string input = "hello this is a string";
+  std::string output;
+
+  StringInputStream in(input);
+  StringOutputStream out(&output, 10u);
+  ASSERT_TRUE(Copy(&out, &in));
+  out.Flush();
+  EXPECT_THAT(output, StrEq(input));
 }
 
 }  // namespace io

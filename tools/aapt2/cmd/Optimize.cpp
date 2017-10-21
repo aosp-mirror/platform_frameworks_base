@@ -33,7 +33,7 @@
 #include "filter/AbiFilter.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
-#include "io/BigBufferInputStream.h"
+#include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "optimize/MultiApkGenerator.h"
 #include "optimize/ResourceDeduper.h"

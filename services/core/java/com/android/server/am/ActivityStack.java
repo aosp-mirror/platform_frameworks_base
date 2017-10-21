@@ -480,6 +480,29 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    @Override
+    public boolean isCompatible(int windowingMode, int activityType) {
+        // TODO: Should we just move this to ConfigurationContainer?
+        if (activityType == ACTIVITY_TYPE_UNDEFINED) {
+            // Undefined activity types end up in a standard stack once the stack is created on a
+            // display, so they should be considered compatible.
+            activityType = ACTIVITY_TYPE_STANDARD;
+        }
+        final ActivityDisplay display = getDisplay();
+        if (display != null) {
+            if (activityType == ACTIVITY_TYPE_STANDARD
+                    && windowingMode == WINDOWING_MODE_UNDEFINED) {
+                // Standard activity types will mostly take on the windowing mode of the display if
+                // one isn't specified, so look-up a compatible stack based on the display's
+                // windowing mode.
+                windowingMode = display.getWindowingMode();
+            }
+            windowingMode =
+                    display.updateWindowingModeForSplitScreenIfNeeded(windowingMode, activityType);
+        }
+        return super.isCompatible(windowingMode, activityType);
+    }
+
     /** Adds the stack to specified display and calls WindowManager to do the same. */
     void reparent(ActivityDisplay activityDisplay, boolean onTop) {
         removeFromDisplay();

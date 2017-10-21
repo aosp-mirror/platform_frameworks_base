@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "io/FileInputStream.h"
+#include "io/FileStream.h"
 
 #include <errno.h>   // for errno
 #include <fcntl.h>   // for O_RDONLY
@@ -66,6 +66,7 @@ bool FileInputStream::Next(const void** data, size_t* size) {
   if (n < 0) {
     error_ = SystemErrorCodeToString(errno);
     fd_.reset();
+    buffer_.reset();
     return false;
   }
 
@@ -91,10 +92,87 @@ size_t FileInputStream::ByteCount() const {
 }
 
 bool FileInputStream::HadError() const {
-  return !error_.empty();
+  return fd_ == -1;
 }
 
 std::string FileInputStream::GetError() const {
+  return error_;
+}
+
+FileOutputStream::FileOutputStream(const std::string& path, int mode, size_t buffer_capacity)
+    : FileOutputStream(::android::base::utf8::open(path.c_str(), mode), buffer_capacity) {
+}
+
+FileOutputStream::FileOutputStream(int fd, size_t buffer_capacity)
+    : fd_(fd), buffer_capacity_(buffer_capacity), buffer_offset_(0u), total_byte_count_(0u) {
+  if (fd_ == -1) {
+    error_ = SystemErrorCodeToString(errno);
+  } else {
+    buffer_.reset(new uint8_t[buffer_capacity_]);
+  }
+}
+
+FileOutputStream::~FileOutputStream() {
+  // Flush the buffer.
+  Flush();
+}
+
+bool FileOutputStream::Next(void** data, size_t* size) {
+  if (fd_ == -1 || HadError()) {
+    return false;
+  }
+
+  if (buffer_offset_ == buffer_capacity_) {
+    if (!FlushImpl()) {
+      return false;
+    }
+  }
+
+  const size_t buffer_size = buffer_capacity_ - buffer_offset_;
+  *data = buffer_.get() + buffer_offset_;
+  *size = buffer_size;
+  total_byte_count_ += buffer_size;
+  buffer_offset_ = buffer_capacity_;
+  return true;
+}
+
+void FileOutputStream::BackUp(size_t count) {
+  if (count > buffer_offset_) {
+    count = buffer_offset_;
+  }
+  buffer_offset_ -= count;
+  total_byte_count_ -= count;
+}
+
+size_t FileOutputStream::ByteCount() const {
+  return total_byte_count_;
+}
+
+bool FileOutputStream::Flush() {
+  if (!HadError()) {
+    return FlushImpl();
+  }
+  return false;
+}
+
+bool FileOutputStream::FlushImpl() {
+  ssize_t n = TEMP_FAILURE_RETRY(write(fd_, buffer_.get(), buffer_offset_));
+  if (n < 0) {
+    error_ = SystemErrorCodeToString(errno);
+    fd_.reset();
+    buffer_.reset();
+    return false;
+  }
+
+  buffer_offset_ = 0u;
+  return true;
+}
+
+bool FileOutputStream::HadError() const {
+  return fd_ == -1;
+}
+
+std::string FileOutputStream::GetError() const {
   return error_;
 }
 

@@ -327,7 +327,9 @@ public class LockTaskController {
             if (getDevicePolicyManager() != null) {
                 getDevicePolicyManager().notifyLockTaskModeChanged(false, null, userId);
             }
-            getLockTaskNotify().show(false);
+            if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
+                getLockTaskNotify().showPinningExitToast();
+            }
             try {
                 boolean shouldLockKeyguard = Settings.Secure.getIntForUser(
                         mContext.getContentResolver(),
@@ -349,10 +351,13 @@ public class LockTaskController {
     }
 
     /**
-     * Show the lock task violation toast.
+     * Show the lock task violation toast. Currently we only show toast for screen pinning mode, and
+     * no-op if the device is in locked mode.
      */
     void showLockTaskToast() {
-        mHandler.post(() -> getLockTaskNotify().showToast(mLockTaskModeState));
+        if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
+            mHandler.post(() -> getLockTaskNotify().showEscapeToast());
+        }
     }
 
     // Starting lock task
@@ -439,7 +444,9 @@ public class LockTaskController {
     private void performStartLockTask(String packageName, int userId, int lockTaskModeState) {
         // When lock task starts, we disable the status bars.
         try {
-            getLockTaskNotify().show(true);
+            if (lockTaskModeState == LOCK_TASK_MODE_PINNED) {
+                getLockTaskNotify().showPinningStartToast();
+            }
             mLockTaskModeState = lockTaskModeState;
             if (getStatusBarService() != null) {
                 int flags = 0;

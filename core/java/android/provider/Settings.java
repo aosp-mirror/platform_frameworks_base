@@ -442,6 +442,18 @@ public final class Settings {
             "android.settings.ASSIST_GESTURE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to enroll fingerprints, and setup PIN/Pattern/Pass if
+     * necessary.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FINGERPRINT_ENROLL =
+            "android.settings.FINGERPRINT_ENROLL";
+
+    /**
      * Activity Action: Show settings to allow configuration of cast endpoints.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -9253,6 +9265,13 @@ public final class Settings {
          * @hide
          */
         public static final String DEFAULT_DNS_SERVER = "default_dns_server";
+
+        /**
+         * Whether to disable DNS over TLS (boolean)
+         *
+         * @hide
+         */
+        public static final String DNS_TLS_DISABLED = "dns_tls_disabled";
 
         /** {@hide} */
         public static final String

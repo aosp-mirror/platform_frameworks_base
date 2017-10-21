@@ -269,8 +269,19 @@ message StyledString {
 
 // A value that is a reference to an external entity, like an XML file or a PNG.
 message FileReference {
+  enum Type {
+    UNKNOWN = 0;
+    PNG = 1;
+    BINARY_XML = 2;
+    PROTO_XML = 3;
+  }
+
   // Path to a file within the APK (typically res/type-config/entry.ext).
   string path = 1;
+
+  // The type of file this path points to. For UAM bundle, this cannot be
+  // BINARY_XML.
+  Type type = 2;
 }
 
 // A value that represents a primitive data type (float, int, boolean, etc.).

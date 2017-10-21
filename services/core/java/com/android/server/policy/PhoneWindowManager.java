@@ -1654,8 +1654,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mScreenshotChordVolumeDownKeyConsumed = true;
                 mA11yShortcutChordVolumeUpKeyConsumed = true;
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_ACCESSIBILITY_SHORTCUT),
-                        ViewConfiguration.get(mContext).getAccessibilityShortcutKeyTimeout());
+                        getAccessibilityShortcutTimeout());
             }
+        }
+    }
+
+    private long getAccessibilityShortcutTimeout() {
+        ViewConfiguration config = ViewConfiguration.get(mContext);
+        try {
+            return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, mCurrentUserId) == 0
+                    ? config.getAccessibilityShortcutKeyTimeout()
+                    : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
+        } catch (Settings.SettingNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -3866,8 +3878,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mAccessibilityTvScheduled = true;
                 Message msg = Message.obtain(mHandler, MSG_ACCESSIBILITY_TV);
                 msg.setAsynchronous(true);
-                mHandler.sendMessageDelayed(msg,
-                        ViewConfiguration.get(mContext).getAccessibilityShortcutKeyTimeout());
+                mHandler.sendMessageDelayed(msg, getAccessibilityShortcutTimeout());
             }
         } else if (mAccessibilityTvScheduled) {
             mHandler.removeMessages(MSG_ACCESSIBILITY_TV);

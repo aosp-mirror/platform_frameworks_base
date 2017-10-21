@@ -36,10 +36,11 @@
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/XmlIdCollector.h"
 #include "format/Archive.h"
-#include "format/binary/XmlFlattener.h"
+#include "format/Container.h"
 #include "format/proto/ProtoSerialize.h"
-#include "io/BigBufferOutputStream.h"
-#include "io/FileInputStream.h"
+#include "io/BigBufferStream.h"
+#include "io/FileStream.h"
+#include "io/StringStream.h"
 #include "io/Util.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
@@ -49,6 +50,7 @@
 
 using ::aapt::io::FileInputStream;
 using ::android::StringPiece;
+using ::android::base::SystemErrorCodeToString;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;
 
 namespace aapt {
@@ -116,7 +118,7 @@ struct CompileOptions {
   bool verbose = false;
 };
 
-static std::string BuildIntermediateFilename(const ResourcePathData& data) {
+static std::string BuildIntermediateContainerFilename(const ResourcePathData& data) {
   std::stringstream name;
   name << data.resource_dir;
   if (!data.config_str.empty()) {
@@ -141,7 +143,7 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
     context->GetDiagnostics()->Error(DiagMessage(root_dir) << "failed to open directory: "
-                                     << android::base::SystemErrorCodeToString(errno));
+                                                           << SystemErrorCodeToString(errno));
     return false;
   }
 
@@ -160,7 +162,7 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
     std::unique_ptr<DIR, decltype(closedir)*> subdir(opendir(prefix_path.data()), closedir);
     if (!subdir) {
       context->GetDiagnostics()->Error(DiagMessage(prefix_path) << "failed to open directory: "
-                                       << android::base::SystemErrorCodeToString(errno));
+                                                                << SystemErrorCodeToString(errno));
       return false;
     }
 
@@ -241,16 +243,15 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     return false;
   }
 
-  // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->FinishEntry().
+  // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->FinishEntry().
   {
-    // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream interface.
+    // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
+    ContainerWriter container_writer(&copying_adaptor, 1u);
 
     pb::ResourceTable pb_table;
     SerializeTableToPb(table, &pb_table);
-    if (!pb_table.SerializeToZeroCopyStream(&copying_adaptor)) {
+    if (!container_writer.AddResTableEntry(pb_table)) {
       context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write");
       return false;
     }
@@ -263,46 +264,8 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
   return true;
 }
 
-static bool WriteHeaderAndBufferToWriter(const StringPiece& output_path, const ResourceFile& file,
-                                         const BigBuffer& buffer, IArchiveWriter* writer,
-                                         IDiagnostics* diag) {
-  // Start the entry so we can write the header.
-  if (!writer->StartEntry(output_path, 0)) {
-    diag->Error(DiagMessage(output_path) << "failed to open file");
-    return false;
-  }
-
-  // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->FinishEntry().
-  {
-    // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream interface.
-    CopyingOutputStreamAdaptor copying_adaptor(writer);
-    CompiledFileOutputStream output_stream(&copying_adaptor);
-
-    // Number of CompiledFiles.
-    output_stream.WriteLittleEndian32(1);
-
-    pb::internal::CompiledFile pb_compiled_file;
-    SerializeCompiledFileToPb(file, &pb_compiled_file);
-    output_stream.WriteCompiledFile(pb_compiled_file);
-    output_stream.WriteData(buffer);
-
-    if (output_stream.HadError()) {
-      diag->Error(DiagMessage(output_path) << "failed to write data");
-      return false;
-    }
-  }
-
-  if (!writer->FinishEntry()) {
-    diag->Error(DiagMessage(output_path) << "failed to finish writing data");
-    return false;
-  }
-  return true;
-}
-
-static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const ResourceFile& file,
-                                       const android::FileMap& map, IArchiveWriter* writer,
+static bool WriteHeaderAndDataToWriter(const StringPiece& output_path, const ResourceFile& file,
+                                       io::KnownSizeInputStream* in, IArchiveWriter* writer,
                                        IDiagnostics* diag) {
   // Start the entry so we can write the header.
   if (!writer->StartEntry(output_path, 0)) {
@@ -310,24 +273,17 @@ static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const Res
     return false;
   }
 
-  // Make sure CopyingOutputStreamAdaptor is deleted before we call
-  // writer->FinishEntry().
+  // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->FinishEntry().
   {
-    // Wrap our IArchiveWriter with an adaptor that implements the
-    // ZeroCopyOutputStream interface.
+    // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
-    CompiledFileOutputStream output_stream(&copying_adaptor);
-
-    // Number of CompiledFiles.
-    output_stream.WriteLittleEndian32(1);
+    ContainerWriter container_writer(&copying_adaptor, 1u);
 
     pb::internal::CompiledFile pb_compiled_file;
     SerializeCompiledFileToPb(file, &pb_compiled_file);
-    output_stream.WriteCompiledFile(pb_compiled_file);
-    output_stream.WriteData(map.getDataPtr(), map.getDataLength());
 
-    if (output_stream.HadError()) {
-      diag->Error(DiagMessage(output_path) << "failed to write data");
+    if (!container_writer.AddResFileEntry(pb_compiled_file, in)) {
+      diag->Error(DiagMessage(output_path) << "failed to write entry data");
       return false;
     }
   }
@@ -339,23 +295,19 @@ static bool WriteHeaderAndMmapToWriter(const StringPiece& output_path, const Res
   return true;
 }
 
-static bool FlattenXmlToOutStream(IAaptContext* context, const StringPiece& output_path,
-                                  xml::XmlResource* xmlres, CompiledFileOutputStream* out) {
-  BigBuffer buffer(1024);
-  XmlFlattenerOptions xml_flattener_options;
-  xml_flattener_options.keep_raw_values = true;
-  XmlFlattener flattener(&buffer, xml_flattener_options);
-  if (!flattener.Consume(context, xmlres)) {
-    return false;
-  }
-
+static bool FlattenXmlToOutStream(const StringPiece& output_path, const xml::XmlResource& xmlres,
+                                  ContainerWriter* container_writer, IDiagnostics* diag) {
   pb::internal::CompiledFile pb_compiled_file;
-  SerializeCompiledFileToPb(xmlres->file, &pb_compiled_file);
-  out->WriteCompiledFile(pb_compiled_file);
-  out->WriteData(buffer);
+  SerializeCompiledFileToPb(xmlres.file, &pb_compiled_file);
 
-  if (out->HadError()) {
-    context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write XML data");
+  pb::XmlNode pb_xml_node;
+  SerializeXmlToPb(*xmlres.root, &pb_xml_node);
+
+  std::string serialized_xml = pb_xml_node.SerializeAsString();
+  io::StringInputStream serialized_in(serialized_xml);
+
+  if (!container_writer->AddResFileEntry(pb_compiled_file, &serialized_in)) {
+    diag->Error(DiagMessage(output_path) << "failed to write entry data");
     return false;
   }
   return true;
@@ -404,6 +356,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
   xmlres->file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir), path_data.name);
   xmlres->file.config = path_data.config;
   xmlres->file.source = path_data.source;
+  xmlres->file.type = ResourceFile::Type::kProtoXml;
 
   // Collect IDs that are defined here.
   XmlIdCollector collector;
@@ -423,24 +376,23 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     return false;
   }
 
+  std::vector<std::unique_ptr<xml::XmlResource>>& inline_documents =
+      inline_xml_format_parser.GetExtractedInlineXmlDocuments();
+
   // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->FinishEntry().
   {
     // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
     CopyingOutputStreamAdaptor copying_adaptor(writer);
-    CompiledFileOutputStream output_stream(&copying_adaptor);
+    ContainerWriter container_writer(&copying_adaptor, 1u + inline_documents.size());
 
-    std::vector<std::unique_ptr<xml::XmlResource>>& inline_documents =
-        inline_xml_format_parser.GetExtractedInlineXmlDocuments();
-
-    // Number of CompiledFiles.
-    output_stream.WriteLittleEndian32(1 + inline_documents.size());
-
-    if (!FlattenXmlToOutStream(context, output_path, xmlres.get(), &output_stream)) {
+    if (!FlattenXmlToOutStream(output_path, *xmlres, &container_writer,
+                               context->GetDiagnostics())) {
       return false;
     }
 
-    for (auto& inline_xml_doc : inline_documents) {
-      if (!FlattenXmlToOutStream(context, output_path, inline_xml_doc.get(), &output_stream)) {
+    for (const std::unique_ptr<xml::XmlResource>& inline_xml_doc : inline_documents) {
+      if (!FlattenXmlToOutStream(output_path, *inline_xml_doc, &container_writer,
+                                 context->GetDiagnostics())) {
         return false;
       }
     }
@@ -465,6 +417,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
   res_file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir), path_data.name);
   res_file.config = path_data.config;
   res_file.source = path_data.source;
+  res_file.type = ResourceFile::Type::kPng;
 
   {
     std::string content;
@@ -472,7 +425,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
                                          true /*follow_symlinks*/)) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
                                        << "failed to open file: "
-                                       << android::base::SystemErrorCodeToString(errno));
+                                       << SystemErrorCodeToString(errno));
       return false;
     }
 
@@ -556,8 +509,9 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
   }
 
-  if (!WriteHeaderAndBufferToWriter(output_path, res_file, buffer, writer,
-                                    context->GetDiagnostics())) {
+  io::BigBufferInputStream buffer_in(&buffer);
+  if (!WriteHeaderAndDataToWriter(output_path, res_file, &buffer_in, writer,
+                                  context->GetDiagnostics())) {
     return false;
   }
   return true;
@@ -575,6 +529,7 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
   res_file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir), path_data.name);
   res_file.config = path_data.config;
   res_file.source = path_data.source;
+  res_file.type = ResourceFile::Type::kUnknown;
 
   std::string error_str;
   Maybe<android::FileMap> f = file::MmapPath(path_data.source.path, &error_str);
@@ -584,7 +539,8 @@ static bool CompileFile(IAaptContext* context, const CompileOptions& options,
     return false;
   }
 
-  if (!WriteHeaderAndMmapToWriter(output_path, res_file, f.value(), writer,
+  io::MmappedData mmapped_in(std::move(f.value()));
+  if (!WriteHeaderAndDataToWriter(output_path, res_file, &mmapped_in, writer,
                                   context->GetDiagnostics())) {
     return false;
   }
@@ -614,7 +570,7 @@ class CompileContext : public IAaptContext {
   }
 
   NameMangler* GetNameMangler() override {
-    abort();
+    UNIMPLEMENTED(FATAL) << "No name mangling should be needed in compile phase";
     return nullptr;
   }
 
@@ -628,7 +584,7 @@ class CompileContext : public IAaptContext {
   }
 
   SymbolTable* GetExternalSymbols() override {
-    abort();
+    UNIMPLEMENTED(FATAL) << "No symbols should be needed in compile phase";
     return nullptr;
   }
 
@@ -637,14 +593,13 @@ class CompileContext : public IAaptContext {
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(CompileContext);
+
   IDiagnostics* diagnostics_;
   bool verbose_ = false;
 };
 
-/**
- * Entry point for compilation phase. Parses arguments and dispatches to the
- * correct steps.
- */
+// Entry point for compilation phase. Parses arguments and dispatches to the correct steps.
 int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   CompileContext context(diagnostics);
   CompileOptions options;
@@ -717,50 +672,34 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       continue;
     }
 
+    // Determine how to compile the file based on its type.
+    auto compile_func = &CompileFile;
     if (path_data.resource_dir == "values") {
-      // Overwrite the extension.
+      compile_func = &CompileTable;
+      // We use a different extension (not necessary anymore, but avoids altering the existing
+      // build system logic).
       path_data.extension = "arsc";
-
-      const std::string output_filename = BuildIntermediateFilename(path_data);
-      if (!CompileTable(&context, options, path_data, archive_writer.get(), output_filename)) {
-        error = true;
-      }
-
-    } else {
-      const std::string output_filename = BuildIntermediateFilename(path_data);
-      if (const ResourceType* type = ParseResourceType(path_data.resource_dir)) {
-        if (*type != ResourceType::kRaw) {
-          if (path_data.extension == "xml") {
-            if (!CompileXml(&context, options, path_data, archive_writer.get(), output_filename)) {
-              error = true;
-            }
-          } else if (!options.no_png_crunch &&
-                     (path_data.extension == "png" || path_data.extension == "9.png")) {
-            if (!CompilePng(&context, options, path_data, archive_writer.get(), output_filename)) {
-              error = true;
-            }
-          } else {
-            if (!CompileFile(&context, options, path_data, archive_writer.get(), output_filename)) {
-              error = true;
-            }
-          }
-        } else {
-          if (!CompileFile(&context, options, path_data, archive_writer.get(), output_filename)) {
-            error = true;
-          }
+    } else if (const ResourceType* type = ParseResourceType(path_data.resource_dir)) {
+      if (*type != ResourceType::kRaw) {
+        if (path_data.extension == "xml") {
+          compile_func = &CompileXml;
+        } else if (!options.no_png_crunch &&
+                   (path_data.extension == "png" || path_data.extension == "9.png")) {
+          compile_func = &CompilePng;
         }
-      } else {
-        context.GetDiagnostics()->Error(DiagMessage() << "invalid file path '" << path_data.source
-                                                      << "'");
-        error = true;
       }
+    } else {
+      context.GetDiagnostics()->Error(DiagMessage()
+                                      << "invalid file path '" << path_data.source << "'");
+      error = true;
+      continue;
     }
-  }
 
-  if (error) {
-    return 1;
+    // Compile the file.
+    const std::string out_path = BuildIntermediateContainerFilename(path_data);
+    error |= !compile_func(&context, options, path_data, archive_writer.get(), out_path);
   }
-  return 0;
+  return error ? 1 : 0;
 }
 
 }  // namespace aapt

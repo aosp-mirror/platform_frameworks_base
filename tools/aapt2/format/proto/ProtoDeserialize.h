@@ -19,7 +19,6 @@
 
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
-#include "google/protobuf/io/coded_stream.h"
 
 #include "ConfigDescription.h"
 #include "Configuration.pb.h"
@@ -56,22 +55,6 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* ou
 
 bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
                                    ResourceFile* out_file, std::string* out_error);
-
-class CompiledFileInputStream {
- public:
-  explicit CompiledFileInputStream(const void* data, size_t size);
-
-  bool ReadLittleEndian32(uint32_t* outVal);
-  bool ReadCompiledFile(pb::internal::CompiledFile* outVal);
-  bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
-
-  void EnsureAlignedRead();
-
-  ::google::protobuf::io::CodedInputStream in_;
-};
 
 }  // namespace aapt
 

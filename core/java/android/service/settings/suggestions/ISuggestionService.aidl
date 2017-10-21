@@ -17,4 +17,10 @@ interface ISuggestionService {
      * calls.
      */
     void dismissSuggestion(in Suggestion suggestion) = 2;
+
+    /**
+     * This is the opposite signal to {@link #dismissSuggestion}, indicating a suggestion has been
+     * launched.
+     */
+    void launchSuggestion(in Suggestion suggestion) = 3;
 }

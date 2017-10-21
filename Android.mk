@@ -425,7 +425,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/widget/ICheckCredentialProgressCallback.aidl \
 	core/java/com/android/internal/widget/ILockSettings.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
-	core/java/com/android/internal/widget/IRemoteViewsAdapterConnection.aidl \
 	keystore/java/android/security/IKeyChainAliasCallback.aidl \
 	keystore/java/android/security/IKeyChainService.aidl \
 	location/java/android/location/IBatchedLocationCallback.aidl \
@@ -578,6 +577,8 @@ LOCAL_SRC_FILES += \
 	../native/cmds/installd/binder/android/os/IInstalld.aidl \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
+
+LOCAL_AIDL_INCLUDES += core/java/android/os/StatsLogEventWrapper.aidl
 
 LOCAL_AIDL_INCLUDES += frameworks/base/lowpan/java
 LOCAL_SRC_FILES += \

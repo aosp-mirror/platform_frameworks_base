@@ -37,13 +37,12 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
   CHECK(master_package_ != nullptr) << "package name or ID already taken";
 }
 
-bool TableMerger::Merge(const Source& src, ResourceTable* table, io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, false /*overlay*/, true /*allow_new*/);
-}
-
-bool TableMerger::MergeOverlay(const Source& src, ResourceTable* table,
-                               io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, true /*overlay*/, options_.auto_add_overlay);
+bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay,
+                        io::IFileCollection* collection) {
+  // We allow adding new resources if this is not an overlay, or if the options allow overlays
+  // to add new resources.
+  return MergeImpl(src, table, collection, overlay,
+                   options_.auto_add_overlay || !overlay /*allow_new*/);
 }
 
 // This will merge packages with the same package name (or no package name).
@@ -322,17 +321,20 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
         util::make_unique<FileReference>(master_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());
     new_file_ref->SetSource(file_ref.GetSource());
+    new_file_ref->type = file_ref.type;
+    new_file_ref->file = file_ref.file;
     return new_file_ref;
   }
   return std::unique_ptr<FileReference>(file_ref.Clone(&master_table_->string_pool));
 }
 
-bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file, bool overlay) {
+bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFile* file) {
   ResourceTable table;
   std::string path = ResourceUtils::BuildResourceFileName(file_desc);
   std::unique_ptr<FileReference> file_ref =
       util::make_unique<FileReference>(table.string_pool.MakeRef(path));
   file_ref->SetSource(file_desc.source);
+  file_ref->type = file_desc.type;
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.CreatePackage(file_desc.name.package, 0x0);
@@ -341,17 +343,8 @@ bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file, 
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);
 
-  return DoMerge(file->GetSource(), &table, pkg, false /* mangle */,
-                 overlay /* overlay */, true /* allow_new */, {});
-}
-
-bool TableMerger::MergeFile(const ResourceFile& file_desc, io::IFile* file) {
-  return MergeFileImpl(file_desc, file, false /* overlay */);
-}
-
-bool TableMerger::MergeFileOverlay(const ResourceFile& file_desc,
-                                   io::IFile* file) {
-  return MergeFileImpl(file_desc, file, true /* overlay */);
+  return DoMerge(file->GetSource(), &table, pkg, false /* mangle */, overlay /* overlay */,
+                 true /* allow_new */, {});
 }
 
 }  // namespace aapt

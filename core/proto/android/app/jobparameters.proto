@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.internal.widget;
+syntax = "proto2";
+option java_multiple_files = true;
 
-import android.os.IBinder;
+package android.app;
 
-/** {@hide} */
-oneway interface IRemoteViewsAdapterConnection {
-    void onServiceConnected(IBinder service);
-    void onServiceDisconnected();
+/**
+ * An android.app.JobParameters object.
+ */
+message JobParametersProto {
+    enum CancelReason {
+        REASON_CANCELLED = 0;
+        REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+        REASON_PREEMPT = 2;
+        REASON_TIMEOUT = 3;
+        REASON_DEVICE_IDLE = 4;
+    }
 }

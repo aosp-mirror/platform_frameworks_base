@@ -22,7 +22,7 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 

@@ -245,21 +245,22 @@ class AssetManager2 {
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
 
-  // Finds the best entry for `resid` amongst all the ApkAssets. The entry can be a simple
-  // Res_value, or a complex map/bag type.
+  // Finds the best entry for `resid` from the set of ApkAssets. The entry can be a simple
+  // Res_value, or a complex map/bag type. If successful, it is available in `out_entry`.
+  // Returns kInvalidCookie on failure. Otherwise, the return value is the cookie associated with
+  // the ApkAssets in which the entry was found.
   //
   // `density_override` overrides the density of the current configuration when doing a search.
   //
   // When `stop_at_first_match` is true, the first match found is selected and the search
   // terminates. This is useful for methods that just look up the name of a resource and don't
-  // care about the value. In this case, the value of `out_flags` is incomplete and should not
-  // be used.
+  // care about the value. In this case, the value of `FindEntryResult::type_flags` is incomplete
+  // and should not be used.
   //
-  // `out_flags` stores the resulting bitmask of configuration axis with which the resource
-  // value varies.
+  // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
+  // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                            uint32_t* out_flags);
+                            FindEntryResult* out_entry);
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
@@ -302,6 +303,8 @@ class Theme {
   friend class AssetManager2;
 
  public:
+  ~Theme();
+
   // Applies the style identified by `resid` to this theme. This can be called
   // multiple times with different styles. By default, any theme attributes that
   // are already defined before this call are not overridden. If `force` is set
@@ -316,27 +319,31 @@ class Theme {
 
   void Clear();
 
-  inline const AssetManager2* GetAssetManager() const { return asset_manager_; }
+  inline const AssetManager2* GetAssetManager() const {
+    return asset_manager_;
+  }
 
-  inline AssetManager2* GetAssetManager() { return asset_manager_; }
+  inline AssetManager2* GetAssetManager() {
+    return asset_manager_;
+  }
 
   // Returns a bit mask of configuration changes that will impact this
   // theme (and thus require completely reloading it).
-  inline uint32_t GetChangingConfigurations() const { return type_spec_flags_; }
+  inline uint32_t GetChangingConfigurations() const {
+    return type_spec_flags_;
+  }
 
-  // Retrieve a value in the theme. If the theme defines this value,
-  // returns an asset cookie indicating which ApkAssets it came from
-  // and populates `out_value` with the value. If `out_flags` is non-null,
-  // populates it with a bitmask of the configuration axis the resource
-  // varies with.
+  // Retrieve a value in the theme. If the theme defines this value, returns an asset cookie
+  // indicating which ApkAssets it came from and populates `out_value` with the value.
+  // `out_flags` is populated with a bitmask of the configuration axis with which the resource
+  // varies.
   //
   // If the attribute is not found, returns kInvalidCookie.
   //
-  // NOTE: This function does not do reference traversal. If you want
-  // to follow references to other resources to get the "real" value to
-  // use, you need to call ResolveReference() after this function.
-  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value,
-                               uint32_t* out_flags = nullptr) const;
+  // NOTE: This function does not do reference traversal. If you want to follow references to other
+  // resources to get the "real" value to use, you need to call ResolveReference() after this
+  // function.
+  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value, uint32_t* out_flags) const;
 
   // This is like AssetManager2::ResolveReference(), but also takes
   // care of resolving attribute references to the theme.
@@ -349,36 +356,21 @@ class Theme {
   DISALLOW_COPY_AND_ASSIGN(Theme);
 
   // Called by AssetManager2.
-  explicit inline Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {}
-
-  struct Entry {
-    ApkAssetsCookie cookie;
-    uint32_t type_spec_flags;
-    Res_value value;
-  };
-
-  struct Type {
-    // Use uint32_t for fewer cycles when loading from memory.
-    uint32_t entry_count;
-    uint32_t entry_capacity;
-    Entry entries[0];
-  };
-
-  static constexpr const size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
-  static constexpr const size_t kTypeCount = std::numeric_limits<uint8_t>::max() + 1;
-
-  struct Package {
-    // Each element of Type will be a dynamically sized object
-    // allocated to have the entries stored contiguously with the Type.
-    std::array<util::unique_cptr<Type>, kTypeCount> types;
-  };
+  explicit Theme(AssetManager2* asset_manager);
 
   AssetManager2* asset_manager_;
   uint32_t type_spec_flags_ = 0u;
+
+  // Defined in the cpp.
+  struct Package;
+
+  constexpr static size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
   std::array<std::unique_ptr<Package>, kPackageCount> packages_;
 };
 
-inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) { return bag->entries; }
+inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) {
+  return bag->entries;
+}
 
 inline const ResolvedBag::Entry* end(const ResolvedBag* bag) {
   return bag->entries + bag->entry_count;

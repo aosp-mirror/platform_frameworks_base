@@ -34,18 +34,18 @@ struct XmlFlattenerOptions {
   bool use_utf16 = false;
 };
 
-class XmlFlattener : public IXmlResourceConsumer {
+class XmlFlattener {
  public:
   XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options)
       : buffer_(buffer), options_(options) {
   }
 
-  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
+  bool Consume(IAaptContext* context, const xml::XmlResource* resource);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlFlattener);
 
-  bool Flatten(IAaptContext* context, xml::Node* node);
+  bool Flatten(IAaptContext* context, const xml::Node* node);
 
   BigBuffer* buffer_;
   XmlFlattenerOptions options_;

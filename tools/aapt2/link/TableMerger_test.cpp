@@ -69,7 +69,7 @@ TEST_F(TableMergerTest, SimpleMerge) {
   TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
   io::FileCollection collection;
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
   ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
   EXPECT_TRUE(merger.merged_packages().count("com.app.b") != 0);
@@ -98,7 +98,7 @@ TEST_F(TableMergerTest, MergeFile) {
   file_desc.source = Source("res/layout-hdpi/main.xml");
   test::TestFile test_file("path/to/res/layout-hdpi/main.xml.flat");
 
-  ASSERT_TRUE(merger.MergeFile(file_desc, &test_file));
+  ASSERT_TRUE(merger.MergeFile(file_desc, false /*overlay*/, &test_file));
 
   FileReference* file = test::GetValueForConfig<FileReference>(
       &final_table, "com.app.a:layout/main", test::ParseConfigOrDie("hdpi-v4"));
@@ -117,8 +117,8 @@ TEST_F(TableMergerTest, MergeFileOverlay) {
   test::TestFile file_a("path/to/fileA.xml.flat");
   test::TestFile file_b("path/to/fileB.xml.flat");
 
-  ASSERT_TRUE(merger.MergeFile(file_desc, &file_a));
-  ASSERT_TRUE(merger.MergeFileOverlay(file_desc, &file_b));
+  ASSERT_TRUE(merger.MergeFile(file_desc, false /*overlay*/, &file_a));
+  ASSERT_TRUE(merger.MergeFile(file_desc, true /*overlay*/, &file_b));
 }
 
 TEST_F(TableMergerTest, MergeFileReferences) {
@@ -138,7 +138,7 @@ TEST_F(TableMergerTest, MergeFileReferences) {
   io::FileCollection collection;
   collection.InsertFile("res/xml/file.xml");
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
   ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
   FileReference* f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
@@ -167,8 +167,8 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, overlay.get(), true /*overlay*/));
 
   BinaryPrimitive* foo = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
   ASSERT_THAT(foo,
@@ -194,8 +194,8 @@ TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
@@ -217,8 +217,8 @@ TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
@@ -240,8 +240,8 @@ TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
@@ -259,8 +259,8 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), false /*overlay*/));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlayWithAutoAddOverlay) {
@@ -277,8 +277,8 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlayWithAutoAddOverlay) {
   options.auto_add_overlay = true;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), false /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
@@ -295,8 +295,8 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, table_b.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
@@ -337,8 +337,8 @@ TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
   options.auto_add_overlay = true;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), true /*overlay*/));
 
   Styleable* styleable = test::GetValue<Styleable>(&final_table, "com.app.a:styleable/Foo");
   ASSERT_THAT(styleable, NotNull());

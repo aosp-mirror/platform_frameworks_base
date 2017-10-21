@@ -26,7 +26,6 @@
 #include "ValueVisitor.h"
 
 using ::android::ResStringPool;
-using ::google::protobuf::io::CodedInputStream;
 
 namespace aapt {
 
@@ -391,8 +390,15 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
     }
 
     ResourceTableType* type = pkg->FindOrCreateType(*res_type);
+    if (pb_type.has_type_id()) {
+      type->id = static_cast<uint8_t>(pb_type.type_id().id());
+    }
+
     for (const pb::Entry& pb_entry : pb_type.entry()) {
       ResourceEntry* entry = type->FindOrCreateEntry(pb_entry.name());
+      if (pb_entry.has_entry_id()) {
+        entry->id = static_cast<uint16_t>(pb_entry.entry_id().id());
+      }
 
       // Deserialize the symbol status (public/private with source and comments).
       if (pb_entry.has_symbol_status()) {
@@ -406,21 +412,11 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
         const SymbolState visibility = DeserializeVisibilityFromPb(pb_status.visibility());
         entry->symbol_status.state = visibility;
-
         if (visibility == SymbolState::kPublic) {
-          // This is a public symbol, we must encode the ID now if there is one.
-          if (pb_entry.has_entry_id()) {
-            entry->id = static_cast<uint16_t>(pb_entry.entry_id().id());
-          }
-
-          if (type->symbol_status.state != SymbolState::kPublic) {
-            // If the type has not been made public, do so now.
-            type->symbol_status.state = SymbolState::kPublic;
-            if (pb_type.has_type_id()) {
-              type->id = static_cast<uint8_t>(pb_type.type_id().id());
-            }
-          }
+          // Propagate the public visibility up to the Type.
+          type->symbol_status.state = SymbolState::kPublic;
         } else if (visibility == SymbolState::kPrivate) {
+          // Only propagate if no previous state was assigned.
           if (type->symbol_status.state == SymbolState::kUndefined) {
             type->symbol_status.state = SymbolState::kPrivate;
           }
@@ -485,6 +481,19 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, ResourceTable* ou
   return true;
 }
 
+static ResourceFile::Type DeserializeFileReferenceTypeFromPb(const pb::FileReference::Type& type) {
+  switch (type) {
+    case pb::FileReference::BINARY_XML:
+      return ResourceFile::Type::kBinaryXml;
+    case pb::FileReference::PROTO_XML:
+      return ResourceFile::Type::kProtoXml;
+    case pb::FileReference::PNG:
+      return ResourceFile::Type::kPng;
+    default:
+      return ResourceFile::Type::kUnknown;
+  }
+}
+
 bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
                                    ResourceFile* out_file, std::string* out_error) {
   ResourceNameRef name_ref;
@@ -497,6 +506,7 @@ bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
 
   out_file->name = name_ref.ToResourceName();
   out_file->source.path = pb_file.source_path();
+  out_file->type = DeserializeFileReferenceTypeFromPb(pb_file.type());
 
   std::string config_error;
   if (!DeserializeConfigFromPb(pb_file.config(), &out_file->config, &config_error)) {
@@ -759,8 +769,12 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
     } break;
 
     case pb::Item::kFile: {
-      return util::make_unique<FileReference>(value_pool->MakeRef(
-          pb_item.file().path(), StringPool::Context(StringPool::Context::kHighPriority, config)));
+      const pb::FileReference& pb_file = pb_item.file();
+      std::unique_ptr<FileReference> file_ref =
+          util::make_unique<FileReference>(value_pool->MakeRef(
+              pb_file.path(), StringPool::Context(StringPool::Context::kHighPriority, config)));
+      file_ref->type = DeserializeFileReferenceTypeFromPb(pb_file.type());
+      return std::move(file_ref);
     } break;
 
     default:
@@ -844,74 +858,6 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
         break;
     }
   }
-  return true;
-}
-
-CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size)
-    : in_(static_cast<const uint8_t*>(data), size) {
-}
-
-void CompiledFileInputStream::EnsureAlignedRead() {
-  const int overflow = in_.CurrentPosition() % 4;
-  if (overflow > 0) {
-    // Reads are always 4 byte aligned.
-    in_.Skip(4 - overflow);
-  }
-}
-
-bool CompiledFileInputStream::ReadLittleEndian32(uint32_t* out_val) {
-  EnsureAlignedRead();
-  return in_.ReadLittleEndian32(out_val);
-}
-
-bool CompiledFileInputStream::ReadCompiledFile(pb::internal::CompiledFile* out_val) {
-  EnsureAlignedRead();
-
-  google::protobuf::uint64 pb_size = 0u;
-  if (!in_.ReadLittleEndian64(&pb_size)) {
-    return false;
-  }
-
-  CodedInputStream::Limit l = in_.PushLimit(static_cast<int>(pb_size));
-
-  // Check that we haven't tried to read past the end.
-  if (static_cast<uint64_t>(in_.BytesUntilLimit()) != pb_size) {
-    in_.PopLimit(l);
-    in_.PushLimit(0);
-    return false;
-  }
-
-  if (!out_val->ParsePartialFromCodedStream(&in_)) {
-    in_.PopLimit(l);
-    in_.PushLimit(0);
-    return false;
-  }
-
-  in_.PopLimit(l);
-  return true;
-}
-
-bool CompiledFileInputStream::ReadDataMetaData(uint64_t* out_offset, uint64_t* out_len) {
-  EnsureAlignedRead();
-
-  google::protobuf::uint64 pb_size = 0u;
-  if (!in_.ReadLittleEndian64(&pb_size)) {
-    return false;
-  }
-
-  // Check that we aren't trying to read past the end.
-  if (pb_size > static_cast<uint64_t>(in_.BytesUntilLimit())) {
-    in_.PushLimit(0);
-    return false;
-  }
-
-  uint64_t offset = static_cast<uint64_t>(in_.CurrentPosition());
-  if (!in_.Skip(pb_size)) {
-    return false;
-  }
-
-  *out_offset = offset;
-  *out_len = pb_size;
   return true;
 }
 

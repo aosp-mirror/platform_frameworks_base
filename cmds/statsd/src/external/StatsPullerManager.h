@@ -20,6 +20,8 @@
 #include <utils/String16.h>
 #include <unordered_map>
 #include "external/StatsPuller.h"
+#include "logd/LogEvent.h"
+#include "matchers/matcher_util.h"
 
 namespace android {
 namespace os {
@@ -27,7 +29,7 @@ namespace statsd {
 
 const static int KERNEL_WAKELOCKS = 1;
 
-class StatsPullerManager {
+class StatsPullerManager : public virtual RefBase {
 public:
     // Enums of pulled data types (pullCodes)
     // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
@@ -35,7 +37,8 @@ public:
     const static int KERNEL_WAKELOCKS;
     StatsPullerManager();
 
-    String16 pull(const int pullCode);
+    // We return a vector of shared_ptr since LogEvent's copy constructor is not available.
+    vector<std::shared_ptr<LogEvent>> Pull(const int pullCode);
 
 private:
     std::unordered_map<int, std::unique_ptr<StatsPuller>> mStatsPullers;

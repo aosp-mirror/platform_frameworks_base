@@ -3128,4 +3128,7 @@
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
          classes are instantiated in the order of the array. -->
     <string-array translatable="false" name="config_deviceSpecificSystemServices"></string-array>
+
+    <!-- Component name of media projection permission dialog -->
+    <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 </resources>

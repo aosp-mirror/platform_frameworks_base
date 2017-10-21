@@ -292,6 +292,7 @@ bool FileReference::Flatten(android::Res_value* out_value) const {
 FileReference* FileReference::Clone(StringPool* new_pool) const {
   FileReference* fr = new FileReference(new_pool->MakeRef(path));
   fr->file = file;
+  fr->type = type;
   fr->comment_ = comment_;
   fr->source_ = source_;
   return fr;

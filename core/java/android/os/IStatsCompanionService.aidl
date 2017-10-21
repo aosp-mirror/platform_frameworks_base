@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.os.StatsLogEventWrapper;
+
 /**
   * Binder interface to communicate with the Java-based statistics service helper.
   * {@hide}
@@ -50,5 +52,5 @@ interface IStatsCompanionService {
     oneway void cancelPollingAlarms();
 
     /** Pull the specified data. Results will be sent to statsd when complete. */
-    String pullData(int pullCode);
+    StatsLogEventWrapper[] pullData(int pullCode);
 }

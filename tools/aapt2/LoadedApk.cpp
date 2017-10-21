@@ -21,7 +21,7 @@
 #include "format/Archive.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
-#include "io/BigBufferInputStream.h"
+#include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "xml/XmlDom.h"
 

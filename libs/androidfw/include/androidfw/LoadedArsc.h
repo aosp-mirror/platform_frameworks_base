@@ -41,11 +41,17 @@ class DynamicPackageEntry {
   int package_id = 0;
 };
 
-struct LoadedArscEntry {
+struct FindEntryResult {
   // A pointer to the resource table entry for this resource.
   // If the size of the entry is > sizeof(ResTable_entry), it can be cast to
   // a ResTable_map_entry and processed as a bag/map.
   const ResTable_entry* entry = nullptr;
+
+  // The configuration for which the resulting entry was defined.
+  const ResTable_config* config = nullptr;
+
+  // Stores the resulting bitmask of configuration axis with which the resource value varies.
+  uint32_t type_flags = 0u;
 
   // The dynamic package ID map for the package from which this resource came from.
   const DynamicRefTable* dynamic_ref_table = nullptr;
@@ -63,12 +69,22 @@ struct TypeSpec;
 class LoadedArsc;
 
 class LoadedPackage {
-  friend class LoadedArsc;
-
  public:
+  static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk,
+                                                   const LoadedIdmap* loaded_idmap, bool system,
+                                                   bool load_as_shared_library);
+
+  ~LoadedPackage();
+
   bool FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTable_config& config,
-                 LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                 uint32_t* out_flags) const;
+                 FindEntryResult* out_entry) const;
+
+  // Finds the entry with the specified type name and entry name. The names are in UTF-16 because
+  // the underlying ResStringPool API expects this. For now this is acceptable, but since
+  // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
+  // Returns a partial resource ID, with the package ID left as 0x00. The caller is responsible
+  // for patching the correct package ID to the resource ID.
+  uint32_t FindEntryByName(const std::u16string& type_name, const std::u16string& entry_name) const;
 
   // Returns the string pool where type names are stored.
   inline const ResStringPool* GetTypeStringPool() const {
@@ -98,8 +114,14 @@ class LoadedPackage {
     return system_;
   }
 
+  // Returns true if this package is from an overlay ApkAssets.
   inline bool IsOverlay() const {
     return overlay_;
+  }
+
+  // Returns true if this package is verified to be valid.
+  inline bool IsVerified() const {
+    return verified_;
   }
 
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
@@ -118,19 +140,14 @@ class LoadedPackage {
   // before being inserted into the set. This may cause some equivalent locales to de-dupe.
   void CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const;
 
-  // Finds the entry with the specified type name and entry name. The names are in UTF-16 because
-  // the underlying ResStringPool API expects this. For now this is acceptable, but since
-  // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
-  // Returns a partial resource ID, with the package ID left as 0x00. The caller is responsible
-  // for patching the correct package ID to the resource ID.
-  uint32_t FindEntryByName(const std::u16string& type_name, const std::u16string& entry_name) const;
-
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
-  static std::unique_ptr<LoadedPackage> Load(const Chunk& chunk, const LoadedIdmap* loaded_idmap);
+  LoadedPackage();
 
-  LoadedPackage() = default;
+  template <bool Verified>
+  bool FindEntry(const util::unique_cptr<TypeSpec>& type_spec_ptr, uint16_t entry_idx,
+                 const ResTable_config& config, FindEntryResult* out_entry) const;
 
   ResStringPool type_string_pool_;
   ResStringPool key_string_pool_;
@@ -140,6 +157,7 @@ class LoadedPackage {
   bool dynamic_ = false;
   bool system_ = false;
   bool overlay_ = false;
+  bool verified_ = true;
 
   ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
@@ -163,8 +181,6 @@ class LoadedArsc {
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
   static std::unique_ptr<const LoadedArsc> CreateEmpty();
 
-  ~LoadedArsc();
-
   // Returns the string pool where all string resource values
   // (Res_value::dataType == Res_value::TYPE_STRING) are indexed.
   inline const ResStringPool* GetStringPool() const {
@@ -175,8 +191,7 @@ class LoadedArsc {
   // The parameter `out_entry` will be filled with the resulting resource entry.
   // The resource entry can be a simple entry (ResTable_entry) or a complex bag
   // (ResTable_entry_map).
-  bool FindEntry(uint32_t resid, const ResTable_config& config, LoadedArscEntry* out_entry,
-                 ResTable_config* selected_config, uint32_t* out_flags) const;
+  bool FindEntry(uint32_t resid, const ResTable_config& config, FindEntryResult* out_entry) const;
 
   // Gets a pointer to the name of the package in `resid`, or nullptr if the package doesn't exist.
   const LoadedPackage* GetPackageForId(uint32_t resid) const;

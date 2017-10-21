@@ -23,16 +23,23 @@ namespace os {
 namespace statsd {
 
 using std::ostringstream;
+using std::string;
 
-LogEvent::LogEvent(const log_msg& msg) {
-    init(msg);
+// We need to keep a copy of the android_log_event_list owned by this instance so that the char*
+// for strings is not cleared before we can read them.
+LogEvent::LogEvent(log_msg msg) : mList(msg) {
+    init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &mList);
 }
 
-LogEvent::LogEvent(int64_t timestampNs, android_log_event_list* reader) {
-    init(timestampNs, reader);
+LogEvent::LogEvent(int tag) : mList(tag) {
 }
 
 LogEvent::~LogEvent() {
+}
+
+void LogEvent::init() {
+    mList.convert_to_reader();
+    init(mTimestampNs, &mList);
 }
 
 /**
@@ -40,12 +47,6 @@ LogEvent::~LogEvent() {
  * The goal is to do as little preprocessing as possible, because we read a tiny fraction
  * of the elements that are written to the log.
  */
-void LogEvent::init(const log_msg& msg) {
-
-    android_log_event_list list(const_cast<log_msg&>(msg));
-    init(msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec, &list);
-}
-
 void LogEvent::init(int64_t timestampNs, android_log_event_list* reader) {
     mTimestampNs = timestampNs;
     mTagId = reader->tag();
@@ -79,6 +80,10 @@ void LogEvent::init(int64_t timestampNs, android_log_event_list* reader) {
     } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
 }
 
+android_log_event_list* LogEvent::GetAndroidLogEventList() {
+    return &mList;
+}
+
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
     if (key < 1 || (key - 1)  >= mElements.size()) {
         *err = BAD_INDEX;
@@ -109,7 +114,8 @@ const char* LogEvent::GetString(size_t key, status_t* err) const {
         *err = BAD_TYPE;
         return NULL;
     }
-    return elem.data.string;
+    // Need to add the '/0' at the end by specifying the length of the string.
+    return string(elem.data.string, elem.len).c_str();
 }
 
 bool LogEvent::GetBool(size_t key, status_t* err) const {
@@ -189,7 +195,8 @@ string LogEvent::ToString() const {
         } else if (elem.type == EVENT_TYPE_FLOAT) {
             result << elem.data.float32;
         } else if (elem.type == EVENT_TYPE_STRING) {
-            result << elem.data.string;
+            // Need to add the '/0' at the end by specifying the length of the string.
+            result << string(elem.data.string, elem.len).c_str();
         }
     }
     result << " }";
