@@ -68,7 +68,7 @@ final class SelectionActionModeHelper {
 
     public void startActionModeAsync(boolean adjustSelection) {
         cancelAsyncTask();
-        if (isNoOpTextClassifier() || !hasSelection()) {
+        if (skipTextClassification()) {
             // No need to make an async call for a no-op TextClassifier.
             // Do not call the TextClassifier if there is no selection.
             startActionMode(null);
@@ -88,7 +88,7 @@ final class SelectionActionModeHelper {
 
     public void invalidateActionModeAsync() {
         cancelAsyncTask();
-        if (isNoOpTextClassifier() || !hasSelection()) {
+        if (skipTextClassification()) {
             // No need to make an async call for a no-op TextClassifier.
             // Do not call the TextClassifier if there is no selection.
             invalidateActionMode(null);
@@ -132,8 +132,16 @@ final class SelectionActionModeHelper {
         mTextClassification = null;
     }
 
-    private boolean isNoOpTextClassifier() {
-        return mEditor.getTextView().getTextClassifier() == TextClassifier.NO_OP;
+    private boolean skipTextClassification() {
+        final TextView textView = mEditor.getTextView();
+        // No need to make an async call for a no-op TextClassifier.
+        final boolean noOpTextClassifier = textView.getTextClassifier() == TextClassifier.NO_OP;
+        // Do not call the TextClassifier if there is no selection.
+        final boolean noSelection = textView.getSelectionEnd() == textView.getSelectionStart();
+        // Do not call the TextClassifier if this is a password field.
+        final boolean password = textView.hasPasswordTransformationMethod()
+                || TextView.isPasswordInputType(textView.getInputType());
+        return noOpTextClassifier || noSelection || password;
     }
 
     private boolean hasSelection() {
