@@ -9219,36 +9219,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    @Override
-    public void invalidate() {
-        super.invalidate();
-
-        if (mEditor != null) {
-            mEditor.invalidateMagnifier();
-        }
-    }
-
-    @Override
-    public void invalidate(int l, int t, int r, int b) {
-        super.invalidate(l, t, r, b);
-
-        if (mEditor != null) {
-            mEditor.invalidateMagnifier(
-                    convertViewToScreenCoord(l, true /* isHorizontal */),
-                    convertViewToScreenCoord(t, false /* isHorizontal */),
-                    convertViewToScreenCoord(r, true /* isHorizontal */),
-                    convertViewToScreenCoord(b, false /* isHorizontal */));
-        }
-    }
-
-    float convertViewToScreenCoord(float viewCoord, boolean isHorizontal) {
-        final int[] coordinatesOnScreen = new int[2];
-        getLocationOnScreen(coordinatesOnScreen);
-        return isHorizontal
-                ? viewCoord + getTotalPaddingLeft() - getScrollX() + coordinatesOnScreen[0]
-                : viewCoord + getTotalPaddingTop() - getScrollY() + coordinatesOnScreen[1];
-    }
-
     /**
      * @return whether or not the cursor is visible (assuming this TextView is editable)
      *
