@@ -20,6 +20,7 @@
 #include "../matchers/SimpleLogMatchingTracker.h"
 #include "CountMetricProducer.h"
 #include "DurationMetricProducer.h"
+#include "EventMetricProducer.h"
 #include "stats_util.h"
 
 using std::set;
@@ -31,13 +32,51 @@ namespace android {
 namespace os {
 namespace statsd {
 
-int getTrackerIndex(const string& name, const unordered_map<string, int>& logTrackerMap) {
-    auto logTrackerIt = logTrackerMap.find(name);
+bool handleMetricWithLogTrackers(const string what, const int metricIndex,
+                                 const unordered_map<string, int>& logTrackerMap,
+                                 unordered_map<int, std::vector<int>>& trackerToMetricMap,
+                                 int& logTrackerIndex) {
+    auto logTrackerIt = logTrackerMap.find(what);
     if (logTrackerIt == logTrackerMap.end()) {
-        ALOGW("cannot find the LogEventMatcher %s in config", name.c_str());
-        return MATCHER_NOT_FOUND;
+        ALOGW("cannot find the LogEntryMatcher %s in config", what.c_str());
+        return false;
     }
-    return logTrackerIt->second;
+    logTrackerIndex = logTrackerIt->second;
+    auto& metric_list = trackerToMetricMap[logTrackerIndex];
+    metric_list.push_back(metricIndex);
+    return true;
+}
+
+bool handleMetricWithConditions(
+        const string condition, const int metricIndex,
+        const unordered_map<string, int>& conditionTrackerMap,
+        const ::google::protobuf::RepeatedPtrField<::android::os::statsd::EventConditionLink>&
+                links,
+        vector<sp<ConditionTracker>>& allConditionTrackers, int& conditionIndex,
+        unordered_map<int, std::vector<int>>& conditionToMetricMap) {
+    auto condition_it = conditionTrackerMap.find(condition);
+    if (condition_it == conditionTrackerMap.end()) {
+        ALOGW("cannot find the Condition %s in the config", condition.c_str());
+        return false;
+    }
+
+    for (const auto& link : links) {
+        auto it = conditionTrackerMap.find(link.condition());
+        if (it == conditionTrackerMap.end()) {
+            ALOGW("cannot find the Condition %s in the config", link.condition().c_str());
+            return false;
+        }
+        allConditionTrackers[condition_it->second]->setSliced(true);
+        allConditionTrackers[it->second]->setSliced(true);
+        allConditionTrackers[it->second]->addDimensions(
+                vector<KeyMatcher>(link.key_in_condition().begin(), link.key_in_condition().end()));
+    }
+    conditionIndex = condition_it->second;
+
+    // will create new vector if not exist before.
+    auto& metricList = conditionToMetricMap[condition_it->second];
+    metricList.push_back(metricIndex);
+    return true;
 }
 
 bool initLogTrackers(const StatsdConfig& config, unordered_map<string, int>& logTrackerMap,
@@ -142,7 +181,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
                  unordered_map<int, std::vector<int>>& trackerToMetricMap) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
-    const int allMetricsCount = config.count_metric_size() + config.duration_metric_size();
+    const int allMetricsCount =
+            config.count_metric_size() + config.duration_metric_size() + config.event_metric_size();
     allMetricProducers.reserve(allMetricsCount);
 
     // Build MetricProducers for each metric defined in config.
@@ -155,100 +195,52 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         }
 
         int metricIndex = allMetricProducers.size();
-
-        auto logTrackerIt = logTrackerMap.find(metric.what());
-        if (logTrackerIt == logTrackerMap.end()) {
-            ALOGW("cannot find the LogEntryMatcher %s in config", metric.what().c_str());
+        int trackerIndex;
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, logTrackerMap,
+                                         trackerToMetricMap, trackerIndex)) {
             return false;
         }
-        int logTrackerIndex = logTrackerIt->second;
-        auto& metric_list = trackerToMetricMap[logTrackerIndex];
-        metric_list.push_back(metricIndex);
 
-        sp<MetricProducer> countProducer;
-
+        int conditionIndex = -1;
         if (metric.has_condition()) {
-            auto condition_it = conditionTrackerMap.find(metric.condition());
-            if (condition_it == conditionTrackerMap.end()) {
-                ALOGW("cannot find the Condition %s in the config", metric.condition().c_str());
-                return false;
-            }
-
-            for (const auto& link : metric.links()) {
-                auto it = conditionTrackerMap.find(link.condition());
-                if (it == conditionTrackerMap.end()) {
-                    ALOGW("cannot find the Condition %s in the config", link.condition().c_str());
-                    return false;
-                }
-                allConditionTrackers[condition_it->second]->setSliced(true);
-                allConditionTrackers[it->second]->setSliced(true);
-                allConditionTrackers[it->second]->addDimensions(vector<KeyMatcher>(
-                        link.key_in_condition().begin(), link.key_in_condition().end()));
-            }
-
-            countProducer = new CountMetricProducer(metric, condition_it->second, wizard);
-            // will create new vector if not exist before.
-            auto& metricList = conditionToMetricMap[condition_it->second];
-            metricList.push_back(metricIndex);
-        } else {
-            countProducer = new CountMetricProducer(metric, -1 /*no condition*/, wizard);
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         }
+
+        sp<MetricProducer> countProducer = new CountMetricProducer(metric, conditionIndex, wizard);
         allMetricProducers.push_back(countProducer);
     }
 
     for (int i = 0; i < config.duration_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
-        const DurationMetric metric = config.duration_metric(i);
-        if (!metric.has_start()) {
-            ALOGW("cannot find start in DurationMetric %lld", metric.metric_id());
+        const DurationMetric& metric = config.duration_metric(i);
+        int trackerIndices[3] = {-1, -1, -1};
+        if (!metric.has_start() ||
+            !handleMetricWithLogTrackers(metric.start(), metricIndex, logTrackerMap,
+                                         trackerToMetricMap, trackerIndices[0])) {
+            ALOGE("Duration metrics must specify a valid the start event matcher");
             return false;
         }
 
-        int trackerIndices[] = {-1, -1, -1};
-        trackerIndices[0] = getTrackerIndex(metric.start(), logTrackerMap);
-
-        if (metric.has_stop()) {
-            trackerIndices[1] = getTrackerIndex(metric.stop(), logTrackerMap);
+        if (metric.has_stop() &&
+            !handleMetricWithLogTrackers(metric.stop(), metricIndex, logTrackerMap,
+                                         trackerToMetricMap, trackerIndices[1])) {
+            return false;
         }
 
-        if (metric.has_stop_all()) {
-            trackerIndices[2] = getTrackerIndex(metric.stop_all(), logTrackerMap);
-        }
-
-        for (const int& index : trackerIndices) {
-            if (index == MATCHER_NOT_FOUND) {
-                return false;
-            }
-            if (index >= 0) {
-                auto& metric_list = trackerToMetricMap[index];
-                metric_list.push_back(metricIndex);
-            }
+        if (metric.has_stop_all() &&
+            !handleMetricWithLogTrackers(metric.stop_all(), metricIndex, logTrackerMap,
+                                         trackerToMetricMap, trackerIndices[2])) {
+            return false;
         }
 
         int conditionIndex = -1;
 
         if (metric.has_predicate()) {
-            auto condition_it = conditionTrackerMap.find(metric.predicate());
-            if (condition_it == conditionTrackerMap.end()) {
-                ALOGW("cannot find the Condition %s in the config", metric.predicate().c_str());
-                return false;
-            }
-            conditionIndex = condition_it->second;
-
-            for (const auto& link : metric.links()) {
-                auto it = conditionTrackerMap.find(link.condition());
-                if (it == conditionTrackerMap.end()) {
-                    ALOGW("cannot find the Condition %s in the config", link.condition().c_str());
-                    return false;
-                }
-                allConditionTrackers[condition_it->second]->setSliced(true);
-                allConditionTrackers[it->second]->setSliced(true);
-                allConditionTrackers[it->second]->addDimensions(vector<KeyMatcher>(
-                        link.key_in_condition().begin(), link.key_in_condition().end()));
-            }
-
-            auto& metricList = conditionToMetricMap[conditionIndex];
-            metricList.push_back(metricIndex);
+            handleMetricWithConditions(metric.predicate(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
         }
 
         sp<MetricProducer> durationMetric =
@@ -257,6 +249,32 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         allMetricProducers.push_back(durationMetric);
     }
+
+    for (int i = 0; i < config.event_metric_size(); i++) {
+        int metricIndex = allMetricProducers.size();
+        const EventMetric& metric = config.event_metric(i);
+        if (!metric.has_metric_id() || !metric.has_what()) {
+            ALOGW("cannot find the metric id or what in config");
+            return false;
+        }
+        int trackerIndex;
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, logTrackerMap,
+                                         trackerToMetricMap, trackerIndex)) {
+            return false;
+        }
+
+        int conditionIndex = -1;
+        if (metric.has_condition()) {
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
+        }
+
+        sp<MetricProducer> eventMetric = new EventMetricProducer(metric, conditionIndex, wizard);
+
+        allMetricProducers.push_back(eventMetric);
+    }
+
     return true;
 }
 

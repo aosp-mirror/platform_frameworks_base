@@ -18,9 +18,10 @@
 
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
-#include <utils/Errors.h>
+#include <android/util/ProtoOutputStream.h>
 #include <log/log_event_list.h>
 #include <log/log_read.h>
+#include <utils/Errors.h>
 
 #include <memory>
 #include <string>
@@ -80,10 +81,9 @@ public:
     string ToString() const;
 
     /**
-     * Write this object as an EventMetricData proto object.
-     * TODO: Use the streaming output generator to do this instead of this proto lite object?
+     * Write this object to a ProtoOutputStream.
      */
-    void ToProto(EventMetricData* out) const;
+    void ToProto(android::util::ProtoOutputStream& out) const;
 
     /*
      * Get a KeyValuePair proto object.
