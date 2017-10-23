@@ -27,7 +27,7 @@
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"
         android:importantForAccessibility="no" />
-    <LinearLayout
+    <com.android.internal.widget.RemeasuringLinearLayout
         android:id="@+id/message_group_and_sender_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,5 +46,5 @@
             android:paddingEnd="8dp"
             android:paddingTop="2dp"
         />
-    </LinearLayout>
+    </com.android.internal.widget.RemeasuringLinearLayout>
 </com.android.internal.widget.MessagingGroup>

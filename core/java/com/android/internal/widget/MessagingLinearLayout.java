@@ -36,7 +36,6 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class MessagingLinearLayout extends ViewGroup {
 
-    private static final int NOT_MEASURED_BEFORE = -1;
     /**
      * Spacing to be applied between views.
      */
@@ -44,15 +43,6 @@ public class MessagingLinearLayout extends ViewGroup {
 
     private int mMaxDisplayedLines = Integer.MAX_VALUE;
 
-    /**
-     * Id of the child that's also visible in the contracted layout.
-     */
-    private int mContractedChildId;
-    /**
-     * The last measured with in a layout pass if it was measured before or
-     * {@link #NOT_MEASURED_BEFORE} if this is the first layout pass.
-     */
-    private int mLastMeasuredWidth = NOT_MEASURED_BEFORE;
     private MessagingLayout mMessagingLayout;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
@@ -86,79 +76,67 @@ public class MessagingLinearLayout extends ViewGroup {
                 break;
         }
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        boolean recalculateVisibility = mLastMeasuredWidth == NOT_MEASURED_BEFORE
-                || getMeasuredHeight() != targetHeight
-                || mLastMeasuredWidth != widthSize;
 
         // Now that we know which views to take, fix up the indents and see what width we get.
         int measuredWidth = mPaddingLeft + mPaddingRight;
         final int count = getChildCount();
-        int totalHeight = getMeasuredHeight();
-        if (recalculateVisibility) {
-            // We only need to recalculate the view visibilities if the view wasn't measured already
-            // in this pass, otherwise we may drop messages here already since we are measured
-            // exactly with what we returned before, which was optimized already with the
-            // line-indents.
-            for (int i = 0; i < count; ++i) {
-                final View child = getChildAt(i);
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                lp.hide = true;
+        int totalHeight;
+        for (int i = 0; i < count; ++i) {
+            final View child = getChildAt(i);
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            lp.hide = true;
+        }
+
+        totalHeight = mPaddingTop + mPaddingBottom;
+        boolean first = true;
+        int linesRemaining = mMaxDisplayedLines;
+
+        // Starting from the bottom: we measure every view as if it were the only one. If it still
+        // fits, we take it, otherwise we stop there.
+        for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
+            if (getChildAt(i).getVisibility() == GONE) {
+                continue;
             }
+            final View child = getChildAt(i);
+            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
+            MessagingChild messagingChild = null;
+            if (child instanceof MessagingChild) {
+                messagingChild = (MessagingChild) child;
+                messagingChild.setMaxDisplayedLines(linesRemaining);
+            }
+            int spacing = first ? 0 : mSpacing;
+            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
+                    - mPaddingTop - mPaddingBottom + spacing);
 
-            totalHeight = mPaddingTop + mPaddingBottom;
-            boolean first = true;
-            int linesRemaining = mMaxDisplayedLines;
-
-            // Starting from the bottom: we measure every view as if it were the only one. If it still
-
-            // fits, we take it, otherwise we stop there.
-            for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
-                if (getChildAt(i).getVisibility() == GONE) {
-                    continue;
-                }
-                final View child = getChildAt(i);
-                LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-                MessagingChild messagingChild = null;
-                if (child instanceof MessagingChild) {
-                    messagingChild = (MessagingChild) child;
-                    messagingChild.setMaxDisplayedLines(linesRemaining);
-                }
-                int spacing = first ? 0 : mSpacing;
-                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
-                        - mPaddingTop - mPaddingBottom + spacing);
-
-                final int childHeight = child.getMeasuredHeight();
-                int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
-                        lp.bottomMargin + spacing);
-                first = false;
-                int measureType = MessagingChild.MEASURED_NORMAL;
-                if (messagingChild != null) {
-                    measureType = messagingChild.getMeasuredType();
-                    linesRemaining -= messagingChild.getConsumedLines();
-                }
-                boolean isShortened = measureType == MessagingChild.MEASURED_SHORTENED;
-                boolean isTooSmall = measureType == MessagingChild.MEASURED_TOO_SMALL;
-                if (newHeight <= targetHeight && !isTooSmall) {
-                    totalHeight = newHeight;
-                    measuredWidth = Math.max(measuredWidth,
-                            child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
-                                    + mPaddingLeft + mPaddingRight);
-                    lp.hide = false;
-                    if (isShortened || linesRemaining <= 0) {
-                        break;
-                    }
-                } else {
+            final int childHeight = child.getMeasuredHeight();
+            int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
+                    lp.bottomMargin + spacing);
+            first = false;
+            int measureType = MessagingChild.MEASURED_NORMAL;
+            if (messagingChild != null) {
+                measureType = messagingChild.getMeasuredType();
+                linesRemaining -= messagingChild.getConsumedLines();
+            }
+            boolean isShortened = measureType == MessagingChild.MEASURED_SHORTENED;
+            boolean isTooSmall = measureType == MessagingChild.MEASURED_TOO_SMALL;
+            if (newHeight <= targetHeight && !isTooSmall) {
+                totalHeight = newHeight;
+                measuredWidth = Math.max(measuredWidth,
+                        child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
+                                + mPaddingLeft + mPaddingRight);
+                lp.hide = false;
+                if (isShortened || linesRemaining <= 0) {
                     break;
                 }
+            } else {
+                break;
             }
         }
 
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth),
                         widthMeasureSpec),
-                resolveSize(Math.max(getSuggestedMinimumHeight(), totalHeight),
-                        heightMeasureSpec));
-        mLastMeasuredWidth = widthSize;
+                Math.max(getSuggestedMinimumHeight(), totalHeight));
     }
 
     @Override
@@ -216,7 +194,6 @@ public class MessagingLinearLayout extends ViewGroup {
 
             first = false;
         }
-        mLastMeasuredWidth = NOT_MEASURED_BEFORE;
     }
 
     @Override
