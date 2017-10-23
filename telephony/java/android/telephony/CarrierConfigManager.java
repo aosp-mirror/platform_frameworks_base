@@ -1388,6 +1388,17 @@ public class CarrierConfigManager {
         "support_3gpp_call_forwarding_while_roaming_bool";
 
     /**
+     * Boolean indicating whether to display voicemail number as default call forwarding number in
+     * call forwarding settings.
+     * If true, display vm number when cf number is null.
+     * If false, display the cf number from network.
+     * By default this value is false.
+     * @hide
+     */
+    public static final String KEY_DISPLAY_VOICEMAIL_NUMBER_AS_DEFAULT_CALL_FORWARDING_NUMBER_BOOL =
+            "display_voicemail_number_as_default_call_forwarding_number";
+
+    /**
      * When {@code true}, the user will be notified when they attempt to place an international call
      * when the call is placed using wifi calling.
      * @hide
@@ -1836,6 +1847,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
+        sDefaults.putBoolean(KEY_DISPLAY_VOICEMAIL_NUMBER_AS_DEFAULT_CALL_FORWARDING_NUMBER_BOOL,
+                false);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
