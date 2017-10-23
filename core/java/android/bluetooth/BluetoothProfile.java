@@ -73,11 +73,11 @@ public interface BluetoothProfile {
     public static final int HEALTH = 3;
 
     /**
-     * Input Device Profile
+     * HID Host
      *
      * @hide
      */
-    public static final int INPUT_DEVICE = 4;
+    public static final int HID_HOST = 4;
 
     /**
      * PAN Profile
@@ -152,11 +152,11 @@ public interface BluetoothProfile {
     public static final int MAP_CLIENT = 18;
 
     /**
-     * Input Host
+     * HID Device
      *
      * @hide
      */
-    public static final int INPUT_HOST = 19;
+    public static final int HID_DEVICE = 19;
 
     /**
      * Max profile ID. This value should be updated whenever a new profile is added to match

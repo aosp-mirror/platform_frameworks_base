@@ -33,9 +33,9 @@ import java.util.List;
 /**
  * @hide
  */
-public final class BluetoothInputHost implements BluetoothProfile {
+public final class BluetoothHidDevice implements BluetoothProfile {
 
-    private static final String TAG = BluetoothInputHost.class.getSimpleName();
+    private static final String TAG = BluetoothHidDevice.class.getSimpleName();
 
     /**
      * Intent used to broadcast the change in connection state of the Input
@@ -57,7 +57,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-            "android.bluetooth.inputhost.profile.action.CONNECTION_STATE_CHANGED";
+            "android.bluetooth.hiddevice.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Constants representing device subclass.
@@ -113,7 +113,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
     private ServiceListener mServiceListener;
 
-    private volatile IBluetoothInputHost mService;
+    private volatile IBluetoothHidDevice mService;
 
     private BluetoothAdapter mAdapter;
 
@@ -205,23 +205,23 @@ public final class BluetoothInputHost implements BluetoothProfile {
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected()");
-            mService = IBluetoothInputHost.Stub.asInterface(service);
+            mService = IBluetoothHidDevice.Stub.asInterface(service);
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.INPUT_HOST,
-                        BluetoothInputHost.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.HID_DEVICE,
+                        BluetoothHidDevice.this);
             }
         }
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "onServiceDisconnected()");
             mService = null;
             if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.INPUT_HOST);
+                mServiceListener.onServiceDisconnected(BluetoothProfile.HID_DEVICE);
             }
         }
     };
 
-    BluetoothInputHost(Context context, ServiceListener listener) {
-        Log.v(TAG, "BluetoothInputHost");
+    BluetoothHidDevice(Context context, ServiceListener listener) {
+        Log.v(TAG, "BluetoothHidDevice");
 
         mContext = context;
         mServiceListener = listener;
@@ -240,7 +240,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     }
 
     boolean doBind() {
-        Intent intent = new Intent(IBluetoothInputHost.class.getName());
+        Intent intent = new Intent(IBluetoothHidDevice.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
@@ -285,7 +285,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public List<BluetoothDevice> getConnectedDevices() {
         Log.v(TAG, "getConnectedDevices()");
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 return service.getConnectedDevices();
@@ -306,7 +306,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         Log.v(TAG, "getDevicesMatchingConnectionStates(): states=" + Arrays.toString(states));
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 return service.getDevicesMatchingConnectionStates(states);
@@ -327,7 +327,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public int getConnectionState(BluetoothDevice device) {
         Log.v(TAG, "getConnectionState(): device=" + device);
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 return service.getConnectionState(device);
@@ -367,7 +367,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
             return false;
         }
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 BluetoothHidDeviceAppConfiguration config =
@@ -401,7 +401,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.unregisterApp(config);
@@ -426,7 +426,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
     public boolean sendReport(BluetoothDevice device, int id, byte[] data) {
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.sendReport(device, id, data);
@@ -454,7 +454,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.replyReport(device, type, id, data);
@@ -480,7 +480,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.reportError(device, error);
@@ -504,7 +504,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.unplug(device);
@@ -529,7 +529,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.connect(device);
@@ -553,7 +553,7 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
         boolean result = false;
 
-        final IBluetoothInputHost service = mService;
+        final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
                 result = service.disconnect(device);

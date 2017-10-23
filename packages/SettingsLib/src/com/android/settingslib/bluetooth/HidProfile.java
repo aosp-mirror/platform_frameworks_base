@@ -19,7 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothInputDevice;
+import android.bluetooth.BluetoothHidHost;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
@@ -35,7 +35,7 @@ public class HidProfile implements LocalBluetoothProfile {
     private static final String TAG = "HidProfile";
     private static boolean V = true;
 
-    private BluetoothInputDevice mService;
+    private BluetoothHidHost mService;
     private boolean mIsProfileReady;
 
     private final LocalBluetoothAdapter mLocalAdapter;
@@ -53,7 +53,7 @@ public class HidProfile implements LocalBluetoothProfile {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (V) Log.d(TAG,"Bluetooth service connected");
-            mService = (BluetoothInputDevice) proxy;
+            mService = (BluetoothHidHost) proxy;
             // We just bound to the service, so refresh the UI for any connected HID devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
             while (!deviceList.isEmpty()) {
@@ -87,7 +87,7 @@ public class HidProfile implements LocalBluetoothProfile {
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
         adapter.getProfileProxy(context, new InputDeviceServiceListener(),
-                BluetoothProfile.INPUT_DEVICE);
+                BluetoothProfile.HID_HOST);
     }
 
     public boolean isConnectable() {
@@ -190,7 +190,7 @@ public class HidProfile implements LocalBluetoothProfile {
         if (V) Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
-                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.INPUT_DEVICE,
+                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.HID_HOST,
                                                                        mService);
                 mService = null;
             }catch (Throwable t) {
