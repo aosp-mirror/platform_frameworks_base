@@ -137,11 +137,10 @@ StatsLogReport DurationMetricProducer::onDumpReport() {
     return report;
 };
 
-void DurationMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
-    if (event.GetTimestampNs() < mStartTimeNs) {
-        return;
-    }
-
+void DurationMetricProducer::onMatchedLogEventInternal(
+        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const map<string, HashableDimensionKey>& conditionKeys, bool condition,
+        const LogEvent& event) {
     flushDurationIfNeeded(event.GetTimestampNs());
 
     if (matcherIndex == mStopAllIndex) {
@@ -149,49 +148,20 @@ void DurationMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const 
         return;
     }
 
-    HashableDimensionKey hashableKey;
-    if (mDimension.size() > 0) {
-        // hook up sliced counter with AnomalyMonitor.
-        vector<KeyValuePair> key = getDimensionKey(event, mDimension);
-        hashableKey = getHashableKey(key);
-        // Add the HashableDimensionKey->DimensionKey to the map, because StatsLogReport expects
-        // vector<KeyValuePair>.
-        if (mDimensionKeyMap.find(hashableKey) == mDimensionKeyMap.end()) {
-            mDimensionKeyMap[hashableKey] = key;
-        }
-    } else {
-        hashableKey = DEFAULT_DIMENSION_KEY;
-    }
-
-    if (mCurrentSlicedDuration.find(hashableKey) == mCurrentSlicedDuration.end() &&
-        mConditionSliced) {
+    if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end() && mConditionSliced) {
         // add the durationInfo for the current bucket.
-        auto& durationInfo = mCurrentSlicedDuration[hashableKey];
-        auto& conditionKeys = durationInfo.conditionKeys;
-        // get and cache the keys for query condition.
-        for (const auto& link : mConditionLinks) {
-            HashableDimensionKey conditionKey = getDimensionKeyForCondition(event, link);
-            conditionKeys[link.condition()] = conditionKey;
-        }
-    }
-
-    bool conditionMet;
-    if (mConditionSliced) {
-        const auto& conditionKeys = mCurrentSlicedDuration[hashableKey].conditionKeys;
-        conditionMet =
-                mWizard->query(mConditionTrackerIndex, conditionKeys) == ConditionState::kTrue;
-    } else {
-        conditionMet = mCondition;
+        auto& durationInfo = mCurrentSlicedDuration[eventKey];
+        durationInfo.conditionKeys = conditionKeys;
     }
 
     if (matcherIndex == mStartIndex) {
-        VLOG("Metric %lld Key: %s Start, Condition %d", mMetric.metric_id(), hashableKey.c_str(),
-             conditionMet);
-        noteStart(hashableKey, conditionMet, event.GetTimestampNs());
+        VLOG("Metric %lld Key: %s Start, Condition %d", mMetric.metric_id(), eventKey.c_str(),
+             condition);
+        noteStart(eventKey, condition, event.GetTimestampNs());
     } else if (matcherIndex == mStopIndex) {
-        VLOG("Metric %lld Key: %s Stop, Condition %d", mMetric.metric_id(), hashableKey.c_str(),
-             conditionMet);
-        noteStop(hashableKey, event.GetTimestampNs());
+        VLOG("Metric %lld Key: %s Stop, Condition %d", mMetric.metric_id(), eventKey.c_str(),
+             condition);
+        noteStop(eventKey, event.GetTimestampNs());
     }
 }
 

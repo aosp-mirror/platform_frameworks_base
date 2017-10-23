@@ -48,7 +48,7 @@ public:
     virtual ~MetricProducer(){};
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    virtual void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) = 0;
+    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event);
 
     virtual void onConditionChanged(const bool condition) = 0;
 
@@ -86,6 +86,26 @@ protected:
     std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
 
     std::vector<EventConditionLink> mConditionLinks;
+
+    /*
+     * Individual metrics can implement their own business logic here. All pre-processing is done.
+     *
+     * [matcherIndex]: the index of the matcher which matched this event. This is interesting to
+     *                 DurationMetric, because it has start/stop/stop_all 3 matchers.
+     * [eventKey]: the extracted dimension key for the final output. if the metric doesn't have
+     *             dimensions, it will be DEFAULT_DIMENSION_KEY
+     * [conditionKey]: the keys of conditions which should be used to query the condition for this
+     *                 target event (from EventConditionLink). This is passed to individual metrics
+     *                 because DurationMetric needs it to be cached.
+     * [condition]: whether condition is met. If condition is sliced, this is the result coming from
+     *              query with ConditionWizard; If condition is not sliced, this is the
+     *              nonSlicedCondition.
+     * [event]: the log event, just in case the metric needs its data, e.g., EventMetric.
+     */
+    virtual void onMatchedLogEventInternal(
+            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+            const LogEvent& event) = 0;
 };
 
 }  // namespace statsd
