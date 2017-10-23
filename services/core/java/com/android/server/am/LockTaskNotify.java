@@ -17,8 +17,6 @@
 package com.android.server.am;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.WindowManager;
@@ -27,21 +25,19 @@ import android.widget.Toast;
 import com.android.internal.R;
 
 /**
- *  Helper to manage showing/hiding a image to notify them that they are entering
- *  or exiting screen pinning mode.
+ *  Helper to manage showing/hiding a image to notify them that they are entering or exiting screen
+ *  pinning mode. All exposed methods should be called from a handler thread.
  */
 public class LockTaskNotify {
     private static final String TAG = "LockTaskNotify";
     private static final long SHOW_TOAST_MINIMUM_INTERVAL = 1000;
 
     private final Context mContext;
-    private final H mHandler;
     private Toast mLastToast;
     private long mLastShowToastTime;
 
     public LockTaskNotify(Context context) {
         mContext = context;
-        mHandler = new H();
     }
 
     /** Show "Screen pinned" toast. */
@@ -56,10 +52,6 @@ public class LockTaskNotify {
 
     /** Show a toast that describes the gesture the user should use to escape pinned mode. */
     void showEscapeToast() {
-        mHandler.obtainMessage(H.SHOW_ESCAPE_TOAST).sendToTarget();
-    }
-
-    private void handleShowEscapeToast() {
         long showToastTime = SystemClock.elapsedRealtime();
         if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
             Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
@@ -78,18 +70,5 @@ public class LockTaskNotify {
                 WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         toast.show();
         return toast;
-    }
-
-    private final class H extends Handler {
-        private static final int SHOW_ESCAPE_TOAST = 3;
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-                case SHOW_ESCAPE_TOAST:
-                    handleShowEscapeToast();
-                    break;
-            }
-        }
     }
 }
