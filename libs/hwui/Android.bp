@@ -7,6 +7,8 @@ cc_defaults {
         //"hwui_compile_for_perf",
     ],
 
+    cpp_std: "c++17",
+
     cflags: [
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
@@ -354,7 +356,8 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/TextDropShadowCacheTests.cpp",
         "tests/unit/TextureCacheTests.cpp",
-	"tests/unit/TypefaceTests.cpp",
+        "tests/unit/ThreadBaseTests.cpp",
+        "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/VectorDrawableAtlasTests.cpp",
     ],

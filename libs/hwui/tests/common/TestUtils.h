@@ -318,7 +318,9 @@ public:
      */
     static void runOnRenderThread(RtCallback rtCallback) {
         TestTask task(rtCallback);
-        renderthread::RenderThread::getInstance().queueAndWait(&task);
+        renderthread::RenderThread::getInstance().queue().runSync([&]() {
+            task.run();
+        });
     }
 
     static bool isRenderThreadRunning() {

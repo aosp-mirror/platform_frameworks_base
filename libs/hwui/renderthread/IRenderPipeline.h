@@ -17,6 +17,7 @@
 #pragma once
 
 #include "FrameInfoVisualizer.h"
+#include "SwapBehavior.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
@@ -32,11 +33,6 @@ namespace uirenderer {
 class DeferredLayerUpdater;
 
 namespace renderthread {
-
-enum class SwapBehavior {
-    kSwap_default,
-    kSwap_discardBuffer,
-};
 
 enum class MakeCurrentResult {
     AlreadyCurrent,

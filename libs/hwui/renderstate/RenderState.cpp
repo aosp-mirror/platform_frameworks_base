@@ -236,25 +236,11 @@ void RenderState::destroyLayersInUpdater() {
     std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
 }
 
-class DecStrongTask : public renderthread::RenderTask {
-public:
-    explicit DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
-
-    virtual void run() override {
-        mObject->decStrong(nullptr);
-        mObject = nullptr;
-        delete this;
-    }
-
-private:
-    VirtualLightRefBase* mObject;
-};
-
 void RenderState::postDecStrong(VirtualLightRefBase* object) {
     if (pthread_equal(mThreadId, pthread_self())) {
         object->decStrong(nullptr);
     } else {
-        mRenderThread.queue(new DecStrongTask(object));
+        mRenderThread.queue().post([object]() { object->decStrong(nullptr); });
     }
 }
 
