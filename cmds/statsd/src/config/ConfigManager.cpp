@@ -130,12 +130,12 @@ static StatsdConfig build_fake_config() {
     int APP_USAGE_FOREGROUND = 1;
     int APP_USAGE_BACKGROUND = 0;
 
-    int SCREEN_EVENT_TAG_ID = 2;
+    int SCREEN_EVENT_TAG_ID = 29;
     int SCREEN_EVENT_STATE_KEY = 1;
     int SCREEN_EVENT_ON_VALUE = 2;
     int SCREEN_EVENT_OFF_VALUE = 1;
 
-    int UID_PROCESS_STATE_TAG_ID = 3;
+    int UID_PROCESS_STATE_TAG_ID = 27;
     int UID_PROCESS_STATE_UID_KEY = 1;
 
     // Count Screen ON events.

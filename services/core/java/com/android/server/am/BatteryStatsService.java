@@ -297,31 +297,39 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     void noteProcessStart(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessStartLocked(name, uid);
+            // TODO: decide where this should be and use a constant instead of a literal.
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 1);
         }
     }
 
     void noteProcessCrash(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessCrashLocked(name, uid);
+            // TODO: decide where this should be and use a constant instead of a literal.
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 2);
         }
     }
 
     void noteProcessAnr(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessAnrLocked(name, uid);
+            // TODO: decide where this should be and use a constant instead of a literal.
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 3);
         }
     }
 
     void noteProcessFinish(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessFinishLocked(name, uid);
+            // TODO: decide where this should be and use a constant instead of a literal.
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 0);
         }
     }
 
     void noteUidProcessState(int uid, int state) {
         synchronized (mStats) {
             // TODO: remove this once we figure out properly where and how
-            StatsLog.write(StatsLog.PROCESS_STATE_CHANGED, uid, state);
+            StatsLog.write(StatsLog.UID_PROCESS_STATE_CHANGED, uid, state);
 
             mStats.noteUidProcessStateLocked(uid, state);
         }
@@ -548,6 +556,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteScreenBrightness(int brightness) {
         enforceCallingPermission();
         synchronized (mStats) {
+            StatsLog.write(StatsLog.SCREEN_BRIGHTNESS_CHANGED, brightness);
             mStats.noteScreenBrightnessLocked(brightness);
         }
     }
@@ -909,6 +918,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteDeviceIdleModeLocked(mode, activeReason, activeUid);
+            StatsLog.write(StatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mode);
         }
     }
 
