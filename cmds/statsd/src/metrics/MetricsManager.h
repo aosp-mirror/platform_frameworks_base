@@ -51,11 +51,11 @@ private:
     std::set<int> mTagIds;
 
     // We only store the sp of LogMatchingTracker, MetricProducer, and ConditionTracker in
-    // MetricManager. There are relationship between them, and the relationship are denoted by index
-    // instead of pointers. The reasons for this are: (1) the relationship between them are
-    // complicated, store index instead of pointers reduce the risk of A holds B's sp, and B holds
-    // A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get the
-    // related results from a cache using the index.
+    // MetricsManager. There are relationships between them, and the relationships are denoted by
+    // index instead of pointers. The reasons for this are: (1) the relationship between them are
+    // complicated, so storing index instead of pointers reduces the risk that A holds B's sp, and B
+    // holds A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get
+    // the related results from a cache using the index.
 
     // Hold all the log entry matchers from the config.
     std::vector<sp<LogMatchingTracker>> mAllLogEntryMatchers;

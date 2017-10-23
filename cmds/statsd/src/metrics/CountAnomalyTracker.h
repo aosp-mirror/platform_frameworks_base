@@ -17,8 +17,10 @@
 #ifndef COUNT_ANOMALY_TRACKER_H
 #define COUNT_ANOMALY_TRACKER_H
 
-#include <stdlib.h>
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h" // Alert
+
 #include <memory> // unique_ptr
+#include <stdlib.h>
 
 namespace android {
 namespace os {
@@ -26,7 +28,7 @@ namespace statsd {
 
 class CountAnomalyTracker {
 public:
-    CountAnomalyTracker(size_t numBuckets, int thresholdGt);
+    CountAnomalyTracker(const Alert& alert);
 
     virtual ~CountAnomalyTracker();
 
@@ -43,6 +45,9 @@ public:
     void checkAnomaly(int currentCount);
 
 private:
+    // statsd_config.proto Alert message that defines this tracker.
+    const Alert mAlert;
+
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).
     const size_t mNumPastBuckets;
@@ -59,8 +64,9 @@ private:
     // Index of the oldest bucket (i.e. the next bucket to be overwritten).
     size_t mOldestBucketIndex = 0;
 
-    // If mSumPastCounters + currentCount > mThresholdGt --> Anomaly!
-    const int mThresholdGt;
+    // Timestamp that the refractory period (if this anomaly was declared) ends, in seconds.
+    // If an anomaly was never declared, set to 0.
+    time_t mRefractoryPeriodEndsSec = 0;
 
     void declareAnomaly();
 

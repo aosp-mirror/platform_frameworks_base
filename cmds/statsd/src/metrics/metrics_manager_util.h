@@ -81,7 +81,7 @@ bool initMetrics(
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
         std::unordered_map<int, std::vector<int>>& trackerToMetricMap);
 
-// Initialize MetricManager from StatsdConfig.
+// Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool initStatsdConfig(const StatsdConfig& config, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
