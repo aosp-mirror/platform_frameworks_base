@@ -710,9 +710,9 @@ android.bluetooth.BluetoothHeadset$1
 android.bluetooth.BluetoothHeadset$2
 android.bluetooth.BluetoothHeadset$3
 android.bluetooth.BluetoothHealthAppConfiguration
-android.bluetooth.BluetoothInputDevice
-android.bluetooth.BluetoothInputDevice$1
-android.bluetooth.BluetoothInputDevice$2
+android.bluetooth.BluetoothHidHost
+android.bluetooth.BluetoothHidHost$1
+android.bluetooth.BluetoothHidHost$2
 android.bluetooth.BluetoothInputStream
 android.bluetooth.BluetoothManager
 android.bluetooth.BluetoothMap
@@ -755,9 +755,9 @@ android.bluetooth.IBluetoothHeadsetPhone$Stub$Proxy
 android.bluetooth.IBluetoothHealth
 android.bluetooth.IBluetoothHealth$Stub
 android.bluetooth.IBluetoothHealthCallback
-android.bluetooth.IBluetoothInputDevice
-android.bluetooth.IBluetoothInputDevice$Stub
-android.bluetooth.IBluetoothInputDevice$Stub$Proxy
+android.bluetooth.IBluetoothHidHost
+android.bluetooth.IBluetoothHidHost$Stub
+android.bluetooth.IBluetoothHidHost$Stub$Proxy
 android.bluetooth.IBluetoothManager
 android.bluetooth.IBluetoothManager$Stub
 android.bluetooth.IBluetoothManager$Stub$Proxy
