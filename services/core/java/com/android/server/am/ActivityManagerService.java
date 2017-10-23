@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
@@ -365,6 +366,7 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
@@ -775,7 +777,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public final Bundle extras;
         public final Intent intent;
         public final String hint;
-        public final IResultReceiver receiver;
+        public final IAssistDataReceiver receiver;
         public final int userHandle;
         public boolean haveResult = false;
         public Bundle result = null;
@@ -784,7 +786,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         public Bundle receiverExtras;
 
         public PendingAssistExtras(ActivityRecord _activity, Bundle _extras, Intent _intent,
-                String _hint, IResultReceiver _receiver, Bundle _receiverExtras, int _userHandle) {
+                String _hint, IAssistDataReceiver _receiver, Bundle _receiverExtras,
+                int _userHandle) {
             activity = _activity;
             extras = _extras;
             intent = _intent;
@@ -4667,15 +4670,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Intent intent, String resolvedType, IVoiceInteractionSession session,
             IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions, int userId) {
-        if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: startVoiceActivity() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.BIND_VOICE_INTERACTION;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        enforceCallingPermission(BIND_VOICE_INTERACTION, "startVoiceActivity()");
         if (session == null || interactor == null) {
             throw new NullPointerException("null session or interactor");
         }
@@ -4690,15 +4685,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int startAssistantActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, Bundle bOptions, int userId) {
-        if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
-                != PackageManager.PERMISSION_GRANTED) {
-            final String msg = "Permission Denial: startAssistantActivity() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + Manifest.permission.BIND_VOICE_INTERACTION;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startAssistantActivity", null);
         return mActivityStarter.startActivityMayWait(null, callingUid, callingPackage, intent,
@@ -12913,7 +12900,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
+    public boolean requestAssistContextExtras(int requestType, IAssistDataReceiver receiver,
             Bundle receiverExtras, IBinder activityToken, boolean focused, boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
                 activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
@@ -12921,7 +12908,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean requestAutofillData(IResultReceiver receiver, Bundle receiverExtras,
+    public boolean requestAutofillData(IAssistDataReceiver receiver, Bundle receiverExtras,
             IBinder activityToken, int flags) {
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
@@ -12929,7 +12916,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
+            IAssistDataReceiver receiver, Bundle receiverExtras, IBinder activityToken,
             boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout,
             int flags) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
@@ -12997,7 +12984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void pendingAssistExtrasTimedOut(PendingAssistExtras pae) {
-        IResultReceiver receiver;
+        IAssistDataReceiver receiver;
         synchronized (this) {
             mPendingAssistExtras.remove(pae);
             receiver = pae.receiver;
@@ -13009,7 +12996,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
                     pae.receiverExtras);
             try {
-                pae.receiver.send(0, sendBundle);
+                pae.receiver.onHandleAssistData(sendBundle);
             } catch (RemoteException e) {
             }
         }
@@ -13047,7 +13034,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         // We are now ready to launch the assist activity.
-        IResultReceiver sendReceiver = null;
+        IAssistDataReceiver sendReceiver = null;
         Bundle sendBundle = null;
         synchronized (this) {
             buildAssistBundleLocked(pae, extras);
@@ -13069,7 +13056,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (sendReceiver != null) {
             try {
-                sendReceiver.send(0, sendBundle);
+                sendReceiver.onHandleAssistData(sendBundle);
             } catch (RemoteException e) {
             }
             return;

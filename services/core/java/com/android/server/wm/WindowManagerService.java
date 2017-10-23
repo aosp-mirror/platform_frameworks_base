@@ -226,7 +226,7 @@ import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
-import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -3783,7 +3783,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * of the target image.
      */
     @Override
-    public boolean requestAssistScreenshot(final IAssistScreenshotReceiver receiver) {
+    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
         if (!checkCallingPermission(READ_FRAME_BUFFER,
                 "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
@@ -3795,7 +3795,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
                     false /* includeDecor */);
             try {
-                receiver.send(bm);
+                receiver.onHandleAssistScreenshot(bm);
             } catch (RemoteException e) {
             }
         });

@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -76,11 +77,11 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.R;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
@@ -206,9 +207,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Receiver of assist data from the app's {@link Activity}.
      */
-    private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
+    private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
         @Override
-        public void send(int resultCode, Bundle resultData) throws RemoteException {
+        public void onHandleAssistData(Bundle resultData) throws RemoteException {
             final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
@@ -263,6 +264,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             mRemoteFillService.onFillRequest(request);
+        }
+
+        @Override
+        public void onHandleAssistScreenshot(Bitmap screenshot) {
+            // Do nothing
         }
     };
 
