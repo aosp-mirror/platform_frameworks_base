@@ -20,13 +20,9 @@ package android.service.battery;
 option java_multiple_files = true;
 option java_outer_classname = "BatteryServiceProto";
 
+import "frameworks/base/core/proto/android/os/batterymanager.proto";
+
 message BatteryServiceDumpProto {
-    enum BatteryPlugged {
-        BATTERY_PLUGGED_NONE = 0;
-        BATTERY_PLUGGED_AC = 1;
-        BATTERY_PLUGGED_USB = 2;
-        BATTERY_PLUGGED_WIRELESS = 4;
-    }
     enum BatteryStatus {
         BATTERY_STATUS_INVALID = 0;
         BATTERY_STATUS_UNKNOWN = 1;
@@ -49,7 +45,7 @@ message BatteryServiceDumpProto {
     // If true: UPDATES STOPPED -- use 'reset' to restart
     optional bool are_updates_stopped = 1;
     // Plugged status of power sources
-    optional BatteryPlugged plugged = 2;
+    optional android.os.BatteryManagerProto.PlugType plugged = 2;
     // Max current in microamperes
     optional int32 max_charging_current = 3;
     // Max voltage

@@ -15,9 +15,9 @@
  */
 
 syntax = "proto2";
-option java_multiple_files = true;
-
 package android.os;
+
+option java_multiple_files = true;
 
 message PowerManagerProto {
     /* User activity events in PowerManager.java. */
@@ -30,5 +30,85 @@ message PowerManagerProto {
         USER_ACTIVITY_EVENT_TOUCH = 2;
         // Accessibility taking action on behalf of user.
         USER_ACTIVITY_EVENT_ACCESSIBILITY = 3;
+    }
+
+    enum WakeLockLevel {
+        // NOTE: Wake lock levels were previously defined as a bit field, except
+        // that only a few combinations were actually supported so the bit field
+        // was removed. This explains why the numbering scheme is so odd. If
+        // adding a new wake lock level, any unused value can be used.
+
+        // Ensures that the CPU is running; the screen and keyboard backlight
+        // will be allowed to go off.
+        PARTIAL_WAKE_LOCK = 1;
+
+        // Ensures that the screen is on (but may be dimmed); the keyboard
+        // backlight will be allowed to go off. If the user presses the power
+        // button, then the SCREEN_DIM_WAKE_LOCK will be implicitly released by
+        // the system, causing both the screen and the CPU to be turned off.
+        SCREEN_DIM_WAKE_LOCK = 6 [deprecated = true];
+
+        // Ensures that the screen is on at full brightness; the keyboard
+        // backlight will be allowed to go off. If the user presses the power
+        // button, then the SCREEN_BRIGHT_WAKE_LOCK will be implicitly released
+        // by the system, causing both the screen and the CPU to be turned off.
+        SCREEN_BRIGHT_WAKE_LOCK = 10 [deprecated = true];
+
+        // Ensures that the screen and keyboard backlight are on at full
+        // brightness. If the user presses the power button, then the
+        // FULL_WAKE_LOCK will be implicitly released by the system, causing
+        // both the screen and the CPU to be turned off.
+        FULL_WAKE_LOCK = 26 [deprecated = true];
+
+        // Turns the screen off when the proximity sensor activates. If the
+        // proximity sensor detects that an object is nearby, the screen turns
+        // off immediately. Shortly after the object moves away, the screen
+        // turns on again.
+        // A proximity wake lock does not prevent the device from falling asleep
+        // unlike FULL_WAKE_LOCK, SCREEN_BRIGHT_WAKE_LOCK and
+        // SCREEN_DIM_WAKE_LOCK. If there is no user activity and no other wake
+        // locks are held, then the device will fall asleep (and lock) as usual.
+        // However, the device will not fall asleep while the screen has been
+        // turned off by the proximity sensor because it effectively counts as
+        // ongoing user activity.
+        PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32;
+
+        // Put the screen in a low power state and allow the CPU to suspend if
+        // no other wake locks are held. This is used by the dream manager to
+        // implement doze mode. It currently has no effect unless the power
+        // manager is in the dozing state.
+        DOZE_WAKE_LOCK = 64;
+
+        // Keep the device awake enough to allow drawing to occur. This is used
+        // by the window manager to allow applications to draw while the system
+        // is dozing. It currently has no effect unless the power manager is in
+        // the dozing state.
+        DRAW_WAKE_LOCK = 128;
+    }
+}
+
+message PowerManagerInternalProto {
+    // Enum values gotten from PowerManagerInternal.java
+    enum Wakefulness {
+        // The device is asleep. It can only be awoken by a call to wakeUp().
+        // The screen should be off or in the process of being turned off by the
+        // display controller. The device typically passes through the dozing
+        // state first.
+        WAKEFULNESS_ASLEEP = 0;
+        // The device is fully awake. It can be put to sleep by a call to
+        // goToSleep(). When the user activity timeout expires, the device may
+        // start dreaming or go to sleep.
+        WAKEFULNESS_AWAKE = 1;
+        // The device is dreaming. It can be awoken by a call to wakeUp(), which
+        // ends the dream. The device goes to sleep when goToSleep() is called,
+        // when the dream ends, or when unplugged. User activity may brighten
+        // the screen but does not end the dream.
+        WAKEFULNESS_DREAMING = 2;
+        // The device is dozing. It is almost asleep but is allowing a special
+        // low-power "doze" dream to run which keeps the display on but lets the
+        // application processor suspend. It can be awoken by a call to wakeUp()
+        // which ends the dream. The device fully goes to sleep if the dream
+        // cannot be started or ends on its own.
+        WAKEFULNESS_DOZING = 3;
     }
 }
