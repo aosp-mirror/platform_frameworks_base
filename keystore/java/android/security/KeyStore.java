@@ -20,6 +20,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -762,6 +763,10 @@ public class KeyStore {
     }
 
     private long getFingerprintOnlySid() {
+        final PackageManager packageManager = mContext.getPackageManager();
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            return 0;
+        }
         FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
         if (fingerprintManager == null) {
             return 0;
