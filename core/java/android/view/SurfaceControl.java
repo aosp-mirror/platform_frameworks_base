@@ -60,6 +60,8 @@ public class SurfaceControl {
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
+    private static native void nativeCaptureLayers(IBinder layerHandleToken, Surface consumer,
+            int rotation);
 
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -968,6 +970,20 @@ public class SurfaceControl {
         }
         nativeScreenshot(display, consumer, sourceCrop, width, height,
                 minLayer, maxLayer, allLayers, useIdentityTransform);
+    }
+
+    /**
+     * Captures a layer and its children into the provided {@link Surface}.
+     *
+     * @param layerHandleToken The root layer to capture.
+     * @param consumer The {@link Surface} to capture the layer into.
+     * @param rotation Apply a custom clockwise rotation to the screenshot, i.e.
+     *                 Surface.ROTATION_0,90,180,270. Surfaceflinger will always capture in its
+     *                 native portrait orientation by default, so this is useful for returning
+     *                 captures that are independent of device orientation.
+     */
+    public static void captureLayers(IBinder layerHandleToken, Surface consumer, int rotation) {
+        nativeCaptureLayers(layerHandleToken, consumer, rotation);
     }
 
     public static class Transaction implements Closeable {

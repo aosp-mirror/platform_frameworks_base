@@ -290,6 +290,22 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
     }
 }
 
+static void nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandleToken,
+        jobject surfaceObj, int rotation) {
+
+    sp<IBinder> layerHandle = ibinderForJavaObject(env, layerHandleToken);
+    if (layerHandle == NULL) {
+        return;
+    }
+
+    sp<Surface> consumer = android_view_Surface_getSurface(env, surfaceObj);
+    if (consumer == NULL) {
+        return;
+    }
+
+    ScreenshotClient::captureLayers(layerHandle, consumer->getIGraphicBufferProducer(), rotation);
+}
+
 static void nativeApplyTransaction(JNIEnv* env, jclass clazz, jlong transactionObj, jboolean sync) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->apply(sync);
@@ -949,6 +965,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeScreenshotToBuffer",
      "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
      (void*)nativeScreenshotToBuffer },
+    {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/view/Surface;I)V",
+            (void*)nativeCaptureLayers },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
