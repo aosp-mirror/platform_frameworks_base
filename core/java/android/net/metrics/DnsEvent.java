@@ -17,11 +17,13 @@
 package android.net.metrics;
 
 import android.net.NetworkCapabilities;
-import java.util.Arrays;
+
 import com.android.internal.util.BitUtils;
 
+import java.util.Arrays;
+
 /**
- * A DNS event recorded by NetdEventListenerService.
+ * A batch of DNS events recorded by NetdEventListenerService for a specific network.
  * {@hide}
  */
 final public class DnsEvent {
@@ -38,6 +40,8 @@ final public class DnsEvent {
     // the eventTypes, returnCodes, and latenciesMs arrays have the same length and the i-th event
     // is spread across the three array at position i.
     public int eventCount;
+    // The number of successful DNS queries recorded.
+    public int successCount;
     // The types of DNS queries as defined in INetdEventListener.
     public byte[] eventTypes;
     // Current getaddrinfo codes go from 1 to EAI_MAX = 15. gethostbyname returns errno, but there
@@ -54,10 +58,11 @@ final public class DnsEvent {
         latenciesMs = new int[initialCapacity];
     }
 
-    public void addResult(byte eventType, byte returnCode, int latencyMs) {
+    boolean addResult(byte eventType, byte returnCode, int latencyMs) {
+        boolean isSuccess = (returnCode == 0);
         if (eventCount >= SIZE_LIMIT) {
             // TODO: implement better rate limiting that does not biases metrics.
-            return;
+            return isSuccess;
         }
         if (eventCount == eventTypes.length) {
             resize((int) (1.4 * eventCount));
@@ -66,6 +71,10 @@ final public class DnsEvent {
         returnCodes[eventCount] = returnCode;
         latenciesMs[eventCount] = latencyMs;
         eventCount++;
+        if (isSuccess) {
+            successCount++;
+        }
+        return isSuccess;
     }
 
     public void resize(int newLength) {
@@ -80,6 +89,8 @@ final public class DnsEvent {
         for (int t : BitUtils.unpackBits(transports)) {
             builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
         }
-        return builder.append(eventCount).append(" events)").toString();
+        builder.append(String.format("%d events, ", eventCount));
+        builder.append(String.format("%d success)", successCount));
+        return builder.toString();
     }
 }
