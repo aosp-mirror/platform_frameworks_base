@@ -56,9 +56,9 @@ static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, j
     if (langs != nullptr) {
         ScopedUtfChars str(env, langs);
         builder = new NativeFamilyBuilder(
-                minikin::FontStyle::registerLanguageList(str.c_str()), variant);
+                minikin::FontStyle::registerLocaleList(str.c_str()), variant);
     } else {
-        builder = new NativeFamilyBuilder(minikin::FontStyle::registerLanguageList(""), variant);
+        builder = new NativeFamilyBuilder(minikin::FontStyle::registerLocaleList(""), variant);
     }
     return reinterpret_cast<jlong>(builder);
 }
