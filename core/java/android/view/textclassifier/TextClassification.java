@@ -33,6 +33,52 @@ import java.util.List;
 
 /**
  * Information for generating a widget to handle classified text.
+ *
+ * <p>A TextClassification object contains icons, labels, onClickListeners and intents that may
+ * be used to build a widget that can be used to act on classified text.
+ *
+ * <p>e.g. building a view that, when clicked, shares the classified text with the preferred app:
+ *
+ * <pre>{@code
+ *   // Called preferably outside the UiThread.
+ *   TextClassification classification = textClassifier.classifyText(allText, 10, 25, null);
+ *
+ *   // Called on the UiThread.
+ *   Button button = new Button(context);
+ *   button.setCompoundDrawablesWithIntrinsicBounds(classification.getIcon(), null, null, null);
+ *   button.setText(classification.getLabel());
+ *   button.setOnClickListener(classification.getOnClickListener());
+ * }</pre>
+ *
+ * <p>e.g. starting an action mode with menu items that can handle the classified text:
+ *
+ * <pre>{@code
+ *   // Called preferably outside the UiThread.
+ *   final TextClassification classification = textClassifier.classifyText(allText, 10, 25, null);
+ *
+ *   // Called on the UiThread.
+ *   view.startActionMode(new ActionMode.Callback() {
+ *
+ *       public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+ *           for (int i = 0; i < classification.getActionCount(); i++) {
+ *               if (thisAppHasPermissionToInvokeIntent(classification.getIntent(i))) {
+ *                   menu.add(Menu.NONE, i, 20, classification.getLabel(i))
+ *                      .setIcon(classification.getIcon(i))
+ *                      .setIntent(classification.getIntent(i));
+ *               }
+ *           }
+ *           return true;
+ *       }
+ *
+ *       public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+ *           context.startActivity(item.getIntent());
+ *           return true;
+ *       }
+ *
+ *       ...
+ *   });
+ * }</pre>
+ *
  */
 public final class TextClassification {
 
