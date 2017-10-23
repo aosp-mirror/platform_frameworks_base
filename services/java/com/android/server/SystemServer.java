@@ -1551,6 +1551,11 @@ public final class SystemServer {
             traceEnd();
         }
 
+        // Statsd helper
+        traceBeginAndSlog("StartStatsCompanionService");
+        mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
+        traceEnd();
+
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.
         final boolean safeMode = wm.detectSafeMode();
