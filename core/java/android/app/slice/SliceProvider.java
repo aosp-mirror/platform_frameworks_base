@@ -156,27 +156,34 @@ public abstract class SliceProvider extends ContentProvider {
     }
 
     private Slice handleBindSlice(Uri sliceUri) {
-        Slice[] output = new Slice[1];
-        CountDownLatch latch = new CountDownLatch(1);
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.post(() -> {
-            ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
-            try {
-                StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                        .detectAll()
-                        .penaltyDeath()
-                        .build());
-                output[0] = onBindSlice(sliceUri);
-            } finally {
-                StrictMode.setThreadPolicy(oldPolicy);
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            return onBindSliceStrict(sliceUri);
+        } else {
+            CountDownLatch latch = new CountDownLatch(1);
+            Slice[] output = new Slice[1];
+            Handler.getMain().post(() -> {
+                output[0] = onBindSliceStrict(sliceUri);
                 latch.countDown();
+            });
+            try {
+                latch.await();
+                return output[0];
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        });
+        }
+    }
+
+    private Slice onBindSliceStrict(Uri sliceUri) {
+        ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
         try {
-            latch.await();
-            return output[0];
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyDeath()
+                    .build());
+            return onBindSlice(sliceUri);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 }
