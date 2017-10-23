@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.perftests.core">
 
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS" />
+
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="android.perftests.utils.StubActivity" />
