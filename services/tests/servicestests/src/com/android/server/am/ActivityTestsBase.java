@@ -52,12 +52,20 @@ import org.mockito.MockitoAnnotations;
  * A base class to handle common operations in activity related unit tests.
  */
 public class ActivityTestsBase {
+    private static boolean sOneTimeSetupDone = false;
+
     private final Context mContext = InstrumentationRegistry.getContext();
     private HandlerThread mHandlerThread;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        if (!sOneTimeSetupDone) {
+            sOneTimeSetupDone = true;
+
+            // Allows to mock package local classes and methods
+            System.setProperty("dexmaker.share_classloader", "true");
+            MockitoAnnotations.initMocks(this);
+        }
         mHandlerThread = new HandlerThread("ActivityTestsBaseThread");
         mHandlerThread.start();
     }
