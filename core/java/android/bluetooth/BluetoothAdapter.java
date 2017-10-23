@@ -2104,8 +2104,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.AVRCP_CONTROLLER) {
             BluetoothAvrcpController avrcp = new BluetoothAvrcpController(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-            BluetoothInputDevice iDev = new BluetoothInputDevice(context, listener);
+        } else if (profile == BluetoothProfile.HID_HOST) {
+            BluetoothHidHost iDev = new BluetoothHidHost(context, listener);
             return true;
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
@@ -2128,8 +2128,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.MAP_CLIENT) {
             BluetoothMapClient mapClient = new BluetoothMapClient(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.INPUT_HOST) {
-            BluetoothInputHost iHost = new BluetoothInputHost(context, listener);
+        } else if (profile == BluetoothProfile.HID_DEVICE) {
+            BluetoothHidDevice hidDevice = new BluetoothHidDevice(context, listener);
             return true;
         } else {
             return false;
@@ -2167,8 +2167,8 @@ public final class BluetoothAdapter {
                 BluetoothAvrcpController avrcp = (BluetoothAvrcpController) proxy;
                 avrcp.close();
                 break;
-            case BluetoothProfile.INPUT_DEVICE:
-                BluetoothInputDevice iDev = (BluetoothInputDevice) proxy;
+            case BluetoothProfile.HID_HOST:
+                BluetoothHidHost iDev = (BluetoothHidHost) proxy;
                 iDev.close();
                 break;
             case BluetoothProfile.PAN:
@@ -2207,9 +2207,9 @@ public final class BluetoothAdapter {
                 BluetoothMapClient mapClient = (BluetoothMapClient) proxy;
                 mapClient.close();
                 break;
-            case BluetoothProfile.INPUT_HOST:
-                BluetoothInputHost iHost = (BluetoothInputHost) proxy;
-                iHost.close();
+            case BluetoothProfile.HID_DEVICE:
+                BluetoothHidDevice hidDevice = (BluetoothHidDevice) proxy;
+                hidDevice.close();
                 break;
         }
     }
