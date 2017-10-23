@@ -48,7 +48,8 @@ public abstract class HwBinder implements IHwBinder {
 
     public static native final IHwBinder getService(
             String iface,
-            String serviceName)
+            String serviceName,
+            boolean isTry)
         throws RemoteException, NoSuchElementException;
 
     public static native final void configureRpcThreadpool(
