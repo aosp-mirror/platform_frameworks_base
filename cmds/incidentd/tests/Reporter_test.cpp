@@ -32,8 +32,6 @@ using namespace android::binder;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
-using ::testing::internal::CaptureStdout;
-using ::testing::internal::GetCapturedStdout;
 
 class TestListener : public IIncidentReportStatusListener
 {
@@ -139,20 +137,24 @@ TEST_F(ReporterTest, RunReportEmpty) {
 }
 
 TEST_F(ReporterTest, RunReportWithHeaders) {
+    TemporaryFile tf;
     IncidentReportArgs args1, args2;
     args1.addSection(1);
     args2.addSection(2);
     std::vector<int8_t> header {'a', 'b', 'c', 'd', 'e'};
     args2.addHeader(header);
-    sp<ReportRequest> r1 = new ReportRequest(args1, l, STDOUT_FILENO);
-    sp<ReportRequest> r2 = new ReportRequest(args2, l, STDOUT_FILENO);
+    sp<ReportRequest> r1 = new ReportRequest(args1, l, tf.fd);
+    sp<ReportRequest> r2 = new ReportRequest(args2, l, tf.fd);
 
     reporter->batch.add(r1);
     reporter->batch.add(r2);
 
-    CaptureStdout();
     ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
-    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x5" "abcde"));
+
+    string result;
+    ReadFileToString(tf.path, &result);
+    EXPECT_THAT(result, StrEq("\n\x5" "abcde"));
+
     EXPECT_EQ(l->startInvoked, 2);
     EXPECT_EQ(l->finishInvoked, 2);
     EXPECT_TRUE(l->startSections.empty());

@@ -225,14 +225,13 @@ ProtoOutputStream::write(uint64_t fieldId, string val)
 }
 
 bool
-ProtoOutputStream::write(uint64_t fieldId, const char* val)
+ProtoOutputStream::write(uint64_t fieldId, const char* val, size_t size)
 {
     if (mCompact) return false;
     const uint32_t id = (uint32_t)fieldId;
-    int size = 0;
-    while (val[size] != '\0') size++;
     switch (fieldId & FIELD_TYPE_MASK) {
         case TYPE_STRING:
+        case TYPE_BYTES:
             writeUtf8StringImpl(id, val, size);
             return true;
         default:
