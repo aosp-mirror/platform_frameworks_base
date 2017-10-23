@@ -985,7 +985,7 @@ public final class DefaultPermissionGrantPolicy {
 
     private PackageParser.Package getSystemPackage(String packageName) {
         PackageParser.Package pkg = getPackage(packageName);
-        if (pkg != null && pkg.isSystemApp()) {
+        if (pkg != null && pkg.isSystem()) {
             return !isSysComponentOrPersistentPlatformSignedPrivApp(pkg) ? pkg : null;
         }
         return null;
@@ -1094,7 +1094,7 @@ public final class DefaultPermissionGrantPolicy {
         if (UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID) {
             return true;
         }
-        if (!pkg.isPrivilegedApp()) {
+        if (!pkg.isPrivileged()) {
             return false;
         }
         final PackageParser.Package disabledPkg =

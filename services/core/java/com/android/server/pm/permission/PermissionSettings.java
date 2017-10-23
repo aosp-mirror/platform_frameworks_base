@@ -47,7 +47,8 @@ import java.util.Set;
  */
 public class PermissionSettings {
 
-    final boolean mPermissionReviewRequired;
+    public final boolean mPermissionReviewRequired;
+
     /**
      * All of the permissions known to the system. The mapping is from permission
      * name to permission object.

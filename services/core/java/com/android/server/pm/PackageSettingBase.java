@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
+import android.content.pm.Signature;
 import android.service.pm.PackageProto;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -57,7 +58,7 @@ public abstract class PackageSettingBase extends SettingBase {
     static final int PKG_INSTALL_COMPLETE = 1;
     static final int PKG_INSTALL_INCOMPLETE = 0;
 
-    final String name;
+    public final String name;
     final String realName;
 
     String parentPackageName;
@@ -231,6 +232,11 @@ public abstract class PackageSettingBase extends SettingBase {
     public boolean isSharedUser() {
         return false;
     }
+
+    public Signature[] getSignatures() {
+        return signatures.mSignatures;
+    }
+
     /**
      * Makes a shallow copy of the given package settings.
      *

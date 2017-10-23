@@ -58,13 +58,17 @@ public abstract class PermissionManagerInternal {
         }
         public void onInstallPermissionRevoked() {
         }
-        public void onPermissionUpdated(int userId) {
+        public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
         }
         public void onPermissionRemoved() {
         }
         public void onInstallPermissionUpdated() {
         }
     }
+
+    public abstract void systemReady();
+
+    public abstract boolean isPermissionsReviewRequired(PackageParser.Package pkg, int userId);
 
     public abstract void grantRuntimePermission(
             @NonNull String permName, @NonNull String packageName, boolean overridePolicy,
@@ -79,9 +83,12 @@ public abstract class PermissionManagerInternal {
     public abstract void revokeRuntimePermission(@NonNull String permName,
             @NonNull String packageName, boolean overridePolicy, int callingUid, int userId,
             @Nullable PermissionCallback callback);
-    public abstract int[] revokeUnusedSharedUserPermissions(@NonNull SharedUserSetting suSetting,
-            @NonNull int[] allUserIds);
 
+    public abstract void updatePermissions(@Nullable String packageName,
+            @Nullable PackageParser.Package pkg, boolean replaceGrant,
+            @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
+    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
+            @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
 
     /**
      * Add all permissions in the given package.
@@ -96,11 +103,6 @@ public abstract class PermissionManagerInternal {
             int callingUid, @Nullable PermissionCallback callback);
     public abstract void removeDynamicPermission(@NonNull String permName, int callingUid,
             @Nullable PermissionCallback callback);
-
-    public abstract int updatePermissions(@Nullable String changingPkg,
-            @Nullable PackageParser.Package pkgInfo, int flags);
-    public abstract int updatePermissionTrees(@Nullable String changingPkg,
-            @Nullable PackageParser.Package pkgInfo, int flags);
 
     public abstract @Nullable String[] getAppOpPermissionPackages(@NonNull String permName);
 
@@ -161,5 +163,4 @@ public abstract class PermissionManagerInternal {
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
-    public abstract @Nullable int[] getGlobalGidsTEMP();
 }

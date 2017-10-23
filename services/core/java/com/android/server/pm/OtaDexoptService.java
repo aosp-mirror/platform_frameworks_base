@@ -310,7 +310,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
         String[] libraryDependencies = pkg.usesLibraryFiles;
-        if (pkg.isSystemApp()) {
+        if (pkg.isSystem()) {
             // For system apps, we want to avoid classpaths checks.
             libraryDependencies = NO_LIBRARIES;
         }
