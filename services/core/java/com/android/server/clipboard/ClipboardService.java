@@ -435,14 +435,9 @@ public class ClipboardService extends SystemService {
     }
 
     private boolean isDeviceLocked() {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            final KeyguardManager keyguardManager = getContext().getSystemService(
+        final KeyguardManager keyguardManager = getContext().getSystemService(
                     KeyguardManager.class);
-            return keyguardManager != null && keyguardManager.isDeviceLocked();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return keyguardManager != null && keyguardManager.isDeviceLocked();
     }
 
     private final void checkUriOwnerLocked(Uri uri, int uid) {
