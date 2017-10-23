@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -34,11 +35,13 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.security.KeyChain;
+import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.IWindowManager;
 
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
@@ -194,6 +197,9 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        AlarmManager getAlarmManager() {return services.alarmManager;}
+
+        @Override
         LockPatternUtils newLockPatternUtils() {
             return services.lockPatternUtils;
         }
@@ -231,6 +237,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         void binderRestoreCallingIdentity(long token) {
             context.binder.restoreCallingIdentity(token);
+        }
+
+        @Override
+        void binderWithCleanCallingIdentity(@NonNull ThrowingRunnable action) {
+            context.binder.withCleanCallingIdentity(action);
         }
 
         @Override

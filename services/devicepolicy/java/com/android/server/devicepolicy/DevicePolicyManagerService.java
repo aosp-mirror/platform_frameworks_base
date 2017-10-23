@@ -175,6 +175,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -1680,6 +1681,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         boolean binderIsCallingUidMyUid() {
             return getCallingUid() == Process.myUid();
+        }
+
+        void binderWithCleanCallingIdentity(@NonNull ThrowingRunnable action) {
+             Binder.withCleanCallingIdentity(action);
         }
 
         final int userHandleGetCallingUserId() {
@@ -9020,6 +9025,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
+    }
+
+    @Override
+    public boolean setTime(ComponentName who, long millis) {
+        Preconditions.checkNotNull(who, "ComponentName is null in setTime");
+        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        // Don't allow set time when auto time is on.
+        if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
+            return false;
+        }
+        mInjector.binderWithCleanCallingIdentity(() -> mInjector.getAlarmManager().setTime(millis));
+        return true;
+    }
+
+    @Override
+    public boolean setTimeZone(ComponentName who, String timeZone) {
+        Preconditions.checkNotNull(who, "ComponentName is null in setTimeZone");
+        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        // Don't allow set timezone when auto timezone is on.
+        if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
+            return false;
+        }
+        mInjector.binderWithCleanCallingIdentity(() ->
+            mInjector.getAlarmManager().setTimeZone(timeZone));
+        return true;
     }
 
     @Override

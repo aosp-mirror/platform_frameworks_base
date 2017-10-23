@@ -6533,6 +6533,52 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device owner to set the system wall clock time. This only takes effect if called
+     * when {@link android.provider.Settings.Global#AUTO_TIME} is 0, otherwise {@code false} will be
+     * returned.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param millis time in milliseconds since the Epoch
+     * @return {@code true} if set time succeeded, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public boolean setTime(@NonNull ComponentName admin, long millis) {
+        throwIfParentInstance("setTime");
+        if (mService != null) {
+            try {
+                return mService.setTime(admin, millis);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by device owner to set the system's persistent default time zone. This only takes
+     * effect if called when {@link android.provider.Settings.Global#AUTO_TIME_ZONE} is 0, otherwise
+     * {@code false} will be returned.
+     *
+     * @see android.app.AlarmManager#setTimeZone(String)
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param timeZone one of the Olson ids from the list returned by
+     *     {@link java.util.TimeZone#getAvailableIDs}
+     * @return {@code true} if set timezone succeeded, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public boolean setTimeZone(@NonNull ComponentName admin, String timeZone) {
+        throwIfParentInstance("setTimeZone");
+        if (mService != null) {
+            try {
+                return mService.setTimeZone(admin, timeZone);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by profile or device owners to update {@link android.provider.Settings.Secure}
      * settings. Validation that the value of the setting is in the correct form for the setting
      * type should be performed by the caller.
