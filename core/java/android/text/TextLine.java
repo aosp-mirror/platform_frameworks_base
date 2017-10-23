@@ -28,6 +28,7 @@ import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ import java.util.ArrayList;
  *
  * @hide
  */
-class TextLine {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class TextLine {
     private static final boolean DEBUG = false;
 
     private TextPaint mPaint;
@@ -82,7 +84,8 @@ class TextLine {
      *
      * @return an uninitialized TextLine
      */
-    static TextLine obtain() {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static TextLine obtain() {
         TextLine tl;
         synchronized (sCached) {
             for (int i = sCached.length; --i >= 0;) {
@@ -107,7 +110,8 @@ class TextLine {
      * @return null, as a convenience from clearing references to the provided
      * TextLine
      */
-    static TextLine recycle(TextLine tl) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static TextLine recycle(TextLine tl) {
         tl.mText = null;
         tl.mPaint = null;
         tl.mDirections = null;
@@ -142,7 +146,8 @@ class TextLine {
      * @param hasTabs true if the line might contain tabs
      * @param tabStops the tabStops. Can be null.
      */
-    void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
             Directions directions, boolean hasTabs, TabStops tabStops) {
         mPaint = paint;
         mText = text;
@@ -196,7 +201,8 @@ class TextLine {
     /**
      * Justify the line to the given width.
      */
-    void justify(float justifyWidth) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void justify(float justifyWidth) {
         int end = mLen;
         while (end > 0 && isLineEndSpace(mText.charAt(mStart + end - 1))) {
             end--;
@@ -277,7 +283,8 @@ class TextLine {
      * @param fmi receives font metrics information, can be null
      * @return the signed width of the line
      */
-    float metrics(FontMetricsInt fmi) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public float metrics(FontMetricsInt fmi) {
         return measure(mLen, false, fmi);
     }
 
@@ -1165,23 +1172,18 @@ class TextLine {
     }
 
     private boolean isStretchableWhitespace(int ch) {
-        // TODO: Support other stretchable whitespace. (Bug: 34013491)
-        return ch == 0x0020 || ch == 0x00A0;
-    }
-
-    private int nextStretchableSpace(int start, int end) {
-        for (int i = start; i < end; i++) {
-            final char c = mCharsValid ? mChars[i] : mText.charAt(i + mStart);
-            if (isStretchableWhitespace(c)) return i;
-        }
-        return end;
+        // TODO: Support NBSP and other stretchable whitespace (b/34013491 and b/68204709).
+        return ch == 0x0020;
     }
 
     /* Return the number of spaces in the text line, for the purpose of justification */
     private int countStretchableSpaces(int start, int end) {
         int count = 0;
-        for (int i = start; i < end; i = nextStretchableSpace(i + 1, end)) {
-            count++;
+        for (int i = start; i < end; i++) {
+            final char c = mCharsValid ? mChars[i] : mText.charAt(i + mStart);
+            if (isStretchableWhitespace(c)) {
+                count++;
+            }
         }
         return count;
     }
