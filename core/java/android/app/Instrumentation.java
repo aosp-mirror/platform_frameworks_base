@@ -1209,10 +1209,10 @@ public class Instrumentation {
     }
 
     private AppComponentFactory getFactory(String pkg) {
-        LoadedApk apk = mThread.peekPackageInfo(pkg, true);
+        LoadedApk loadedApk = mThread.peekLoadedApk(pkg, true);
         // This is in the case of starting up "android".
-        if (apk == null) apk = mThread.getSystemContext().mPackageInfo;
-        return apk.getAppFactory();
+        if (loadedApk == null) loadedApk = mThread.getSystemContext().mLoadedApk;
+        return loadedApk.getAppFactory();
     }
 
     private void prePerformCreate(Activity activity) {
