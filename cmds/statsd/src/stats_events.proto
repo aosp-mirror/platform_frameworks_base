@@ -69,7 +69,7 @@ message StatsEvent {
         WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
         WifiScanStateChanged wifi_scan_state_changed = 39;
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
-
+        SettingChanged setting_changed = 41;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -479,7 +479,7 @@ message ScreenBrightnessChanged {
  * Logs battery level (percent full, from 0 to 100).
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message BatteryLevelChanged {
     // Battery level. Should be in [0, 100].
@@ -490,7 +490,7 @@ message BatteryLevelChanged {
  * Logs change in charging status of the device.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message ChargingStateChanged {
     // TODO: Link directly to BatteryManager.java's constants (via a proto).
@@ -508,7 +508,7 @@ message ChargingStateChanged {
  * Logs whether the device is plugged in, and what power source it is using.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message PluggedStateChanged {
     // TODO: Link directly to BatteryManager.java's constants (via a proto).
@@ -529,7 +529,7 @@ message PluggedStateChanged {
  * Logs the temperature of the device, in tenths of a degree Celsius.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceTemperatureReported {
     // Temperature in tenths of a degree C.
@@ -542,7 +542,7 @@ message DeviceTemperatureReported {
  * Logs when the device turns off or on.
  *
  * Logged from:
-  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
  */
 message DeviceOnStatusChanged {
     enum State {
@@ -556,7 +556,7 @@ message DeviceOnStatusChanged {
  * Logs when an app's wakeup alarm fires.
  *
  * Logged from:
-  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
  */
 message WakeupAlarmOccurred {
     // TODO: Add attribution instead of uid?
@@ -581,7 +581,7 @@ message KernelWakeupReported {
  * Logs wifi locks held by an app.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiLockStateChanged {
     // TODO: Add attribution instead of uid.
@@ -598,7 +598,7 @@ message WifiLockStateChanged {
  * Logs wifi signal strength changes.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiSignalStrengthChanged {
     // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
@@ -616,7 +616,7 @@ message WifiSignalStrengthChanged {
  * Logs wifi scans performed by an app.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiScanStateChanged {
     // TODO: Add attribution instead of uid.
@@ -633,7 +633,7 @@ message WifiScanStateChanged {
  * Logs phone signal strength changes.
  *
  * Logged from:
-  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message PhoneSignalStrengthChanged {
     // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
@@ -645,4 +645,37 @@ message PhoneSignalStrengthChanged {
         SIGNAL_STRENGTH_GREAT = 4;
     }
     optional SignalStrength signal_strength = 1;
+}
+
+/**
+ * Logs that a setting was updated.
+ * Logged from:
+ *   frameworks/base/core/java/android/provider/Settings.java
+ * The tag and is_default allow resetting of settings to default values based on the specified
+ * tag. See Settings#putString(ContentResolver, String, String, String, boolean) for more details.
+ */
+message SettingChanged {
+    // The name of the setting.
+    optional string setting = 1;
+
+    // The change being imposed on this setting. May represent a number, eg "3".
+    optional string value = 2;
+
+    // The new value of this setting. For most settings, this is same as value. For some settings,
+    // value is +X or -X where X represents an element in a set. For example, if the previous value
+    // is A,B,C and value is -B, then new_value is A,C and prev_value is A,B,C.
+    // The +/- feature is currently only used for location_providers_allowed.
+    optional string new_value = 3;
+
+    // The previous value of this setting.
+    optional string prev_value = 4;
+
+    // The tag used with the is_default for resetting sets of settings. This is generally null.
+    optional string tag = 5;
+
+    // 1 indicates that this setting with tag should be resettable.
+    optional int32 is_default = 6;
+
+    // The user ID associated. Defined in android/os/UserHandle.java
+    optional int32 user = 7;
 }
