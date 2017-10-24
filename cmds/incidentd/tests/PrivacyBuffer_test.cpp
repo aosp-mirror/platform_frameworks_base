@@ -260,3 +260,13 @@ TEST_F(PrivacyBufferTest, BadDataInNestedMessage) {
     PrivacySpec spec;
     ASSERT_EQ(privacyBuf.strip(spec), BAD_VALUE);
 }
+
+TEST_F(PrivacyBufferTest, SelfRecursionMessage) {
+    string input = "\x2a\"" + VARINT_FIELD_1 + STRING_FIELD_2 + MESSAGE_FIELD_5;
+    writeToFdBuffer(input);
+    Privacy* field5 = create_message_privacy(5, NULL);
+    Privacy* list[] = { create_privacy(1, OTHER_TYPE, LOCAL), field5, NULL };
+    field5->children = list;
+    string expected = "\x2a\x1c" + STRING_FIELD_2 + "\x2a\xd" + STRING_FIELD_2;
+    assertStrip(EXPLICIT, expected, field5);
+}
