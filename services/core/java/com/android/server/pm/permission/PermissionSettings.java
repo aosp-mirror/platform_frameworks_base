@@ -19,6 +19,7 @@ package com.android.server.pm.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageParser;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -62,6 +63,14 @@ public class PermissionSettings {
     @GuardedBy("mLock")
     final ArrayMap<String, BasePermission> mPermissionTrees =
             new ArrayMap<String, BasePermission>();
+
+    /**
+     * All permisson groups know to the system. The mapping is from permission group
+     * name to permission group object.
+     */
+    @GuardedBy("mLock")
+    final ArrayMap<String, PackageParser.PermissionGroup> mPermissionGroups =
+            new ArrayMap<String, PackageParser.PermissionGroup>();
 
     /**
      * Set of packages that request a particular app op. The mapping is from permission
