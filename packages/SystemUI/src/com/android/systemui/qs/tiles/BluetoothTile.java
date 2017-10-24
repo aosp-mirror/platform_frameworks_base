@@ -134,7 +134,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 if (lastDevice != null) {
                     int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        state.icon = new BluetoothBatteryDrawable(batteryLevel,
+                        state.icon = new BluetoothBatteryTileIcon(batteryLevel,
                                 mContext.getResources().getFraction(
                                         R.fraction.bt_battery_scale_fraction, 1, 1));
                     }
@@ -212,15 +212,11 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         return new BluetoothDetailAdapter();
     }
 
-    private class BluetoothBatteryDrawable extends Icon {
+    private class BluetoothBatteryTileIcon extends Icon {
         private int mLevel;
         private float mIconScale;
 
-        BluetoothBatteryDrawable(int level) {
-            this(level, 1 /* iconScale */);
-        }
-
-        BluetoothBatteryDrawable(int level, float iconScale) {
+        BluetoothBatteryTileIcon(int level, float iconScale) {
             mLevel = level;
             mIconScale = iconScale;
         }
@@ -302,15 +298,16 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 for (CachedBluetoothDevice device : devices) {
                     if (mController.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
                     final Item item = new Item();
-                    item.icon = R.drawable.ic_qs_bluetooth_on;
+                    item.iconResId = R.drawable.ic_qs_bluetooth_on;
                     item.line1 = device.getName();
                     item.tag = device;
                     int state = device.getMaxConnectionState();
                     if (state == BluetoothProfile.STATE_CONNECTED) {
-                        item.icon = R.drawable.ic_qs_bluetooth_connected;
+                        item.iconResId = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                            item.iconDrawable = new BluetoothBatteryDrawable(batteryLevel);
+                            item.icon = new BluetoothBatteryTileIcon(batteryLevel,
+                                    1 /* iconScale */);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
                                     Utils.formatPercentage(batteryLevel));
@@ -321,7 +318,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         items.add(connectedDevices, item);
                         connectedDevices++;
                     } else if (state == BluetoothProfile.STATE_CONNECTING) {
-                        item.icon = R.drawable.ic_qs_bluetooth_connecting;
+                        item.iconResId = R.drawable.ic_qs_bluetooth_connecting;
                         item.line2 = mContext.getString(R.string.quick_settings_connecting);
                         items.add(connectedDevices, item);
                     } else {
