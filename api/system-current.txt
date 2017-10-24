@@ -4538,6 +4538,7 @@ package android.webkit {
     method public boolean canInvokeDrawGlFunctor(android.view.View);
     method public void detachDrawGlFunctor(android.view.View, long);
     method public android.app.Application getApplication();
+    method public java.lang.String getDataDirectorySuffix();
     method public java.lang.String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, java.lang.String);
     method public void invokeDrawGlFunctor(android.view.View, long, boolean);

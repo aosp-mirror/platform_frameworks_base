@@ -2075,6 +2075,48 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Define the directory used to store WebView data for the current process.
+     * The provided suffix will be used when constructing data and cache
+     * directory paths. If this API is not called, no suffix will be used.
+     * Each directory can be used by only one process in the application. If more
+     * than one process in an app wishes to use WebView, only one process can use
+     * the default directory, and other processes must call this API to define
+     * a unique suffix.
+     * <p>
+     * This API must be called before any instances of WebView are created in
+     * this process and before any other methods in the android.webkit package
+     * are called by this process.
+     *
+     * @param suffix The directory name suffix to be used for the current
+     *               process. Must not contain a path separator.
+     * @throws IllegalStateException if WebView has already been initialized
+     *                               in the current process.
+     * @throws IllegalArgumentException if the suffix contains a path separator.
+     */
+    public static void setDataDirectorySuffix(String suffix) {
+        WebViewFactory.setDataDirectorySuffix(suffix);
+    }
+
+    /**
+     * Indicate that the current process does not intend to use WebView, and
+     * that an exception should be thrown if a WebView is created or any other
+     * methods in the android.webkit package are used.
+     * <p>
+     * Applications with multiple processes may wish to call this in processes
+     * which are not intended to use WebView to prevent potential data directory
+     * conflicts (see {@link #setDataDirectorySuffix}) and to avoid accidentally
+     * incurring the memory usage of initializing WebView in long-lived
+     * processes which have no need for it.
+     *
+     * @throws IllegalStateException if WebView has already been initialized
+     *                               in the current process.
+     */
+    public static void disableWebView() {
+        WebViewFactory.disableWebView();
+    }
+
+
+    /**
      * @deprecated This was used for Gears, which has been deprecated.
      * @hide
      */
