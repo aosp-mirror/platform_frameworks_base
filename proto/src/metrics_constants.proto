@@ -4573,6 +4573,31 @@ message MetricsEvent {
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
+    // ACTION: Stop an app and turn on background check
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_APP_STOP_AND_BACKGROUND_CHECK = 1233;
+
+    // FIELD: The action type for each anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_ANOMALY_ACTION_TYPE = 1234;
+
+    // OPEN: Settings -> Battery -> Wakelock anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_WAKELOCK = 1235;
+
+    // OPEN: Settings -> Battery -> Wakeup alarm anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_WAKEUP_ALARM = 1236;
+
+    // OPEN: Settings -> Battery -> Unoptimized bt anomaly
+    // CATEGORY: SETTINGS
+    // OS: P
+    ANOMALY_TYPE_UNOPTIMIZED_BT = 1237;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
