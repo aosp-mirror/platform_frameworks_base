@@ -4,7 +4,7 @@ cc_defaults {
         "hwui_static_deps",
         "skia_deps",
         //"hwui_bugreport_font_cache_usage",
-        //"hwui_compile_for_perf",
+        "hwui_compile_for_perf",
         "hwui_pgo",
         "hwui_lto",
     ],
@@ -83,12 +83,18 @@ cc_defaults {
 
 cc_defaults {
     name: "hwui_compile_for_perf",
-    // TODO: Non-arm?
     cflags: [
         "-fno-omit-frame-pointer",
-        "-marm",
-        "-mapcs",
     ],
+
+    arch: {
+        arm: {
+            cflags: ["-marm"],
+        },
+        arm64: {
+            cflags: ["-marm"],
+        },
+    },
 }
 
 cc_defaults {
