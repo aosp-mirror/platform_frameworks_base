@@ -21,6 +21,7 @@ import static android.system.OsConstants.EADDRINUSE;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -174,6 +175,7 @@ public class IpSecServiceTest {
                 mIpSecService.openUdpEncapsulationSocket(0, new Binder());
         assertNotNull(udpEncapResp);
         assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+        assertNotEquals(0, udpEncapResp.port);
         mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
         udpEncapResp.fileDescriptor.close();
     }
