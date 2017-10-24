@@ -25,7 +25,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -445,38 +444,17 @@ public final class WebViewFactory {
         }
     }
 
-    private static int prepareWebViewInSystemServer(String[] nativeLibraryPaths) {
-        if (DEBUG) Log.v(LOGTAG, "creating relro files");
-        int numRelros = 0;
-
-        // We must always trigger createRelRo regardless of the value of nativeLibraryPaths. Any
-        // unexpected values will be handled there to ensure that we trigger notifying any process
-        // waiting on relro creation.
-        if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-            if (DEBUG) Log.v(LOGTAG, "Create 32 bit relro");
-            WebViewLibraryLoader.createRelroFile(false /* is64Bit */, nativeLibraryPaths[0]);
-            numRelros++;
-        }
-
-        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-            if (DEBUG) Log.v(LOGTAG, "Create 64 bit relro");
-            WebViewLibraryLoader.createRelroFile(true /* is64Bit */, nativeLibraryPaths[1]);
-            numRelros++;
-        }
-        return numRelros;
-    }
-
     /**
      * @hide
      */
     public static int onWebViewProviderChanged(PackageInfo packageInfo) {
-        String[] nativeLibs = null;
+        int startedRelroProcesses = 0;
         ApplicationInfo originalAppInfo = new ApplicationInfo(packageInfo.applicationInfo);
         try {
             fixupStubApplicationInfo(packageInfo.applicationInfo,
                                      AppGlobals.getInitialApplication().getPackageManager());
 
-            nativeLibs = WebViewLibraryLoader.updateWebViewZygoteVmSize(packageInfo);
+            startedRelroProcesses = WebViewLibraryLoader.prepareNativeLibraries(packageInfo);
         } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the system server.
             Log.e(LOGTAG, "error preparing webview native library", t);
@@ -484,7 +462,7 @@ public final class WebViewFactory {
 
         WebViewZygote.onWebViewProviderChanged(packageInfo, originalAppInfo);
 
-        return prepareWebViewInSystemServer(nativeLibs);
+        return startedRelroProcesses;
     }
 
     private static String WEBVIEW_UPDATE_SERVICE_NAME = "webviewupdate";
