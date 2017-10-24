@@ -68,9 +68,10 @@ oneway interface IAutoFillManagerClient {
     void requestHideFillUi(int sessionId, in AutofillId id);
 
     /**
-     * Notifies no fill UI will be shown, and also mark the state as finished if necessary.
+     * Notifies no fill UI will be shown, and also mark the state as finished if necessary (if
+     * sessionFinishedState != 0).
      */
-    void notifyNoFillUi(int sessionId, in AutofillId id, boolean sessionFinished);
+    void notifyNoFillUi(int sessionId, in AutofillId id, int sessionFinishedState);
 
     /**
      * Starts the provided intent sender.
