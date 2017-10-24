@@ -20,6 +20,7 @@ import android.net.NetworkCapabilities;
 import android.system.OsConstants;
 import android.util.IntArray;
 import android.util.SparseIntArray;
+
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.TokenBucket;
 
@@ -43,6 +44,8 @@ public class ConnectStats {
     public final TokenBucket mLatencyTb;
     /** Maximum number of latency values recorded. */
     public final int mMaxLatencyRecords;
+    /** Total count of events */
+    public int eventCount = 0;
     /** Total count of successful connects. */
     public int connectCount = 0;
     /** Total count of successful connects done in blocking mode. */
@@ -57,12 +60,15 @@ public class ConnectStats {
         mMaxLatencyRecords = maxLatencyRecords;
     }
 
-    public void addEvent(int errno, int latencyMs, String ipAddr) {
+    boolean addEvent(int errno, int latencyMs, String ipAddr) {
+        eventCount++;
         if (isSuccess(errno)) {
             countConnect(errno, ipAddr);
             countLatency(errno, latencyMs);
+            return true;
         } else {
             countError(errno);
+            return false;
         }
     }
 
@@ -101,7 +107,7 @@ public class ConnectStats {
         return (errno == 0) || isNonBlocking(errno);
     }
 
-    private static boolean isNonBlocking(int errno) {
+    static boolean isNonBlocking(int errno) {
         // On non-blocking TCP sockets, connect() immediately returns EINPROGRESS.
         // On non-blocking TCP sockets that are connecting, connect() immediately returns EALREADY.
         return (errno == EINPROGRESS) || (errno == EALREADY);
@@ -117,6 +123,7 @@ public class ConnectStats {
         for (int t : BitUtils.unpackBits(transports)) {
             builder.append(NetworkCapabilities.transportNameOf(t)).append(", ");
         }
+        builder.append(String.format("%d events, ", eventCount));
         builder.append(String.format("%d success, ", connectCount));
         builder.append(String.format("%d blocking, ", connectBlockingCount));
         builder.append(String.format("%d IPv6 dst", ipv6ConnectCount));
