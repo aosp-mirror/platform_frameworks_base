@@ -34,7 +34,7 @@
          http://smscoin.net/software/engine/WordPress/Paid+SMS-registration/ -->
 
     <!-- Arab Emirates -->
-    <shortcode country="ae" free="3214|1017" />
+    <shortcode country="ae" pattern="\\d{1,5}" free="3214|1017" />
 
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
@@ -126,7 +126,7 @@
     <shortcode country="gr" pattern="\\d{5}" premium="54\\d{3}|19[0-5]\\d{2}" free="116\\d{3}|12115" />
 
     <!-- Croatia -->
-    <shortcode country="hr" free="13062" />
+    <shortcode country="hr" pattern="\\d{1,5}" free="13062" />
 
     <!-- Hungary: 4 or 10 digits starting with 1 or 0, plus EU:
          http://clients.txtnation.com/entries/209633-hungary-premium-sms-short-code-regulations -->
@@ -150,7 +150,7 @@
     <shortcode country="it" pattern="\\d{5}" premium="4\\d{4}" free="116\\d{3}|4112503" standard="43\\d{3}" />
 
     <!-- Japan: 8083 used by SOFTBANK_DCB_2 -->
-    <shortcode country="jp" free="8083" />
+    <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
 
     <!-- Kenya: 5 digits, known premium codes listed -->
     <shortcode country="ke" pattern="\\d{5}" free="21725" />
@@ -199,10 +199,10 @@
     <shortcode country="pe" pattern="\\d{4,5}" free="9963" />
 
     <!-- Philippines -->
-    <shortcode country="ph" free="2147|5495|5496" />
+    <shortcode country="ph" pattern="\\d{1,5}" free="2147|5495|5496" />
 
     <!-- Pakistan -->
-    <shortcode country="pk" free="2057" />
+    <shortcode country="pk" pattern="\\d{1,5}" free="2057" />
 
     <!-- Poland: 4-5 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="pl" pattern="\\d{4,5}" premium="74240|79(?:10|866)|92525" free="116\\d{3}|8012|80921" />
@@ -224,7 +224,7 @@
     <shortcode country="ru" pattern="\\d{4}" premium="1(?:1[56]1|899)|2(?:09[57]|322|47[46]|880|990)|3[589]33|4161|44(?:4[3-9]|81)|77(?:33|81)|8424" free="6954|8501" standard="2037|2044"/>
 
     <!-- Saudi Arabia -->
-    <shortcode country="sa" free="8145" />
+    <shortcode country="sa" pattern="\\d{1,5}" free="8145" />
 
     <!-- Sweden: 5 digits (72xxx), plus EU: http://www.viatel.se/en/premium-sms/ -->
     <shortcode country="se" premium="72\\d{3}" free="116\\d{3}" />
@@ -240,13 +240,13 @@
     <shortcode country="sk" premium="\\d{4}" free="116\\d{3}|8000" />
 
     <!-- Thailand: 4186001 used by AIS_TH_DCB -->
-    <shortcode country="th" free="4186001" />
+    <shortcode country="th" pattern="\\d{1,5}" free="4186001" />
 
     <!-- Tajikistan: 4 digits, known premium codes listed -->
     <shortcode country="tj" pattern="\\d{4}" premium="11[3-7]1|4161|4333|444[689]" />
 
     <!-- Turkey -->
-    <shortcode country="tr" free="7529|5528|6493" />
+    <shortcode country="tr" pattern="\\d{1,5}" free="7529|5528|6493" />
 
     <!-- Ukraine: 4 digits, known premium codes listed -->
     <shortcode country="ua" pattern="\\d{4}" premium="444[3-9]|70[579]4|7540" />
