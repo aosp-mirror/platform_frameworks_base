@@ -6129,6 +6129,8 @@ public class Notification implements Parcelable
                 // Let's add the conversationTitle in case we didn't have one before and all
                 // messages are from the same sender
                 conversationTitle = createConversationTitleFromMessages();
+            } else if (hasOnlyWhiteSpaceSenders()) {
+                isOneToOne = true;
             }
             boolean hasTitle = !TextUtils.isEmpty(conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
@@ -6145,6 +6147,35 @@ public class Notification implements Parcelable
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",
                     mBuilder.mN.extras);
             return contentView;
+        }
+
+        private boolean hasOnlyWhiteSpaceSenders() {
+            for (int i = 0; i < mMessages.size(); i++) {
+                Message m = mMessages.get(i);
+                CharSequence sender = m.getSender();
+                if (!isWhiteSpace(sender)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean isWhiteSpace(CharSequence sender) {
+            if (TextUtils.isEmpty(sender)) {
+                return true;
+            }
+            if (sender.toString().matches("^\\s*$")) {
+                return true;
+            }
+            // Let's check if we only have 0 whitespace chars. Some apps did this as a workaround
+            // For the presentation that we had.
+            for (int i = 0; i < sender.length(); i++) {
+                char c = sender.charAt(i);
+                if (c != '\u200B') {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private CharSequence createConversationTitleFromMessages() {
