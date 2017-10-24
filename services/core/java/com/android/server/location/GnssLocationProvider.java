@@ -669,9 +669,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         for (String item : configValues) {
             if (DEBUG) Log.d(TAG, "GpsParamsResource: " + item);
             // We need to support "KEY =", but not "=VALUE".
-            String[] split = item.split("=");
-            if (split.length == 2) {
-                properties.setProperty(split[0].trim().toUpperCase(), split[1]);
+            int index = item.indexOf("=");
+            if (index > 0 && index + 1 < item.length()) {
+                String key = item.substring(0, index);
+                String value = item.substring(index + 1);
+                properties.setProperty(key.trim().toUpperCase(), value);
             } else {
                 Log.w(TAG, "malformed contents: " + item);
             }
