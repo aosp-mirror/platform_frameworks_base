@@ -46,10 +46,10 @@ interface IStatsCompanionService {
       * Uses AlarmManager.setRepeating API, so if the timestamp is in past, alarm fires immediately,
       * and alarm is inexact.
       */
-    oneway void setPollingAlarms(long timestampMs, long intervalMs);
+    oneway void setPullingAlarms(long timestampMs, long intervalMs);
 
     /** Cancel any repeating polling alarm. */
-    oneway void cancelPollingAlarms();
+    oneway void cancelPullingAlarms();
 
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);

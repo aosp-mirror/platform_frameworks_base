@@ -14,38 +14,79 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_STATSPULLERMANAGER_H
-#define STATSD_STATSPULLERMANAGER_H
+#pragma once
 
+#include <android/os/IStatsCompanionService.h>
+#include <binder/IServiceManager.h>
+#include <utils/RefBase.h>
 #include <utils/String16.h>
+#include <utils/String8.h>
+#include <utils/threads.h>
+#include <string>
 #include <unordered_map>
-#include "external/StatsPuller.h"
+#include <vector>
+#include "PullDataReceiver.h"
+#include "StatsPuller.h"
 #include "logd/LogEvent.h"
-#include "matchers/matcher_util.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-const static int KERNEL_WAKELOCKS = 1;
-
 class StatsPullerManager : public virtual RefBase {
 public:
-    // Enums of pulled data types (pullCodes)
-    // These values must be kept in sync with com/android/server/stats/StatsCompanionService.java.
-    // TODO: pull the constant from stats_events.proto instead
-    const static int KERNEL_WAKELOCKS;
-    StatsPullerManager();
+    static StatsPullerManager& GetInstance();
+
+    void RegisterReceiver(int pullCode, sp<PullDataReceiver> receiver, long intervalMs);
+
+    void UnRegisterReceiver(int pullCode, sp<PullDataReceiver> receiver);
 
     // We return a vector of shared_ptr since LogEvent's copy constructor is not available.
-    vector<std::shared_ptr<LogEvent>> Pull(const int pullCode);
+    vector<std::shared_ptr<LogEvent>> Pull(const int pullCode, const uint64_t timestampSec);
+
+    // Translate metric name to pullCodes.
+    // return -1 if no valid pullCode is found
+    int GetPullCode(std::string metricName);
+
+    void OnAlarmFired();
 
 private:
-    std::unordered_map<int, std::unique_ptr<StatsPuller>> mStatsPullers;
+    StatsPullerManager();
+
+    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+
+    sp<IStatsCompanionService> get_stats_companion_service();
+
+    std::unordered_map<int, std::unique_ptr<StatsPuller>> mPullers;
+
+
+
+      // internal state of a bucket.
+      typedef struct {
+        // pull_interval_sec : last_pull_time_sec
+        std::pair<uint64_t, uint64_t> timeInfo;
+        sp<PullDataReceiver> receiver;
+      } ReceiverInfo;
+
+    std::map<int, std::vector<ReceiverInfo>> mReceivers;
+
+    Mutex mReceiversLock;
+
+    long mCurrentPullingInterval;
+
+    // for value metrics, it is important for the buckets to be aligned to multiple of smallest
+    // bucket size. All pulled metrics start pulling based on this time, so that they can be
+    // correctly attributed to the correct buckets. Pulled data attach a timestamp which is the
+    // request time.
+    const long mPullStartTimeMs;
+
+    long get_pull_start_time_ms();
+
+    LogEvent parse_pulled_data(String16 data);
+
+    static const std::unordered_map<std::string, int> kPullCodes;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATSD_STATSPULLERMANAGER_H

@@ -139,6 +139,9 @@ static StatsdConfig build_fake_config() {
     int UID_PROCESS_STATE_TAG_ID = 27;
     int UID_PROCESS_STATE_UID_KEY = 1;
 
+    int KERNEL_WAKELOCK_TAG_ID = 41;
+    int KERNEL_WAKELOCK_NAME_KEY = 4;
+
     // Count Screen ON events.
     CountMetric* metric = config.add_count_metric();
     metric->set_metric_id(1);
@@ -227,6 +230,17 @@ static StatsdConfig build_fake_config() {
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_type(DurationMetric_AggregationType_DURATION_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
+
+    // Value metric to count KERNEL_WAKELOCK when screen turned on
+    ValueMetric* valueMetric = config.add_value_metric();
+    valueMetric->set_metric_id(6);
+    valueMetric->set_what("KERNEL_WAKELOCK");
+    valueMetric->set_value_field(1);
+    valueMetric->set_condition("SCREEN_IS_ON");
+    keyMatcher = valueMetric->add_dimension();
+    keyMatcher->set_key(KERNEL_WAKELOCK_NAME_KEY);
+    // This is for testing easier. We should never set bucket size this small.
+    valueMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
     // Add an EventMetric to log process state change events.
     EventMetric* eventMetric = config.add_event_metric();

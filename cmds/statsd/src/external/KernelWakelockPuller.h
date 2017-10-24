@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_KERNELWAKELOCKPULLER_H
-#define STATSD_KERNELWAKELOCKPULLER_H
+#pragma once
 
 #include <utils/String16.h>
-#include "external/StatsPuller.h"
+#include "StatsPuller.h"
 
 namespace android {
 namespace os {
@@ -29,11 +28,9 @@ public:
     // a number of stats need to be pulled from StatsCompanionService
     //
     const static int PULL_CODE_KERNEL_WAKELOCKS;
-    vector<StatsLogEventWrapper> pull() override;
+    vector<StatsLogEventWrapper> Pull() override;
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATSD_KERNELWAKELOCKPULLER_H

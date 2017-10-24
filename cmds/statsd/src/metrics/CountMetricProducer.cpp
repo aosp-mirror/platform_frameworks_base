@@ -135,7 +135,7 @@ void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint
 void CountMetricProducer::onMatchedLogEventInternal(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event) {
+        const LogEvent& event, bool scheduledPull) {
     uint64_t eventTimeNs = event.GetTimestampNs();
 
     flushCounterIfNeeded(eventTimeNs);

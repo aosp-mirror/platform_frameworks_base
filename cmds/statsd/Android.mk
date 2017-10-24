@@ -44,6 +44,7 @@ statsd_common_src := \
     src/metrics/DurationMetricProducer.cpp \
     src/metrics/duration_helper/OringDurationTracker.cpp \
     src/metrics/duration_helper/MaxDurationTracker.cpp \
+    src/metrics/ValueMetricProducer.cpp \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \

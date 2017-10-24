@@ -70,6 +70,7 @@ message StatsEvent {
         WifiScanStateChanged wifi_scan_state_changed = 39;
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
+        KernelWakelockPulled kernel_wakelock_pulled = 42;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -678,4 +679,17 @@ message SettingChanged {
 
     // The user ID associated. Defined in android/os/UserHandle.java
     optional int32 user = 7;
+}
+
+/*
+ * Pulls kernel wakelock changes.
+ *
+ * Pulled from:
+  *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message KernelWakelockPulled {
+    optional int32 count = 1;
+    optional int32 version = 2;
+    optional int64 total_time = 3;
+    optional string name = 4;
 }

@@ -16,11 +16,13 @@
 
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
+#include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
 #include "CountMetricProducer.h"
 #include "DurationMetricProducer.h"
 #include "EventMetricProducer.h"
+#include "ValueMetricProducer.h"
 #include "stats_util.h"
 
 using std::set;
@@ -192,6 +194,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     const int allMetricsCount =
             config.count_metric_size() + config.duration_metric_size() + config.event_metric_size();
     allMetricProducers.reserve(allMetricsCount);
+    StatsPullerManager& statsPullerManager = StatsPullerManager::GetInstance();
 
     // Build MetricProducers for each metric defined in config.
     // (1) build CountMetricProducer
@@ -307,6 +310,34 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         allMetricProducers.push_back(eventMetric);
     }
 
+    // value metrics
+    for (int i = 0; i < config.value_metric_size(); i++) {
+        const ValueMetric& metric = config.value_metric(i);
+        if (!metric.has_what()) {
+            ALOGW("cannot find what in ValueMetric %lld", metric.metric_id());
+            return false;
+        }
+
+        int pullCode = statsPullerManager.GetPullCode(metric.what());
+        if (pullCode == -1) {
+            ALOGW("cannot find %s in pulled metrics", metric.what().c_str());
+            return false;
+        }
+
+        sp<MetricProducer> valueProducer;
+        auto condition_it = conditionTrackerMap.find(metric.condition());
+        if (condition_it == conditionTrackerMap.end()) {
+            ALOGW("cannot find the Condition %s in the config", metric.condition().c_str());
+            return false;
+        }
+        int metricIndex = allMetricProducers.size();
+        valueProducer = new ValueMetricProducer(metric, condition_it->second, wizard);
+        // will create new vector if not exist before.
+        auto& metricList = conditionToMetricMap[condition_it->second];
+        metricList.push_back(metricIndex);
+
+        allMetricProducers.push_back(valueProducer);
+    }
     return true;
 }
 

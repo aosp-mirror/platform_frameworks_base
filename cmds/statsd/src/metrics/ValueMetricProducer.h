@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-#ifndef COUNT_METRIC_PRODUCER_H
-#define COUNT_METRIC_PRODUCER_H
+#pragma once
 
-#include <unordered_map>
-
+#include <utils/threads.h>
+#include <list>
 #include "../condition/ConditionTracker.h"
-#include "../matchers/matcher_util.h"
+#include "../external/PullDataReceiver.h"
+#include "../external/StatsPullerManager.h"
 #include "CountAnomalyTracker.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "stats_util.h"
-
-using namespace std;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class CountMetricProducer : public MetricProducer {
+class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
-    CountMetricProducer(const CountMetric& countMetric, const int conditionIndex,
+    ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
                         const sp<ConditionWizard>& wizard);
 
-    virtual ~CountMetricProducer();
+    virtual ~ValueMetricProducer();
 
-    void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
+    void onConditionChanged(const bool condition, const uint64_t eventTime) override;
 
     void finish() override;
 
     StatsLogReport onDumpReport() override;
 
-    void onSlicedConditionMayChange(const uint64_t eventTime) override;
+    void onSlicedConditionMayChange(const uint64_t eventTime);
 
-    size_t byteSize() override;
+    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
+    // TODO: Implement this later.
+    size_t byteSize() override{return 0;};
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -63,20 +61,32 @@ protected:
                                    bool scheduledPull) override;
 
 private:
-    const CountMetric mMetric;
+    const ValueMetric mMetric;
+
+    StatsPullerManager& mStatsPullerManager = StatsPullerManager::GetInstance();
+
+    Mutex mLock;
+
+    const int mPullCode;
+
+    // internal state of a bucket.
+    typedef struct {
+        std::vector<std::pair<long, long>> raw;
+    } Interval;
+
+    std::unordered_map<HashableDimensionKey, Interval> mCurrentSlicedBucket;
+    // If condition is true and pulling on schedule, the previous bucket value needs to be carried
+    // over to the next bucket.
+    std::unordered_map<HashableDimensionKey, Interval> mNextSlicedBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<HashableDimensionKey, std::vector<CountBucketInfo>> mPastBuckets;
+    std::unordered_map<HashableDimensionKey, std::vector<ValueBucketInfo>> mPastBuckets;
 
-    // The current bucket.
-    std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
+    long get_value(const LogEvent& event);
 
-    vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
-
-    void flushCounterIfNeeded(const uint64_t newEventTime);
+    void flush_if_needed(const uint64_t eventTimeNs);
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-#endif  // COUNT_METRIC_PRODUCER_H

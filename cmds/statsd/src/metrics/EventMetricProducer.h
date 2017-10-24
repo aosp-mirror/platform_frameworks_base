@@ -41,7 +41,7 @@ public:
 
     void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
                                    const std::map<std::string, HashableDimensionKey>& conditionKey,
-                                   bool condition, const LogEvent& event) override;
+                                   bool condition, const LogEvent& event, bool scheduledPull) override;
 
     void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 

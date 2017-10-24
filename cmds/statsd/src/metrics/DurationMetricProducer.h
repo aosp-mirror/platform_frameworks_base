@@ -62,7 +62,8 @@ public:
 protected:
     void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
                                    const std::map<std::string, HashableDimensionKey>& conditionKeys,
-                                   bool condition, const LogEvent& event) override;
+                                   bool condition, const LogEvent& event,
+                                   bool scheduledPull) override;
 
 private:
     const DurationMetric mMetric;

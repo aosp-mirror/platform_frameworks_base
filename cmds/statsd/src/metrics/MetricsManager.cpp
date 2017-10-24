@@ -145,7 +145,8 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
             if (pair != mTrackerToMetricMap.end()) {
                 auto& metricList = pair->second;
                 for (const int metricIndex : metricList) {
-                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event);
+                    // pushed metrics are never scheduled pulls
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event, false);
                 }
             }
         }
