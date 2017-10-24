@@ -22,6 +22,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -167,6 +168,7 @@ public final class JobStatus {
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
+    public Network network;
 
     public int lastEvaluatedPriority;
 
@@ -1100,6 +1102,9 @@ public final class JobStatus {
                     pw.print(prefix); pw.print("  "); pw.println(changedUris.valueAt(i));
                 }
             }
+        }
+        if (network != null) {
+            pw.print(prefix); pw.print("Network: "); pw.println(network);
         }
         if (pendingWork != null && pendingWork.size() > 0) {
             pw.print(prefix); pw.println("Pending work:");

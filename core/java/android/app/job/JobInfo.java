@@ -909,12 +909,21 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set some description of the kind of network type your job needs to have.
-         * Not calling this function means the network is not necessary, as the default is
-         * {@link #NETWORK_TYPE_NONE}.
-         * Bear in mind that calling this function defines network as a strict requirement for your
-         * job. If the network requested is not available your job will never run. See
-         * {@link #setOverrideDeadline(long)} to change this behaviour.
+         * Set some description of the kind of network type your job needs to
+         * have. Not calling this function means the network is not necessary,
+         * as the default is {@link #NETWORK_TYPE_NONE}. Bear in mind that
+         * calling this function defines network as a strict requirement for
+         * your job. If the network requested is not available your job will
+         * never run. See {@link #setOverrideDeadline(long)} to change this
+         * behaviour.
+         * <p class="note">
+         * Note: When your job executes in
+         * {@link JobService#onStartJob(JobParameters)}, be sure to use the
+         * specific network returned by {@link JobParameters#getNetwork()},
+         * otherwise you'll use the default network which may not meet this
+         * constraint.
+         *
+         * @see JobParameters#getNetwork()
          */
         public Builder setRequiredNetworkType(@NetworkType int networkType) {
             mNetworkType = networkType;

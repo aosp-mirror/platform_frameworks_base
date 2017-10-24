@@ -125,6 +125,11 @@ public final class ConnectivityController extends StateController implements
         changed |= jobStatus.setUnmeteredConstraintSatisfied(unmetered);
         changed |= jobStatus.setNotRoamingConstraintSatisfied(notRoaming);
 
+        // Pass along the evaluated network for job to use; prevents race
+        // conditions as default routes change over time, and opens the door to
+        // using non-default routes.
+        jobStatus.network = network;
+
         // Track system-uid connected/validated as a general reportable proxy for the
         // overall state of connectivity constraint satisfiability.
         if (jobUid == Process.SYSTEM_UID) {
