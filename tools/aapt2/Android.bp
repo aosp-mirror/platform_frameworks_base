@@ -170,7 +170,7 @@ cc_test_host {
         "test/Builders.cpp",
         "test/Common.cpp",
         "**/*_test.cpp",
-    ],
+    ] + toolSources,
     static_libs: [
         "libaapt2",
         "libgmock",
