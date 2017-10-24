@@ -16,23 +16,24 @@
 
 package android.telephony;
 
-import android.os.Binder;
-import android.os.Parcel;
+import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
+
+import android.annotation.StringDef;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.SubmitPduBase;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
 
-import java.lang.Math;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 
 /**
@@ -81,15 +82,18 @@ public class SmsMessage {
      */
     public static final int MAX_USER_DATA_SEPTETS_WITH_HEADER = 153;
 
+    /** @hide */
+    @StringDef({FORMAT_3GPP, FORMAT_3GPP2})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Format {}
+
     /**
      * Indicates a 3GPP format SMS message.
-     * @hide pending API council approval
      */
     public static final String FORMAT_3GPP = "3gpp";
 
     /**
      * Indicates a 3GPP2 format SMS message.
-     * @hide pending API council approval
      */
     public static final String FORMAT_3GPP2 = "3gpp2";
 
