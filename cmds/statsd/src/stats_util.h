@@ -30,6 +30,14 @@ namespace statsd {
 #define MATCHER_NOT_FOUND -2
 #define NANO_SECONDS_IN_A_SECOND (1000 * 1000 * 1000)
 
+// TODO: Remove the following constants once they are exposed in ProtOutputStream.h
+const uint64_t FIELD_TYPE_SHIFT = 32;
+const uint64_t TYPE_MESSAGE = 11ULL << FIELD_TYPE_SHIFT;
+const uint64_t TYPE_INT64 = 3ULL << FIELD_TYPE_SHIFT;
+const uint64_t TYPE_INT32 = 5ULL << FIELD_TYPE_SHIFT;
+const uint64_t TYPE_FLOAT = 2ULL << FIELD_TYPE_SHIFT;
+const uint64_t TYPE_STRING = 9ULL << FIELD_TYPE_SHIFT;
+
 typedef std::string HashableDimensionKey;
 
 EventMetricData parse(log_msg msg);

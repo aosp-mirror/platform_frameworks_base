@@ -22,7 +22,6 @@
 
 #include "../condition/ConditionTracker.h"
 #include "../matchers/LogMatchingTracker.h"
-#include "CountMetricProducer.h"
 
 namespace android {
 namespace os {
@@ -90,8 +89,6 @@ bool initStatsdConfig(const StatsdConfig& config, std::set<int>& allTagIds,
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap);
-
-int getTrackerIndex(const std::string& name, const std::unordered_map<string, int>& logTrackerMap);
 
 }  // namespace statsd
 }  // namespace os

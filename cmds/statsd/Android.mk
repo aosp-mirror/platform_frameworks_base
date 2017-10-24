@@ -38,6 +38,7 @@ statsd_common_src := \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/CountAnomalyTracker.cpp \
     src/metrics/MetricProducer.cpp \
+    src/metrics/EventMetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
     src/metrics/DurationMetricProducer.cpp \
     src/metrics/MetricsManager.cpp \
@@ -65,7 +66,8 @@ statsd_common_shared_libraries := \
     libselinux \
     libutils \
     libservices \
-    libandroidfw
+    libandroidfw \
+    libprotoutil
 
 # =========
 # statsd
