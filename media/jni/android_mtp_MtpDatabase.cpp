@@ -949,6 +949,7 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
                         outThumbSize = image_data.thumbnail.length;
                     } else {
                         free(result);
+                        result = NULL;
                     }
                 }
                 break;
