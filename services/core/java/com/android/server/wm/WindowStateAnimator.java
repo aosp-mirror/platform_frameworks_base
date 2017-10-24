@@ -25,7 +25,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.AppWindowAnimator.sDummyAnimation;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
@@ -242,17 +241,12 @@ class WindowStateAnimator {
         return mWin.isAnimating();
     }
 
-    /** Is the window animating the DummyAnimation? */
-    boolean isDummyAnimation() {
-        return mAppAnimator != null
-                && mAppAnimator.animation == sDummyAnimation;
-    }
-
     /**
      * Is this window currently waiting to run an opening animation?
      */
     boolean isWaitingForOpening() {
-        return mService.mAppTransition.isTransitionSet() && isDummyAnimation()
+        return mService.mAppTransition.isTransitionSet()
+                && (mWin.mAppToken != null && mWin.mAppToken.isHidden())
                 && mService.mOpeningApps.contains(mWin.mAppToken);
     }
 
@@ -423,7 +417,7 @@ class WindowStateAnimator {
             return;
         }
 
-        if (mWin.mAppToken.mAppAnimator.animation == null) {
+        if (!mWin.mAppToken.isSelfAnimating()) {
             mWin.mAppToken.clearAllDrawn();
         } else {
             // Currently animating, persist current state of allDrawn until animation
@@ -914,12 +908,13 @@ class WindowStateAnimator {
     }
 
     private int resolveStackClip() {
-        // App animation overrides window animation stack clip mode.
+        // TODO
+        /*// App animation overrides window animation stack clip mode.
         if (mAppAnimator != null && mAppAnimator.animation != null) {
             return mAppAnimator.getStackClip();
-        } else {
+        } else {*/
             return STACK_CLIP_AFTER_ANIM;
-        }
+        //}
     }
 
     private boolean shouldCropToStackBounds() {

@@ -63,7 +63,7 @@ class WindowToken extends WindowContainer<WindowState> {
     boolean paused = false;
 
     // Should this token's windows be hidden?
-    boolean hidden;
+    private boolean mHidden;
 
     // Temporary for finding which tokens no longer have visible windows.
     boolean hasVisible;
@@ -112,6 +112,16 @@ class WindowToken extends WindowContainer<WindowState> {
         onDisplayChanged(dc);
     }
 
+    void setHidden(boolean hidden) {
+        if (hidden != mHidden) {
+            mHidden = hidden;
+        }
+    }
+
+    boolean isHidden() {
+        return mHidden;
+    }
+
     void removeAllWindowsIfPossible() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState win = mChildren.get(i);
@@ -130,7 +140,7 @@ class WindowToken extends WindowContainer<WindowState> {
         // This token is exiting, so allow it to be removed when it no longer contains any windows.
         mPersistOnEmpty = false;
 
-        if (hidden) {
+        if (mHidden) {
             return;
         }
 
@@ -146,7 +156,7 @@ class WindowToken extends WindowContainer<WindowState> {
             changed |= win.onSetAppExiting();
         }
 
-        hidden = true;
+        setHidden(true);
 
         if (changed) {
             mService.mWindowPlacerLocked.performSurfacePlacement();
@@ -274,10 +284,11 @@ class WindowToken extends WindowContainer<WindowState> {
         proto.end(token);
     }
 
-    void dump(PrintWriter pw, String prefix) {
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("windows="); pw.println(mChildren);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
-                pw.print(" hidden="); pw.print(hidden);
+                pw.print(" hidden="); pw.print(mHidden);
                 pw.print(" hasVisible="); pw.println(hasVisible);
         if (waitingToShow || sendingToBottom) {
             pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);

@@ -2126,14 +2126,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
             @Override
             public int onAppTransitionStartingLocked(int transit, IBinder openToken,
-                    IBinder closeToken,
-                    Animation openAnimation, Animation closeAnimation) {
-                return handleStartTransitionForKeyguardLw(transit, openAnimation);
+                    IBinder closeToken, long duration, long statusBarAnimationStartTime,
+                    long statusBarAnimationDuration) {
+                return handleStartTransitionForKeyguardLw(transit, duration);
             }
 
             @Override
             public void onAppTransitionCancelledLocked(int transit) {
-                handleStartTransitionForKeyguardLw(transit, null /* transit */);
+                handleStartTransitionForKeyguardLw(transit, 0 /* duration */);
             }
         });
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
@@ -3989,7 +3989,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private int handleStartTransitionForKeyguardLw(int transit, @Nullable Animation anim) {
+    private int handleStartTransitionForKeyguardLw(int transit, long duration) {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
@@ -4000,13 +4000,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (AppTransition.isKeyguardGoingAwayTransit(transit)) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
-            final long startTime = anim != null
-                    ? SystemClock.uptimeMillis() + anim.getStartOffset()
-                    : SystemClock.uptimeMillis();
-            final long duration = anim != null
-                    ? anim.getDuration()
-                    : 0;
-            startKeyguardExitAnimation(startTime, duration);
+            startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }
         return 0;
     }

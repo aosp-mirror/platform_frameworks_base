@@ -361,14 +361,9 @@ class WindowSurfacePlacer {
 
         mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
 
-        final AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
-                topOpeningApp.mAppAnimator;
-        final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
-                topClosingApp.mAppAnimator;
-
         final int flags = mService.mAppTransition.getTransitFlags();
-        int layoutRedo = mService.mAppTransition.goodToGo(transit, openingAppAnimator,
-                closingAppAnimator, mService.mOpeningApps, mService.mClosingApps);
+        int layoutRedo = mService.mAppTransition.goodToGo(transit, topOpeningApp,
+                topClosingApp, mService.mOpeningApps, mService.mClosingApps);
         handleNonAppWindowsInTransition(transit, flags);
         mService.mAppTransition.postAnimationCallback();
         mService.mAppTransition.clear();
@@ -408,11 +403,6 @@ class WindowSurfacePlacer {
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
 
-            if (!appAnimator.usingTransferredAnimation) {
-                appAnimator.clearThumbnail();
-                appAnimator.setNullAnimation();
-            }
-
             if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)){
                 // This token isn't going to be animating. Add it to the list of tokens to
                 // be notified of app transition complete since the notification will not be
@@ -426,13 +416,12 @@ class WindowSurfacePlacer {
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             mService.openSurfaceTransaction();
             try {
-                appAnimator.showAllWindowsLocked();
+                wtoken.showAllWindowsLocked();
             } finally {
                 mService.closeSurfaceTransaction("handleAppTransitionReadyLocked");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
             }
-            mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
             if (animLp != null) {
                 final int layer = wtoken.getHighestAnimLayer();
@@ -455,10 +444,7 @@ class WindowSurfacePlacer {
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
 
-            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
-            appAnimator.clearThumbnail();
-            appAnimator.setNullAnimation();
             // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
             //       animating?
             wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
@@ -474,7 +460,6 @@ class WindowSurfacePlacer {
                     && wtoken.getController() != null) {
                 wtoken.getController().removeStartingWindow();
             }
-            mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
             if (animLp != null) {
                 int layer = wtoken.getHighestAnimLayer();
@@ -661,22 +646,19 @@ class WindowSurfacePlacer {
             final WindowState win = mService.getDefaultDisplayContentLocked().findFocusedWindow();
             if (win != null) {
                 final AppWindowToken wtoken = win.mAppToken;
-                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
                 if (DEBUG_APP_TRANSITIONS)
                     Slog.v(TAG, "Now animating app in place " + wtoken);
-                appAnimator.clearThumbnail();
-                appAnimator.setNullAnimation();
-                mService.updateTokenInPlaceLocked(wtoken, transit);
+                wtoken.cancelAnimation();
+                wtoken.applyAnimationLocked(null, transit, false, false);
                 wtoken.updateReportedVisibilityLocked();
-                mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-                appAnimator.showAllWindowsLocked();
+                wtoken.showAllWindowsLocked();
             }
         }
     }
 
     private void createThumbnailAppAnimator(int transit, AppWindowToken appToken) {
         AppWindowAnimator openingAppAnimator = (appToken == null) ? null : appToken.mAppAnimator;
-        if (openingAppAnimator == null || openingAppAnimator.animation == null) {
+        if (appToken == null || !appToken.isSelfAnimating()) {
             return;
         }
         final int taskId = appToken.getTask().mTaskId;
@@ -752,7 +734,7 @@ class WindowSurfacePlacer {
         } catch (Surface.OutOfResourcesException e) {
             Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w="
                     + dirty.width() + " h=" + dirty.height(), e);
-            openingAppAnimator.clearThumbnail();
+            appToken.clearThumbnail();
         }
     }
 

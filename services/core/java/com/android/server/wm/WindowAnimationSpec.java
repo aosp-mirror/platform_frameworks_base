@@ -16,11 +16,17 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
+
 import android.graphics.Point;
+import android.os.SystemClock;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
@@ -61,6 +67,63 @@ public class WindowAnimationSpec implements AnimationSpec {
         tmp.transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
         t.setMatrix(leash, tmp.transformation.getMatrix(), tmp.floats);
         t.setAlpha(leash, tmp.transformation.getAlpha());
+        t.setWindowCrop(leash, tmp.transformation.getClipRect());
+    }
+
+    @Override
+    public long calculateStatusBarTransitionStartTime() {
+        TranslateAnimation openTranslateAnimation = findTranslateAnimation(mAnimation);
+        if (openTranslateAnimation != null) {
+
+            // Some interpolators are extremely quickly mostly finished, but not completely. For
+            // our purposes, we need to find the fraction for which ther interpolator is mostly
+            // there, and use that value for the calculation.
+            float t = findAlmostThereFraction(openTranslateAnimation.getInterpolator());
+            return SystemClock.uptimeMillis()
+                    + openTranslateAnimation.getStartOffset()
+                    + (long)(openTranslateAnimation.getDuration() * t)
+                    - STATUS_BAR_TRANSITION_DURATION;
+        } else {
+            return SystemClock.uptimeMillis();
+        }
+    }
+
+    /**
+     * Tries to find a {@link TranslateAnimation} inside the {@code animation}.
+     *
+     * @return the found animation, {@code null} otherwise
+     */
+    private static TranslateAnimation findTranslateAnimation(Animation animation) {
+        if (animation instanceof TranslateAnimation) {
+            return (TranslateAnimation) animation;
+        } else if (animation instanceof AnimationSet) {
+            AnimationSet set = (AnimationSet) animation;
+            for (int i = 0; i < set.getAnimations().size(); i++) {
+                Animation a = set.getAnimations().get(i);
+                if (a instanceof TranslateAnimation) {
+                    return (TranslateAnimation) a;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Binary searches for a {@code t} such that there exists a {@code -0.01 < eps < 0.01} for which
+     * {@code interpolator(t + eps) > 0.99}.
+     */
+    private static float findAlmostThereFraction(Interpolator interpolator) {
+        float val = 0.5f;
+        float adj = 0.25f;
+        while (adj >= 0.01f) {
+            if (interpolator.getInterpolation(val) < 0.99f) {
+                val += adj;
+            } else {
+                val -= adj;
+            }
+            adj /= 2;
+        }
+        return val;
     }
 
     private static class TmpValues {

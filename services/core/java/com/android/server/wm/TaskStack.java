@@ -1284,7 +1284,8 @@ public class TaskStack extends WindowContainer<Task> implements
         proto.end(token);
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    @Override
+     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.println(prefix + "mStackId=" + mStackId);
         pw.println(prefix + "mDeferRemoval=" + mDeferRemoval);
         pw.println(prefix + "mBounds=" + getRawBounds().toShortString());
@@ -1300,7 +1301,7 @@ public class TaskStack extends WindowContainer<Task> implements
             pw.println(prefix + "mAdjustedBounds=" + mAdjustedBounds.toShortString());
         }
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).dump(prefix + "  ", pw);
+            mChildren.get(taskNdx).dump(pw, prefix + "  ", dumpAll);
         }
         if (mAnimationBackgroundSurfaceIsShown) {
             pw.println(prefix + "mWindowAnimationBackgroundSurface is shown");
@@ -1313,7 +1314,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 pw.print("  Exiting App #"); pw.print(i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
-                token.dump(pw, "    ");
+                token.dump(pw, "    ", dumpAll);
             }
         }
     }
@@ -1651,35 +1652,6 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         return super.checkCompleteDeferredRemoval();
-    }
-
-    void stepAppWindowsAnimation(long currentTime) {
-        super.stepAppWindowsAnimation(currentTime);
-
-        // TODO: Why aren't we just using the loop above for this? mAppAnimator.animating isn't set
-        // below but is set in the loop above. See if it really matters...
-
-        // Clear before using.
-        mTmpAppTokens.clear();
-        // We copy the list as things can be removed from the exiting token list while we are
-        // processing.
-        mTmpAppTokens.addAll(mExitingAppTokens);
-        for (int i = 0; i < mTmpAppTokens.size(); i++) {
-            final AppWindowAnimator appAnimator = mTmpAppTokens.get(i).mAppAnimator;
-            appAnimator.wasAnimating = appAnimator.animating;
-            if (appAnimator.stepAnimationLocked(currentTime)) {
-                mService.mAnimator.setAnimating(true);
-                mService.mAnimator.mAppWindowAnimating = true;
-            } else if (appAnimator.wasAnimating) {
-                // stopped animating, do one more pass through the layout
-                appAnimator.mAppToken.setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
-                        "exiting appToken " + appAnimator.mAppToken + " done");
-                if (DEBUG_ANIM) Slog.v(TAG_WM,
-                        "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
-            }
-        }
-        // Clear to avoid holding reference to tokens.
-        mTmpAppTokens.clear();
     }
 
     @Override

@@ -16,12 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -56,7 +53,7 @@ class WallpaperWindowToken extends WindowToken {
             final WindowState wallpaper = mChildren.get(j);
             wallpaper.hideWallpaperWindow(wasDeferred, reason);
         }
-        hidden = true;
+        setHidden(true);
     }
 
     void sendWindowWallpaperCommand(
@@ -92,8 +89,9 @@ class WallpaperWindowToken extends WindowToken {
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        if (hidden == visible) {
-            hidden = !visible;
+        if (isHidden() == visible) {
+            setHidden(!visible);
+
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -121,10 +119,10 @@ class WallpaperWindowToken extends WindowToken {
 
     void updateWallpaperWindows(boolean visible, int animLayerAdj) {
 
-        if (hidden == visible) {
+        if (isHidden() == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
                     "Wallpaper token " + token + " hidden=" + !visible);
-            hidden = !visible;
+            setHidden(!visible);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }

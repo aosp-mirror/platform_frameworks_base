@@ -118,8 +118,11 @@ public abstract class WindowManagerInternal {
          *                of AppTransition.TRANSIT_* values
          * @param openToken the token for the opening app
          * @param closeToken the token for the closing app
-         * @param openAnimation the animation for the opening app
-         * @param closeAnimation the animation for the closing app
+         * @param duration the total duration of the transition
+         * @param statusBarAnimationStartTime the desired start time for all visual animations in
+         *        the status bar caused by this app transition in uptime millis
+         * @param statusBarAnimationDuration the duration for all visual animations in the status
+         *        bar caused by this app transition in millis
          *
          * @return Return any bit set of {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_LAYOUT},
          * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_CONFIG},
@@ -127,7 +130,7 @@ public abstract class WindowManagerInternal {
          * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
          */
         public int onAppTransitionStartingLocked(int transit, IBinder openToken, IBinder closeToken,
-                Animation openAnimation, Animation closeAnimation) {
+                long duration, long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             return 0;
         }
 

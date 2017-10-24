@@ -536,14 +536,14 @@ class Task extends WindowContainer<AppWindowToken> {
     /** Cancels any running app transitions associated with the task. */
     void cancelTaskWindowTransition() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).mAppAnimator.clearAnimation();
+            mChildren.get(i).cancelAnimation();
         }
     }
 
     /** Cancels any running thumbnail transitions associated with the task. */
     void cancelTaskThumbnailTransition() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).mAppAnimator.clearThumbnail();
+            mChildren.get(i).clearThumbnail();
         }
     }
 
@@ -677,7 +677,9 @@ class Task extends WindowContainer<AppWindowToken> {
         proto.end(token);
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         final String doublePrefix = prefix + "  ";
 
         pw.println(prefix + "taskId=" + mTaskId);
@@ -691,7 +693,7 @@ class Task extends WindowContainer<AppWindowToken> {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken wtoken = mChildren.get(i);
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
-            wtoken.dump(pw, triplePrefix);
+            wtoken.dump(pw, triplePrefix, dumpAll);
         }
     }
 

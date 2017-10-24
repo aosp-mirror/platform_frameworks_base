@@ -52,14 +52,12 @@ public class WindowAnimator {
     private boolean mAnimating;
     private boolean mLastAnimating;
 
-    /** Is any app window animating? */
-    boolean mAppWindowAnimating;
-
     final Choreographer.FrameCallback mAnimationFrameCallback;
 
     /** Time of current animation step. Reset on each iteration */
     long mCurrentTime;
 
+    boolean mAppWindowAnimating;
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
     int mAnimTransactionSequence;
@@ -156,7 +154,6 @@ public class WindowAnimator {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
             mAnimating = false;
-            mAppWindowAnimating = false;
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
             }
@@ -170,7 +167,6 @@ public class WindowAnimator {
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
                     final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-                    dc.stepAppWindowsAnimation(mCurrentTime);
                     DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                     final ScreenRotationAnimation screenRotationAnimation =

@@ -437,15 +437,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // If this window's app token is running a detached wallpaper animation, make a note so
         // we can ensure the wallpaper is displayed behind it.
-        final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
-        if (appAnimator != null && appAnimator.animation != null
-                && appAnimator.animating) {
-            if ((flags & FLAG_SHOW_WALLPAPER) != 0
-                    && appAnimator.animation.getDetachWallpaper()) {
+        final AppWindowToken atoken = winAnimator.mWin.mAppToken;
+        final AnimationAdapter animation = atoken != null ? atoken.getAnimation() : null;
+        if (animation != null) {
+            if ((flags & FLAG_SHOW_WALLPAPER) != 0 && animation.getDetachWallpaper()) {
                 mTmpWindow = w;
             }
 
-            final int color = appAnimator.animation.getBackgroundColor();
+            final int color = animation.getBackgroundColor();
             if (color != 0) {
                 final TaskStack stack = w.getStack();
                 if (stack != null) {
@@ -528,11 +527,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " screen changed=" + w.isConfigChanged());
             final AppWindowToken atoken = w.mAppToken;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.hidden
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
                     + " hiddenRequested=" + (atoken != null && atoken.hiddenRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
             else Slog.v(TAG, "  VIS: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.hidden
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
                     + " hiddenRequested=" + (atoken != null && atoken.hiddenRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
         }
@@ -707,7 +706,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             final TaskStack stack = w.getStack();
-            if ((!winAnimator.isWaitingForOpening())
+            if (!winAnimator.isWaitingForOpening()
                     || (stack != null && stack.isAnimatingBounds())) {
                 // Updates the shown frame before we set up the surface. This is needed
                 // because the resizing could change the top-left position (in addition to
@@ -2169,7 +2168,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         proto.end(token);
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
@@ -2203,7 +2204,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.println(prefix + "Application tokens in top down Z order:");
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            stack.dump(prefix + "  ", pw);
+            stack.dump(pw, prefix + "  ", dumpAll);
         }
 
         pw.println();
@@ -2215,7 +2216,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 pw.print("  Exiting #"); pw.print(i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
-                token.dump(pw, "    ");
+                token.dump(pw, "    ", dumpAll);
             }
         }
 
@@ -2467,7 +2468,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // to look at all windows below the current target that are in this app, finding the
                 // highest visible one in layering.
                 WindowState highestTarget = null;
-                if (token.mAppAnimator.animating || token.mAppAnimator.animation != null) {
+                if (token.isSelfAnimating()) {
                     highestTarget = token.getHighestAnimLayerWindow(curTarget);
                 }
 
@@ -2574,7 +2575,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.print(token);
             if (dumpAll) {
                 pw.println(':');
-                token.dump(pw, "    ");
+                token.dump(pw, "    ", dumpAll);
             } else {
                 pw.println();
             }
@@ -3463,8 +3464,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         // Make sure there is no animation running on this token, so any windows
                         // associated with it will be removed as soon as their animations are
                         // complete.
-                        token.mAppAnimator.clearAnimation();
-                        token.mAppAnimator.animating = false;
+                        cancelAnimation();
                         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                                 "performLayout: App token exiting now removed" + token);
                         token.removeIfPossible();

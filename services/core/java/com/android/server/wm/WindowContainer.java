@@ -446,6 +446,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * @return {@code true} if in this subtree of the hierarchy we have an {@link AppWindowToken}
+     *         that is {@link #isSelfAnimating}; {@code false} otherwise.
+     */
+    boolean isAppAnimating() {
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowContainer wc = mChildren.get(j);
+            if (wc.isAppAnimating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @return Whether our own container running an animation at the moment.
      */
     boolean isSelfAnimating() {
@@ -529,14 +543,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.checkAppWindowsReadyToShow();
-        }
-    }
-
-    /** Step currently ongoing animation for App window containers. */
-    void stepAppWindowsAnimation(long currentTime) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.stepAppWindowsAnimation(currentTime);
         }
     }
 
@@ -1059,6 +1065,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mSurfaceControl.getHeight();
     }
 
+    @CallSuper
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mSurfaceAnimator.isAnimating()) {
             pw.print(prefix); pw.println("ContainerAnimator:");

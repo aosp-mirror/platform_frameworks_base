@@ -1432,7 +1432,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
     boolean isWinVisibleLw() {
-        return (mAppToken == null || !mAppToken.hiddenRequested || mAppToken.mAppAnimator.animating)
+        return (mAppToken == null || !mAppToken.hiddenRequested || mAppToken.isSelfAnimating())
                 && isVisible();
     }
 
@@ -1441,7 +1441,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return (!mToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
+        return (!mToken.isHidden() || mAttrs.type == TYPE_APPLICATION_STARTING)
                 && isVisible();
     }
 
@@ -1479,7 +1479,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
             return ((!isParentWindowHidden() && !atoken.hiddenRequested)
-                    || mWinAnimator.isAnimationSet() || atoken.mAppAnimator.animation != null);
+                    || mWinAnimator.isAnimationSet());
         }
         return !isParentWindowHidden() || mWinAnimator.isAnimationSet();
     }
@@ -1513,33 +1513,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
-                        || mWinAnimator.isAnimationSet()
-                        || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.isHidden())
+                        || mWinAnimator.isAnimationSet());
     }
 
     // TODO: Another visibility method that was added late in the release to minimize risk.
     @Override
     public boolean canAffectSystemUiFlags() {
-        final boolean shown = mWinAnimator.getShown();
-
-        // We only consider the app to be exiting when the animation has started. After the app
-        // transition is executed the windows are marked exiting before the new windows have been
-        // shown. Thus, wait considering a window to be exiting after the animation has actually
-        // started.
-        final boolean appAnimationStarting = mAppToken != null
-                && mAppToken.mAppAnimator.isAnimationStarting();
-        final boolean exitingSelf = mAnimatingExit && !appAnimationStarting;
-        final boolean appExiting = mAppToken != null && mAppToken.hidden && !appAnimationStarting;
-
-        final boolean exiting = exitingSelf || mDestroying || appExiting;
         final boolean translucent = mAttrs.alpha == 0.0f;
-
-        // If we are entering with a dummy animation, avoid affecting SystemUI flags until the
-        // transition is starting.
-        final boolean enteringWithDummyAnimation =
-                mWinAnimator.isDummyAnimation() && mWinAnimator.mShownAlpha == 0f;
-        return shown && !exiting && !translucent && !enteringWithDummyAnimation;
+        if (mAppToken == null) {
+            final boolean shown = mWinAnimator.getShown();
+            final boolean exiting = mAnimatingExit || mDestroying;
+            return shown && !exiting && !translucent;
+        } else {
+            return !mAppToken.isHidden();
+        }
     }
 
     /**
@@ -1550,10 +1538,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public boolean isDisplayedLw() {
         final AppWindowToken atoken = mAppToken;
         return isDrawnLw() && mPolicyVisibility
-            && ((!isParentWindowHidden() &&
-                    (atoken == null || !atoken.hiddenRequested))
-                        || mWinAnimator.isAnimationSet()
-                        || (atoken != null && atoken.mAppAnimator.animation != null));
+                && ((!isParentWindowHidden() && (atoken == null || !atoken.hiddenRequested))
+                        || mWinAnimator.isAnimationSet());
     }
 
     /**
@@ -1561,8 +1547,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     @Override
     public boolean isAnimatingLw() {
-        return mWinAnimator.isAnimationSet()
-                || (mAppToken != null && mAppToken.mAppAnimator.animation != null);
+        return isAnimating();
     }
 
     @Override
@@ -1570,7 +1555,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final AppWindowToken atoken = mAppToken;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
-                || (atoken == null && mToken.hidden)
+                || (atoken == null && mToken.isHidden())
                 || (atoken != null && atoken.hiddenRequested)
                 || isParentWindowHidden()
                 || (mAnimatingExit && !isAnimatingLw())
@@ -1608,8 +1593,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to determine if it's occluding apps.
         return ((!mIsWallpaper && mAttrs.format == PixelFormat.OPAQUE)
                 || (mIsWallpaper && mWallpaperVisible))
-                && isDrawnLw() && !mWinAnimator.isAnimationSet()
-                && (mAppToken == null || mAppToken.mAppAnimator.animation == null);
+                && isDrawnLw() && !mWinAnimator.isAnimationSet();
     }
 
     @Override
@@ -1631,7 +1615,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Starting window that's exiting will be removed when the animation finishes.
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
-            if (!visible && isVisibleNow() && mAppToken.mAppAnimator.isAnimating()) {
+            if (!visible && isVisibleNow() && mAppToken.isSelfAnimating()) {
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
@@ -1908,7 +1892,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " surfaceShowing=" + mWinAnimator.getShown()
                     + " isAnimationSet=" + mWinAnimator.isAnimationSet()
                     + " app-animation="
-                    + (mAppToken != null ? mAppToken.mAppAnimator.animation : null)
+                    + (mAppToken != null ? mAppToken.isSelfAnimating() : "false")
                     + " mWillReplaceWindow=" + mWillReplaceWindow
                     + " inPendingTransaction="
                     + (mAppToken != null ? mAppToken.inPendingTransaction : false)
@@ -1968,8 +1952,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }
-                final boolean isAnimating =
-                        mWinAnimator.isAnimationSet() && !mWinAnimator.isDummyAnimation();
+                final boolean isAnimating = mWinAnimator.isAnimationSet()
+                        && (mAppToken == null || !mAppToken.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mAppToken != null
                         && mAppToken.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -3697,10 +3681,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " parentHidden=" + isParentWindowHidden()
                     + " tok.hiddenRequested="
                     + (mAppToken != null && mAppToken.hiddenRequested)
-                    + " tok.hidden=" + (mAppToken != null && mAppToken.hidden)
+                    + " tok.hidden=" + (mAppToken != null && mAppToken.isHidden())
                     + " animationSet=" + mWinAnimator.isAnimationSet()
                     + " tok animating="
-                    + (mWinAnimator.mAppAnimator != null && mWinAnimator.mAppAnimator.animating)
+                    + (mAppToken != null && mAppToken.isSelfAnimating())
                     + " Callers=" + Debug.getCallers(4));
         }
     }
