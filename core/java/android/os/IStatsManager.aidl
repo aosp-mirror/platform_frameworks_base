@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.os.IStatsCallbacks;
+
 /**
   * Binder interface to communicate with the statistics management service.
   * {@hide}
@@ -61,4 +63,15 @@ interface IStatsManager {
      * Inform stats that an app was removed.
      */
     oneway void informOnePackageRemoved(in String app, in int uid);
+
+    /**
+     * Trigger pushLog to force push stats log entries from statsd on client side.
+     */
+    void requestPush();
+
+    /**
+     * Listen to statsd to send stats log entries.
+     * TODO: Limit callbacks with specific configurations.
+     */
+    void subscribeStatsLog(IStatsCallbacks callbacks);
 }
