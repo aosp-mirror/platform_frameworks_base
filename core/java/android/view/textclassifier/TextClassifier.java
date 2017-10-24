@@ -29,8 +29,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface for providing text classification related features.
  *
- * <p>Unless otherwise stated, methods of this interface are blocking operations and you should
- * avoid calling them on the UI thread.
+ * <p>Unless otherwise stated, methods of this interface are blocking operations.
+ * Avoid calling them on the UI thread.
  */
 public interface TextClassifier {
 
@@ -75,8 +75,8 @@ public interface TextClassifier {
     };
 
     /**
-     * Returns suggested text selection indices, recognized types and their associated confidence
-     * scores. The selections are ordered from highest to lowest scoring.
+     * Returns suggested text selection start and end indices, recognized entity types, and their
+     * associated confidence scores. The entity types are ordered from highest to lowest scoring.
      *
      * @param text text providing context for the selected text (which is specified
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
