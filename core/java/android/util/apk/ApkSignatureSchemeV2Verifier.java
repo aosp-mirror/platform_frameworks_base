@@ -16,9 +16,6 @@
 
 package android.util.apk;
 
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.Pair;
 
@@ -30,7 +27,6 @@ import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.DirectByteBuffer;
 import java.security.DigestException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -119,40 +115,6 @@ public class ApkSignatureSchemeV2Verifier {
             throws SignatureNotFoundException, SecurityException, IOException {
         SignatureInfo signatureInfo = findSignature(apk);
         return verify(apk.getFD(), signatureInfo);
-    }
-
-    /**
-     * APK Signature Scheme v2 block and additional information relevant to verifying the signatures
-     * contained in the block against the file.
-     */
-    private static class SignatureInfo {
-        /** Contents of APK Signature Scheme v2 block. */
-        private final ByteBuffer signatureBlock;
-
-        /** Position of the APK Signing Block in the file. */
-        private final long apkSigningBlockOffset;
-
-        /** Position of the ZIP Central Directory in the file. */
-        private final long centralDirOffset;
-
-        /** Position of the ZIP End of Central Directory (EoCD) in the file. */
-        private final long eocdOffset;
-
-        /** Contents of ZIP End of Central Directory (EoCD) of the file. */
-        private final ByteBuffer eocd;
-
-        private SignatureInfo(
-                ByteBuffer signatureBlock,
-                long apkSigningBlockOffset,
-                long centralDirOffset,
-                long eocdOffset,
-                ByteBuffer eocd) {
-            this.signatureBlock = signatureBlock;
-            this.apkSigningBlockOffset = apkSigningBlockOffset;
-            this.centralDirOffset = centralDirOffset;
-            this.eocdOffset = eocdOffset;
-            this.eocd = eocd;
-        }
     }
 
     /**
@@ -497,6 +459,7 @@ public class ApkSignatureSchemeV2Verifier {
         // TODO: Compute digests of chunks in parallel when beneficial. This requires some research
         // into how to parallelize (if at all) based on the capabilities of the hardware on which
         // this code is running and based on the size of input.
+        DataDigester digester = new MultipleDigestDataDigester(mds);
         int dataSourceIndex = 0;
         for (DataSource input : contents) {
             long inputOffset = 0;
@@ -508,7 +471,7 @@ public class ApkSignatureSchemeV2Verifier {
                     mds[i].update(chunkContentPrefix);
                 }
                 try {
-                    input.feedIntoMessageDigests(mds, inputOffset, chunkSize);
+                    input.feedIntoDataDigester(digester, inputOffset, chunkSize);
                 } catch (IOException e) {
                     throw new DigestException(
                             "Failed to digest chunk #" + chunkIndex + " of section #"
@@ -967,155 +930,26 @@ public class ApkSignatureSchemeV2Verifier {
     }
 
     /**
-     * Source of data to be digested.
+     * {@link DataDigester} that updates multiple {@link MessageDigest}s whenever data is feeded.
      */
-    private static interface DataSource {
+    private static class MultipleDigestDataDigester implements DataDigester {
+        private final MessageDigest[] mMds;
 
-        /**
-         * Returns the size (in bytes) of the data offered by this source.
-         */
-        long size();
-
-        /**
-         * Feeds the specified region of this source's data into the provided digests. Each digest
-         * instance gets the same data.
-         *
-         * @param offset offset of the region inside this data source.
-         * @param size size (in bytes) of the region.
-         */
-        void feedIntoMessageDigests(MessageDigest[] mds, long offset, int size) throws IOException;
-    }
-
-    /**
-     * {@link DataSource} which provides data from a file descriptor by memory-mapping the sections
-     * of the file requested by
-     * {@link DataSource#feedIntoMessageDigests(MessageDigest[], long, int) feedIntoMessageDigests}.
-     */
-    private static final class MemoryMappedFileDataSource implements DataSource {
-        private static final long MEMORY_PAGE_SIZE_BYTES = Os.sysconf(OsConstants._SC_PAGESIZE);
-
-        private final FileDescriptor mFd;
-        private final long mFilePosition;
-        private final long mSize;
-
-        /**
-         * Constructs a new {@code MemoryMappedFileDataSource} for the specified region of the file.
-         *
-         * @param position start position of the region in the file.
-         * @param size size (in bytes) of the region.
-         */
-        public MemoryMappedFileDataSource(FileDescriptor fd, long position, long size) {
-            mFd = fd;
-            mFilePosition = position;
-            mSize = size;
+        MultipleDigestDataDigester(MessageDigest[] mds) {
+            mMds = mds;
         }
 
         @Override
-        public long size() {
-            return mSize;
-        }
-
-        @Override
-        public void feedIntoMessageDigests(
-                MessageDigest[] mds, long offset, int size) throws IOException {
-            // IMPLEMENTATION NOTE: After a lot of experimentation, the implementation of this
-            // method was settled on a straightforward mmap with prefaulting.
-            //
-            // This method is not using FileChannel.map API because that API does not offset a way
-            // to "prefault" the resulting memory pages. Without prefaulting, performance is about
-            // 10% slower on small to medium APKs, but is significantly worse for APKs in 500+ MB
-            // range. FileChannel.load (which currently uses madvise) doesn't help. Finally,
-            // invoking madvise (MADV_SEQUENTIAL) after mmap with prefaulting wastes quite a bit of
-            // time, which is not compensated for by faster reads.
-
-            // We mmap the smallest region of the file containing the requested data. mmap requires
-            // that the start offset in the file must be a multiple of memory page size. We thus may
-            // need to mmap from an offset less than the requested offset.
-            long filePosition = mFilePosition + offset;
-            long mmapFilePosition =
-                    (filePosition / MEMORY_PAGE_SIZE_BYTES) * MEMORY_PAGE_SIZE_BYTES;
-            int dataStartOffsetInMmapRegion = (int) (filePosition - mmapFilePosition);
-            long mmapRegionSize = size + dataStartOffsetInMmapRegion;
-            long mmapPtr = 0;
-            try {
-                mmapPtr = Os.mmap(
-                        0, // let the OS choose the start address of the region in memory
-                        mmapRegionSize,
-                        OsConstants.PROT_READ,
-                        OsConstants.MAP_SHARED | OsConstants.MAP_POPULATE, // "prefault" all pages
-                        mFd,
-                        mmapFilePosition);
-                // Feeding a memory region into MessageDigest requires the region to be represented
-                // as a direct ByteBuffer.
-                ByteBuffer buf = new DirectByteBuffer(
-                        size,
-                        mmapPtr + dataStartOffsetInMmapRegion,
-                        mFd,  // not really needed, but just in case
-                        null, // no need to clean up -- it's taken care of by the finally block
-                        true  // read only buffer
-                        );
-                for (MessageDigest md : mds) {
-                    buf.position(0);
-                    md.update(buf);
-                }
-            } catch (ErrnoException e) {
-                throw new IOException("Failed to mmap " + mmapRegionSize + " bytes", e);
-            } finally {
-                if (mmapPtr != 0) {
-                    try {
-                        Os.munmap(mmapPtr, mmapRegionSize);
-                    } catch (ErrnoException ignored) {}
-                }
+        public void consume(ByteBuffer buffer) {
+            buffer = buffer.slice();
+            for (MessageDigest md : mMds) {
+                buffer.position(0);
+                md.update(buffer);
             }
         }
-    }
-
-    /**
-     * {@link DataSource} which provides data from a {@link ByteBuffer}.
-     */
-    private static final class ByteBufferDataSource implements DataSource {
-        /**
-         * Underlying buffer. The data is stored between position 0 and the buffer's capacity.
-         * The buffer's position is 0 and limit is equal to capacity.
-         */
-        private final ByteBuffer mBuf;
-
-        public ByteBufferDataSource(ByteBuffer buf) {
-            // Defensive copy, to avoid changes to mBuf being visible in buf.
-            mBuf = buf.slice();
-        }
 
         @Override
-        public long size() {
-            return mBuf.capacity();
-        }
-
-        @Override
-        public void feedIntoMessageDigests(
-                MessageDigest[] mds, long offset, int size) throws IOException {
-            // There's no way to tell MessageDigest to read data from ByteBuffer from a position
-            // other than the buffer's current position. We thus need to change the buffer's
-            // position to match the requested offset.
-            //
-            // In the future, it may be necessary to compute digests of multiple regions in
-            // parallel. Given that digest computation is a slow operation, we enable multiple
-            // such requests to be fulfilled by this instance. This is achieved by serially
-            // creating a new ByteBuffer corresponding to the requested data range and then,
-            // potentially concurrently, feeding these buffers into MessageDigest instances.
-            ByteBuffer region;
-            synchronized (mBuf) {
-                mBuf.position((int) offset);
-                mBuf.limit((int) offset + size);
-                region = mBuf.slice();
-            }
-
-            for (MessageDigest md : mds) {
-                // Need to reset position to 0 at the start of each iteration because
-                // MessageDigest.update below sets it to the buffer's limit.
-                region.position(0);
-                md.update(region);
-            }
-        }
+        public void finish() {}
     }
 
     /**
