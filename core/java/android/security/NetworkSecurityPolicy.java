@@ -16,7 +16,6 @@
 
 package android.security;
 
-import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.security.net.config.ApplicationConfig;
@@ -63,7 +62,8 @@ public class NetworkSecurityPolicy {
      * traffic from applications is handled by higher-level network stacks/components which can
      * honor this aspect of the policy.
      *
-     * <p>NOTE: {@link android.webkit.WebView} does not honor this flag.
+     * <p>NOTE: {@link android.webkit.WebView} honors this flag for applications targeting API level
+     * 26 and up.
      */
     public boolean isCleartextTrafficPermitted() {
         return libcore.net.NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted();
