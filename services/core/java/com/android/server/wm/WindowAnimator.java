@@ -223,10 +223,6 @@ public class WindowAnimator {
                     }
                 }
 
-                if (mService.mDragState != null) {
-                    mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
-                }
-
                 if (!mAnimating) {
                     cancelAnimation();
                 }
