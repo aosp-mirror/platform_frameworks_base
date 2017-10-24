@@ -415,8 +415,8 @@ public class BatteryMeterDrawableBase extends Drawable {
                             : (mLevel == 100 ? 0.38f : 0.5f)));
             mTextHeight = -mTextPaint.getFontMetrics().ascent;
             pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level / 10) : level);
-            pctX = mWidth * 0.5f;
-            pctY = (mHeight + mTextHeight) * 0.47f;
+            pctX = mWidth * 0.5f + left;
+            pctY = (mHeight + mTextHeight) * 0.47f + top;
             pctOpaque = levelTop > pctY;
             if (!pctOpaque) {
                 mTextPath.reset();
@@ -439,8 +439,8 @@ public class BatteryMeterDrawableBase extends Drawable {
         if (!mCharging && !mPowerSaveEnabled) {
             if (level <= mCriticalLevel) {
                 // draw the warning text
-                final float x = mWidth * 0.5f;
-                final float y = (mHeight + mWarningTextHeight) * 0.48f;
+                final float x = mWidth * 0.5f + left;
+                final float y = (mHeight + mWarningTextHeight) * 0.48f + top;
                 c.drawText(mWarningString, x, y, mWarningTextPaint);
             } else if (pctOpaque) {
                 // draw the percentage text
