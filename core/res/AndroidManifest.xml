@@ -183,9 +183,17 @@
     <protected-broadcast
         android:name="android.bluetooth.a2dp-sink.profile.action.AUDIO_CONFIG_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.avrcp-controller.profile.action.BROWSE_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.avrcp-controller.profile.action.FOLDER_LIST" />
+    <protected-broadcast
+        android:name="android.bluetooth.avrcp-controller.profile.action.TRACK_EVENT" />
+    <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.input.profile.action.IDLE_TIME_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED" />
     <protected-broadcast

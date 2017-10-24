@@ -1134,6 +1134,28 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Returns the {@link BluetoothClass} Bluetooth Class of Device (CoD) of the local Bluetooth
+     * adapter.
+     *
+     * @return {@link BluetoothClass} Bluetooth CoD of local Bluetooth device.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public BluetoothClass getBluetoothClass() {
+        if (getState() != STATE_ON) return null;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getBluetoothClass();
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    /**
      * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of the local Bluetooth
      * adapter.
      *
