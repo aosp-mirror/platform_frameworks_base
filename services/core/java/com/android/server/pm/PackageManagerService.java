@@ -326,6 +326,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -9952,7 +9953,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void addSharedLibraryLPr(ArraySet<String> usesLibraryFiles, SharedLibraryEntry file,
+    private void addSharedLibraryLPr(Set<String> usesLibraryFiles,
+            SharedLibraryEntry file,
             PackageParser.Package changingLib) {
         if (file.path != null) {
             usesLibraryFiles.add(file.path);
@@ -9981,7 +9983,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkg == null) {
             return;
         }
-        ArraySet<String> usesLibraryFiles = null;
+        // The collection used here must maintain the order of addition (so
+        // that libraries are searched in the correct order) and must have no
+        // duplicates.
+        Set<String> usesLibraryFiles = null;
         if (pkg.usesLibraries != null) {
             usesLibraryFiles = addSharedLibrariesLPw(pkg.usesLibraries,
                     null, null, pkg.packageName, changingLib, true, null);
@@ -10002,10 +10007,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private ArraySet<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
+    private Set<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
             @Nullable int[] requiredVersions, @Nullable String[] requiredCertDigests,
             @NonNull String packageName, @Nullable PackageParser.Package changingLib,
-            boolean required, @Nullable ArraySet<String> outUsedLibraries)
+            boolean required, @Nullable Set<String> outUsedLibraries)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
@@ -10050,7 +10055,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (outUsedLibraries == null) {
-                    outUsedLibraries = new ArraySet<>();
+                    // Use LinkedHashSet to preserve the order of files added to
+                    // usesLibraryFiles while eliminating duplicates.
+                    outUsedLibraries = new LinkedHashSet<>();
                 }
                 addSharedLibraryLPr(outUsedLibraries, libEntry, changingLib);
             }
