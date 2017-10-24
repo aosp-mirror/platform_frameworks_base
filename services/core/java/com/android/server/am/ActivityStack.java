@@ -489,22 +489,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             activityType = ACTIVITY_TYPE_STANDARD;
         }
         final ActivityDisplay display = getDisplay();
-        if (display != null) {
-            if (activityType == ACTIVITY_TYPE_STANDARD
+        if (display != null && activityType == ACTIVITY_TYPE_STANDARD
                     && windowingMode == WINDOWING_MODE_UNDEFINED) {
-                // Standard activity types will mostly take on the windowing mode of the display if
-                // one isn't specified, so look-up a compatible stack based on the display's
-                // windowing mode.
-                windowingMode = display.getWindowingMode();
-            }
-            windowingMode =
-                    display.updateWindowingModeForSplitScreenIfNeeded(windowingMode, activityType);
+            // Standard activity types will mostly take on the windowing mode of the display if one
+            // isn't specified, so look-up a compatible stack based on the display's windowing mode.
+            windowingMode = display.getWindowingMode();
         }
         return super.isCompatible(windowingMode, activityType);
     }
 
     /** Adds the stack to specified display and calls WindowManager to do the same. */
     void reparent(ActivityDisplay activityDisplay, boolean onTop) {
+        // TODO: We should probably resolve the windowing mode for the stack on the new display here
+        // so that it end up in a compatible mode in the new display. e.g. split-screen secondary.
         removeFromDisplay();
         mTmpRect2.setEmpty();
         postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
@@ -1496,25 +1493,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    /** Returns true if the stack contains a fullscreen task. */
-    private boolean hasFullscreenTask() {
-        for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
-            final TaskRecord task = mTaskHistory.get(i);
-            if (task.mFullscreen) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns true if the stack is translucent and can have other contents visible behind it if
      * needed. A stack is considered translucent if it don't contain a visible or
      * starting (about to be visible) activity that is fullscreen (opaque).
      * @param starting The currently starting activity or null if there is none.
+     * TODO: Can be removed once we are no longer using returnToType for back functionality
      * @param stackBehind The stack directly behind this one.
      */
-    private boolean isStackTranslucent(ActivityRecord starting, ActivityStack stackBehind) {
+    @VisibleForTesting
+    boolean isStackTranslucent(ActivityRecord starting, ActivityStack stackBehind) {
+        if (!isAttached() || mForceHidden) {
+            return true;
+        }
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -1533,7 +1524,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     continue;
                 }
 
-                if (r.fullscreen) {
+                if (r.fullscreen || r.hasWallpaper) {
                     // Stack isn't translucent if it has at least one fullscreen activity
                     // that is visible.
                     return false;
@@ -1572,127 +1563,66 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (!isAttached() || mForceHidden) {
             return false;
         }
-
-        final ActivityDisplay display = getDisplay();
-        if (isTopStackOnDisplay() || mStackSupervisor.isFocusedStack(this)) {
+        if (mStackSupervisor.isFocusedStack(this)) {
             return true;
         }
 
-        final int stackIndex = display.getIndexOf(this);
-
-        // Check position and visibility of this stack relative to the front stack on its display.
-        final ActivityStack topStack = getDisplay().getTopStack();
-        final int windowingMode = getWindowingMode();
-        final int activityType = getActivityType();
-
-        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // If the assistant stack is focused and translucent, then the docked stack is always
-            // visible
-            if (topStack.isActivityTypeAssistant()) {
-                return topStack.isStackTranslucent(starting, this);
-            }
-            return true;
-        }
-
-        // Set home stack to invisible when it is below but not immediately below the docked stack
-        // A case would be if recents stack exists but has no tasks and is below the docked stack
-        // and home stack is below recents
-        if (activityType == ACTIVITY_TYPE_HOME) {
-            final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
-            int dockedStackIndex = display.getIndexOf(splitScreenStack);
-            if (dockedStackIndex > stackIndex && stackIndex != dockedStackIndex - 1) {
-                return false;
-            }
-        }
-
-        // Find the first stack behind front stack that actually got something visible.
-        int stackBehindTopIndex = display.getIndexOf(topStack) - 1;
-        while (stackBehindTopIndex >= 0 &&
-                display.getChildAt(stackBehindTopIndex).topRunningActivityLocked() == null) {
-            stackBehindTopIndex--;
-        }
-        final ActivityStack stackBehindTop = (stackBehindTopIndex >= 0)
-                ? display.getChildAt(stackBehindTopIndex) : null;
-        int stackBehindTopWindowingMode = WINDOWING_MODE_UNDEFINED;
-        int stackBehindTopActivityType = ACTIVITY_TYPE_UNDEFINED;
-        if (stackBehindTop != null) {
-            stackBehindTopWindowingMode = stackBehindTop.getWindowingMode();
-            stackBehindTopActivityType = stackBehindTop.getActivityType();
-        }
-
-        final boolean alwaysOnTop = topStack.getWindowConfiguration().isAlwaysOnTop();
-        if (topStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY || alwaysOnTop) {
-            if (this == stackBehindTop) {
-                // Stacks directly behind the docked or pinned stack are always visible.
-                return true;
-            } else if (alwaysOnTop && stackIndex == stackBehindTopIndex - 1) {
-                // Otherwise, this stack can also be visible if it is directly behind a docked stack
-                // or translucent assistant stack behind an always-on-top top-most stack
-                if (stackBehindTopWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    return true;
-                } else if (stackBehindTopActivityType == ACTIVITY_TYPE_ASSISTANT) {
-                    return stackBehindTop.isStackTranslucent(starting, this);
-                }
-            }
-        }
-
-        if (topStack.isBackdropToTranslucentActivity()
-                && topStack.isStackTranslucent(starting, stackBehindTop)) {
-            // Stacks behind the fullscreen or assistant stack with a translucent activity are
-            // always visible so they can act as a backdrop to the translucent activity.
-            // For example, dialog activities
-            if (stackIndex == stackBehindTopIndex) {
-                return true;
-            }
-            if (stackBehindTopIndex >= 0) {
-                if ((stackBehindTopWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                        || stackBehindTopWindowingMode == WINDOWING_MODE_PINNED)
-                        && stackIndex == (stackBehindTopIndex - 1)) {
-                    // The stack behind the docked or pinned stack is also visible so we can have a
-                    // complete backdrop to the translucent activity when the docked stack is up.
-                    return true;
-                }
-            }
-        }
-
-        if (isOnHomeDisplay()) {
-            // Visibility of any stack on default display should have been determined by the
-            // conditions above.
+        final ActivityRecord top = topRunningActivityLocked();
+        if (top == null && isInStackLocked(starting) == null && !isTopStackOnDisplay()) {
+            // Shouldn't be visible if you don't have any running activities, not starting one, and
+            // not the top stack on display.
             return false;
         }
 
-        final int stackCount = display.getChildCount();
-        for (int i = stackIndex + 1; i < stackCount; i++) {
-            final ActivityStack stack = display.getChildAt(i);
-
-            if (!stack.mFullscreen && !stack.hasFullscreenTask()) {
-                continue;
-            }
-
-            if (!stack.isDynamicStacksVisibleBehindAllowed()) {
-                // These stacks can't have any dynamic stacks visible behind them.
-                return false;
-            }
-
-            if (!stack.isStackTranslucent(starting, null /* stackBehind */)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean isBackdropToTranslucentActivity() {
-        if (isActivityTypeAssistant()) {
-            return true;
-        }
+        final ActivityDisplay display = getDisplay();
+        boolean gotOpaqueSplitScreenPrimary = false;
+        boolean gotOpaqueSplitScreenSecondary = false;
         final int windowingMode = getWindowingMode();
-        return windowingMode == WINDOWING_MODE_FULLSCREEN
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-    }
+        for (int i = display.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack other = display.getChildAt(i);
+            if (other == this) {
+                // Should be visible if there is no other stack occluding it.
+                return true;
+            }
 
-    private boolean isDynamicStacksVisibleBehindAllowed() {
-        return isActivityTypeAssistant() || getWindowingMode() == WINDOWING_MODE_PINNED;
+            final int otherWindowingMode = other.getWindowingMode();
+            // TODO: Can be removed once we are no longer using returnToType for back functionality
+            final ActivityStack stackBehind = i > 0 ? display.getChildAt(i - 1) : null;
+
+            if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+                if (other.isStackTranslucent(starting, stackBehind)) {
+                    // Can be visible behind a translucent fullscreen stack.
+                    continue;
+                }
+                return false;
+            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    && !gotOpaqueSplitScreenPrimary) {
+                gotOpaqueSplitScreenPrimary =
+                        !other.isStackTranslucent(starting, stackBehind);
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                        && gotOpaqueSplitScreenPrimary) {
+                    // Can not be visible behind another opaque stack in split-screen-primary mode.
+                    return false;
+                }
+            } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                    && !gotOpaqueSplitScreenSecondary) {
+                gotOpaqueSplitScreenSecondary =
+                        !other.isStackTranslucent(starting, stackBehind);
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                        && gotOpaqueSplitScreenSecondary) {
+                    // Can not be visible behind another opaque stack in split-screen-secondary mode.
+                    return false;
+                }
+            }
+            if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
+                // Can not be visible if we are in split-screen windowing mode and both halves of
+                // the screen are opaque.
+                return false;
+            }
+        }
+
+        // Well, nothing is stopping you from being visible...
+        return true;
     }
 
     final int rankTaskLayers(int baseLayer) {
@@ -5263,7 +5193,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     public String toString() {
         return "ActivityStack{" + Integer.toHexString(System.identityHashCode(this))
                 + " stackId=" + mStackId + " type=" + activityTypeToString(getActivityType())
-                + " mode=" + windowingModeToString(getWindowingMode()) + ", "
+                + " mode=" + windowingModeToString(getWindowingMode())
+                + " visible=" + shouldBeVisible(null /* starting */) + ", "
                 + mTaskHistory.size() + " tasks}";
     }
 

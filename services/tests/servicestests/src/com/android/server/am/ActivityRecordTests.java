@@ -57,7 +57,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
             ComponentName.unflattenFromString("com.foo/.BarActivity2");
 
     private ActivityManagerService mService;
-    private ActivityStack mStack;
+    private TestActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivity;
 
@@ -76,13 +76,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testStackCleanupOnClearingTask() throws Exception {
         mActivity.setTask(null);
-        assertEquals(getActivityRemovedFromStackCount(), 1);
+        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 1);
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() throws Exception {
         mTask.removeActivity(mActivity);
-        assertEquals(getActivityRemovedFromStackCount(),  1);
+        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(),  1);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final TaskRecord newTask =
                 createTask(mService.mStackSupervisor, testActivityComponent, mStack);
         mActivity.reparent(newTask, 0, null /*reason*/);
-        assertEquals(getActivityRemovedFromStackCount(), 0);
+        assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 0);
     }
 
     @Test
@@ -128,15 +128,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 0 /* globalChanges */, false /* preserveWindow */);
         assertEquals(expectedActivityBounds, mActivity.getBounds());
     }
-
-    private int getActivityRemovedFromStackCount() {
-        if (mStack instanceof ActivityStackReporter) {
-            return ((ActivityStackReporter) mStack).onActivityRemovedFromStackInvocationCount();
-        }
-
-        return -1;
-    }
-
 
     @Test
     public void testCanBeLaunchedOnDisplay() throws Exception {

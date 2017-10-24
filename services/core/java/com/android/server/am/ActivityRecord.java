@@ -165,6 +165,7 @@ import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -232,7 +233,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     final String processName; // process where this component wants to run
     final String taskAffinity; // as per ActivityInfo.taskAffinity
     final boolean stateNotNeeded; // As per ActivityInfo.flags
-    boolean fullscreen; // covers the full screen?
+    boolean fullscreen; // The activity is opaque and fills the entire space of this task.
+    // TODO: See if it possible to combine this with the fullscreen field.
+    final boolean hasWallpaper; // Has a wallpaper window as a background.
     final boolean noDisplay;  // activity is not displayed?
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
@@ -883,9 +886,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         Entry ent = AttributeCache.instance().get(packageName,
                 realTheme, com.android.internal.R.styleable.Window, userId);
-        fullscreen = ent != null && !ActivityInfo.isTranslucentOrFloating(ent.array);
-        noDisplay = ent != null && ent.array.getBoolean(
-                com.android.internal.R.styleable.Window_windowNoDisplay, false);
+        if (ent != null) {
+            fullscreen = !ActivityInfo.isTranslucentOrFloating(ent.array);
+            hasWallpaper = ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
+            noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+        } else {
+            hasWallpaper = false;
+            noDisplay = false;
+        }
 
         setActivityType(_componentSpecified, _launchedFromUid, _intent, options, sourceRecord);
 
