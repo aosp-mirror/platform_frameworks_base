@@ -330,7 +330,6 @@ package android.net.wifi {
     method public deprecated java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
     method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
     method public deprecated boolean isBatchedScanSupported();
-    method public deprecated boolean setWifiApEnabled(android.net.wifi.WifiConfiguration, boolean);
     method public deprecated boolean startLocationRestrictedScan(android.os.WorkSource);
   }
 
