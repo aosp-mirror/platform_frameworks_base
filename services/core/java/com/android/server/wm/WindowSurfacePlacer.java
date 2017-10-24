@@ -421,13 +421,12 @@ class WindowSurfacePlacer {
             }
             wtoken.updateReportedVisibilityLocked();
             wtoken.waitingToShow = false;
-            wtoken.setAllAppWinAnimators();
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             mService.openSurfaceTransaction();
             try {
-                mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
+                appAnimator.showAllWindowsLocked();
             } finally {
                 mService.closeSurfaceTransaction("handleAppTransitionReadyLocked");
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
@@ -462,12 +461,8 @@ class WindowSurfacePlacer {
             appAnimator.setNullAnimation();
             // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
             //       animating?
-            wtoken.setAllAppWinAnimators();
             wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
-            // setAllAppWinAnimators so the windows get onExitAnimationDone once the animation is
-            // done.
-            wtoken.setAllAppWinAnimators();
             // Force the allDrawn flag, because we want to start
             // this guy's animations regardless of whether it's
             // gotten drawn.
@@ -673,9 +668,8 @@ class WindowSurfacePlacer {
                 appAnimator.setNullAnimation();
                 mService.updateTokenInPlaceLocked(wtoken, transit);
                 wtoken.updateReportedVisibilityLocked();
-                wtoken.setAllAppWinAnimators();
                 mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-                mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
+                appAnimator.showAllWindowsLocked();
             }
         }
     }

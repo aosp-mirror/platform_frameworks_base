@@ -100,9 +100,6 @@ public class AppWindowAnimator {
     private int mTransit;
     private int mTransitFlags;
 
-    /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
-    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<>();
-
     /** True if the current animation was transferred from another AppWindowAnimator.
      *  See {@link #transferCurrentAnimation}*/
     boolean usingTransferredAnimation = false;
@@ -239,8 +236,6 @@ public class AppWindowAnimator {
             toAppAnimator.mTransit = mTransit;
         }
         if (transferWinAnimator != null) {
-            mAllAppWinAnimators.remove(transferWinAnimator);
-            toAppAnimator.mAllAppWinAnimators.add(transferWinAnimator);
             toAppAnimator.hasTransformation = transferWinAnimator.mAppAnimator.hasTransformation;
             if (toAppAnimator.hasTransformation) {
                 toAppAnimator.transformation.set(transferWinAnimator.mAppAnimator.transformation);
@@ -417,25 +412,17 @@ public class AppWindowAnimator {
 
         transformation.clear();
 
-        final int numAllAppWinAnimators = mAllAppWinAnimators.size();
-        for (int i = 0; i < numAllAppWinAnimators; i++) {
-            mAllAppWinAnimators.get(i).mWin.onExitAnimationDone();
-        }
+        mAppToken.forAllWindows(WindowState::onExitAnimationDone, false /* traverseTopToBottom */);
         mService.mAppTransition.notifyAppTransitionFinishedLocked(mAppToken.token);
         return false;
     }
 
     // This must be called while inside a transaction.
-    boolean showAllWindowsLocked() {
-        boolean isAnimating = false;
-        final int NW = mAllAppWinAnimators.size();
-        for (int i=0; i<NW; i++) {
-            WindowStateAnimator winAnimator = mAllAppWinAnimators.get(i);
-            if (DEBUG_VISIBILITY) Slog.v(TAG, "performing show on: " + winAnimator);
-            winAnimator.mWin.performShowLocked();
-            isAnimating |= winAnimator.isAnimationSet();
-        }
-        return isAnimating;
+    void showAllWindowsLocked() {
+        mAppToken.forAllWindows(windowState -> {
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "performing show on: " + windowState);
+            windowState.performShowLocked();
+        }, false /* traverseTopToBottom */);
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -465,11 +452,6 @@ public class AppWindowAnimator {
             pw.print(prefix); pw.print("thumbnailAnimation="); pw.println(thumbnailAnimation);
             pw.print(prefix); pw.print("thumbnailTransformation=");
                     pw.println(thumbnailTransformation.toShortString());
-        }
-        for (int i=0; i<mAllAppWinAnimators.size(); i++) {
-            WindowStateAnimator wanim = mAllAppWinAnimators.get(i);
-            pw.print(prefix); pw.print("App Win Anim #"); pw.print(i);
-                    pw.print(": "); pw.println(wanim);
         }
     }
 

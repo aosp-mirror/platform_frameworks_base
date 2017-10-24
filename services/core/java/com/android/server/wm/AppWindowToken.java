@@ -1160,16 +1160,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return mChildren.size() == 1 && mChildren.get(0) == win;
     }
 
-    void setAllAppWinAnimators() {
-        final ArrayList<WindowStateAnimator> allAppWinAnimators = mAppAnimator.mAllAppWinAnimators;
-        allAppWinAnimators.clear();
-
-        final int windowsCount = mChildren.size();
-        for (int j = 0; j < windowsCount; j++) {
-            (mChildren.get(j)).addWinAnimatorToList(allAppWinAnimators);
-        }
-    }
-
     @Override
     void onAppTransitionDone() {
         sendingToBottom = false;
@@ -1230,7 +1220,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             // We can now show all of the drawn windows!
             if (!mService.mOpeningApps.contains(this)) {
-                mService.mAnimator.orAnimating(mAppAnimator.showAllWindowsLocked());
+                mAppAnimator.showAllWindowsLocked();
             }
         }
     }
