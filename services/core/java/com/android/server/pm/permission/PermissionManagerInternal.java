@@ -144,6 +144,7 @@ public abstract class PermissionManagerInternal {
 
     public abstract int checkPermission(@NonNull String permName, @NonNull String packageName,
             int callingUid, int userId);
+    public abstract int checkUidPermission(String permName, int uid, int callingUid);
 
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
@@ -159,8 +160,6 @@ public abstract class PermissionManagerInternal {
     public abstract @NonNull DefaultPermissionGrantPolicy getDefaultPermissionGrantPolicy();
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
-    public abstract Iterator<BasePermission> getPermissionIteratorTEMP();
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
-    public abstract void putPermissionTEMP(@NonNull String permName,
-            @NonNull BasePermission permission);
+    public abstract @Nullable int[] getGlobalGidsTEMP();
 }
