@@ -19,7 +19,7 @@ import org.objectweb.asm.Opcodes;
 
 public class Utils {
 
-    public static final int ASM_VERSION = Opcodes.ASM5;
+    public static final int ASM_VERSION = Opcodes.ASM6;
 
     /**
      * Reads a comma separated configuration similar to the Jack definition.
