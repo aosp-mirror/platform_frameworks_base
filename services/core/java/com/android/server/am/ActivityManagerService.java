@@ -334,6 +334,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
@@ -12332,6 +12333,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + android.Manifest.permission.SHUTDOWN);
         }
 
+        // TODO: Where should the corresponding '1' (start) write go?
+        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED, 0);
+
         boolean timedout = false;
 
         synchronized(this) {
@@ -13514,6 +13518,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.noteWakeupAlarmLocked(tag);
+                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid);
             }
         }
     }

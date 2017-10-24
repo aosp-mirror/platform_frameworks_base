@@ -4055,6 +4055,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptime * 1000, 1); // time in in microseconds
+            StatsLog.write(StatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason, deltaUptime * 1000);
             mLastWakeupReason = null;
         }
     }
@@ -11156,10 +11157,14 @@ public class BatteryStatsImpl extends BatteryStats {
     // This should probably be exposed in the API, though it's not critical
     public static final int BATTERY_PLUGGED_NONE = 0;
 
-    public void setBatteryStateLocked(int status, int health, int plugType, int level,
-            int temp, int volt, int chargeUAh, int chargeFullUAh) {
+    public void setBatteryStateLocked(final int status, final int health, final int plugType,
+            final int level, /* not final */ int temp, final int volt, final int chargeUAh,
+            final int chargeFullUAh) {
         // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
         temp = Math.max(0, temp);
+
+        reportChangesToStatsLog(mHaveBatteryLevel ? mHistoryCur : null,
+                status, plugType, level, temp);
 
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
@@ -11335,6 +11340,24 @@ public class BatteryStatsImpl extends BatteryStats {
             Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
         mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
+    }
+
+    // Inform StatsLog of setBatteryState changes.
+    // If this is the first reporting, pass in recentPast == null.
+    private void reportChangesToStatsLog(HistoryItem recentPast,
+            final int status, final int plugType, final int level, final int temp) {
+
+        if (recentPast == null || recentPast.batteryStatus != status) {
+            StatsLog.write(StatsLog.CHARGING_STATE_CHANGED, status);
+        }
+        if (recentPast == null || recentPast.batteryPlugType != plugType) {
+            StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED, plugType);
+        }
+        if (recentPast == null || recentPast.batteryLevel != level) {
+            StatsLog.write(StatsLog.BATTERY_LEVEL_CHANGED, level);
+        }
+        // Let's just always print the temperature, regardless of whether it changed.
+        StatsLog.write(StatsLog.DEVICE_TEMPERATURE_REPORTED, temp);
     }
 
     public long getAwakeTimeBattery() {
