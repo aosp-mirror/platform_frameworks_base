@@ -7403,6 +7403,13 @@ public final class Settings {
         public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
 
         /**
+         * An integer representing the Bluetooth Class of Device (CoD).
+         *
+         * @hide
+         */
+        public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
+
+        /**
          * A Long representing a bitmap of profiles that should be disabled when bluetooth starts.
          * See {@link android.bluetooth.BluetoothProfile}.
          * {@hide}
