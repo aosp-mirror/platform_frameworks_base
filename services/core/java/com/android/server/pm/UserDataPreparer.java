@@ -132,11 +132,9 @@ class UserDataPreparer {
                 if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                     FileUtils.deleteContentsAndDir(getUserSystemDirectory(userId));
                     FileUtils.deleteContentsAndDir(getDataSystemDeDirectory(userId));
-                    FileUtils.deleteContentsAndDir(getDataMiscDeDirectory(userId));
                 }
                 if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
                     FileUtils.deleteContentsAndDir(getDataSystemCeDirectory(userId));
-                    FileUtils.deleteContentsAndDir(getDataMiscCeDirectory(userId));
                 }
             }
 
