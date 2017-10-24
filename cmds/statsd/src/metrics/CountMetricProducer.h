@@ -41,8 +41,6 @@ public:
 
     virtual ~CountMetricProducer();
 
-    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) override;
-
     void onConditionChanged(const bool conditionMet) override;
 
     void finish() override;
@@ -54,16 +52,21 @@ public:
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
 
+protected:
+    void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
+                                   const std::map<std::string, HashableDimensionKey>& conditionKey,
+                                   bool condition, const LogEvent& event) override;
+
 private:
     const CountMetric mMetric;
-
-    CountAnomalyTracker mAnomalyTracker;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucketInfo>> mPastBuckets;
 
     // The current bucket.
     std::unordered_map<HashableDimensionKey, int> mCurrentSlicedCounter;
+
+    vector<unique_ptr<CountAnomalyTracker>> mAnomalyTrackers;
 
     void flushCounterIfNeeded(const uint64_t newEventTime);
 };

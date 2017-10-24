@@ -1029,6 +1029,26 @@ public class WifiManager {
     }
 
     /**
+     * Return all matching WifiConfigurations for this ScanResult.
+     *
+     * An empty list will be returned when no configurations are installed or if no configurations
+     * match the ScanResult.
+     *
+     * @param scanResult scanResult that represents the BSSID
+     * @return A list of {@link WifiConfiguration}
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @hide
+     */
+    public List<WifiConfiguration> getAllMatchingWifiConfigs(ScanResult scanResult) {
+        try {
+            return mService.getAllMatchingWifiConfigs(scanResult);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
      * Returns a list of Hotspot 2.0 OSU (Online Sign-Up) providers associated with the given AP.
      *
      * An empty list will be returned if no match is found.

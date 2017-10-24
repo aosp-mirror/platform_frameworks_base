@@ -12,9 +12,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.BatteryManager;
@@ -296,5 +294,10 @@ public class Utils {
             // We are likely in a test environment.
         }
         return defaultDays;
+    }
+
+    public static boolean isWifiOnly(Context context) {
+        return !context.getSystemService(ConnectivityManager.class)
+                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 }

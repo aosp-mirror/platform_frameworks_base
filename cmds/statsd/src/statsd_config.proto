@@ -114,7 +114,7 @@ message Alert {
 
   optional int32 refractory_period_secs = 4;
 
-  optional int64 trigger_if_gt = 5;
+  optional int64 trigger_if_sum_gt = 5;
 }
 
 message EventMetric {

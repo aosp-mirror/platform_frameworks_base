@@ -36,9 +36,28 @@ option java_outer_classname = "StatsEventProto";
  */
 message StatsEvent {
     oneof event {
-        ScreenStateChanged screen_state_changed = 1;
-        ProcessStateChanged process_state_changed = 2;
-        WakeLockChanged wakelock_changed = 3;
+        // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
+        BleScanStateChanged ble_scan_state_changed = 2;
+        BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
+        BleScanResultReceived ble_scan_result_received = 4;
+        SensorStateChanged sensor_state_changed = 5;
+        GpsScanStateChanged gps_scan_state_changed = 6; // TODO: untested
+        SyncStateChanged sync_state_changed = 7;
+        ScheduledJobStateChanged scheduled_job_state_changed = 8;
+        ScreenBrightnessChanged screen_brightness_changed = 9;
+        // 10-20 are temporarily reserved for wakelocks etc.
+        UidWakelockStateChanged uid_wakelock_state_changed = 11;
+        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
+        BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
+        DeviceIdleModeStateChanged device_idle_mode_state_changed = 22;
+        AudioStateChanged audio_state_changed = 23;
+        MediaCodecActivityChanged media_codec_activity_changed = 24;
+        CameraStateChanged camera_state_changed = 25;
+        FlashlightStateChanged flashlight_state_changed = 26;
+        UidProcessStateChanged uid_process_state_changed = 27;
+        ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
+        ScreenStateChanged screen_state_changed = 29;
+        // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
 
@@ -72,7 +91,7 @@ message WorkSource {
  *     and those UIDs will be translated in xxx to those strings.
  *
  * CONVENTIONS:
- *   - Events are past tense. e.g. ScreenStateChanged, not ScreenStateChange
+ *   - Events are past tense. e.g. ScreenStateChanged, not ScreenStateChange.
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
@@ -98,33 +117,347 @@ message ScreenStateChanged {
 }
 
 /**
- * Logs that the state of a process state, as per the activity manager has changed.
+ * Logs that the state of a process state, as per the activity manager, has changed.
  *
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
-message ProcessStateChanged {
-    // TODO: Use the real (mapped) process states.
+message UidProcessStateChanged {
     optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
 
     // The state.
+    // TODO: Use the real (mapped) process states.
     optional int32 state = 2;
 }
 
 /**
- * Logs that the state of a wakelock has changed.
+ * Logs that a process started, finished, crashed, or ANRed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ProcessLifeCycleStateChanged {
+    // TODO: Use the real (mapped) process states.
+    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+
+    // TODO: What is this?
+    optional string name = 2;
+
+    // The state.
+    // TODO: Use an enum.
+    optional int32 event = 3;
+}
+
+
+
+/**
+ * Logs when the ble scan state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BleScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when an unoptimized ble scan state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+message BleUnoptimizedScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs reporting of a ble scan finding results.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+message BleScanResultReceived {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Number of ble scan results returned.
+    optional int32 num_of_results = 2;
+}
+
+/**
+ * Logs when a sensor state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message SensorStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // TODO: Is there a way to get the actual name of the sensor?
+    // The id (int) of the sensor.
+    optional int32 sensor_id = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+
+/**
+ * Logs when GPS state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message GpsScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+
+/**
+ * Logs when a sync manager sync state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message SyncStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Name of the sync (as named in the app)
+    optional string name = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when a job scheduler job state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ScheduledJobStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Name of the job (as named in the app)
+    optional string name = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+
+    // TODO: Consider adding the stopReason (int)
+}
+
+/**
+ * Logs when the audio state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message AudioStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the video codec state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message MediaCodecActivityChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the flashlight state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message FlashlightStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the camera state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message CameraStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs that the state of a wakelock (per app and per wakelock name) has changed.
  *
  * Logged from:
  *   TODO
  */
-message WakeLockChanged {
+message WakelockChanged {
     // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Type of wakelock.
+    enum Type {
+        PARTIAL = 0;
+        FULL = 1;
+        WINDOW = 2;
+    }
+    optional int32 type = 2;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 3;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs when an app is holding a wakelock, regardless of the wakelock's name.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message UidWakelockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    // Type of wakelock.
+    enum Type {
+        PARTIAL = 0;
+        FULL = 1;
+        WINDOW = 2;
+    }
+    optional int32 type = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when a partial wakelock is considered 'long' (over 1 min).
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message LongPartialWakelockStateChanged {
+    // TODO: Add attribution instead of uid?
     optional int32 uid = 1;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
     optional string tag = 2;
 
-    // TODO: Use a constant instead of boolean?
-    optional bool state = 3;
+    // TODO: I have no idea what this is.
+    optional string history_tag = 3;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 4;
 }
 
+/**
+ * Logs Battery Saver state change.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatterySaverModeStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs Doze mode state change.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message DeviceIdleModeStateChanged {
+    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
+    optional int32 state = 1;
+}
+
+/**
+ * Logs screen brightness level.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenBrightnessChanged {
+    // Screen brightness level. Should be in [-1, 255] according to PowerManager.java.
+    optional int32 level = 1;
+}

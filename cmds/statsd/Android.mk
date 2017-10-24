@@ -37,6 +37,7 @@ statsd_common_src := \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/CountAnomalyTracker.cpp \
+    src/metrics/MetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
     src/metrics/DurationMetricProducer.cpp \
     src/metrics/MetricsManager.cpp \

@@ -7615,6 +7615,13 @@ public final class Settings {
         public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
 
         /**
+         * An integer representing the Bluetooth Class of Device (CoD).
+         *
+         * @hide
+         */
+        public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
+
+        /**
          * A Long representing a bitmap of profiles that should be disabled when bluetooth starts.
          * See {@link android.bluetooth.BluetoothProfile}.
          * {@hide}
@@ -9649,7 +9656,7 @@ public final class Settings {
          * Get the key that retrieves a bluetooth Input Device's priority.
          * @hide
          */
-        public static final String getBluetoothInputDevicePriorityKey(String address) {
+        public static final String getBluetoothHidHostPriorityKey(String address) {
             return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 

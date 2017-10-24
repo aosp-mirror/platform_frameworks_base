@@ -17,23 +17,22 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
-#define VLOG(...) \
-    if (DEBUG) ALOGD(__VA_ARGS__);
-
 #include "CountAnomalyTracker.h"
+
+#include <time.h>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-CountAnomalyTracker::CountAnomalyTracker(size_t numBuckets, int thresholdGt)
-    : mNumPastBuckets(numBuckets > 0 ? numBuckets - 1 : 0),
-      mPastBuckets(mNumPastBuckets > 0 ? (new int[mNumPastBuckets]) : nullptr),
-      mThresholdGt(thresholdGt) {
+CountAnomalyTracker::CountAnomalyTracker(const Alert& alert)
+    : mAlert(alert),
+      mNumPastBuckets(alert.number_of_buckets() > 0 ? alert.number_of_buckets() - 1 : 0),
+      mPastBuckets(mNumPastBuckets > 0 ? (new int[mNumPastBuckets]) : nullptr) {
 
     VLOG("CountAnomalyTracker() called");
-    if (numBuckets < 1) {
-        ALOGE("Cannot create CountAnomalyTracker with %zu buckets", numBuckets);
+    if (alert.number_of_buckets() < 1) {
+        ALOGE("Cannot create CountAnomalyTracker with %d buckets", alert.number_of_buckets());
     }
     reset(); // initialization
 }
@@ -84,22 +83,45 @@ void CountAnomalyTracker::reset() {
 }
 
 void CountAnomalyTracker::checkAnomaly(int currentCount) {
-    // Note that this works even if mNumPastBuckets < 1 (since then
-    // mSumPastCounters = 0 so the comparison is based only on currentCount).
+    // Skip the check if in refractory period.
+    if (time(nullptr) < mRefractoryPeriodEndsSec) {
+        VLOG("Skipping anomaly check since within refractory period");
+        return;
+    }
 
     // TODO: Remove these extremely verbose debugging log.
-    VLOG("Checking whether %d + %d > %d",
-         mSumPastCounters, currentCount, mThresholdGt);
+    VLOG("Checking whether %d + %d > %lld",
+         mSumPastCounters, currentCount, mAlert.trigger_if_sum_gt());
 
-    if (mSumPastCounters + currentCount > mThresholdGt) {
+    // Note that this works even if mNumPastBuckets < 1 (since then
+    // mSumPastCounters = 0 so the comparison is based only on currentCount).
+    if (mAlert.has_trigger_if_sum_gt() &&
+            mSumPastCounters + currentCount > mAlert.trigger_if_sum_gt()) {
         declareAnomaly();
     }
 }
 
 void CountAnomalyTracker::declareAnomaly() {
-    // TODO: check that not in refractory period.
-    // TODO: Do something.
-    ALOGI("An anomaly has occurred!");
+    // TODO(guardrail): Consider guarding against too short refractory periods.
+    time_t currTime = time(nullptr);
+    mRefractoryPeriodEndsSec = currTime + mAlert.refractory_period_secs();
+
+    // TODO: If we had access to the bucket_size_millis, consider calling reset()
+    // if (mAlert.refractory_period_secs() > mNumPastBuckets * bucket_size_millis * 1000).
+
+    if (mAlert.has_incidentd_details()) {
+        const Alert_IncidentdDetails& incident = mAlert.incidentd_details();
+        if (incident.has_alert_name()) {
+            ALOGW("An anomaly (%s) has occurred! Informing incidentd.",
+                  incident.alert_name().c_str());
+        } else {
+            // TODO: Can construct a name based on the criteria (and/or relay the criteria).
+            ALOGW("An anomaly (nameless) has occurred! Informing incidentd.");
+        }
+        // TODO: Send incidentd_details.name and incidentd_details.incidentd_sections to incidentd
+    } else {
+        ALOGW("An anomaly has occurred! (But informing incidentd not requested.)");
+    }
 }
 
 }  // namespace statsd

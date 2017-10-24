@@ -1134,8 +1134,32 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of
-     * the local Bluetooth adapter.
+     * Returns the {@link BluetoothClass} Bluetooth Class of Device (CoD) of the local Bluetooth
+     * adapter.
+     *
+     * @return {@link BluetoothClass} Bluetooth CoD of local Bluetooth device.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public BluetoothClass getBluetoothClass() {
+        if (getState() != STATE_ON) return null;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getBluetoothClass();
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    /**
+     * Sets the {@link BluetoothClass} Bluetooth Class of Device (CoD) of the local Bluetooth
+     * adapter.
+     *
+     * <p>Note: This value persists across system reboot.
      *
      * @param bluetoothClass {@link BluetoothClass} to set the local Bluetooth adapter to.
      * @return true if successful, false if unsuccessful.
@@ -2104,8 +2128,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.AVRCP_CONTROLLER) {
             BluetoothAvrcpController avrcp = new BluetoothAvrcpController(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-            BluetoothInputDevice iDev = new BluetoothInputDevice(context, listener);
+        } else if (profile == BluetoothProfile.HID_HOST) {
+            BluetoothHidHost iDev = new BluetoothHidHost(context, listener);
             return true;
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
@@ -2128,8 +2152,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.MAP_CLIENT) {
             BluetoothMapClient mapClient = new BluetoothMapClient(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.INPUT_HOST) {
-            BluetoothInputHost iHost = new BluetoothInputHost(context, listener);
+        } else if (profile == BluetoothProfile.HID_DEVICE) {
+            BluetoothHidDevice hidDevice = new BluetoothHidDevice(context, listener);
             return true;
         } else {
             return false;
@@ -2167,8 +2191,8 @@ public final class BluetoothAdapter {
                 BluetoothAvrcpController avrcp = (BluetoothAvrcpController) proxy;
                 avrcp.close();
                 break;
-            case BluetoothProfile.INPUT_DEVICE:
-                BluetoothInputDevice iDev = (BluetoothInputDevice) proxy;
+            case BluetoothProfile.HID_HOST:
+                BluetoothHidHost iDev = (BluetoothHidHost) proxy;
                 iDev.close();
                 break;
             case BluetoothProfile.PAN:
@@ -2207,9 +2231,9 @@ public final class BluetoothAdapter {
                 BluetoothMapClient mapClient = (BluetoothMapClient) proxy;
                 mapClient.close();
                 break;
-            case BluetoothProfile.INPUT_HOST:
-                BluetoothInputHost iHost = (BluetoothInputHost) proxy;
-                iHost.close();
+            case BluetoothProfile.HID_DEVICE:
+                BluetoothHidDevice hidDevice = (BluetoothHidDevice) proxy;
+                hidDevice.close();
                 break;
         }
     }

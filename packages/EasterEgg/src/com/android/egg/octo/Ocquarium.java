@@ -26,6 +26,7 @@ import com.android.egg.R;
 
 public class Ocquarium extends Activity {
     ImageView mImageView;
+    private OctopusDrawable mOcto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +44,9 @@ public class Ocquarium extends Activity {
         bg.addView(mImageView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        final OctopusDrawable octo = new OctopusDrawable(getApplicationContext());
-        octo.setSizePx((int) (OctopusDrawable.randfrange(40f,180f) * dp));
-        mImageView.setImageDrawable(octo);
-        octo.startDrift();
+        mOcto = new OctopusDrawable(getApplicationContext());
+        mOcto.setSizePx((int) (OctopusDrawable.randfrange(40f,180f) * dp));
+        mImageView.setImageDrawable(mOcto);
 
         mImageView.setOnTouchListener(new View.OnTouchListener() {
             boolean touching;
@@ -54,24 +54,36 @@ public class Ocquarium extends Activity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        if (octo.hitTest(motionEvent.getX(), motionEvent.getY())) {
+                        if (mOcto.hitTest(motionEvent.getX(), motionEvent.getY())) {
                             touching = true;
-                            octo.stopDrift();
+                            mOcto.stopDrift();
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (touching) {
-                            octo.moveTo(motionEvent.getX(), motionEvent.getY());
+                            mOcto.moveTo(motionEvent.getX(), motionEvent.getY());
                         }
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         touching = false;
-                        octo.startDrift();
+                        mOcto.startDrift();
                         break;
                 }
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        mOcto.stopDrift();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mOcto.startDrift();
     }
 }

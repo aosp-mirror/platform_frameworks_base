@@ -1,0 +1,4 @@
+filegroup {
+    name: "IKeyAttestationApplicationIdProvider.aidl",
+    srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
+}

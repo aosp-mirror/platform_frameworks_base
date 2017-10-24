@@ -128,7 +128,7 @@ LOCAL_SRC_FILES += \
 	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetPhone.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHealth.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHealthCallback.aidl \
-	../../system/bt/binder/android/bluetooth/IBluetoothInputDevice.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHidHost.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothPan.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothManager.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothManagerCallback.aidl \
@@ -139,7 +139,7 @@ LOCAL_SRC_FILES += \
 	../../system/bt/binder/android/bluetooth/IBluetoothSap.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothStateChangeCallback.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHeadsetClient.aidl \
-	../../system/bt/binder/android/bluetooth/IBluetoothInputHost.aidl \
+	../../system/bt/binder/android/bluetooth/IBluetoothHidDevice.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothHidDeviceCallback.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothGatt.aidl \
 	../../system/bt/binder/android/bluetooth/IBluetoothGattCallback.aidl \

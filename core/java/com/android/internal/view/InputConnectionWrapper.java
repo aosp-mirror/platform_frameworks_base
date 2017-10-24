@@ -36,6 +36,7 @@ import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InputConnectionWrapper implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
@@ -45,6 +46,14 @@ public class InputConnectionWrapper implements InputConnection {
 
     @MissingMethodFlags
     private final int mMissingMethods;
+
+    /**
+     * {@code true} if the system already decided to take away IME focus from the target app. This
+     * can be signaled even when the corresponding signal is in the task queue and
+     * {@link InputMethodService#onUnbindInput()} is not yet called back on the UI thread.
+     */
+    @NonNull
+    private final AtomicBoolean mIsUnbindIssued;
 
     static class InputContextCallback extends IInputContextCallback.Stub {
         private static final String TAG = "InputConnectionWrapper.ICC";
@@ -231,14 +240,20 @@ public class InputConnectionWrapper implements InputConnection {
 
     public InputConnectionWrapper(
             @NonNull WeakReference<AbstractInputMethodService> inputMethodService,
-            IInputContext inputContext, @MissingMethodFlags final int missingMethods) {
+            IInputContext inputContext, @MissingMethodFlags final int missingMethods,
+            @NonNull AtomicBoolean isUnbindIssued) {
         mInputMethodService = inputMethodService;
         mIInputContext = inputContext;
         mMissingMethods = missingMethods;
+        mIsUnbindIssued = isUnbindIssued;
     }
 
     @AnyThread
     public CharSequence getTextAfterCursor(int length, int flags) {
+        if (mIsUnbindIssued.get()) {
+            return null;
+        }
+
         CharSequence value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -258,6 +273,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public CharSequence getTextBeforeCursor(int length, int flags) {
+        if (mIsUnbindIssued.get()) {
+            return null;
+        }
+
         CharSequence value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -277,6 +296,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public CharSequence getSelectedText(int flags) {
+        if (mIsUnbindIssued.get()) {
+            return null;
+        }
+
         if (isMethodMissing(MissingMethodFlags.GET_SELECTED_TEXT)) {
             // This method is not implemented.
             return null;
@@ -300,6 +323,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public int getCursorCapsMode(int reqModes) {
+        if (mIsUnbindIssued.get()) {
+            return 0;
+        }
+
         int value = 0;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -319,6 +346,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
+        if (mIsUnbindIssued.get()) {
+            return null;
+        }
+
         ExtractedText value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -516,6 +547,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public boolean requestCursorUpdates(int cursorUpdateMode) {
+        if (mIsUnbindIssued.get()) {
+            return false;
+        }
+
         boolean result = false;
         if (isMethodMissing(MissingMethodFlags.REQUEST_CURSOR_UPDATES)) {
             // This method is not implemented.
@@ -550,6 +585,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        if (mIsUnbindIssued.get()) {
+            return false;
+        }
+
         boolean result = false;
         if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
             // This method is not implemented.

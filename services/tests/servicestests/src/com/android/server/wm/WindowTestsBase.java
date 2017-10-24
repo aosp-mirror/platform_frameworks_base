@@ -89,6 +89,9 @@ class WindowTestsBase {
     public void setUp() throws Exception {
         if (!sOneTimeSetupDone) {
             sOneTimeSetupDone = true;
+
+            // Allows to mock package local classes and methods
+            System.setProperty("dexmaker.share_classloader", "true");
             MockitoAnnotations.initMocks(this);
         }
 

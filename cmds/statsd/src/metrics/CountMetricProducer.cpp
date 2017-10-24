@@ -39,14 +39,23 @@ CountMetricProducer::CountMetricProducer(const CountMetric& metric, const int co
                                          const sp<ConditionWizard>& wizard)
     // TODO: Pass in the start time from MetricsManager, instead of calling time() here.
     : MetricProducer((time(nullptr) * NANO_SECONDS_IN_A_SECOND), conditionIndex, wizard),
-      mMetric(metric),
-      // TODO: read mAnomalyTracker parameters from config file.
-      mAnomalyTracker(6, 10) {
+      mMetric(metric) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
         mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
     } else {
         mBucketSizeNs = LLONG_MAX;
+    }
+
+    mAnomalyTrackers.reserve(metric.alerts_size());
+    for (int i = 0; i < metric.alerts_size(); i++) {
+        const Alert& alert = metric.alerts(i);
+        if (alert.trigger_if_sum_gt() > 0 && alert.number_of_buckets() > 0) {
+            mAnomalyTrackers.push_back(std::make_unique<CountAnomalyTracker>(alert));
+        } else {
+            ALOGW("Ignoring invalid count metric alert: threshold=%lld num_buckets= %d",
+                  alert.trigger_if_sum_gt(), alert.number_of_buckets());
+        }
     }
 
     // TODO: use UidMap if uid->pkg_name is required
@@ -124,52 +133,23 @@ void CountMetricProducer::onConditionChanged(const bool conditionMet) {
     mCondition = conditionMet;
 }
 
-void CountMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
+void CountMetricProducer::onMatchedLogEventInternal(
+        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const map<string, HashableDimensionKey>& conditionKey, bool condition,
+        const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
-    // this is old event, maybe statsd restarted?
-    if (eventTimeNs < mStartTimeNs) {
-        return;
-    }
 
     flushCounterIfNeeded(eventTimeNs);
 
-    if (mConditionSliced) {
-        map<string, HashableDimensionKey> conditionKeys;
-        for (const auto& link : mConditionLinks) {
-            VLOG("Condition link key_in_main size %d", link.key_in_main_size());
-            HashableDimensionKey conditionKey = getDimensionKeyForCondition(event, link);
-            conditionKeys[link.condition()] = conditionKey;
-        }
-        if (mWizard->query(mConditionTrackerIndex, conditionKeys) != ConditionState::kTrue) {
-            VLOG("metric %lld sliced condition not met", mMetric.metric_id());
-            return;
-        }
-    } else {
-        if (!mCondition) {
-            VLOG("metric %lld condition not met", mMetric.metric_id());
-            return;
-        }
+    if (condition == false) {
+        return;
     }
 
-    HashableDimensionKey hashableKey;
-
-    if (mDimension.size() > 0) {
-        vector<KeyValuePair> key = getDimensionKey(event, mDimension);
-        hashableKey = getHashableKey(key);
-        // Add the HashableDimensionKey->vector<KeyValuePair> to the map, because StatsLogReport
-        // expects vector<KeyValuePair>.
-        if (mDimensionKeyMap.find(hashableKey) == mDimensionKeyMap.end()) {
-            mDimensionKeyMap[hashableKey] = key;
-        }
-    } else {
-        hashableKey = DEFAULT_DIMENSION_KEY;
-    }
-
-    auto it = mCurrentSlicedCounter.find(hashableKey);
+    auto it = mCurrentSlicedCounter.find(eventKey);
 
     if (it == mCurrentSlicedCounter.end()) {
         // create a counter for the new key
-        mCurrentSlicedCounter[hashableKey] = 1;
+        mCurrentSlicedCounter[eventKey] = 1;
 
     } else {
         // increment the existing value
@@ -177,8 +157,13 @@ void CountMetricProducer::onMatchedLogEvent(const size_t matcherIndex, const Log
         count++;
     }
 
-    VLOG("metric %lld %s->%d", mMetric.metric_id(), hashableKey.c_str(),
-         mCurrentSlicedCounter[hashableKey]);
+    // TODO: Re-add anomaly detection (similar to):
+    // for (auto& tracker : mAnomalyTrackers) {
+    //     tracker->checkAnomaly(mCounter);
+    // }
+
+    VLOG("metric %lld %s->%d", mMetric.metric_id(), eventKey.c_str(),
+         mCurrentSlicedCounter[eventKey]);
 }
 
 // When a new matched event comes in, we check if event falls into the current
@@ -204,6 +189,11 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
         VLOG("metric %lld, dump key value: %s -> %d", mMetric.metric_id(), counter.first.c_str(),
              counter.second);
     }
+
+    // TODO: Re-add anomaly detection (similar to):
+    // for (auto& tracker : mAnomalyTrackers) {
+    //     tracker->addPastBucket(mCounter, numBucketsForward);
+    //}
 
     // Reset counters
     mCurrentSlicedCounter.clear();

@@ -130,12 +130,12 @@ static StatsdConfig build_fake_config() {
     int APP_USAGE_FOREGROUND = 1;
     int APP_USAGE_BACKGROUND = 0;
 
-    int SCREEN_EVENT_TAG_ID = 2;
+    int SCREEN_EVENT_TAG_ID = 29;
     int SCREEN_EVENT_STATE_KEY = 1;
     int SCREEN_EVENT_ON_VALUE = 2;
     int SCREEN_EVENT_OFF_VALUE = 1;
 
-    int UID_PROCESS_STATE_TAG_ID = 3;
+    int UID_PROCESS_STATE_TAG_ID = 27;
     int UID_PROCESS_STATE_UID_KEY = 1;
 
     // Count Screen ON events.
@@ -143,6 +143,12 @@ static StatsdConfig build_fake_config() {
     metric->set_metric_id(1);
     metric->set_what("SCREEN_TURNED_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+
+    // Anomaly threshold for screen-on count.
+    Alert* alert = metric->add_alerts();
+    alert->set_number_of_buckets(6);
+    alert->set_trigger_if_sum_gt(10);
+    alert->set_refractory_period_secs(30);
 
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();

@@ -61,8 +61,6 @@ public:
 
     virtual ~DurationMetricProducer();
 
-    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) override;
-
     void onConditionChanged(const bool conditionMet) override;
 
     void finish() override;
@@ -73,6 +71,11 @@ public:
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
+
+protected:
+    void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
+                                   const std::map<std::string, HashableDimensionKey>& conditionKeys,
+                                   bool condition, const LogEvent& event) override;
 
 private:
     const DurationMetric mMetric;
