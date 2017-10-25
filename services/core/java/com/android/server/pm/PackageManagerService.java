@@ -397,7 +397,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final boolean DEBUG_UPGRADE = false;
     static final boolean DEBUG_DOMAIN_VERIFICATION = false;
     private static final boolean DEBUG_BACKUP = false;
-    private static final boolean DEBUG_INSTALL = false;
+    public static final boolean DEBUG_INSTALL = false;
     public static final boolean DEBUG_REMOVE = false;
     private static final boolean DEBUG_BROADCASTS = false;
     private static final boolean DEBUG_SHOW_INFO = false;
@@ -522,7 +522,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static final int DEFAULT_VERIFICATION_RESPONSE = PackageManager.VERIFICATION_ALLOW;
 
-    static final String PLATFORM_PACKAGE_NAME = "android";
+    public static final String PLATFORM_PACKAGE_NAME = "android";
 
     static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
@@ -541,18 +541,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
-
-    /** Permission grant: not grant the permission. */
-    private static final int GRANT_DENIED = 1;
-
-    /** Permission grant: grant the permission as an install permission. */
-    private static final int GRANT_INSTALL = 2;
-
-    /** Permission grant: grant the permission as a runtime one. */
-    private static final int GRANT_RUNTIME = 3;
-
-    /** Permission grant: grant as runtime a permission that was granted as an install time one. */
-    private static final int GRANT_UPGRADE = 4;
 
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
@@ -1009,8 +997,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private File mCacheDir;
 
-    private ArraySet<String> mPrivappPermissionsViolations;
-
     private Future<?> mPrepareAppDataFuture;
 
     private static class IFVerificationParams {
@@ -1397,8 +1383,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
-
-    final boolean mPermissionReviewRequired;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -1921,9 +1905,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         @Override
-        public void onPermissionUpdated(int userId) {
+        public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
             synchronized (mPackages) {
-                mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+                for (int userId : updatedUserIds) {
+                    mSettings.writeRuntimePermissionsForUserLPr(userId, sync);
+                }
             }
         }
         @Override
@@ -2355,9 +2341,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         mContext = context;
-
-        mPermissionReviewRequired = context.getResources().getBoolean(
-                R.bool.config_permissionReviewRequired);
 
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
@@ -2863,13 +2846,14 @@ public class PackageManagerService extends IPackageManager.Stub
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            int updateFlags = UPDATE_PERMISSIONS_ALL;
-            if (ver.sdkVersion != mSdkVersion) {
+            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
+            if (sdkUpdated) {
                 Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for internal storage");
-                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLocked(null, null, StorageManager.UUID_PRIVATE_INTERNAL, updateFlags);
+            mPermissionManager.updateAllPermissions(
+                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated, mPackages.values(),
+                    mPermissionCallback);
             ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot or an update from pre-M, and it is a normal
@@ -3588,7 +3572,7 @@ public class PackageManagerService extends IPackageManager.Stub
         for (String packageName : packages) {
             PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg != null) {
-                if (!pkg.isSystemApp()) {
+                if (!pkg.isSystem()) {
                     Slog.w(TAG, "Non-system app '" + packageName + "' in sysconfig <app-link>");
                     continue;
                 }
@@ -5269,7 +5253,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         synchronized (mPackages) {
-            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
+            mPermissionManager.updateAllPermissions(
+                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
+                    mPermissionCallback);
             for (int userId : UserManagerService.getInstance().getUserIds()) {
                 final int packageCount = mPackages.size();
                 for (int i = 0; i < packageCount; i++) {
@@ -5286,7 +5272,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int getPermissionFlags(String permName, String packageName, int userId) {
-        return mPermissionManager.getPermissionFlags(permName, packageName, getCallingUid(), userId);
+        return mPermissionManager.getPermissionFlags(
+                permName, packageName, getCallingUid(), userId);
     }
 
     @Override
@@ -9831,7 +9818,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // it is better for the user to reinstall than to be in an limbo
                 // state. Also libs disappearing under an app should never happen
                 // - just in case.
-                if (!pkg.isSystemApp() || pkg.isUpdatedSystemApp()) {
+                if (!pkg.isSystem() || pkg.isUpdatedSystemApp()) {
                     final int flags = pkg.isUpdatedSystemApp()
                             ? PackageManager.DELETE_KEEP_DATA : 0;
                     deletePackageLIF(pkg.packageName, null, true, sUserManager.getUserIds(),
@@ -9980,7 +9967,7 @@ public class PackageManagerService extends IPackageManager.Stub
         assertPackageIsValid(pkg, policyFlags, scanFlags);
 
         if (Build.IS_DEBUGGABLE &&
-                pkg.isPrivilegedApp() &&
+                pkg.isPrivileged() &&
                 !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
             PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
         }
@@ -11873,611 +11860,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    public static final int UPDATE_PERMISSIONS_ALL = 1<<0;
-    public static final int UPDATE_PERMISSIONS_REPLACE_PKG = 1<<1;
-    public static final int UPDATE_PERMISSIONS_REPLACE_ALL = 1<<2;
-
-    private void updatePermissionsLPw(PackageParser.Package pkg, int flags) {
-        // Update the parent permissions
-        updatePermissionsLPw(pkg.packageName, pkg, flags);
-        // Update the child permissions
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-        for (int i = 0; i < childCount; i++) {
-            PackageParser.Package childPkg = pkg.childPackages.get(i);
-            updatePermissionsLPw(childPkg.packageName, childPkg, flags);
-        }
-    }
-
-    private void updatePermissionsLPw(String changingPkg, PackageParser.Package pkgInfo,
-            int flags) {
-        final String volumeUuid = (pkgInfo != null) ? getVolumeUuidForPackage(pkgInfo) : null;
-        updatePermissionsLocked(changingPkg, pkgInfo, volumeUuid, flags);
-    }
-
-    private void updatePermissionsLocked(String changingPkg,
-            PackageParser.Package pkgInfo, String replaceVolumeUuid, int flags) {
-        // TODO: Most of the methods exposing BasePermission internals [source package name,
-        // etc..] shouldn't be needed. Instead, when we've parsed a permission that doesn't
-        // have package settings, we should make note of it elsewhere [map between
-        // source package name and BasePermission] and cycle through that here. Then we
-        // define a single method on BasePermission that takes a PackageSetting, changing
-        // package name and a package.
-        // NOTE: With this approach, we also don't need to tree trees differently than
-        // normal permissions. Today, we need two separate loops because these BasePermission
-        // objects are stored separately.
-        // Make sure there are no dangling permission trees.
-        flags = mPermissionManager.updatePermissionTrees(changingPkg, pkgInfo, flags);
-
-        // Make sure all dynamic permissions have been assigned to a package,
-        // and make sure there are no dangling permissions.
-        flags = mPermissionManager.updatePermissions(changingPkg, pkgInfo, flags);
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "grantPermissions");
-        // Now update the permissions for all packages, in particular
-        // replace the granted permissions of the system packages.
-        if ((flags&UPDATE_PERMISSIONS_ALL) != 0) {
-            for (PackageParser.Package pkg : mPackages.values()) {
-                if (pkg != pkgInfo) {
-                    // Only replace for packages on requested volume
-                    final String volumeUuid = getVolumeUuidForPackage(pkg);
-                    final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_ALL) != 0)
-                            && Objects.equals(replaceVolumeUuid, volumeUuid);
-                    grantPermissionsLPw(pkg, replace, changingPkg);
-                }
-            }
-        }
-
-        if (pkgInfo != null) {
-            // Only replace for packages on requested volume
-            final String volumeUuid = getVolumeUuidForPackage(pkgInfo);
-            final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_PKG) != 0)
-                    && Objects.equals(replaceVolumeUuid, volumeUuid);
-            grantPermissionsLPw(pkgInfo, replace, changingPkg);
-        }
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-    }
-
-    private void grantPermissionsLPw(PackageParser.Package pkg, boolean replace,
-            String packageOfInterest) {
-        // IMPORTANT: There are two types of permissions: install and runtime.
-        // Install time permissions are granted when the app is installed to
-        // all device users and users added in the future. Runtime permissions
-        // are granted at runtime explicitly to specific users. Normal and signature
-        // protected permissions are install time permissions. Dangerous permissions
-        // are install permissions if the app's target SDK is Lollipop MR1 or older,
-        // otherwise they are runtime permissions. This function does not manage
-        // runtime permissions except for the case an app targeting Lollipop MR1
-        // being upgraded to target a newer SDK, in which case dangerous permissions
-        // are transformed from install time to runtime ones.
-
-        final PackageSetting ps = (PackageSetting) pkg.mExtras;
-        if (ps == null) {
-            return;
-        }
-
-        PermissionsState permissionsState = ps.getPermissionsState();
-        PermissionsState origPermissions = permissionsState;
-
-        final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-
-        boolean runtimePermissionsRevoked = false;
-        int[] changedRuntimePermissionUserIds = EMPTY_INT_ARRAY;
-
-        boolean changedInstallPermission = false;
-
-        if (replace) {
-            ps.installPermissionsFixed = false;
-            if (!ps.isSharedUser()) {
-                origPermissions = new PermissionsState(permissionsState);
-                permissionsState.reset();
-            } else {
-                // We need to know only about runtime permission changes since the
-                // calling code always writes the install permissions state but
-                // the runtime ones are written only if changed. The only cases of
-                // changed runtime permissions here are promotion of an install to
-                // runtime and revocation of a runtime from a shared user.
-                changedRuntimePermissionUserIds =
-                        mPermissionManager.revokeUnusedSharedUserPermissions(
-                                ps.sharedUser, UserManagerService.getInstance().getUserIds());
-                if (!ArrayUtils.isEmpty(changedRuntimePermissionUserIds)) {
-                    runtimePermissionsRevoked = true;
-                }
-            }
-        }
-
-        permissionsState.setGlobalGids(mPermissionManager.getGlobalGidsTEMP());
-
-        final int N = pkg.requestedPermissions.size();
-        for (int i=0; i<N; i++) {
-            final String name = pkg.requestedPermissions.get(i);
-            final BasePermission bp = (BasePermission) mPermissionManager.getPermissionTEMP(name);
-            final boolean appSupportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
-                    >= Build.VERSION_CODES.M;
-
-            if (DEBUG_INSTALL) {
-                Log.i(TAG, "Package " + pkg.packageName + " checking " + name + ": " + bp);
-            }
-
-            if (bp == null || bp.getSourcePackageSetting() == null) {
-                if (packageOfInterest == null || packageOfInterest.equals(pkg.packageName)) {
-                    if (DEBUG_PERMISSIONS) {
-                        Slog.i(TAG, "Unknown permission " + name
-                                + " in package " + pkg.packageName);
-                    }
-                }
-                continue;
-            }
-
-
-            // Limit ephemeral apps to ephemeral allowed permissions.
-            if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
-                if (DEBUG_PERMISSIONS) {
-                    Log.i(TAG, "Denying non-ephemeral permission " + bp.getName() + " for package "
-                            + pkg.packageName);
-                }
-                continue;
-            }
-
-            if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
-                if (DEBUG_PERMISSIONS) {
-                    Log.i(TAG, "Denying runtime-only permission " + bp.getName() + " for package "
-                            + pkg.packageName);
-                }
-                continue;
-            }
-
-            final String perm = bp.getName();
-            boolean allowedSig = false;
-            int grant = GRANT_DENIED;
-
-            // Keep track of app op permissions.
-            if (bp.isAppOp()) {
-                mSettings.addAppOpPackage(perm, pkg.packageName);
-            }
-
-            if (bp.isNormal()) {
-                // For all apps normal permissions are install time ones.
-                grant = GRANT_INSTALL;
-            } else if (bp.isRuntime()) {
-                // If a permission review is required for legacy apps we represent
-                // their permissions as always granted runtime ones since we need
-                // to keep the review required permission flag per user while an
-                // install permission's state is shared across all users.
-                if (!appSupportsRuntimePermissions && !mPermissionReviewRequired) {
-                    // For legacy apps dangerous permissions are install time ones.
-                    grant = GRANT_INSTALL;
-                } else if (origPermissions.hasInstallPermission(bp.getName())) {
-                    // For legacy apps that became modern, install becomes runtime.
-                    grant = GRANT_UPGRADE;
-                } else if (mPromoteSystemApps
-                        && isSystemApp(ps)
-                        && mExistingSystemPackages.contains(ps.name)) {
-                    // For legacy system apps, install becomes runtime.
-                    // We cannot check hasInstallPermission() for system apps since those
-                    // permissions were granted implicitly and not persisted pre-M.
-                    grant = GRANT_UPGRADE;
-                } else {
-                    // For modern apps keep runtime permissions unchanged.
-                    grant = GRANT_RUNTIME;
-                }
-            } else if (bp.isSignature()) {
-                // For all apps signature permissions are install time ones.
-                allowedSig = grantSignaturePermission(perm, pkg, bp, origPermissions);
-                if (allowedSig) {
-                    grant = GRANT_INSTALL;
-                }
-            }
-
-            if (DEBUG_PERMISSIONS) {
-                Slog.i(TAG, "Granting permission " + perm + " to package " + pkg.packageName);
-            }
-
-            if (grant != GRANT_DENIED) {
-                if (!isSystemApp(ps) && ps.installPermissionsFixed) {
-                    // If this is an existing, non-system package, then
-                    // we can't add any new permissions to it.
-                    if (!allowedSig && !origPermissions.hasInstallPermission(perm)) {
-                        // Except...  if this is a permission that was added
-                        // to the platform (note: need to only do this when
-                        // updating the platform).
-                        if (!isNewPlatformPermissionForPackage(perm, pkg)) {
-                            grant = GRANT_DENIED;
-                        }
-                    }
-                }
-
-                switch (grant) {
-                    case GRANT_INSTALL: {
-                        // Revoke this as runtime permission to handle the case of
-                        // a runtime permission being downgraded to an install one.
-                        // Also in permission review mode we keep dangerous permissions
-                        // for legacy apps
-                        for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            if (origPermissions.getRuntimePermissionState(
-                                    perm, userId) != null) {
-                                // Revoke the runtime permission and clear the flags.
-                                origPermissions.revokeRuntimePermission(bp, userId);
-                                origPermissions.updatePermissionFlags(bp, userId,
-                                      PackageManager.MASK_PERMISSION_FLAGS, 0);
-                                // If we revoked a permission permission, we have to write.
-                                changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                        changedRuntimePermissionUserIds, userId);
-                            }
-                        }
-                        // Grant an install permission.
-                        if (permissionsState.grantInstallPermission(bp) !=
-                                PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                            changedInstallPermission = true;
-                        }
-                    } break;
-
-                    case GRANT_RUNTIME: {
-                        // Grant previously granted runtime permissions.
-                        for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            PermissionState permissionState = origPermissions
-                                    .getRuntimePermissionState(perm, userId);
-                            int flags = permissionState != null
-                                    ? permissionState.getFlags() : 0;
-                            if (origPermissions.hasRuntimePermission(perm, userId)) {
-                                // Don't propagate the permission in a permission review mode if
-                                // the former was revoked, i.e. marked to not propagate on upgrade.
-                                // Note that in a permission review mode install permissions are
-                                // represented as constantly granted runtime ones since we need to
-                                // keep a per user state associated with the permission. Also the
-                                // revoke on upgrade flag is no longer applicable and is reset.
-                                final boolean revokeOnUpgrade = (flags & PackageManager
-                                        .FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0;
-                                if (revokeOnUpgrade) {
-                                    flags &= ~PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
-                                    // Since we changed the flags, we have to write.
-                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                            changedRuntimePermissionUserIds, userId);
-                                }
-                                if (!mPermissionReviewRequired || !revokeOnUpgrade) {
-                                    if (permissionsState.grantRuntimePermission(bp, userId) ==
-                                            PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                        // If we cannot put the permission as it was,
-                                        // we have to write.
-                                        changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                                changedRuntimePermissionUserIds, userId);
-                                    }
-                                }
-
-                                // If the app supports runtime permissions no need for a review.
-                                if (mPermissionReviewRequired
-                                        && appSupportsRuntimePermissions
-                                        && (flags & PackageManager
-                                                .FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                                    flags &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-                                    // Since we changed the flags, we have to write.
-                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                            changedRuntimePermissionUserIds, userId);
-                                }
-                            } else if (mPermissionReviewRequired
-                                    && !appSupportsRuntimePermissions) {
-                                // For legacy apps that need a permission review, every new
-                                // runtime permission is granted but it is pending a review.
-                                // We also need to review only platform defined runtime
-                                // permissions as these are the only ones the platform knows
-                                // how to disable the API to simulate revocation as legacy
-                                // apps don't expect to run with revoked permissions.
-                                if (PLATFORM_PACKAGE_NAME.equals(bp.getSourcePackageName())) {
-                                    if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
-                                        flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
-                                        // We changed the flags, hence have to write.
-                                        changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                                changedRuntimePermissionUserIds, userId);
-                                    }
-                                }
-                                if (permissionsState.grantRuntimePermission(bp, userId)
-                                        != PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                    // We changed the permission, hence have to write.
-                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                            changedRuntimePermissionUserIds, userId);
-                                }
-                            }
-                            // Propagate the permission flags.
-                            permissionsState.updatePermissionFlags(bp, userId, flags, flags);
-                        }
-                    } break;
-
-                    case GRANT_UPGRADE: {
-                        // Grant runtime permissions for a previously held install permission.
-                        PermissionState permissionState = origPermissions
-                                .getInstallPermissionState(perm);
-                        final int flags = permissionState != null ? permissionState.getFlags() : 0;
-
-                        if (origPermissions.revokeInstallPermission(bp)
-                                != PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                            // We will be transferring the permission flags, so clear them.
-                            origPermissions.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                    PackageManager.MASK_PERMISSION_FLAGS, 0);
-                            changedInstallPermission = true;
-                        }
-
-                        // If the permission is not to be promoted to runtime we ignore it and
-                        // also its other flags as they are not applicable to install permissions.
-                        if ((flags & PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE) == 0) {
-                            for (int userId : currentUserIds) {
-                                if (permissionsState.grantRuntimePermission(bp, userId) !=
-                                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                    // Transfer the permission flags.
-                                    permissionsState.updatePermissionFlags(bp, userId,
-                                            flags, flags);
-                                    // If we granted the permission, we have to write.
-                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
-                                            changedRuntimePermissionUserIds, userId);
-                                }
-                            }
-                        }
-                    } break;
-
-                    default: {
-                        if (packageOfInterest == null
-                                || packageOfInterest.equals(pkg.packageName)) {
-                            if (DEBUG_PERMISSIONS) {
-                                Slog.i(TAG, "Not granting permission " + perm
-                                        + " to package " + pkg.packageName
-                                        + " because it was previously installed without");
-                            }
-                        }
-                    } break;
-                }
-            } else {
-                if (permissionsState.revokeInstallPermission(bp) !=
-                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                    // Also drop the permission flags.
-                    permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                            PackageManager.MASK_PERMISSION_FLAGS, 0);
-                    changedInstallPermission = true;
-                    Slog.i(TAG, "Un-granting permission " + perm
-                            + " from package " + pkg.packageName
-                            + " (protectionLevel=" + bp.getProtectionLevel()
-                            + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                            + ")");
-                } else if (bp.isAppOp()) {
-                    // Don't print warning for app op permissions, since it is fine for them
-                    // not to be granted, there is a UI for the user to decide.
-                    if (DEBUG_PERMISSIONS
-                            && (packageOfInterest == null
-                                    || packageOfInterest.equals(pkg.packageName))) {
-                        Slog.i(TAG, "Not granting permission " + perm
-                                + " to package " + pkg.packageName
-                                + " (protectionLevel=" + bp.getProtectionLevel()
-                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                                + ")");
-                    }
-                }
-            }
-        }
-
-        if ((changedInstallPermission || replace) && !ps.installPermissionsFixed &&
-                !isSystemApp(ps) || isUpdatedSystemApp(ps)){
-            // This is the first that we have heard about this package, so the
-            // permissions we have now selected are fixed until explicitly
-            // changed.
-            ps.installPermissionsFixed = true;
-        }
-
-        // Persist the runtime permissions state for users with changes. If permissions
-        // were revoked because no app in the shared user declares them we have to
-        // write synchronously to avoid losing runtime permissions state.
-        for (int userId : changedRuntimePermissionUserIds) {
-            mSettings.writeRuntimePermissionsForUserLPr(userId, runtimePermissionsRevoked);
-        }
-    }
-
-    private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {
-        boolean allowed = false;
-        final int NP = PackageParser.NEW_PERMISSIONS.length;
-        for (int ip=0; ip<NP; ip++) {
-            final PackageParser.NewPermissionInfo npi
-                    = PackageParser.NEW_PERMISSIONS[ip];
-            if (npi.name.equals(perm)
-                    && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
-                allowed = true;
-                Log.i(TAG, "Auto-granting " + perm + " to old pkg "
-                        + pkg.packageName);
-                break;
-            }
-        }
-        return allowed;
-    }
-
-    /**
-     * Determines whether a package is whitelisted for a particular privapp permission.
-     *
-     * <p>Does NOT check whether the package is a privapp, just whether it's whitelisted.
-     *
-     * <p>This handles parent/child apps.
-     */
-    private boolean hasPrivappWhitelistEntry(String perm, PackageParser.Package pkg) {
-        ArraySet<String> wlPermissions = SystemConfig.getInstance()
-                .getPrivAppPermissions(pkg.packageName);
-        // Let's check if this package is whitelisted...
-        boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
-        // If it's not, we'll also tail-recurse to the parent.
-        return whitelisted ||
-                pkg.parentPackage != null && hasPrivappWhitelistEntry(perm, pkg.parentPackage);
-    }
-
-    private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
-            BasePermission bp, PermissionsState origPermissions) {
-        boolean oemPermission = bp.isOEM();
-        boolean privilegedPermission = bp.isPrivileged();
-        boolean privappPermissionsDisable =
-                RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE;
-        boolean platformPermission = PLATFORM_PACKAGE_NAME.equals(bp.getSourcePackageName());
-        boolean platformPackage = PLATFORM_PACKAGE_NAME.equals(pkg.packageName);
-        if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivilegedApp()
-                && !platformPackage && platformPermission) {
-            if (!hasPrivappWhitelistEntry(perm, pkg)) {
-                Slog.w(TAG, "Privileged permission " + perm + " for package "
-                        + pkg.packageName + " - not in privapp-permissions whitelist");
-                // Only report violations for apps on system image
-                if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
-                    // it's only a reportable violation if the permission isn't explicitly denied
-                    final ArraySet<String> deniedPermissions = SystemConfig.getInstance()
-                            .getPrivAppDenyPermissions(pkg.packageName);
-                    final boolean permissionViolation =
-                            deniedPermissions == null || !deniedPermissions.contains(perm);
-                    if (permissionViolation
-                            && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                        if (mPrivappPermissionsViolations == null) {
-                            mPrivappPermissionsViolations = new ArraySet<>();
-                        }
-                        mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
-                    } else {
-                        return false;
-                    }
-                }
-                if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                    return false;
-                }
-            }
-        }
-        boolean allowed = (compareSignatures(
-                bp.getSourcePackageSetting().signatures.mSignatures, pkg.mSignatures)
-                        == PackageManager.SIGNATURE_MATCH)
-                || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
-                        == PackageManager.SIGNATURE_MATCH);
-        if (!allowed && (privilegedPermission || oemPermission)) {
-            if (isSystemApp(pkg)) {
-                // For updated system applications, a privileged/oem permission
-                // is granted only if it had been defined by the original application.
-                if (pkg.isUpdatedSystemApp()) {
-                    final PackageSetting sysPs = mSettings
-                            .getDisabledSystemPkgLPr(pkg.packageName);
-                    if (sysPs != null && sysPs.getPermissionsState().hasInstallPermission(perm)) {
-                        // If the original was granted this permission, we take
-                        // that grant decision as read and propagate it to the
-                        // update.
-                        if ((privilegedPermission && sysPs.isPrivileged())
-                                || (oemPermission && sysPs.isOem()
-                                        && canGrantOemPermission(sysPs, perm))) {
-                            allowed = true;
-                        }
-                    } else {
-                        // The system apk may have been updated with an older
-                        // version of the one on the data partition, but which
-                        // granted a new system permission that it didn't have
-                        // before.  In this case we do want to allow the app to
-                        // now get the new permission if the ancestral apk is
-                        // privileged to get it.
-                        if (sysPs != null && sysPs.pkg != null
-                                && isPackageRequestingPermission(sysPs.pkg, perm)
-                                && ((privilegedPermission && sysPs.isPrivileged())
-                                        || (oemPermission && sysPs.isOem()
-                                                && canGrantOemPermission(sysPs, perm)))) {
-                            allowed = true;
-                        }
-                        // Also if a privileged parent package on the system image or any of
-                        // its children requested a privileged/oem permission, the updated child
-                        // packages can also get the permission.
-                        if (pkg.parentPackage != null) {
-                            final PackageSetting disabledSysParentPs = mSettings
-                                    .getDisabledSystemPkgLPr(pkg.parentPackage.packageName);
-                            final PackageParser.Package disabledSysParentPkg =
-                                    (disabledSysParentPs == null || disabledSysParentPs.pkg == null)
-                                    ? null : disabledSysParentPs.pkg;
-                            if (disabledSysParentPkg != null
-                                    && ((privilegedPermission && disabledSysParentPs.isPrivileged())
-                                            || (oemPermission && disabledSysParentPs.isOem()))) {
-                                if (isPackageRequestingPermission(disabledSysParentPkg, perm)
-                                        && canGrantOemPermission(disabledSysParentPs, perm)) {
-                                    allowed = true;
-                                } else if (disabledSysParentPkg.childPackages != null) {
-                                    final int count = disabledSysParentPkg.childPackages.size();
-                                    for (int i = 0; i < count; i++) {
-                                        final PackageParser.Package disabledSysChildPkg =
-                                                disabledSysParentPkg.childPackages.get(i);
-                                        final PackageSetting disabledSysChildPs =
-                                                mSettings.getDisabledSystemPkgLPr(
-                                                        disabledSysChildPkg.packageName);
-                                        if (isPackageRequestingPermission(disabledSysChildPkg, perm)
-                                                && canGrantOemPermission(
-                                                        disabledSysChildPs, perm)) {
-                                            allowed = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    allowed = (privilegedPermission && isPrivilegedApp(pkg))
-                            || (oemPermission && isOemApp(pkg)
-                                    && canGrantOemPermission(
-                                            mSettings.getPackageLPr(pkg.packageName), perm));
-                }
-            }
-        }
-        if (!allowed) {
-            if (!allowed
-                    && bp.isPre23()
-                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                // If this was a previously normal/dangerous permission that got moved
-                // to a system permission as part of the runtime permission redesign, then
-                // we still want to blindly grant it to old apps.
-                allowed = true;
-            }
-            if (!allowed && bp.isInstaller()
-                    && pkg.packageName.equals(mRequiredInstallerPackage)) {
-                // If this permission is to be granted to the system installer and
-                // this app is an installer, then it gets the permission.
-                allowed = true;
-            }
-            if (!allowed && bp.isVerifier()
-                    && pkg.packageName.equals(mRequiredVerifierPackage)) {
-                // If this permission is to be granted to the system verifier and
-                // this app is a verifier, then it gets the permission.
-                allowed = true;
-            }
-            if (!allowed && bp.isPreInstalled()
-                    && isSystemApp(pkg)) {
-                // Any pre-installed system app is allowed to get this permission.
-                allowed = true;
-            }
-            if (!allowed && bp.isDevelopment()) {
-                // For development permissions, a development permission
-                // is granted only if it was already granted.
-                allowed = origPermissions.hasInstallPermission(perm);
-            }
-            if (!allowed && bp.isSetup()
-                    && pkg.packageName.equals(mSetupWizardPackage)) {
-                // If this permission is to be granted to the system setup wizard and
-                // this app is a setup wizard, then it gets the permission.
-                allowed = true;
-            }
-        }
-        return allowed;
-    }
-
-    private static boolean canGrantOemPermission(PackageSetting ps, String permission) {
-        if (!ps.isOem()) {
-            return false;
-        }
-        // all oem permissions must explicitly be granted or denied
-        final Boolean granted =
-                SystemConfig.getInstance().getOemPermissions(ps.name).get(permission);
-        if (granted == null) {
-            throw new IllegalStateException("OEM permission" + permission + " requested by package "
-                    + ps.name + " must be explicitly declared granted or not");
-        }
-        return Boolean.TRUE == granted;
-    }
-
-    private boolean isPackageRequestingPermission(PackageParser.Package pkg, String permission) {
-        final int permCount = pkg.requestedPermissions.size();
-        for (int j = 0; j < permCount; j++) {
-            String requestedPermission = pkg.requestedPermissions.get(j);
-            if (permission.equals(requestedPermission)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
@@ -16369,7 +15751,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // don't allow a system upgrade unless the upgrade hash matches
-            if (oldPackage.restrictUpdateHash != null && oldPackage.isSystemApp()) {
+            if (oldPackage.restrictUpdateHash != null && oldPackage.isSystem()) {
                 byte[] digestBytes = null;
                 try {
                     final MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -16636,7 +16018,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     setInstallerPackageNameLPw(deletedPackage, installerPackageName);
 
                     // Update permissions for restored package
-                    updatePermissionsLPw(deletedPackage, UPDATE_PERMISSIONS_ALL);
+                    mPermissionManager.updatePermissions(
+                            deletedPackage.packageName, deletedPackage, false, mPackages.values(),
+                            mPermissionCallback);
 
                     mSettings.writeLPr();
                 }
@@ -16778,7 +16162,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 setInstallerPackageNameLPw(deletedPackage, installerPackageName);
 
                 // Update permissions for restored package
-                updatePermissionsLPw(deletedPackage, UPDATE_PERMISSIONS_ALL);
+                mPermissionManager.updatePermissions(
+                        deletedPackage.packageName, deletedPackage, false, mPackages.values(),
+                        mPermissionCallback);
 
                 mSettings.writeLPr();
             }
@@ -16891,12 +16277,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void updateSettingsInternalLI(PackageParser.Package newPackage,
+    private void updateSettingsInternalLI(PackageParser.Package pkg,
             String installerPackageName, int[] allUsers, int[] installedForUsers,
             PackageInstalledInfo res, UserHandle user, int installReason) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
-        String pkgName = newPackage.packageName;
+        String pkgName = pkg.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
             //note that the new package setting would have already been
@@ -16908,18 +16294,18 @@ public class PackageManagerService extends IPackageManager.Stub
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + newPackage.codePath);
+        if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.codePath);
         synchronized (mPackages) {
-            updatePermissionsLPw(newPackage.packageName, newPackage,
-                    UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
-                            ? UPDATE_PERMISSIONS_ALL : 0));
+// NOTE: This changes slightly to include UPDATE_PERMISSIONS_ALL regardless of the size of pkg.permissions
+            mPermissionManager.updatePermissions(pkg.packageName, pkg, true, mPackages.values(),
+                    mPermissionCallback);
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
             PackageSetting ps = mSettings.mPackages.get(pkgName);
             final int userId = user.getIdentifier();
             if (ps != null) {
-                if (isSystemApp(newPackage)) {
+                if (isSystemApp(pkg)) {
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
                     }
@@ -16979,8 +16365,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.writeKernelMappingLPr(ps);
             }
             res.name = pkgName;
-            res.uid = newPackage.applicationInfo.uid;
-            res.pkg = newPackage;
+            res.uid = pkg.applicationInfo.uid;
+            res.pkg = pkg;
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_COMPLETE);
             mSettings.setInstallerPackageName(pkgName, installerPackageName);
             res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
@@ -17679,18 +17065,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return installFlags;
     }
 
-    private String getVolumeUuidForPackage(PackageParser.Package pkg) {
-        if (isExternal(pkg)) {
-            if (TextUtils.isEmpty(pkg.volumeUuid)) {
-                return StorageManager.UUID_PRIMARY_PHYSICAL;
-            } else {
-                return pkg.volumeUuid;
-            }
-        } else {
-            return StorageManager.UUID_PRIVATE_INTERNAL;
-        }
-    }
-
     private VersionInfo getSettingsVersionForPackage(PackageParser.Package pkg) {
         if (isExternal(pkg)) {
             if (TextUtils.isEmpty(pkg.volumeUuid)) {
@@ -18335,7 +17709,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
                     }
-                    updatePermissionsLPw(deletedPs.name, null, 0);
+                    mPermissionManager.updatePermissions(
+                            deletedPs.name, null, false, mPackages.values(), mPermissionCallback);
                     if (deletedPs.sharedUser != null) {
                         // Remove permissions associated with package. Since runtime
                         // permissions are per user we have to kill the removed package
@@ -18538,21 +17913,21 @@ public class PackageManagerService extends IPackageManager.Stub
             parseFlags |= PackageParser.PARSE_IS_OEM;
         }
 
-        final PackageParser.Package newPkg =
+        final PackageParser.Package pkg =
                 scanPackageTracedLI(codePath, parseFlags, 0 /*scanFlags*/, 0 /*currentTime*/, null);
 
         try {
             // update shared libraries for the newly re-installed system package
-            updateSharedLibrariesLPr(newPkg, null);
+            updateSharedLibrariesLPr(pkg, null);
         } catch (PackageManagerException e) {
             Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
         }
 
-        prepareAppDataAfterInstallLIF(newPkg);
+        prepareAppDataAfterInstallLIF(pkg);
 
         // writer
         synchronized (mPackages) {
-            PackageSetting ps = mSettings.mPackages.get(newPkg.packageName);
+            PackageSetting ps = mSettings.mPackages.get(pkg.packageName);
 
             // Propagate the permissions state as we do not want to drop on the floor
             // runtime permissions. The update permissions method below will take
@@ -18560,8 +17935,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (origPermissionState != null) {
                 ps.getPermissionsState().copyFrom(origPermissionState);
             }
-            updatePermissionsLPw(newPkg.packageName, newPkg,
-                    UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
+            mPermissionManager.updatePermissions(pkg.packageName, pkg, true, mPackages.values(),
+                    mPermissionCallback);
 
             final boolean applyUserRestrictions
                     = (allUserHandles != null) && (origUserHandles != null);
@@ -18594,7 +17969,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.writeLPr();
             }
         }
-        return newPkg;
+        return pkg;
     }
 
     private boolean deleteInstalledPackageLIF(PackageSetting ps,
@@ -19211,7 +18586,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
-            if (mPermissionReviewRequired
+            if (mSettings.mPermissions.mPermissionReviewRequired
                     && ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
             }
@@ -20570,7 +19945,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // data partition and then replace the version on the system partition.
             final PackageParser.Package deletedPkg = pkgSetting.pkg;
             final boolean isSystemStub = deletedPkg.isStub
-                    && deletedPkg.isSystemApp();
+                    && deletedPkg.isSystem();
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
@@ -20610,22 +19985,23 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     synchronized (mPackages) {
                         disableSystemPackageLPw(deletedPkg, tmpPkg);
                     }
-                    final PackageParser.Package newPkg;
+                    final PackageParser.Package pkg;
                     try (PackageFreezer freezer =
                             freezePackage(deletedPkg.packageName, "setEnabledSetting")) {
                         final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                                 | PackageParser.PARSE_ENFORCE_CODE;
-                        newPkg = scanPackageTracedLI(codePath, parseFlags, 0 /*scanFlags*/,
+                        pkg = scanPackageTracedLI(codePath, parseFlags, 0 /*scanFlags*/,
                                 0 /*currentTime*/, null /*user*/);
-                        prepareAppDataAfterInstallLIF(newPkg);
+                        prepareAppDataAfterInstallLIF(pkg);
                         synchronized (mPackages) {
                             try {
-                                updateSharedLibrariesLPr(newPkg, null);
+                                updateSharedLibrariesLPr(pkg, null);
                             } catch (PackageManagerException e) {
                                 Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                             }
-                            updatePermissionsLPw(newPkg.packageName, newPkg,
-                                    UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
+                            mPermissionManager.updatePermissions(
+                                    pkg.packageName, pkg, true, mPackages.values(),
+                                    mPermissionCallback);
                             mSettings.writeLPr();
                         }
                     } catch (PackageManagerException e) {
@@ -20665,11 +20041,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         }
                         return;
                     }
-                    clearAppDataLIF(newPkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
+                    clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
                             | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    clearAppProfilesLIF(newPkg, UserHandle.USER_ALL);
-                    mDexManager.notifyPackageUpdated(newPkg.packageName,
-                            newPkg.baseCodePath, newPkg.splitCodePaths);
+                    clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
+                    mDexManager.notifyPackageUpdated(pkg.packageName,
+                            pkg.baseCodePath, pkg.splitCodePaths);
                 }
             }
             if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
@@ -20980,8 +20356,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // permissions, ensure permissions are updated. Beware of dragons if you
         // try optimizing this.
         synchronized (mPackages) {
-            updatePermissionsLocked(null, null, StorageManager.UUID_PRIVATE_INTERNAL,
-                    UPDATE_PERMISSIONS_ALL);
+            mPermissionManager.updateAllPermissions(
+                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
+                    mPermissionCallback);
         }
 
         // Kick off any messages waiting for system ready
@@ -21030,10 +20407,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         sUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
-        if (mPrivappPermissionsViolations != null) {
-            throw new IllegalStateException("Signature|privileged permissions not in "
-                    + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
-        }
+        mPermissionManager.systemReady();
     }
 
     public void waitForAppDataPrepared() {
@@ -22018,13 +21392,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         synchronized (mPackages) {
-            int updateFlags = UPDATE_PERMISSIONS_ALL;
-            if (ver.sdkVersion != mSdkVersion) {
+            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
+            if (sdkUpdated) {
                 logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for " + volumeUuid);
-                updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLocked(null, null, volumeUuid, updateFlags);
+            mPermissionManager.updateAllPermissions(volumeUuid, sdkUpdated, mPackages.values(),
+                    mPermissionCallback);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -22472,7 +21846,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * requested by the app.
      */
     private boolean maybeMigrateAppDataLIF(PackageParser.Package pkg, int userId) {
-        if (pkg.isSystemApp() && !StorageManager.isFileEncryptedNativeOrEmulated()
+        if (pkg.isSystem() && !StorageManager.isFileEncryptedNativeOrEmulated()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
             final int storageTarget = pkg.applicationInfo.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
@@ -23037,9 +22411,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // permissions to keep per user flag state whether review is needed.
             // Hence, if a new user is added we have to propagate dangerous
             // permission grants for these legacy apps.
-            if (mPermissionReviewRequired) {
-                updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
-                        | UPDATE_PERMISSIONS_REPLACE_ALL);
+            if (mSettings.mPermissions.mPermissionReviewRequired) {
+// NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+                mPermissionManager.updateAllPermissions(
+                        StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
+                        mPermissionCallback);
             }
         }
     }
@@ -23621,24 +22997,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public boolean isPermissionsReviewRequired(String packageName, int userId) {
             synchronized (mPackages) {
-                // If we do not support permission review, done.
-                if (!mPermissionReviewRequired) {
-                    return false;
-                }
-
-                PackageSetting packageSetting = mSettings.mPackages.get(packageName);
-                if (packageSetting == null) {
-                    return false;
-                }
-
-                // Permission review applies only to apps not supporting the new permission model.
-                if (packageSetting.pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M) {
-                    return false;
-                }
-
-                // Legacy apps have the permission and get user consent on launch.
-                PermissionsState permissionsState = packageSetting.getPermissionsState();
-                return permissionsState.isPermissionReviewRequired(userId);
+                return mPermissionManager.isPermissionsReviewRequired(
+                        mPackages.get(packageName), userId);
             }
         }
 
@@ -23788,6 +23148,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                                         | ApplicationInfo.FLAG_PERSISTENT)) ==
                                 (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_PERSISTENT))
                         : false;
+            }
+        }
+
+        @Override
+        public boolean isLegacySystemApp(Package pkg) {
+            synchronized (mPackages) {
+                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                return mPromoteSystemApps
+                        && ps.isSystem()
+                        && mExistingSystemPackages.contains(ps.name);
             }
         }
 

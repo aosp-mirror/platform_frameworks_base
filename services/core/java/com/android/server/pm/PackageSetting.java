@@ -86,6 +86,10 @@ public final class PackageSetting extends PackageSettingBase {
         return sharedUserId;
     }
 
+    public SharedUserSetting getSharedUser() {
+        return sharedUser;
+    }
+
     @Override
     public String toString() {
         return "PackageSetting{"
@@ -120,6 +124,14 @@ public final class PackageSetting extends PackageSettingBase {
         return appId;
     }
 
+    public void setInstallPermissionsFixed(boolean fixed) {
+        installPermissionsFixed = fixed;
+    }
+
+    public boolean areInstallPermissionsFixed() {
+        return installPermissionsFixed;
+    }
+
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -134,6 +146,10 @@ public final class PackageSetting extends PackageSettingBase {
 
     public boolean isSystem() {
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    public boolean isUpdatedSystem() {
+        return (pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     @Override
