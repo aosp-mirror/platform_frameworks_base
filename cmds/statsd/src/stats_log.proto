@@ -98,15 +98,19 @@ message GaugeMetricData {
 }
 
 message UidMapping {
-  message AppInfo {
-    optional string app = 1;
+  message PackageInfoSnapshot {
+    message PackageInfo {
+      optional string name = 1;
 
-    optional int32 version = 2;
+      optional int32 version = 2;
 
-    optional int32 uid = 3;
+      optional int32 uid = 3;
+    }
+    optional int64 timestamp_nanos = 1;
+
+    repeated PackageInfo package_info = 2;
   }
-
-  repeated AppInfo initial = 1;
+  repeated PackageInfoSnapshot snapshots = 1;
 
   message Change {
     optional bool deletion = 1;

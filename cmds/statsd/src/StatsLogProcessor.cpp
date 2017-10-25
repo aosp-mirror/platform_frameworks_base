@@ -60,6 +60,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
 
     unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(config);
     if (newMetricsManager->isConfigValid()) {
+        mUidMap->OnConfigUpdated(key);
         mMetricsManagers[key] = std::move(newMetricsManager);
         // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
         ALOGD("StatsdConfig valid");
@@ -69,14 +70,27 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     }
 }
 
-vector<StatsLogReport> StatsLogProcessor::onDumpReport(const ConfigKey& key) {
+ConfigMetricsReport StatsLogProcessor::onDumpReport(const ConfigKey& key) {
+    ConfigMetricsReport report;
+
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
-        return vector<StatsLogReport>();
+        return report;
     }
 
-    return it->second->onDumpReport();
+    auto set_key = report.mutable_config_key();
+    set_key->set_uid(key.GetUid());
+    set_key->set_name(key.GetName());
+    for (auto m : it->second->onDumpReport()) {
+        // Transfer the vector of StatsLogReport into a field
+        // TODO: perhaps we just have bytes being returned from onDumpReport and transfer bytes
+        auto dest = report.add_metrics();
+        *dest = m;
+    }
+    auto temp = mUidMap->getOutput(key);
+    report.set_allocated_uid_map(&temp);
+    return report;
 }
 
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
@@ -84,6 +98,7 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     if (it != mMetricsManagers.end()) {
         it->second->finish();
         mMetricsManagers.erase(it);
+        mUidMap->OnConfigRemoved(key);
     }
     auto flushTime = mLastFlushTimes.find(key);
     if (flushTime != mLastFlushTimes.end()) {
