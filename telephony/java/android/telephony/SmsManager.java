@@ -338,16 +338,18 @@ public final class SmsManager {
     /**
      * Send a text based SMS without writing it into the SMS Provider.
      *
+     * <p>
+     * The message will be sent directly over the network and will not be visible in SMS
+     * applications. Intended for internal carrier use only.
+     * </p>
+     *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
      * privileges.
      * </p>
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
