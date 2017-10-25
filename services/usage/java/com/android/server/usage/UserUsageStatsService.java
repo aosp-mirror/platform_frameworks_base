@@ -474,19 +474,19 @@ class UserUsageStatsService {
         mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
             @Override
             public boolean checkin(IntervalStats stats) {
-                printIntervalStats(pw, stats, false);
+                printIntervalStats(pw, stats, false, null);
                 return true;
             }
         });
     }
 
-    void dump(IndentingPrintWriter pw) {
+    void dump(IndentingPrintWriter pw, String pkg) {
         // This is not a check-in, only dump in-memory stats.
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], true);
+            printIntervalStats(pw, mCurrentStats[interval], true, pkg);
         }
     }
 
@@ -505,7 +505,7 @@ class UserUsageStatsService {
     }
 
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean prettyDates) {
+            boolean prettyDates, String pkg) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -521,6 +521,9 @@ class UserUsageStatsService {
         final int pkgCount = pkgStats.size();
         for (int i = 0; i < pkgCount; i++) {
             final UsageStats usageStats = pkgStats.valueAt(i);
+            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+                continue;
+            }
             pw.printPair("package", usageStats.mPackageName);
             pw.printPair("totalTime",
                     formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
@@ -533,6 +536,9 @@ class UserUsageStatsService {
         pw.println("ChooserCounts");
         pw.increaseIndent();
         for (UsageStats usageStats : pkgStats.values()) {
+            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+                continue;
+            }
             pw.printPair("package", usageStats.mPackageName);
             if (usageStats.mChooserCounts != null) {
                 final int chooserCountSize = usageStats.mChooserCounts.size();
@@ -555,19 +561,22 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
-        pw.println("configurations");
-        pw.increaseIndent();
-        final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
-        final int configCount = configStats.size();
-        for (int i = 0; i < configCount; i++) {
-            final ConfigurationStats config = configStats.valueAt(i);
-            pw.printPair("config", Configuration.resourceQualifierString(config.mConfiguration));
-            pw.printPair("totalTime", formatElapsedTime(config.mTotalTimeActive, prettyDates));
-            pw.printPair("lastTime", formatDateTime(config.mLastTimeActive, prettyDates));
-            pw.printPair("count", config.mActivationCount);
-            pw.println();
+        if (pkg == null) {
+            pw.println("configurations");
+            pw.increaseIndent();
+            final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
+            final int configCount = configStats.size();
+            for (int i = 0; i < configCount; i++) {
+                final ConfigurationStats config = configStats.valueAt(i);
+                pw.printPair("config", Configuration.resourceQualifierString(
+                        config.mConfiguration));
+                pw.printPair("totalTime", formatElapsedTime(config.mTotalTimeActive, prettyDates));
+                pw.printPair("lastTime", formatDateTime(config.mLastTimeActive, prettyDates));
+                pw.printPair("count", config.mActivationCount);
+                pw.println();
+            }
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
 
         pw.println("events");
         pw.increaseIndent();
@@ -575,6 +584,9 @@ class UserUsageStatsService {
         final int eventCount = events != null ? events.size() : 0;
         for (int i = 0; i < eventCount; i++) {
             final UsageEvents.Event event = events.valueAt(i);
+            if (pkg != null && !pkg.equals(event.mPackage)) {
+                continue;
+            }
             pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
             pw.printPair("type", eventToString(event.mEventType));
             pw.printPair("package", event.mPackage);
