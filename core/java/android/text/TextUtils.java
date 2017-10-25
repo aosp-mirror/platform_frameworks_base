@@ -1519,7 +1519,7 @@ public class TextUtils {
                     }
 
                     // XXX this is probably ok, but need to look at it more
-                    tempMt.setPara(format, 0, format.length(), textDir, null);
+                    tempMt.setPara(format, 0, format.length(), textDir);
                     float moreWid = tempMt.addStyleRun(p, tempMt.mLen, null);
 
                     if (w + moreWid <= avail) {
@@ -1541,7 +1541,7 @@ public class TextUtils {
     private static float setPara(MeasuredText mt, TextPaint paint,
             CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
 
-        mt.setPara(text, start, end, textDir, null);
+        mt.setPara(text, start, end, textDir);
 
         float width;
         Spanned sp = text instanceof Spanned ? (Spanned) text : null;

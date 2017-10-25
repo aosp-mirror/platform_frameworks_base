@@ -68,9 +68,7 @@ import java.util.Set;
  * This class represents an active client session.  There is generally one
  * Session object per process that is interacting with the window manager.
  */
-// Needs to be public and not final so we can mock during tests...sucks I know :(
-public class Session extends IWindowSession.Stub
-        implements IBinder.DeathRecipient {
+class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final WindowManagerService mService;
     final IWindowSessionCallback mCallback;
     final IInputMethodClient mClient;

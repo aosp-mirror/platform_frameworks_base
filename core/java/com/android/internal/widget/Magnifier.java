@@ -63,7 +63,7 @@ public final class Magnifier {
     // the copy is finished.
     private final Handler mPixelCopyHandler = Handler.getMain();
     // Current magnification scale.
-    private float mScale;
+    private final float mZoomScale;
     // Timer used to schedule the copy task.
     private Timer mTimer;
 
@@ -76,11 +76,12 @@ public final class Magnifier {
     public Magnifier(@NonNull View view) {
         mView = Preconditions.checkNotNull(view);
         final Context context = mView.getContext();
+        final float elevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
         final View content = LayoutInflater.from(context).inflate(R.layout.magnifier, null);
         content.findViewById(R.id.magnifier_inner).setClipToOutline(true);
         mWindowWidth = context.getResources().getDimensionPixelSize(R.dimen.magnifier_width);
         mWindowHeight = context.getResources().getDimensionPixelSize(R.dimen.magnifier_height);
-        final float elevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
+        mZoomScale = context.getResources().getFloat(R.dimen.magnifier_zoom_scale);
 
         mWindow = new PopupWindow(context);
         mWindow.setContentView(content);
@@ -90,7 +91,9 @@ public final class Magnifier {
         mWindow.setTouchable(false);
         mWindow.setBackgroundDrawable(null);
 
-        mBitmap = Bitmap.createBitmap(mWindowWidth, mWindowHeight, Bitmap.Config.ARGB_8888);
+        final int bitmapWidth = (int) (mWindowWidth / mZoomScale);
+        final int bitmapHeight = (int) (mWindowHeight / mZoomScale);
+        mBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         getImageView().setImageBitmap(mBitmap);
     }
 
@@ -101,20 +104,8 @@ public final class Magnifier {
      *        to the view. The lower end is clamped to 0
      * @param yPosInView vertical coordinate of the center point of the magnifier source
      *        relative to the view. The lower end is clamped to 0
-     * @param scale the scale at which the magnifier zooms on the source content. The
-     *        lower end is clamped to 1 and the higher end to 4
      */
-    public void show(@FloatRange(from=0) float xPosInView,
-            @FloatRange(from=0) float yPosInView,
-            @FloatRange(from=1, to=4) float scale) {
-        if (scale > 4) {
-            scale = 4;
-        }
-
-        if (scale < 1) {
-            scale = 1;
-        }
-
+    public void show(@FloatRange(from=0) float xPosInView, @FloatRange(from=0) float yPosInView) {
         if (xPosInView < 0) {
             xPosInView = 0;
         }
@@ -123,10 +114,6 @@ public final class Magnifier {
             yPosInView = 0;
         }
 
-        if (mScale != scale) {
-            resizeBitmap(scale);
-        }
-        mScale = scale;
         configureCoordinates(xPosInView, yPosInView);
 
         if (mTimer == null) {
@@ -164,6 +151,7 @@ public final class Magnifier {
     /**
      * @return the height of the magnifier window.
      */
+    @NonNull
     public int getHeight() {
         return mWindowHeight;
     }
@@ -171,15 +159,17 @@ public final class Magnifier {
     /**
      * @return the width of the magnifier window.
      */
+    @NonNull
     public int getWidth() {
         return mWindowWidth;
     }
 
-    private void resizeBitmap(float scale) {
-        final int bitmapWidth = (int) (mWindowWidth / scale);
-        final int bitmapHeight = (int) (mWindowHeight / scale);
-        mBitmap.reconfigure(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-        getImageView().setImageBitmap(mBitmap);
+    /**
+     * @return the zoom scale of the magnifier.
+     */
+    @NonNull
+    public float getZoomScale() {
+        return mZoomScale;
     }
 
     private void configureCoordinates(float xPosInView, float yPosInView) {

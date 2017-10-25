@@ -375,7 +375,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@code DownloadManager}, {@code MediaPlayer}) will refuse app's requests to use cleartext
      * traffic. Third-party libraries are encouraged to honor this flag as well.
      *
-     * <p>NOTE: {@code WebView} does not honor this flag.
+     * <p>NOTE: {@code WebView} honors this flag for applications targeting API level 26 and up.
      *
      * <p>This flag is ignored on Android N and above if an Android Network Security Config is
      * present.

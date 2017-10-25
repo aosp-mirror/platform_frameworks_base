@@ -641,8 +641,8 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                     break;
                 }
                 case H_PARTITION_FORGET: {
-                    final String partGuid = (String) msg.obj;
-                    forgetPartition(partGuid);
+                    final VolumeRecord rec = (VolumeRecord) msg.obj;
+                    forgetPartition(rec.partGuid, rec.fsUuid);
                     break;
                 }
                 case H_RESET: {
@@ -1694,7 +1694,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.remove(fsUuid);
             if (rec != null && !TextUtils.isEmpty(rec.partGuid)) {
-                mHandler.obtainMessage(H_PARTITION_FORGET, rec.partGuid).sendToTarget();
+                mHandler.obtainMessage(H_PARTITION_FORGET, rec).sendToTarget();
             }
             mCallbacks.notifyVolumeForgotten(fsUuid);
 
@@ -1718,7 +1718,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                 final String fsUuid = mRecords.keyAt(i);
                 final VolumeRecord rec = mRecords.valueAt(i);
                 if (!TextUtils.isEmpty(rec.partGuid)) {
-                    mHandler.obtainMessage(H_PARTITION_FORGET, rec.partGuid).sendToTarget();
+                    mHandler.obtainMessage(H_PARTITION_FORGET, rec).sendToTarget();
                 }
                 mCallbacks.notifyVolumeForgotten(fsUuid);
             }
@@ -1733,9 +1733,9 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
         }
     }
 
-    private void forgetPartition(String partGuid) {
+    private void forgetPartition(String partGuid, String fsUuid) {
         try {
-            mVold.forgetPartition(partGuid);
+            mVold.forgetPartition(partGuid, fsUuid);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }

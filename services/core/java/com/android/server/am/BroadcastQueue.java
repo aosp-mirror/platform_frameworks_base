@@ -1198,11 +1198,6 @@ public final class BroadcastQueue {
                         + " (uid " + r.callingUid + ")");
                 skip = true;
             }
-            if (!skip) {
-                r.manifestCount++;
-            } else {
-                r.manifestSkipCount++;
-            }
             if (r.curApp != null && r.curApp.crashing) {
                 // If the target process is crashing, just skip it.
                 Slog.w(TAG, "Skipping deliver ordered [" + mQueueName + "] " + r
@@ -1283,6 +1278,16 @@ public final class BroadcastQueue {
                 }
             }
 
+            if (!skip && !Intent.ACTION_SHUTDOWN.equals(r.intent.getAction())
+                    && !mService.mUserController
+                    .isUserRunning(UserHandle.getUserId(info.activityInfo.applicationInfo.uid),
+                            0 /* flags */)) {
+                skip = true;
+                Slog.w(TAG,
+                        "Skipping delivery to " + info.activityInfo.packageName + " / "
+                                + info.activityInfo.applicationInfo.uid + " : user is not running");
+            }
+
             if (skip) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Skipping delivery of ordered [" + mQueueName + "] "
@@ -1291,9 +1296,11 @@ public final class BroadcastQueue {
                 r.receiver = null;
                 r.curFilter = null;
                 r.state = BroadcastRecord.IDLE;
+                r.manifestSkipCount++;
                 scheduleBroadcastsLocked();
                 return;
             }
+            r.manifestCount++;
 
             r.delivery[recIdx] = BroadcastRecord.DELIVERY_DELIVERED;
             r.state = BroadcastRecord.APP_RECEIVE;
@@ -1302,7 +1309,7 @@ public final class BroadcastQueue {
             if (DEBUG_MU && r.callingUid > UserHandle.PER_USER_RANGE) {
                 Slog.v(TAG_MU, "Updated broadcast record activity info for secondary user, "
                         + info.activityInfo + ", callingUid = " + r.callingUid + ", uid = "
-                        + info.activityInfo.applicationInfo.uid);
+                        + receiverUid);
             }
 
             if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
@@ -1365,7 +1372,7 @@ public final class BroadcastQueue {
                 // and mark the broadcast record as ready for the next.
                 Slog.w(TAG, "Unable to launch app "
                         + info.activityInfo.applicationInfo.packageName + "/"
-                        + info.activityInfo.applicationInfo.uid + " for broadcast "
+                        + receiverUid + " for broadcast "
                         + r.intent + ": process is bad");
                 logBroadcastReceiverDiscardLocked(r);
                 finishReceiverLocked(r, r.resultCode, r.resultData,

@@ -1910,7 +1910,7 @@ public abstract class Layout {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, textDir, null);
+            mt.setPara(text, start, end, textDir);
             Directions directions;
             int dir;
             if (mt.mEasy) {

@@ -38,7 +38,9 @@ import static com.android.server.am.proto.ActivityDisplayProto.CONFIGURATION_CON
 import static com.android.server.am.proto.ActivityDisplayProto.STACKS;
 import static com.android.server.am.proto.ActivityDisplayProto.ID;
 
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.util.IntArray;
 import android.util.Slog;
@@ -206,6 +208,18 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     /**
+     * Returns an existing stack compatible with the input params or creates one
+     * if a compatible stack doesn't exist.
+     * @see #getOrCreateStack(int, int, boolean)
+     */
+    <T extends ActivityStack> T getOrCreateStack(@Nullable ActivityRecord r,
+            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, int activityType,
+            boolean onTop) {
+        final int windowingMode = resolveWindowingMode(r, options, candidateTask, activityType);
+        return getOrCreateStack(windowingMode, activityType, onTop);
+    }
+
+    /**
      * Creates a stack matching the input windowing mode and activity type on this display.
      * @param windowingMode The windowing mode the stack should be created in. If
      *                      {@link WindowConfiguration#WINDOWING_MODE_UNDEFINED} then the stack will
@@ -235,7 +249,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         }
 
         final ActivityManagerService service = mSupervisor.mService;
-        if (!mSupervisor.isWindowingModeSupported(windowingMode, service.mSupportsMultiWindow,
+        if (!isWindowingModeSupported(windowingMode, service.mSupportsMultiWindow,
                 service.mSupportsSplitScreenMultiWindow, service.mSupportsFreeformWindowManagement,
                 service.mSupportsPictureInPicture, activityType)) {
             throw new IllegalArgumentException("Can't create stack for unsupported windowingMode="
@@ -252,33 +266,27 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             }
         }
 
-        windowingMode = updateWindowingModeForSplitScreenIfNeeded(windowingMode, activityType);
-
         final int stackId = mSupervisor.getNextStackId();
-
-        final T stack = createStackUnchecked(windowingMode, activityType, stackId, onTop);
-
-        if (mDisplayId == DEFAULT_DISPLAY && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // Make sure recents stack exist when creating a dock stack as it normally need to be on
-            // the other side of the docked stack and we make visibility decisions based on that.
-            // TODO: Not sure if this is needed after we change to calculate visibility based on
-            // stack z-order vs. id.
-            getOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS, onTop);
-        }
-
-        return stack;
+        return createStackUnchecked(windowingMode, activityType, stackId, onTop);
     }
 
     @VisibleForTesting
     <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
             int stackId, boolean onTop) {
-        switch (windowingMode) {
-            case WINDOWING_MODE_PINNED:
-                return (T) new PinnedActivityStack(this, stackId, mSupervisor, onTop);
-            default:
-                return (T) new ActivityStack(
-                        this, stackId, mSupervisor, windowingMode, activityType, onTop);
+        if (windowingMode == WINDOWING_MODE_PINNED) {
+            return (T) new PinnedActivityStack(this, stackId, mSupervisor, onTop);
         }
+        final T stack = (T) new ActivityStack(
+                        this, stackId, mSupervisor, windowingMode, activityType, onTop);
+
+        if (mDisplayId == DEFAULT_DISPLAY && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            // Make sure recents stack exist when creating a dock stack as it normally needs to be
+            // on the other side of the docked stack and we make visibility decisions based on that.
+            // TODO: Not sure if this is needed after we change to calculate visibility based on
+            // stack z-order vs. id.
+            getOrCreateStack(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS, onTop);
+        }
+        return stack;
     }
 
     /**
@@ -372,6 +380,105 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         }
     }
 
+    /**
+     * Returns true if the {@param windowingMode} is supported based on other parameters passed in.
+     * @param windowingMode The windowing mode we are checking support for.
+     * @param supportsMultiWindow If we should consider support for multi-window mode in general.
+     * @param supportsSplitScreen If we should consider support for split-screen multi-window.
+     * @param supportsFreeform If we should consider support for freeform multi-window.
+     * @param supportsPip If we should consider support for picture-in-picture mutli-window.
+     * @param activityType The activity type under consideration.
+     * @return true if the windowing mode is supported.
+     */
+    private boolean isWindowingModeSupported(int windowingMode, boolean supportsMultiWindow,
+            boolean supportsSplitScreen, boolean supportsFreeform, boolean supportsPip,
+            int activityType) {
+
+        if (windowingMode == WINDOWING_MODE_UNDEFINED
+                || windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            return true;
+        }
+        if (!supportsMultiWindow) {
+            return false;
+        }
+
+        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            return supportsSplitScreen && WindowConfiguration.supportSplitScreenWindowingMode(
+                    windowingMode, activityType);
+        }
+
+        if (!supportsFreeform && windowingMode == WINDOWING_MODE_FREEFORM) {
+            return false;
+        }
+
+        if (!supportsPip && windowingMode == WINDOWING_MODE_PINNED) {
+            return false;
+        }
+        return true;
+    }
+
+    int resolveWindowingMode(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
+            @Nullable TaskRecord task, int activityType) {
+
+        // First preference if the windowing mode in the activity options if set.
+        int windowingMode = (options != null)
+                ? options.getLaunchWindowingMode() : WINDOWING_MODE_UNDEFINED;
+
+        // If windowing mode is unset, then next preference is the candidate task, then the
+        // activity record.
+        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+            if (task != null) {
+                windowingMode = task.getWindowingMode();
+            }
+            if (windowingMode == WINDOWING_MODE_UNDEFINED && r != null) {
+                windowingMode = r.getWindowingMode();
+            }
+            if (windowingMode == WINDOWING_MODE_UNDEFINED) {
+                // Use the display's windowing mode.
+                windowingMode = getWindowingMode();
+            }
+        }
+
+        // Make sure the windowing mode we are trying to use makes sense for what is supported.
+        final ActivityManagerService service = mSupervisor.mService;
+        boolean supportsMultiWindow = service.mSupportsMultiWindow;
+        boolean supportsSplitScreen = service.mSupportsSplitScreenMultiWindow;
+        boolean supportsFreeform = service.mSupportsFreeformWindowManagement;
+        boolean supportsPip = service.mSupportsPictureInPicture;
+        if (supportsMultiWindow) {
+            if (task != null) {
+                supportsMultiWindow = task.isResizeable();
+                supportsSplitScreen = task.supportsSplitScreenWindowingMode();
+                // TODO: Do we need to check for freeform and Pip support here?
+            } else if (r != null) {
+                supportsMultiWindow = r.isResizeable();
+                supportsSplitScreen = r.supportsSplitScreenWindowingMode();
+                supportsFreeform = r.supportsFreeform();
+                supportsPip = r.supportsPictureInPicture();
+            }
+        }
+
+        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
+        if (!inSplitScreenMode
+                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
+            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
+            // trying to launch in split-screen secondary.
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
+        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+                && supportsSplitScreen) {
+            windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+        }
+
+        if (windowingMode != WINDOWING_MODE_UNDEFINED
+                && isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
+                supportsFreeform, supportsPip, activityType)) {
+            return windowingMode;
+        }
+        // Return the display's windowing mode
+        return getWindowingMode();
+    }
+
     /** Returns the top visible stack activity type that isn't in the exclude windowing mode. */
     int getTopVisibleStackActivityType(int excludeWindowingMode) {
         for (int i = mStacks.size() - 1; i >= 0; --i) {
@@ -408,6 +515,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         }
     }
 
+    /** We are in the process of exiting split-screen mode. */
+    void onExitingSplitScreenMode() {
+        // Remove reference to the primary-split-screen stack so it no longer has any effect on the
+        // display. For example, we want to be able to create fullscreen stack for standard activity
+        // types when exiting split-screen mode.
+        mSplitScreenPrimaryStack = null;
+    }
+
     ActivityStack getSplitScreenPrimaryStack() {
         return mSplitScreenPrimaryStack;
     }
@@ -422,21 +537,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     boolean hasPinnedStack() {
         return mPinnedStack != null;
-    }
-
-    int updateWindowingModeForSplitScreenIfNeeded(int windowingMode, int activityType) {
-        final boolean inSplitScreenMode = hasSplitScreenPrimaryStack();
-        if (!inSplitScreenMode
-                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
-            // Switch to fullscreen windowing mode if we are not in split-screen mode and we are
-            // trying to launch in split-screen secondary.
-            return WINDOWING_MODE_FULLSCREEN;
-        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
-                && WindowConfiguration.supportSplitScreenWindowingMode(
-                windowingMode, activityType)) {
-            return WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-        }
-        return windowingMode;
     }
 
     @Override

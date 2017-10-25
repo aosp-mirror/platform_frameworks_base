@@ -120,7 +120,7 @@ static StatsdConfig build_fake_config() {
 
     int WAKE_LOCK_TAG_ID = 11;
     int WAKE_LOCK_UID_KEY_ID = 1;
-    int WAKE_LOCK_STATE_KEY = 2;
+    int WAKE_LOCK_STATE_KEY = 3;
     int WAKE_LOCK_ACQUIRE_VALUE = 1;
     int WAKE_LOCK_RELEASE_VALUE = 0;
 
@@ -167,7 +167,7 @@ static StatsdConfig build_fake_config() {
     keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
     metric->set_condition("SCREEN_IS_OFF");
 
-    // Count wake lock, slice by uid, while SCREEN_IS_OFF and app in background
+    // Count wake lock, slice by uid, while SCREEN_IS_ON and app in background
     metric = config.add_count_metric();
     metric->set_metric_id(4);
     metric->set_what("APP_GET_WL");
@@ -194,6 +194,11 @@ static StatsdConfig build_fake_config() {
     link->set_condition("APP_IS_BACKGROUND");
     link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+
+    // Add an EventMetric to log process state change events.
+    EventMetric* eventMetric = config.add_event_metric();
+    eventMetric->set_metric_id(6);
+    eventMetric->set_what("SCREEN_TURNED_ON");
 
     // Event matchers............
     LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();

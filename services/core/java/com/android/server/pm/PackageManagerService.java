@@ -753,9 +753,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
 
-    // System configuration read by SystemConfig.
-    final int[] mGlobalGids;
-    final SparseArray<ArraySet<String>> mSystemPermissions;
     @GuardedBy("mAvailableFeatures")
     final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
@@ -937,10 +934,6 @@ public class PackageManagerService extends IPackageManager.Stub
     // Mapping from instrumentation class names to info about them.
     final ArrayMap<ComponentName, PackageParser.Instrumentation> mInstrumentation =
             new ArrayMap<ComponentName, PackageParser.Instrumentation>();
-
-    // Mapping from permission names to info about them.
-    final ArrayMap<String, PackageParser.PermissionGroup> mPermissionGroups =
-            new ArrayMap<String, PackageParser.PermissionGroup>();
 
     // Packages whose data we have transfered into another package, thus
     // should no longer exist.
@@ -2434,8 +2427,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
-        mGlobalGids = systemConfig.getGlobalGids();
-        mSystemPermissions = systemConfig.getSystemPermissions();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
@@ -4228,44 +4219,22 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public @Nullable ParceledListSlice<PermissionInfo> queryPermissionsByGroup(String groupName,
             int flags) {
-        // TODO Move this to PermissionManager when mPermissionGroups is moved there
-        synchronized (mPackages) {
-            if (groupName != null && !mPermissionGroups.containsKey(groupName)) {
-                // This is thrown as NameNotFoundException
-                return null;
-            }
-        }
-        return new ParceledListSlice<>(
-                mPermissionManager.getPermissionInfoByGroup(groupName, flags, getCallingUid()));
+        final List<PermissionInfo> permissionList =
+                mPermissionManager.getPermissionInfoByGroup(groupName, flags, getCallingUid());
+        return (permissionList == null) ? null : new ParceledListSlice<>(permissionList);
     }
 
     @Override
-    public PermissionGroupInfo getPermissionGroupInfo(String name, int flags) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return null;
-        }
-        // reader
-        synchronized (mPackages) {
-            return PackageParser.generatePermissionGroupInfo(
-                    mPermissionGroups.get(name), flags);
-        }
+    public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags) {
+        return mPermissionManager.getPermissionGroupInfo(groupName, flags, getCallingUid());
     }
 
     @Override
     public @NonNull ParceledListSlice<PermissionGroupInfo> getAllPermissionGroups(int flags) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return ParceledListSlice.emptyList();
-        }
-        // reader
-        synchronized (mPackages) {
-            final int N = mPermissionGroups.size();
-            ArrayList<PermissionGroupInfo> out
-                    = new ArrayList<PermissionGroupInfo>(N);
-            for (PackageParser.PermissionGroup pg : mPermissionGroups.values()) {
-                out.add(PackageParser.generatePermissionGroupInfo(pg, flags));
-            }
-            return new ParceledListSlice<>(out);
-        }
+        final List<PermissionGroupInfo> permissionList =
+                mPermissionManager.getAllPermissionGroups(flags, getCallingUid());
+        return (permissionList == null)
+                ? ParceledListSlice.emptyList() : new ParceledListSlice<>(permissionList);
     }
 
     private ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName, int flags,
@@ -5138,59 +5107,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkUidPermission(String permName, int uid) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
-        final boolean isUidInstantApp = getInstantAppPackageName(uid) != null;
-        final int userId = UserHandle.getUserId(uid);
-        if (!sUserManager.exists(userId)) {
-            return PackageManager.PERMISSION_DENIED;
-        }
-
-        synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
-            if (obj != null) {
-                if (obj instanceof SharedUserSetting) {
-                    if (isCallerInstantApp) {
-                        return PackageManager.PERMISSION_DENIED;
-                    }
-                } else if (obj instanceof PackageSetting) {
-                    final PackageSetting ps = (PackageSetting) obj;
-                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
-                        return PackageManager.PERMISSION_DENIED;
-                    }
-                }
-                final SettingBase settingBase = (SettingBase) obj;
-                final PermissionsState permissionsState = settingBase.getPermissionsState();
-                if (permissionsState.hasPermission(permName, userId)) {
-                    if (isUidInstantApp) {
-                        if (mSettings.mPermissions.isPermissionInstant(permName)) {
-                            return PackageManager.PERMISSION_GRANTED;
-                        }
-                    } else {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                }
-                // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
-                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
-                        .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            } else {
-                ArraySet<String> perms = mSystemPermissions.get(uid);
-                if (perms != null) {
-                    if (perms.contains(permName)) {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                    if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && perms
-                            .contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        return PackageManager.PERMISSION_GRANTED;
-                    }
-                }
-            }
-        }
-
-        return PackageManager.PERMISSION_DENIED;
+        return mPermissionManager.checkUidPermission(permName, uid, getCallingUid());
     }
 
     @Override
@@ -11156,54 +11073,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Activities: " + r);
             }
 
-            N = pkg.permissionGroups.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.PermissionGroup pg = pkg.permissionGroups.get(i);
-                PackageParser.PermissionGroup cur = mPermissionGroups.get(pg.info.name);
-                final String curPackageName = cur == null ? null : cur.info.packageName;
-                // Dont allow ephemeral apps to define new permission groups.
-                if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-                    Slog.w(TAG, "Permission group " + pg.info.name + " from package "
-                            + pg.info.packageName
-                            + " ignored: instant apps cannot define new permission groups.");
-                    continue;
-                }
-                final boolean isPackageUpdate = pg.info.packageName.equals(curPackageName);
-                if (cur == null || isPackageUpdate) {
-                    mPermissionGroups.put(pg.info.name, pg);
-                    if (chatty) {
-                        if (r == null) {
-                            r = new StringBuilder(256);
-                        } else {
-                            r.append(' ');
-                        }
-                        if (isPackageUpdate) {
-                            r.append("UPD:");
-                        }
-                        r.append(pg.info.name);
-                    }
-                } else {
-                    Slog.w(TAG, "Permission group " + pg.info.name + " from package "
-                            + pg.info.packageName + " ignored: original from "
-                            + cur.info.packageName);
-                    if (chatty) {
-                        if (r == null) {
-                            r = new StringBuilder(256);
-                        } else {
-                            r.append(' ');
-                        }
-                        r.append("DUP:");
-                        r.append(pg.info.name);
-                    }
-                }
-            }
-            if (r != null) {
-                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permission Groups: " + r);
+            // Don't allow ephemeral applications to define new permissions groups.
+            if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
+                Slog.w(TAG, "Permission groups from package " + pkg.packageName
+                        + " ignored: instant apps cannot define new permission groups.");
+            } else {
+                mPermissionManager.addAllPermissionGroups(pkg, chatty);
             }
 
-
-            // Dont allow ephemeral apps to define new permissions.
+            // Don't allow ephemeral applications to define new permissions.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
                 Slog.w(TAG, "Permissions from package " + pkg.packageName
                         + " ignored: instant apps cannot define new permissions.");
@@ -12107,7 +11985,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        permissionsState.setGlobalGids(mGlobalGids);
+        permissionsState.setGlobalGids(mPermissionManager.getGlobalGidsTEMP());
 
         final int N = pkg.requestedPermissions.size();
         for (int i=0; i<N; i++) {
@@ -23603,13 +23481,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public int getPermissionFlagsTEMP(String permName, String packageName, int userId) {
             return PackageManagerService.this.getPermissionFlags(permName, packageName, userId);
-        }
-
-        @Override
-        public PackageParser.PermissionGroup getPermissionGroupTEMP(String groupName) {
-            synchronized (mPackages) {
-                return mPermissionGroups.get(groupName);
-            }
         }
 
         @Override

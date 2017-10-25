@@ -1060,6 +1060,7 @@ public final class BatteryService extends SystemService {
         }
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
             IHealth service = mHealthServiceWrapper.getLastService();
+            if (service == null) throw new RemoteException("no health service");
             final MutableInt outResult = new MutableInt(Result.NOT_SUPPORTED);
             switch(id) {
                 case BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER:
@@ -1101,8 +1102,10 @@ public final class BatteryService extends SystemService {
             }
             return outResult.value;
         }
-        public void scheduleUpdate() {
-            Slog.e(TAG, "health: must not call scheduleUpdate on battery properties");
+        public void scheduleUpdate() throws RemoteException {
+            IHealth service = mHealthServiceWrapper.getLastService();
+            if (service == null) throw new RemoteException("no health service");
+            service.update();
         }
     }
 

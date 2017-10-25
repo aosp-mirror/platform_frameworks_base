@@ -63,7 +63,7 @@ import java.util.LinkedList;
 class WindowTestsBase {
     static WindowManagerService sWm = null;
     private static final IWindow sIWindow = new TestIWindow();
-    private static final Session sMockSession = mock(Session.class);
+    private static Session sMockSession;
     // The default display is removed in {@link #setUp} and then we iterate over all displays to
     // make sure we don't collide with any existing display. If we run into no other display, the
     // added display should be treated as default. This cannot be the default display
@@ -93,6 +93,7 @@ class WindowTestsBase {
             // Allows to mock package local classes and methods
             System.setProperty("dexmaker.share_classloader", "true");
             MockitoAnnotations.initMocks(this);
+            sMockSession = mock(Session.class);
         }
 
         final Context context = InstrumentationRegistry.getTargetContext();

@@ -127,11 +127,34 @@ class WebViewLibraryLoader {
         }
     }
 
+    static int prepareNativeLibraries(PackageInfo webviewPackageInfo)
+            throws WebViewFactory.MissingWebViewPackageException {
+        String[] nativeLibs = updateWebViewZygoteVmSize(webviewPackageInfo);
+        if (DEBUG) Log.v(LOGTAG, "creating relro files");
+        int numRelros = 0;
+
+        // We must always trigger createRelRo regardless of the value of nativeLibraryPaths. Any
+        // unexpected values will be handled there to ensure that we trigger notifying any process
+        // waiting on relro creation.
+        if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
+            if (DEBUG) Log.v(LOGTAG, "Create 32 bit relro");
+            createRelroFile(false /* is64Bit */, nativeLibs[0]);
+            numRelros++;
+        }
+
+        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+            if (DEBUG) Log.v(LOGTAG, "Create 64 bit relro");
+            createRelroFile(true /* is64Bit */, nativeLibs[1]);
+            numRelros++;
+        }
+        return numRelros;
+    }
+
     /**
      *
      * @return the native WebView libraries in the new WebView APK.
      */
-    static String[] updateWebViewZygoteVmSize(PackageInfo packageInfo)
+    private static String[] updateWebViewZygoteVmSize(PackageInfo packageInfo)
             throws WebViewFactory.MissingWebViewPackageException {
         // Find the native libraries of the new WebView package, to change the size of the
         // memory region in the Zygote reserved for the library.

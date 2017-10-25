@@ -2484,6 +2484,7 @@
   <java-symbol type="dimen" name="magnifier_width" />
   <java-symbol type="dimen" name="magnifier_height" />
   <java-symbol type="dimen" name="magnifier_elevation" />
+  <java-symbol type="dimen" name="magnifier_zoom_scale" />
   <java-symbol type="dimen" name="magnifier_offset" />
 
   <java-symbol type="string" name="date_picker_prev_month_button" />

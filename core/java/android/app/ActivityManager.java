@@ -1596,6 +1596,9 @@ public class ActivityManager {
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {
+            if (maxNum < 0) {
+                throw new IllegalArgumentException("The requested number of tasks should be >= 0");
+            }
             return getService().getRecentTasks(maxNum, flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

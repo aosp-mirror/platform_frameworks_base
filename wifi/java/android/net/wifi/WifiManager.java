@@ -1877,32 +1877,6 @@ public class WifiManager {
     }
 
     /**
-     * This call is deprecated and removed.  It is no longer used to
-     * start WiFi Tethering.  Please use {@link ConnectivityManager#startTethering(int, boolean,
-     * ConnectivityManager#OnStartTetheringCallback)} if
-     * the caller has proper permissions.  Callers can also use the LocalOnlyHotspot feature for a
-     * hotspot capable of communicating with co-located devices {@link
-     * WifiManager#startLocalOnlyHotspot(LocalOnlyHotspotCallback)}.
-     *
-     * @param wifiConfig SSID, security and channel details as
-     *        part of WifiConfiguration
-     * @return {@code false}
-     *
-     * @hide
-     * @deprecated This API is nolonger supported.
-     * @removed
-     */
-    @SystemApi
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
-    public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
-        String packageName = mContext.getOpPackageName();
-
-        Log.w(TAG, packageName + " attempted call to setWifiApEnabled: enabled = " + enabled);
-        return false;
-    }
-
-    /**
      * Call allowing ConnectivityService to update WifiService with interface mode changes.
      *
      * The possible modes include: {@link IFACE_IP_MODE_TETHERED},
