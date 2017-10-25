@@ -248,7 +248,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         spec.getUserAuthenticationValidityDurationSeconds(),
                         spec.isUserAuthenticationValidWhileOnBody(),
                         spec.isInvalidatedByBiometricEnrollment(),
-                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */,
+                        spec.isUserConfirmationRequired());
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -289,7 +290,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 spec.getUserAuthenticationValidityDurationSeconds(),
                 spec.isUserAuthenticationValidWhileOnBody(),
                 spec.isInvalidatedByBiometricEnrollment(),
-                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */,
+                spec.isUserConfirmationRequired());
         if (spec.isTrustedUserPresenceRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
         }
