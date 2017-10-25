@@ -20,8 +20,6 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include <nativehelper/JNIHelp.h>
-
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -44,8 +42,9 @@
 #include <utils/SystemClock.h>
 #include <utils/threads.h>
 
-#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "core_jni_helpers.h"
 
@@ -174,8 +173,49 @@ static JNIEnv* javavm_to_jnienv(JavaVM* vm)
     return vm->GetEnv((void **)&env, JNI_VERSION_1_4) >= 0 ? env : NULL;
 }
 
-// Report a java.lang.Error (or subclass). This may terminate the runtime.
-static void report_java_lang_error(JNIEnv* env, jthrowable error)
+// Report a java.lang.Error (or subclass). This will terminate the runtime by
+// calling FatalError with a message derived from the given error.
+static void report_java_lang_error_fatal_error(JNIEnv* env, jthrowable error,
+        const char* msg)
+{
+    // Report an error: reraise the exception and ask the runtime to abort.
+
+    // Try to get the exception string. Sometimes logcat isn't available,
+    // so try to add it to the abort message.
+    std::string exc_msg = "(Unknown exception message)";
+    {
+        ScopedLocalRef<jclass> exc_class(env, env->GetObjectClass(error));
+        jmethodID method_id = env->GetMethodID(exc_class.get(), "toString",
+                "()Ljava/lang/String;");
+        ScopedLocalRef<jstring> jstr(
+                env,
+                reinterpret_cast<jstring>(
+                        env->CallObjectMethod(error, method_id)));
+        env->ExceptionClear();  // Just for good measure.
+        if (jstr.get() != nullptr) {
+            ScopedUtfChars jstr_utf(env, jstr.get());
+            if (jstr_utf.c_str() != nullptr) {
+                exc_msg = jstr_utf.c_str();
+            } else {
+                env->ExceptionClear();
+            }
+        }
+    }
+
+    env->Throw(error);
+    ALOGE("java.lang.Error thrown during binder transaction (stack trace follows) : ");
+    env->ExceptionDescribe();
+
+    std::string error_msg = base::StringPrintf(
+            "java.lang.Error thrown during binder transaction: %s",
+            exc_msg.c_str());
+    env->FatalError(error_msg.c_str());
+}
+
+// Report a java.lang.Error (or subclass). This will terminate the runtime, either by
+// the uncaught exception handler, or explicitly by calling
+// report_java_lang_error_fatal_error.
+static void report_java_lang_error(JNIEnv* env, jthrowable error, const char* msg)
 {
     // Try to run the uncaught exception machinery.
     jobject thread = env->CallStaticObjectMethod(gThreadDispatchOffsets.mClass,
@@ -187,77 +227,39 @@ static void report_java_lang_error(JNIEnv* env, jthrowable error)
     }
     // Some error occurred that meant that either dispatchUncaughtException could not be
     // called or that it had an error itself (as this should be unreachable under normal
-    // conditions). Clear the exception.
+    // conditions). As the binder code cannot handle Errors, attempt to log the error and
+    // abort.
     env->ExceptionClear();
+    report_java_lang_error_fatal_error(env, error, msg);
 }
 
 static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
 {
     env->ExceptionClear();
 
-    jstring tagstr = env->NewStringUTF(LOG_TAG);
-    jstring msgstr = NULL;
-    if (tagstr != NULL) {
-        msgstr = env->NewStringUTF(msg);
+    ScopedLocalRef<jstring> tagstr(env, env->NewStringUTF(LOG_TAG));
+    ScopedLocalRef<jstring> msgstr(env);
+    if (tagstr != nullptr) {
+        msgstr.reset(env->NewStringUTF(msg));
     }
 
-    if ((tagstr == NULL) || (msgstr == NULL)) {
+    if ((tagstr != nullptr) && (msgstr != nullptr)) {
+        env->CallStaticIntMethod(gLogOffsets.mClass, gLogOffsets.mLogE,
+                tagstr.get(), msgstr.get(), excep);
+        if (env->ExceptionCheck()) {
+            // Attempting to log the failure has failed.
+            ALOGW("Failed trying to log exception, msg='%s'\n", msg);
+            env->ExceptionClear();
+        }
+    } else {
         env->ExceptionClear();      /* assume exception (OOM?) was thrown */
         ALOGE("Unable to call Log.e()\n");
         ALOGE("%s", msg);
-        goto bail;
-    }
-
-    env->CallStaticIntMethod(
-        gLogOffsets.mClass, gLogOffsets.mLogE, tagstr, msgstr, excep);
-    if (env->ExceptionCheck()) {
-        /* attempting to log the failure has failed */
-        ALOGW("Failed trying to log exception, msg='%s'\n", msg);
-        env->ExceptionClear();
     }
 
     if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
-        // Try to report the error. This should not return under normal circumstances.
-        report_java_lang_error(env, excep);
-        // The traditional handling: re-raise and abort.
-
-        /*
-         * It's an Error: Reraise the exception and ask the runtime to abort.
-         */
-
-        // Try to get the exception string. Sometimes logcat isn't available,
-        // so try to add it to the abort message.
-        std::string exc_msg = "(Unknown exception message)";
-        {
-            ScopedLocalRef<jclass> exc_class(env, env->GetObjectClass(excep));
-            jmethodID method_id = env->GetMethodID(exc_class.get(),
-                                                   "toString",
-                                                   "()Ljava/lang/String;");
-            ScopedLocalRef<jstring> jstr(
-                    env,
-                    reinterpret_cast<jstring>(
-                            env->CallObjectMethod(excep, method_id)));
-            env->ExceptionClear();  // Just for good measure.
-            if (jstr.get() != nullptr) {
-                ScopedUtfChars jstr_utf(env, jstr.get());
-                exc_msg = jstr_utf.c_str();
-            }
-        }
-
-        env->Throw(excep);
-        ALOGE("java.lang.Error thrown during binder transaction (stack trace follows) : ");
-        env->ExceptionDescribe();
-
-        std::string error_msg = base::StringPrintf(
-                "java.lang.Error thrown during binder transaction: %s",
-                exc_msg.c_str());
-        env->FatalError(error_msg.c_str());
+        report_java_lang_error(env, excep, msg);
     }
-
-bail:
-    /* discard local refs created for us by VM */
-    env->DeleteLocalRef(tagstr);
-    env->DeleteLocalRef(msgstr);
 }
 
 class JavaBBinderHolder;
@@ -309,14 +311,11 @@ protected:
             code, reinterpret_cast<jlong>(&data), reinterpret_cast<jlong>(reply), flags);
 
         if (env->ExceptionCheck()) {
-            jthrowable excep = env->ExceptionOccurred();
-            report_exception(env, excep,
+            ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
+            report_exception(env, excep.get(),
                 "*** Uncaught remote exception!  "
                 "(Exceptions are not yet supported across processes.)");
             res = JNI_FALSE;
-
-            /* clean up JNI local ref -- we don't return to Java code */
-            env->DeleteLocalRef(excep);
         }
 
         // Check if the strict mode state changed while processing the
@@ -328,11 +327,9 @@ protected:
         }
 
         if (env->ExceptionCheck()) {
-            jthrowable excep = env->ExceptionOccurred();
-            report_exception(env, excep,
+            ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
+            report_exception(env, excep.get(),
                 "*** Uncaught exception in onBinderStrictModePolicyChange");
-            /* clean up JNI local ref -- we don't return to Java code */
-            env->DeleteLocalRef(excep);
         }
 
         // Need to always call through the native implementation of
@@ -475,9 +472,8 @@ public:
         if (mObject != NULL) {
             result = env->IsSameObject(obj, mObject);
         } else {
-            jobject me = env->NewLocalRef(mObjectWeak);
-            result = env->IsSameObject(obj, me);
-            env->DeleteLocalRef(me);
+            ScopedLocalRef<jobject> me(env, env->NewLocalRef(mObjectWeak));
+            result = env->IsSameObject(obj, me.get());
         }
         return result;
     }
