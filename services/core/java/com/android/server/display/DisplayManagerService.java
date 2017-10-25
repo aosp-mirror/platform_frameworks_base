@@ -31,9 +31,11 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
@@ -58,6 +60,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
@@ -139,6 +142,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
+    private static final int MSG_REGISTER_BRIGHTNESS_TRACKER = 6;
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
@@ -256,6 +260,8 @@ public final class DisplayManagerService extends SystemService {
 
     private final Injector mInjector;
 
+    private final BrightnessTracker mBrightnessTracker;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -274,6 +280,7 @@ public final class DisplayManagerService extends SystemService {
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
+        mBrightnessTracker = new BrightnessTracker(context, null);
     }
 
     public void setupSchedulerPolicies() {
@@ -350,6 +357,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
+        mHandler.sendEmptyMessage(MSG_REGISTER_BRIGHTNESS_TRACKER);
     }
 
     @VisibleForTesting
@@ -1352,6 +1360,10 @@ public final class DisplayManagerService extends SystemService {
                             mTempExternalTouchViewport, mTempVirtualTouchViewports);
                     break;
                 }
+
+                case MSG_REGISTER_BRIGHTNESS_TRACKER:
+                    mBrightnessTracker.start();
+                    break;
             }
         }
     }
@@ -1731,6 +1743,35 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 dumpInternal(pw);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.BRIGHTNESS_SLIDER_USAGE,
+                    "Permission to read brightness events.");
+            int userId = UserHandle.getUserId(Binder.getCallingUid());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mBrightnessTracker.getEvents(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setBrightness(int brightness) {
+            // STOPSHIP - remove when adaptive brightness controller accepts curves.
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.BRIGHTNESS_SLIDER_USAGE,
+                    "Permission to set brightness.");
+            int userId = UserHandle.getUserId(Binder.getCallingUid());
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mBrightnessTracker.setBrightness(brightness, userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
