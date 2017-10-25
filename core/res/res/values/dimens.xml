@@ -624,4 +624,7 @@
     <dimen name="slice_icon_size">24dp</dimen>
     <!-- Standard padding used in a slice view -->
     <dimen name="slice_padding">16dp</dimen>
+
+    <!-- Default dialog corner radius -->
+    <dimen name="dialog_corner_radius">2dp</dimen>
 </resources>
