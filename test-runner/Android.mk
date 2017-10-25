@@ -106,9 +106,11 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.mock.stubs \
 
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
+LOCAL_SDK_VERSION := current
 
 # Make sure to run droiddoc first to generate the stub source files.
 LOCAL_ADDITIONAL_DEPENDENCIES := $(android_test_runner_api_gen_stamp)
+android_test_runner_api_gen_stamp :=
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
@@ -203,6 +205,7 @@ LOCAL_SOURCE_FILES_ALL_GENERATED := true
 
 # Make sure to run droiddoc first to generate the stub source files.
 LOCAL_ADDITIONAL_DEPENDENCIES := $(android_test_mock_gen_stamp)
+android_test_mock_gen_stamp :=
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
@@ -246,6 +249,7 @@ update-android-test-mock-api: $(ANDROID_TEST_MOCK_OUTPUT_API_FILE) | $(ACP)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := android.test.mock.sdk
+LOCAL_SDK_VERSION := current
 
 LOCAL_STATIC_JAVA_LIBRARIES := android.test.mock.stubs
 
