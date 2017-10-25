@@ -23,12 +23,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.util.VersionedBroadcastListener;
+import android.net.util.VersionedBroadcastListener.IntentCallback;
 import android.os.Handler;
 import android.util.Log;
 
 import com.android.internal.telephony.TelephonyIntents;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 
 /**
@@ -37,88 +40,40 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @hide
  */
-public class SimChangeListener {
+public class SimChangeListener extends VersionedBroadcastListener {
     private static final String TAG = SimChangeListener.class.getSimpleName();
     private static final boolean DBG = false;
 
-    private final Context mContext;
-    private final Handler mTarget;
-    private final AtomicInteger mSimBcastGenerationNumber;
-    private final Runnable mCallback;
-    private BroadcastReceiver mBroadcastReceiver;
-
     public SimChangeListener(Context ctx, Handler handler, Runnable onSimCardLoadedCallback) {
-        mContext = ctx;
-        mTarget = handler;
-        mCallback = onSimCardLoadedCallback;
-        mSimBcastGenerationNumber = new AtomicInteger(0);
+        super(TAG, ctx, handler, makeIntentFilter(), makeCallback(onSimCardLoadedCallback));
     }
 
-    public int generationNumber() {
-        return mSimBcastGenerationNumber.get();
-    }
-
-    public void startListening() {
-        if (DBG) Log.d(TAG, "startListening for SIM changes");
-
-        if (mBroadcastReceiver != null) return;
-
-        mBroadcastReceiver = new SimChangeBroadcastReceiver(
-                mSimBcastGenerationNumber.incrementAndGet());
+    private static IntentFilter makeIntentFilter() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, mTarget);
+        return filter;
     }
 
-    public void stopListening() {
-        if (DBG) Log.d(TAG, "stopListening for SIM changes");
+    private static Consumer<Intent> makeCallback(Runnable onSimCardLoadedCallback) {
+        return new Consumer<Intent>() {
+            private boolean mSimNotLoadedSeen = false;
 
-        if (mBroadcastReceiver == null) return;
+            @Override
+            public void accept(Intent intent) {
+                final String state = intent.getStringExtra(INTENT_KEY_ICC_STATE);
+                Log.d(TAG, "got Sim changed to state " + state + ", mSimNotLoadedSeen=" +
+                        mSimNotLoadedSeen);
 
-        mSimBcastGenerationNumber.incrementAndGet();
-        mContext.unregisterReceiver(mBroadcastReceiver);
-        mBroadcastReceiver = null;
-    }
+                if (!INTENT_VALUE_ICC_LOADED.equals(state)) {
+                    mSimNotLoadedSeen = true;
+                    return;
+                }
 
-    private boolean isSimCardLoaded(String state) {
-        return INTENT_VALUE_ICC_LOADED.equals(state);
-    }
-
-    private class SimChangeBroadcastReceiver extends BroadcastReceiver {
-        // used to verify this receiver is still current
-        final private int mGenerationNumber;
-
-        // used to check the sim state transition from non-loaded to loaded
-        private boolean mSimNotLoadedSeen = false;
-
-        public SimChangeBroadcastReceiver(int generationNumber) {
-            mGenerationNumber = generationNumber;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final int currentGenerationNumber = mSimBcastGenerationNumber.get();
-
-            if (DBG) {
-                Log.d(TAG, "simchange mGenerationNumber=" + mGenerationNumber +
-                        ", current generationNumber=" + currentGenerationNumber);
+                if (mSimNotLoadedSeen) {
+                    mSimNotLoadedSeen = false;
+                    onSimCardLoadedCallback.run();
+                }
             }
-            if (mGenerationNumber != currentGenerationNumber) return;
-
-            final String state = intent.getStringExtra(INTENT_KEY_ICC_STATE);
-            Log.d(TAG, "got Sim changed to state " + state + ", mSimNotLoadedSeen=" +
-                    mSimNotLoadedSeen);
-
-            if (!isSimCardLoaded(state)) {
-                mSimNotLoadedSeen = true;
-                return;
-            }
-
-            if (mSimNotLoadedSeen) {
-                mSimNotLoadedSeen = false;
-                mCallback.run();
-            }
-        }
+        };
     }
 }
