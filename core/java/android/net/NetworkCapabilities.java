@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,6 +24,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -76,6 +79,31 @@ public final class NetworkCapabilities implements Parcelable {
      * by any Network that matches all of them.
      */
     private long mNetworkCapabilities;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "NET_CAPABILITY_" }, value = {
+            NET_CAPABILITY_MMS,
+            NET_CAPABILITY_SUPL,
+            NET_CAPABILITY_DUN,
+            NET_CAPABILITY_FOTA,
+            NET_CAPABILITY_IMS,
+            NET_CAPABILITY_CBS,
+            NET_CAPABILITY_WIFI_P2P,
+            NET_CAPABILITY_IA,
+            NET_CAPABILITY_RCS,
+            NET_CAPABILITY_XCAP,
+            NET_CAPABILITY_EIMS,
+            NET_CAPABILITY_NOT_METERED,
+            NET_CAPABILITY_INTERNET,
+            NET_CAPABILITY_NOT_RESTRICTED,
+            NET_CAPABILITY_TRUSTED,
+            NET_CAPABILITY_NOT_VPN,
+            NET_CAPABILITY_VALIDATED,
+            NET_CAPABILITY_CAPTIVE_PORTAL,
+            NET_CAPABILITY_FOREGROUND,
+    })
+    public @interface NetCapability { }
 
     /**
      * Indicates this is a network that has the ability to reach the
@@ -260,11 +288,11 @@ public final class NetworkCapabilities implements Parcelable {
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
      *
-     * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be added.
+     * @param capability the capability to be added.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public NetworkCapabilities addCapability(int capability) {
+    public NetworkCapabilities addCapability(@NetCapability int capability) {
         if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             throw new IllegalArgumentException("NetworkCapability out of range");
         }
@@ -275,11 +303,11 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
      *
-     * @param capability the {@code NetworkCapabilities.NET_CAPABILTIY_*} to be removed.
+     * @param capability the capability to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public NetworkCapabilities removeCapability(int capability) {
+    public NetworkCapabilities removeCapability(@NetCapability int capability) {
         if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             throw new IllegalArgumentException("NetworkCapability out of range");
         }
@@ -290,21 +318,20 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Gets all the capabilities set on this {@code NetworkCapability} instance.
      *
-     * @return an array of {@code NetworkCapabilities.NET_CAPABILITY_*} values
-     *         for this instance.
+     * @return an array of capability values for this instance.
      * @hide
      */
-    public int[] getCapabilities() {
+    public @NetCapability int[] getCapabilities() {
         return BitUtils.unpackBits(mNetworkCapabilities);
     }
 
     /**
      * Tests for the presence of a capabilitity on this instance.
      *
-     * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be tested for.
+     * @param capability the capabilities to be tested for.
      * @return {@code true} if set on this instance.
      */
-    public boolean hasCapability(int capability) {
+    public boolean hasCapability(@NetCapability int capability) {
         if (capability < MIN_NET_CAPABILITY || capability > MAX_NET_CAPABILITY) {
             return false;
         }
@@ -385,6 +412,19 @@ public final class NetworkCapabilities implements Parcelable {
      */
     private long mTransportTypes;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "TRANSPORT_" }, value = {
+            TRANSPORT_CELLULAR,
+            TRANSPORT_WIFI,
+            TRANSPORT_BLUETOOTH,
+            TRANSPORT_ETHERNET,
+            TRANSPORT_VPN,
+            TRANSPORT_WIFI_AWARE,
+            TRANSPORT_LOWPAN,
+    })
+    public @interface Transport { }
+
     /**
      * Indicates this network uses a Cellular transport.
      */
@@ -426,7 +466,7 @@ public final class NetworkCapabilities implements Parcelable {
     public static final int MAX_TRANSPORT = TRANSPORT_LOWPAN;
 
     /** @hide */
-    public static boolean isValidTransport(int transportType) {
+    public static boolean isValidTransport(@Transport int transportType) {
         return (MIN_TRANSPORT <= transportType) && (transportType <= MAX_TRANSPORT);
     }
 
@@ -449,11 +489,11 @@ public final class NetworkCapabilities implements Parcelable {
      * to be selected.  This is logically different than
      * {@code NetworkCapabilities.NET_CAPABILITY_*} listed above.
      *
-     * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be added.
+     * @param transportType the transport type to be added.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public NetworkCapabilities addTransportType(int transportType) {
+    public NetworkCapabilities addTransportType(@Transport int transportType) {
         checkValidTransportType(transportType);
         mTransportTypes |= 1 << transportType;
         setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
@@ -463,11 +503,11 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Removes (if found) the given transport from this {@code NetworkCapability} instance.
      *
-     * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be removed.
+     * @param transportType the transport type to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public NetworkCapabilities removeTransportType(int transportType) {
+    public NetworkCapabilities removeTransportType(@Transport int transportType) {
         checkValidTransportType(transportType);
         mTransportTypes &= ~(1 << transportType);
         setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
@@ -477,21 +517,20 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Gets all the transports set on this {@code NetworkCapability} instance.
      *
-     * @return an array of {@code NetworkCapabilities.TRANSPORT_*} values
-     *         for this instance.
+     * @return an array of transport type values for this instance.
      * @hide
      */
-    public int[] getTransportTypes() {
+    public @Transport int[] getTransportTypes() {
         return BitUtils.unpackBits(mTransportTypes);
     }
 
     /**
      * Tests for the presence of a transport on this instance.
      *
-     * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be tested for.
+     * @param transportType the transport type to be tested for.
      * @return {@code true} if set on this instance.
      */
-    public boolean hasTransport(int transportType) {
+    public boolean hasTransport(@Transport int transportType) {
         return isValidTransport(transportType) && ((mTransportTypes & (1 << transportType)) != 0);
     }
 
@@ -898,7 +937,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
-    public static String capabilityNamesOf(int[] capabilities) {
+    public static String capabilityNamesOf(@NetCapability int[] capabilities) {
         StringJoiner joiner = new StringJoiner("|");
         if (capabilities != null) {
             for (int c : capabilities) {
@@ -911,7 +950,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
-    public static String capabilityNameOf(int capability) {
+    public static String capabilityNameOf(@NetCapability int capability) {
         switch (capability) {
             case NET_CAPABILITY_MMS:            return "MMS";
             case NET_CAPABILITY_SUPL:           return "SUPL";
@@ -939,7 +978,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
-    public static String transportNamesOf(int[] types) {
+    public static String transportNamesOf(@Transport int[] types) {
         StringJoiner joiner = new StringJoiner("|");
         if (types != null) {
             for (int t : types) {
@@ -952,14 +991,14 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * @hide
      */
-    public static String transportNameOf(int transport) {
+    public static String transportNameOf(@Transport int transport) {
         if (!isValidTransport(transport)) {
             return "UNKNOWN";
         }
         return TRANSPORT_NAMES[transport];
     }
 
-    private static void checkValidTransportType(int transport) {
+    private static void checkValidTransportType(@Transport int transport) {
         Preconditions.checkArgument(
                 isValidTransport(transport), "Invalid TransportType " + transport);
     }
