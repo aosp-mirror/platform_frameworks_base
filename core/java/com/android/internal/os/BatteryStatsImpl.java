@@ -4634,6 +4634,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Signal strength " + strengthBin + " to: "
                         + Integer.toHexString(mHistoryCur.states));
                 newHistory = true;
+                StatsLog.write(StatsLog.PHONE_SIGNAL_STRENGTH_CHANGED, strengthBin);
             } else {
                 stopAllPhoneSignalStrengthTimersLocked(-1);
             }
@@ -5189,6 +5190,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (strengthBin >= 0) {
                 if (!mWifiSignalStrengthsTimer[strengthBin].isRunningLocked()) {
                     mWifiSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
+                    StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
                 }
                 mHistoryCur.states2 =
                         (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
@@ -6054,6 +6056,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mBsi.mFullWifiLockTimers, mBsi.mOnBatteryTimeBase);
                 }
                 mFullWifiLockTimer.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6062,6 +6066,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mFullWifiLockOut) {
                 mFullWifiLockOut = false;
                 mFullWifiLockTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mFullWifiLockTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
@@ -6075,6 +6083,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mOnBatteryBackgroundTimeBase);
                 }
                 mWifiScanTimer.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6083,6 +6093,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiScanStarted) {
                 mWifiScanStarted = false;
                 mWifiScanTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mWifiScanTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 

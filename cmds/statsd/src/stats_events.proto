@@ -65,6 +65,10 @@ message StatsEvent {
         DeviceOnStatusChanged device_on_status_changed = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
+        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
+        WifiScanStateChanged wifi_scan_state_changed = 39;
+        PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
 
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
@@ -571,4 +575,74 @@ message KernelWakeupReported {
 
     // Duration (in microseconds) for the wake-up interrupt to be serviced.
     optional int64 duration_usec = 2;
+}
+
+/**
+ * Logs wifi locks held by an app.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiLockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi signal strength changes.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
+}
+
+/**
+ * Logs wifi scans performed by an app.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs phone signal strength changes.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
 }

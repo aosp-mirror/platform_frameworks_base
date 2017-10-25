@@ -26,6 +26,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// TODO: Can probably be used for Count, Value, and Gauge. If so, rename to ValueAnomalyTracker.
+// (caveat: currently, the value cannot be negative. Probably fine for P.)
 class CountAnomalyTracker {
 public:
     CountAnomalyTracker(const Alert& alert);
