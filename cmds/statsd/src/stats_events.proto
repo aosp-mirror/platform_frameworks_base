@@ -46,6 +46,7 @@ message StatsEvent {
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
         // 10-20 are temporarily reserved for wakelocks etc.
+        WakelockStateChanged wakelock_state_changed = 10;
         UidWakelockStateChanged uid_wakelock_state_changed = 11;
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
@@ -364,7 +365,7 @@ message CameraStateChanged {
  * Logged from:
  *   TODO
  */
-message WakelockChanged {
+message WakelockStateChanged {
     // TODO: Add attribution instead of uid.
     optional int32 uid = 1;
 

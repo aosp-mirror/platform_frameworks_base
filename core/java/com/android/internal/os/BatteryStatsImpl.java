@@ -8877,6 +8877,8 @@ public class BatteryStatsImpl extends BatteryStats {
             Wakelock wl = mWakelockStats.startObject(name);
             if (wl != null) {
                 getWakelockTimerLocked(wl, type).startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Hopefully use a worksource instead of a uid (so move elsewhere)
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 1);
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
@@ -8894,7 +8896,12 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             Wakelock wl = mWakelockStats.stopObject(name);
             if (wl != null) {
-                getWakelockTimerLocked(wl, type).stopRunningLocked(elapsedRealtimeMs);
+                StopwatchTimer wlt = getWakelockTimerLocked(wl, type);
+                wlt.stopRunningLocked(elapsedRealtimeMs);
+                if (!wlt.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 0);
+                }
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
