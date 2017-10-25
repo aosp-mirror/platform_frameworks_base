@@ -1986,7 +1986,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getDeviceIdlingTime(int mode, long elapsedRealtimeUs, int which);
 
     /**
-     * Returns the number of times that the devie has started idling.
+     * Returns the number of times that the device has started idling.
      *
      * {@hide}
      */

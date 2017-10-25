@@ -57,6 +57,14 @@ message StatsEvent {
         UidProcessStateChanged uid_process_state_changed = 27;
         ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
         ScreenStateChanged screen_state_changed = 29;
+        BatteryLevelChanged battery_level_changed = 30;
+        ChargingStateChanged charging_state_changed = 31;
+        PluggedStateChanged plugged_state_changed = 32;
+        DeviceTemperatureReported device_temperature_reported = 33;
+        DeviceOnStatusChanged device_on_status_changed = 34;
+        WakeupAlarmOccurred wakeup_alarm_occurred = 35;
+        KernelWakeupReported kernel_wakeup_reported = 36;
+
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -460,4 +468,106 @@ message DeviceIdleModeStateChanged {
 message ScreenBrightnessChanged {
     // Screen brightness level. Should be in [-1, 255] according to PowerManager.java.
     optional int32 level = 1;
+}
+
+/**
+ * Logs battery level (percent full, from 0 to 100).
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatteryLevelChanged {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
+}
+
+/**
+ * Logs change in charging status of the device.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ChargingStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        BATTERY_STATUS_UNKNOWN = 1;
+        BATTERY_STATUS_CHARGING = 2;
+        BATTERY_STATUS_DISCHARGING = 3;
+        BATTERY_STATUS_NOT_CHARGING = 4;
+        BATTERY_STATUS_FULL = 5;
+    }
+    optional State charging_state = 1;
+}
+
+/**
+ * Logs whether the device is plugged in, and what power source it is using.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PluggedStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        // Note that NONE is not in BatteryManager.java's constants.
+        BATTERY_PLUGGED_NONE = 0;
+        // Power source is an AC charger.
+        BATTERY_PLUGGED_AC = 1;
+        // Power source is a USB port.
+        BATTERY_PLUGGED_USB = 2;
+        // Power source is wireless.
+        BATTERY_PLUGGED_WIRELESS = 4;
+    }
+    optional State plugged_state = 1;
+}
+
+/**
+ * Logs the temperature of the device, in tenths of a degree Celsius.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceTemperatureReported {
+    // Temperature in tenths of a degree C.
+    optional int32 temperature = 1;
+}
+
+// TODO: Define this more precisely.
+// TODO: Log the ON state somewhere. It isn't currently logged anywhere.
+/**
+ * Logs when the device turns off or on.
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message DeviceOnStatusChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs when an app's wakeup alarm fires.
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WakeupAlarmOccurred {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+}
+
+/**
+ * Logs kernel wakeup reasons and aborts.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message KernelWakeupReported {
+    // Name of the kernel wakeup reason (or abort).
+    optional string wakeup_reason_name = 1;
+
+    // Duration (in microseconds) for the wake-up interrupt to be serviced.
+    optional int64 duration_usec = 2;
 }
