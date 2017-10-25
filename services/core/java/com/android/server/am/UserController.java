@@ -250,21 +250,21 @@ class UserController implements Handler.Callback {
     }
 
     void stopRunningUsersLU(int maxRunningUsers) {
-        int num = mUserLru.size();
+        int currentlyRunning = mUserLru.size();
         int i = 0;
-        while (num > maxRunningUsers && i < mUserLru.size()) {
+        while (currentlyRunning > maxRunningUsers && i < mUserLru.size()) {
             Integer oldUserId = mUserLru.get(i);
             UserState oldUss = mStartedUsers.get(oldUserId);
             if (oldUss == null) {
                 // Shouldn't happen, but be sane if it does.
                 mUserLru.remove(i);
-                num--;
+                currentlyRunning--;
                 continue;
             }
             if (oldUss.state == UserState.STATE_STOPPING
                     || oldUss.state == UserState.STATE_SHUTDOWN) {
                 // This user is already stopping, doesn't count.
-                num--;
+                currentlyRunning--;
                 i++;
                 continue;
             }
@@ -272,16 +272,15 @@ class UserController implements Handler.Callback {
                 // Owner/System user and current user can't be stopped. We count it as running
                 // when it is not a pure system user.
                 if (UserInfo.isSystemOnly(oldUserId)) {
-                    num--;
+                    currentlyRunning--;
                 }
                 i++;
                 continue;
             }
             // This is a user to be stopped.
-            if (stopUsersLU(oldUserId, false, null) != USER_OP_SUCCESS) {
-                num--;
+            if (stopUsersLU(oldUserId, false, null) == USER_OP_SUCCESS) {
+                currentlyRunning--;
             }
-            num--;
             i++;
         }
     }
