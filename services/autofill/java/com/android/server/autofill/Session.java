@@ -16,10 +16,10 @@
 
 package com.android.server.autofill;
 
+import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
-import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
-import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
@@ -55,14 +55,12 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillContext;
-import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
-import android.service.autofill.Transformation;
 import android.service.autofill.ValueFinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -92,7 +90,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -210,13 +207,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
         @Override
         public void onHandleAssistData(Bundle resultData) throws RemoteException {
-            final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
+            final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
                 return;
             }
 
-            final Bundle receiverExtras = resultData.getBundle(KEY_RECEIVER_EXTRAS);
+            final Bundle receiverExtras = resultData.getBundle(ASSIST_KEY_RECEIVER_EXTRAS);
             if (receiverExtras == null) {
                 Slog.e(TAG, "No receiver extras - app might have crashed providing it");
                 return;

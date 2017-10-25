@@ -64,6 +64,27 @@ public abstract class ActivityManagerInternal {
     public static final int APP_TRANSITION_SNAPSHOT = 4;
 
     /**
+     * The bundle key to extract the assist data.
+     */
+    public static final String ASSIST_KEY_DATA = "data";
+
+    /**
+     * The bundle key to extract the assist structure.
+     */
+    public static final String ASSIST_KEY_STRUCTURE = "structure";
+
+    /**
+     * The bundle key to extract the assist content.
+     */
+    public static final String ASSIST_KEY_CONTENT = "content";
+
+    /**
+     * The bundle key to extract the assist receiver extras.
+     */
+    public static final String ASSIST_KEY_RECEIVER_EXTRAS = "receiverExtras";
+
+
+    /**
      * Grant Uri permissions from one app to another. This method only extends
      * permission grants if {@code callingUid} has permission to them.
      */
