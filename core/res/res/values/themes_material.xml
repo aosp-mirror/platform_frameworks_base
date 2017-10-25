@@ -1325,12 +1325,15 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Notification" parent="">
         <item name="notificationHeaderStyle">@style/Notification.Header</item>
         <item name="notificationHeaderTextAppearance">@style/TextAppearance.Material.Notification.Info</item>
+        <item name="notificationHeaderAppNameVisibility">visible</item>
         <item name="notificationHeaderIconSize">@dimen/notification_header_icon_size</item>
     </style>
 
     <!-- Theme for inflating ambient notification -->
     <style name="Theme.Material.Notification.Ambient">
+        <item name="notificationHeaderStyle">@style/Notification.Header.Ambient</item>
         <item name="notificationHeaderTextAppearance">@style/TextAppearance.Material.Notification.Info.Ambient</item>
+        <item name="notificationHeaderAppNameVisibility">gone</item>
         <item name="notificationHeaderIconSize">@dimen/notification_header_icon_size_ambient</item>
     </style>
 

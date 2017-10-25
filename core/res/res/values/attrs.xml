@@ -8708,6 +8708,14 @@
         <attr name="notificationHeaderStyle" format="reference" />
         <attr name="notificationHeaderTextAppearance" format="reference" />
         <attr name="notificationHeaderIconSize" format="dimension" />
+        <attr name="notificationHeaderAppNameVisibility" format="enum">
+            <!-- Visible on screen; the default value. -->
+            <enum name="visible" value="0" />
+            <!-- Not displayed, but taken into account during layout (space is left for it). -->
+            <enum name="invisible" value="1" />
+            <!-- Completely hidden, as if the view had not been added. -->
+            <enum name="gone" value="2" />
+        </attr>
     </declare-styleable>
 
     <attr name="lockPatternStyle" format="reference" />
