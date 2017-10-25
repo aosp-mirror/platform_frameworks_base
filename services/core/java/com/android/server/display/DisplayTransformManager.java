@@ -16,15 +16,20 @@
 
 package com.android.server.display;
 
+import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
+import com.android.internal.app.NightDisplayController;
 import java.util.Arrays;
 
 /**
@@ -50,6 +55,17 @@ public class DisplayTransformManager {
     private static final int SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX = 1015;
     private static final int SURFACE_FLINGER_TRANSACTION_DALTONIZER = 1014;
 
+    static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+
+    static final String PERSISTENT_PROPERTY_NATIVE_MODE = "persist.sys.sf.native_mode";
+
+    private static final int SURFACE_FLINGER_TRANSACTION_SATURATION = 1022;
+    private static final int SURFACE_FLINGER_TRANSACTION_NATIVE_MODE = 1023;
+
+    static final float COLOR_SATURATION_NATURAL = 1.0f;
+
+    static final float COLOR_SATURATION_BOOSTED = 1.1f;
+
     /**
      * Map of level -> color transformation matrix.
      */
@@ -68,7 +84,16 @@ public class DisplayTransformManager {
     @GuardedBy("mDaltonizerModeLock")
     private int mDaltonizerMode = -1;
 
+    private IBinder mSurfaceFlinger;
+
     /* package */ DisplayTransformManager() {
+    }
+
+    public IBinder getSurfaceFlinger() {
+        if (mSurfaceFlinger == null) {
+            mSurfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+        }
+        return mSurfaceFlinger;
     }
 
     /**
@@ -199,6 +224,73 @@ public class DisplayTransformManager {
             } finally {
                 data.recycle();
             }
+        }
+    }
+
+    public static boolean isNativeModeEnabled() {
+        return SystemProperties.getBoolean(PERSISTENT_PROPERTY_NATIVE_MODE, false);
+    }
+
+    public boolean setColorMode(int colorMode) {
+        if (colorMode == NightDisplayController.COLOR_MODE_NATURAL) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setNativeMode(false);
+        } else if (colorMode == NightDisplayController.COLOR_MODE_BOOSTED) {
+            applySaturation(COLOR_SATURATION_BOOSTED);
+            setNativeMode(false);
+        } else if (colorMode == NightDisplayController.COLOR_MODE_SATURATED) {
+            applySaturation(COLOR_SATURATION_NATURAL);
+            setNativeMode(true);
+        }
+
+        updateConfiguration();
+
+        return true;
+    }
+
+    /**
+     * Propagates the provided saturation to the SurfaceFlinger.
+     */
+    private void applySaturation(float saturation) {
+        SystemProperties.set(PERSISTENT_PROPERTY_SATURATION, Float.toString(saturation));
+        if (getSurfaceFlinger() != null) {
+            final Parcel data = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            data.writeFloat(saturation);
+            try {
+                getSurfaceFlinger().transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to set saturation", ex);
+            } finally {
+                data.recycle();
+            }
+        }
+    }
+
+    /**
+     * Toggles native mode on/off in SurfaceFlinger.
+     */
+    private void setNativeMode(boolean enabled) {
+        SystemProperties.set(PERSISTENT_PROPERTY_NATIVE_MODE, enabled ? "1" : "0");
+        if (getSurfaceFlinger() != null) {
+            final Parcel data = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            data.writeInt(enabled ? 1 : 0);
+            try {
+                getSurfaceFlinger().transact(SURFACE_FLINGER_TRANSACTION_NATIVE_MODE, data, null, 0);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to set native mode", ex);
+            } finally {
+                data.recycle();
+            }
+        }
+    }
+
+    void updateConfiguration() {
+        try {
+            ActivityManager.getService().updateConfiguration(null);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not update configuration", e);
         }
     }
 }
