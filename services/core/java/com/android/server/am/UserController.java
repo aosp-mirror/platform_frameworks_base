@@ -2020,7 +2020,7 @@ class UserController implements Handler.Callback {
 
         void loadUserRecents(int userId) {
             synchronized (mService) {
-                mService.mRecentTasks.loadUserRecentsLocked(userId);
+                mService.getRecentTasks().loadUserRecentsLocked(userId);
             }
         }
 

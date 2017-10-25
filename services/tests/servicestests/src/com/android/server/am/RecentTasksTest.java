@@ -16,44 +16,55 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
+import static java.lang.Integer.MAX_VALUE;
+
+import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.os.Debug;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.MutableLong;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.server.am.RecentTasks.Callbacks;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/RecentTasksTest.java
@@ -67,13 +78,17 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static final int TEST_QUIET_USER_ID = 20;
     private static final UserInfo DEFAULT_USER_INFO = new UserInfo();
     private static final UserInfo QUIET_USER_INFO = new UserInfo();
+    private static final ComponentName MY_COMPONENT = new ComponentName(
+            RecentTasksTest.class.getPackage().getName(), RecentTasksTest.class.getName());
     private static int LAST_TASK_ID = 1;
+    private static int INVALID_STACK_ID = 999;
 
     private Context mContext = InstrumentationRegistry.getContext();
     private ActivityManagerService mService;
     private ActivityStack mStack;
     private TestTaskPersister mTaskPersister;
     private RecentTasks mRecentTasks;
+    private RunningTasks mRunningTasks;
 
     private static ArrayList<TaskRecord> mTasks = new ArrayList<>();
     private static ArrayList<TaskRecord> mSameDocumentTasks = new ArrayList<>();
@@ -88,6 +103,14 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         int[] getCurrentProfileIds() {
             return new int[] { TEST_USER_0_ID, TEST_QUIET_USER_ID };
+        }
+
+        @Override
+        Set<Integer> getProfileIds(int userId) {
+            Set<Integer> profileIds = new HashSet<>();
+            profileIds.add(TEST_USER_0_ID);
+            profileIds.add(TEST_QUIET_USER_ID);
+            return profileIds;
         }
 
         @Override
@@ -108,12 +131,12 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityManagerService();
+        mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
+        mService = setupActivityManagerService(new MyTestActivityManagerService(mContext));
+        mRecentTasks = mService.getRecentTasks();
+        mRecentTasks.loadParametersFromResources(mContext.getResources());
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mRecentTasks = new RecentTasks(mService, mTaskPersister, new TestUserController(mService));
-        mRecentTasks.loadParametersFromResources(mContext.getResources());
         mCallbacksRecorder = new CallbacksRecorder();
         mRecentTasks.registerCallback(mCallbacksRecorder);
         QUIET_USER_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE | UserInfo.FLAG_QUIET_MODE;
@@ -322,6 +345,103 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrimmed(mTasks.get(0), mTasks.get(1));
     }
 
+    @Test
+    public void testNotRecentsComponent_denyApiAccess() throws Exception {
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService).checkPermission(anyString(),
+                anyInt(), anyInt());
+
+        // Expect the following methods to fail due to recents component not being set
+        ((TestRecentTasks) mRecentTasks).setIsCallerRecentsOverride(
+                TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
+        testRecentTasksApis(false /* expectNoSecurityException */);
+        // Don't throw for the following tests
+        ((TestRecentTasks) mRecentTasks).setIsCallerRecentsOverride(TestRecentTasks.DENY);
+        testGetTasksApis(false /* expectNoSecurityException */);
+    }
+
+    @Test
+    public void testRecentsComponent_allowApiAccessWithoutPermissions() throws Exception {
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService).checkPermission(anyString(),
+                anyInt(), anyInt());
+
+        // Set the recents component and ensure that the following calls do not fail
+        ((TestRecentTasks) mRecentTasks).setIsCallerRecentsOverride(TestRecentTasks.GRANT);
+        testRecentTasksApis(true /* expectNoSecurityException */);
+        testGetTasksApis(true /* expectNoSecurityException */);
+    }
+
+    private void testRecentTasksApis(boolean expectCallable) {
+        assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable,
+                () -> mService.removeStacksInWindowingModes(new int[] {WINDOWING_MODE_UNDEFINED}));
+        assertSecurityException(expectCallable,
+                () -> mService.removeStacksWithActivityTypes(new int[] {ACTIVITY_TYPE_UNDEFINED}));
+        assertSecurityException(expectCallable, () -> mService.removeTask(0));
+        assertSecurityException(expectCallable,
+                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
+        assertSecurityException(expectCallable,
+                () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
+        assertSecurityException(expectCallable,
+                () -> mService.moveTaskToDockedStack(0, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, true,
+                        true, new Rect()));
+        assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
+        assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
+        assertSecurityException(expectCallable,
+                () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+        assertSecurityException(expectCallable,
+                () -> mService.resizeStack(INVALID_STACK_ID, new Rect(), true, true, true, 0));
+        assertSecurityException(expectCallable,
+                () -> mService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
+                        new Rect()));
+        assertSecurityException(expectCallable,
+                () -> mService.resizePinnedStack(new Rect(), new Rect()));
+        assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
+        assertSecurityException(expectCallable,
+                () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
+        assertSecurityException(expectCallable, () -> {
+            try {
+                mService.getFocusedStackInfo();
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        });
+        assertSecurityException(expectCallable,
+                () -> mService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
+        assertSecurityException(expectCallable,
+                () -> mService.startActivityFromRecents(0, new Bundle()));
+        assertSecurityException(expectCallable,
+                () -> mService.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> {
+            try {
+                mService.registerTaskStackListener(null);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        });
+        assertSecurityException(expectCallable, () -> {
+            try {
+                mService.unregisterTaskStackListener(null);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        });
+        assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
+        assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
+        assertSecurityException(expectCallable, () -> mService.cancelTaskThumbnailTransition(0));
+    }
+
+    private void testGetTasksApis(boolean expectCallable) {
+        mService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
+        mService.getTasks(MAX_VALUE);
+        if (expectCallable) {
+            assertTrue(((TestRecentTasks) mRecentTasks).mLastAllowed);
+            assertTrue(((TestRunningTasks) mRunningTasks).mLastAllowed);
+        } else {
+            assertFalse(((TestRecentTasks) mRecentTasks).mLastAllowed);
+            assertFalse(((TestRunningTasks) mRunningTasks).mLastAllowed);
+        }
+    }
+
     private ComponentName createComponent(String className) {
         return new ComponentName(mContext.getPackageName(), className);
     }
@@ -364,6 +484,55 @@ public class RecentTasksTest extends ActivityTestsBase {
         for (TaskRecord task : tasks) {
             assertTrue("Expected trimmed task: " + task, trimmed.contains(task));
             assertTrue("Expected removed task: " + task, removed.contains(task));
+        }
+    }
+
+    private void assertSecurityException(boolean expectCallable, Runnable runnable) {
+        boolean noSecurityException = true;
+        try {
+            runnable.run();
+        } catch (SecurityException se) {
+            noSecurityException = false;
+        } catch (Exception e) {
+            // We only care about SecurityExceptions, fall through here
+            e.printStackTrace();
+        }
+        if (noSecurityException != expectCallable) {
+            fail("Expected callable: " + expectCallable + " but got no security exception: "
+                    + noSecurityException);
+        }
+    }
+
+    private class MyTestActivityManagerService extends TestActivityManagerService {
+        MyTestActivityManagerService(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected ActivityStackSupervisor createStackSupervisor() {
+            return new MyTestActivityStackSupervisor(this, mHandlerThread.getLooper());
+        }
+
+        @Override
+        protected RecentTasks createRecentTasks() {
+            return new TestRecentTasks(this, mTaskPersister, new TestUserController(this));
+        }
+
+        @Override
+        public boolean isUserRunning(int userId, int flags) {
+            return true;
+        }
+    }
+
+    private class MyTestActivityStackSupervisor extends TestActivityStackSupervisor {
+        public MyTestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
+            super(service, looper);
+        }
+
+        @Override
+        RunningTasks createRunningTasks() {
+            mRunningTasks = new TestRunningTasks();
+            return mRunningTasks;
         }
     }
 
@@ -415,6 +584,63 @@ public class RecentTasksTest extends ActivityTestsBase {
                 return userTasksOverride;
             }
             return super.restoreTasksForUserLocked(userId, preaddedTasks);
+        }
+    }
+
+    private static class TestRecentTasks extends RecentTasks {
+        static final int GRANT = 0;
+        static final int DENY = 1;
+        static final int DENY_THROW_SECURITY_EXCEPTION = 2;
+
+        private boolean mOverrideIsCallerRecents;
+        private int mIsCallerRecentsPolicy;
+        boolean mLastAllowed;
+
+        TestRecentTasks(ActivityManagerService service, TaskPersister taskPersister,
+                UserController userController) {
+            super(service, taskPersister, userController);
+        }
+
+        @Override
+        boolean isCallerRecents(int callingUid) {
+            if (mOverrideIsCallerRecents) {
+                switch (mIsCallerRecentsPolicy) {
+                    case GRANT:
+                        return true;
+                    case DENY:
+                        return false;
+                    case DENY_THROW_SECURITY_EXCEPTION:
+                        throw new SecurityException();
+                }
+            }
+            return super.isCallerRecents(callingUid);
+        }
+
+        void setIsCallerRecentsOverride(int policy) {
+            mOverrideIsCallerRecents = true;
+            mIsCallerRecentsPolicy = policy;
+        }
+
+        @Override
+        ParceledListSlice<RecentTaskInfo> getRecentTasks(int maxNum, int flags,
+                boolean getTasksAllowed,
+                boolean getDetailedTasks, int userId, int callingUid) {
+            mLastAllowed = getTasksAllowed;
+            return super.getRecentTasks(maxNum, flags, getTasksAllowed, getDetailedTasks, userId,
+                    callingUid);
+        }
+    }
+
+    private static class TestRunningTasks extends RunningTasks {
+        boolean mLastAllowed;
+
+        @Override
+        void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
+                int ignoreWindowingMode, SparseArray<ActivityDisplay> activityDisplays,
+                int callingUid, boolean allowed) {
+            mLastAllowed = allowed;
+            super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,
+                    callingUid, allowed);
         }
     }
 }

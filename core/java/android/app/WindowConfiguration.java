@@ -102,7 +102,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int ACTIVITY_TYPE_STANDARD = 1;
     /** Home/Launcher activity type. */
     public static final int ACTIVITY_TYPE_HOME = 2;
-    /** Recents/Overview activity type. */
+    /** Recents/Overview activity type. There is only one activity with this type in the system. */
     public static final int ACTIVITY_TYPE_RECENTS = 3;
     /** Assistant activity type. */
     public static final int ACTIVITY_TYPE_ASSISTANT = 4;

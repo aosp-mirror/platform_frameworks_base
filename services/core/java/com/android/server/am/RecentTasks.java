@@ -37,8 +37,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
-import com.google.android.collect.Sets;
-
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -58,15 +56,16 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.MutableBoolean;
-import android.util.MutableInt;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.TaskRecord.TaskActivitiesReport;
+
+import com.google.android.collect.Sets;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -125,6 +124,13 @@ class RecentTasks {
     private final UserController mUserController;
 
     /**
+     * Keeps track of the static recents package/component which is granted additional permissions
+     * to call recents-related APIs.
+     */
+    private int mRecentsUid = -1;
+    private ComponentName mRecentsComponent = null;
+
+    /**
      * Mapping of user id -> whether recent tasks have been loaded for that user.
      */
     private final SparseBooleanArray mUsersWithRecentsLoaded = new SparseBooleanArray(
@@ -153,8 +159,7 @@ class RecentTasks {
     private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
     private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
-    private final TaskRecord.TaskActivitiesReport mTmpReport =
-            new TaskRecord.TaskActivitiesReport();
+    private final TaskActivitiesReport mTmpReport = new TaskActivitiesReport();
 
     @VisibleForTesting
     RecentTasks(ActivityManagerService service, TaskPersister taskPersister,
@@ -174,7 +179,7 @@ class RecentTasks {
         mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
         mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
-        loadParametersFromResources(service.mContext.getResources());
+        loadParametersFromResources(res);
     }
 
     @VisibleForTesting
@@ -216,6 +221,47 @@ class RecentTasks {
         mActiveTasksSessionDurationMs = (sessionDurationHrs > 0)
                 ? TimeUnit.HOURS.toMillis(sessionDurationHrs)
                 : -1;
+    }
+
+    /**
+     * Loads the static recents component.  This is called after the system is ready, but before
+     * any dependent services (like SystemUI) is started.
+     */
+    void loadRecentsComponent(Resources res) {
+        final String rawRecentsComponent = res.getString(
+                com.android.internal.R.string.config_recentsComponentName);
+        if (TextUtils.isEmpty(rawRecentsComponent)) {
+            return;
+        }
+
+        final ComponentName cn = ComponentName.unflattenFromString(rawRecentsComponent);
+        if (cn != null) {
+            try {
+                final ApplicationInfo appInfo = AppGlobals.getPackageManager()
+                        .getApplicationInfo(cn.getPackageName(), 0, mService.mContext.getUserId());
+                if (appInfo != null) {
+                    mRecentsUid = appInfo.uid;
+                    mRecentsComponent = cn;
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not load application info for recents component: " + cn);
+            }
+        }
+    }
+
+    /**
+     * @return whether the current caller has the same uid as the recents component.
+     */
+    boolean isCallerRecents(int callingUid) {
+        return UserHandle.isSameApp(callingUid, mRecentsUid);
+    }
+
+    /**
+     * @return whether the given component is the recents component and shares the same uid as the
+     *         recents component.
+     */
+    boolean isRecentsComponent(ComponentName cn, int uid) {
+        return cn.equals(mRecentsComponent) && UserHandle.isSameApp(uid, mRecentsUid);
     }
 
     void registerCallback(Callbacks callback) {
@@ -340,6 +386,7 @@ class RecentTasks {
     }
 
     void onSystemReadyLocked() {
+        loadRecentsComponent(mService.mContext.getResources());
         mTasks.clear();
         mTaskPersister.startPersisting();
     }
@@ -1328,12 +1375,14 @@ class RecentTasks {
 
     void dump(PrintWriter pw, boolean dumpAll, String dumpPackage) {
         pw.println("ACTIVITY MANAGER RECENT TASKS (dumpsys activity recents)");
+        pw.println("mRecentsUid=" + mRecentsUid);
+        pw.println("mRecentsComponent=" + mRecentsComponent);
         if (mTasks.isEmpty()) {
             return;
         }
 
-        final MutableBoolean printedAnything = new MutableBoolean(false);
-        final MutableBoolean printedHeader = new MutableBoolean(false);
+        boolean printedAnything = false;
+        boolean printedHeader = false;
         final int size = mTasks.size();
         for (int i = 0; i < size; i++) {
             final TaskRecord tr = mTasks.get(i);
@@ -1342,10 +1391,10 @@ class RecentTasks {
                 continue;
             }
 
-            if (!printedHeader.value) {
+            if (!printedHeader) {
                 pw.println("  Recent tasks:");
-                printedHeader.value = true;
-                printedAnything.value = true;
+                printedHeader = true;
+                printedAnything = true;
             }
             pw.print("  * Recent #"); pw.print(i); pw.print(": ");
             pw.println(tr);
@@ -1354,7 +1403,7 @@ class RecentTasks {
             }
         }
 
-        if (!printedAnything.value) {
+        if (!printedAnything) {
             pw.println("  (nothing)");
         }
     }
