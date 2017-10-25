@@ -1008,10 +1008,13 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     void resetAdjustedForIme(boolean adjustBoundsNow) {
         if (adjustBoundsNow) {
             mImeWin = null;
-            mAdjustedForIme = false;
             mImeGoingAway = false;
             mAdjustImeAmount = 0f;
             mAdjustDividerAmount = 0f;
+            if (!mAdjustedForIme) {
+                return;
+            }
+            mAdjustedForIme = false;
             updateAdjustedBounds();
             mService.setResizeDimLayer(false, getWindowingMode(), 1.0f);
         } else {
