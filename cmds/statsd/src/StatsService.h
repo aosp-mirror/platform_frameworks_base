@@ -24,6 +24,7 @@
 #include "packages/UidMap.h"
 
 #include <android/os/BnStatsManager.h>
+#include <android/os/IStatsCallbacks.h>
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
@@ -42,7 +43,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsService : public BnStatsManager, public LogListener {
+class StatsService : public BnStatsManager, public LogListener, public IBinder::DeathRecipient {
 public:
     StatsService(const sp<Looper>& handlerLooper);
     virtual ~StatsService();
@@ -70,6 +71,22 @@ public:
      */
     virtual void OnLogEvent(const LogEvent& event);
 
+    /**
+     * Binder call to force trigger pushLog. This would be called by callback
+     * clients.
+     */
+    virtual Status requestPush() override;
+
+    /**
+     * Pushes stats log entries from statsd to callback clients.
+     */
+    Status pushLog(const vector<uint8_t>& log);
+
+    /**
+     * Binder call to listen to statsd to send stats log entries.
+     */
+    virtual Status subscribeStatsLog(const sp<IStatsCallbacks>& callbacks) override;
+
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.
     /** Inform statsCompanion that statsd is ready. */
@@ -77,6 +94,9 @@ public:
 
     /** Fetches and returns the StatsCompanionService. */
     static sp<IStatsCompanionService> getStatsCompanionService();
+
+    /** IBinder::DeathRecipient */
+    virtual void binderDied(const wp<IBinder>& who) override;
 
 private:
     /**
@@ -159,6 +179,16 @@ private:
      * Whether this is an eng build.
      */
     bool mEngBuild;
+
+    /**
+     * Lock for callback handling.
+     */
+    std::mutex mLock;
+
+    /**
+     * Vector maintaining the list of callbacks for clients.
+     */
+    Vector< sp<IStatsCallbacks> > mCallbacks;
 };
 
 }  // namespace statsd

@@ -15,6 +15,7 @@
 LOCAL_PATH:= $(call my-dir)
 
 statsd_common_src := \
+    ../../core/java/android/os/IStatsCallbacks.aidl \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \

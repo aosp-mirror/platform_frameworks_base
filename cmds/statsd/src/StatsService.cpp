@@ -68,7 +68,9 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mStatsPullerManager = new StatsPullerManager();
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap);
+    mProcessor = new StatsLogProcessor(mUidMap, [this](const vector<uint8_t>& log) {
+      pushLog(log);
+    });
 
     mConfigManager->AddListener(mProcessor);
 
@@ -505,6 +507,40 @@ void StatsService::Startup() {
 
 void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
+}
+
+Status StatsService::requestPush() {
+    mProcessor->flush();
+    return Status::ok();
+}
+
+Status StatsService::pushLog(const vector<uint8_t>& log) {
+    std::lock_guard<std::mutex> lock(mLock);
+    for (size_t i = 0; i < mCallbacks.size(); i++) {
+        mCallbacks[i]->onReceiveLogs((vector<uint8_t>*)&log);
+    }
+    return Status::ok();
+}
+
+Status StatsService::subscribeStatsLog(const sp<IStatsCallbacks>& callback) {
+    std::lock_guard<std::mutex> lock(mLock);
+    for (size_t i = 0; i < mCallbacks.size(); i++) {
+        if (mCallbacks[i] == callback) {
+           return Status::fromStatusT(-errno);
+        }
+    }
+    mCallbacks.add(callback);
+    IInterface::asBinder(callback)->linkToDeath(this);
+    return Status::ok();
+}
+
+void StatsService::binderDied(const wp<IBinder>& who) {
+    for (size_t i = 0; i < mCallbacks.size(); i++) {
+        if (IInterface::asBinder(mCallbacks[i]) == who) {
+            mCallbacks.removeAt(i);
+            break;
+        }
+    }
 }
 
 }  // namespace statsd

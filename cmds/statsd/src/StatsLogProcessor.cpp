@@ -33,8 +33,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap)
-    : m_dropbox_writer("all-logs"), mUidMap(uidMap) {
+StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
+                                     const std::function<void(const vector<uint8_t>&)>& pushLog)
+    : m_dropbox_writer("all-logs"), mUidMap(uidMap), mPushLog(pushLog) {
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -89,6 +90,41 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
         it->second->finish();
         mMetricsManagers.erase(it);
     }
+}
+
+void StatsLogProcessor::addEventMetricData(const EventMetricData& eventMetricData) {
+    // TODO: Replace this code when MetricsManager.onDumpReport() is ready to
+    // get a list of byte arrays.
+    flushIfNecessary(eventMetricData);
+    const int numBytes = eventMetricData.ByteSize();
+    char buffer[numBytes];
+    eventMetricData.SerializeToArray(&buffer[0], numBytes);
+    string bufferString(buffer, numBytes);
+    mEvents.push_back(bufferString);
+    mBufferSize += eventMetricData.ByteSize();
+}
+
+void StatsLogProcessor::flushIfNecessary(const EventMetricData& eventMetricData) {
+    if (eventMetricData.ByteSize() + mBufferSize > kMaxSerializedBytes) {
+      flush();
+    }
+}
+
+void StatsLogProcessor::flush() {
+    StatsLogReport logReport;
+    for (string eventBuffer : mEvents) {
+        EventMetricData eventFromBuffer;
+        eventFromBuffer.ParseFromString(eventBuffer);
+        EventMetricData* newEntry = logReport.mutable_event_metrics()->add_data();
+        newEntry->CopyFrom(eventFromBuffer);
+    }
+
+    const int numBytes = logReport.ByteSize();
+    vector<uint8_t> logReportBuffer(numBytes);
+    logReport.SerializeToArray(&logReportBuffer[0], numBytes);
+    mPushLog(logReportBuffer);
+    mEvents.clear();
+    mBufferSize = 0;
 }
 
 }  // namespace statsd
