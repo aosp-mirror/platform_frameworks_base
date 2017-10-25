@@ -277,6 +277,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     ActivityState state;    // current state we are in
     Bundle  icicle;         // last saved activity state
     PersistableBundle persistentState; // last persistently saved activity state
+    // TODO: See if this is still needed.
     boolean frontOfTask;    // is this the root activity of its task?
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?

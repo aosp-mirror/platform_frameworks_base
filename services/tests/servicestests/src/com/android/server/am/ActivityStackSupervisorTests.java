@@ -104,7 +104,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Move first activity to pinned stack.
         final Rect sourceBounds = new Rect();
         mSupervisor.moveActivityToPinnedStackLocked(firstActivity, sourceBounds,
-                0f /*aspectRatio*/, false, "initialMove");
+                0f /*aspectRatio*/, "initialMove");
 
         final ActivityDisplay display = mFullscreenStack.getDisplay();
         ActivityStack pinnedStack = display.getPinnedStack();
@@ -114,7 +114,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
         // Move second activity to pinned stack.
         mSupervisor.moveActivityToPinnedStackLocked(secondActivity, sourceBounds,
-                0f /*aspectRatio*/, false, "secondMove");
+                0f /*aspectRatio*/, "secondMove");
 
         // Need to get stacks again as a new instance might have been created.
         pinnedStack = display.getPinnedStack();

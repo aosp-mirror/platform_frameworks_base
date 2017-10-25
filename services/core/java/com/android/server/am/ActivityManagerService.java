@@ -8083,7 +8083,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Adjust the source bounds by the insets for the transition down
                     final Rect sourceBounds = new Rect(r.pictureInPictureArgs.getSourceRectHint());
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
-                            true /* moveHomeStackToFront */, "enterPictureInPictureMode");
+                            "enterPictureInPictureMode");
                     final PinnedActivityStack stack = r.getStack();
                     stack.setPictureInPictureAspectRatio(aspectRatio);
                     stack.setPictureInPictureActions(actions);
@@ -10231,11 +10231,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
-            final ActivityRecord prev = mStackSupervisor.topRunningActivityLocked();
-            if (prev != null) {
-                task.setTaskToReturnTo(prev);
-            }
-            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront",
+            mStackSupervisor.findTaskToMoveToFront(task, flags, options, "moveTaskToFront",
                     false /* forceNonResizable */);
 
             final ActivityRecord topActivity = task.getTopActivity();
