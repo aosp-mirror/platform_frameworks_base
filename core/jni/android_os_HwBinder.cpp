@@ -332,7 +332,7 @@ static jobject JHwBinder_native_getService(
     env->ReleaseStringUTFChars(serviceNameObj, serviceNameCStr);
 
     // TODO(b/67981006): true /* retry */
-    sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, false /* retry */, false /* getStub */); 
+    sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, false /* retry */, false /* getStub */);
     sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
     if (service == NULL) {
@@ -346,7 +346,8 @@ static jobject JHwBinder_native_getService(
     return JHwRemoteBinder::NewObject(env, service);
 }
 
-void JHwBinder_native_configureRpcThreadpool(jlong maxThreads, jboolean callerWillJoin) {
+void JHwBinder_native_configureRpcThreadpool(JNIEnv *, jclass,
+        jlong maxThreads, jboolean callerWillJoin) {
     CHECK(maxThreads > 0);
     ProcessState::self()->setThreadPoolConfiguration(maxThreads, callerWillJoin /*callerJoinsPool*/);
 }
@@ -355,7 +356,7 @@ void JHwBinder_native_joinRpcThreadpool() {
     IPCThreadState::self()->joinThreadPool();
 }
 
-static void JHwBinder_report_sysprop_change(JNIEnv /**env*/, jobject /*clazz*/)
+static void JHwBinder_report_sysprop_change(JNIEnv * /*env*/, jclass /*clazz*/)
 {
     report_sysprop_change();
 }
