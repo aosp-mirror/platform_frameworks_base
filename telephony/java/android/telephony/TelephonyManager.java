@@ -953,6 +953,27 @@ public class TelephonyManager {
      */
     public static final int USSD_ERROR_SERVICE_UNAVAIL = -2;
 
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which leaves the roaming
+     * mode set to the radio default or to the user's preference if they've indicated one.
+     */
+    public static final int CDMA_ROAMING_MODE_RADIO_DEFAULT = -1;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which only permits
+     * connections on home networks.
+     */
+    public static final int CDMA_ROAMING_MODE_HOME = 0;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
+     * affiliated networks.
+     */
+    public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
+     * any network.
+     */
+    public static final int CDMA_ROAMING_MODE_ANY = 2;
+
     //
     //
     // Device Info
