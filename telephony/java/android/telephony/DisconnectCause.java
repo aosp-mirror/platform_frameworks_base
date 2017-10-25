@@ -273,6 +273,13 @@ public class DisconnectCause {
      * {@hide}
      */
     public static final int EMERGENCY_PERM_FAILURE = 64;
+
+    /**
+     * This cause is used to report a normal event only when no other cause in the normal class
+     * applies.
+     * {@hide}
+     */
+    public static final int NORMAL_UNSPECIFIED = 65;
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -413,6 +420,8 @@ public class DisconnectCause {
             return "EMERGENCY_TEMP_FAILURE";
         case EMERGENCY_PERM_FAILURE:
             return "EMERGENCY_PERM_FAILURE";
+        case NORMAL_UNSPECIFIED:
+            return "NORMAL_UNSPECIFIED";
         default:
             return "INVALID: " + cause;
         }
