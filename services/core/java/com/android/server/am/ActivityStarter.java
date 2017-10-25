@@ -151,7 +151,7 @@ class ActivityStarter {
     private boolean mLaunchTaskBehind;
     private int mLaunchFlags;
 
-    private Rect mLaunchBounds;
+    private Rect mLaunchBounds = new Rect();
 
     private ActivityRecord mNotTop;
     private boolean mDoResume;
@@ -210,7 +210,7 @@ class ActivityStarter {
         mLaunchFlags = 0;
         mLaunchMode = INVALID_LAUNCH_MODE;
 
-        mLaunchBounds = null;
+        mLaunchBounds.setEmpty();
 
         mNotTop = null;
         mDoResume = false;
@@ -1254,7 +1254,10 @@ class ActivityStarter {
 
         mPreferredDisplayId = getPreferedDisplayId(mSourceRecord, mStartActivity, options);
 
-        mLaunchBounds = getOverrideBounds(r, options, inTask);
+        mLaunchBounds.setEmpty();
+
+        mSupervisor.getLaunchingBoundsController().calculateBounds(inTask, null /*layout*/, r,
+                options, mLaunchBounds);
 
         mLaunchMode = r.launchMode;
 
@@ -1725,7 +1728,7 @@ class ActivityStarter {
                     // Target stack got cleared when we all activities were removed above.
                     // Go ahead and reset it.
                     mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
-                            null /* bounds */, mLaunchFlags, mOptions);
+                            mLaunchFlags, mOptions);
                     mTargetStack.addTask(task,
                             !mLaunchTaskBehind /* toTop */, "startActivityUnchecked");
                 }
@@ -1776,8 +1779,7 @@ class ActivityStarter {
 
     private int setTaskFromReuseOrCreateNewTask(
             TaskRecord taskToAffiliate, ActivityStack topStack) {
-        mTargetStack = computeStackFocus(
-                mStartActivity, true, mLaunchBounds, mLaunchFlags, mOptions);
+        mTargetStack = computeStackFocus(mStartActivity, true, mLaunchFlags, mOptions);
 
         // Do no move the target stack to front yet, as we might bail if
         // isLockTaskModeViolation fails below.
@@ -1962,7 +1964,7 @@ class ActivityStarter {
             return START_TASK_TO_FRONT;
         }
 
-        if (mLaunchBounds != null) {
+        if (!mLaunchBounds.isEmpty()) {
             // TODO: Shouldn't we already know what stack to use by the time we get here?
             ActivityStack stack = mSupervisor.getLaunchStack(null, null, mInTask, ON_TOP);
             if (stack != mInTask.getStack()) {
@@ -1985,7 +1987,7 @@ class ActivityStarter {
     }
 
     void updateBounds(TaskRecord task, Rect bounds) {
-        if (bounds == null) {
+        if (bounds.isEmpty()) {
             return;
         }
 
@@ -1998,8 +2000,7 @@ class ActivityStarter {
     }
 
     private void setTaskToCurrentTopOrCreateNewTask() {
-        mTargetStack = computeStackFocus(mStartActivity, false, null /* bounds */, mLaunchFlags,
-                mOptions);
+        mTargetStack = computeStackFocus(mStartActivity, false, mLaunchFlags, mOptions);
         if (mDoResume) {
             mTargetStack.moveToFront("addingToTopTask");
         }
@@ -2062,8 +2063,8 @@ class ActivityStarter {
         }
     }
 
-    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
-            int launchFlags, ActivityOptions aOptions) {
+    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, int launchFlags,
+            ActivityOptions aOptions) {
         final TaskRecord task = r.getTask();
         ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions);
         if (stack != null) {

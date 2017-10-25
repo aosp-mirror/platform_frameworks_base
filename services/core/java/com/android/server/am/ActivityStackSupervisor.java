@@ -287,7 +287,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    LaunchingTaskPositioner mTaskPositioner = new LaunchingTaskPositioner();
+    private final LaunchingBoundsController mLaunchingBoundsController;
 
     /** Counter for next free stack ID to use for dynamic activity stacks. */
     private int mNextFreeStackId = 0;
@@ -568,6 +568,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mHandler = new ActivityStackSupervisorHandler(looper);
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mKeyguardController = new KeyguardController(service, this);
+
+        mLaunchingBoundsController = new LaunchingBoundsController();
+        mLaunchingBoundsController.registerDefaultPositioners(this);
     }
 
     void setRecentTasks(RecentTasks recentTasks) {
@@ -2154,8 +2157,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 || mService.mSupportsFreeformWindowManagement;
     }
 
-    LaunchingTaskPositioner getLaunchingTaskPositioner() {
-        return mTaskPositioner;
+    LaunchingBoundsController getLaunchingBoundsController() {
+        return mLaunchingBoundsController;
     }
 
     protected <T extends ActivityStack> T getStack(int stackId) {
