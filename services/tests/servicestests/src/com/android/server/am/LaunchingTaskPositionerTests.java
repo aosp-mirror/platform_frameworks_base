@@ -52,9 +52,6 @@ import static org.junit.Assert.assertEquals;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LaunchingTaskPositionerTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private final static int STACK_WIDTH = 100;
     private final static int STACK_HEIGHT = 200;
 
@@ -81,7 +78,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
 
         // We must create the task after resizing to make sure it does not inherit the stack
         // dimensions on resize.
-        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
 
         mPositioner = new LaunchingTaskPositioner();
 
@@ -193,11 +190,10 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         // wrap with try/finally to ensure cleanup of activity/stack.
         try {
             // empty tasks are ignored in conflicts
-            activity = createActivity(mService, testActivityComponent, mTask);
+            activity = new ActivityBuilder(mService).setTask(mTask).build();
 
             // Create secondary task
-            secondTask = createTask(mService.mStackSupervisor, testActivityComponent,
-                    mStack);
+            secondTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
 
             // layout second task
             assertEquals(RESULT_CONTINUE,

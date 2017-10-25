@@ -49,9 +49,6 @@ import static com.android.server.am.LaunchingBoundsController.LaunchingBoundsPos
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LaunchingActivityPositionerTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private LaunchingActivityPositioner mPositioner;
     private ActivityManagerService mService;
     private ActivityStack mStack;
@@ -73,8 +70,8 @@ public class LaunchingActivityPositionerTests extends ActivityTestsBase {
 
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
-        mActivity = createActivity(mService, testActivityComponent, mTask);
+        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        mActivity = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
 

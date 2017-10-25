@@ -335,8 +335,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private TaskRecord createTask(String className, int flags, int userId) {
-        TaskRecord task = createTask(mService.mStackSupervisor, createComponent(className), flags,
-                LAST_TASK_ID++, mStack);
+        TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
+                .setComponent(createComponent(className))
+                .setStack(mStack).setFlags(flags).setTaskId(LAST_TASK_ID++).build();
         task.userId = userId;
         task.touchActiveTime();
         return task;

@@ -51,11 +51,6 @@ import org.junit.Test;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-    private final ComponentName secondaryActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity2");
-
     private ActivityManagerService mService;
     private TestActivityStack mStack;
     private TaskRecord mTask;
@@ -69,8 +64,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mService = createActivityManagerService();
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
-        mActivity = createActivity(mService, testActivityComponent, mTask);
+        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        mActivity = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
     @Test
@@ -94,8 +89,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() throws Exception {
-        final TaskRecord newTask =
-                createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+        final TaskRecord newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack)
+                .build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 0);
     }
@@ -149,13 +144,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mService.mSupportsMultiWindow = true;
 
         final TaskRecord task = taskPresent
-                ? createTask(mService.mStackSupervisor, testActivityComponent, mStack) : null;
+                ? new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build() : null;
 
         if (task != null) {
             task.setResizeMode(taskResizeable ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE);
         }
 
-        final ActivityRecord record = createActivity(mService, secondaryActivityComponent, task);
+        final ActivityRecord record = new ActivityBuilder(mService).setTask(task).build();
         record.info.resizeMode = activityResizeable
                 ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE;
 
