@@ -52,6 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import com.android.internal.R;
+
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 
 /**
@@ -110,19 +112,7 @@ public final class NightDisplayService extends SystemService
 
     private float[] mMatrixNight = new float[16];
 
-    /**
-     *  The 3x3 color transformation matrix is formatted like so:
-     *  <table>
-     *      <tr><td>R: a coefficient</td><td>G: a coefficient</td><td>B: a coefficient</td></tr>
-     *      <tr><td>R: b coefficient</td><td>G: b coefficient</td><td>B: b coefficient</td></tr>
-     *      <tr><td>R: y-intercept</td><td>G: y-intercept</td><td>B: y-intercept</td></tr>
-     *  </table>
-     */
-    private static final float[] mColorTempCoefficients = new float[] {
-            0.0f, -0.000000014365268757f, -0.000000000910931179f,
-            0.0f, 0.000255092801250106f, 0.000207598323269139f,
-            1.0f, -0.064156942434907716f, -0.349361641294833436f
-    };
+    private final float[] mColorTempCoefficients = new float[9];
 
     private int mCurrentUser = UserHandle.USER_NULL;
     private ContentObserver mUserSetupObserver;
@@ -240,6 +230,8 @@ public final class NightDisplayService extends SystemService
         mController = new NightDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
+        setCoefficientMatrix(getContext());
+
         // Prepare color transformation matrix.
         setMatrix(mController.getColorTemperature(), mMatrixNight);
 
@@ -335,6 +327,28 @@ public final class NightDisplayService extends SystemService
         applyTint(true);
     }
 
+    @Override
+    public void onDisplayColorModeChanged(int colorMode) {
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMode(colorMode);
+
+        setCoefficientMatrix(getContext());
+        setMatrix(mController.getColorTemperature(), mMatrixNight);
+        if (mController.isActivated()) {
+            applyTint(true);
+        }
+    }
+
+    private void setCoefficientMatrix(Context context) {
+        final boolean isNative = DisplayTransformManager.isNativeModeEnabled();
+        final String[] coefficients = context.getResources().getStringArray(isNative ?
+            R.array.config_nightDisplayColorTemperatureCoefficientsNative
+            : R.array.config_nightDisplayColorTemperatureCoefficients);
+        for (int i = 0; i < 9 && i < coefficients.length; i++) {
+            mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
+        }
+    }
+
     /**
      * Applies current color temperature matrix, or removes it if deactivated.
      *
@@ -410,11 +424,11 @@ public final class NightDisplayService extends SystemService
 
         final float squareTemperature = colorTemperature * colorTemperature;
         final float red = squareTemperature * mColorTempCoefficients[0]
-                + colorTemperature * mColorTempCoefficients[3] + mColorTempCoefficients[6];
-        final float green = squareTemperature * mColorTempCoefficients[1]
-                + colorTemperature * mColorTempCoefficients[4] + mColorTempCoefficients[7];
-        final float blue = squareTemperature * mColorTempCoefficients[2]
-                + colorTemperature * mColorTempCoefficients[5] + mColorTempCoefficients[8];
+                + colorTemperature * mColorTempCoefficients[1] + mColorTempCoefficients[2];
+        final float green = squareTemperature * mColorTempCoefficients[3]
+                + colorTemperature * mColorTempCoefficients[4] + mColorTempCoefficients[5];
+        final float blue = squareTemperature * mColorTempCoefficients[6]
+                + colorTemperature * mColorTempCoefficients[7] + mColorTempCoefficients[8];
         outTemp[0] = red;
         outTemp[5] = green;
         outTemp[10] = blue;
