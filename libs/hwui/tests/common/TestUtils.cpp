@@ -19,6 +19,7 @@
 #include "hwui/Paint.h"
 #include "DeferredLayerUpdater.h"
 
+#include <minikin/Layout.h>
 #include <renderthread/EglManager.h>
 #include <renderthread/OpenGLPipeline.h>
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
@@ -121,13 +122,15 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
         const SkPaint& paint, float x, float y) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, 0, paint, nullptr);
+    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR, paint,
+            nullptr);
 }
 
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
         const SkPaint& paint, const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawTextOnPath(utf16.get(), strlen(text), 0, path, 0, 0, paint, nullptr);
+    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, paint,
+            nullptr);
 }
 
 void TestUtils::TestTask::run() {

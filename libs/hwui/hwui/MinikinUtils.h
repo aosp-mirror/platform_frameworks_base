@@ -37,11 +37,11 @@ public:
     ANDROID_API static minikin::FontStyle prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
             const Paint* paint, const Typeface* typeface);
 
-    ANDROID_API static minikin::Layout doLayout(const Paint* paint, int bidiFlags,
+    ANDROID_API static minikin::Layout doLayout(const Paint* paint, minikin::Bidi bidiFlags,
             const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
-    ANDROID_API static float measureText(const Paint* paint, int bidiFlags,
+    ANDROID_API static float measureText(const Paint* paint, minikin::Bidi bidiFlags,
               const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
               size_t bufSize, float *advances);
 

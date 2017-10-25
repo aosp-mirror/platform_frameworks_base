@@ -112,8 +112,8 @@ namespace PaintGlue {
         float measured = 0;
 
         std::unique_ptr<float[]> advancesArray(new float[count]);
-        MinikinUtils::measureText(&paint, bidiFlags, typeface, text, 0, count, count,
-                advancesArray.get());
+        MinikinUtils::measureText(&paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text,
+                0, count, count, advancesArray.get());
 
         for (int i = 0; i < count; i++) {
             // traverse in the given direction
@@ -203,8 +203,9 @@ namespace PaintGlue {
         if (advances) {
             advancesArray.reset(new jfloat[count]);
         }
-        const float advance = MinikinUtils::measureText(paint, bidiFlags, typeface, text,
-                start, count, contextCount, advancesArray.get());
+        const float advance = MinikinUtils::measureText(paint,
+                static_cast<minikin::Bidi>(bidiFlags), typeface, text, start, count, contextCount,
+                advancesArray.get());
         if (advances) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }
@@ -239,7 +240,7 @@ namespace PaintGlue {
     static jint doTextRunCursor(JNIEnv *env, Paint* paint, const Typeface* typeface,
             const jchar *text, jint start, jint count, jint dir, jint offset, jint opt) {
         minikin::GraphemeBreak::MoveOpt moveOpt = minikin::GraphemeBreak::MoveOpt(opt);
-        int bidiFlags = dir == 1 ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+        minikin::Bidi bidiFlags = dir == 1 ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, text, start, count, start + count,
                 advancesArray.get());
@@ -305,7 +306,7 @@ namespace PaintGlue {
     static void getTextPath(JNIEnv* env, Paint* paint, const Typeface* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         minikin::Layout layout = MinikinUtils::doLayout(
-                paint, bidiFlags, typeface, text, 0, count, count);
+                paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
         SkPoint* pos = new SkPoint[nGlyphs];
@@ -346,8 +347,8 @@ namespace PaintGlue {
         SkRect  r;
         SkIRect ir;
 
-        minikin::Layout layout = MinikinUtils::doLayout(
-                &paint, bidiFlags, typeface, text, 0, count, count);
+        minikin::Layout layout = MinikinUtils::doLayout(&paint,
+                static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count);
         minikin::MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
@@ -461,8 +462,9 @@ namespace PaintGlue {
             nChars++;
             prevCp = cp;
         }
-        minikin::Layout layout = MinikinUtils::doLayout(
-                paint, bidiFlags, typeface, str.get(), 0, str.size(), str.size());
+        minikin::Layout layout = MinikinUtils::doLayout(paint,
+                static_cast<minikin::Bidi>(bidiFlags), typeface, str.get(), 0, str.size(),
+                str.size());
         size_t nGlyphs = countNonSpaceGlyphs(layout);
         if (nGlyphs != 1 && nChars > 1) {
             // multiple-character input, and was not a ligature
@@ -481,8 +483,8 @@ namespace PaintGlue {
             // since ZZ is reserved for unknown or invalid territory.
             // U+1F1FF (REGIONAL INDICATOR SYMBOL LETTER Z) is \uD83C\uDDFF in UTF16.
             static const jchar ZZ_FLAG_STR[] = { 0xD83C, 0xDDFF, 0xD83C, 0xDDFF };
-            minikin::Layout zzLayout = MinikinUtils::doLayout(
-                    paint, bidiFlags, typeface, ZZ_FLAG_STR, 0, 4, 4);
+            minikin::Layout zzLayout = MinikinUtils::doLayout(paint,
+                    static_cast<minikin::Bidi>(bidiFlags), typeface, ZZ_FLAG_STR, 0, 4, 4);
             if (zzLayout.nGlyphs() != 1 || layoutContainsNotdef(zzLayout)) {
                 // The font collection doesn't have a glyph for unknown flag. Just return true.
                 return true;
@@ -494,7 +496,7 @@ namespace PaintGlue {
 
     static jfloat doRunAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
-        int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+        minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
         if (offset == start + count) {
             return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
                     bufSize, nullptr);
@@ -519,7 +521,7 @@ namespace PaintGlue {
 
     static jint doOffsetForAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
-        int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+        minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
                 advancesArray.get());
