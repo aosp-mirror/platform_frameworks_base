@@ -52,6 +52,7 @@ public class DexoptOptionsTests {
         assertFalse(opt.isDexoptOnlySharedDex());
         assertFalse(opt.isDowngrade());
         assertFalse(opt.isForce());
+        assertFalse(opt.isDexoptIdleBackgroundJob());
     }
 
     @Test
@@ -63,7 +64,8 @@ public class DexoptOptionsTests {
                 DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
                 DexoptOptions.DEXOPT_ONLY_SHARED_DEX |
                 DexoptOptions.DEXOPT_DOWNGRADE  |
-                DexoptOptions.DEXOPT_AS_SHARED_LIBRARY;
+                DexoptOptions.DEXOPT_AS_SHARED_LIBRARY |
+                DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
 
         DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, flags);
         assertEquals(mPackageName, opt.getPackageName());
@@ -76,6 +78,7 @@ public class DexoptOptionsTests {
         assertTrue(opt.isDowngrade());
         assertTrue(opt.isForce());
         assertTrue(opt.isDexoptAsSharedLibrary());
+        assertTrue(opt.isDexoptIdleBackgroundJob());
     }
 
     @Test
