@@ -52,7 +52,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.TimeZone;
+
+import com.android.internal.R;
 
 import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 
@@ -126,12 +127,6 @@ public final class NightDisplayService extends SystemService
     public NightDisplayService(Context context) {
         super(context);
         mHandler = new Handler(Looper.getMainLooper());
-
-        final String[] coefficients = context.getResources().getStringArray(
-                com.android.internal.R.array.config_nightDisplayColorTemperatureCoefficients);
-        for (int i = 0; i < 9 && i < coefficients.length; i++) {
-            mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
-        }
     }
 
     @Override
@@ -236,6 +231,8 @@ public final class NightDisplayService extends SystemService
         mController = new NightDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
+        setCoefficientMatrix(getContext());
+
         // Prepare color transformation matrix.
         setMatrix(mController.getColorTemperature(), mMatrixNight);
 
@@ -329,6 +326,26 @@ public final class NightDisplayService extends SystemService
     public void onColorTemperatureChanged(int colorTemperature) {
         setMatrix(colorTemperature, mMatrixNight);
         applyTint(true);
+    }
+
+    @Override
+    public void onDisplayColorModeChanged(int colorMode) {
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+        dtm.setColorMode(colorMode);
+
+        setCoefficientMatrix(getContext());
+        setMatrix(mController.getColorTemperature(), mMatrixNight);
+        applyTint(true);
+    }
+
+    private void setCoefficientMatrix(Context context) {
+        final boolean isNative = DisplayTransformManager.isNativeModeEnabled();
+        final String[] coefficients = context.getResources().getStringArray(isNative
+                ? R.array.config_nightDisplayColorTemperatureCoefficientsNative
+                : R.array.config_nightDisplayColorTemperatureCoefficients);
+        for (int i = 0; i < 9 && i < coefficients.length; i++) {
+            mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
+        }
     }
 
     /**
