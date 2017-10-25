@@ -751,7 +751,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mAllowTheaterModeWakeFromLayout;
 
     TaskPositioner mTaskPositioner;
-    final DragDropController mDragDropController = new DragDropController();
+    final DragDropController mDragDropController;
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
@@ -827,12 +827,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + newX + "," + newY);
                             mMuteInput = true;
                             synchronized (mWindowMap) {
-                                endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
+                                endDrag = mDragDropController.mDragState.notifyDropLocked(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
                                 // move the surface and tell the involved window(s) where we are
-                                mDragDropController.mDragState.notifyMoveLw(newX, newY);
+                                mDragDropController.mDragState.notifyMoveLocked(newX, newY);
                             }
                         }
                     } break;
@@ -842,7 +842,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + newX + "," + newY);
                         mMuteInput = true;
                         synchronized (mWindowMap) {
-                            endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
+                            endDrag = mDragDropController.mDragState.notifyDropLocked(newX, newY);
                         }
                     } break;
 
@@ -857,9 +857,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag ended; tearing down state");
                         // tell all the windows that the drag has ended
                         synchronized (mWindowMap) {
-                            // endDragLw will post back to looper to dispose the receiver
+                            // endDragLocked will post back to looper to dispose the receiver
                             // since we still need the receiver for the last finishInputEvent.
-                            mDragDropController.mDragState.endDragLw();
+                            mDragDropController.mDragState.endDragLocked();
                         }
                         mStylusButtonDownAtStart = false;
                         mIsStartEvent = true;
@@ -1164,6 +1164,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
+        mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         initPolicy();
@@ -4796,8 +4797,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int APP_FREEZE_TIMEOUT = 17;
         public static final int SEND_NEW_CONFIGURATION = 18;
         public static final int REPORT_WINDOWS_CHANGE = 19;
-        public static final int DRAG_START_TIMEOUT = 20;
-        public static final int DRAG_END_TIMEOUT = 21;
 
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
@@ -4823,8 +4822,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int FINISH_TASK_POSITIONING = 40;
 
         public static final int UPDATE_DOCKED_STACK_DIVIDER = 41;
-
-        public static final int TEAR_DOWN_DRAG_AND_DROP_INPUT = 44;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
@@ -5050,13 +5047,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         notifyWindowsChanged();
                     }
-                    break;
-                }
-
-                case DRAG_START_TIMEOUT:
-                case DRAG_END_TIMEOUT:
-                case TEAR_DOWN_DRAG_AND_DROP_INPUT: {
-                    mDragDropController.handleMessage(WindowManagerService.this, msg);
                     break;
                 }
 
