@@ -2784,7 +2784,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
-        mActivityStarter = new ActivityStarter(this);
+        mActivityStarter = new ActivityStarter(this, AppGlobals.getPackageManager());
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
@@ -5352,8 +5352,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return -1;
     }
 
-    final ProcessRecord getRecordForAppLocked(
-            IApplicationThread thread) {
+    ProcessRecord getRecordForAppLocked(IApplicationThread thread) {
         if (thread == null) {
             return null;
         }

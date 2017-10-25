@@ -41,6 +41,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.service.voice.IVoiceInteractionSession;
 import android.support.test.InstrumentationRegistry;
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
@@ -81,7 +82,10 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        return setupActivityManagerService(new TestActivityManagerService(mContext));
+        final ActivityManagerService service =
+                setupActivityManagerService(new TestActivityManagerService(mContext));
+        AttributeCache.init(mContext);
+        return service;
     }
 
     protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
@@ -98,7 +102,7 @@ public class ActivityTestsBase {
         private static int sCurrentActivityId = 0;
 
         // Default package name
-        private static final String DEFAULT_PACKAGE = "com.foo";
+        static final String DEFAULT_PACKAGE = "com.foo";
 
         // Default base activity name
         private static final String DEFAULT_BASE_ACTIVITY_NAME = ".BarActivity";
@@ -159,7 +163,6 @@ public class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
-            AttributeCache.init(mService.mContext);
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
@@ -185,6 +188,7 @@ public class ActivityTestsBase {
         private String mPackage;
         private int mFlags = 0;
         private int mTaskId = 0;
+        private IVoiceInteractionSession mVoiceSession;
 
         private ActivityStack mStack;
 
@@ -199,6 +203,11 @@ public class ActivityTestsBase {
 
         TaskBuilder setPackage(String packageName) {
             mPackage = packageName;
+            return this;
+        }
+
+        TaskBuilder setVoiceSession(IVoiceInteractionSession session) {
+            mVoiceSession = session;
             return this;
         }
 
@@ -232,7 +241,7 @@ public class ActivityTestsBase {
             intent.setFlags(mFlags);
 
             final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
-                    intent /*intent*/, null /*_taskDescription*/);
+                    intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
             mSupervisor.setFocusStackUnchecked("test", mStack);
             mStack.addTask(task, true, "creating test task");
             task.setStack(mStack);
