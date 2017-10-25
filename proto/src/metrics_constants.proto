@@ -4562,6 +4562,11 @@ message MetricsEvent {
     // OS: O MR
     NOTIFICATION_SNOOZE_OPTIONS = 1142;
 
+    // OPEN: Settings > Display > Colors
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    COLOR_MODE_SETTINGS = 1143;
+
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // Add new aosp constants above this line.
