@@ -303,8 +303,7 @@ static jobject JHwBinder_native_getService(
         JNIEnv *env,
         jclass /* clazzObj */,
         jstring ifaceNameObj,
-        jstring serviceNameObj,
-        jboolean isTry) {
+        jstring serviceNameObj) {
 
     using ::android::hidl::base::V1_0::IBase;
     using ::android::hardware::details::getRawServiceInternal;
@@ -332,7 +331,8 @@ static jobject JHwBinder_native_getService(
     std::string serviceName(serviceNameCStr);
     env->ReleaseStringUTFChars(serviceNameObj, serviceNameCStr);
 
-    sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, !isTry /* retry */, false /* getStub */);
+    // TODO(b/67981006): true /* retry */
+    sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, false /* retry */, false /* getStub */); 
     sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
     if (service == NULL) {
@@ -371,7 +371,7 @@ static JNINativeMethod gMethods[] = {
     { "registerService", "(Ljava/lang/String;)V",
         (void *)JHwBinder_native_registerService },
 
-    { "getService", "(Ljava/lang/String;Ljava/lang/String;Z)L" PACKAGE_PATH "/IHwBinder;",
+    { "getService", "(Ljava/lang/String;Ljava/lang/String;)L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwBinder_native_getService },
 
     { "configureRpcThreadpool", "(JZ)V",
