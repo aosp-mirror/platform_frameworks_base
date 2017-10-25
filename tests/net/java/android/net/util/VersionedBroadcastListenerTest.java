@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity.tethering;
-
-import static com.android.internal.telephony.IccCardConstants.INTENT_VALUE_ICC_ABSENT;
-import static com.android.internal.telephony.IccCardConstants.INTENT_VALUE_ICC_LOADED;
-import static com.android.internal.telephony.IccCardConstants.INTENT_KEY_ICC_STATE;
-import static com.android.internal.telephony.TelephonyIntents.ACTION_SIM_STATE_CHANGED;
+package android.net.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.reset;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -47,11 +43,14 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class SimChangeListenerTest {
+public class VersionedBroadcastListenerTest {
+    private static final String TAG = VersionedBroadcastListenerTest.class.getSimpleName();
+    private static final String ACTION_TEST = "action.test.happy.broadcasts";
+
     @Mock private Context mContext;
     private BroadcastInterceptingContext mServiceContext;
     private Handler mHandler;
-    private SimChangeListener mSCL;
+    private VersionedBroadcastListener mListener;
     private int mCallbackCount;
 
     private void doCallback() { mCallbackCount++; }
@@ -75,58 +74,58 @@ public class SimChangeListenerTest {
         mServiceContext = new MockContext(mContext);
         mHandler = new Handler(Looper.myLooper());
         mCallbackCount = 0;
-        mSCL = new SimChangeListener(mServiceContext, mHandler, () -> doCallback());
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_TEST);
+        mListener = new VersionedBroadcastListener(
+                TAG, mServiceContext, mHandler, filter, (Intent intent) -> doCallback());
     }
 
     @After public void tearDown() throws Exception {
-        if (mSCL != null) {
-            mSCL.stopListening();
-            mSCL = null;
+        if (mListener != null) {
+            mListener.stopListening();
+            mListener = null;
         }
     }
 
-    private void sendSimStateChangeIntent(String state) {
-        final Intent intent = new Intent(ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(INTENT_KEY_ICC_STATE, state);
+    private void sendBroadcast() {
+        final Intent intent = new Intent(ACTION_TEST);
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     @Test
-    public void testNotSeenFollowedBySeenCallsCallback() {
-        mSCL.startListening();
+    public void testBasicListening() {
+        assertEquals(0, mCallbackCount);
+        mListener.startListening();
+        for (int i = 0; i < 5; i++) {
+            sendBroadcast();
+            assertEquals(i+1, mCallbackCount);
+        }
+        mListener.stopListening();
+    }
 
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_ABSENT);
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
+    @Test
+    public void testBroadcastsBeforeStartAreIgnored() {
+        assertEquals(0, mCallbackCount);
+        for (int i = 0; i < 5; i++) {
+            sendBroadcast();
+            assertEquals(0, mCallbackCount);
+        }
+
+        mListener.startListening();
+        sendBroadcast();
         assertEquals(1, mCallbackCount);
-
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_ABSENT);
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
-        assertEquals(2, mCallbackCount);
-
-        mSCL.stopListening();
     }
 
     @Test
-    public void testNotListeningDoesNotCallback() {
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_ABSENT);
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
-        assertEquals(0, mCallbackCount);
+    public void testBroadcastsAfterStopAreIgnored() {
+        mListener.startListening();
+        sendBroadcast();
+        assertEquals(1, mCallbackCount);
+        mListener.stopListening();
 
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_ABSENT);
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
-        assertEquals(0, mCallbackCount);
-    }
-
-    @Test
-    public void testSeenOnlyDoesNotCallback() {
-        mSCL.startListening();
-
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
-        assertEquals(0, mCallbackCount);
-
-        sendSimStateChangeIntent(INTENT_VALUE_ICC_LOADED);
-        assertEquals(0, mCallbackCount);
-
-        mSCL.stopListening();
+        for (int i = 0; i < 5; i++) {
+            sendBroadcast();
+            assertEquals(1, mCallbackCount);
+        }
     }
 }
