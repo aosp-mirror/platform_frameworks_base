@@ -88,6 +88,16 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
+    public MockBatteryStatsImpl setKernelUidCpuActiveTimeReader(KernelUidCpuActiveTimeReader reader) {
+        mKernelUidCpuActiveTimeReader = reader;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setKernelUidCpuClusterTimeReader(KernelUidCpuClusterTimeReader reader) {
+        mKernelUidCpuClusterTimeReader = reader;
+        return this;
+    }
+
     public MockBatteryStatsImpl setKernelUidCpuTimeReader(KernelUidCpuTimeReader reader) {
         mKernelUidCpuTimeReader = reader;
         return this;

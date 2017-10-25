@@ -39,8 +39,11 @@ import org.junit.runners.Suite;
         KernelMemoryBandwidthStatsTest.class,
         KernelSingleUidTimeReaderTest.class,
         KernelUidCpuFreqTimeReaderTest.class,
+        KernelUidCpuActiveTimeReaderTest.class,
+        KernelUidCpuClusterTimeReaderTest.class,
         KernelWakelockReaderTest.class,
-        LongSamplingCounterArrayTest.class
+        LongSamplingCounterArrayTest.class,
+        PowerProfileTest.class
     })
 public class BatteryStatsTests {
 }
