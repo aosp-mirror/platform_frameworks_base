@@ -102,7 +102,7 @@ public class UsbManager {
             "android.hardware.usb.action.USB_PORT_CHANGED";
 
    /**
-     * Broadcast Action:  A broadcast for USB device attached event.
+     * Activity intent sent when a USB device is attached.
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
      * <ul>
@@ -128,9 +128,8 @@ public class UsbManager {
             "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
    /**
-     * Broadcast Action:  A broadcast for USB accessory attached event.
+     * Activity intent sent when a USB accessory is attached.
      *
-     * This intent is sent when a USB accessory is attached.
      * <ul>
      * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.usb.UsbAccessory}
      * for the attached accessory
