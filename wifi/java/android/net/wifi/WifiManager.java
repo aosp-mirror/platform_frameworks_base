@@ -68,6 +68,7 @@ import java.util.concurrent.CountDownLatch;
  * leaks within the calling process.
  * <p>
  * It deals with several categories of items:
+ * </p>
  * <ul>
  * <li>The list of configured networks. The list can be viewed and updated, and
  * attributes of individual entries can be modified.</li>
@@ -79,9 +80,11 @@ import java.util.concurrent.CountDownLatch;
  * <li>It defines the names of various Intent actions that are broadcast upon
  * any sort of change in Wi-Fi state.
  * </ul>
+ * <p>
  * This is the API to use when performing Wi-Fi specific operations. To perform
  * operations that pertain to network connectivity at an abstract level, use
  * {@link android.net.ConnectivityManager}.
+ * </p>
  */
 @SystemService(Context.WIFI_SERVICE)
 public class WifiManager {
@@ -1553,7 +1556,21 @@ public class WifiManager {
      * Request a scan for access points. Returns immediately. The availability
      * of the results is made known later by means of an asynchronous event sent
      * on completion of the scan.
-     * @return {@code true} if the operation succeeded, i.e., the scan was initiated
+     * <p>
+     * To initiate a Wi-Fi scan, declare the
+     * {@link android.Manifest.permission#CHANGE_WIFI_STATE}
+     * permission in the manifest, and perform these steps:
+     * </p>
+     * <ol style="1">
+     * <li>Invoke the following method:
+     * {@code ((WifiManager) getSystemService(WIFI_SERVICE)).startScan()}</li>
+     * <li>
+     * Register a BroadcastReceiver to listen to
+     * {@code SCAN_RESULTS_AVAILABLE_ACTION}.</li>
+     * <li>When a broadcast is received, call:
+     * {@code ((WifiManager) getSystemService(WIFI_SERVICE)).getScanResults()}</li>
+     * </ol>
+     * @return {@code true} if the operation succeeded, i.e., the scan was initiated.
      */
     public boolean startScan() {
         return startScan(null);
