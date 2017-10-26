@@ -30,6 +30,7 @@ import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto"
 import "frameworks/base/core/proto/android/view/display.proto";
 
 message PowerManagerServiceDumpProto {
+    // A com.android.server.power.PowerManagerService.Constants object.
     message ConstantsProto {
         optional bool is_no_cached_wake_locks = 1;
     }
@@ -49,7 +50,8 @@ message PowerManagerServiceDumpProto {
         optional bool is_screen_dim = 2;
         optional bool is_screen_dream = 3;
     }
-    message UidProto {
+    // A com.android.server.power.PowerManagerService.UidState object.
+    message UidStateProto {
         optional int32 uid = 1;
         optional string uid_string = 2;
         optional bool is_active = 3;
@@ -154,7 +156,7 @@ message PowerManagerServiceDumpProto {
     // Some uids have actually changed while mUidsChanging was true.
     optional bool are_uids_changed = 45;
     // List of UIDs and their states
-    repeated UidProto uids = 46;
+    repeated UidStateProto uid_states = 46;
     optional .android.os.LooperProto looper = 47;
     // List of all wake locks acquired by applications.
     repeated WakeLockProto wake_locks = 48;
@@ -163,11 +165,13 @@ message PowerManagerServiceDumpProto {
     optional WirelessChargerDetectorProto wireless_charger_detector = 50;
 }
 
+// A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
 message SuspendBlockerProto {
     optional string name = 1;
     optional int32 reference_count = 2;
 }
 
+// A com.android.server.power.PowerManagerService.WakeLock object.
 message WakeLockProto {
     message WakeLockFlagsProto {
         // Turn the screen on when the wake lock is acquired.
