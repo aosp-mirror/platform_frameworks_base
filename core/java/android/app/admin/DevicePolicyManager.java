@@ -2665,6 +2665,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * When called by a profile owner of a managed profile returns true if the profile uses unified
+     * challenge with its parent user.
+     *
+     * <strong>Note: This method is not concerned with password quality and will return false if
+     * the profile has empty password as a separate challenge.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a profile owner of a managed profile.
+     * @see UserManager#DISALLOW_UNIFIED_PASSWORD
+     */
+    public boolean isUsingUnifiedPassword(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.isUsingUnifiedPassword(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
      * Determine whether the current profile password the user has set is sufficient
      * to meet the policy requirements (e.g. quality, minimum length) that have been
      * requested by the admins of the parent user and its profiles.
