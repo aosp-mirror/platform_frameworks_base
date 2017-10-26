@@ -2137,27 +2137,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         proto.write(ID, mDisplayId);
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            stack.writeToProto(proto, STACKS);
+            stack.writeToProto(proto, STACKS, trim);
         }
         mDividerControllerLocked.writeToProto(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
         mPinnedStackControllerLocked.writeToProto(proto, PINNED_STACK_CONTROLLER);
         for (int i = mAboveAppWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mAboveAppWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, ABOVE_APP_WINDOWS);
+            windowToken.writeToProto(proto, ABOVE_APP_WINDOWS, trim);
         }
         for (int i = mBelowAppWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mBelowAppWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, BELOW_APP_WINDOWS);
+            windowToken.writeToProto(proto, BELOW_APP_WINDOWS, trim);
         }
         for (int i = mImeWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mImeWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, IME_WINDOWS);
+            windowToken.writeToProto(proto, IME_WINDOWS, trim);
         }
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.writeToProto(proto, DISPLAY_INFO);

@@ -50,6 +50,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /** Contains override configuration settings applied to this configuration container. */
     private Configuration mOverrideConfiguration = new Configuration();
 
+    /** True if mOverrideConfiguration is not empty */
+    private boolean mHasOverrideConfiguration;
+
     /**
      * Contains full configuration applied to this configuration container. Corresponds to full
      * parent's config with applied {@link #mOverrideConfiguration}.
@@ -101,6 +104,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @see #mFullConfiguration
      */
     public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        // Pre-compute this here, so we don't need to go through the entire Configuration when
+        // writing to proto (which has significant cost if we write a lot of empty configurations).
+        mHasOverrideConfiguration = !Configuration.EMPTY.equals(overrideConfiguration);
         mOverrideConfiguration.setTo(overrideConfiguration);
         // Update full configuration of this container and all its children.
         final ConfigurationContainer parent = getParent();
@@ -330,18 +336,23 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
      * {@link com.android.server.wm.proto.ConfigurationContainerProto}.
      *
-     * @param protoOutputStream Stream to write the ConfigurationContainer object to.
-     * @param fieldId           Field Id of the ConfigurationContainer as defined in the parent
-     *                          message.
+     * @param proto    Stream to write the ConfigurationContainer object to.
+     * @param fieldId  Field Id of the ConfigurationContainer as defined in the parent
+     *                 message.
+     * @param trim     If true, reduce amount of data written.
      * @hide
      */
     @CallSuper
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        final long token = protoOutputStream.start(fieldId);
-        mOverrideConfiguration.writeToProto(protoOutputStream, OVERRIDE_CONFIGURATION);
-        mFullConfiguration.writeToProto(protoOutputStream, FULL_CONFIGURATION);
-        mMergedOverrideConfiguration.writeToProto(protoOutputStream, MERGED_OVERRIDE_CONFIGURATION);
-        protoOutputStream.end(token);
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+        final long token = proto.start(fieldId);
+        if (!trim || mHasOverrideConfiguration) {
+            mOverrideConfiguration.writeToProto(proto, OVERRIDE_CONFIGURATION);
+        }
+        if (!trim) {
+            mFullConfiguration.writeToProto(proto, FULL_CONFIGURATION);
+            mMergedOverrideConfiguration.writeToProto(proto, MERGED_OVERRIDE_CONFIGURATION);
+        }
+        proto.end(token);
     }
 
     /**

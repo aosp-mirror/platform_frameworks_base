@@ -2821,7 +2821,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, state.toString());
         proto.write(VISIBLE, visible);

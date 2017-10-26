@@ -1081,19 +1081,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         if (mService.mDisplayReady) {
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
-                displayContent.writeToProto(proto, DISPLAYS);
+                displayContent.writeToProto(proto, DISPLAYS, trim);
             }
         }
-        forAllWindows((w) -> {
-            w.writeIdentifierToProto(proto, WINDOWS);
-        }, true);
+        if (!trim) {
+            forAllWindows((w) -> {
+                w.writeIdentifierToProto(proto, WINDOWS);
+            }, true);
+        }
         proto.end(token);
     }
 

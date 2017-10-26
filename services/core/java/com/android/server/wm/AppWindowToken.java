@@ -1621,10 +1621,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
         writeNameToProto(proto, NAME);
-        super.writeToProto(proto, WINDOW_TOKEN);
+        super.writeToProto(proto, WINDOW_TOKEN, trim);
         proto.end(token);
     }
 

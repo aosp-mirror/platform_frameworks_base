@@ -6430,9 +6430,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void writeToProtoLocked(ProtoOutputStream proto) {
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at
+     * {@link com.android.server.wm.proto.WindowManagerServiceProto}.
+     *
+     * @param proto     Stream to write the WindowContainer object to.
+     * @param trim      If true, reduce the amount of data written.
+     */
+    private void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
         mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER);
+        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
         if (mCurrentFocus != null) {
             mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
         }
@@ -6768,7 +6775,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             synchronized (mWindowMap) {
-                writeToProtoLocked(proto);
+                writeToProtoLocked(proto, false /* trim */);
             }
             proto.flush();
             return;
