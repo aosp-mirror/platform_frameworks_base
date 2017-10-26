@@ -104,6 +104,8 @@ import android.util.LogPrinter;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.DefaultNetworkMetrics;
+import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
@@ -155,6 +157,9 @@ public class ConnectivityServiceTest {
     private MockNetworkAgent mCellNetworkAgent;
     private MockNetworkAgent mEthernetNetworkAgent;
     private Context mContext;
+
+    @Mock IpConnectivityMetrics.Logger mMetricsService;
+    @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -805,6 +810,11 @@ public class ConnectivityServiceTest {
             return Context.ETHERNET_SERVICE.equals(name);
         }
 
+        @Override
+        protected IpConnectivityMetrics.Logger metricsLogger() {
+            return mMetricsService;
+        }
+
         public WrappedNetworkMonitor getLastCreatedWrappedNetworkMonitor() {
             return mLastCreatedNetworkMonitor;
         }
@@ -832,6 +842,9 @@ public class ConnectivityServiceTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
+
+        MockitoAnnotations.initMocks(this);
+        when(mMetricsService.defaultNetworkMetrics()).thenReturn(mDefaultNetworkMetrics);
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
         // http://b/25897652 .
