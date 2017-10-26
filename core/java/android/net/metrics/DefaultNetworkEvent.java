@@ -16,73 +16,43 @@
 
 package android.net.metrics;
 
+import static android.net.ConnectivityManager.NETID_UNSET;
+
 import android.net.NetworkCapabilities;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * An event recorded by ConnectivityService when there is a change in the default network.
  * {@hide}
  */
-public final class DefaultNetworkEvent implements Parcelable {
+public class DefaultNetworkEvent {
+
     // The ID of the network that has become the new default or NETID_UNSET if none.
-    public final int netId;
+    public int netId = NETID_UNSET;
     // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
     // defined in NetworkCapabilities.java.
-    public final int[] transportTypes;
+    public int[] transportTypes = new int[0];
     // The ID of the network that was the default before or NETID_UNSET if none.
-    public final int prevNetId;
+    public int prevNetId = NETID_UNSET;
     // Whether the previous network had IPv4/IPv6 connectivity.
-    public final boolean prevIPv4;
-    public final boolean prevIPv6;
-
-    public DefaultNetworkEvent(int netId, int[] transportTypes,
-                int prevNetId, boolean prevIPv4, boolean prevIPv6) {
-        this.netId = netId;
-        this.transportTypes = transportTypes;
-        this.prevNetId = prevNetId;
-        this.prevIPv4 = prevIPv4;
-        this.prevIPv6 = prevIPv6;
-    }
-
-    private DefaultNetworkEvent(Parcel in) {
-        this.netId = in.readInt();
-        this.transportTypes = in.createIntArray();
-        this.prevNetId = in.readInt();
-        this.prevIPv4 = (in.readByte() > 0);
-        this.prevIPv6 = (in.readByte() > 0);
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(netId);
-        out.writeIntArray(transportTypes);
-        out.writeInt(prevNetId);
-        out.writeByte(prevIPv4 ? (byte) 1 : (byte) 0);
-        out.writeByte(prevIPv6 ? (byte) 1 : (byte) 0);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    public boolean prevIPv4;
+    public boolean prevIPv6;
 
     @Override
     public String toString() {
-      String prevNetwork = String.valueOf(prevNetId);
-      String newNetwork = String.valueOf(netId);
-      if (prevNetId != 0) {
-          prevNetwork += ":" + ipSupport();
-      }
-      if (netId != 0) {
-          newNetwork += ":" + NetworkCapabilities.transportNamesOf(transportTypes);
-      }
-      return String.format("DefaultNetworkEvent(%s -> %s)", prevNetwork, newNetwork);
+        String prevNetwork = String.valueOf(prevNetId);
+        String newNetwork = String.valueOf(netId);
+        if (prevNetId != 0) {
+            prevNetwork += ":" + ipSupport();
+        }
+        if (netId != 0) {
+            newNetwork += ":" + NetworkCapabilities.transportNamesOf(transportTypes);
+        }
+        return String.format("DefaultNetworkEvent(%s -> %s)", prevNetwork, newNetwork);
     }
 
     private String ipSupport() {
         if (prevIPv4 && prevIPv6) {
-            return "DUAL";
+            return "IPv4v6";
         }
         if (prevIPv6) {
             return "IPv6";
@@ -92,15 +62,4 @@ public final class DefaultNetworkEvent implements Parcelable {
         }
         return "NONE";
     }
-
-    public static final Parcelable.Creator<DefaultNetworkEvent> CREATOR
-        = new Parcelable.Creator<DefaultNetworkEvent>() {
-        public DefaultNetworkEvent createFromParcel(Parcel in) {
-            return new DefaultNetworkEvent(in);
-        }
-
-        public DefaultNetworkEvent[] newArray(int size) {
-            return new DefaultNetworkEvent[size];
-        }
-    };
 }

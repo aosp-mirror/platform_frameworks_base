@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
 import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,10 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.metrics.ApfProgramEvent;
@@ -41,18 +46,22 @@ import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
-import android.system.OsConstants;
 import android.os.Parcelable;
 import android.support.test.runner.AndroidJUnit4;
+import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
+
+import com.android.internal.util.BitUtils;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -162,6 +171,144 @@ public class IpConnectivityMetricsTest {
     }
 
     @Test
+    public void testDefaultNetworkEvents() throws Exception {
+        final long cell = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
+        final long wifi = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_WIFI});
+
+        NetworkAgentInfo[][] defaultNetworks = {
+            // nothing -> cell
+            {null, makeNai(100, 10, false, true, cell)},
+            // cell -> wifi
+            {makeNai(100, 50, true, true, cell), makeNai(101, 20, true, false, wifi)},
+            // wifi -> nothing
+            {makeNai(101, 60, true, false, wifi), null},
+            // nothing -> cell
+            {null, makeNai(102, 10, true, true, cell)},
+            // cell -> wifi
+            {makeNai(102, 50, true, true, cell), makeNai(103, 20, true, false, wifi)},
+        };
+
+        for (NetworkAgentInfo[] pair : defaultNetworks) {
+            mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(pair[1], pair[0]);
+        }
+
+        String want = String.join("\n",
+                "dropped_events: 0",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 100",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 0",
+                "    >",
+                "    previous_network_ip_support: 0",
+                "    transport_types: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 101",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 100",
+                "    >",
+                "    previous_network_ip_support: 3",
+                "    transport_types: 1",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 0",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 101",
+                "    >",
+                "    previous_network_ip_support: 1",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 102",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 102",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 0",
+                "    >",
+                "    previous_network_ip_support: 0",
+                "    transport_types: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 103",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 103",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 102",
+                "    >",
+                "    previous_network_ip_support: 3",
+                "    transport_types: 1",
+                "  >",
+                ">",
+                "version: 2\n");
+
+        verifySerialization(want, getdump("flush"));
+    }
+
+    @Test
     public void testEndToEndLogging() throws Exception {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
@@ -194,7 +341,6 @@ public class IpConnectivityMetricsTest {
         Parcelable[] events = {
             new IpReachabilityEvent(IpReachabilityEvent.NUD_FAILED),
             new DhcpClientEvent("SomeState", 192),
-            new DefaultNetworkEvent(102, new int[]{1,2,3}, 101, true, false),
             new IpManagerEvent(IpManagerEvent.PROVISIONING_OK, 5678),
             validationEv,
             apfStats,
@@ -233,6 +379,13 @@ public class IpConnectivityMetricsTest {
         wakeupEvent("wlan0", 10008);
         wakeupEvent("rmnet0", 1000);
 
+        final long cell = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
+        final long wifi = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_WIFI});
+        NetworkAgentInfo cellNai = makeNai(100, 50, false, true, cell);
+        NetworkAgentInfo wifiNai = makeNai(101, 60, true, false, wifi);
+        mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(cellNai, null);
+        mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(wifiNai, cellNai);
+
         String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
@@ -264,30 +417,6 @@ public class IpConnectivityMetricsTest {
                 "  network_id: 0",
                 "  time_ms: 300",
                 "  transports: 0",
-                "  default_network_event <",
-                "    default_network_duration_ms: 0",
-                "    final_score: 0",
-                "    initial_score: 0",
-                "    ip_support: 0",
-                "    network_id <",
-                "      network_id: 102",
-                "    >",
-                "    no_default_network_duration_ms: 0",
-                "    previous_network_id <",
-                "      network_id: 101",
-                "    >",
-                "    previous_network_ip_support: 1",
-                "    transport_types: 1",
-                "    transport_types: 2",
-                "    transport_types: 3",
-                "  >",
-                ">",
-                "events <",
-                "  if_name: \"\"",
-                "  link_layer: 4",
-                "  network_id: 0",
-                "  time_ms: 400",
-                "  transports: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
                 "    if_name: \"\"",
@@ -298,7 +427,7 @@ public class IpConnectivityMetricsTest {
                 "  if_name: \"\"",
                 "  link_layer: 4",
                 "  network_id: 0",
-                "  time_ms: 500",
+                "  time_ms: 400",
                 "  transports: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
@@ -310,7 +439,7 @@ public class IpConnectivityMetricsTest {
                 "  if_name: \"\"",
                 "  link_layer: 4",
                 "  network_id: 0",
-                "  time_ms: 600",
+                "  time_ms: 500",
                 "  transports: 0",
                 "  apf_statistics <",
                 "    dropped_ras: 2",
@@ -331,7 +460,7 @@ public class IpConnectivityMetricsTest {
                 "  if_name: \"\"",
                 "  link_layer: 4",
                 "  network_id: 0",
-                "  time_ms: 700",
+                "  time_ms: 600",
                 "  transports: 0",
                 "  ra_event <",
                 "    dnssl_lifetime: -1",
@@ -340,6 +469,50 @@ public class IpConnectivityMetricsTest {
                 "    rdnss_lifetime: 1000",
                 "    route_info_lifetime: -1",
                 "    router_lifetime: 2000",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 100",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 100",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 0",
+                "    >",
+                "    previous_network_ip_support: 0",
+                "    transport_types: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 0",
+                "  network_id: 101",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
+                "    network_id <",
+                "      network_id: 101",
+                "    >",
+                "    no_default_network_duration_ms: 0",
+                "    previous_network_id <",
+                "      network_id: 100",
+                "    >",
+                "    previous_network_ip_support: 2",
+                "    transport_types: 1",
                 "  >",
                 ">",
                 "events <",
@@ -469,6 +642,26 @@ public class IpConnectivityMetricsTest {
     void wakeupEvent(String iface, int uid) throws Exception {
         String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
         mNetdListener.onWakeupEvent(prefix, uid, uid, 0);
+    }
+
+    NetworkAgentInfo makeNai(int netId, int score, boolean ipv4, boolean ipv6, long transports) {
+        NetworkAgentInfo nai = mock(NetworkAgentInfo.class);
+        when(nai.network()).thenReturn(new Network(netId));
+        when(nai.getCurrentScore()).thenReturn(score);
+        nai.linkProperties = new LinkProperties();
+        nai.networkCapabilities = new NetworkCapabilities();
+        for (int t : BitUtils.unpackBits(transports)) {
+            nai.networkCapabilities.addTransportType(t);
+        }
+        if (ipv4) {
+            nai.linkProperties.addLinkAddress(new LinkAddress("192.0.2.12/24"));
+            nai.linkProperties.addRoute(new RouteInfo(new IpPrefix("0.0.0.0/0")));
+        }
+        if (ipv6) {
+            nai.linkProperties.addLinkAddress(new LinkAddress("2001:db8:dead:beef:f00::a0/64"));
+            nai.linkProperties.addRoute(new RouteInfo(new IpPrefix("::/0")));
+        }
+        return nai;
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
