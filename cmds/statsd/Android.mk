@@ -38,7 +38,7 @@ statsd_common_src := \
     src/matchers/CombinationLogMatchingTracker.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
-    src/metrics/CountAnomalyTracker.cpp \
+    src/anomaly/DiscreteAnomalyTracker.cpp \
     src/metrics/MetricProducer.cpp \
     src/metrics/EventMetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
@@ -150,6 +150,7 @@ LOCAL_CFLAGS += \
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
     tests/AnomalyMonitor_test.cpp \
+    tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConditionTracker_test.cpp \
     tests/ConfigManager_test.cpp \
     tests/indexed_priority_queue_test.cpp \
