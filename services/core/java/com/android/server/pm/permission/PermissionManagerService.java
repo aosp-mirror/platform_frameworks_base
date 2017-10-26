@@ -288,7 +288,21 @@ public class PermissionManagerService {
 
         final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         if (packages != null && packages.length > 0) {
-            final PackageParser.Package pkg = mPackageManagerInt.getPackage(packages[0]);
+Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
+            PackageParser.Package pkg = null;
+            for (String packageName : packages) {
+                pkg = mPackageManagerInt.getPackage(packageName);
+                if (pkg != null) {
+Slog.e(TAG, "TODD: Using packge: " + packageName);
+                    break;
+                } else {
+Slog.e(TAG, "TODD: Missing packge: " + packageName);
+                }
+            }
+            if (pkg == null) {
+Slog.e(TAG, "TODD: No package not found; UID: " + uid);
+                return PackageManager.PERMISSION_DENIED;
+            }
             if (pkg.mSharedUserId != null) {
                 if (isCallerInstantApp) {
                     return PackageManager.PERMISSION_DENIED;
