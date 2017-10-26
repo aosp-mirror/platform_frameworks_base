@@ -22,10 +22,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.session.MediaSession;
+import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.widget.RemoteViews;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -136,6 +139,44 @@ public class NotificationTest {
                 .setProgress(0, 0, true)
                 .build();
         assertFalse(n.hasCompletedProgress());
+    }
+
+    @Test
+    public void allPendingIntents_recollectedAfterReusingBuilder() {
+        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), 0);
+        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), 0);
+
+        Notification.Builder builder = new Notification.Builder(mContext, "channel");
+        builder.setContentIntent(intent1);
+
+        Parcel p = Parcel.obtain();
+
+        Notification n1 = builder.build();
+        n1.writeToParcel(p, 0);
+
+        builder.setContentIntent(intent2);
+        Notification n2 = builder.build();
+        n2.writeToParcel(p, 0);
+
+        assertTrue(n2.allPendingIntents.contains(intent2));
+    }
+
+    @Test
+    public void allPendingIntents_containsCustomRemoteViews() {
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), 0);
+
+        RemoteViews contentView = new RemoteViews(mContext.getPackageName(), 0 /* layoutId */);
+        contentView.setOnClickPendingIntent(1 /* id */, intent);
+
+        Notification.Builder builder = new Notification.Builder(mContext, "channel");
+        builder.setCustomContentView(contentView);
+
+        Parcel p = Parcel.obtain();
+
+        Notification n = builder.build();
+        n.writeToParcel(p, 0);
+
+        assertTrue(n.allPendingIntents.contains(intent));
     }
 
     private Notification.Builder getMediaNotification() {

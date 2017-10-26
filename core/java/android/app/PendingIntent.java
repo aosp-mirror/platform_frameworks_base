@@ -1119,8 +1119,13 @@ public final class PendingIntent implements Parcelable {
      */
     public static void writePendingIntentOrNullToParcel(@Nullable PendingIntent sender,
             @NonNull Parcel out) {
-        out.writeStrongBinder(sender != null ? sender.mTarget.asBinder()
-                : null);
+        out.writeStrongBinder(sender != null ? sender.mTarget.asBinder() : null);
+        if (sender != null) {
+            OnMarshaledListener listener = sOnMarshaledListener.get();
+            if (listener != null) {
+                listener.onMarshaled(sender, out, 0 /* flags */);
+            }
+        }
     }
 
     /**

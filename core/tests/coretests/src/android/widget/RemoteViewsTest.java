@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -376,13 +377,24 @@ public class RemoteViewsTest {
         parcelAndRecreate(views);
     }
 
-    private void parcelAndRecreate(RemoteViews views) {
-        Parcel p = Parcel.obtain();
-        views.writeToParcel(p, 0);
-        p.setDataPosition(0);
+    private RemoteViews parcelAndRecreate(RemoteViews views) {
+        return parcelAndRecreateWithPendingIntentCookie(views, null);
+    }
 
-        RemoteViews.CREATOR.createFromParcel(p);
-        p.recycle();
+    private RemoteViews parcelAndRecreateWithPendingIntentCookie(RemoteViews views, Object cookie) {
+        Parcel p = Parcel.obtain();
+        try {
+            views.writeToParcel(p, 0);
+            p.setDataPosition(0);
+
+            if (cookie != null) {
+                p.setClassCookie(PendingIntent.class, cookie);
+            }
+
+            return RemoteViews.CREATOR.createFromParcel(p);
+        } finally {
+            p.recycle();
+        }
     }
 
     @Test
@@ -398,5 +410,38 @@ public class RemoteViewsTest {
         } catch (Throwable t) {
             throw new Exception(t);
         }
+    }
+
+    @Test
+    public void copy_keepsPendingIntentWhitelistToken() throws Exception {
+        Binder whitelistToken = new Binder();
+
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
+                new Intent("test"), PendingIntent.FLAG_ONE_SHOT);
+        views.setOnClickPendingIntent(1, pi);
+        RemoteViews withCookie = parcelAndRecreateWithPendingIntentCookie(views, whitelistToken);
+
+        RemoteViews cloned = new RemoteViews(withCookie);
+
+        PendingIntent found = extractAnyPendingIntent(cloned);
+        assertEquals(whitelistToken, found.getWhitelistToken());
+    }
+
+    private PendingIntent extractAnyPendingIntent(RemoteViews cloned) {
+        PendingIntent[] found = new PendingIntent[1];
+        Parcel p = Parcel.obtain();
+        try {
+            PendingIntent.setOnMarshaledListener((intent, parcel, flags) -> {
+                if (parcel == p) {
+                    found[0] = intent;
+                }
+            });
+            cloned.writeToParcel(p, 0);
+        } finally {
+            p.recycle();
+            PendingIntent.setOnMarshaledListener(null);
+        }
+        return found[0];
     }
 }
