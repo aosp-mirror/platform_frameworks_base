@@ -53,9 +53,10 @@ import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.os.Build.VERSION_CODES.N;
-import static android.os.IServiceManager.DUMP_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_PRIORITY_HIGH;
-import static android.os.IServiceManager.DUMP_PRIORITY_NORMAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.FIRST_ISOLATED_UID;
@@ -722,30 +723,36 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
         @Override
-        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, new String[] {"activities"});
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            if (asProto) return;
+            doDump(fd, pw, new String[]{"activities"}, asProto);
         }
 
         @Override
-        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, new String[] {"settings"});
-            doDump(fd, pw, new String[] {"intents"});
-            doDump(fd, pw, new String[] {"broadcasts"});
-            doDump(fd, pw, new String[] {"providers"});
-            doDump(fd, pw, new String[] {"permissions"});
-            doDump(fd, pw, new String[] {"services"});
-            doDump(fd, pw, new String[] {"recents"});
-            doDump(fd, pw, new String[] {"lastanr"});
-            doDump(fd, pw, new String[] {"starter"});
-            if (mAssociations.size() > 0) {
-                doDump(fd, pw, new String[] {"associations"});
+        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            if (asProto) {
+                doDump(fd, pw, new String[0], asProto);
+            } else {
+                doDump(fd, pw, new String[]{"settings"}, asProto);
+                doDump(fd, pw, new String[]{"intents"}, asProto);
+                doDump(fd, pw, new String[]{"broadcasts"}, asProto);
+                doDump(fd, pw, new String[]{"providers"}, asProto);
+                doDump(fd, pw, new String[]{"permissions"}, asProto);
+                doDump(fd, pw, new String[]{"services"}, asProto);
+                doDump(fd, pw, new String[]{"recents"}, asProto);
+                doDump(fd, pw, new String[]{"lastanr"}, asProto);
+                doDump(fd, pw, new String[]{"starter"}, asProto);
+                if (mAssociations.size() > 0) {
+                    doDump(fd, pw, new String[]{"associations"}, asProto);
+                }
+                doDump(fd, pw, new String[]{"processes"}, asProto);
             }
-            doDump(fd, pw, new String[] {"processes"});
         }
 
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, args);
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            doDump(fd, pw, args, asProto);
         }
     };
 
@@ -2493,15 +2500,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setSystemProcess() {
         try {
             ServiceManager.addService(Context.ACTIVITY_SERVICE, this, /* allowIsolated= */ true,
-                    DUMP_PRIORITY_CRITICAL | DUMP_PRIORITY_NORMAL);
+                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(ProcessStats.SERVICE_NAME, mProcessStats);
             ServiceManager.addService("meminfo", new MemBinder(this), /* allowIsolated= */ false,
-                    DUMP_PRIORITY_HIGH | DUMP_PRIORITY_NORMAL);
+                    DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
             ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
             ServiceManager.addService("dbinfo", new DbBinder(this));
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(this),
-                        /* allowIsolated= */ false, DUMP_PRIORITY_CRITICAL);
+                        /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
             }
             ServiceManager.addService("permission", new PermissionController(this));
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
@@ -2554,7 +2561,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         private final PriorityDump.PriorityDumper mPriorityDumper =
                 new PriorityDump.PriorityDumper() {
             @Override
-            public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args) {
+            public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args,
+                    boolean asProto) {
+                if (asProto) return;
                 mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
             }
         };
@@ -2604,7 +2613,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         private final PriorityDump.PriorityDumper mPriorityDumper =
                 new PriorityDump.PriorityDumper() {
             @Override
-            public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
+            public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                    boolean asProto) {
+                if (asProto) return;
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "cpuinfo", pw)) return;
                 synchronized (mActivityManagerService.mProcessCpuTracker) {
@@ -14847,7 +14858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Wrapper function to print out debug data filtered by specified arguments.
     */
-    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         boolean dumpAll = false;
@@ -14856,7 +14867,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpCheckinFormat = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
-        boolean useProto = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -14890,8 +14900,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
-            } else if ("--proto".equals(opt)) {
-                useProto = true;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
