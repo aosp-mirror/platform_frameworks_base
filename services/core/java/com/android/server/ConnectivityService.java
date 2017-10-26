@@ -70,7 +70,6 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
-import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.util.MultinetworkPolicyTracker;
@@ -127,6 +126,7 @@ import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
+import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -2265,7 +2265,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // Let rematchAllNetworksAndRequests() below record a new default network event
                 // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
                 // whose timestamps tell how long it takes to recover a default network.
-                logDefaultNetworkEvent(null, nai);
+                metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(null, nai);
             }
             notifyIfacesChangedForNetworkStats();
             // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -4995,7 +4995,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Notify system services that this network is up.
             makeDefault(newNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-            logDefaultNetworkEvent(newNetwork, oldDefaultNetwork);
+            metricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
+                    newNetwork, oldDefaultNetwork);
             // Have a new default network, release the transition wakelock in
             scheduleReleaseNetworkTransitionWakelock();
         }
@@ -5554,25 +5555,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return ServiceManager.checkService(name) != null;
     }
 
-    private void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
-        int newNetid = NETID_UNSET;
-        int prevNetid = NETID_UNSET;
-        int[] transports = new int[0];
-        boolean hadIPv4 = false;
-        boolean hadIPv6 = false;
-
-        if (newNai != null) {
-            newNetid = newNai.network.netId;
-            transports = newNai.networkCapabilities.getTransportTypes();
-        }
-        if (prevNai != null) {
-            prevNetid = prevNai.network.netId;
-            final LinkProperties lp = prevNai.linkProperties;
-            hadIPv4 = lp.hasIPv4Address() && lp.hasIPv4DefaultRoute();
-            hadIPv6 = lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
-        }
-
-        mMetricsLog.log(new DefaultNetworkEvent(newNetid, transports, prevNetid, hadIPv4, hadIPv6));
+    @VisibleForTesting
+    protected IpConnectivityMetrics.Logger metricsLogger() {
+        return checkNotNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
+                "no IpConnectivityMetrics service");
     }
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
