@@ -198,21 +198,20 @@ public class IpConnectivityEventBuilderTest {
 
     @Test
     public void testDefaultNetworkEventSerialization() {
-        ConnectivityMetricsEvent ev = describeIpEvent(
-                aType(DefaultNetworkEvent.class),
-                anInt(102),
-                anIntArray(1, 2, 3),
-                anInt(101),
-                aBool(true),
-                aBool(false));
+        DefaultNetworkEvent ev = new DefaultNetworkEvent();
+        ev.netId = 102;
+        ev.prevNetId = 101;
+        ev.transportTypes = new int[]{1, 2, 3};
+        ev.prevIPv4 = true;
+        ev.prevIPv6 = true;
 
         String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
                 "  if_name: \"\"",
                 "  link_layer: 0",
-                "  network_id: 0",
-                "  time_ms: 1",
+                "  network_id: 102",
+                "  time_ms: 0",
                 "  transports: 0",
                 "  default_network_event <",
                 "    default_network_duration_ms: 0",
@@ -226,7 +225,7 @@ public class IpConnectivityEventBuilderTest {
                 "    previous_network_id <",
                 "      network_id: 101",
                 "    >",
-                "    previous_network_ip_support: 1",
+                "    previous_network_ip_support: 3",
                 "    transport_types: 1",
                 "    transport_types: 2",
                 "    transport_types: 3",
@@ -234,7 +233,7 @@ public class IpConnectivityEventBuilderTest {
                 ">",
                 "version: 2\n");
 
-        verifySerialization(want, ev);
+        verifySerialization(want, IpConnectivityEventBuilder.toProto(ev));
     }
 
     @Test

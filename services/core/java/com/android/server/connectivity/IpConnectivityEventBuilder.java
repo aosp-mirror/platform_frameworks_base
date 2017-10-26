@@ -132,6 +132,18 @@ final public class IpConnectivityEventBuilder {
         return out;
     }
 
+    public static IpConnectivityEvent toProto(DefaultNetworkEvent in) {
+        IpConnectivityLogClass.DefaultNetworkEvent ev =
+                new IpConnectivityLogClass.DefaultNetworkEvent();
+        ev.networkId = netIdOf(in.netId);
+        ev.previousNetworkId = netIdOf(in.prevNetId);
+        ev.transportTypes = in.transportTypes;
+        ev.previousNetworkIpSupport = ipSupportOf(in);
+        final IpConnectivityEvent out = buildEvent(in.netId, 0, null);
+        out.setDefaultNetworkEvent(ev);
+        return out;
+    }
+
     private static IpConnectivityEvent buildEvent(int netId, long transports, String ifname) {
         final IpConnectivityEvent ev = new IpConnectivityEvent();
         ev.networkId = netId;
@@ -161,11 +173,6 @@ final public class IpConnectivityEventBuilder {
 
         if (in instanceof IpReachabilityEvent) {
             setIpReachabilityEvent(out, (IpReachabilityEvent) in);
-            return true;
-        }
-
-        if (in instanceof DefaultNetworkEvent) {
-            setDefaultNetworkEvent(out, (DefaultNetworkEvent) in);
             return true;
         }
 
@@ -223,16 +230,6 @@ final public class IpConnectivityEventBuilder {
                 new IpConnectivityLogClass.IpReachabilityEvent();
         ipReachabilityEvent.eventType = in.eventType;
         out.setIpReachabilityEvent(ipReachabilityEvent);
-    }
-
-    private static void setDefaultNetworkEvent(IpConnectivityEvent out, DefaultNetworkEvent in) {
-        IpConnectivityLogClass.DefaultNetworkEvent defaultNetworkEvent =
-                new IpConnectivityLogClass.DefaultNetworkEvent();
-        defaultNetworkEvent.networkId = netIdOf(in.netId);
-        defaultNetworkEvent.previousNetworkId = netIdOf(in.prevNetId);
-        defaultNetworkEvent.transportTypes = in.transportTypes;
-        defaultNetworkEvent.previousNetworkIpSupport = ipSupportOf(in);
-        out.setDefaultNetworkEvent(defaultNetworkEvent);
     }
 
     private static void setNetworkEvent(IpConnectivityEvent out, NetworkEvent in) {
