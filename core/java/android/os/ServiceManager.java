@@ -83,7 +83,7 @@ public final class ServiceManager {
      * @param service the service object
      */
     public static void addService(String name, IBinder service) {
-        addService(name, service, false, IServiceManager.DUMP_PRIORITY_NORMAL);
+        addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_NORMAL);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class ServiceManager {
      * to access this service
      */
     public static void addService(String name, IBinder service, boolean allowIsolated) {
-        addService(name, service, allowIsolated, IServiceManager.DUMP_PRIORITY_NORMAL);
+        addService(name, service, allowIsolated, IServiceManager.DUMP_FLAG_PRIORITY_NORMAL);
     }
 
     /**
@@ -143,7 +143,7 @@ public final class ServiceManager {
      */
     public static String[] listServices() {
         try {
-            return getIServiceManager().listServices(IServiceManager.DUMP_PRIORITY_ALL);
+            return getIServiceManager().listServices(IServiceManager.DUMP_FLAG_PRIORITY_ALL);
         } catch (RemoteException e) {
             Log.e(TAG, "error in listServices", e);
             return null;

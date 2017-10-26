@@ -394,13 +394,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
         @Override
-        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, new String[] {"-a"});
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            doDump(fd, pw, new String[] {"-a"}, asProto);
         }
 
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, args);
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            doDump(fd, pw, args, asProto);
         }
     };
 
@@ -6825,10 +6826,9 @@ public class WindowManagerService extends IWindowManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
-    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
-        boolean useProto = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -6839,8 +6839,6 @@ public class WindowManagerService extends IWindowManager.Stub
             opti++;
             if ("-a".equals(opt)) {
                 dumpAll = true;
-            } else if ("--proto".equals(opt)) {
-                useProto = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Window manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");

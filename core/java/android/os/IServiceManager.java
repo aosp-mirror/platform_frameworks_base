@@ -45,13 +45,13 @@ public interface IServiceManager extends IInterface
      * Place a new @a service called @a name into the service
      * manager.
      */
-    void addService(String name, IBinder service, boolean allowIsolated, int dumpPriority)
-                throws RemoteException;
+    void addService(String name, IBinder service, boolean allowIsolated, int dumpFlags)
+            throws RemoteException;
 
     /**
      * Return a list of all currently running services.
      */
-    String[] listServices(int dumpPriority) throws RemoteException;
+    String[] listServices(int dumpFlags) throws RemoteException;
 
     /**
      * Assign a permission controller to the service manager.  After set, this
@@ -72,9 +72,13 @@ public interface IServiceManager extends IInterface
     /*
      * Must update values in IServiceManager.h
      */
-    int DUMP_PRIORITY_CRITICAL = 1 << 0;
-    int DUMP_PRIORITY_HIGH = 1 << 1;
-    int DUMP_PRIORITY_NORMAL = 1 << 2;
-    int DUMP_PRIORITY_ALL = DUMP_PRIORITY_CRITICAL | DUMP_PRIORITY_HIGH
-            | DUMP_PRIORITY_NORMAL;
+    /* Allows services to dump sections according to priorities. */
+    int DUMP_FLAG_PRIORITY_CRITICAL = 1 << 0;
+    int DUMP_FLAG_PRIORITY_HIGH = 1 << 1;
+    int DUMP_FLAG_PRIORITY_NORMAL = 1 << 2;
+    int DUMP_FLAG_PRIORITY_ALL = DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
+            | DUMP_FLAG_PRIORITY_NORMAL;
+    /* Allows services to dump sections in protobuf format. */
+    int DUMP_FLAG_PROTO = 1 << 3;
+
 }
