@@ -1138,7 +1138,9 @@ public final class SystemServer {
                 try {
                     connectivity = new ConnectivityService(
                             context, networkManagement, networkStats, networkPolicy);
-                    ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
+                    ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity,
+                            /* allowIsolated= */ false,
+                            DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
                     networkStats.bindConnectivityManager(connectivity);
                     networkPolicy.bindConnectivityManager(connectivity);
                 } catch (Throwable e) {
