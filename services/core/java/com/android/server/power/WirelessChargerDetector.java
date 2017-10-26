@@ -24,7 +24,6 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.service.power.WirelessChargerDetectorProto;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;

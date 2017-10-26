@@ -501,7 +501,7 @@ public class ActivityManager {
     public static final int PROCESS_STATE_SERVICE = 11;
 
     /** @hide Process is in the background running a receiver.   Note that from the
-     * perspective of oom_adj receivers run at a higher foreground level, but for our
+     * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
     public static final int PROCESS_STATE_RECEIVER = 12;
@@ -524,6 +524,20 @@ public class ActivityManager {
 
     /** @hide Process does not exist. */
     public static final int PROCESS_STATE_NONEXISTENT = 18;
+
+    // NOTE: If PROCESS_STATEs are added or changed, then new fields must be added
+    // to frameworks/base/core/proto/android/app/activitymanager.proto and the following method must
+    // be updated to correctly map between them.
+    /**
+     * Maps ActivityManager.PROCESS_STATE_ values to ActivityManagerProto.ProcessState enum.
+     *
+     * @param amInt a process state of the form ActivityManager.PROCESS_STATE_
+     * @return the value of the corresponding android.app.ActivityManagerProto's ProcessState enum.
+     * @hide
+     */
+    public static final int processStateAmToProto(int amInt) {
+        return amInt * 100;
+    }
 
     /** @hide The lowest process state number */
     public static final int MIN_PROCESS_STATE = PROCESS_STATE_PERSISTENT;

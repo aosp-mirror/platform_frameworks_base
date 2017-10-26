@@ -15,15 +15,37 @@
  */
 
 syntax = "proto2";
+package android.content;
+
 option java_package = "android.content";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/patternmatcher.proto";
 
-package android.content;
-
 // Next Tag: 13
 message IntentProto {
+    enum DockState {
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is not in any dock.
+        DOCK_STATE_UNDOCKED = 0;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a desk dock.
+        DOCK_STATE_DESK = 1;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a car dock.
+        DOCK_STATE_CAR = 2;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a analog (low end) dock.
+        DOCK_STATE_LE_DESK = 3;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a digital (high end) dock.
+        DOCK_STATE_HE_DESK = 4;
+    }
+
     optional string action = 1;
     repeated string categories = 2;
     optional string data = 3;

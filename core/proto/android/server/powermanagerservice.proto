@@ -15,16 +15,21 @@
  */
 
 syntax = "proto2";
-package android.service.power;
+package com.android.server.power;
 
 option java_multiple_files = true;
-option java_outer_classname = "PowerServiceProto";
 
+import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/os/batterymanager.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
+import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
-import "frameworks/base/core/proto/android/service/wirelesschargerdetector.proto";
+import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
+import "frameworks/base/core/proto/android/view/display.proto";
 
-message PowerServiceDumpProto {
+message PowerManagerServiceDumpProto {
     message ConstantsProto {
         optional bool is_no_cached_wake_locks = 1;
     }
@@ -45,78 +50,12 @@ message PowerServiceDumpProto {
         optional bool is_screen_dream = 3;
     }
     message UidProto {
-        // Enum values gotten from ActivityManager.java
-        enum ProcessState {
-            // Process is a persistent system process.
-            PROCESS_STATE_PERSISTENT = 0;
-            // Process is a persistent system process and is doing UI.
-            PROCESS_STATE_PERSISTENT_UI = 1;
-            // Process is hosting the current top activities. Note that this
-            // covers all activities that are visible to the user.
-            PROCESS_STATE_TOP = 2;
-            // Process is hosting a foreground service due to a system binding.
-            PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 3;
-            // Process is hosting a foreground service.
-            PROCESS_STATE_FOREGROUND_SERVICE = 4;
-            // Same as {@link #PROCESS_STATE_TOP} but while device is sleeping.
-            PROCESS_STATE_TOP_SLEEPING = 5;
-            // Process is important to the user, and something they are aware of.
-            PROCESS_STATE_IMPORTANT_FOREGROUND = 6;
-            // Process is important to the user, but not something they are aware of.
-            PROCESS_STATE_IMPORTANT_BACKGROUND = 7;
-            // Process is in the background running a backup/restore operation.
-            PROCESS_STATE_BACKUP = 8;
-            // Process is in the background, but it can't restore its state so
-            // we want to try to avoid killing it.
-            PROCESS_STATE_HEAVY_WEIGHT = 9;
-            // Process is in the background running a service.
-            PROCESS_STATE_SERVICE = 10;
-            // Process is in the background running a receiver.
-            PROCESS_STATE_RECEIVER = 11;
-            // Process is in the background but hosts the home activity.
-            PROCESS_STATE_HOME = 12;
-            // Process is in the background but hosts the last shown activity.
-            PROCESS_STATE_LAST_ACTIVITY = 13;
-            // Process is being cached for later use and contains activities.
-            PROCESS_STATE_CACHED_ACTIVITY = 14;
-            // Process is being cached for later use and is a client of another
-            // cached process that contains activities.
-            PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 15;
-            // Process is being cached for later use and is empty.
-            PROCESS_STATE_CACHED_EMPTY = 16;
-            // Process does not exist.
-            PROCESS_STATE_NONEXISTENT = 17;
-        }
         optional int32 uid = 1;
         optional string uid_string = 2;
         optional bool is_active = 3;
         optional int32 num_wake_locks = 4;
         optional bool is_process_state_unknown = 5;
-        optional ProcessState process_state = 6;
-    }
-
-    // Enum values gotten from PowerManagerInternal.java
-    enum Wakefulness {
-        WAKEFULNESS_ASLEEP = 0;
-        WAKEFULNESS_AWAKE = 1;
-        WAKEFULNESS_DREAMING = 2;
-        WAKEFULNESS_DOZING = 3;
-        WAKEFULNESS_UNKNOWN = 4;
-    }
-    // Enum values gotten from BatteryManager.java
-    enum PlugType {
-        PLUG_TYPE_NONE = 0;
-        PLUG_TYPE_PLUGGED_AC = 1;
-        PLUG_TYPE_PLUGGED_USB = 2;
-        PLUG_TYPE_PLUGGED_WIRELESS = 4;
-    }
-    // Enum values gotten from Intent.java
-    enum DockState {
-        DOCK_STATE_UNDOCKED = 0;
-        DOCK_STATE_DESK = 1;
-        DOCK_STATE_CAR = 2;
-        DOCK_STATE_LE_DESK = 3;
-        DOCK_STATE_HE_DESK = 4;
+        optional .android.app.ActivityManagerProto.ProcessState process_state = 6;
     }
 
     optional ConstantsProto constants = 1;
@@ -124,18 +63,18 @@ message PowerServiceDumpProto {
     // changed and need to be recalculated.
     optional int32 dirty = 2;
     // Indicates whether the device is awake or asleep or somewhere in between.
-    optional Wakefulness wakefulness = 3;
+    optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 3;
     optional bool is_wakefulness_changing = 4;
     // True if the device is plugged into a power source.
     optional bool is_powered = 5;
     // The current plug type
-    optional PlugType plug_type = 6;
+    optional .android.os.BatteryManagerProto.PlugType plug_type = 6;
     // The current battery level percentage.
     optional int32 battery_level = 7;
     // The battery level percentage at the time the dream started.
     optional int32 battery_level_when_dream_started = 8;
     // The current dock state.
-    optional DockState dock_state = 9;
+    optional .android.content.IntentProto.DockState dock_state = 9;
     // True if the device should stay on.
     optional bool is_stay_on = 10;
     // True if the proximity sensor reads a positive result.
@@ -216,7 +155,7 @@ message PowerServiceDumpProto {
     optional bool are_uids_changed = 45;
     // List of UIDs and their states
     repeated UidProto uids = 46;
-    optional android.os.LooperProto looper = 47;
+    optional .android.os.LooperProto looper = 47;
     // List of all wake locks acquired by applications.
     repeated WakeLockProto wake_locks = 48;
     // List of all suspend blockers.
@@ -238,27 +177,7 @@ message WakeLockProto {
         optional bool is_on_after_release = 2;
     }
 
-    // Enum values gotten from PowerManager.java
-    enum LockLevel {
-        WAKE_LOCK_INVALID = 0;
-        // Ensures that the CPU is running.
-        PARTIAL_WAKE_LOCK = 1;
-        // Ensures that the screen is on (but may be dimmed).
-        SCREEN_DIM_WAKE_LOCK = 6;
-        // Ensures that the screen is on at full brightness.
-        SCREEN_BRIGHT_WAKE_LOCK = 10;
-        // Ensures that the screen and keyboard backlight are on at full brightness.
-        FULL_WAKE_LOCK = 26;
-        // Turns the screen off when the proximity sensor activates.
-        PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32;
-        // Put the screen in a low power state and allow the CPU to suspend
-        // if no other wake locks are held.
-        DOZE_WAKE_LOCK = 64;
-        // Keep the device awake enough to allow drawing to occur.
-        DRAW_WAKE_LOCK = 128;
-    }
-
-    optional LockLevel lock_level = 1;
+    optional .android.os.PowerManagerProto.WakeLockLevel lock_level = 1;
     optional string tag = 2;
     optional WakeLockFlagsProto flags = 3;
     optional bool is_disabled = 4;
@@ -269,7 +188,7 @@ message WakeLockProto {
     optional int32 uid = 7;
     // Owner PID
     optional int32 pid = 8;
-    optional android.os.WorkSourceProto work_source = 9;
+    optional .android.os.WorkSourceProto work_source = 9;
 }
 
 message PowerServiceSettingsAndConfigurationDumpProto {
@@ -284,22 +203,6 @@ message PowerServiceSettingsAndConfigurationDumpProto {
         optional int32 setting_default = 3;
         optional int32 setting_for_vr_default = 4;
     }
-
-    // Enum values gotten from Settings.java
-    enum ScreenBrightnessMode {
-        SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
-        SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
-    }
-    // Enum values gotten from Display.java
-    enum DisplayState {
-        DISPLAY_STATE_UNKNOWN = 0;
-        DISPLAY_STATE_OFF = 1;
-        DISPLAY_STATE_ON = 2;
-        DISPLAY_STATE_DOZE = 3;
-        DISPLAY_STATE_DOZE_SUSPEND = 4;
-        DISPLAY_STATE_VR = 5;
-    }
-
 
     // True to decouple auto-suspend mode from the display state.
     optional bool is_decouple_hal_auto_suspend_mode_from_display_config = 1;
@@ -371,7 +274,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     // Use 0 if there is no adjustment.
     optional float screen_auto_brightness_adjustment_setting = 31;
     // The screen brightness mode.
-    optional ScreenBrightnessMode screen_brightness_mode_setting = 32;
+    optional .android.providers.settings.SettingsProto.ScreenBrightnessMode screen_brightness_mode_setting = 32;
     // The screen brightness setting override from the window manager
     // to allow the current foreground activity to override the brightness.
     // Use -1 to disable.
@@ -393,7 +296,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     // Use NaN to disable.
     optional float temporary_screen_auto_brightness_adjustment_setting_override = 37;
     // The screen state to use while dozing.
-    optional DisplayState doze_screen_state_override_from_dream_manager = 38;
+    optional .android.view.DisplayProto.DisplayState doze_screen_state_override_from_dream_manager = 38;
     // The screen brightness to use while dozing.
     optional float dozed_screen_brightness_override_from_dream_manager = 39;
     // Screen brightness settings limits.
