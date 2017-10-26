@@ -65,7 +65,7 @@ public class TileUtils {
      *
      * <p>A summary my be defined by meta-data named {@link #META_DATA_PREFERENCE_SUMMARY}
      */
-    private static final String EXTRA_SETTINGS_ACTION =
+    public static final String EXTRA_SETTINGS_ACTION =
             "com.android.settings.action.EXTRA_SETTINGS";
 
     /**
