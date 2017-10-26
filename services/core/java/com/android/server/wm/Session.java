@@ -81,6 +81,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final Set<WindowSurfaceController> mAppOverlaySurfaces = new HashSet<>();
     // Set of visible alert window surfaces connected to this session.
     private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
+    private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanAcquireSleepToken;
@@ -106,6 +107,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
                 == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
+        mDragDropController = mService.mDragDropController;
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
@@ -304,94 +306,56 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     /* Drag/drop */
     @Override
-    public IBinder prepareDrag(IWindow window, int flags,
-            int width, int height, Surface outSurface) {
-        return mService.prepareDragSurface(window, mSurfaceSession, flags,
-                width, height, outSurface);
+    public IBinder prepareDrag(IWindow window, int flags, int width, int height,
+            Surface outSurface) {
+        final int callerPid = Binder.getCallingPid();
+        final int callerUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDragDropController.prepareDrag(
+                    mService, mSurfaceSession, callerPid, callerUid, window, flags, width, height,
+                    outSurface);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override
     public boolean performDrag(IWindow window, IBinder dragToken,
             int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data) {
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "perform drag: win=" + window + " data=" + data);
+        return mDragDropController.performDrag(mService, window, dragToken, touchSource,
+                touchX, touchY, thumbCenterX, thumbCenterY, data);
+    }
+
+    @Override
+    public void reportDropResult(IWindow window, boolean consumed) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mDragDropController.reportDropResult(mService, window, consumed);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
+    }
 
-        synchronized (mService.mWindowMap) {
-            if (mService.mDragState == null) {
-                Slog.w(TAG_WM, "No drag prepared");
-                throw new IllegalStateException("performDrag() without prepareDrag()");
-            }
-
-            if (dragToken != mService.mDragState.mToken) {
-                Slog.w(TAG_WM, "Performing mismatched drag");
-                throw new IllegalStateException("performDrag() does not match prepareDrag()");
-            }
-
-            WindowState callingWin = mService.windowForClientLocked(null, window, false);
-            if (callingWin == null) {
-                Slog.w(TAG_WM, "Bad requesting window " + window);
-                return false;  // !!! TODO: throw here?
-            }
-
-            // !!! TODO: if input is not still focused on the initiating window, fail
-            // the drag initiation (e.g. an alarm window popped up just as the application
-            // called performDrag()
-
-            mService.mH.removeMessages(H.DRAG_START_TIMEOUT, window.asBinder());
-
-            // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
-            // will let us eliminate the (touchX,touchY) parameters from the API.
-
-            // !!! FIXME: put all this heavy stuff onto the mH looper, as well as
-            // the actual drag event dispatch stuff in the dragstate
-
-            final DisplayContent displayContent = callingWin.getDisplayContent();
-            if (displayContent == null) {
-               return false;
-            }
-            Display display = displayContent.getDisplay();
-            mService.mDragState.register(display);
-            if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                    mService.mDragState.getInputChannel())) {
-                Slog.e(TAG_WM, "Unable to transfer touch focus");
-                mService.mDragState.unregister();
-                mService.mDragState.reset();
-                mService.mDragState = null;
-                return false;
-            }
-
-            mService.mDragState.mDisplayContent = displayContent;
-            mService.mDragState.mData = data;
-            mService.mDragState.broadcastDragStartedLw(touchX, touchY);
-            mService.mDragState.overridePointerIconLw(touchSource);
-
-            // remember the thumb offsets for later
-            mService.mDragState.mThumbOffsetX = thumbCenterX;
-            mService.mDragState.mThumbOffsetY = thumbCenterY;
-
-            // Make the surface visible at the proper location
-            final SurfaceControl surfaceControl = mService.mDragState.mSurfaceControl;
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                    TAG_WM, ">>> OPEN TRANSACTION performDrag");
-            mService.openSurfaceTransaction();
-            try {
-                surfaceControl.setPosition(touchX - thumbCenterX,
-                        touchY - thumbCenterY);
-                surfaceControl.setLayer(mService.mDragState.getDragLayerLw());
-                surfaceControl.setLayerStack(display.getLayerStack());
-                surfaceControl.show();
-            } finally {
-                mService.closeSurfaceTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                        TAG_WM, "<<< CLOSE TRANSACTION performDrag");
-            }
-
-            mService.mDragState.notifyLocationLw(touchX, touchY);
+    @Override
+    public void cancelDragAndDrop(IBinder dragToken) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mDragDropController.cancelDragAndDrop(mService, dragToken);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
+    }
 
-        return true;    // success!
+    @Override
+    public void dragRecipientEntered(IWindow window) {
+        mDragDropController.dragRecipientEntered(window);
+    }
+
+    @Override
+    public void dragRecipientExited(IWindow window) {
+        mDragDropController.dragRecipientExited(window);
     }
 
     @Override
@@ -404,90 +368,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             return mService.startMovingTask(window, startX, startY);
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    @Override
-    public void reportDropResult(IWindow window, boolean consumed) {
-        IBinder token = window.asBinder();
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "Drop result=" + consumed + " reported by " + token);
-        }
-
-        synchronized (mService.mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                if (mService.mDragState == null) {
-                    // Most likely the drop recipient ANRed and we ended the drag
-                    // out from under it.  Log the issue and move on.
-                    Slog.w(TAG_WM, "Drop result given but no drag in progress");
-                    return;
-                }
-
-                if (mService.mDragState.mToken != token) {
-                    // We're in a drag, but the wrong window has responded.
-                    Slog.w(TAG_WM, "Invalid drop-result claim by " + window);
-                    throw new IllegalStateException("reportDropResult() by non-recipient");
-                }
-
-                // The right window has responded, even if it's no longer around,
-                // so be sure to halt the timeout even if the later WindowState
-                // lookup fails.
-                mService.mH.removeMessages(H.DRAG_END_TIMEOUT, window.asBinder());
-                WindowState callingWin = mService.windowForClientLocked(null, window, false);
-                if (callingWin == null) {
-                    Slog.w(TAG_WM, "Bad result-reporting window " + window);
-                    return;  // !!! TODO: throw here?
-                }
-
-                mService.mDragState.mDragResult = consumed;
-                mService.mDragState.endDragLw();
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public void cancelDragAndDrop(IBinder dragToken) {
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "cancelDragAndDrop");
-        }
-
-        synchronized (mService.mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                if (mService.mDragState == null) {
-                    Slog.w(TAG_WM, "cancelDragAndDrop() without prepareDrag()");
-                    throw new IllegalStateException("cancelDragAndDrop() without prepareDrag()");
-                }
-
-                if (mService.mDragState.mToken != dragToken) {
-                    Slog.w(TAG_WM,
-                            "cancelDragAndDrop() does not match prepareDrag()");
-                    throw new IllegalStateException(
-                            "cancelDragAndDrop() does not match prepareDrag()");
-                }
-
-                mService.mDragState.mDragResult = false;
-                mService.mDragState.cancelDragLw();
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public void dragRecipientEntered(IWindow window) {
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "Drag into new candidate view @ " + window.asBinder());
-        }
-    }
-
-    @Override
-    public void dragRecipientExited(IWindow window) {
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "Drag from old candidate view @ " + window.asBinder());
         }
     }
 
