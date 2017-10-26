@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -217,7 +219,7 @@ public class Binder implements IBinder {
      * with their own uid.  If the current thread is not currently executing an
      * incoming transaction, then its own UserHandle is returned.
      */
-    public static final UserHandle getCallingUserHandle() {
+    public static final @NonNull UserHandle getCallingUserHandle() {
         return UserHandle.of(UserHandle.getUserId(getCallingUid()));
     }
 
@@ -260,7 +262,7 @@ public class Binder implements IBinder {
      *
      * @hide
      */
-    public static final void withCleanCallingIdentity(ThrowingRunnable action) {
+    public static final void withCleanCallingIdentity(@NonNull ThrowingRunnable action) {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
@@ -284,7 +286,7 @@ public class Binder implements IBinder {
      *
      * @hide
      */
-    public static final <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
+    public static final <T> T withCleanCallingIdentity(@NonNull ThrowingSupplier<T> action) {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
@@ -376,7 +378,7 @@ public class Binder implements IBinder {
      * to return the given owner IInterface when the corresponding
      * descriptor is requested.
      */
-    public void attachInterface(IInterface owner, String descriptor) {
+    public void attachInterface(@Nullable IInterface owner, @Nullable String descriptor) {
         mOwner = owner;
         mDescriptor = descriptor;
     }
@@ -384,7 +386,7 @@ public class Binder implements IBinder {
     /**
      * Default implementation returns an empty interface name.
      */
-    public String getInterfaceDescriptor() {
+    public @Nullable String getInterfaceDescriptor() {
         return mDescriptor;
     }
 
@@ -411,7 +413,7 @@ public class Binder implements IBinder {
      * associated IInterface if it matches the requested
      * descriptor.
      */
-    public IInterface queryLocalInterface(String descriptor) {
+    public @Nullable IInterface queryLocalInterface(@NonNull String descriptor) {
         if (mDescriptor.equals(descriptor)) {
             return mOwner;
         }
@@ -437,8 +439,20 @@ public class Binder implements IBinder {
      * to override this to do the appropriate unmarshalling of transactions.
      *
      * <p>If you want to call this, call transact().
+     *
+     * @param code The action to perform.  This should
+     * be a number between {@link #FIRST_CALL_TRANSACTION} and
+     * {@link #LAST_CALL_TRANSACTION}.
+     * @param data Marshalled data being received from the caller.
+     * @param reply If the caller is expecting a result back, it should be marshalled
+     * in to here.
+     * @param flags Additional operation flags.  Either 0 for a normal
+     * RPC, or {@link #FLAG_ONEWAY} for a one-way RPC.
+     *
+     * @return Return true on a successful call; returning false is generally used to
+     * indicate that you did not understand the transaction code.
      */
-    protected boolean onTransact(int code, Parcel data, Parcel reply,
+    protected boolean onTransact(int code, @NonNull Parcel data, @Nullable Parcel reply,
             int flags) throws RemoteException {
         if (code == INTERFACE_TRANSACTION) {
             reply.writeString(getInterfaceDescriptor());
@@ -494,7 +508,7 @@ public class Binder implements IBinder {
      * Implemented to call the more convenient version
      * {@link #dump(FileDescriptor, PrintWriter, String[])}.
      */
-    public void dump(FileDescriptor fd, String[] args) {
+    public void dump(@NonNull FileDescriptor fd, @Nullable String[] args) {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
         try {
@@ -530,7 +544,7 @@ public class Binder implements IBinder {
      * Like {@link #dump(FileDescriptor, String[])}, but ensures the target
      * executes asynchronously.
      */
-    public void dumpAsync(final FileDescriptor fd, final String[] args) {
+    public void dumpAsync(@NonNull final FileDescriptor fd, @Nullable final String[] args) {
         final FileOutputStream fout = new FileOutputStream(fd);
         final PrintWriter pw = new FastPrintWriter(fout);
         Thread thr = new Thread("Binder.dumpAsync") {
@@ -553,7 +567,8 @@ public class Binder implements IBinder {
      * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
-    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
+            @Nullable String[] args) {
     }
 
     /**
@@ -566,9 +581,10 @@ public class Binder implements IBinder {
      * @throws RemoteException
      * @hide
      */
-    public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ShellCallback callback,
-            ResultReceiver resultReceiver) throws RemoteException {
+    public void shellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
         onShellCommand(in, out, err, args, callback, resultReceiver);
     }
 
@@ -580,8 +596,10 @@ public class Binder implements IBinder {
      * Consider using {@link ShellCommand} to help in the implementation.</p>
      * @hide
      */
-    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ShellCallback callback, ResultReceiver resultReceiver) throws RemoteException {
+    public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
         FileOutputStream fout = new FileOutputStream(err != null ? err : out);
         PrintWriter pw = new FastPrintWriter(fout);
         pw.println("No shell command implementation.");
@@ -593,7 +611,7 @@ public class Binder implements IBinder {
      * Default implementation rewinds the parcels and calls onTransact.  On
      * the remote side, transact calls into the binder to do the IPC.
      */
-    public final boolean transact(int code, Parcel data, Parcel reply,
+    public final boolean transact(int code, @NonNull Parcel data, @Nullable Parcel reply,
             int flags) throws RemoteException {
         if (false) Log.v("Binder", "Transact: " + code + " to " + this);
 
@@ -610,13 +628,13 @@ public class Binder implements IBinder {
     /**
      * Local implementation is a no-op.
      */
-    public void linkToDeath(DeathRecipient recipient, int flags) {
+    public void linkToDeath(@NonNull DeathRecipient recipient, int flags) {
     }
 
     /**
      * Local implementation is a no-op.
      */
-    public boolean unlinkToDeath(DeathRecipient recipient, int flags) {
+    public boolean unlinkToDeath(@NonNull DeathRecipient recipient, int flags) {
         return true;
     }
 
