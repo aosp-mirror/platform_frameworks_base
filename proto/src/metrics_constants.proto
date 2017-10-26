@@ -4704,6 +4704,11 @@ message MetricsEvent {
     // OS: P
     AUTOFILL_SAVE_EXPLICITLY_TRIGGERED = 1229;
 
+    // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_CALLING_FOR_SUB = 1230;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
