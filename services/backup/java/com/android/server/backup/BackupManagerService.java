@@ -2877,7 +2877,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     // The backend reports that our dataset has been wiped.  Note this in
                     // the event log; the no-success code below will reset the backup
                     // state as well.
-                    EventLog.writeEvent(EventLogTags.BACKUP_RESET, mTransport.transportDirName());
+                    EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Error in backup thread", e);
@@ -9781,7 +9781,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     }
 
                     Slog.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
-                    EventLog.writeEvent(EventLogTags.BACKUP_START, transport.transportDirName());
+                    String transportDirName = transport.transportDirName();
+                    EventLog.writeEvent(EventLogTags.BACKUP_START, transportDirName);
                     long startRealtime = SystemClock.elapsedRealtime();
                     int status = transport.initializeDevice();
 
@@ -9794,7 +9795,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         Slog.i(TAG, "Device init successful");
                         int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                         EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
-                        resetBackupState(new File(mBaseStateDir, transport.transportDirName()));
+                        resetBackupState(new File(mBaseStateDir, transportDirName));
                         EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(false, transportName);
