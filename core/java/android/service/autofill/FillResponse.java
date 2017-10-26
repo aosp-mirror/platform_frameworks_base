@@ -193,7 +193,7 @@ public final class FillResponse implements Parcelable {
          *
          * @param authentication Intent to an activity with your authentication flow.
          * @param presentation The presentation to visualize the response.
-         * @param ids id of Views that when focused will display the authentication UI affordance.
+         * @param ids id of Views that when focused will display the authentication UI.
          *
          * @return This builder.
          * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if

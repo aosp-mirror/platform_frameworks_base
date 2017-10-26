@@ -325,14 +325,14 @@ public final class AutoFillUI {
     }
 
     /**
-     * Hides all UI affordances.
+     * Hides all autofill UIs.
      */
     public void hideAll(@Nullable AutoFillUiCallback callback) {
         mHandler.post(() -> hideAllUiThread(callback));
     }
 
     /**
-     * Destroy all UI affordances.
+     * Destroy all autofill UIs.
      */
     public void destroyAll(@Nullable PendingUi pendingSaveUi,
             @Nullable AutoFillUiCallback callback, boolean notifyClient) {
