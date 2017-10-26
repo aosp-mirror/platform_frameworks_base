@@ -35,6 +35,7 @@
 #include <hidl/HidlTransportSupport.h>
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <vintf/parse_string.h>
 #include <utils/misc.h>
 
@@ -261,14 +262,9 @@ static void JHwBinder_native_registerService(
         JNIEnv *env,
         jobject thiz,
         jstring serviceNameObj) {
-    if (serviceNameObj == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return;
-    }
-
-    const char *serviceName = env->GetStringUTFChars(serviceNameObj, NULL);
-    if (serviceName == NULL) {
-        return;  // XXX exception already pending?
+    ScopedUtfChars str(env, serviceNameObj);
+    if (str.c_str() == nullptr) {
+        return;  // NPE will be pending.
     }
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeBinder(env, thiz);
@@ -284,15 +280,12 @@ static void JHwBinder_native_registerService(
         return;
     }
 
-    Return<bool> ret = manager->add(serviceName, base);
-
-    env->ReleaseStringUTFChars(serviceNameObj, serviceName);
-    serviceName = NULL;
+    Return<bool> ret = manager->add(str.c_str(), base);
 
     bool ok = ret.isOk() && ret;
 
     if (ok) {
-        LOG(INFO) << "Starting thread pool.";
+        LOG(INFO) << "HwBinder: Starting thread pool for " << str.c_str();
         ::android::hardware::ProcessState::self()->startThreadPool();
     }
 
@@ -308,28 +301,23 @@ static jobject JHwBinder_native_getService(
     using ::android::hidl::base::V1_0::IBase;
     using ::android::hardware::details::getRawServiceInternal;
 
-    if (ifaceNameObj == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return NULL;
-    }
-    if (serviceNameObj == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return NULL;
+    std::string ifaceName;
+    {
+        ScopedUtfChars str(env, ifaceNameObj);
+        if (str.c_str() == nullptr) {
+            return nullptr;  // NPE will be pending.
+        }
+        ifaceName = str.c_str();
     }
 
-    const char *ifaceNameCStr = env->GetStringUTFChars(ifaceNameObj, NULL);
-    if (ifaceNameCStr == NULL) {
-        return NULL; // XXX exception already pending?
+    std::string serviceName;
+    {
+        ScopedUtfChars str(env, serviceNameObj);
+        if (str.c_str() == nullptr) {
+            return nullptr;  // NPE will be pending.
+        }
+        serviceName = str.c_str();
     }
-    std::string ifaceName(ifaceNameCStr);
-    env->ReleaseStringUTFChars(ifaceNameObj, ifaceNameCStr);
-
-    const char *serviceNameCStr = env->GetStringUTFChars(serviceNameObj, NULL);
-    if (serviceNameCStr == NULL) {
-        return NULL; // XXX exception already pending?
-    }
-    std::string serviceName(serviceNameCStr);
-    env->ReleaseStringUTFChars(serviceNameObj, serviceNameCStr);
 
     // TODO(b/67981006): true /* retry */
     sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, false /* retry */, false /* getStub */);
@@ -340,7 +328,7 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    LOG(INFO) << "Starting thread pool.";
+    LOG(INFO) << "HwBinder: Starting thread pool for " << serviceName << "::" << ifaceName;
     ::android::hardware::ProcessState::self()->startThreadPool();
 
     return JHwRemoteBinder::NewObject(env, service);
