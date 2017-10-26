@@ -81,127 +81,139 @@ TEST(TypefaceTest, resolveDefault_and_setDefaultTest) {
 
 TEST(TypefaceTest, createWithDifferentBaseWeight) {
     std::unique_ptr<Typeface> bold(Typeface::createWithDifferentBaseWeight(nullptr, 700));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, bold->fAPIStyle);
 
     std::unique_ptr<Typeface> light(Typeface::createWithDifferentBaseWeight(nullptr, 300));
-    EXPECT_EQ(3, light->fStyle.getWeight());
-    EXPECT_FALSE(light->fStyle.getItalic());
+    EXPECT_EQ(300, light->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, light->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, light->fAPIStyle);
 }
 
 TEST(TypefaceTest, createRelativeTest_fromRegular) {
     // In Java, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(nullptr, Typeface::kNormal));
-    EXPECT_EQ(4, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(400, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
     // In Java, Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(nullptr, Typeface::kBold));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java, Typeface.create(Typeface.DEFAULT, Typeface.ITALIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(nullptr, Typeface::kItalic));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java, Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(Typeface::createRelative(nullptr, Typeface::kBoldItalic));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
 TEST(TypefaceTest, createRelativeTest_BoldBase) {
     std::unique_ptr<Typeface> base(Typeface::createWithDifferentBaseWeight(nullptr, 700));
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-bold"), Typeface.NORMAL);
+    // In Java, Typeface.create(Typeface.create("sans-serif-bold"),
+    // Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(base.get(), Typeface::kNormal));
-    EXPECT_EQ(7, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(700, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-bold"), Typeface.BOLD);
+    // In Java, Typeface.create(Typeface.create("sans-serif-bold"),
+    // Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(base.get(), Typeface::kBold));
-    EXPECT_EQ(10, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(1000, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-bold"), Typeface.ITALIC);
+    // In Java, Typeface.create(Typeface.create("sans-serif-bold"),
+    // Typeface.ITALIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(base.get(), Typeface::kItalic));
-    EXPECT_EQ(7, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(700, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-bold"), Typeface.BOLD_ITALIC);
+    // In Java, Typeface.create(Typeface.create("sans-serif-bold"),
+    // Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createRelative(base.get(), Typeface::kBoldItalic));
-    EXPECT_EQ(10, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(1000, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
 TEST(TypefaceTest, createRelativeTest_LightBase) {
     std::unique_ptr<Typeface> base(Typeface::createWithDifferentBaseWeight(nullptr, 300));
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-light"), Typeface.NORMAL);
+    // In Java, Typeface.create(Typeface.create("sans-serif-light"),
+    // Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(base.get(), Typeface::kNormal));
-    EXPECT_EQ(3, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(300, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-light"), Typeface.BOLD);
+    // In Java, Typeface.create(Typeface.create("sans-serif-light"),
+    // Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(base.get(), Typeface::kBold));
-    EXPECT_EQ(6, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(600, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-light"), Typeface.ITLIC);
+    // In Java, Typeface.create(Typeface.create("sans-serif-light"),
+    // Typeface.ITLIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(base.get(), Typeface::kItalic));
-    EXPECT_EQ(3, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(300, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create("sans-serif-light"), Typeface.BOLD_ITALIC);
+    // In Java, Typeface.create(Typeface.create("sans-serif-light"),
+    // Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createRelative(base.get(), Typeface::kBoldItalic));
-    EXPECT_EQ(6, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(600, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
 TEST(TypefaceTest, createRelativeTest_fromBoldStyled) {
     std::unique_ptr<Typeface> base(Typeface::createRelative(nullptr, Typeface::kBold));
 
-    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD), Typeface.NORMAL);
+    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD),
+    // Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(base.get(), Typeface::kNormal));
-    EXPECT_EQ(4, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(400, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
-    // In Java Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD), Typeface.BOLD);
+    // In Java Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD),
+    // Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(base.get(), Typeface::kBold));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD), Typeface.ITALIC);
+    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD),
+    // Typeface.ITALIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(base.get(), Typeface::kItalic));
-    EXPECT_EQ(4, normal->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
-    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD), Typeface.BOLD_ITALIC);
+    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.BOLD),
+    // Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createRelative(base.get(), Typeface::kBoldItalic));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
@@ -209,31 +221,35 @@ TEST(TypefaceTest, createRelativeTest_fromItalicStyled) {
     std::unique_ptr<Typeface> base(Typeface::createRelative(nullptr, Typeface::kItalic));
 
     // In Java,
-    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC), Typeface.NORMAL);
+    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC),
+    // Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(base.get(), Typeface::kNormal));
-    EXPECT_EQ(4, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(400, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
-    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC), Typeface.BOLD);
+    // In Java, Typeface.create(Typeface.create(Typeface.DEFAULT,
+    // Typeface.ITALIC), Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(base.get(), Typeface::kBold));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java,
-    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC), Typeface.ITALIC);
+    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC),
+    // Typeface.ITALIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(base.get(), Typeface::kItalic));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
-    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC), Typeface.BOLD_ITALIC);
+    // Typeface.create(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC),
+    // Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createRelative(base.get(), Typeface::kBoldItalic));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
@@ -245,8 +261,8 @@ TEST(TypefaceTest, createRelativeTest_fromSpecifiedStyled) {
     //     .setWeight(700).setItalic(false).build();
     // Typeface.create(typeface, Typeface.NORMAL);
     std::unique_ptr<Typeface> normal(Typeface::createRelative(base.get(), Typeface::kNormal));
-    EXPECT_EQ(4, normal->fStyle.getWeight());
-    EXPECT_FALSE(normal->fStyle.getItalic());
+    EXPECT_EQ(400, normal->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, normal->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, normal->fAPIStyle);
 
     // In Java,
@@ -254,8 +270,8 @@ TEST(TypefaceTest, createRelativeTest_fromSpecifiedStyled) {
     //     .setWeight(700).setItalic(false).build();
     // Typeface.create(typeface, Typeface.BOLD);
     std::unique_ptr<Typeface> bold(Typeface::createRelative(base.get(), Typeface::kBold));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java,
@@ -263,8 +279,8 @@ TEST(TypefaceTest, createRelativeTest_fromSpecifiedStyled) {
     //     .setWeight(700).setItalic(false).build();
     // Typeface.create(typeface, Typeface.ITALIC);
     std::unique_ptr<Typeface> italic(Typeface::createRelative(base.get(), Typeface::kItalic));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
@@ -273,89 +289,99 @@ TEST(TypefaceTest, createRelativeTest_fromSpecifiedStyled) {
     // Typeface.create(typeface, Typeface.BOLD_ITALIC);
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createRelative(base.get(), Typeface::kBoldItalic));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 }
 
 TEST(TypefaceTest, createAbsolute) {
     // In Java,
-    // new Typeface.Builder(invalid).setFallback("sans-serif").setWeight(400).setItalic(false)
+    // new
+    // Typeface.Builder(invalid).setFallback("sans-serif").setWeight(400).setItalic(false)
     //     .build();
     std::unique_ptr<Typeface> regular(Typeface::createAbsolute(nullptr, 400, false));
-    EXPECT_EQ(4, regular->fStyle.getWeight());
-    EXPECT_FALSE(regular->fStyle.getItalic());
+    EXPECT_EQ(400, regular->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, regular->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, regular->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder(invalid).setFallback("sans-serif").setWeight(700).setItalic(false)
+    // new
+    // Typeface.Builder(invalid).setFallback("sans-serif").setWeight(700).setItalic(false)
     //     .build();
     std::unique_ptr<Typeface> bold(Typeface::createAbsolute(nullptr, 700, false));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder(invalid).setFallback("sans-serif").setWeight(400).setItalic(true)
+    // new
+    // Typeface.Builder(invalid).setFallback("sans-serif").setWeight(400).setItalic(true)
     //     .build();
     std::unique_ptr<Typeface> italic(Typeface::createAbsolute(nullptr, 400, true));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder(invalid).setFallback("sans-serif").setWeight(700).setItalic(true)
+    // new
+    // Typeface.Builder(invalid).setFallback("sans-serif").setWeight(700).setItalic(true)
     //     .build();
     std::unique_ptr<Typeface> boldItalic(Typeface::createAbsolute(nullptr, 700, true));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kBoldItalic, boldItalic->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder(invalid).setFallback("sans-serif").setWeight(1100).setItalic(true)
+    // new
+    // Typeface.Builder(invalid).setFallback("sans-serif").setWeight(1100).setItalic(true)
     //     .build();
     std::unique_ptr<Typeface> over1000(Typeface::createAbsolute(nullptr, 1100, false));
-    EXPECT_EQ(10, over1000->fStyle.getWeight());
-    EXPECT_FALSE(over1000->fStyle.getItalic());
+    EXPECT_EQ(1000, over1000->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, over1000->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, over1000->fAPIStyle);
 }
 
 TEST(TypefaceTest, createFromFamilies_Single) {
-    // In Java, new Typeface.Builder("Roboto-Regular.ttf").setWeight(400).setItalic(false).build();
+    // In Java, new
+    // Typeface.Builder("Roboto-Regular.ttf").setWeight(400).setItalic(false).build();
     std::unique_ptr<Typeface> regular(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoRegular), 400, false));
-    EXPECT_EQ(4, regular->fStyle.getWeight());
-    EXPECT_FALSE(regular->fStyle.getItalic());
+    EXPECT_EQ(400, regular->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, regular->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, regular->fAPIStyle);
 
-    // In Java, new Typeface.Builder("Roboto-Bold.ttf").setWeight(700).setItalic(false).build();
+    // In Java, new
+    // Typeface.Builder("Roboto-Bold.ttf").setWeight(700).setItalic(false).build();
     std::unique_ptr<Typeface> bold(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoBold), 700, false));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
-    // In Java, new Typeface.Builder("Roboto-Italic.ttf").setWeight(400).setItalic(true).build();
+    // In Java, new
+    // Typeface.Builder("Roboto-Italic.ttf").setWeight(400).setItalic(true).build();
     std::unique_ptr<Typeface> italic(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoItalic), 400, true));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder("Roboto-BoldItalic.ttf").setWeight(700).setItalic(true).build();
+    // new
+    // Typeface.Builder("Roboto-BoldItalic.ttf").setWeight(700).setItalic(true).build();
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoBoldItalic), 700, true));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java,
-    // new Typeface.Builder("Roboto-BoldItalic.ttf").setWeight(1100).setItalic(false).build();
+    // new
+    // Typeface.Builder("Roboto-BoldItalic.ttf").setWeight(1100).setItalic(false).build();
     std::unique_ptr<Typeface> over1000(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoBold), 1100, false));
-    EXPECT_EQ(10, over1000->fStyle.getWeight());
-    EXPECT_FALSE(over1000->fStyle.getItalic());
+    EXPECT_EQ(1000, over1000->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, over1000->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, over1000->fAPIStyle);
 }
 
@@ -363,30 +389,30 @@ TEST(TypefaceTest, createFromFamilies_Single_resolveByTable) {
     // In Java, new Typeface.Builder("Roboto-Regular.ttf").build();
     std::unique_ptr<Typeface> regular(Typeface::createFromFamilies(
             makeSingleFamlyVector(kRobotoRegular), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(4, regular->fStyle.getWeight());
-    EXPECT_FALSE(regular->fStyle.getItalic());
+    EXPECT_EQ(400, regular->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, regular->fStyle.slant);
     EXPECT_EQ(Typeface::kNormal, regular->fAPIStyle);
 
     // In Java, new Typeface.Builder("Roboto-Bold.ttf").build();
     std::unique_ptr<Typeface> bold(Typeface::createFromFamilies(
             makeSingleFamlyVector(kRobotoBold), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(7, bold->fStyle.getWeight());
-    EXPECT_FALSE(bold->fStyle.getItalic());
+    EXPECT_EQ(700, bold->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, bold->fStyle.slant);
     EXPECT_EQ(Typeface::kBold, bold->fAPIStyle);
 
     // In Java, new Typeface.Builder("Roboto-Italic.ttf").build();
     std::unique_ptr<Typeface> italic(Typeface::createFromFamilies(
             makeSingleFamlyVector(kRobotoItalic), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(4, italic->fStyle.getWeight());
-    EXPECT_TRUE(italic->fStyle.getItalic());
+    EXPECT_EQ(400, italic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, italic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 
     // In Java, new Typeface.Builder("Roboto-BoldItalic.ttf").build();
     std::unique_ptr<Typeface> boldItalic(
             Typeface::createFromFamilies(makeSingleFamlyVector(kRobotoBoldItalic),
                                          RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(7, boldItalic->fStyle.getWeight());
-    EXPECT_TRUE(boldItalic->fStyle.getItalic());
+    EXPECT_EQ(700, boldItalic->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::ITALIC, boldItalic->fStyle.slant);
     EXPECT_EQ(Typeface::kItalic, italic->fAPIStyle);
 }
 
@@ -396,8 +422,8 @@ TEST(TypefaceTest, createFromFamilies_Family) {
             buildFamily(kRobotoBoldItalic)};
     std::unique_ptr<Typeface> typeface(Typeface::createFromFamilies(
             std::move(families), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(4, typeface->fStyle.getWeight());
-    EXPECT_FALSE(typeface->fStyle.getItalic());
+    EXPECT_EQ(400, typeface->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, typeface->fStyle.slant);
 }
 
 TEST(TypefaceTest, createFromFamilies_Family_withoutRegular) {
@@ -405,8 +431,8 @@ TEST(TypefaceTest, createFromFamilies_Family_withoutRegular) {
             buildFamily(kRobotoBold), buildFamily(kRobotoItalic), buildFamily(kRobotoBoldItalic)};
     std::unique_ptr<Typeface> typeface(Typeface::createFromFamilies(
             std::move(families), RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
-    EXPECT_EQ(7, typeface->fStyle.getWeight());
-    EXPECT_FALSE(typeface->fStyle.getItalic());
+    EXPECT_EQ(700, typeface->fStyle.weight);
+    EXPECT_EQ(minikin::FontSlant::UPRIGHT, typeface->fStyle.slant);
 }
 
 }  // namespace

@@ -83,7 +83,7 @@ static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
 
 static jint Typeface_getWeight(JNIEnv* env, jobject obj, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
-    return face->fStyle.getWeight() * 100;
+    return face->fStyle.weight;
 }
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray,

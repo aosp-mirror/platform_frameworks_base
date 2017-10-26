@@ -126,19 +126,17 @@ class Run {
 class StyleRun : public Run {
     public:
         StyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint,
-                std::shared_ptr<minikin::FontCollection>&& collection,
-                minikin::FontStyle&& style, bool isRtl)
+                std::shared_ptr<minikin::FontCollection>&& collection, bool isRtl)
             : Run(start, end), mPaint(std::move(paint)), mCollection(std::move(collection)),
-              mStyle(std::move(style)), mIsRtl(isRtl) {}
+              mIsRtl(isRtl) {}
 
         void addTo(minikin::LineBreaker* lineBreaker) override {
-            lineBreaker->addStyleRun(&mPaint, mCollection, mStyle, mStart, mEnd, mIsRtl);
+            lineBreaker->addStyleRun(&mPaint, mCollection, mStart, mEnd, mIsRtl);
         }
 
     private:
         minikin::MinikinPaint mPaint;
         std::shared_ptr<minikin::FontCollection> mCollection;
-        minikin::FontStyle mStyle;
         const bool mIsRtl;
 };
 
@@ -167,10 +165,9 @@ class StaticLayoutNative {
               mRightPaddings(std::move(rightPaddings)) {}
 
         void addStyleRun(int32_t start, int32_t end, minikin::MinikinPaint&& paint,
-                         std::shared_ptr<minikin::FontCollection> collection,
-                         minikin::FontStyle&& style, bool isRtl) {
+                         std::shared_ptr<minikin::FontCollection> collection, bool isRtl) {
             mRuns.emplace_back(std::make_unique<StyleRun>(
-                    start, end, std::move(paint), std::move(collection), std::move(style), isRtl));
+                    start, end, std::move(paint), std::move(collection), isRtl));
         }
 
         void addReplacementRun(int32_t start, int32_t end, float width, uint32_t localeListId) {
@@ -323,15 +320,9 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
 static void nAddStyleRun(jlong nativePtr, jlong nativePaint, jint start, jint end, jboolean isRtl) {
     StaticLayoutNative* builder = toNative(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    const Typeface* typeface = paint->getAndroidTypeface();
-    minikin::MinikinPaint minikinPaint;
-    const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
-    minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
-            typeface);
-
-    builder->addStyleRun(
-        start, end, std::move(minikinPaint), resolvedTypeface->fFontCollection, std::move(style),
-        isRtl);
+    const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
+    minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
+    builder->addStyleRun(start, end, std::move(minikinPaint), typeface->fFontCollection, isRtl);
 }
 
 // CriticalNative
@@ -339,7 +330,7 @@ static void nAddReplacementRun(jlong nativePtr, jlong nativePaint, jint start, j
         jfloat width) {
     StaticLayoutNative* builder = toNative(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    builder->addReplacementRun(start, end, width, paint->getMinikinLangListId());
+    builder->addReplacementRun(start, end, width, paint->getMinikinLocaleListId());
 }
 
 static const JNINativeMethod gMethods[] = {
