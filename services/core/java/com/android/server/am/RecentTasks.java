@@ -80,6 +80,20 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class for managing the recent tasks list. The list is ordered by most recent (index 0) to the
  * least recent.
+ *
+ * The trimming logic can be boiled down to the following.  For recent task list with a number of
+ * tasks, the visible tasks are an interleaving subset of tasks that would normally be presented to
+ * the user. Non-visible tasks are not considered for trimming. Of the visible tasks, only a
+ * sub-range are presented to the user, based on the device type, last task active time, or other
+ * task state. Tasks that are not in the visible range and are not returnable from the SystemUI
+ * (considering the back stack) are considered trimmable. If the device does not support recent
+ * tasks, then trimming is completely disabled.
+ *
+ * eg.
+ * L = [TTTTTTTTTTTTTTTTTTTTTTTTTT] // list of tasks
+ *     [VVV  VV   VVVV  V V V     ] // Visible tasks
+ *     [RRR  RR   XXXX  X X X     ] // Visible range tasks, eg. if the device only shows 5 tasks,
+ *                                  // 'X' tasks are trimmed.
  */
 class RecentTasks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_AM;
@@ -496,7 +510,8 @@ class RecentTasks {
             if (tr.userId != userId) return;
             if (!taskPackageName.equals(packageName)) return;
 
-            mService.mStackSupervisor.removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS);
+            mService.mStackSupervisor.removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS,
+                    "remove-package-task");
         }
     }
 
@@ -513,7 +528,7 @@ class RecentTasks {
                     && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
             if (sameComponent) {
                 mService.mStackSupervisor.removeTaskByIdLocked(tr.taskId, false,
-                        REMOVE_FROM_RECENTS);
+                        REMOVE_FROM_RECENTS, "disabled-package");
             }
         }
     }
@@ -1001,12 +1016,13 @@ class RecentTasks {
                     continue;
                 } else {
                     numVisibleTasks++;
-                    if (isInVisibleRange(task, numVisibleTasks)) {
+                    if (isInVisibleRange(task, numVisibleTasks) || !isTrimmable(task)) {
                         // Keep visible tasks in range
                         i++;
                         continue;
                     } else {
-                        // Fall through to trim visible tasks that are no longer in range
+                        // Fall through to trim visible tasks that are no longer in range and
+                        // trimmable
                         if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG,
                                 "Trimming out-of-range visible task=" + task);
                     }
@@ -1119,6 +1135,28 @@ class RecentTasks {
         }
 
         return false;
+    }
+
+    /**
+     * @return whether the given task can be trimmed even if it is outside the visible range.
+     */
+    protected boolean isTrimmable(TaskRecord task) {
+        final ActivityStack stack = task.getStack();
+        final ActivityStack homeStack = mService.mStackSupervisor.mHomeStack;
+
+        // No stack for task, just trim it
+        if (stack == null) {
+            return true;
+        }
+
+        // Ignore tasks from different displays
+        if (stack.getDisplay() != homeStack.getDisplay()) {
+            return false;
+        }
+
+        // Trim tasks that are in stacks that are behind the home stack
+        final ActivityDisplay display = stack.getDisplay();
+        return display.getIndexOf(stack) < display.getIndexOf(homeStack);
     }
 
     /**
