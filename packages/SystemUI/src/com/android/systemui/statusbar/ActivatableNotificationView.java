@@ -29,7 +29,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
@@ -173,12 +172,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mOverrideTint;
     private float mOverrideAmount;
     private boolean mShadowHidden;
-    private boolean mWasActivatedOnDown;
     /**
      * Similar to mDimmed but is also true if it's not dimmable but should be
      */
     private boolean mNeedsDimming;
     private int mDimmedAlpha;
+    private boolean mBlockNextTouch;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -204,7 +203,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             } else {
                 makeInactive(true /* animate */);
             }
-        }, this::performClick, this::handleSlideBack, mFalsingManager::onNotificationDoubleTap);
+        }, super::performClick, this::handleSlideBack, mFalsingManager::onNotificationDoubleTap);
     }
 
     @Override
@@ -241,9 +240,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mNeedsDimming && !mActivated && ev.getActionMasked() == MotionEvent.ACTION_DOWN
+        if (mNeedsDimming && ev.getActionMasked() == MotionEvent.ACTION_DOWN
                 && disallowSingleClick(ev) && !isTouchExplorationEnabled()) {
-            return true;
+            if (!mActivated) {
+                return true;
+            } else if (!mDoubleTapHelper.isWithinDoubleTapSlop(ev)) {
+                mBlockNextTouch = true;
+                makeInactive(true /* animate */);
+                return true;
+            }
         }
         return super.onInterceptTouchEvent(ev);
     }
@@ -263,10 +268,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mWasActivatedOnDown = mActivated;
+        if (mBlockNextTouch) {
+            mBlockNextTouch = false;
+            return false;
         }
-        if ((mNeedsDimming && !mActivated) && !isTouchExplorationEnabled() && isInteractive()) {
+        if (mNeedsDimming && !isTouchExplorationEnabled() && isInteractive()) {
             boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
             if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
@@ -312,7 +318,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public boolean performClick() {
-        if (mWasActivatedOnDown || !mNeedsDimming || isTouchExplorationEnabled()) {
+        if (!mNeedsDimming || isTouchExplorationEnabled()) {
             return super.performClick();
         }
         return false;
