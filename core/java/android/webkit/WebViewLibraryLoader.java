@@ -204,7 +204,9 @@ class WebViewLibraryLoader {
 
     /**
      * Load WebView's native library into the current process.
-     * Note: assumes that we have waited for relro creation.
+     *
+     * <p class="note"><b>Note:</b> Assumes that we have waited for relro creation.
+     *
      * @param clazzLoader class loader used to find the linker namespace to load the library into.
      * @param packageInfo the package from which WebView is loaded.
      */

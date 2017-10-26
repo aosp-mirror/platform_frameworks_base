@@ -191,7 +191,7 @@ import java.util.Map;
  * {@link #getSettings() WebSettings}.{@link WebSettings#setBuiltInZoomControls(boolean)}
  * (introduced in API level {@link android.os.Build.VERSION_CODES#CUPCAKE}).
  *
- * <p>NOTE: Using zoom if either the height or width is set to
+ * <p class="note"><b>Note:</b> Using zoom if either the height or width is set to
  * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} may lead to undefined behavior
  * and should be avoided.
  *

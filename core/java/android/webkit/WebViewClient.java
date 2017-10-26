@@ -149,13 +149,15 @@ public class WebViewClient {
      * Notify the host application of a resource request and allow the
      * application to return the data.  If the return value is {@code null}, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
-     * response and data will be used.  NOTE: This method is called on a thread
+     * response and data will be used.
+     *
+     * <p class="note"><b>Note:</b> This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
      *
-     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
-     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
-     * the warning with {@link #onSafeBrowsingHit}.
+     * <p class="note"><b>Note:</b> When Safe Browsing is enabled, these URLs still undergo Safe
+     * Browsing checks. If this is undesired, whitelist the URL with {@link
+     * WebView#setSafeBrowsingWhitelist} or ignore the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
@@ -176,13 +178,15 @@ public class WebViewClient {
      * Notify the host application of a resource request and allow the
      * application to return the data.  If the return value is {@code null}, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
-     * response and data will be used.  NOTE: This method is called on a thread
+     * response and data will be used.
+     *
+     * <p class="note"><b>Note:</b> This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
      *
-     * <p>Note: when Safe Browsing is enabled, these URLs still undergo Safe Browsing checks. If
-     * this is undesired, whitelist the URL with {@link WebView#setSafeBrowsingWhitelist} or ignore
-     * the warning with {@link #onSafeBrowsingHit}.
+     * <p class="note"><b>Note:</b> When Safe Browsing is enabled, these URLs still undergo Safe
+     * Browsing checks. If this is undesired, whitelist the URL with {@link
+     * WebView#setSafeBrowsingWhitelist} or ignore the warning with {@link #onSafeBrowsingHit}.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
