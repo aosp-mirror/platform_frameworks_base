@@ -34,7 +34,8 @@ public class LaunchingActivityPositioner implements LaunchingBoundsPositioner {
 
     @Override
     public int onCalculateBounds(TaskRecord task, ActivityInfo.WindowLayout layout,
-            ActivityRecord activity, ActivityOptions options,  Rect current, Rect result) {
+            ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options, Rect current, Rect result) {
         // We only care about figuring out bounds for activities.
         if (activity == null) {
             return RESULT_SKIP;

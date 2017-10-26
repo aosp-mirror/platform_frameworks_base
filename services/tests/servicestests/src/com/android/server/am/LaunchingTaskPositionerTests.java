@@ -105,7 +105,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     @Test
     public void testLaunchNoWindowLayout() throws Exception {
         assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask, null /*layout*/,
-                null /*record*/, null /*options*/, mCurrent, mResult));
+                null /*record*/, null /*source*/, null /*options*/, mCurrent, mResult));
         assertEquals(getDefaultBounds(Gravity.NO_GRAVITY), mResult);
     }
 
@@ -118,7 +118,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     public void testlaunchEmptyWindowLayout() throws Exception {
         assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
                 new WindowLayout(0, 0, 0, 0, Gravity.NO_GRAVITY, 0, 0), null /*activity*/,
-                null /*options*/, mCurrent, mResult));
+                null /*source*/, null /*options*/, mCurrent, mResult));
         assertEquals(mResult, getDefaultBounds(Gravity.NO_GRAVITY));
     }
 
@@ -151,7 +151,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         try {
             assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
                     new WindowLayout(0, 0, 0, 0, gravity, 0, 0), null /*activity*/,
-                    null /*options*/, mCurrent, mResult));
+                    null /*source*/, null /*options*/, mCurrent, mResult));
             assertEquals(mResult, getDefaultBounds(gravity));
         } finally {
             mCurrent.setEmpty();
@@ -198,7 +198,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
             // layout second task
             assertEquals(RESULT_CONTINUE,
                     mPositioner.onCalculateBounds(secondTask, layout, null /*activity*/,
-                            null /*options*/, mCurrent, mResult));
+                            null /*source*/, null /*options*/, mCurrent, mResult));
 
             if ((gravity & (Gravity.TOP | Gravity.RIGHT)) == (Gravity.TOP | Gravity.RIGHT)
                     || (gravity & (Gravity.BOTTOM | Gravity.RIGHT))

@@ -62,12 +62,13 @@ class LaunchingBoundsController {
      * @param task      The {@link TaskRecord} currently being positioned.
      * @param layout    The specified {@link WindowLayout}.
      * @param activity  The {@link ActivityRecord} currently being positioned.
+     * @param source    The {@link ActivityRecord} from which activity was started from.
      * @param options   The {@link ActivityOptions} specified for the activity.
      * @param result    The resulting bounds. If no bounds are set, {@link Rect#isEmpty()} will be
-     *                  true.
+     *                  {@code true}.
      */
     void calculateBounds(TaskRecord task, WindowLayout layout, ActivityRecord activity,
-            ActivityOptions options, Rect result) {
+            ActivityRecord source, ActivityOptions options, Rect result) {
         result.setEmpty();
 
         // We start at the last registered {@link LaunchingBoundsPositioner} as this represents
@@ -78,8 +79,8 @@ class LaunchingBoundsController {
             mTmpCurrent.set(result);
             final LaunchingBoundsPositioner positioner = mPositioners.get(i);
 
-            switch(positioner.onCalculateBounds(task, layout, activity, options, mTmpCurrent,
-                    mTmpResult)) {
+            switch(positioner.onCalculateBounds(task, layout, activity, source, options,
+                    mTmpCurrent, mTmpResult)) {
                 case RESULT_SKIP:
                     // Do not apply any results when we are told to skip
                     continue;
@@ -100,7 +101,8 @@ class LaunchingBoundsController {
      * @return {@code true} if bounds were set on the task. {@code false} otherwise.
      */
     boolean layoutTask(TaskRecord task, WindowLayout layout) {
-        calculateBounds(task, layout, null /*activity*/, null /*options*/, mTmpRect);
+        calculateBounds(task, layout, null /*activity*/, null /*source*/, null /*options*/,
+                mTmpRect);
 
         if (mTmpRect.isEmpty()) {
             return false;
@@ -145,16 +147,17 @@ class LaunchingBoundsController {
          * @param task      The {@link TaskRecord} currently being positioned.
          * @param layout    The specified {@link WindowLayout}.
          * @param activity  The {@link ActivityRecord} currently being positioned.
+         * @param source    The {@link ActivityRecord} activity was started from.
          * @param options   The {@link ActivityOptions} specified for the activity.
          * @param current   The current bounds. This can differ from the initial bounds as it
          *                  represents the modified bounds up to this point.
          * @param result    The {@link Rect} which the positioner should return its modified bounds.
          *                  Any merging of the current bounds should be already applied to this
          *                  value as well before returning.
-         * @return A {@link Result} representing the result of the bounds calculation.
+         * @return          A {@link Result} representing the result of the bounds calculation.
          */
         @Result
         int onCalculateBounds(TaskRecord task, WindowLayout layout, ActivityRecord activity,
-                ActivityOptions options, Rect current, Rect result);
+                ActivityRecord source, ActivityOptions options, Rect current, Rect result);
     }
 }
