@@ -1463,47 +1463,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
-    public boolean isForwardLocked() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public boolean isSystemApp() {
-        return (flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public boolean isPrivilegedApp() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isUpdatedSystemApp() {
-        return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-    }
-
-    /** @hide */
-    public boolean isInternal() {
-        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0;
-    }
-
-    /** @hide */
-    public boolean isExternalAsec() {
-        return TextUtils.isEmpty(volumeUuid)
-                && (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
-    }
-
     /** @hide */
     public boolean isDefaultToDeviceProtectedStorage() {
         return (privateFlags
@@ -1516,43 +1475,70 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
+    public boolean isEncryptionAware() {
+        return isDirectBootAware() || isPartiallyDirectBootAware();
+    }
+
+    /** @hide */
+    public boolean isExternal() {
+        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    /** @hide */
+    public boolean isExternalAsec() {
+        return TextUtils.isEmpty(volumeUuid) && isExternal();
+    }
+
+    /** @hide */
+    public boolean isForwardLocked() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
+    }
+
+    /** @hide */
+    public boolean isInstantApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
+    }
+
+    /** @hide */
+    public boolean isInternal() {
+        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0;
+    }
+
+    /** @hide */
+    public boolean isOem() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+    }
+
+    /** @hide */
     public boolean isPartiallyDirectBootAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
     }
 
     /** @hide */
-    public boolean isEncryptionAware() {
-        return isDirectBootAware() || isPartiallyDirectBootAware();
+    @TestApi
+    public boolean isPrivilegedApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 
-    /**
-     * @hide
-     */
-    public boolean isInstantApp() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
-    }
-
-    /**
-     * @hide
-     */
+    /** @hide */
     public boolean isRequiredForSystemUser() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER) != 0;
     }
 
-    /**
-     * Returns true if the app has declared in its manifest that it wants its split APKs to be
-     * loaded into isolated Contexts, with their own ClassLoaders and Resources objects.
-     * @hide
-     */
-    public boolean requestsIsolatedSplitLoading() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING) != 0;
-    }
-
-    /**
-     * @hide
-     */
+    /** @hide */
     public boolean isStaticSharedLibrary() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY) != 0;
+    }
+
+    /** @hide */
+    @TestApi
+    public boolean isSystemApp() {
+        return (flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /** @hide */
+    public boolean isUpdatedSystemApp() {
+        return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     /**
@@ -1563,10 +1549,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
+     * Returns true if the app has declared in its manifest that it wants its split APKs to be
+     * loaded into isolated Contexts, with their own ClassLoaders and Resources objects.
      * @hide
      */
-    public boolean isOem() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+    public boolean requestsIsolatedSplitLoading() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING) != 0;
     }
 
     /**

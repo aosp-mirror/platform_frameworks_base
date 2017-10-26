@@ -137,6 +137,8 @@ public class DockedStackDividerController implements DimLayerUser {
     float mLastDividerProgress;
     private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
     private boolean mImeHideRequested;
+    private final Rect mLastDimLayerRect = new Rect();
+    private float mLastDimLayerAlpha;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -525,7 +527,6 @@ public class DockedStackDividerController implements DimLayerUser {
      * display in that windowing mode.
      */
     void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha) {
-        mService.openSurfaceTransaction();
         // TODO: Maybe only allow split-screen windowing modes?
         final TaskStack stack = targetWindowingMode != WINDOWING_MODE_UNDEFINED
                 ? mDisplayContent.getStack(targetWindowingMode)
@@ -535,16 +536,33 @@ public class DockedStackDividerController implements DimLayerUser {
         if (visibleAndValid) {
             stack.getDimBounds(mTmpRect);
             if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
-                mDimLayer.setBounds(mTmpRect);
-                mDimLayer.show(getResizeDimLayer(), alpha, 0 /* duration */);
+                if (!mLastDimLayerRect.equals(mTmpRect) || mLastDimLayerAlpha != alpha) {
+                    try {
+                        // TODO: This should use the regular animation transaction - here and below
+                        mService.openSurfaceTransaction();
+                        mDimLayer.setBounds(mTmpRect);
+                        mDimLayer.show(getResizeDimLayer(), alpha, 0 /* duration */);
+                    } finally {
+                        mService.closeSurfaceTransaction();
+                    }
+                }
+                mLastDimLayerRect.set(mTmpRect);
+                mLastDimLayerAlpha = alpha;
             } else {
                 visibleAndValid = false;
             }
         }
         if (!visibleAndValid) {
-            mDimLayer.hide();
+            if (mLastDimLayerAlpha != 0f) {
+                try {
+                    mService.openSurfaceTransaction();
+                    mDimLayer.hide();
+                } finally {
+                    mService.closeSurfaceTransaction();
+                }
+            }
+            mLastDimLayerAlpha = 0f;
         }
-        mService.closeSurfaceTransaction();
     }
 
     /**

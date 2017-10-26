@@ -334,6 +334,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
@@ -369,6 +370,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BinderInternal;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
@@ -8082,7 +8084,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Adjust the source bounds by the insets for the transition down
                     final Rect sourceBounds = new Rect(r.pictureInPictureArgs.getSourceRectHint());
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
-                            true /* moveHomeStackToFront */, "enterPictureInPictureMode");
+                            "enterPictureInPictureMode");
                     final PinnedActivityStack stack = r.getStack();
                     stack.setPictureInPictureAspectRatio(aspectRatio);
                     stack.setPictureInPictureActions(actions);
@@ -10230,11 +10232,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
-            final ActivityRecord prev = mStackSupervisor.topRunningActivityLocked();
-            if (prev != null) {
-                task.setTaskToReturnTo(prev);
-            }
-            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront",
+            mStackSupervisor.findTaskToMoveToFront(task, flags, options, "moveTaskToFront",
                     false /* forceNonResizable */);
 
             final ActivityRecord topActivity = task.getTopActivity();
@@ -12332,6 +12330,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + android.Manifest.permission.SHUTDOWN);
         }
 
+        // TODO: Where should the corresponding '1' (start) write go?
+        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED, 0);
+
         boolean timedout = false;
 
         synchronized(this) {
@@ -13514,6 +13515,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.noteWakeupAlarmLocked(tag);
+                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid);
             }
         }
     }
@@ -14085,6 +14087,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+
+            BinderInternal.nSetBinderProxyCountEnabled(true);
+            BinderInternal.setBinderProxyCountCallback(
+                    new BinderInternal.BinderProxyLimitListener() {
+                        @Override
+                        public void onLimitReached(int uid) {
+                            Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
+                                    + Process.myUid());
+                            if (uid == Process.SYSTEM_UID) {
+                                Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
+                            } else {
+                                killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                                        "Too many Binders sent to SYSTEM");
+                            }
+                        }
+                    }, mHandler);
+
             traceLog.traceEnd(); // ActivityManagerStartApps
             traceLog.traceEnd(); // PhaseActivityManagerReady
         }
@@ -14902,6 +14921,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mRecentTasks.dump(pw, true /* dumpAll */, dumpPackage);
                     }
                 }
+            } else if ("binder-proxies".equals(cmd)) {
+                if (opti >= args.length) {
+                    dumpBinderProxiesCounts(pw, BinderInternal.nGetBinderProxyPerUidCounts(),
+                            "Counts of Binder Proxies held by SYSTEM");
+                } else {
+                    String uid = args[opti];
+                    opti++;
+                    // Ensure Binder Proxy Count is as up to date as possible
+                    System.gc();
+                    System.runFinalization();
+                    System.gc();
+                    pw.println(BinderInternal.nGetBinderProxyCount(Integer.parseInt(uid)));
+                }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -15420,6 +15452,34 @@ public class ActivityManagerService extends IActivityManager.Stub
         return printed;
     }
 
+    boolean dumpBinderProxiesCounts(PrintWriter pw, SparseIntArray counts, String header) {
+        if(counts != null) {
+            pw.println(header);
+            for (int i = 0; i < counts.size(); i++) {
+                final int uid = counts.keyAt(i);
+                final int binderCount = counts.valueAt(i);
+                pw.print("    UID ");
+                pw.print(uid);
+                pw.print(", binder count = ");
+                pw.print(binderCount);
+                pw.print(", package(s)= ");
+                final String[] pkgNames = mContext.getPackageManager().getPackagesForUid(uid);
+                if (pkgNames != null) {
+                    for (int j = 0; j < pkgNames.length; j++) {
+                        pw.print(pkgNames[j]);
+                        pw.print("; ");
+                    }
+                } else {
+                    pw.print("NO PACKAGE NAME FOUND");
+                }
+                pw.println();
+            }
+            pw.println();
+            return true;
+        }
+        return false;
+    }
+
     void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         boolean needSep = false;
@@ -15625,7 +15685,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mPreviousProcess: " + mPreviousProcess);
         }
-        if (dumpAll) {
+        if (dumpAll && (mPreviousProcess == null || dumpPackage == null
+                || mPreviousProcess.pkgList.containsKey(dumpPackage))) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("  mPreviousProcessVisibleTime: ");
             TimeUtils.formatDuration(mPreviousProcessVisibleTime, sb);
@@ -15644,7 +15705,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.dumpDisplayConfigs(pw, "  ");
         }
         if (dumpAll) {
-            pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
+            if (dumpPackage == null) {
+                pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
+            }
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
                 for (Map.Entry<String, Integer> entry
@@ -15724,8 +15787,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mRunningVoice=" + mRunningVoice);
                 pw.println("  mVoiceWakeLock" + mVoiceWakeLock);
             }
+            pw.println("  mVrController=" + mVrController);
         }
-        pw.println("  mVrController=" + mVrController);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
             if (dumpPackage == null || dumpPackage.equals(mDebugApp)

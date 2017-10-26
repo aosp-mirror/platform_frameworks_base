@@ -17,6 +17,7 @@
 package android.os;
 
 import android.util.Slog;
+
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.BufferedInputStream;
@@ -118,10 +119,30 @@ public abstract class ShellCommand {
                 mErrPrintWriter.flush();
             }
             if (DEBUG) Slog.d(TAG, "Sending command result on " + mTarget);
-            mResultReceiver.send(res, null);
+            if (mResultReceiver != null) {
+                mResultReceiver.send(res, null);
+            }
         }
         if (DEBUG) Slog.d(TAG, "Finished command " + mCmd + " on " + mTarget);
         return res;
+    }
+
+    /**
+     * Adopt the ResultReceiver that was given to this shell command from it, taking
+     * it over.  Primarily used to dispatch to another shell command.  Once called,
+     * this shell command will no longer return its own result when done.
+     */
+    public ResultReceiver adoptResultReceiver() {
+        ResultReceiver rr = mResultReceiver;
+        mResultReceiver = null;
+        return rr;
+    }
+
+    /**
+     * Return the raw FileDescriptor for the output stream.
+     */
+    public FileDescriptor getOutFileDescriptor() {
+        return mOut;
     }
 
     /**
@@ -145,6 +166,13 @@ public abstract class ShellCommand {
     }
 
     /**
+     * Return the raw FileDescriptor for the error stream.
+     */
+    public FileDescriptor getErrFileDescriptor() {
+        return mErr;
+    }
+
+    /**
      * Return direct raw access (not buffered) to the command's error output data stream.
      */
     public OutputStream getRawErrorStream() {
@@ -165,6 +193,13 @@ public abstract class ShellCommand {
             mErrPrintWriter = new FastPrintWriter(getRawErrorStream());
         }
         return mErrPrintWriter;
+    }
+
+    /**
+     * Return the raw FileDescriptor for the input stream.
+     */
+    public FileDescriptor getInFileDescriptor() {
+        return mIn;
     }
 
     /**

@@ -107,8 +107,6 @@ import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -174,21 +172,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 Slog.i(TAG, "Received broadcast: " + action + " on user " + userId);
             }
 
-            if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                onConfigurationChanged();
-            } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)
-                    || Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
-                synchronized (mLock) {
-                    reloadWidgetsMaskedState(userId);
-                }
-            } else if (Intent.ACTION_PACKAGES_SUSPENDED.equals(action)) {
-                String[] packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                updateWidgetPackageSuspensionMaskedState(packages, true, getSendingUserId());
-            } else if (Intent.ACTION_PACKAGES_UNSUSPENDED.equals(action)) {
-                String[] packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                updateWidgetPackageSuspensionMaskedState(packages, false, getSendingUserId());
-            } else {
-                onPackageBroadcastReceived(intent, userId);
+            switch (action) {
+                case Intent.ACTION_CONFIGURATION_CHANGED:
+                    onConfigurationChanged();
+                    break;
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                    synchronized (mLock) {
+                        reloadWidgetsMaskedState(userId);
+                    }
+                    break;
+                case Intent.ACTION_PACKAGES_SUSPENDED:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    updateWidgetPackageSuspensionMaskedState(intent, true, getSendingUserId());
+                    break;
+                case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    updateWidgetPackageSuspensionMaskedState(intent, false, getSendingUserId());
+                    break;
+                default:
+                    onPackageBroadcastReceived(intent, getSendingUserId());
+                    break;
             }
         }
     };
@@ -378,25 +382,32 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         boolean changed = false;
         boolean componentsModified = false;
 
-        String pkgList[] = null;
-        if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-            pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            added = true;
-        } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-            pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            added = false;
-        } else {
-            Uri uri = intent.getData();
-            if (uri == null) {
-                return;
+        final String pkgList[];
+        switch (action) {
+            case Intent.ACTION_PACKAGES_SUSPENDED:
+            case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                changed = true;
+                break;
+            case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+                added = true;
+                // Follow through
+            case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                break;
+            default: {
+                Uri uri = intent.getData();
+                if (uri == null) {
+                    return;
+                }
+                String pkgName = uri.getSchemeSpecificPart();
+                if (pkgName == null) {
+                    return;
+                }
+                pkgList = new String[] { pkgName };
+                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
             }
-            String pkgName = uri.getSchemeSpecificPart();
-            if (pkgName == null) {
-                return;
-            }
-            pkgList = new String[] { pkgName };
-            added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-            changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
         }
         if (pkgList == null || pkgList.length == 0) {
             return;
@@ -516,12 +527,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     /**
      * Incrementally update the masked state due to package suspension state.
      */
-    private void updateWidgetPackageSuspensionMaskedState(String[] packagesArray, boolean suspended,
+    private void updateWidgetPackageSuspensionMaskedState(Intent intent, boolean suspended,
             int profileId) {
+        String[] packagesArray = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
         if (packagesArray == null) {
             return;
         }
-        Set<String> packages = new ArraySet<String>(Arrays.asList(packagesArray));
+        Set<String> packages = new ArraySet<>(Arrays.asList(packagesArray));
         synchronized (mLock) {
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -2630,11 +2642,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             // No file written for this user - nothing to do.
             AtomicFile file = getSavedStateFile(profileId);
-            try {
-                FileInputStream stream = file.openRead();
+            try (FileInputStream stream = file.openRead()) {
                 version = readProfileStateFromFileLocked(stream, profileId, loadedWidgets);
-                IoUtils.closeQuietly(stream);
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 Slog.w(TAG, "Failed to read state: " + e);
             }
         }

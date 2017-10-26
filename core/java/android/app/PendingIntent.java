@@ -33,6 +33,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1081,7 +1082,16 @@ public final class PendingIntent implements Parcelable {
         sb.append('}');
         return sb.toString();
     }
-    
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        if (mTarget != null) {
+            proto.write(PendingIntentProto.TARGET, mTarget.asBinder().toString());
+        }
+        proto.end(token);
+    }
+
     public int describeContents() {
         return 0;
     }

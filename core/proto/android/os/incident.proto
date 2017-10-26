@@ -20,6 +20,7 @@ option java_outer_classname = "IncidentProtoMetadata";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/batterystats.proto";
@@ -28,10 +29,10 @@ import "frameworks/base/core/proto/android/service/diskstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
-import "frameworks/base/core/proto/android/service/power.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
+import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
@@ -105,7 +106,11 @@ message IncidentProto {
         (section).args = "package --proto"
     ];
 
-    optional android.service.power.PowerServiceDumpProto power = 3009;
+    optional com.android.server.power.PowerManagerServiceDumpProto power = 3009 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "power --proto"
+    ];
+
     optional android.service.print.PrintServiceDumpProto print = 3010;
 
     optional android.service.procstats.ProcessStatsServiceDumpProto procstats = 3011 [
@@ -125,4 +130,9 @@ message IncidentProto {
 
     optional com.android.server.am.proto.ServiceProto amservices = 3014;
     optional com.android.server.am.proto.ProcessProto amprocesses = 3015;
+
+    optional com.android.server.AlarmManagerServiceProto alarm = 3016 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "alarm --proto"
+    ];
 }

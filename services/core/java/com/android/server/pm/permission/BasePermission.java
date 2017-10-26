@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Permission;
 import android.content.pm.PermissionInfo;
+import android.content.pm.Signature;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -128,6 +129,9 @@ public final class BasePermission {
     }
     public PackageSettingBase getSourcePackageSetting() {
         return sourcePackageSetting;
+    }
+    public Signature[] getSourceSignatures() {
+        return sourcePackageSetting.getSignatures();
     }
     public int getType() {
         return type;
@@ -277,8 +281,8 @@ public final class BasePermission {
         // Allow system apps to redefine non-system permissions
         if (bp != null && !Objects.equals(bp.sourcePackageName, p.info.packageName)) {
             final boolean currentOwnerIsSystem = (bp.perm != null
-                    && bp.perm.owner.isSystemApp());
-            if (p.owner.isSystemApp()) {
+                    && bp.perm.owner.isSystem());
+            if (p.owner.isSystem()) {
                 if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
                     // It's a built-in permission and no owner, take ownership now
                     bp.sourcePackageSetting = pkgSetting;

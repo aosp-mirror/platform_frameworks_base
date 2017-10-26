@@ -46,6 +46,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -500,7 +501,7 @@ public class ActivityManager {
     public static final int PROCESS_STATE_SERVICE = 11;
 
     /** @hide Process is in the background running a receiver.   Note that from the
-     * perspective of oom_adj receivers run at a higher foreground level, but for our
+     * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
     public static final int PROCESS_STATE_RECEIVER = 12;
@@ -523,6 +524,20 @@ public class ActivityManager {
 
     /** @hide Process does not exist. */
     public static final int PROCESS_STATE_NONEXISTENT = 18;
+
+    // NOTE: If PROCESS_STATEs are added or changed, then new fields must be added
+    // to frameworks/base/core/proto/android/app/activitymanager.proto and the following method must
+    // be updated to correctly map between them.
+    /**
+     * Maps ActivityManager.PROCESS_STATE_ values to ActivityManagerProto.ProcessState enum.
+     *
+     * @param amInt a process state of the form ActivityManager.PROCESS_STATE_
+     * @return the value of the corresponding android.app.ActivityManagerProto's ProcessState enum.
+     * @hide
+     */
+    public static final int processStateAmToProto(int amInt) {
+        return amInt * 100;
+    }
 
     /** @hide The lowest process state number */
     public static final int MIN_PROCESS_STATE = PROCESS_STATE_PERSISTENT;
@@ -3885,21 +3900,36 @@ public class ActivityManager {
         IBinder service = ServiceManager.checkService(name);
         if (service == null) {
             pw.println("  (Service not found)");
+            pw.flush();
             return;
         }
-        TransferPipe tp = null;
-        try {
-            pw.flush();
-            tp = new TransferPipe();
-            tp.setBufferPrefix("  ");
-            service.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
-            tp.go(fd, 10000);
-        } catch (Throwable e) {
-            if (tp != null) {
-                tp.kill();
+        pw.flush();
+        if (service instanceof Binder) {
+            // If this is a local object, it doesn't make sense to do an async dump with it,
+            // just directly dump.
+            try {
+                service.dump(fd, args);
+            } catch (Throwable e) {
+                pw.println("Failure dumping service:");
+                e.printStackTrace(pw);
+                pw.flush();
             }
-            pw.println("Failure dumping service:");
-            e.printStackTrace(pw);
+        } else {
+            // Otherwise, it is remote, do the dump asynchronously to avoid blocking.
+            TransferPipe tp = null;
+            try {
+                pw.flush();
+                tp = new TransferPipe();
+                tp.setBufferPrefix("  ");
+                service.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
+                tp.go(fd, 10000);
+            } catch (Throwable e) {
+                if (tp != null) {
+                    tp.kill();
+                }
+                pw.println("Failure dumping service:");
+                e.printStackTrace(pw);
+            }
         }
     }
 

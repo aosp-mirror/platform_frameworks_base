@@ -19,8 +19,6 @@ package android.appwidget;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.LauncherApps;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -66,11 +64,8 @@ public class AppWidgetHostView extends FrameLayout {
 
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
-    static final LayoutInflater.Filter sInflaterFilter = new LayoutInflater.Filter() {
-        public boolean onLoadClass(Class clazz) {
-            return clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
-        }
-    };
+    private static final LayoutInflater.Filter INFLATER_FILTER =
+            (clazz) -> clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
 
     Context mContext;
     Context mRemoteContext;
@@ -136,13 +131,19 @@ public class AppWidgetHostView extends FrameLayout {
         mAppWidgetId = appWidgetId;
         mInfo = info;
 
+        // We add padding to the AppWidgetHostView if necessary
+        Rect padding = getDefaultPadding();
+        setPadding(padding.left, padding.top, padding.right, padding.bottom);
+
         // Sometimes the AppWidgetManager returns a null AppWidgetProviderInfo object for
         // a widget, eg. for some widgets in safe mode.
         if (info != null) {
-            // We add padding to the AppWidgetHostView if necessary
-            Rect padding = getDefaultPaddingForWidget(mContext, info.provider, null);
-            setPadding(padding.left, padding.top, padding.right, padding.bottom);
-            updateContentDescription(info);
+            String description = info.loadLabel(getContext().getPackageManager());
+            if ((info.providerInfo.applicationInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0) {
+                description = Resources.getSystem().getString(
+                        com.android.internal.R.string.suspended_widget_accessibility, description);
+            }
+            setContentDescription(description);
         }
     }
 
@@ -164,23 +165,23 @@ public class AppWidgetHostView extends FrameLayout {
      */
     public static Rect getDefaultPaddingForWidget(Context context, ComponentName component,
             Rect padding) {
-        PackageManager packageManager = context.getPackageManager();
-        ApplicationInfo appInfo;
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = context.getPackageManager().getApplicationInfo(component.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            // if we can't find the package, ignore
+        }
+        return getDefaultPaddingForWidget(context, appInfo, padding);
+    }
 
+    private static Rect getDefaultPaddingForWidget(Context context, ApplicationInfo appInfo,
+            Rect padding) {
         if (padding == null) {
             padding = new Rect(0, 0, 0, 0);
         } else {
             padding.set(0, 0, 0, 0);
         }
-
-        try {
-            appInfo = packageManager.getApplicationInfo(component.getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            // if we can't find the package, return 0 padding
-            return padding;
-        }
-
-        if (appInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (appInfo != null && appInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             Resources r = context.getResources();
             padding.left = r.getDimensionPixelSize(com.android.internal.
                     R.dimen.default_app_widget_padding_left);
@@ -192,6 +193,11 @@ public class AppWidgetHostView extends FrameLayout {
                     R.dimen.default_app_widget_padding_bottom);
         }
         return padding;
+    }
+
+    private Rect getDefaultPadding() {
+        return getDefaultPaddingForWidget(mContext,
+                mInfo == null ? null : mInfo.providerInfo.applicationInfo, null);
     }
 
     public int getAppWidgetId() {
@@ -284,10 +290,7 @@ public class AppWidgetHostView extends FrameLayout {
             newOptions = new Bundle();
         }
 
-        Rect padding = new Rect();
-        if (mInfo != null) {
-            padding = getDefaultPaddingForWidget(mContext, mInfo.provider, padding);
-        }
+        Rect padding = getDefaultPadding();
         float density = getResources().getDisplayMetrics().density;
 
         int xPaddingDips = (int) ((padding.left + padding.right) / density);
@@ -361,7 +364,7 @@ public class AppWidgetHostView extends FrameLayout {
      * initial layout.
      */
     void resetAppWidget(AppWidgetProviderInfo info) {
-        mInfo = info;
+        setAppWidget(mAppWidgetId, info);
         mViewMode = VIEW_MODE_NOINIT;
         updateAppWidget(null);
     }
@@ -433,7 +436,6 @@ public class AppWidgetHostView extends FrameLayout {
         }
 
         applyContent(content, recycled, exception);
-        updateContentDescription(mInfo);
     }
 
     private void applyContent(View content, boolean recycled, Exception exception) {
@@ -457,27 +459,6 @@ public class AppWidgetHostView extends FrameLayout {
         if (mView != content) {
             removeView(mView);
             mView = content;
-        }
-    }
-
-    private void updateContentDescription(AppWidgetProviderInfo info) {
-        if (info != null) {
-            LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
-            ApplicationInfo appInfo = null;
-            try {
-                appInfo = launcherApps.getApplicationInfo(
-                        info.provider.getPackageName(), 0, info.getProfile());
-            } catch (NameNotFoundException e) {
-                // ignore -- use null.
-            }
-            if (appInfo != null &&
-                    (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0) {
-                setContentDescription(
-                        Resources.getSystem().getString(
-                        com.android.internal.R.string.suspended_widget_accessibility, info.label));
-            } else {
-                setContentDescription(info.label);
-            }
         }
     }
 
@@ -614,7 +595,7 @@ public class AppWidgetHostView extends FrameLayout {
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);
-                inflater.setFilter(sInflaterFilter);
+                inflater.setFilter(INFLATER_FILTER);
                 AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
                 Bundle options = manager.getAppWidgetOptions(mAppWidgetId);
 

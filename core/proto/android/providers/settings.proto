@@ -599,6 +599,14 @@ message SettingProto {
     optional bool default_from_system = 6;
 }
 
+message SettingsProto {
+    // Enum values gotten from Settings.java
+    enum ScreenBrightnessMode {
+        SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
+        SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
+    }
+}
+
 message SettingsOperationProto {
     // When the operation happened
     optional int64 timestamp = 1;

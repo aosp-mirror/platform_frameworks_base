@@ -48,8 +48,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SimChangeListenerTest {
-    private static final int EVENT_UNM_UPDATE = 1;
-
     @Mock private Context mContext;
     private BroadcastInterceptingContext mServiceContext;
     private Handler mHandler;

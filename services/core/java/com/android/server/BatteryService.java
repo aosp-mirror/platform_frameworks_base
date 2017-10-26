@@ -43,6 +43,7 @@ import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.IHealth;
 import android.hardware.health.V2_0.Result;
 import android.os.BatteryManager;
+import android.os.BatteryManagerProto;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryProperty;
 import android.os.Binder;
@@ -913,13 +914,13 @@ public final class BatteryService extends SystemService {
 
         synchronized (mLock) {
             proto.write(BatteryServiceDumpProto.ARE_UPDATES_STOPPED, mUpdatesStopped);
-            int batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_NONE;
+            int batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_NONE;
             if (mHealthInfo.legacy.chargerAcOnline) {
-                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_AC;
+                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_AC;
             } else if (mHealthInfo.legacy.chargerUsbOnline) {
-                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_USB;
+                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_USB;
             } else if (mHealthInfo.legacy.chargerWirelessOnline) {
-                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_WIRELESS;
+                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_WIRELESS;
             }
             proto.write(BatteryServiceDumpProto.PLUGGED, batteryPluggedValue);
             proto.write(BatteryServiceDumpProto.MAX_CHARGING_CURRENT, mHealthInfo.legacy.maxChargingCurrent);

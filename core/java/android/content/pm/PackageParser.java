@@ -6221,48 +6221,48 @@ public class PackageParser {
             return false;
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
+        public boolean isExternal() {
+            return applicationInfo.isExternal();
+        }
+
+        /** @hide */
         public boolean isForwardLocked() {
             return applicationInfo.isForwardLocked();
         }
 
-        /**
-         * @hide
-         */
-        public boolean isSystemApp() {
-            return applicationInfo.isSystemApp();
+        /** @hide */
+        public boolean isOem() {
+            return applicationInfo.isOem();
         }
 
-        /**
-         * @hide
-         */
-        public boolean isPrivilegedApp() {
+        /** @hide */
+        public boolean isPrivileged() {
             return applicationInfo.isPrivilegedApp();
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
+        public boolean isSystem() {
+            return applicationInfo.isSystemApp();
+        }
+
+        /** @hide */
         public boolean isUpdatedSystemApp() {
             return applicationInfo.isUpdatedSystemApp();
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
         public boolean canHaveOatDir() {
             // The following app types CANNOT have oat directory
             // - non-updated system apps
             // - forward-locked apps or apps installed in ASEC containers
-            return (!isSystemApp() || isUpdatedSystemApp())
+            return (!isSystem() || isUpdatedSystemApp())
                     && !isForwardLocked() && !applicationInfo.isExternalAsec();
         }
 
         public boolean isMatch(int flags) {
             if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
-                return isSystemApp();
+                return isSystem();
             }
             return true;
         }

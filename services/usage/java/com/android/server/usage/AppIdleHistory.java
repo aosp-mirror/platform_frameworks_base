@@ -478,7 +478,7 @@ public class AppIdleHistory {
         }
     }
 
-    public void dump(IndentingPrintWriter idpw, int userId) {
+    public void dump(IndentingPrintWriter idpw, int userId, String pkg) {
         idpw.println("Package idle stats:");
         idpw.increaseIndent();
         ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
@@ -490,6 +490,9 @@ public class AppIdleHistory {
         for (int p = 0; p < P; p++) {
             final String packageName = userHistory.keyAt(p);
             final AppUsageHistory appUsageHistory = userHistory.valueAt(p);
+            if (pkg != null && !pkg.equals(packageName)) {
+                continue;
+            }
             idpw.print("package=" + packageName);
             idpw.print(" lastUsedElapsed=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedElapsedTime, idpw);

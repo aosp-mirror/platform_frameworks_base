@@ -58,10 +58,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
-import android.service.power.PowerServiceDumpProto;
-import android.service.power.PowerServiceSettingsAndConfigurationDumpProto;
-import android.service.power.SuspendBlockerProto;
-import android.service.power.WakeLockProto;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
@@ -620,8 +616,8 @@ public final class PowerManagerService extends SystemService
         }
 
         void dumpProto(ProtoOutputStream proto) {
-            final long constantsToken = proto.start(PowerServiceDumpProto.CONSTANTS);
-            proto.write(PowerServiceDumpProto.ConstantsProto.IS_NO_CACHED_WAKE_LOCKS,
+            final long constantsToken = proto.start(PowerManagerServiceDumpProto.CONSTANTS);
+            proto.write(PowerManagerServiceDumpProto.ConstantsProto.IS_NO_CACHED_WAKE_LOCKS,
                     NO_CACHED_WAKE_LOCKS);
             proto.end(constantsToken);
         }
@@ -3396,112 +3392,112 @@ public final class PowerManagerService extends SystemService
 
         synchronized (mLock) {
             mConstants.dumpProto(proto);
-            proto.write(PowerServiceDumpProto.DIRTY, mDirty);
-            proto.write(PowerServiceDumpProto.WAKEFULNESS, mWakefulness);
-            proto.write(PowerServiceDumpProto.IS_WAKEFULNESS_CHANGING, mWakefulnessChanging);
-            proto.write(PowerServiceDumpProto.IS_POWERED, mIsPowered);
-            proto.write(PowerServiceDumpProto.PLUG_TYPE, mPlugType);
-            proto.write(PowerServiceDumpProto.BATTERY_LEVEL, mBatteryLevel);
+            proto.write(PowerManagerServiceDumpProto.DIRTY, mDirty);
+            proto.write(PowerManagerServiceDumpProto.WAKEFULNESS, mWakefulness);
+            proto.write(PowerManagerServiceDumpProto.IS_WAKEFULNESS_CHANGING, mWakefulnessChanging);
+            proto.write(PowerManagerServiceDumpProto.IS_POWERED, mIsPowered);
+            proto.write(PowerManagerServiceDumpProto.PLUG_TYPE, mPlugType);
+            proto.write(PowerManagerServiceDumpProto.BATTERY_LEVEL, mBatteryLevel);
             proto.write(
-                    PowerServiceDumpProto.BATTERY_LEVEL_WHEN_DREAM_STARTED,
+                    PowerManagerServiceDumpProto.BATTERY_LEVEL_WHEN_DREAM_STARTED,
                     mBatteryLevelWhenDreamStarted);
-            proto.write(PowerServiceDumpProto.DOCK_STATE, mDockState);
-            proto.write(PowerServiceDumpProto.IS_STAY_ON, mStayOn);
-            proto.write(PowerServiceDumpProto.IS_PROXIMITY_POSITIVE, mProximityPositive);
-            proto.write(PowerServiceDumpProto.IS_BOOT_COMPLETED, mBootCompleted);
-            proto.write(PowerServiceDumpProto.IS_SYSTEM_READY, mSystemReady);
+            proto.write(PowerManagerServiceDumpProto.DOCK_STATE, mDockState);
+            proto.write(PowerManagerServiceDumpProto.IS_STAY_ON, mStayOn);
+            proto.write(PowerManagerServiceDumpProto.IS_PROXIMITY_POSITIVE, mProximityPositive);
+            proto.write(PowerManagerServiceDumpProto.IS_BOOT_COMPLETED, mBootCompleted);
+            proto.write(PowerManagerServiceDumpProto.IS_SYSTEM_READY, mSystemReady);
             proto.write(
-                    PowerServiceDumpProto.IS_HAL_AUTO_SUSPEND_MODE_ENABLED,
+                    PowerManagerServiceDumpProto.IS_HAL_AUTO_SUSPEND_MODE_ENABLED,
                     mHalAutoSuspendModeEnabled);
             proto.write(
-                    PowerServiceDumpProto.IS_HAL_AUTO_INTERACTIVE_MODE_ENABLED,
+                    PowerManagerServiceDumpProto.IS_HAL_AUTO_INTERACTIVE_MODE_ENABLED,
                     mHalInteractiveModeEnabled);
 
-            final long activeWakeLocksToken = proto.start(PowerServiceDumpProto.ACTIVE_WAKE_LOCKS);
+            final long activeWakeLocksToken = proto.start(PowerManagerServiceDumpProto.ACTIVE_WAKE_LOCKS);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_CPU,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_CPU,
                     (mWakeLockSummary & WAKE_LOCK_CPU) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_SCREEN_BRIGHT,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_SCREEN_BRIGHT,
                     (mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_SCREEN_DIM,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_SCREEN_DIM,
                     (mWakeLockSummary & WAKE_LOCK_SCREEN_DIM) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_BUTTON_BRIGHT,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_BUTTON_BRIGHT,
                     (mWakeLockSummary & WAKE_LOCK_BUTTON_BRIGHT) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_PROXIMITY_SCREEN_OFF,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_PROXIMITY_SCREEN_OFF,
                     (mWakeLockSummary & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_STAY_AWAKE,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_STAY_AWAKE,
                     (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_DOZE,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_DOZE,
                     (mWakeLockSummary & WAKE_LOCK_DOZE) != 0);
             proto.write(
-                    PowerServiceDumpProto.ActiveWakeLocksProto.IS_DRAW,
+                    PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_DRAW,
                     (mWakeLockSummary & WAKE_LOCK_DRAW) != 0);
             proto.end(activeWakeLocksToken);
 
-            proto.write(PowerServiceDumpProto.NOTIFY_LONG_SCHEDULED_MS, mNotifyLongScheduled);
-            proto.write(PowerServiceDumpProto.NOTIFY_LONG_DISPATCHED_MS, mNotifyLongDispatched);
-            proto.write(PowerServiceDumpProto.NOTIFY_LONG_NEXT_CHECK_MS, mNotifyLongNextCheck);
+            proto.write(PowerManagerServiceDumpProto.NOTIFY_LONG_SCHEDULED_MS, mNotifyLongScheduled);
+            proto.write(PowerManagerServiceDumpProto.NOTIFY_LONG_DISPATCHED_MS, mNotifyLongDispatched);
+            proto.write(PowerManagerServiceDumpProto.NOTIFY_LONG_NEXT_CHECK_MS, mNotifyLongNextCheck);
 
-            final long userActivityToken = proto.start(PowerServiceDumpProto.USER_ACTIVITY);
+            final long userActivityToken = proto.start(PowerManagerServiceDumpProto.USER_ACTIVITY);
             proto.write(
-                    PowerServiceDumpProto.UserActivityProto.IS_SCREEN_BRIGHT,
+                    PowerManagerServiceDumpProto.UserActivityProto.IS_SCREEN_BRIGHT,
                     (mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0);
             proto.write(
-                    PowerServiceDumpProto.UserActivityProto.IS_SCREEN_DIM,
+                    PowerManagerServiceDumpProto.UserActivityProto.IS_SCREEN_DIM,
                     (mUserActivitySummary & USER_ACTIVITY_SCREEN_DIM) != 0);
             proto.write(
-                    PowerServiceDumpProto.UserActivityProto.IS_SCREEN_DREAM,
+                    PowerManagerServiceDumpProto.UserActivityProto.IS_SCREEN_DREAM,
                     (mUserActivitySummary & USER_ACTIVITY_SCREEN_DREAM) != 0);
             proto.end(userActivityToken);
 
             proto.write(
-                    PowerServiceDumpProto.IS_REQUEST_WAIT_FOR_NEGATIVE_PROXIMITY,
+                    PowerManagerServiceDumpProto.IS_REQUEST_WAIT_FOR_NEGATIVE_PROXIMITY,
                     mRequestWaitForNegativeProximity);
-            proto.write(PowerServiceDumpProto.IS_SANDMAN_SCHEDULED, mSandmanScheduled);
-            proto.write(PowerServiceDumpProto.IS_SANDMAN_SUMMONED, mSandmanSummoned);
-            proto.write(PowerServiceDumpProto.IS_LOW_POWER_MODE_ENABLED, mLowPowerModeEnabled);
-            proto.write(PowerServiceDumpProto.IS_BATTERY_LEVEL_LOW, mBatteryLevelLow);
-            proto.write(PowerServiceDumpProto.IS_LIGHT_DEVICE_IDLE_MODE, mLightDeviceIdleMode);
-            proto.write(PowerServiceDumpProto.IS_DEVICE_IDLE_MODE, mDeviceIdleMode);
+            proto.write(PowerManagerServiceDumpProto.IS_SANDMAN_SCHEDULED, mSandmanScheduled);
+            proto.write(PowerManagerServiceDumpProto.IS_SANDMAN_SUMMONED, mSandmanSummoned);
+            proto.write(PowerManagerServiceDumpProto.IS_LOW_POWER_MODE_ENABLED, mLowPowerModeEnabled);
+            proto.write(PowerManagerServiceDumpProto.IS_BATTERY_LEVEL_LOW, mBatteryLevelLow);
+            proto.write(PowerManagerServiceDumpProto.IS_LIGHT_DEVICE_IDLE_MODE, mLightDeviceIdleMode);
+            proto.write(PowerManagerServiceDumpProto.IS_DEVICE_IDLE_MODE, mDeviceIdleMode);
 
             for (int id : mDeviceIdleWhitelist) {
-                proto.write(PowerServiceDumpProto.DEVICE_IDLE_WHITELIST, id);
+                proto.write(PowerManagerServiceDumpProto.DEVICE_IDLE_WHITELIST, id);
             }
             for (int id : mDeviceIdleTempWhitelist) {
-                proto.write(PowerServiceDumpProto.DEVICE_IDLE_TEMP_WHITELIST, id);
+                proto.write(PowerManagerServiceDumpProto.DEVICE_IDLE_TEMP_WHITELIST, id);
             }
 
-            proto.write(PowerServiceDumpProto.LAST_WAKE_TIME_MS, mLastWakeTime);
-            proto.write(PowerServiceDumpProto.LAST_SLEEP_TIME_MS, mLastSleepTime);
-            proto.write(PowerServiceDumpProto.LAST_USER_ACTIVITY_TIME_MS, mLastUserActivityTime);
+            proto.write(PowerManagerServiceDumpProto.LAST_WAKE_TIME_MS, mLastWakeTime);
+            proto.write(PowerManagerServiceDumpProto.LAST_SLEEP_TIME_MS, mLastSleepTime);
+            proto.write(PowerManagerServiceDumpProto.LAST_USER_ACTIVITY_TIME_MS, mLastUserActivityTime);
             proto.write(
-                    PowerServiceDumpProto.LAST_USER_ACTIVITY_TIME_NO_CHANGE_LIGHTS_MS,
+                    PowerManagerServiceDumpProto.LAST_USER_ACTIVITY_TIME_NO_CHANGE_LIGHTS_MS,
                     mLastUserActivityTimeNoChangeLights);
             proto.write(
-                    PowerServiceDumpProto.LAST_INTERACTIVE_POWER_HINT_TIME_MS,
+                    PowerManagerServiceDumpProto.LAST_INTERACTIVE_POWER_HINT_TIME_MS,
                     mLastInteractivePowerHintTime);
             proto.write(
-                    PowerServiceDumpProto.LAST_SCREEN_BRIGHTNESS_BOOST_TIME_MS,
+                    PowerManagerServiceDumpProto.LAST_SCREEN_BRIGHTNESS_BOOST_TIME_MS,
                     mLastScreenBrightnessBoostTime);
             proto.write(
-                    PowerServiceDumpProto.IS_SCREEN_BRIGHTNESS_BOOST_IN_PROGRESS,
+                    PowerManagerServiceDumpProto.IS_SCREEN_BRIGHTNESS_BOOST_IN_PROGRESS,
                     mScreenBrightnessBoostInProgress);
-            proto.write(PowerServiceDumpProto.IS_DISPLAY_READY, mDisplayReady);
+            proto.write(PowerManagerServiceDumpProto.IS_DISPLAY_READY, mDisplayReady);
             proto.write(
-                    PowerServiceDumpProto.IS_HOLDING_WAKE_LOCK_SUSPEND_BLOCKER,
+                    PowerManagerServiceDumpProto.IS_HOLDING_WAKE_LOCK_SUSPEND_BLOCKER,
                     mHoldingWakeLockSuspendBlocker);
             proto.write(
-                    PowerServiceDumpProto.IS_HOLDING_DISPLAY_SUSPEND_BLOCKER,
+                    PowerManagerServiceDumpProto.IS_HOLDING_DISPLAY_SUSPEND_BLOCKER,
                     mHoldingDisplaySuspendBlocker);
 
             final long settingsAndConfigurationToken =
-                    proto.start(PowerServiceDumpProto.SETTINGS_AND_CONFIGURATION);
+                    proto.start(PowerManagerServiceDumpProto.SETTINGS_AND_CONFIGURATION);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .IS_DECOUPLE_HAL_AUTO_SUSPEND_MODE_FROM_DISPLAY_CONFIG,
@@ -3698,42 +3694,43 @@ public final class PowerManagerService extends SystemService
             final int sleepTimeout = getSleepTimeoutLocked();
             final int screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
             final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
-            proto.write(PowerServiceDumpProto.SLEEP_TIMEOUT_MS, sleepTimeout);
-            proto.write(PowerServiceDumpProto.SCREEN_OFF_TIMEOUT_MS, screenOffTimeout);
-            proto.write(PowerServiceDumpProto.SCREEN_DIM_DURATION_MS, screenDimDuration);
-            proto.write(PowerServiceDumpProto.ARE_UIDS_CHANGING, mUidsChanging);
-            proto.write(PowerServiceDumpProto.ARE_UIDS_CHANGED, mUidsChanged);
+            proto.write(PowerManagerServiceDumpProto.SLEEP_TIMEOUT_MS, sleepTimeout);
+            proto.write(PowerManagerServiceDumpProto.SCREEN_OFF_TIMEOUT_MS, screenOffTimeout);
+            proto.write(PowerManagerServiceDumpProto.SCREEN_DIM_DURATION_MS, screenDimDuration);
+            proto.write(PowerManagerServiceDumpProto.ARE_UIDS_CHANGING, mUidsChanging);
+            proto.write(PowerManagerServiceDumpProto.ARE_UIDS_CHANGED, mUidsChanged);
 
             for (int i = 0; i < mUidState.size(); i++) {
                 final UidState state = mUidState.valueAt(i);
-                final long uIDToken = proto.start(PowerServiceDumpProto.UIDS);
+                final long uIDToken = proto.start(PowerManagerServiceDumpProto.UIDS);
                 final int uid = mUidState.keyAt(i);
-                proto.write(PowerServiceDumpProto.UidProto.UID, uid);
-                proto.write(PowerServiceDumpProto.UidProto.UID_STRING, UserHandle.formatUid(uid));
-                proto.write(PowerServiceDumpProto.UidProto.IS_ACTIVE, state.mActive);
-                proto.write(PowerServiceDumpProto.UidProto.NUM_WAKE_LOCKS, state.mNumWakeLocks);
+                proto.write(PowerManagerServiceDumpProto.UidProto.UID, uid);
+                proto.write(PowerManagerServiceDumpProto.UidProto.UID_STRING, UserHandle.formatUid(uid));
+                proto.write(PowerManagerServiceDumpProto.UidProto.IS_ACTIVE, state.mActive);
+                proto.write(PowerManagerServiceDumpProto.UidProto.NUM_WAKE_LOCKS, state.mNumWakeLocks);
                 if (state.mProcState == ActivityManager.PROCESS_STATE_UNKNOWN) {
-                    proto.write(PowerServiceDumpProto.UidProto.IS_PROCESS_STATE_UNKNOWN, true);
+                    proto.write(PowerManagerServiceDumpProto.UidProto.IS_PROCESS_STATE_UNKNOWN, true);
                 } else {
-                    proto.write(PowerServiceDumpProto.UidProto.PROCESS_STATE, state.mProcState);
+                    proto.write(PowerManagerServiceDumpProto.UidProto.PROCESS_STATE,
+                            ActivityManager.processStateAmToProto(state.mProcState));
                 }
                 proto.end(uIDToken);
             }
 
-            mHandler.getLooper().writeToProto(proto, PowerServiceDumpProto.LOOPER);
+            mHandler.getLooper().writeToProto(proto, PowerManagerServiceDumpProto.LOOPER);
 
             for (WakeLock wl : mWakeLocks) {
-                wl.writeToProto(proto, PowerServiceDumpProto.WAKE_LOCKS);
+                wl.writeToProto(proto, PowerManagerServiceDumpProto.WAKE_LOCKS);
             }
 
             for (SuspendBlocker sb : mSuspendBlockers) {
-                sb.writeToProto(proto, PowerServiceDumpProto.SUSPEND_BLOCKERS);
+                sb.writeToProto(proto, PowerManagerServiceDumpProto.SUSPEND_BLOCKERS);
             }
             wcd = mWirelessChargerDetector;
         }
 
         if (wcd != null) {
-            wcd.writeToProto(proto, PowerServiceDumpProto.WIRELESS_CHARGER_DETECTOR);
+            wcd.writeToProto(proto, PowerManagerServiceDumpProto.WIRELESS_CHARGER_DETECTOR);
         }
         proto.flush();
     }

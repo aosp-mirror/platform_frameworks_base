@@ -402,7 +402,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
                     final AccessPoint ap = mAccessPoints[i];
                     final Item item = new Item();
                     item.tag = ap;
-                    item.icon = mWifiController.getIcon(ap);
+                    item.iconResId = mWifiController.getIcon(ap);
                     item.line1 = ap.getSsid();
                     item.line2 = ap.isActive() ? ap.getSummary() : null;
                     item.icon2 = ap.getSecurity() != AccessPoint.SECURITY_NONE

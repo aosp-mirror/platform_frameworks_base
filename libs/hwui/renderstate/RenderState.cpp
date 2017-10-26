@@ -105,8 +105,8 @@ static void layerDestroyedVkContext(Layer* layer) {
 }
 
 void RenderState::onVkContextDestroyed() {
-    mLayerPool->clear();
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
+    destroyLayersInUpdater();
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 

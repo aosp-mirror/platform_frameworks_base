@@ -46,6 +46,7 @@ message StatsEvent {
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
         // 10-20 are temporarily reserved for wakelocks etc.
+        WakelockStateChanged wakelock_state_changed = 10;
         UidWakelockStateChanged uid_wakelock_state_changed = 11;
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
@@ -57,6 +58,18 @@ message StatsEvent {
         UidProcessStateChanged uid_process_state_changed = 27;
         ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
         ScreenStateChanged screen_state_changed = 29;
+        BatteryLevelChanged battery_level_changed = 30;
+        ChargingStateChanged charging_state_changed = 31;
+        PluggedStateChanged plugged_state_changed = 32;
+        DeviceTemperatureReported device_temperature_reported = 33;
+        DeviceOnStatusChanged device_on_status_changed = 34;
+        WakeupAlarmOccurred wakeup_alarm_occurred = 35;
+        KernelWakeupReported kernel_wakeup_reported = 36;
+        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
+        WifiScanStateChanged wifi_scan_state_changed = 39;
+        PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
+
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 }
@@ -356,7 +369,7 @@ message CameraStateChanged {
  * Logged from:
  *   TODO
  */
-message WakelockChanged {
+message WakelockStateChanged {
     // TODO: Add attribution instead of uid.
     optional int32 uid = 1;
 
@@ -460,4 +473,176 @@ message DeviceIdleModeStateChanged {
 message ScreenBrightnessChanged {
     // Screen brightness level. Should be in [-1, 255] according to PowerManager.java.
     optional int32 level = 1;
+}
+
+/**
+ * Logs battery level (percent full, from 0 to 100).
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatteryLevelChanged {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
+}
+
+/**
+ * Logs change in charging status of the device.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ChargingStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        BATTERY_STATUS_UNKNOWN = 1;
+        BATTERY_STATUS_CHARGING = 2;
+        BATTERY_STATUS_DISCHARGING = 3;
+        BATTERY_STATUS_NOT_CHARGING = 4;
+        BATTERY_STATUS_FULL = 5;
+    }
+    optional State charging_state = 1;
+}
+
+/**
+ * Logs whether the device is plugged in, and what power source it is using.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PluggedStateChanged {
+    // TODO: Link directly to BatteryManager.java's constants (via a proto).
+    enum State {
+        // Note that NONE is not in BatteryManager.java's constants.
+        BATTERY_PLUGGED_NONE = 0;
+        // Power source is an AC charger.
+        BATTERY_PLUGGED_AC = 1;
+        // Power source is a USB port.
+        BATTERY_PLUGGED_USB = 2;
+        // Power source is wireless.
+        BATTERY_PLUGGED_WIRELESS = 4;
+    }
+    optional State plugged_state = 1;
+}
+
+/**
+ * Logs the temperature of the device, in tenths of a degree Celsius.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceTemperatureReported {
+    // Temperature in tenths of a degree C.
+    optional int32 temperature = 1;
+}
+
+// TODO: Define this more precisely.
+// TODO: Log the ON state somewhere. It isn't currently logged anywhere.
+/**
+ * Logs when the device turns off or on.
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message DeviceOnStatusChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs when an app's wakeup alarm fires.
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WakeupAlarmOccurred {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+}
+
+/**
+ * Logs kernel wakeup reasons and aborts.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message KernelWakeupReported {
+    // Name of the kernel wakeup reason (or abort).
+    optional string wakeup_reason_name = 1;
+
+    // Duration (in microseconds) for the wake-up interrupt to be serviced.
+    optional int64 duration_usec = 2;
+}
+
+/**
+ * Logs wifi locks held by an app.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiLockStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi signal strength changes.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
+}
+
+/**
+ * Logs wifi scans performed by an app.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiScanStateChanged {
+    // TODO: Add attribution instead of uid.
+    optional int32 uid = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs phone signal strength changes.
+ *
+ * Logged from:
+  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneSignalStrengthChanged {
+    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
+    enum SignalStrength {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+    optional SignalStrength signal_strength = 1;
 }

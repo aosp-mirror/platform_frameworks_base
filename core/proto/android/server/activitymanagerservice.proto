@@ -69,12 +69,11 @@ message TaskRecordProto {
   optional string real_activity = 6;
   optional string orig_activity = 7;
   optional int32 activity_type = 8;
-  optional int32 return_to_type = 9;
-  optional int32 resize_mode = 10;
-  optional bool fullscreen = 11;
-  optional .android.graphics.RectProto bounds = 12;
-  optional int32 min_width = 13;
-  optional int32 min_height = 14;
+  optional int32 resize_mode = 9;
+  optional bool fullscreen = 10;
+  optional .android.graphics.RectProto bounds = 11;
+  optional int32 min_width = 12;
+  optional int32 min_height = 13;
 }
 
 message ActivityRecordProto {

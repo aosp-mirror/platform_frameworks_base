@@ -4055,6 +4055,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptime * 1000, 1); // time in in microseconds
+            StatsLog.write(StatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason, deltaUptime * 1000);
             mLastWakeupReason = null;
         }
     }
@@ -4633,6 +4634,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Signal strength " + strengthBin + " to: "
                         + Integer.toHexString(mHistoryCur.states));
                 newHistory = true;
+                StatsLog.write(StatsLog.PHONE_SIGNAL_STRENGTH_CHANGED, strengthBin);
             } else {
                 stopAllPhoneSignalStrengthTimersLocked(-1);
             }
@@ -5188,6 +5190,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (strengthBin >= 0) {
                 if (!mWifiSignalStrengthsTimer[strengthBin].isRunningLocked()) {
                     mWifiSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
+                    StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
                 }
                 mHistoryCur.states2 =
                         (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
@@ -6053,6 +6056,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mBsi.mFullWifiLockTimers, mBsi.mOnBatteryTimeBase);
                 }
                 mFullWifiLockTimer.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6061,6 +6066,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mFullWifiLockOut) {
                 mFullWifiLockOut = false;
                 mFullWifiLockTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mFullWifiLockTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
@@ -6074,6 +6083,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mOnBatteryBackgroundTimeBase);
                 }
                 mWifiScanTimer.startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Possibly use a worksource instead of a uid.
+                StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6082,6 +6093,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiScanStarted) {
                 mWifiScanStarted = false;
                 mWifiScanTimer.stopRunningLocked(elapsedRealtimeMs);
+                if (!mWifiScanTimer.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 0);
+                }
             }
         }
 
@@ -8876,6 +8891,8 @@ public class BatteryStatsImpl extends BatteryStats {
             Wakelock wl = mWakelockStats.startObject(name);
             if (wl != null) {
                 getWakelockTimerLocked(wl, type).startRunningLocked(elapsedRealtimeMs);
+                // TODO(statsd): Hopefully use a worksource instead of a uid (so move elsewhere)
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 1);
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
@@ -8893,7 +8910,12 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             Wakelock wl = mWakelockStats.stopObject(name);
             if (wl != null) {
-                getWakelockTimerLocked(wl, type).stopRunningLocked(elapsedRealtimeMs);
+                StopwatchTimer wlt = getWakelockTimerLocked(wl, type);
+                wlt.stopRunningLocked(elapsedRealtimeMs);
+                if (!wlt.isRunningLocked()) { // only tell statsd if truly stopped
+                    // TODO(statsd): Possibly use a worksource instead of a uid.
+                    StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 0);
+                }
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
@@ -11156,10 +11178,14 @@ public class BatteryStatsImpl extends BatteryStats {
     // This should probably be exposed in the API, though it's not critical
     public static final int BATTERY_PLUGGED_NONE = 0;
 
-    public void setBatteryStateLocked(int status, int health, int plugType, int level,
-            int temp, int volt, int chargeUAh, int chargeFullUAh) {
+    public void setBatteryStateLocked(final int status, final int health, final int plugType,
+            final int level, /* not final */ int temp, final int volt, final int chargeUAh,
+            final int chargeFullUAh) {
         // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
         temp = Math.max(0, temp);
+
+        reportChangesToStatsLog(mHaveBatteryLevel ? mHistoryCur : null,
+                status, plugType, level, temp);
 
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
@@ -11335,6 +11361,24 @@ public class BatteryStatsImpl extends BatteryStats {
             Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
         mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
+    }
+
+    // Inform StatsLog of setBatteryState changes.
+    // If this is the first reporting, pass in recentPast == null.
+    private void reportChangesToStatsLog(HistoryItem recentPast,
+            final int status, final int plugType, final int level, final int temp) {
+
+        if (recentPast == null || recentPast.batteryStatus != status) {
+            StatsLog.write(StatsLog.CHARGING_STATE_CHANGED, status);
+        }
+        if (recentPast == null || recentPast.batteryPlugType != plugType) {
+            StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED, plugType);
+        }
+        if (recentPast == null || recentPast.batteryLevel != level) {
+            StatsLog.write(StatsLog.BATTERY_LEVEL_CHANGED, level);
+        }
+        // Let's just always print the temperature, regardless of whether it changed.
+        StatsLog.write(StatsLog.DEVICE_TEMPERATURE_REPORTED, temp);
     }
 
     public long getAwakeTimeBattery() {

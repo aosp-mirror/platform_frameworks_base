@@ -28,6 +28,7 @@ import static android.net.wifi.WifiManager.IFACE_IP_MODE_LOCAL_ONLY;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_UNSPECIFIED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
+import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static com.android.server.ConnectivityService.SHORT_ARG;
 
 import android.app.Notification;
@@ -60,6 +61,7 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
+import android.net.util.VersionedBroadcastListener;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -68,6 +70,7 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
@@ -184,6 +187,8 @@ public class Tethering extends BaseNetworkObserver {
     // TODO: Figure out how to merge this and other downstream-tracking objects
     // into a single coherent structure.
     private final HashSet<TetherInterfaceStateMachine> mForwardedDownstreams;
+    private final VersionedBroadcastListener mCarrierConfigChange;
+    // TODO: Delete SimChangeListener; it's obsolete.
     private final SimChangeListener mSimChange;
 
     private volatile TetheringConfiguration mConfig;
@@ -224,11 +229,26 @@ public class Tethering extends BaseNetworkObserver {
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, mLog, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
+        mCarrierConfigChange = new VersionedBroadcastListener(
+                "CarrierConfigChangeListener", mContext, smHandler, filter,
+                (Intent ignored) -> {
+                    mLog.log("OBSERVED carrier config change");
+                    reevaluateSimCardProvisioning();
+                });
+        // TODO: Remove SimChangeListener altogether. For now, we retain it
+        // for logging purposes in case we need to debug something that might
+        // be related to changing signals from ACTION_SIM_STATE_CHANGED to
+        // ACTION_CARRIER_CONFIG_CHANGED.
         mSimChange = new SimChangeListener(
-                mContext, smHandler, () -> reevaluateSimCardProvisioning());
+                mContext, smHandler, () -> {
+                    mLog.log("OBSERVED SIM card change");
+                });
 
         mStateReceiver = new StateReceiver();
-        IntentFilter filter = new IntentFilter();
+        filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
@@ -364,18 +384,30 @@ public class Tethering extends BaseNetworkObserver {
             return false;
         }
 
+        if (carrierConfigAffirmsEntitlementCheckNotRequired()) {
+            return false;
+        }
+        return (provisionApp.length == 2);
+    }
+
+    // The logic here is aimed solely at confirming that a CarrierConfig exists
+    // and affirms that entitlement checks are not required.
+    //
+    // TODO: find a better way to express this, or alter the checking process
+    // entirely so that this is more intuitive.
+    private boolean carrierConfigAffirmsEntitlementCheckNotRequired() {
         // Check carrier config for entitlement checks
         final CarrierConfigManager configManager = (CarrierConfigManager) mContext
              .getSystemService(Context.CARRIER_CONFIG_SERVICE);
-        if (configManager != null && configManager.getConfig() != null) {
-            // we do have a CarrierConfigManager and it has a config.
-            boolean isEntitlementCheckRequired = configManager.getConfig().getBoolean(
-                    CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
-            if (!isEntitlementCheckRequired) {
-                return false;
-            }
-        }
-        return (provisionApp.length == 2);
+        if (configManager == null) return false;
+
+        final PersistableBundle carrierConfig = configManager.getConfig();
+        if (carrierConfig == null) return false;
+
+        // A CarrierConfigManager was found and it has a config.
+        final boolean isEntitlementCheckRequired = carrierConfig.getBoolean(
+                CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
+        return !isEntitlementCheckRequired;
     }
 
     // Used by the SIM card change observation code.
@@ -818,6 +850,7 @@ public class Tethering extends BaseNetworkObserver {
             } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 handleWifiApAction(intent);
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                mLog.log("OBSERVED configuration changed");
                 updateConfiguration();
             }
         }
@@ -1192,6 +1225,7 @@ public class Tethering extends BaseNetworkObserver {
 
     private void reevaluateSimCardProvisioning() {
         if (!hasMobileHotspotProvisionApp()) return;
+        if (carrierConfigAffirmsEntitlementCheckNotRequired()) return;
 
         ArrayList<Integer> tethered = new ArrayList<>();
         synchronized (mPublicSync) {
@@ -1559,6 +1593,7 @@ public class Tethering extends BaseNetworkObserver {
                     return;
                 }
 
+                mCarrierConfigChange.startListening();
                 mSimChange.startListening();
                 mUpstreamNetworkMonitor.start();
 
@@ -1576,6 +1611,7 @@ public class Tethering extends BaseNetworkObserver {
                 mOffload.stop();
                 mUpstreamNetworkMonitor.stop();
                 mSimChange.stopListening();
+                mCarrierConfigChange.stopListening();
                 notifyDownstreamsOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
             }

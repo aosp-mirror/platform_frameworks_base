@@ -17,15 +17,12 @@
 package com.android.server.am;
 
 import android.content.ComponentName;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.WindowLayout;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import android.view.Display;
 import android.view.Gravity;
 import org.junit.runner.RunWith;
 import org.junit.Before;
@@ -33,10 +30,11 @@ import org.junit.Test;
 
 import org.mockito.invocation.InvocationOnMock;
 
-import java.util.ArrayList;
-
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
+import static com.android.server.am.LaunchingBoundsController.LaunchingBoundsPositioner.RESULT_CONTINUE;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -48,16 +46,14 @@ import static org.junit.Assert.assertEquals;
  * Tests for exercising resizing bounds.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.LaunchBoundsTests
+ *  bit FrameworksServicesTests:com.android.server.am.LaunchingTaskPositionerTests
  */
 @MediumTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class LaunchBoundsTests extends ActivityTestsBase {
+public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     private final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
-    private final ComponentName testActivityComponent2 =
-            ComponentName.unflattenFromString("com.foo/.BarActivity2");
 
     private final static int STACK_WIDTH = 100;
     private final static int STACK_HEIGHT = 200;
@@ -67,6 +63,11 @@ public class LaunchBoundsTests extends ActivityTestsBase {
     private ActivityManagerService mService;
     private ActivityStack mStack;
     private TaskRecord mTask;
+
+    private LaunchingTaskPositioner mPositioner;
+
+    private Rect mCurrent;
+    private Rect mResult;
 
     @Before
     @Override
@@ -81,6 +82,11 @@ public class LaunchBoundsTests extends ActivityTestsBase {
         // We must create the task after resizing to make sure it does not inherit the stack
         // dimensions on resize.
         mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+
+        mPositioner = new LaunchingTaskPositioner();
+
+        mResult = new Rect();
+        mCurrent = new Rect();
     }
 
     /**
@@ -101,12 +107,9 @@ public class LaunchBoundsTests extends ActivityTestsBase {
      */
     @Test
     public void testLaunchNoWindowLayout() throws Exception {
-        final Rect expectedTaskBounds = getDefaultBounds(Gravity.NO_GRAVITY);
-
-        mStack.layoutTaskInStack(mTask, null);
-
-        // We expect the task to be placed in the middle of the screen with margins applied.
-        assertEquals(mTask.mBounds, expectedTaskBounds);
+        assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask, null /*layout*/,
+                null /*record*/, null /*options*/, mCurrent, mResult));
+        assertEquals(getDefaultBounds(Gravity.NO_GRAVITY), mResult);
     }
 
     /**
@@ -116,11 +119,10 @@ public class LaunchBoundsTests extends ActivityTestsBase {
      */
     @Test
     public void testlaunchEmptyWindowLayout() throws Exception {
-        final Rect expectedTaskBounds = getDefaultBounds(Gravity.NO_GRAVITY);
-
-        WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
-        mStack.layoutTaskInStack(mTask, layout);
-        assertEquals(mTask.mBounds, expectedTaskBounds);
+        assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
+                new WindowLayout(0, 0, 0, 0, Gravity.NO_GRAVITY, 0, 0), null /*activity*/,
+                null /*options*/, mCurrent, mResult));
+        assertEquals(mResult, getDefaultBounds(Gravity.NO_GRAVITY));
     }
 
     /**
@@ -149,9 +151,15 @@ public class LaunchBoundsTests extends ActivityTestsBase {
     }
 
     private void testGravity(int gravity) {
-        final WindowLayout gravityLayout = new WindowLayout(0, 0, 0, 0, gravity, 0, 0);
-        mStack.layoutTaskInStack(mTask, gravityLayout);
-        assertEquals(mTask.mBounds, getDefaultBounds(gravity));
+        try {
+            assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
+                    new WindowLayout(0, 0, 0, 0, gravity, 0, 0), null /*activity*/,
+                    null /*options*/, mCurrent, mResult));
+            assertEquals(mResult, getDefaultBounds(gravity));
+        } finally {
+            mCurrent.setEmpty();
+            mResult.setEmpty();
+        }
     }
 
     /**
@@ -174,7 +182,7 @@ public class LaunchBoundsTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, gravity, 0, 0);
 
         // layout first task
-        mStack.layoutTaskInStack(mTask, layout /*windowLayout*/);
+        mService.mStackSupervisor.getLaunchingBoundsController().layoutTask(mTask, layout);
 
         // Second task will be laid out on top of the first so starting bounds is the same.
         final Rect expectedBounds = new Rect(mTask.mBounds);
@@ -192,7 +200,9 @@ public class LaunchBoundsTests extends ActivityTestsBase {
                     mStack);
 
             // layout second task
-            mStack.layoutTaskInStack(secondTask, layout /*windowLayout*/);
+            assertEquals(RESULT_CONTINUE,
+                    mPositioner.onCalculateBounds(secondTask, layout, null /*activity*/,
+                            null /*options*/, mCurrent, mResult));
 
             if ((gravity & (Gravity.TOP | Gravity.RIGHT)) == (Gravity.TOP | Gravity.RIGHT)
                     || (gravity & (Gravity.BOTTOM | Gravity.RIGHT))
@@ -207,7 +217,7 @@ public class LaunchBoundsTests extends ActivityTestsBase {
                         LaunchingTaskPositioner.getVerticalStep(mStack.mBounds));
             }
 
-            assertEquals(secondTask.mBounds, expectedBounds);
+            assertEquals(mResult, expectedBounds);
         } finally {
             // Remove task and activity to prevent influencing future tests
             if (activity != null) {

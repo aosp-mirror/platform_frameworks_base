@@ -216,7 +216,7 @@ public final class JobServiceContext implements ServiceConnection {
             final JobInfo ji = job.getJob();
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
-                    isDeadlineExpired, triggeredUris, triggeredAuthorities);
+                    isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             // Once we'e begun executing a job, we by definition no longer care whether

@@ -470,8 +470,32 @@ public class UsageStatsService extends SystemService implements
     void dump(String[] args, PrintWriter pw) {
         synchronized (mLock) {
             IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
-            ArraySet<String> argSet = new ArraySet<>();
-            argSet.addAll(Arrays.asList(args));
+
+            boolean checkin = false;
+            boolean history = false;
+            String pkg = null;
+
+            if (args != null) {
+                for (int i = 0; i < args.length; i++) {
+                    String arg = args[i];
+                    if ("--checkin".equals(arg)) {
+                        checkin = true;
+                    } else if ("--history".equals(arg)) {
+                        history = true;
+                    } else if ("history".equals(arg)) {
+                        history = true;
+                        break;
+                    } else if ("flush".equals(arg)) {
+                        flushToDiskLocked();
+                        pw.println("Flushed stats to disk");
+                        return;
+                    } else {
+                        // Anything else is a pkg to filter
+                        pkg = arg;
+                        break;
+                    }
+                }
+            }
 
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
@@ -479,26 +503,23 @@ public class UsageStatsService extends SystemService implements
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
-                if (argSet.contains("--checkin")) {
+                if (checkin) {
                     mUserState.valueAt(i).checkin(idpw);
                 } else {
-                    mUserState.valueAt(i).dump(idpw);
+                    mUserState.valueAt(i).dump(idpw, pkg);
                     idpw.println();
-                    if (args.length > 0) {
-                        if ("history".equals(args[0])) {
-                            mAppStandby.dumpHistory(idpw, userId);
-                        } else if ("flush".equals(args[0])) {
-                            flushToDiskLocked();
-                            pw.println("Flushed stats to disk");
-                        }
+                    if (history) {
+                        mAppStandby.dumpHistory(idpw, userId);
                     }
                 }
-                mAppStandby.dumpUser(idpw, userId);
+                mAppStandby.dumpUser(idpw, userId, pkg);
                 idpw.decreaseIndent();
             }
 
-            pw.println();
-            mAppStandby.dumpState(args, pw);
+            if (pkg == null) {
+                pw.println();
+                mAppStandby.dumpState(args, pw);
+            }
         }
     }
 

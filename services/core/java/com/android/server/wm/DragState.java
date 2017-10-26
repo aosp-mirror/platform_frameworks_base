@@ -412,7 +412,6 @@ class DragState {
         }
         if (!mDragResult) {
             mAnimator = createReturnAnimationLocked();
-            mService.scheduleAnimationLocked();
             return;  // Will call cleanUpDragLw when the animation is done.
         }
         cleanUpDragLw();

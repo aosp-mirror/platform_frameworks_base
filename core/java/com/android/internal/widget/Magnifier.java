@@ -151,7 +151,6 @@ public final class Magnifier {
     /**
      * @return the height of the magnifier window.
      */
-    @NonNull
     public int getHeight() {
         return mWindowHeight;
     }
@@ -159,7 +158,6 @@ public final class Magnifier {
     /**
      * @return the width of the magnifier window.
      */
-    @NonNull
     public int getWidth() {
         return mWindowWidth;
     }
@@ -167,7 +165,6 @@ public final class Magnifier {
     /**
      * @return the zoom scale of the magnifier.
      */
-    @NonNull
     public float getZoomScale() {
         return mZoomScale;
     }

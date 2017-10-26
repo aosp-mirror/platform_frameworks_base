@@ -15,7 +15,7 @@
  */
 
 syntax = "proto2";
-package android.service.power;
+package com.android.server.power;
 
 option java_multiple_files = true;
 
