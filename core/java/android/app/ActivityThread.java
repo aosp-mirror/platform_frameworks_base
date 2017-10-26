@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.servertransaction.ActivityResultItem;
+import android.app.servertransaction.ClientTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -174,7 +176,7 @@ final class RemoteServiceException extends AndroidRuntimeException {
  *
  * {@hide}
  */
-public final class ActivityThread {
+public final class ActivityThread extends ClientTransactionHandler {
     /** @hide */
     public static final String TAG = "ActivityThread";
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
@@ -401,8 +403,8 @@ public final class ActivityThread {
                     throw new IllegalStateException(
                             "Received config update for non-existing activity");
                 }
-                activity.mMainThread.handleActivityConfigurationChanged(
-                        new ActivityConfigChangeData(token, overrideConfig), newDisplayId);
+                activity.mMainThread.handleActivityConfigurationChanged(token, overrideConfig,
+                        newDisplayId);
             };
         }
 
@@ -466,16 +468,6 @@ public final class ActivityThread {
             mProvider = provider;
             mLocalProvider = localProvider;
             mHolder = holder;
-        }
-    }
-
-    static final class NewIntentData {
-        List<ReferrerIntent> intents;
-        IBinder token;
-        boolean andPause;
-        public String toString() {
-            return "NewIntentData{intents=" + intents + " token=" + token
-                    + " andPause=" + andPause +"}";
         }
     }
 
@@ -644,14 +636,6 @@ public final class ActivityThread {
         String[] args;
     }
 
-    static final class ResultData {
-        IBinder token;
-        List<ResultInfo> results;
-        public String toString() {
-            return "ResultData{token=" + token + " results" + results + "}";
-        }
-    }
-
     static final class ContextCleanupInfo {
         ContextImpl context;
         String what;
@@ -679,15 +663,6 @@ public final class ActivityThread {
         int flags;
     }
 
-    static final class ActivityConfigChangeData {
-        final IBinder activityToken;
-        final Configuration overrideConfig;
-        public ActivityConfigChangeData(IBinder token, Configuration config) {
-            activityToken = token;
-            overrideConfig = config;
-        }
-    }
-
     private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
@@ -702,91 +677,8 @@ public final class ActivityThread {
             }
         }
 
-        public final void schedulePauseActivity(IBinder token, boolean finished,
-                boolean userLeaving, int configChanges, boolean dontReport) {
-            int seq = getLifecycleSeq();
-            if (DEBUG_ORDER) Slog.d(TAG, "pauseActivity " + ActivityThread.this
-                    + " operation received seq: " + seq);
-            sendMessage(
-                    finished ? H.PAUSE_ACTIVITY_FINISHING : H.PAUSE_ACTIVITY,
-                    token,
-                    (userLeaving ? USER_LEAVING : 0) | (dontReport ? DONT_REPORT : 0),
-                    configChanges,
-                    seq);
-        }
-
-        public final void scheduleStopActivity(IBinder token, boolean showWindow,
-                int configChanges) {
-            int seq = getLifecycleSeq();
-            if (DEBUG_ORDER) Slog.d(TAG, "stopActivity " + ActivityThread.this
-                    + " operation received seq: " + seq);
-            sendMessage(
-                showWindow ? H.STOP_ACTIVITY_SHOW : H.STOP_ACTIVITY_HIDE,
-                token, 0, configChanges, seq);
-        }
-
-        public final void scheduleWindowVisibility(IBinder token, boolean showWindow) {
-            sendMessage(
-                showWindow ? H.SHOW_WINDOW : H.HIDE_WINDOW,
-                token);
-        }
-
         public final void scheduleSleeping(IBinder token, boolean sleeping) {
             sendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
-        }
-
-        public final void scheduleResumeActivity(IBinder token, int processState,
-                boolean isForward, Bundle resumeArgs) {
-            int seq = getLifecycleSeq();
-            if (DEBUG_ORDER) Slog.d(TAG, "resumeActivity " + ActivityThread.this
-                    + " operation received seq: " + seq);
-            updateProcessState(processState, false);
-            sendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0, 0, seq);
-        }
-
-        public final void scheduleSendResult(IBinder token, List<ResultInfo> results) {
-            ResultData res = new ResultData();
-            res.token = token;
-            res.results = results;
-            sendMessage(H.SEND_RESULT, res);
-        }
-
-        // we use token to identify this activity without having to send the
-        // activity itself back to the activity manager. (matters more with ipc)
-        @Override
-        public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-                ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
-                CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
-                int procState, Bundle state, PersistableBundle persistentState,
-                List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-                boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) {
-
-            updateProcessState(procState, false);
-
-            ActivityClientRecord r = new ActivityClientRecord();
-
-            r.token = token;
-            r.ident = ident;
-            r.intent = intent;
-            r.referrer = referrer;
-            r.voiceInteractor = voiceInteractor;
-            r.activityInfo = info;
-            r.compatInfo = compatInfo;
-            r.state = state;
-            r.persistentState = persistentState;
-
-            r.pendingResults = pendingResults;
-            r.pendingIntents = pendingNewIntents;
-
-            r.startsNotResumed = notResumed;
-            r.isForward = isForward;
-
-            r.profilerInfo = profilerInfo;
-
-            r.overrideConfig = overrideConfig;
-            updatePendingConfiguration(curConfig);
-
-            sendMessage(H.LAUNCH_ACTIVITY, r);
         }
 
         @Override
@@ -796,22 +688,6 @@ public final class ActivityThread {
                 Configuration overrideConfig, boolean preserveWindow) {
             requestRelaunchActivity(token, pendingResults, pendingNewIntents,
                     configChanges, notResumed, config, overrideConfig, true, preserveWindow);
-        }
-
-        public final void scheduleNewIntent(
-                List<ReferrerIntent> intents, IBinder token, boolean andPause) {
-            NewIntentData data = new NewIntentData();
-            data.intents = intents;
-            data.token = token;
-            data.andPause = andPause;
-
-            sendMessage(H.NEW_INTENT, data);
-        }
-
-        public final void scheduleDestroyActivity(IBinder token, boolean finishing,
-                int configChanges) {
-            sendMessage(H.DESTROY_ACTIVITY, token, finishing ? 1 : 0,
-                    configChanges);
         }
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
@@ -949,11 +825,6 @@ public final class ActivityThread {
             sendMessage(H.SUICIDE, null);
         }
 
-        public void scheduleConfigurationChanged(Configuration config) {
-            updatePendingConfiguration(config);
-            sendMessage(H.CONFIGURATION_CHANGED, config);
-        }
-
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
@@ -1013,20 +884,6 @@ public final class ActivityThread {
         @Override
         public void scheduleLowMemory() {
             sendMessage(H.LOW_MEMORY, null);
-        }
-
-        @Override
-        public void scheduleActivityConfigurationChanged(
-                IBinder token, Configuration overrideConfig) {
-            sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED,
-                    new ActivityConfigChangeData(token, overrideConfig));
-        }
-
-        @Override
-        public void scheduleActivityMovedToDisplay(IBinder token, int displayId,
-                Configuration overrideConfig) {
-            sendMessage(H.ACTIVITY_MOVED_TO_DISPLAY,
-                    new ActivityConfigChangeData(token, overrideConfig), displayId);
         }
 
         @Override
@@ -1427,26 +1284,6 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-                Configuration overrideConfig) throws RemoteException {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = token;
-            args.arg2 = overrideConfig;
-            args.argi1 = isInMultiWindowMode ? 1 : 0;
-            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, args);
-        }
-
-        @Override
-        public void schedulePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
-                Configuration overrideConfig) throws RemoteException {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = token;
-            args.arg2 = overrideConfig;
-            args.argi1 = isInPipMode ? 1 : 0;
-            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, args);
-        }
-
-        @Override
         public void scheduleLocalVoiceInteractionStarted(IBinder token,
                 IVoiceInteractor voiceInteractor) throws RemoteException {
             SomeArgs args = SomeArgs.obtain();
@@ -1459,28 +1296,33 @@ public final class ActivityThread {
         public void handleTrustStorageUpdate() {
             NetworkSecurityPolicy.getInstance().handleTrustStorageUpdate();
         }
+
+        @Override
+        public void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
+            ActivityThread.this.scheduleTransaction(transaction);
+        }
     }
 
-    private int getLifecycleSeq() {
+    @Override
+    public void updatePendingConfiguration(Configuration config) {
+        mAppThread.updatePendingConfiguration(config);
+    }
+
+    @Override
+    public void updateProcessState(int processState, boolean fromIpc) {
+        mAppThread.updateProcessState(processState, fromIpc);
+    }
+
+    @Override
+    public int getLifecycleSeq() {
         synchronized (mResourcesManager) {
             return mLifecycleSeq++;
         }
     }
 
-    private class H extends Handler {
-        public static final int LAUNCH_ACTIVITY         = 100;
-        public static final int PAUSE_ACTIVITY          = 101;
-        public static final int PAUSE_ACTIVITY_FINISHING= 102;
-        public static final int STOP_ACTIVITY_SHOW      = 103;
-        public static final int STOP_ACTIVITY_HIDE      = 104;
-        public static final int SHOW_WINDOW             = 105;
-        public static final int HIDE_WINDOW             = 106;
-        public static final int RESUME_ACTIVITY         = 107;
-        public static final int SEND_RESULT             = 108;
-        public static final int DESTROY_ACTIVITY        = 109;
+    class H extends Handler {
         public static final int BIND_APPLICATION        = 110;
         public static final int EXIT_APPLICATION        = 111;
-        public static final int NEW_INTENT              = 112;
         public static final int RECEIVER                = 113;
         public static final int CREATE_SERVICE          = 114;
         public static final int SERVICE_ARGS            = 115;
@@ -1493,7 +1335,6 @@ public final class ActivityThread {
         public static final int UNBIND_SERVICE          = 122;
         public static final int DUMP_SERVICE            = 123;
         public static final int LOW_MEMORY              = 124;
-        public static final int ACTIVITY_CONFIGURATION_CHANGED = 125;
         public static final int RELAUNCH_ACTIVITY       = 126;
         public static final int PROFILER_CONTROL        = 127;
         public static final int CREATE_BACKUP_AGENT     = 128;
@@ -1518,30 +1359,17 @@ public final class ActivityThread {
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
-        public static final int MULTI_WINDOW_MODE_CHANGED = 152;
-        public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
         public static final int ATTACH_AGENT = 155;
         public static final int APPLICATION_INFO_CHANGED = 156;
-        public static final int ACTIVITY_MOVED_TO_DISPLAY = 157;
         public static final int RUN_ISOLATED_ENTRY_POINT = 158;
+        public static final int EXECUTE_TRANSACTION = 159;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
-                    case LAUNCH_ACTIVITY: return "LAUNCH_ACTIVITY";
-                    case PAUSE_ACTIVITY: return "PAUSE_ACTIVITY";
-                    case PAUSE_ACTIVITY_FINISHING: return "PAUSE_ACTIVITY_FINISHING";
-                    case STOP_ACTIVITY_SHOW: return "STOP_ACTIVITY_SHOW";
-                    case STOP_ACTIVITY_HIDE: return "STOP_ACTIVITY_HIDE";
-                    case SHOW_WINDOW: return "SHOW_WINDOW";
-                    case HIDE_WINDOW: return "HIDE_WINDOW";
-                    case RESUME_ACTIVITY: return "RESUME_ACTIVITY";
-                    case SEND_RESULT: return "SEND_RESULT";
-                    case DESTROY_ACTIVITY: return "DESTROY_ACTIVITY";
                     case BIND_APPLICATION: return "BIND_APPLICATION";
                     case EXIT_APPLICATION: return "EXIT_APPLICATION";
-                    case NEW_INTENT: return "NEW_INTENT";
                     case RECEIVER: return "RECEIVER";
                     case CREATE_SERVICE: return "CREATE_SERVICE";
                     case SERVICE_ARGS: return "SERVICE_ARGS";
@@ -1553,8 +1381,6 @@ public final class ActivityThread {
                     case UNBIND_SERVICE: return "UNBIND_SERVICE";
                     case DUMP_SERVICE: return "DUMP_SERVICE";
                     case LOW_MEMORY: return "LOW_MEMORY";
-                    case ACTIVITY_CONFIGURATION_CHANGED: return "ACTIVITY_CONFIGURATION_CHANGED";
-                    case ACTIVITY_MOVED_TO_DISPLAY: return "ACTIVITY_MOVED_TO_DISPLAY";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PROFILER_CONTROL: return "PROFILER_CONTROL";
                     case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
@@ -1577,12 +1403,11 @@ public final class ActivityThread {
                     case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
                     case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
-                    case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
-                    case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                     case ATTACH_AGENT: return "ATTACH_AGENT";
                     case APPLICATION_INFO_CHANGED: return "APPLICATION_INFO_CHANGED";
                     case RUN_ISOLATED_ENTRY_POINT: return "RUN_ISOLATED_ENTRY_POINT";
+                    case EXECUTE_TRANSACTION: return "EXECUTE_TRANSACTION";
                 }
             }
             return Integer.toString(code);
@@ -1590,76 +1415,12 @@ public final class ActivityThread {
         public void handleMessage(Message msg) {
             if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + codeToString(msg.what));
             switch (msg.what) {
-                case LAUNCH_ACTIVITY: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-                    final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
-
-                    r.packageInfo = getPackageInfoNoCheck(
-                            r.activityInfo.applicationInfo, r.compatInfo);
-                    handleLaunchActivity(r, null, "LAUNCH_ACTIVITY");
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
                 case RELAUNCH_ACTIVITY: {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityRestart");
                     ActivityClientRecord r = (ActivityClientRecord)msg.obj;
                     handleRelaunchActivity(r);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 } break;
-                case PAUSE_ACTIVITY: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handlePauseActivity((IBinder) args.arg1, false,
-                            (args.argi1 & USER_LEAVING) != 0, args.argi2,
-                            (args.argi1 & DONT_REPORT) != 0, args.argi3);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
-                case PAUSE_ACTIVITY_FINISHING: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handlePauseActivity((IBinder) args.arg1, true, (args.argi1 & USER_LEAVING) != 0,
-                            args.argi2, (args.argi1 & DONT_REPORT) != 0, args.argi3);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
-                case STOP_ACTIVITY_SHOW: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handleStopActivity((IBinder) args.arg1, true, args.argi2, args.argi3);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
-                case STOP_ACTIVITY_HIDE: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handleStopActivity((IBinder) args.arg1, false, args.argi2, args.argi3);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
-                case SHOW_WINDOW:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
-                    handleWindowVisibility((IBinder)msg.obj, true);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case HIDE_WINDOW:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityHideWindow");
-                    handleWindowVisibility((IBinder)msg.obj, false);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case RESUME_ACTIVITY:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handleResumeActivity((IBinder) args.arg1, true, args.argi1 != 0, true,
-                            args.argi3, "RESUME_ACTIVITY");
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case SEND_RESULT:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
-                    handleSendResult((ResultData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case DESTROY_ACTIVITY:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
-                    handleDestroyActivity((IBinder)msg.obj, msg.arg1 != 0,
-                            msg.arg2, false);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
                 case BIND_APPLICATION:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "bindApplication");
                     AppBindData data = (AppBindData)msg.obj;
@@ -1671,11 +1432,6 @@ public final class ActivityThread {
                         mInitialApplication.onTerminate();
                     }
                     Looper.myLooper().quit();
-                    break;
-                case NEW_INTENT:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityNewIntent");
-                    handleNewIntent((NewIntentData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case RECEIVER:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveComp");
@@ -1708,15 +1464,7 @@ public final class ActivityThread {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
-                    mCurDefaultDisplayDpi = ((Configuration)msg.obj).densityDpi;
-                    mUpdatingSystemConfig = true;
-                    try {
-                        handleConfigurationChanged((Configuration) msg.obj, null);
-                    } finally {
-                        mUpdatingSystemConfig = false;
-                    }
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    handleConfigurationChanged((Configuration) msg.obj);
                     break;
                 case CLEAN_UP_CONTEXT:
                     ContextCleanupInfo cci = (ContextCleanupInfo)msg.obj;
@@ -1731,18 +1479,6 @@ public final class ActivityThread {
                 case LOW_MEMORY:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "lowMemory");
                     handleLowMemory();
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case ACTIVITY_CONFIGURATION_CHANGED:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
-                    handleActivityConfigurationChanged((ActivityConfigChangeData) msg.obj,
-                            INVALID_DISPLAY);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    break;
-                case ACTIVITY_MOVED_TO_DISPLAY:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
-                    handleActivityConfigurationChanged((ActivityConfigChangeData) msg.obj,
-                            msg.arg1 /* displayId */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case PROFILER_CONTROL:
@@ -1828,16 +1564,6 @@ public final class ActivityThread {
                 case STOP_BINDER_TRACKING_AND_DUMP:
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
-                case MULTI_WINDOW_MODE_CHANGED:
-                    handleMultiWindowModeChanged((IBinder) ((SomeArgs) msg.obj).arg1,
-                            ((SomeArgs) msg.obj).argi1 == 1,
-                            (Configuration) ((SomeArgs) msg.obj).arg2);
-                    break;
-                case PICTURE_IN_PICTURE_MODE_CHANGED:
-                    handlePictureInPictureModeChanged((IBinder) ((SomeArgs) msg.obj).arg1,
-                            ((SomeArgs) msg.obj).argi1 == 1,
-                            (Configuration) ((SomeArgs) msg.obj).arg2);
-                    break;
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
                             (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
@@ -1856,6 +1582,9 @@ public final class ActivityThread {
                 case RUN_ISOLATED_ENTRY_POINT:
                     handleRunIsolatedEntryPoint((String) ((SomeArgs) msg.obj).arg1,
                             (String[]) ((SomeArgs) msg.obj).arg2);
+                    break;
+                case EXECUTE_TRANSACTION:
+                    ((ClientTransaction) msg.obj).execute(ActivityThread.this);
                     break;
             }
             Object obj = msg.obj;
@@ -2601,10 +2330,16 @@ public final class ActivityThread {
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        mAppThread.scheduleSendResult(token, list);
+        final ClientTransaction clientTransaction = new ClientTransaction(mAppThread, token);
+        clientTransaction.addCallback(new ActivityResultItem(list));
+        try {
+            mAppThread.scheduleTransaction(clientTransaction);
+        } catch (RemoteException e) {
+            // Local scheduling
+        }
     }
 
-    private void sendMessage(int what, Object obj) {
+    void sendMessage(int what, Object obj) {
         sendMessage(what, obj, 0, 0, false);
     }
 
@@ -2844,6 +2579,37 @@ public final class ActivityThread {
         return appContext;
     }
 
+    @Override
+    public void handleLaunchActivity(IBinder token, Intent intent, int ident, ActivityInfo info,
+            Configuration overrideConfig, CompatibilityInfo compatInfo, String referrer,
+            IVoiceInteractor voiceInteractor, Bundle state, PersistableBundle persistentState,
+            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+            boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) {
+        ActivityClientRecord r = new ActivityClientRecord();
+
+        r.token = token;
+        r.ident = ident;
+        r.intent = intent;
+        r.referrer = referrer;
+        r.voiceInteractor = voiceInteractor;
+        r.activityInfo = info;
+        r.compatInfo = compatInfo;
+        r.state = state;
+        r.persistentState = persistentState;
+
+        r.pendingResults = pendingResults;
+        r.pendingIntents = pendingNewIntents;
+
+        r.startsNotResumed = notResumed;
+        r.isForward = isForward;
+
+        r.profilerInfo = profilerInfo;
+
+        r.overrideConfig = overrideConfig;
+        r.packageInfo = getPackageInfoNoCheck(r.activityInfo.applicationInfo, r.compatInfo);
+        handleLaunchActivity(r, null /* customIntent */, "LAUNCH_ACTIVITY");
+    }
+
     private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent, String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -2974,8 +2740,9 @@ public final class ActivityThread {
         }
     }
 
-    private void handleNewIntent(NewIntentData data) {
-        performNewIntents(data.token, data.intents, data.andPause);
+    @Override
+    public void handleNewIntent(IBinder token, List<ReferrerIntent> intents, boolean andPause) {
+        performNewIntents(token, intents, andPause);
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
@@ -3096,7 +2863,8 @@ public final class ActivityThread {
         }
     }
 
-    private void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
+    @Override
+    public void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
             Configuration overrideConfig) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
@@ -3108,7 +2876,8 @@ public final class ActivityThread {
         }
     }
 
-    private void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
+    @Override
+    public void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
             Configuration overrideConfig) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
@@ -3619,8 +3388,9 @@ public final class ActivityThread {
         r.mPendingRemoveWindowManager = null;
     }
 
-    final void handleResumeActivity(IBinder token,
-            boolean clearHide, boolean isForward, boolean reallyResume, int seq, String reason) {
+    @Override
+    public void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
+            boolean reallyResume, int seq, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (!checkAndUpdateLifecycleSeq(seq, r, "resumeActivity")) {
             return;
@@ -3823,7 +3593,8 @@ public final class ActivityThread {
         return thumbnail;
     }
 
-    private void handlePauseActivity(IBinder token, boolean finished,
+    @Override
+    public void handlePauseActivity(IBinder token, boolean finished,
             boolean userLeaving, int configChanges, boolean dontReport, int seq) {
         ActivityClientRecord r = mActivities.get(token);
         if (DEBUG_ORDER) Slog.d(TAG, "handlePauseActivity " + r + ", seq: " + seq);
@@ -4087,7 +3858,8 @@ public final class ActivityThread {
         }
     }
 
-    private void handleStopActivity(IBinder token, boolean show, int configChanges, int seq) {
+    @Override
+    public void handleStopActivity(IBinder token, boolean show, int configChanges, int seq) {
         ActivityClientRecord r = mActivities.get(token);
         if (!checkAndUpdateLifecycleSeq(seq, r, "stopActivity")) {
             return;
@@ -4142,7 +3914,8 @@ public final class ActivityThread {
         }
     }
 
-    private void handleWindowVisibility(IBinder token, boolean show) {
+    @Override
+    public void handleWindowVisibility(IBinder token, boolean show) {
         ActivityClientRecord r = mActivities.get(token);
 
         if (r == null) {
@@ -4288,8 +4061,9 @@ public final class ActivityThread {
         }
     }
 
-    private void handleSendResult(ResultData res) {
-        ActivityClientRecord r = mActivities.get(res.token);
+    @Override
+    public void handleSendResult(IBinder token, List<ResultInfo> results) {
+        ActivityClientRecord r = mActivities.get(token);
         if (DEBUG_RESULTS) Slog.v(TAG, "Handling send result to " + r);
         if (r != null) {
             final boolean resumed = !r.paused;
@@ -4323,7 +4097,7 @@ public final class ActivityThread {
                 }
             }
             checkAndBlockForNetworkAccess();
-            deliverResults(r, res.results);
+            deliverResults(r, results);
             if (resumed) {
                 r.activity.performResume();
                 r.activity.mTemporaryPause = false;
@@ -4410,8 +4184,9 @@ public final class ActivityThread {
         return component == null ? "[Unknown]" : component.toShortString();
     }
 
-    private void handleDestroyActivity(IBinder token, boolean finishing,
-            int configChanges, boolean getNonConfigInstance) {
+    @Override
+    public void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,
+            boolean getNonConfigInstance) {
         ActivityClientRecord r = performDestroyActivity(token, finishing,
                 configChanges, getNonConfigInstance);
         if (r != null) {
@@ -4982,7 +4757,20 @@ public final class ActivityThread {
         return config;
     }
 
-    final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
+    @Override
+    public void handleConfigurationChanged(Configuration config) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
+        mCurDefaultDisplayDpi = config.densityDpi;
+        mUpdatingSystemConfig = true;
+        try {
+            handleConfigurationChanged(config, null /* compat */);
+        } finally {
+            mUpdatingSystemConfig = false;
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    private void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
         int configDiff = 0;
 
@@ -5113,12 +4901,15 @@ public final class ActivityThread {
 
     /**
      * Handle new activity configuration and/or move to a different display.
-     * @param data Configuration update data.
+     * @param activityToken Target activity token.
+     * @param overrideConfig Activity override config.
      * @param displayId Id of the display where activity was moved to, -1 if there was no move and
      *                  value didn't change.
      */
-    void handleActivityConfigurationChanged(ActivityConfigChangeData data, int displayId) {
-        ActivityClientRecord r = mActivities.get(data.activityToken);
+    @Override
+    public void handleActivityConfigurationChanged(IBinder activityToken,
+            Configuration overrideConfig, int displayId) {
+        ActivityClientRecord r = mActivities.get(activityToken);
         // Check input params.
         if (r == null || r.activity == null) {
             if (DEBUG_CONFIGURATION) Slog.w(TAG, "Not found target activity to report to: " + r);
@@ -5128,14 +4919,14 @@ public final class ActivityThread {
                 && displayId != r.activity.getDisplay().getDisplayId();
 
         // Perform updates.
-        r.overrideConfig = data.overrideConfig;
+        r.overrideConfig = overrideConfig;
         final ViewRootImpl viewRoot = r.activity.mDecor != null
             ? r.activity.mDecor.getViewRootImpl() : null;
 
         if (movedToDifferentDisplay) {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity moved to display, activity:"
                     + r.activityInfo.name + ", displayId=" + displayId
-                    + ", config=" + data.overrideConfig);
+                    + ", config=" + overrideConfig);
 
             final Configuration reportedConfig = performConfigurationChangedForActivity(r,
                     mCompatConfiguration, displayId, true /* movedToDifferentDisplay */);
@@ -5144,7 +4935,7 @@ public final class ActivityThread {
             }
         } else {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
-                    + r.activityInfo.name + ", config=" + data.overrideConfig);
+                    + r.activityInfo.name + ", config=" + overrideConfig);
             performConfigurationChangedForActivity(r, mCompatConfiguration);
         }
         // Notify the ViewRootImpl instance about configuration changes. It may have initiated this

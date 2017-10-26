@@ -114,6 +114,7 @@ import android.app.ResultInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.servertransaction.LaunchActivityItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1375,7 +1376,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
-                app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
+                mService.mLifecycleManager.scheduleTransaction(app.thread, r.appToken,
+                        new LaunchActivityItem(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
@@ -1383,7 +1385,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
                         r.persistentState, results, newIntents, !andResume,
-                        mService.isNextTransitionForward(), profilerInfo);
+                        mService.isNextTransitionForward(), profilerInfo));
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                     // This may be a heavy-weight process!  Note that the package

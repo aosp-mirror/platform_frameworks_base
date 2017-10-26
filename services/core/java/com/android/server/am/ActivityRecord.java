@@ -131,6 +131,12 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
+import android.app.servertransaction.MoveToDisplayItem;
+import android.app.servertransaction.MultiWindowModeChangeItem;
+import android.app.servertransaction.NewIntentItem;
+import android.app.servertransaction.PipModeChangeItem;
+import android.app.servertransaction.WindowVisibilityItem;
+import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -618,8 +624,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     "Reporting activity moved to display" + ", activityRecord=" + this
                             + ", displayId=" + displayId + ", config=" + config);
 
-            app.thread.scheduleActivityMovedToDisplay(appToken, displayId,
-                    new Configuration(config));
+            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                    new MoveToDisplayItem(displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -636,7 +642,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
                     + config);
 
-            app.thread.scheduleActivityConfigurationChanged(appToken, new Configuration(config));
+            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                    new ActivityConfigurationChangeItem(config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -657,8 +664,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
-            app.thread.scheduleMultiWindowModeChanged(appToken, mLastReportedMultiWindowMode,
-                    overrideConfig);
+            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                    new MultiWindowModeChangeItem(mLastReportedMultiWindowMode,
+                            overrideConfig));
         } catch (Exception e) {
             // If process died, I don't care.
         }
@@ -684,8 +692,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
-            app.thread.schedulePictureInPictureModeChanged(appToken,
-                    mLastReportedPictureInPictureMode, overrideConfig);
+            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                    new PipModeChangeItem(mLastReportedPictureInPictureMode,
+                            overrideConfig));
         } catch (Exception e) {
             // If process died, no one cares.
         }
@@ -1364,8 +1373,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                app.thread.scheduleNewIntent(
-                        ar, appToken, state == PAUSED /* andPause */);
+                service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                        new NewIntentItem(ar, state == PAUSED));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -1587,7 +1596,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             setVisible(true);
             sleeping = false;
             app.pendingUiClean = true;
-            app.thread.scheduleWindowVisibility(appToken, true /* showWindow */);
+            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                    new WindowVisibilityItem(true /* showWindow */));
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
