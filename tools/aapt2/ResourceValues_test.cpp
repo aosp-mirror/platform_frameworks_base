@@ -18,6 +18,10 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
+using ::testing::SizeIs;
+using ::testing::StrEq;
+
 namespace aapt {
 
 TEST(ResourceValuesTest, PluralEquals) {
@@ -146,6 +150,22 @@ TEST(ResourceValuesTest, StyleClone) {
 
   std::unique_ptr<Style> b(a->Clone(nullptr));
   EXPECT_TRUE(a->Equals(b.get()));
+}
+
+TEST(ResourcesValuesTest, StringClones) {
+  StringPool pool_a;
+  StringPool pool_b;
+
+  String str_a(pool_a.MakeRef("hello", StringPool::Context(test::ParseConfigOrDie("en"))));
+
+  ASSERT_THAT(pool_a, SizeIs(1u));
+  EXPECT_THAT(pool_a.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
+  EXPECT_THAT(pool_a.strings()[0]->value, StrEq("hello"));
+
+  std::unique_ptr<String> str_b(str_a.Clone(&pool_b));
+  ASSERT_THAT(pool_b, SizeIs(1u));
+  EXPECT_THAT(pool_b.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
+  EXPECT_THAT(pool_b.strings()[0]->value, StrEq("hello"));
 }
 
 TEST(ResourceValuesTest, StyleMerges) {

@@ -17,7 +17,6 @@
 package android.service.carrier;
 
 import android.os.PersistableBundle;
-import android.os.ResultReceiver;
 import android.service.carrier.CarrierIdentifier;
 
 /**
@@ -29,5 +28,5 @@ import android.service.carrier.CarrierIdentifier;
 interface ICarrierService {
 
     /** @see android.service.carrier.CarrierService#onLoadConfig */
-    oneway void getCarrierConfig(in CarrierIdentifier id, in ResultReceiver result);
+    PersistableBundle getCarrierConfig(in CarrierIdentifier id);
 }

@@ -103,8 +103,8 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
     // fd2   A file descriptor bound to the following netlink groups
     //       (NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY).
     base::unique_fd
-            fd1(conntrackSocket(NFNLGRP_CONNTRACK_NEW | NFNLGRP_CONNTRACK_DESTROY)),
-            fd2(conntrackSocket(NFNLGRP_CONNTRACK_UPDATE | NFNLGRP_CONNTRACK_DESTROY));
+            fd1(conntrackSocket(NF_NETLINK_CONNTRACK_NEW | NF_NETLINK_CONNTRACK_DESTROY)),
+            fd2(conntrackSocket(NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY));
     if (fd1.get() < 0 || fd2.get() < 0) {
         ALOGE("Unable to create conntrack handles: %d/%s", errno, strerror(errno));
         return false;

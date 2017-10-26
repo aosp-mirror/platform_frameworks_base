@@ -66,31 +66,7 @@ static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 // Throttling interval for user activity calls.
 static const nsecs_t MIN_TIME_BETWEEN_USERACTIVITIES = 100 * 1000000L; // 100ms
 
-static int gPowerHintMask = 0xffffffff;
-
 // ----------------------------------------------------------------------------
-
-static bool shouldSendPowerHint(uint featureId, int data) {
-    switch ((PowerHint) featureId) {
-    case PowerHint::VSYNC:
-    case PowerHint::SUSTAINED_PERFORMANCE:
-    case PowerHint::VR_MODE:
-    case PowerHint::LAUNCH:
-        if (data == 0) return true; // Always pass 0
-        break;
-    case PowerHint::LOW_POWER:           // TODO Use it?
-        if (data == 0) {
-            featureId = 16;
-        }
-    default:
-        break; // Just pass the other ones.
-    }
-    return (gPowerHintMask & (1 << (featureId - 1))) != 0;
-}
-
-static bool shouldSendPowerHint(PowerHint feature, int data) {
-    return shouldSendPowerHint((uint) feature, data);
-}
 
 static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
@@ -146,7 +122,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 
             // Tell the power HAL when user activity occurs.
             gPowerHalMutex.lock();
-            if (shouldSendPowerHint(PowerHint::INTERACTION, 0) && getPowerHal()) {
+            if (getPowerHal()) {
               Return<void> ret;
               if (gPowerHalV1_1 != nullptr) {
                 ret = gPowerHalV1_1->powerHintAsync(PowerHint::INTERACTION, 0);
@@ -201,13 +177,6 @@ static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean
     }
 }
 
-static void nativeSetPowerHintMask(JNIEnv* /* env */, jclass /* clazz */, jint mask) {
-    std::lock_guard<std::mutex> lock(gPowerHalMutex);
-    gPowerHintMask = mask;
-
-    ALOGD("nativeSetPowerHintMask: mask=%x", gPowerHintMask);
-}
-
 static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (enable) {
         android::base::Timer t;
@@ -226,8 +195,7 @@ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean
 
 static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint data) {
     std::lock_guard<std::mutex> lock(gPowerHalMutex);
-
-    if (shouldSendPowerHint(hintId, data) && getPowerHal()) {
+    if (getPowerHal()) {
         Return<void> ret;
         if (gPowerHalV1_1 != nullptr) {
             ret =  gPowerHalV1_1->powerHintAsync((PowerHint)hintId, data);
@@ -264,9 +232,6 @@ static const JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeSendPowerHint },
     { "nativeSetFeature", "(II)V",
             (void*) nativeSetFeature },
-
-    { "nativeSetPowerHintMask", "(I)V",
-            (void*) nativeSetPowerHintMask },
 };
 
 #define FIND_CLASS(var, className) \

@@ -286,7 +286,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
-    <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
+    <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Inaruhusu programu kuwa upau wa hali."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"panua/kunja mwambaa hali"</string>
@@ -977,7 +977,6 @@
     <string name="cancel" msgid="6442560571259935130">"Ghairi"</string>
     <string name="yes" msgid="5362982303337969312">"Sawa"</string>
     <string name="no" msgid="5141531044935541497">"Ghairi"</string>
-    <string name="close" msgid="2318214661230355730">"FUNGA"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Zingatia"</string>
     <string name="loading" msgid="7933681260296021180">"Inapakia…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Washa"</string>
@@ -1034,8 +1033,6 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Kipimo"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Onyesha kila wakati"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Wezesha tena hii katika mipangilio ya Mfumo &gt; Programu &gt;  iliyopakuliwa."</string>
-    <string name="top_app_killed_title" msgid="6814231368167994497">"Programu haifanyi kazi"</string>
-    <string name="top_app_killed_message" msgid="3487519022191609844">"Huenda <xliff:g id="APP_NAME">%1$s</xliff:g> inatumia hifadhi nyingi mno."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> haiwezi kutumia mipangilio ya sasa ya ukubwa wa Skrini na huenda isifanye kazi vizuri."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Onyesha kila wakati"</string>
     <string name="smv_application" msgid="3307209192155442829">"Programu <xliff:g id="APPLICATION">%1$s</xliff:g>  (utaratibu  <xliff:g id="PROCESS">%2$s</xliff:g>) imeenda kinyume na sera yake ya StrictMode."</string>
@@ -1059,7 +1056,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Anza <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Komesha programu ya zamani bila kuhifadhi."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> imezidi kiwango cha hifadhi kinachotakikana"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Imezidi kikomo cha hifadhi; gonga ili uishiriki"</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Imezidi kikomo cha hifadhi; gusa ili uishiriki"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Ungependa kushiriki picha ya binafsi?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Mchakato wa <xliff:g id="PROC">%1$s</xliff:g> umezidi kiwango kinachotakikana cha hifadhi cha <xliff:g id="SIZE">%2$s</xliff:g>. Unaweza kupata picha ya hifadhi ili uishiriki na msadini programu wa picha. Tahadhari: picha hii ya hifadhi inaweza kuwa na maelezo yako ya binafsi ambayo yanaweza kufikiwa na programu."</string>
     <string name="sendText" msgid="5209874571959469142">"Chagua kitendo kwa ajili ya maandishi"</string>

@@ -134,7 +134,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 if (lastDevice != null) {
                     int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        state.icon = new BluetoothBatteryDrawable(batteryLevel);
+                        state.icon = new BluetoothBatteryDrawable(batteryLevel,
+                                mContext.getResources().getFraction(
+                                        R.fraction.bt_battery_scale_fraction, 1, 1));
                     }
                 }
                 state.contentDescription = mContext.getString(
@@ -212,17 +214,21 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     private class BluetoothBatteryDrawable extends Icon {
         private int mLevel;
+        private float mIconScale;
 
         BluetoothBatteryDrawable(int level) {
+            this(level, 1 /* iconScale */);
+        }
+
+        BluetoothBatteryDrawable(int level, float iconScale) {
             mLevel = level;
+            mIconScale = iconScale;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
             return createLayerDrawable(context,
-                    R.drawable.ic_qs_bluetooth_connected, mLevel,
-                    context.getResources().getFraction(
-                            R.fraction.bt_battery_scale_fraction, 1, 1));
+                    R.drawable.ic_qs_bluetooth_connected, mLevel, mIconScale);
         }
     }
 
@@ -304,8 +310,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                            item.iconDrawable = createLayerDrawable(mContext, item.icon,
-                                    batteryLevel);
+                            item.iconDrawable = new BluetoothBatteryDrawable(batteryLevel);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
                                     Utils.formatPercentage(batteryLevel));

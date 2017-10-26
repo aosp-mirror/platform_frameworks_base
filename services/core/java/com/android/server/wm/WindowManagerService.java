@@ -398,7 +398,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
-    // final boolean mAllowAnimationsInLowPowerMode;
+    final boolean mAllowAnimationsInLowPowerMode;
 
     final boolean mAllowBootMessages;
 
@@ -1039,8 +1039,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_defaultInTouchMode);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
-//        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
-//                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
+        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
@@ -1086,7 +1086,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 public void onLowPowerModeChanged(PowerSaveState result) {
                     synchronized (mWindowMap) {
                         final boolean enabled = result.batterySaverEnabled;
-                        if (mAnimationsDisabled != enabled) {
+                        if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
                             mAnimationsDisabled = enabled;
                             dispatchNewAnimatorScaleLocked(null);
                         }
@@ -7673,7 +7673,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean hasWideColorGamutSupport() {
-        return mHasWideColorGamutSupport;
+        return mHasWideColorGamutSupport &&
+                !SystemProperties.getBoolean("persist.sys.sf.native_mode", false);
     }
 
     void updateNonSystemOverlayWindowsVisibilityIfNeeded(WindowState win, boolean surfaceShown) {
