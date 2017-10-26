@@ -218,6 +218,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/location/IGeofenceHardwareMonitorCallback.aidl \
 	core/java/android/hardware/location/IContextHubCallback.aidl \
 	core/java/android/hardware/location/IContextHubService.aidl \
+	core/java/android/hardware/location/IContextHubTransactionCallback.aidl \
 	core/java/android/hardware/radio/IRadioService.aidl \
 	core/java/android/hardware/radio/ITuner.aidl \
 	core/java/android/hardware/radio/ITunerCallback.aidl \
