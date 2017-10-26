@@ -302,11 +302,6 @@ public class RecentsTransitionHelper {
      */
     private List<AppTransitionAnimationSpec> composeAnimationSpecs(final Task task,
             final TaskStackView stackView, int windowingMode, int activityType, Rect windowRect) {
-        if (activityType == ACTIVITY_TYPE_RECENTS || activityType == ACTIVITY_TYPE_HOME
-                || windowingMode == WINDOWING_MODE_PINNED) {
-            return null;
-        }
-
         // Calculate the offscreen task rect (for tasks that are not backed by views)
         TaskView taskView = stackView.getChildViewForTask(task);
         TaskStackLayoutAlgorithm stackLayout = stackView.getStackAlgorithm();

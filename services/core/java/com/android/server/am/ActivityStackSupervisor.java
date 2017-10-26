@@ -285,7 +285,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     RecentTasks mRecentTasks;
 
     /** Helper class to abstract out logic for fetching the set of currently running tasks */
-    private RunningTasks mRunningTasks = new RunningTasks();
+    private RunningTasks mRunningTasks;
 
     final ActivityStackSupervisorHandler mHandler;
 
@@ -572,6 +572,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(looper);
+        mRunningTasks = createRunningTasks();
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mKeyguardController = new KeyguardController(service, this);
 
@@ -582,6 +583,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void setRecentTasks(RecentTasks recentTasks) {
         mRecentTasks = recentTasks;
         mRecentTasks.registerCallback(this);
+    }
+
+    @VisibleForTesting
+    RunningTasks createRunningTasks() {
+        return new RunningTasks();
     }
 
     /**
@@ -1559,7 +1565,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
         if (options != null) {
-            if (options.getLaunchTaskId() != INVALID_STACK_ID) {
+            // If a launch task id is specified, then ensure that the caller is the recents
+            // component or has the START_TASKS_FROM_RECENTS permission
+            if (options.getLaunchTaskId() != INVALID_TASK_ID
+                    && !mRecentTasks.isCallerRecents(callingUid)) {
                 final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
                         callingPid, callingUid);
                 if (startInTaskPerm == PERMISSION_DENIED) {

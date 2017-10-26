@@ -23,6 +23,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
+import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
@@ -672,7 +673,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * List of intents that were used to start the most recent tasks.
      */
-    final RecentTasks mRecentTasks;
+    private final RecentTasks mRecentTasks;
 
     /**
      * For addAppTask: cached of the last activity component that was added.
@@ -2773,7 +2774,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStarter = new ActivityStarter(this);
-        mRecentTasks = new RecentTasks(this, mStackSupervisor);
+        mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
 
@@ -2817,6 +2818,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     protected ActivityStackSupervisor createStackSupervisor() {
         return new ActivityStackSupervisor(this, mHandler.getLooper());
+    }
+
+    protected RecentTasks createRecentTasks() {
+        return new RecentTasks(this, mStackSupervisor);
+    }
+
+    RecentTasks getRecentTasks() {
+        return mRecentTasks;
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -3154,6 +3163,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 final ActivityStack stack = mStackSupervisor.getStack(stackId);
                 if (stack == null) {
+                    Slog.w(TAG, "setFocusedStack: No stack with id=" + stackId);
                     return;
                 }
                 final ActivityRecord r = stack.topRunningActivityLocked();
@@ -3190,7 +3200,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "registerTaskStackListener()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "registerTaskStackListener()");
         mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
 
@@ -3199,7 +3210,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void unregisterTaskStackListener(ITaskStackListener listener) throws RemoteException {
-         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "unregisterTaskStackListener()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "unregisterTaskStackListener()");
          mTaskChangeNotificationController.unregisterTaskStackListener(listener);
      }
 
@@ -4877,12 +4889,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public final int startActivityFromRecents(int taskId, Bundle bOptions) {
-        if (checkCallingPermission(START_TASKS_FROM_RECENTS) != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: startActivityFromRecents called without " +
-                    START_TASKS_FROM_RECENTS;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
+        enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
+                "startActivityFromRecents()");
+
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -8334,9 +8343,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * This can be called with or without the global lock held.
-     */
     int checkComponentPermission(String permission, int pid, int uid,
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
@@ -8408,6 +8414,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 + " requires " + permission;
         Slog.w(TAG, msg);
         throw new SecurityException(msg);
+    }
+
+    /**
+     * This can be called with or without the global lock held.
+     */
+    void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
+        if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
+            enforceCallingPermission(permission, func);
+        }
     }
 
     /**
@@ -9799,6 +9814,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
+        if (mRecentTasks.isCallerRecents(callingUid)) {
+            // Always allow the recents component to get tasks
+            return true;
+        }
+
         boolean allowed = checkPermission(android.Manifest.permission.REAL_GET_TASKS,
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
         if (!allowed) {
@@ -9846,8 +9866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public ActivityManager.TaskDescription getTaskDescription(int id) {
         synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                    "getTaskDescription()");
+            enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getTaskDescription()");
             final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(id,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr != null) {
@@ -10041,7 +10060,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void cancelTaskWindowTransition(int taskId) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "cancelTaskWindowTransition()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "cancelTaskWindowTransition()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -10060,7 +10080,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void cancelTaskThumbnailTransition(int taskId) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "cancelTaskThumbnailTransition()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "cancelTaskThumbnailTransition()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -10079,7 +10100,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
-        enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
+        enforceCallerIsRecentsOrHasPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
             final TaskRecord task;
@@ -10132,12 +10153,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void removeStack(int stackId) {
-        enforceCallingPermission(Manifest.permission.MANAGE_ACTIVITY_STACKS, "removeStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "removeStack()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 final ActivityStack stack = mStackSupervisor.getStack(stackId);
                 if (stack == null) {
+                    Slog.w(TAG, "removeStack: No stack with id=" + stackId);
                     return;
                 }
                 if (!stack.isActivityTypeStandardOrUndefined()) {
@@ -10157,7 +10179,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void removeStacksInWindowingModes(int[] windowingModes) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "removeStacksInWindowingModes()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "removeStacksInWindowingModes()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -10170,7 +10193,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void removeStacksWithActivityTypes(int[] activityTypes) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "removeStacksWithActivityTypes()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "removeStacksWithActivityTypes()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -10199,7 +10223,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean removeTask(int taskId) {
-        enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS, "removeTask()");
+        enforceCallerIsRecentsOrHasPermission(REMOVE_TASKS, "removeTask()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -10376,7 +10400,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -10412,7 +10436,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
@@ -10463,7 +10487,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
@@ -10502,12 +10526,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void dismissSplitScreenMode(boolean toTop) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "dismissSplitScreenMode()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "dismissSplitScreenMode()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final ActivityStack stack =
                         mStackSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
+                if (stack == null) {
+                    Slog.w(TAG, "dismissSplitScreenMode: primary split-screen stack not found.");
+                    return;
+                }
                 if (toTop) {
                     mStackSupervisor.resizeStackLocked(stack, null /* destBounds */,
                             null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
@@ -10530,14 +10558,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void dismissPip(boolean animate, int animationDuration) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "dismissPip()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "dismissPip()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final PinnedActivityStack stack =
                         mStackSupervisor.getDefaultDisplay().getPinnedStack();
-
                 if (stack == null) {
+                    Slog.w(TAG, "dismissPip: pinned stack not found.");
                     return;
                 }
                 if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
@@ -10567,7 +10595,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTopActivityToPinnedStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "moveTopActivityToPinnedStack()");
         synchronized (this) {
             if (!mSupportsPictureInPicture) {
                 throw new IllegalStateException("moveTopActivityToPinnedStack:"
@@ -10586,13 +10615,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void resizeStack(int stackId, Rect destBounds, boolean allowResizeInDockedMode,
             boolean preserveWindows, boolean animate, int animationDuration) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 if (animate) {
                     final PinnedActivityStack stack = mStackSupervisor.getStack(stackId);
                     if (stack == null) {
+                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
                         return;
                     }
                     if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
@@ -10621,8 +10651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds,
             Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "resizeDockedStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizeDockedStack()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -10637,8 +10666,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void resizePinnedStack(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "resizePinnedStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizePinnedStack()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -10697,7 +10725,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public List<StackInfo> getAllStackInfos() {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -10710,7 +10738,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public StackInfo getStackInfo(int windowingMode, int activityType) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -11871,8 +11899,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void appNotRespondingViaProvider(IBinder connection) {
-        enforceCallingPermission(
-                android.Manifest.permission.REMOVE_TASKS, "appNotRespondingViaProvider()");
+        enforceCallingPermission(REMOVE_TASKS, "appNotRespondingViaProvider()");
 
         final ContentProviderConnection conn = (ContentProviderConnection) connection;
         if (conn == null) {
@@ -18135,8 +18162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // =========================================================
 
     @Override
-    public List<ActivityManager.RunningServiceInfo> getServices(int maxNum,
-            int flags) {
+    public List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags) {
         enforceNotIsolatedCaller("getServices");
 
         final int callingUid = Binder.getCallingUid();
@@ -20080,7 +20106,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public StackInfo getFocusedStackInfo() throws RemoteException {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -20120,7 +20146,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     // TODO: API should just be about changing windowing modes...
     public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTasksToFullscreenStack()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "moveTasksToFullscreenStack()");
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
             try {

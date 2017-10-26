@@ -78,7 +78,11 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        final ActivityManagerService service = spy(new TestActivityManagerService(mContext));
+        return setupActivityManagerService(new TestActivityManagerService(mContext));
+    }
+
+    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+        service = spy(service);
         service.mWindowManager = prepareMockWindowManager();
         return service;
     }
