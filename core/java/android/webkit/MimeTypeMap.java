@@ -37,7 +37,7 @@ public class MimeTypeMap {
     }
 
     /**
-     * Returns the file extension or an empty string iff there is no
+     * Returns the file extension or an empty string if there is no
      * extension. This method is a convenience method for obtaining the
      * extension of a url and has undefined results for other Strings.
      * @param url
@@ -76,7 +76,7 @@ public class MimeTypeMap {
     /**
      * Return {@code true} if the given MIME type has an entry in the map.
      * @param mimeType A MIME type (i.e. text/plain)
-     * @return {@code true} iff there is a mimeType entry in the map.
+     * @return {@code true} if there is a mimeType entry in the map.
      */
     public boolean hasMimeType(String mimeType) {
         return MimeUtils.hasMimeType(mimeType);
@@ -85,7 +85,7 @@ public class MimeTypeMap {
     /**
      * Return the MIME type for the given extension.
      * @param extension A file extension without the leading '.'
-     * @return The MIME type for the given extension or {@code null} iff there is none.
+     * @return The MIME type for the given extension or {@code null} if there is none.
      */
     @Nullable
     public String getMimeTypeFromExtension(String extension) {
@@ -100,7 +100,7 @@ public class MimeTypeMap {
     /**
      * Return {@code true} if the given extension has a registered MIME type.
      * @param extension A file extension without the leading '.'
-     * @return {@code true} iff there is an extension entry in the map.
+     * @return {@code true} if there is an extension entry in the map.
      */
     public boolean hasExtension(String extension) {
         return MimeUtils.hasExtension(extension);
@@ -111,7 +111,7 @@ public class MimeTypeMap {
      * MIME types map to multiple extensions. This call will return the most
      * common extension for the given MIME type.
      * @param mimeType A MIME type (i.e. text/plain)
-     * @return The extension for the given MIME type or {@code null} iff there is none.
+     * @return The extension for the given MIME type or {@code null} if there is none.
      */
     @Nullable
     public String getExtensionFromMimeType(String mimeType) {

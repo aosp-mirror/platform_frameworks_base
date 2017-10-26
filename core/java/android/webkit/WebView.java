@@ -1103,7 +1103,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Gets whether this WebView has a back history item.
      *
-     * @return {@code true} iff this WebView has a back history item
+     * @return {@code true} if this WebView has a back history item
      */
     public boolean canGoBack() {
         checkThread();
@@ -1121,7 +1121,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Gets whether this WebView has a forward history item.
      *
-     * @return {@code true} iff this WebView has a forward history item
+     * @return {@code true} if this WebView has a forward history item
      */
     public boolean canGoForward() {
         checkThread();
