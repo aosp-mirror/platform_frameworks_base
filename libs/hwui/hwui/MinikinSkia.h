@@ -32,13 +32,16 @@ public:
         int ttcIndex, const std::vector<minikin::FontVariation>& axes);
 
     float GetHorizontalAdvance(uint32_t glyph_id,
-        const minikin::MinikinPaint &paint) const;
+        const minikin::MinikinPaint& paint,
+        const minikin::FontFakery& fakery) const override;
 
     void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
-        const minikin::MinikinPaint &paint) const;
+        const minikin::MinikinPaint& paint,
+        const minikin::FontFakery& fakery) const override;
 
     void GetFontExtent(minikin::MinikinExtent* extent,
-        const minikin::MinikinPaint &paint) const;
+        const minikin::MinikinPaint& paint,
+        const minikin::FontFakery& fakery) const override;
 
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
