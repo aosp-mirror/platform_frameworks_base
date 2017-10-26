@@ -253,39 +253,33 @@ public final class BatteryService extends SystemService {
             mHealthServiceWrapper.init(mHealthHalCallback,
                     new HealthServiceWrapper.IServiceManagerSupplier() {},
                     new HealthServiceWrapper.IHealthSupplier() {});
-        } catch (RemoteException | NoSuchElementException ex) {
-            Slog.w(TAG, "health: cannot register callback. "
-                        + "BatteryService will be started with dummy values. Reason: "
-                        + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-            update(new HealthInfo());
-            return;
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "health: cannot register callback. (RemoteException)");
+            throw ex.rethrowFromSystemServer();
+        } catch (NoSuchElementException ex) {
+            Slog.e(TAG, "health: cannot register callback. (no supported health HAL service)");
+            throw ex;
         }
 
         // init register for new service notifications, and IServiceManager should return the
         // existing service in a near future. Wait for this.update() to instantiate
         // the initial mHealthInfo.
-        long timeWaited = 0;
+        long beforeWait = SystemClock.uptimeMillis();
         synchronized (mLock) {
-            long beforeWait = SystemClock.uptimeMillis();
-            while (mHealthInfo == null &&
-                    (timeWaited = SystemClock.uptimeMillis() - beforeWait) < HEALTH_HAL_WAIT_MS) {
+            while (mHealthInfo == null) {
+                Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait) +
+                        "ms for callbacks. Waiting another " + HEALTH_HAL_WAIT_MS + " ms...");
                 try {
-                    mLock.wait(HEALTH_HAL_WAIT_MS - timeWaited);
+                    mLock.wait(HEALTH_HAL_WAIT_MS);
                 } catch (InterruptedException ex) {
-                    break;
+                    Slog.i(TAG, "health: InterruptedException when waiting for update. "
+                        + " Continuing...");
                 }
-            }
-            if (mHealthInfo == null) {
-                Slog.w(TAG, "health: Waited " + timeWaited + "ms for callbacks but received "
-                        + "nothing. BatteryService will be started with dummy values.");
-                update(new HealthInfo());
-                return;
             }
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "health: Waited " + timeWaited + "ms and received the update.");
-        }
+        Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
+                + "ms and received the update.");
     }
 
     private void updateBatteryWarningLevelLocked() {
