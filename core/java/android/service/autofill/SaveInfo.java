@@ -535,14 +535,15 @@ public final class SaveInfo implements Parcelable {
          * 16 digits, or 15 digits starting with 108:
          *
          * <pre class="prettyprint">
-         * import android.service.autofill.Validators;
+         * import static android.service.autofill.Validators.and;
+         * import static android.service.autofill.Validators.or;
          *
          * Validator validator =
          *   and(
          *     new LuhnChecksumValidator(ccNumberId),
          *     or(
-         *       new RegexValidator(ccNumberId, Pattern.compile(""^\\d{16}$")),
-         *       new RegexValidator(ccNumberId, Pattern.compile(""^108\\d{12}$"))
+         *       new RegexValidator(ccNumberId, Pattern.compile("^\\d{16}$")),
+         *       new RegexValidator(ccNumberId, Pattern.compile("^108\\d{12}$"))
          *     )
          *   );
          * </pre>
@@ -562,14 +563,14 @@ public final class SaveInfo implements Parcelable {
          * 4 digits on each field:
          *
          * <pre class="prettyprint">
-         * import android.service.autofill.Validators;
+         * import static android.service.autofill.Validators.and;
          *
          * Validator validator =
          *   and(
-         *     new RegexValidator(ccNumberId1, Pattern.compile(""^\\d{4}$")),
-         *     new RegexValidator(ccNumberId2, Pattern.compile(""^\\d{4}$")),
-         *     new RegexValidator(ccNumberId3, Pattern.compile(""^\\d{4}$")),
-         *     new RegexValidator(ccNumberId4, Pattern.compile(""^\\d{4}$"))
+         *     new RegexValidator(ccNumberId1, Pattern.compile("^\\d{4}$")),
+         *     new RegexValidator(ccNumberId2, Pattern.compile("^\\d{4}$")),
+         *     new RegexValidator(ccNumberId3, Pattern.compile("^\\d{4}$")),
+         *     new RegexValidator(ccNumberId4, Pattern.compile("^\\d{4}$"))
          *   );
          * </pre>
          *
