@@ -535,9 +535,13 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Constructs a new WebView with a Context object.
+     * Constructs a new WebView with an Activity Context object.
      *
-     * @param context a Context object used to access application assets
+     * <p class="note"><b>Note:</b> WebView should always be instantiated with an Activity Context.
+     * If instantiated with an Application Context, WebView will be unable to provide several
+     * features, such as JavaScript dialogs and autofill.
+     *
+     * @param context an Activity Context to access application assets
      */
     public WebView(Context context) {
         this(context, null);
@@ -546,7 +550,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Constructs a new WebView with layout parameters.
      *
-     * @param context a Context object used to access application assets
+     * @param context an Activity Context to access application assets
      * @param attrs an AttributeSet passed to our parent
      */
     public WebView(Context context, AttributeSet attrs) {
@@ -556,7 +560,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Constructs a new WebView with layout parameters and a default style.
      *
-     * @param context a Context object used to access application assets
+     * @param context an Activity Context to access application assets
      * @param attrs an AttributeSet passed to our parent
      * @param defStyleAttr an attribute in the current theme that contains a
      *        reference to a style resource that supplies default values for
@@ -569,7 +573,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Constructs a new WebView with layout parameters and a default style.
      *
-     * @param context a Context object used to access application assets
+     * @param context an Activity Context to access application assets
      * @param attrs an AttributeSet passed to our parent
      * @param defStyleAttr an attribute in the current theme that contains a
      *        reference to a style resource that supplies default values for
@@ -586,7 +590,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Constructs a new WebView with layout parameters and a default style.
      *
-     * @param context a Context object used to access application assets
+     * @param context an Activity Context to access application assets
      * @param attrs an AttributeSet passed to our parent
      * @param defStyleAttr an attribute in the current theme that contains a
      *        reference to a style resource that supplies default values for
@@ -611,7 +615,7 @@ public class WebView extends AbsoluteLayout
      * time. This guarantees that these interfaces will be available when the JS
      * context is initialized.
      *
-     * @param context a Context object used to access application assets
+     * @param context an Activity Context to access application assets
      * @param attrs an AttributeSet passed to our parent
      * @param defStyleAttr an attribute in the current theme that contains a
      *        reference to a style resource that supplies default values for
