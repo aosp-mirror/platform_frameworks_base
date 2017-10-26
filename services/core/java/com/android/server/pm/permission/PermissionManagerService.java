@@ -1056,7 +1056,7 @@ public class PermissionManagerService {
                         // before.  In this case we do want to allow the app to
                         // now get the new permission if the ancestral apk is
                         // privileged to get it.
-                        if (disabledPkg != null
+                        if (disabledPs != null && disabledPkg != null
                                 && isPackageRequestingPermission(disabledPkg, perm)
                                 && ((privilegedPermission && disabledPs.isPrivileged())
                                         || (oemPermission && disabledPs.isOem()
