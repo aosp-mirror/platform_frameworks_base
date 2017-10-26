@@ -20,24 +20,24 @@ option java_outer_classname = "IncidentProtoMetadata";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
+import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/os/incidentheader.proto";
+import "frameworks/base/core/proto/android/os/kernelwake.proto";
+import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
+import "frameworks/base/core/proto/android/os/procrank.proto";
+import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
+import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/batterystats.proto";
-import "frameworks/base/core/proto/android/service/fingerprint.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
-import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
-import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
-import "frameworks/base/core/proto/android/providers/settings.proto";
-import "frameworks/base/core/proto/android/os/incidentheader.proto";
-import "frameworks/base/core/proto/android/os/kernelwake.proto";
-import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
-import "frameworks/base/core/proto/android/os/procrank.proto";
 
 package android.os;
 
@@ -69,7 +69,7 @@ message IncidentProto {
 
 
     // System Services
-    optional android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+    optional com.android.server.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "fingerprint --proto --incident"
     ];
