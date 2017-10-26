@@ -137,7 +137,7 @@ public final class WebViewFactory {
     }
 
     /**
-     * Load the native library for the given package name iff that package
+     * Load the native library for the given package name if that package
      * name is the same as the one providing the webview.
      */
     public static int loadWebViewNativeLibraryFromPackage(String packageName,
