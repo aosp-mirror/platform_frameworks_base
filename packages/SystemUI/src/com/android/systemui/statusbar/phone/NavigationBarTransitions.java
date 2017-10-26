@@ -17,12 +17,19 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.SparseArray;
+import android.view.Display;
+import android.view.IWallpaperVisibilityListener;
+import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 public final class NavigationBarTransitions extends BarTransitions {
@@ -30,8 +37,10 @@ public final class NavigationBarTransitions extends BarTransitions {
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
     private final LightBarTransitionsController mLightTransitionsController;
+    private boolean mWallpaperVisible;
 
     private boolean mLightsOut;
+    private boolean mAutoDim;
 
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
@@ -40,11 +49,38 @@ public final class NavigationBarTransitions extends BarTransitions {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mLightTransitionsController = new LightBarTransitionsController(view.getContext(),
                 this::applyDarkIntensity);
+
+        IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
+        Handler handler = Handler.getMain();
+        try {
+            mWallpaperVisible = windowManagerService.registerWallpaperVisibilityListener(
+                new IWallpaperVisibilityListener.Stub() {
+                    @Override
+                    public void onWallpaperVisibilityChanged(boolean newVisibility,
+                            int displayId) throws RemoteException {
+                        mWallpaperVisible = newVisibility;
+                        handler.post(() -> applyLightsOut(true, false));
+                    }
+                }, Display.DEFAULT_DISPLAY);
+        } catch (RemoteException e) {
+        }
     }
 
     public void init() {
         applyModeBackground(-1, getMode(), false /*animate*/);
-        applyMode(getMode(), false /*animate*/, true /*force*/);
+        applyLightsOut(false /*animate*/, true /*force*/);
+    }
+
+    @Override
+    public void setAutoDim(boolean autoDim) {
+        if (mAutoDim == autoDim) return;
+        mAutoDim = autoDim;
+        applyLightsOut(true, false);
+    }
+
+    @Override
+    protected boolean isLightsOut(int mode) {
+        return super.isLightsOut(mode) || (mAutoDim && !mWallpaperVisible);
     }
 
     public LightBarTransitionsController getLightTransitionsController() {
@@ -54,13 +90,12 @@ public final class NavigationBarTransitions extends BarTransitions {
     @Override
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
-        applyMode(newMode, animate, false /*force*/);
+        applyLightsOut(animate, false /*force*/);
     }
 
-    private void applyMode(int mode, boolean animate, boolean force) {
-
+    private void applyLightsOut(boolean animate, boolean force) {
         // apply to lights out
-        applyLightsOut(isLightsOut(mode), animate, force);
+        applyLightsOut(isLightsOut(getMode()), animate, force);
     }
 
     private void applyLightsOut(boolean lightsOut, boolean animate, boolean force) {
@@ -73,7 +108,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         // ok, everyone, stop it right there
         navButtons.animate().cancel();
 
-        final float navButtonsAlpha = lightsOut ? 0.5f : 1f;
+        final float navButtonsAlpha = lightsOut ? 0.6f : 1f;
 
         if (!animate) {
             navButtons.setAlpha(navButtonsAlpha);
@@ -85,7 +120,6 @@ public final class NavigationBarTransitions extends BarTransitions {
                 .start();
         }
     }
-
 
     public void reapplyDarkIntensity() {
         applyDarkIntensity(mLightTransitionsController.getCurrentDarkIntensity());
