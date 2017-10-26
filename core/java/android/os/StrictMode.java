@@ -34,6 +34,7 @@ import android.util.Singleton;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -2247,9 +2248,8 @@ public final class StrictMode {
         ((AndroidBlockGuardPolicy) policy).onWriteToDisk();
     }
 
-    // Guarded by StrictMode.class
-    private static final HashMap<Class, Integer> sExpectedActivityInstanceCount =
-            new HashMap<Class, Integer>();
+    @GuardedBy("StrictMode.class")
+    private static final HashMap<Class, Integer> sExpectedActivityInstanceCount = new HashMap<>();
 
     /**
      * Returns an object that is used to track instances of activites. The activity should store a
