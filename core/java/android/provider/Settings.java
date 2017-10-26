@@ -3047,6 +3047,12 @@ public final class Settings {
         private static final Validator DIM_SCREEN_VALIDATOR = sBooleanValidator;
 
         /**
+         * The display color mode.
+         * @hide
+         */
+        public static final String DISPLAY_COLOR_MODE = "display_color_mode";
+
+        /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
          * user activity timeout period since the screen isn't necessarily turned off
