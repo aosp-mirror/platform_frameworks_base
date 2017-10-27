@@ -21,7 +21,16 @@ import android.os.Parcelable;
 
 import java.util.Random;
 
-/** @hide */
+/**
+ * Represents the app configuration for a Bluetooth HID Device application.
+ *
+ * The app needs a BluetoothHidDeviceAppConfiguration token to unregister
+ * the Bluetooth HID Device service.
+ *
+ * {@see BluetoothHidDevice}
+ *
+ * {@hide}
+ */
 public final class BluetoothHidDeviceAppConfiguration implements Parcelable {
     private final long mHash;
 
