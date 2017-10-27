@@ -1169,9 +1169,8 @@ public class NetworkStatsServiceTest {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
-        if (!isMetered) {
-            capabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        }
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         return new NetworkState(info, prop, capabilities, null, null, TEST_SSID);
     }
 
@@ -1187,6 +1186,8 @@ public class NetworkStatsServiceTest {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
         return new NetworkState(info, prop, capabilities, null, subscriberId, null);
     }
 
@@ -1196,6 +1197,8 @@ public class NetworkStatsServiceTest {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         return new NetworkState(info, prop, capabilities, null, null, null);
     }
 
