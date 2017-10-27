@@ -35,7 +35,7 @@ namespace statsd {
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const std::function<void(const vector<uint8_t>&)>& pushLog)
-    : m_dropbox_writer("all-logs"), mUidMap(uidMap), mPushLog(pushLog) {
+    : mUidMap(uidMap), mPushLog(pushLog) {
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -43,12 +43,6 @@ StatsLogProcessor::~StatsLogProcessor() {
 
 // TODO: what if statsd service restarts? How do we know what logs are already processed before?
 void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
-    // TODO: Use EventMetric to filter the events we want to log.
-    /* TODO: Convert this when we have the generic protobuf writing library in.
-    EventMetricData eventMetricData = parse(msg);
-    m_dropbox_writer.addEventMetricData(eventMetricData);
-    */
-
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
