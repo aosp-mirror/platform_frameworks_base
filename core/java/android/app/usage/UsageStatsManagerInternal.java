@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.app.usage.AppStandby.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 
@@ -89,6 +90,19 @@ public abstract class UsageStatsManagerInternal {
      * @return
      */
     public abstract boolean isAppIdle(String packageName, int uidForAppId, int userId);
+
+    /**
+     * Returns the app standby bucket that the app is currently in.  This accessor does
+     * <em>not</em> obfuscate instant apps.
+     *
+     * @param packageName
+     * @param userId
+     * @param nowElapsed The current time, in the elapsedRealtime time base
+     * @return the AppStandby bucket code the app currently resides in.  If the app is
+     *     unknown in the given user, STANDBY_BUCKET_NEVER is returned.
+     */
+    @StandbyBuckets public abstract int getAppStandbyBucket(String packageName, int userId,
+            long nowElapsed);
 
     /**
      * Returns all of the uids for a given user where all packages associating with that uid

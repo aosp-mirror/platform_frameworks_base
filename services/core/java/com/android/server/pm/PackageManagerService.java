@@ -87,7 +87,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
-
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -167,6 +166,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.Package;
@@ -22703,6 +22703,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return PackageManagerService.this
                     .getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
                             flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public int getPackageUid(String packageName, int flags, int userId) {
+            return PackageManagerService.this
+                    .getPackageUid(packageName, flags, userId);
         }
 
         @Override

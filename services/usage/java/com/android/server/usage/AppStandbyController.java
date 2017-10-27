@@ -154,7 +154,7 @@ public class AppStandbyController {
 
     private volatile boolean mPendingOneTimeCheckIdleStates;
 
-    private final Handler mHandler;
+    private final AppStandbyHandler mHandler;
     private final Context mContext;
 
     // TODO: Provide a mechanism to set an external bucketing service
@@ -412,6 +412,7 @@ public class AppStandbyController {
     private void maybeInformListeners(String packageName, int userId,
             long elapsedRealtime, int bucket) {
         synchronized (mAppIdleLock) {
+            // TODO: fold these into one call + lookup for efficiency if needed
             if (mAppIdleHistory.shouldInformListeners(packageName, userId,
                     elapsedRealtime, bucket)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
@@ -533,15 +534,15 @@ public class AppStandbyController {
 
         final boolean previouslyIdle = isAppIdleFiltered(packageName, appId,
                 userId, elapsedRealtime);
+        final int standbyBucket;
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.setIdle(packageName, userId, idle, elapsedRealtime);
+            standbyBucket = mAppIdleHistory.setIdle(packageName, userId, idle, elapsedRealtime);
         }
         final boolean stillIdle = isAppIdleFiltered(packageName, appId,
                 userId, elapsedRealtime);
         // Inform listeners if necessary
         if (previouslyIdle != stillIdle) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
-                    /* idle = */ stillIdle ? 1 : 0, packageName));
+            maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket);
             if (!stillIdle) {
                 notifyBatteryStats(packageName, userId, idle);
             }
@@ -737,7 +738,7 @@ public class AppStandbyController {
                 .sendToTarget();
     }
 
-    @StandbyBuckets int getAppStandbyBucket(String packageName, int userId,
+    @StandbyBuckets public int getAppStandbyBucket(String packageName, int userId,
             long elapsedRealtime, boolean shouldObfuscateInstantApps) {
         if (shouldObfuscateInstantApps &&
                 mInjector.isPackageEphemeral(userId, packageName)) {
@@ -751,6 +752,8 @@ public class AppStandbyController {
             String reason, long elapsedRealtime) {
         mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                 reason);
+        maybeInformListeners(packageName, userId, elapsedRealtime,
+                newBucket);
     }
 
     private boolean isActiveDeviceAdmin(String packageName, int userId) {

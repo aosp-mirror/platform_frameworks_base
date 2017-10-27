@@ -64,6 +64,8 @@ import com.android.server.job.controllers.JobStatus;
  */
 public final class JobServiceContext implements ServiceConnection {
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
+    private static final boolean DEBUG_STANDBY = JobSchedulerService.DEBUG_STANDBY;
+
     private static final String TAG = "JobServiceContext";
     /** Amount of time a job is allowed to execute for before being considered timed-out. */
     public static final long EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
@@ -220,6 +222,17 @@ public final class JobServiceContext implements ServiceConnection {
                     isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
 
+            if (DEBUG_STANDBY) {
+                final long whenDeferred = job.getWhenStandbyDeferred();
+                if (whenDeferred > 0) {
+                    StringBuilder sb = new StringBuilder(128);
+                    sb.append("Starting job deferred for standby by ");
+                    TimeUtils.formatDuration(mExecutionStartTimeElapsed - whenDeferred, sb);
+                    sb.append(" : ");
+                    sb.append(job.toShortString());
+                    Slog.v(TAG, sb.toString());
+                }
+            }
             // Once we'e begun executing a job, we by definition no longer care whether
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
