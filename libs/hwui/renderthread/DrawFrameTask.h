@@ -55,7 +55,7 @@ enum {
  * tracked across many frames not just a single frame.
  * It is the sync-state task, and will kick off the post-sync draw
  */
-class DrawFrameTask : public RenderTask {
+class DrawFrameTask {
 public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
@@ -72,7 +72,7 @@ public:
 
     int64_t* frameInfo() { return mFrameInfo; }
 
-    virtual void run() override;
+    void run();
 
 private:
     void postAndWait();

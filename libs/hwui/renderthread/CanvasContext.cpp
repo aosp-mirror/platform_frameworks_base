@@ -181,13 +181,13 @@ void CanvasContext::destroy() {
     mAnimationContext->destroy();
 }
 
-void CanvasContext::setSurface(Surface* surface) {
+void CanvasContext::setSurface(sp<Surface>&& surface) {
     ATRACE_CALL();
 
-    mNativeSurface = surface;
+    mNativeSurface = std::move(surface);
 
     ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Srgb;
-    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior, colorMode);
+    bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode);
 
     mFrameNumber = -1;
 
@@ -203,15 +203,7 @@ void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
     mSwapBehavior = swapBehavior;
 }
 
-void CanvasContext::initialize(Surface* surface) {
-    setSurface(surface);
-}
-
-void CanvasContext::updateSurface(Surface* surface) {
-    setSurface(surface);
-}
-
-bool CanvasContext::pauseSurface(Surface* surface) {
+bool CanvasContext::pauseSurface() {
     return mRenderThread.removeFrameCallback(this);
 }
 

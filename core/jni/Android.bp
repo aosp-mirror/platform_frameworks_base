@@ -38,6 +38,7 @@ cc_library_shared {
     ],
 
     cppflags: ["-Wno-conversion-null"],
+    cpp_std: "c++17",
 
     srcs: [
         "AndroidRuntime.cpp",
