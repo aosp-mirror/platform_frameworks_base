@@ -306,7 +306,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"terima pesan teks (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Memungkinkan aplikasi menerima dan memproses pesan MMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"membaca pesan siaran seluler"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Mengizinkan aplikasi membaca pesan siaran seluler yang diterima perangkat Anda. Lansiran siaran seluler dikirimkan di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu kinerja atau operasi perangkat Anda saat siaran seluler darurat diterima."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Mengizinkan aplikasi membaca pesan siaran seluler yang diterima perangkat Anda. Notifikasi siaran seluler dikirimkan di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu kinerja atau operasi perangkat Anda saat siaran seluler darurat diterima."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca umpan langganan"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Mengizinkan apl mendapatkan detail tentang umpan yang saat ini sedang disinkronkan."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"mengirim dan melihat pesan SMS"</string>
@@ -1368,7 +1368,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Drive USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Penyimpanan USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edit"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Lansiran penggunaan data"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Notifikasi penggunaan data"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Ketuk untuk lihat penggunaan &amp; setelan."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Batas data 2G-3G terlampaui"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Batas data 4G terlampaui"</string>

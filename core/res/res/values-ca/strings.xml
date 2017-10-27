@@ -268,7 +268,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Emmagatzematge"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrar àudio"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"gravar àudio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
@@ -383,12 +383,12 @@
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrar àudio"</string>
-    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Aquesta aplicació pot enregistrar àudio amb el micròfon en qualsevol moment."</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar àudio"</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Aquesta aplicació pot gravar àudio amb el micròfon en qualsevol moment."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar ordres a la SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permet que l\'aplicació enviï ordres a la SIM. Això és molt perillós."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fer fotos i vídeos"</string>
-    <string name="permdesc_camera" msgid="5392231870049240670">"Aquesta aplicació pot fer fotos i enregistrar vídeos amb la càmera en qualsevol moment."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Aquesta aplicació pot fer fotos i gravar vídeos amb la càmera en qualsevol moment."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"trucar directament a números de telèfon"</string>
@@ -439,7 +439,7 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces multidifusió, no només a la teva tauleta. Fa servir més energia que el mode que no és multidifusió."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces de multidifusió, no només al televisor. Fa servir més energia que el mode que no és de multidifusió."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permet que l\'aplicació rebi paquets enviats a tots els dispositius d\'una xarxa Wi-Fi mitjançant les adreces multidifusió, no només al teu telèfon. Fa servir més energia que el mode que no és multidifusió."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració de Bluetooth"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accés a la configuració del Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que detecti dispositius remots i s\'hi vinculi."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Permet que l\'aplicació configuri el televisor Bluetooth local, cerqui dispositius remots i s\'hi vinculi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que detecti dispositius remots i s\'hi vinculi."</string>
@@ -450,9 +450,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Permet que l\'aplicació connecti el televisor a xarxes WiMAX, o bé que el desconnecti."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permet que l\'aplicació connecti i desconnecti el telèfon de les xarxes WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"vincula amb dispositius Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració de Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet que l\'aplicació consulti la configuració de Bluetooth del televisor i estableixi i accepti connexions amb dispositius vinculats ."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permet que l\'aplicació visualitzi la configuració del Bluetooth de la tauleta i que estableixi i accepti connexions amb dispositius sincronitzats."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet que l\'aplicació consulti la configuració del Bluetooth del televisor i estableixi i accepti connexions amb dispositius vinculats ."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració del Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicació de camp proper (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Comunicació de camp proper (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
@@ -1064,14 +1064,14 @@
     <string name="sendText" msgid="5209874571959469142">"Tria una acció per al text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint a través de Bluetooth"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint per Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"S\'ha establert el so de silenci"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volum en trucada"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada Bluetooth"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada per Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificacions"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volum de Bluetooth"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volum del Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volum del so"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volum de trucada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volum de multimèdia"</string>
