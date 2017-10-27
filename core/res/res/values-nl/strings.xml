@@ -210,9 +210,9 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Uitschakelen"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Noodgeval"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Foutenrapport"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Foutenrapport genereren"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een foutenrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Bugrapport"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Bugrapport genereren"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een bugrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactief rapport"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gebruik deze optie in de meeste situaties. Hiermee kun je de voortgang van het rapport bijhouden, meer gegevens over het probleem opgeven en screenshots maken. Mogelijk worden bepaalde minder vaak gebruikte gedeelten weggelaten (waarvoor het lang zou duren om een rapport te genereren)."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Volledig rapport"</string>

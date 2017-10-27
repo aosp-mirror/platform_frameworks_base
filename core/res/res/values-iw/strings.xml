@@ -1331,7 +1331,7 @@
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏חיבור תמידי ל-VPN מנותק"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏שגיאת VPN שמופעל תמיד"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"הקש כדי להגדיר"</string>
-    <string name="upload_file" msgid="2897957172366730416">"בחר קובץ"</string>
+    <string name="upload_file" msgid="2897957172366730416">"בחירת קובץ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"לא נבחר קובץ"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
     <string name="submit" msgid="1602335572089911941">"שלח"</string>

@@ -271,7 +271,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снима слике и видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
