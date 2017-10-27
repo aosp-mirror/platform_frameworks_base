@@ -6096,8 +6096,8 @@ public class DevicePolicyManager {
 
     /**
      * Flag used by {@link #createAndManageUser} to specify that the user should be created
-     * ephemeral.
-     * @hide
+     * ephemeral. Ephemeral users will be removed after switching to another user or rebooting the
+     * device.
      */
     public static final int MAKE_USER_EPHEMERAL = 0x0002;
 
