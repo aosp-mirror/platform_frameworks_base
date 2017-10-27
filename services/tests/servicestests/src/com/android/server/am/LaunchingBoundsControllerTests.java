@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
@@ -63,21 +64,40 @@ public class LaunchingBoundsControllerTests extends ActivityTestsBase {
     }
 
     /**
+     * Makes sure positioners get values passed to controller.
+     */
+    @Test
+    public void testArgumentPropagation() {
+        final ActivityManagerService service = createActivityManagerService();
+        final LaunchingBoundsPositioner positioner = mock(LaunchingBoundsPositioner.class);
+        mController.registerPositioner(positioner);
+
+        final ActivityRecord record = new ActivityBuilder(service).build();
+        final ActivityRecord source = new ActivityBuilder(service).build();
+        final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
+        final ActivityOptions options = mock(ActivityOptions.class);
+
+        mController.calculateBounds(record.getTask(), layout, record, source, options, new Rect());
+        verify(positioner, times(1)).onCalculateBounds(eq(record.getTask()), eq(layout), eq(record),
+                eq(source), eq(options), any(), any());
+    }
+
+    /**
      * Ensures positioners further down the chain are not called when RESULT_DONE is returned.
      */
     @Test
     public void testEarlyExit() {
         final LaunchingBoundsPositioner ignoredPositioner = mock(LaunchingBoundsPositioner.class);
         final LaunchingBoundsPositioner earlyExitPositioner =
-                (task, layout, activity, options, current, result) -> RESULT_DONE;
+                (task, layout, activity, source, options, current, result) -> RESULT_DONE;
 
         mController.registerPositioner(ignoredPositioner);
         mController.registerPositioner(earlyExitPositioner);
 
         mController.calculateBounds(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*options*/, new Rect());
+                null /*source*/, null /*options*/, new Rect());
         verify(ignoredPositioner, never()).onCalculateBounds(any(), any(), any(), any(), any(),
-                any());
+                any(), any());
     }
 
     /**
@@ -93,20 +113,20 @@ public class LaunchingBoundsControllerTests extends ActivityTestsBase {
         mController.registerPositioner(firstPositioner);
 
         mController.calculateBounds(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*options*/, new Rect());
+                null /*source*/, null /*options*/, new Rect());
         verify(firstPositioner, times(1)).onCalculateBounds(any(), any(), any(), any(), any(),
-                any());
+                any(), any());
 
         final LaunchingBoundsPositioner secondPositioner = spy(earlyExitPositioner);
 
         mController.registerPositioner(secondPositioner);
 
         mController.calculateBounds(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*options*/, new Rect());
+                null /*source*/, null /*options*/, new Rect());
         verify(firstPositioner, times(1)).onCalculateBounds(any(), any(), any(), any(), any(),
-                any());
+                any(), any());
         verify(secondPositioner, times(1)).onCalculateBounds(any(), any(), any(), any(), any(),
-                any());
+                any(), any());
     }
 
     /**
@@ -122,9 +142,9 @@ public class LaunchingBoundsControllerTests extends ActivityTestsBase {
         mController.registerPositioner(positioner2);
 
         mController.calculateBounds(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*options*/, new Rect());
+                null /*source*/, null /*options*/, new Rect());
 
-        verify(positioner1, times(1)).onCalculateBounds(any(), any(), any(), any(),
+        verify(positioner1, times(1)).onCalculateBounds(any(), any(), any(), any(), any(),
                 eq(positioner2.getLaunchBounds()), any());
     }
 
@@ -146,7 +166,7 @@ public class LaunchingBoundsControllerTests extends ActivityTestsBase {
         final Rect resultBounds = new Rect();
 
         mController.calculateBounds(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*options*/, resultBounds);
+                null /*source*/, null /*options*/, resultBounds);
 
         assertEquals(resultBounds, positioner2.getLaunchBounds());
     }
@@ -161,7 +181,8 @@ public class LaunchingBoundsControllerTests extends ActivityTestsBase {
 
         @Override
         public int onCalculateBounds(TaskRecord task, ActivityInfo.WindowLayout layout,
-                ActivityRecord activity, ActivityOptions options, Rect current, Rect result) {
+                ActivityRecord activity, ActivityRecord source,
+                ActivityOptions options, Rect current, Rect result) {
             result.set(mBounds);
             return mReturnVal;
         }

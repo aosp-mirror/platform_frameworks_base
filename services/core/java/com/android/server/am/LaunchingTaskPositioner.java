@@ -79,7 +79,8 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
      */
     @Override
     public int onCalculateBounds(TaskRecord task, ActivityInfo.WindowLayout layout,
-            ActivityRecord activity, ActivityOptions options, Rect current, Rect result) {
+            ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options, Rect current, Rect result) {
         // We can only apply positioning if we're in a freeform stack.
         if (task == null || task.getStack() == null || !task.inFreeformWindowingMode()) {
             return RESULT_SKIP;

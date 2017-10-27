@@ -26,9 +26,6 @@ import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -1249,7 +1246,7 @@ class ActivityStarter {
         mLaunchBounds.setEmpty();
 
         mSupervisor.getLaunchingBoundsController().calculateBounds(inTask, null /*layout*/, r,
-                options, mLaunchBounds);
+                sourceRecord, options, mLaunchBounds);
 
         mLaunchMode = r.launchMode;
 
@@ -2168,15 +2165,6 @@ class ActivityStarter {
                 }
             }
         }
-    }
-
-    private Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
-        Rect newBounds = null;
-        if (mSupervisor.canUseActivityOptionsLaunchBounds(options)
-                && (r.isResizeable() || (inTask != null && inTask.isResizeable()))) {
-            newBounds = TaskRecord.validateBounds(options.getLaunchBounds());
-        }
-        return newBounds;
     }
 
     private boolean isLaunchModeOneOf(int mode1, int mode2) {
