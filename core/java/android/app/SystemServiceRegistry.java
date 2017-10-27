@@ -81,6 +81,7 @@ import android.net.INetworkPolicyManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
+import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
@@ -150,6 +151,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
@@ -861,6 +863,17 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.SHORTCUT_SERVICE);
                 return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
             }});
+
+        registerService(Context.NETWORK_WATCHLIST_SERVICE, NetworkWatchlistManager.class,
+                new CachedServiceFetcher<NetworkWatchlistManager>() {
+                    @Override
+                    public NetworkWatchlistManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b =
+                                ServiceManager.getServiceOrThrow(Context.NETWORK_WATCHLIST_SERVICE);
+                        return new NetworkWatchlistManager(ctx,
+                                INetworkWatchlistManager.Stub.asInterface(b));
+                    }});
 
         registerService(Context.SYSTEM_HEALTH_SERVICE, SystemHealthManager.class,
                 new CachedServiceFetcher<SystemHealthManager>() {

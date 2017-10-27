@@ -8513,6 +8513,13 @@ public final class Settings {
        public static final String NETWORK_METERED_MULTIPATH_PREFERENCE =
                "network_metered_multipath_preference";
 
+        /**
+         * Network watchlist last report time.
+         * @hide
+         */
+        public static final String NETWORK_WATCHLIST_LAST_REPORT_TIME =
+                "network_watchlist_last_report_time";
+
        /**
         * The thresholds of the wifi throughput badging (SD, HD etc.) as a comma-delimited list of
         * colon-delimited key-value pairs. The key is the badging enum value defined in

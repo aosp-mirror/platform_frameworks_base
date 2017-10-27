@@ -83,6 +83,7 @@ import com.android.server.media.MediaSessionService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
+import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
@@ -882,6 +883,10 @@ public final class SystemServer {
 
             traceBeginAndSlog("IpConnectivityMetrics");
             mSystemServiceManager.startService(IpConnectivityMetrics.class);
+            traceEnd();
+
+            traceBeginAndSlog("NetworkWatchlistService");
+            mSystemServiceManager.startService(NetworkWatchlistService.Lifecycle.class);
             traceEnd();
 
             traceBeginAndSlog("PinnerService");

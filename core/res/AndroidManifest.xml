@@ -3944,6 +3944,10 @@
         <service android:name="com.android.server.timezone.TimeZoneUpdateIdler"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
+
+        <service android:name="com.android.server.net.watchlist.ReportWatchlistJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
     </application>
 
 </manifest>
