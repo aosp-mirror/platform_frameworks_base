@@ -21,7 +21,7 @@ import android.util.DebugUtils;
 import android.view.autofill.IAutoFillManagerClient;
 
 /**
- * Helper class used to handle a pending Autofill affordance such as the Save UI.
+ * Helper class used to handle a pending Autofill UI such as the save UI.
  *
  * <p>This class is not thread safe.
  */

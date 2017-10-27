@@ -4480,7 +4480,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_INVALID_AUTHENTICATION = 1128;
 
-    // An autofill service used a custom description (using RemoteViews) in the Save affordance
+    // An autofill service used a custom description (using RemoteViews) in the autofill save UI
     // Package: Package of app that is autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
@@ -4491,14 +4491,14 @@ message MetricsEvent {
     // OS: O MR
     FIELD_AUTOFILL_SAVE_TYPE = 1130;
 
-    // An autofill service used a custom subtitle (String) in the Save affordance
+    // An autofill service used a custom subtitle (String) in the autofill save UI
     // Package: Package of app that is autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
 
-    // User tapped a link in the custom description of the Save affordance provided by an autofill service
+    // User tapped a link in the custom description of the autofill save UI provided by an autofill service
     // Package: Package of app that is autofilled
     // OS: O MR
     // Type TYPE_UNKNOWN: The link was not properly set by the service
@@ -4518,12 +4518,12 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     AUTOFILL_SAVE_VALIDATION = 1133;
 
-    // Result of an operation in the autofill save affordance after the user tapped a link in the custom description
+    // Result of an operation in the autofill save UI after the user tapped a link in the custom description
     // provided by the autofill service
     // Package: Package of app that is autofilled
     // OS: O MR
-    // Type TYPE_OPEN: The save affordance was restored
-    // Type TYPE_DISMISS: The save affordcance was destroyed
+    // Type TYPE_OPEN: The autofill save UI was restored
+    // Type TYPE_DISMISS: The autofill save UI was destroyed
     // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
     AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
 
