@@ -448,9 +448,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi
-                        || ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
-        final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
+                || ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
+
+        boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
+
+        if ((disableRecent || disableBack) && inScreenPinning()) {
+            // Don't hide back and recents buttons when in screen pinning mode, as they are used for
+            // exiting.
+            disableBack = false;
+            disableRecent = false;
+        }
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
@@ -461,20 +469,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 }
             }
         }
-        if (inLockTask() && disableRecent && !disableHome) {
-            // Don't hide recents when in lock task, it is used for exiting.
-            // Unless home is hidden, then in DPM locked mode and no exit available.
-            disableRecent = false;
-        }
 
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
         getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
     }
 
-    private boolean inLockTask() {
+    private boolean inScreenPinning() {
         try {
-            return ActivityManager.getService().isInLockTaskMode();
+            return ActivityManager.getService().getLockTaskModeState()
+                    == ActivityManager.LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
