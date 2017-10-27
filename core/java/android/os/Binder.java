@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -751,6 +752,188 @@ final class BinderProxy implements IBinder {
     // Assume the process-wide default value when created
     volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
 
+    /*
+     * Map from longs to BinderProxy, retaining only a WeakReference to the BinderProxies.
+     * We roll our own only because we need to lazily remove WeakReferences during accesses
+     * to avoid accumulating junk WeakReference objects. WeakHashMap isn't easily usable
+     * because we want weak values, not keys.
+     * Our hash table is never resized, but the number of entries is unlimited;
+     * performance degrades as occupancy increases significantly past MAIN_INDEX_SIZE.
+     * Not thread-safe. Client ensures there's a single access at a time.
+     */
+    private static final class ProxyMap {
+        private static final int LOG_MAIN_INDEX_SIZE = 8;
+        private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
+        private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
+
+        /**
+         * We next warn when we exceed this bucket size.
+         */
+        private int mWarnBucketSize = 20;
+
+        /**
+         * Increment mWarnBucketSize by WARN_INCREMENT each time we warn.
+         */
+        private static final int WARN_INCREMENT = 10;
+
+        /**
+         * Hash function tailored to native pointers.
+         * Returns a value < MAIN_INDEX_SIZE.
+         */
+        private static int hash(long arg) {
+            return ((int) ((arg >> 2) ^ (arg >> (2 + LOG_MAIN_INDEX_SIZE)))) & MAIN_INDEX_MASK;
+        }
+
+        /**
+         * Return the total number of pairs in the map.
+         */
+        int size() {
+            int size = 0;
+            for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
+                if (a != null) {
+                    size += a.size();
+                }
+            }
+            return size;
+        }
+
+        /**
+         * Remove ith entry from the hash bucket indicated by hash.
+         */
+        private void remove(int hash, int index) {
+            Long[] keyArray = mMainIndexKeys[hash];
+            ArrayList<WeakReference<BinderProxy>> valueArray = mMainIndexValues[hash];
+            int size = valueArray.size();  // KeyArray may have extra elements.
+            // Move last entry into empty slot, and truncate at end.
+            if (index != size - 1) {
+                keyArray[index] = keyArray[size - 1];
+                valueArray.set(index, valueArray.get(size - 1));
+            }
+            valueArray.remove(size - 1);
+            // Just leave key array entry; it's unused. We only trust the valueArray size.
+        }
+
+        /**
+         * Look up the supplied key. If we have a non-cleared entry for it, return it.
+         */
+        BinderProxy get(long key) {
+            int myHash = hash(key);
+            Long[] keyArray = mMainIndexKeys[myHash];
+            if (keyArray == null) {
+                return null;
+            }
+            ArrayList<WeakReference<BinderProxy>> valueArray = mMainIndexValues[myHash];
+            int bucketSize = valueArray.size();
+            for (int i = 0; i < bucketSize; ++i) {
+                long foundKey = keyArray[i];
+                if (key == foundKey) {
+                    WeakReference<BinderProxy> wr = valueArray.get(i);
+                    BinderProxy bp = wr.get();
+                    if (bp != null) {
+                        return bp;
+                    } else {
+                        remove(myHash, i);
+                        return null;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private int mRandom;  // A counter used to generate a "random" index. World's 2nd worst RNG.
+
+        /**
+         * Add the key-value pair to the map.
+         * Requires that the indicated key is not already in the map.
+         */
+        void set(long key, @NonNull BinderProxy value) {
+            int myHash = hash(key);
+            ArrayList<WeakReference<BinderProxy>> valueArray = mMainIndexValues[myHash];
+            if (valueArray == null) {
+                valueArray = mMainIndexValues[myHash] = new ArrayList<>();
+                mMainIndexKeys[myHash] = new Long[1];
+            }
+            int size = valueArray.size();
+            WeakReference<BinderProxy> newWr = new WeakReference<>(value);
+            // First look for a cleared reference.
+            // This ensures that ArrayList size is bounded by the maximum occupancy of
+            // that bucket.
+            for (int i = 0; i < size; ++i) {
+                if (valueArray.get(i).get() == null) {
+                    valueArray.set(i, newWr);
+                    Long[] keyArray = mMainIndexKeys[myHash];
+                    keyArray[i] = key;
+                    if (i < size - 1) {
+                        // "Randomly" check one of the remaining entries in [i+1, size), so that
+                        // needlessly long buckets are eventually pruned.
+                        int rnd = Math.floorMod(++mRandom, size - (i + 1));
+                        if (valueArray.get(i + 1 + rnd).get() == null) {
+                            remove(myHash, i + 1 + rnd);
+                        }
+                    }
+                    return;
+                }
+            }
+            valueArray.add(size, newWr);
+            Long[] keyArray = mMainIndexKeys[myHash];
+            if (keyArray.length == size) {
+                // size >= 1, since we initially allocated one element
+                Long[] newArray = new Long[size + size / 2 + 2];
+                System.arraycopy(keyArray, 0, newArray, 0, size);
+                newArray[size] = key;
+                mMainIndexKeys[myHash] = newArray;
+            } else {
+                keyArray[size] = key;
+            }
+            if (size >= mWarnBucketSize) {
+                Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
+                        + " total = " + size());
+                mWarnBucketSize += WARN_INCREMENT;
+            }
+        }
+
+        // Corresponding ArrayLists in the following two arrays always have the same size.
+        // They contain no empty entries. However WeakReferences in the values ArrayLists
+        // may have been cleared.
+
+        // mMainIndexKeys[i][j] corresponds to mMainIndexValues[i].get(j) .
+        // The values ArrayList has the proper size(), the corresponding keys array
+        // is always at least the same size, but may be larger.
+        // If either a particular keys array, or the corresponding values ArrayList
+        // are null, then they both are.
+        private final Long[][] mMainIndexKeys = new Long[MAIN_INDEX_SIZE][];
+        private final ArrayList<WeakReference<BinderProxy>>[] mMainIndexValues =
+                new ArrayList[MAIN_INDEX_SIZE];
+    }
+
+    private static ProxyMap sProxyMap = new ProxyMap();
+
+    /**
+     * Return a BinderProxy for IBinder.
+     * This method is thread-hostile!  The (native) caller serializes getInstance() calls using
+     * gProxyLock.
+     * If we previously returned a BinderProxy bp for the same iBinder, and bp is still
+     * in use, then we return the same bp.
+     *
+     * @param nativeData C++ pointer to (possibly still empty) BinderProxyNativeData.
+     * Takes ownership of nativeData iff <result>.mNativeData == nativeData.  Caller will usually
+     * delete nativeData if that's not the case.
+     * @param iBinder C++ pointer to IBinder. Does not take ownership of referenced object.
+     */
+    private static BinderProxy getInstance(long nativeData, long iBinder) {
+        BinderProxy result = sProxyMap.get(iBinder);
+        if (result == null) {
+            result = new BinderProxy(nativeData);
+            sProxyMap.set(iBinder, result);
+        }
+        return result;
+    }
+
+    private BinderProxy(long nativeData) {
+        mNativeData = nativeData;
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeData);
+    }
+
     /**
      * Guestimate of native memory associated with a BinderProxy.
      * This includes the underlying IBinder, associated DeathRecipientList, and KeyedVector
@@ -856,12 +1039,6 @@ final class BinderProxy implements IBinder {
         }
     }
 
-    BinderProxy(long nativeData) {
-        mNativeData = nativeData;
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeData);
-        mSelf = new WeakReference(this);
-    }
-
     private static final void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
@@ -872,14 +1049,6 @@ final class BinderProxy implements IBinder {
                     exc);
         }
     }
-
-    // This WeakReference to "this" is used only by native code to "attach" to the
-    // native IBinder object.
-    // Using WeakGlobalRefs instead currently appears unsafe, in that they can yield a
-    // non-null value after the BinderProxy is enqueued for finalization.
-    // Used only once immediately after construction.
-    // TODO: Consider making the extra native-to-java call to compute this on the fly.
-    final private WeakReference mSelf;
 
     /**
      * C++ pointer to BinderProxyNativeData. That consists of strong pointers to the
