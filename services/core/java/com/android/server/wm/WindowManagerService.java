@@ -752,7 +752,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     TaskPositioner mTaskPositioner;
     final DragDropController mDragDropController = new DragDropController();
-    DragState mDragState = null;
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
@@ -789,7 +788,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = false;
             try {
-                if (mDragState == null) {
+                if (mDragDropController.mDragState == null) {
                     // The drag has ended but the clean-up message has not been processed by
                     // window manager. Drop events that occur after this until window manager
                     // has a chance to clean-up the input handle.
@@ -828,12 +827,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + newX + "," + newY);
                             mMuteInput = true;
                             synchronized (mWindowMap) {
-                                endDrag = mDragState.notifyDropLw(newX, newY);
+                                endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
                                 // move the surface and tell the involved window(s) where we are
-                                mDragState.notifyMoveLw(newX, newY);
+                                mDragDropController.mDragState.notifyMoveLw(newX, newY);
                             }
                         }
                     } break;
@@ -843,7 +842,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + newX + "," + newY);
                         mMuteInput = true;
                         synchronized (mWindowMap) {
-                            endDrag = mDragState.notifyDropLw(newX, newY);
+                            endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
                         }
                     } break;
 
@@ -860,7 +859,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         synchronized (mWindowMap) {
                             // endDragLw will post back to looper to dispose the receiver
                             // since we still need the receiver for the last finishInputEvent.
-                            mDragState.endDragLw();
+                            mDragDropController.mDragState.endDragLw();
                         }
                         mStylusButtonDownAtStart = false;
                         mIsStartEvent = true;
@@ -7171,7 +7170,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            if (mDragState != null) {
+            if (mDragDropController.mDragState != null) {
                 // Drag cursor overrides the app cursor.
                 return;
             }
