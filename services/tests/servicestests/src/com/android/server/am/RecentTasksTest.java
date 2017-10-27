@@ -510,7 +510,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
+        protected ActivityStackSupervisor createTestSupervisor() {
             return new MyTestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
 

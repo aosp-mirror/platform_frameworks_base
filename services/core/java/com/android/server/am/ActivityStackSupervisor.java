@@ -295,7 +295,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    private final LaunchingBoundsController mLaunchingBoundsController;
+    private LaunchingBoundsController mLaunchingBoundsController;
 
     /** Counter for next free stack ID to use for dynamic activity stacks. */
     private int mNextFreeStackId = 0;
@@ -395,7 +395,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
     private DisplayManagerInternal mDisplayManagerInternal;
-    private InputManagerInternal mInputManagerInternal;
 
     /** Used to keep resumeTopActivityUncheckedLocked() from being entered recursively */
     boolean inResumeTopActivity;
@@ -414,7 +413,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
 
-    final ActivityMetricsLogger mActivityMetricsLogger;
+    private ActivityMetricsLogger mActivityMetricsLogger;
 
     private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
 
@@ -534,10 +533,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      */
     boolean mIsDockMinimized;
 
-    final KeyguardController mKeyguardController;
+    private KeyguardController mKeyguardController;
 
     private PowerManager mPowerManager;
     private int mDeferResumeCount;
+
+    private boolean mInitialized;
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -574,12 +575,30 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(looper);
+    }
+
+    public void initialize() {
+        if (mInitialized) {
+            return;
+        }
+
+        mInitialized = true;
         mRunningTasks = createRunningTasks();
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, looper);
-        mKeyguardController = new KeyguardController(service, this);
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
+                mHandler.getLooper());
+        mKeyguardController = new KeyguardController(mService, this);
 
         mLaunchingBoundsController = new LaunchingBoundsController();
         mLaunchingBoundsController.registerDefaultPositioners(this);
+    }
+
+
+    public ActivityMetricsLogger getActivityMetricsLogger() {
+        return mActivityMetricsLogger;
+    }
+
+    public KeyguardController getKeyguardController() {
+        return mKeyguardController;
     }
 
     void setRecentTasks(RecentTasks recentTasks) {
@@ -624,8 +643,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             mHomeStack = mFocusedStack = mLastFocusedStack = getDefaultDisplay().getOrCreateStack(
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-
-            mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
     }
 
