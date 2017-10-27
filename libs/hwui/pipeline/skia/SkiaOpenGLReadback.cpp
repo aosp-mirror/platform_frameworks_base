@@ -84,57 +84,50 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
             kTopLeft_GrSurfaceOrigin));
     if (image) {
-        // Convert imgTransform matrix from right to left handed coordinate system.
-        // If we have a matrix transformation in right handed coordinate system
-        //|ScaleX, SkewX,  TransX| same transform in left handed is    |ScaleX, SkewX,   TransX  |
-        //|SkewY,  ScaleY, TransY|                                     |-SkewY, -ScaleY, 1-TransY|
-        //|0,      0,      1     |                                     |0,      0,       1       |
-        SkMatrix textureMatrix;
-        textureMatrix.setIdentity();
-        textureMatrix[SkMatrix::kMScaleX] = imgTransform[Matrix4::kScaleX];
-        textureMatrix[SkMatrix::kMScaleY] = -imgTransform[Matrix4::kScaleY];
-        textureMatrix[SkMatrix::kMSkewX] = imgTransform[Matrix4::kSkewX];
-        textureMatrix[SkMatrix::kMSkewY] = -imgTransform[Matrix4::kSkewY];
-        textureMatrix[SkMatrix::kMTransX] = imgTransform[Matrix4::kTranslateX];
-        textureMatrix[SkMatrix::kMTransY] = 1-imgTransform[Matrix4::kTranslateY];
-
-        // textureMatrix maps 2D texture coordinates of the form (s, t, 1) with s and t in the
-        // inclusive range [0, 1] to the texture (see GLConsumer::getTransformMatrix comments).
-        // Convert textureMatrix to translate in real texture dimensions. Texture width and
-        // height are affected by the orientation (width and height swapped for 90/270 rotation).
-        if (textureMatrix[SkMatrix::kMSkewX] >= 0.5f || textureMatrix[SkMatrix::kMSkewX] <= -0.5f) {
-            textureMatrix[SkMatrix::kMTransX] *= imgHeight;
-            textureMatrix[SkMatrix::kMTransY] *= imgWidth;
-        } else {
-            textureMatrix[SkMatrix::kMTransX] *= imgWidth;
-            textureMatrix[SkMatrix::kMTransY] *= imgHeight;
+        int displayedWidth = imgWidth, displayedHeight = imgHeight;
+        // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
+        // size.
+        if (imgTransform[Matrix4::kSkewX] >= 0.5f || imgTransform[Matrix4::kSkewX] <= -0.5f) {
+            std::swap(displayedWidth, displayedHeight);
         }
-
-        // convert to Skia data structures
-        SkRect skiaSrcRect = srcRect.toSkRect();
-        SkMatrix textureMatrixInv;
         SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
-        bool srcNotEmpty = false;
-        if (textureMatrix.invert(&textureMatrixInv)) {
-            if (skiaSrcRect.isEmpty()) {
-                skiaSrcRect = SkRect::MakeIWH(imgWidth, imgHeight);
-                srcNotEmpty = !skiaSrcRect.isEmpty();
-            } else {
-                // src and dest rectangles need to be converted into texture coordinates before the
-                // rotation matrix is applied (because drawImageRect preconcat its matrix).
-                textureMatrixInv.mapRect(&skiaSrcRect);
-                srcNotEmpty = skiaSrcRect.intersect(SkRect::MakeIWH(imgWidth, imgHeight));
-            }
-            textureMatrixInv.mapRect(&skiaDestRect);
+        SkRect skiaSrcRect = srcRect.toSkRect();
+        if (skiaSrcRect.isEmpty()) {
+            skiaSrcRect = SkRect::MakeIWH(displayedWidth, displayedHeight);
         }
+        bool srcNotEmpty = skiaSrcRect.intersect(SkRect::MakeIWH(displayedWidth, displayedHeight));
 
         if (srcNotEmpty) {
+            SkMatrix textureMatrixInv;
+            imgTransform.copyTo(textureMatrixInv);
+            //TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
+            // use bottom left origin and remove flipV and invert transformations.
+            SkMatrix flipV;
+            flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
+            textureMatrixInv.preConcat(flipV);
+            textureMatrixInv.preScale(1.0f/displayedWidth, 1.0f/displayedHeight);
+            textureMatrixInv.postScale(imgWidth, imgHeight);
+            SkMatrix textureMatrix;
+            if (!textureMatrixInv.invert(&textureMatrix)) {
+                textureMatrix = textureMatrixInv;
+            }
+
+            textureMatrixInv.mapRect(&skiaSrcRect);
+            textureMatrixInv.mapRect(&skiaDestRect);
+
             // we render in an offscreen buffer to scale and to avoid an issue b/62262733
             // with reading incorrect data from EGLImage backed SkImage (likely a driver bug)
             sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
                     grContext.get(), SkBudgeted::kYes, bitmap->info());
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
+            // Apply a filter, which is matching OpenGL pipeline readback behaviour. Filter usage
+            // is codified by tests using golden images like DecodeAccuracyTest.
+            if (skiaSrcRect.width() != bitmap->width()
+                    || skiaSrcRect.height() != bitmap->height()) {
+                //TODO: apply filter always, but check if tests will be fine
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             scaledSurface->getCanvas()->concat(textureMatrix);
             scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint,
                     SkCanvas::kFast_SrcRectConstraint);
