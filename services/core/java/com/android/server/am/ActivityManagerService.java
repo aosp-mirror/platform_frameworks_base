@@ -13944,6 +13944,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(
                     com.android.internal.R.bool.config_customUserSwitchUi);
+            mUserController.mMaxRunningUsers = res.getInteger(
+                    com.android.internal.R.integer.config_multiuserMaxRunningUsers);
+
             if ((globalConfig.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
                 mFullscreenThumbnailScale = (float) res
                     .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
