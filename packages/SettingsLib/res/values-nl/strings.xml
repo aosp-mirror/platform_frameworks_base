@@ -173,8 +173,8 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB-foutopsporing"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Foutopsporingsmodus bij USB-verbinding"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Autorisatie USB-foutopsporing intrekken"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Snelle link naar foutenrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Een knop in het voedingsmenu weergeven om een foutenrapport te maken"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Snelle link naar bugrapport"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Een knop in het voedingsmenu weergeven om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Snoop-logbestand voor Bluetooth-HCI inschakelen"</string>
@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-codec voor Bluetooth-audio: afspeelkwaliteit"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"LDAC-codec voor Bluetooth-audio selecteren:\nafspeelkwaliteit"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS via TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Als deze optie is ingeschakeld, wordt geprobeerd om DNS via TLS uit te voeren via poort 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Indien ingeschakeld, is wifi agressiever bij het overgeven van de gegevensverbinding aan mobiel wanneer het wifi-signaal zwak is"</string>

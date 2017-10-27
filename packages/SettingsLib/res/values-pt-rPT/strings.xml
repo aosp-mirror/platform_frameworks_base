@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC de áudio Bluetooth: qualidade de reprodução"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Selecionar codec LDAC de áudio Bluetooth:\nQualidade de reprodução"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmissão em fluxo contínuo: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS através de TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Se a opção estiver ativada, tente efetuar DNS através de TLS na porta 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Se estiver ativado, o Wi-Fi será mais agressivo ao transmitir a lig. de dados para a rede móvel quando o sinal Wi-Fi estiver fraco"</string>
@@ -357,9 +359,9 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Ligada à corrente, não é possível carregar neste momento"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Completo"</string>
-    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlado pelo administrador"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Ativada pelo administrador"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Desativada pelo administrador"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlado pelo gestor"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"Ativada pelo gestor"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"Desativada pelo gestor"</string>
     <string name="disabled" msgid="9206776641295849915">"Desativada"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Autorizada"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Não autorizada"</string>

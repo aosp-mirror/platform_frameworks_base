@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್:\nಪ್ಲೇಬ್ಯಾಕ್‌ ಗುಣಮಟ್ಟ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ಸ್ಟ್ರೀಮಿಂಗ್: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS ಮೇಲೆ DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"ಸಕ್ರಿಯಗೊಂಡರೆ, ಪೋರ್ಟ್ 853 ನಲ್ಲಿ TLS ಮೇಲೆ DNS ಅನ್ನು ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ಇದು ಸಕ್ರಿಯಗೊಂಡರೆ, ವೈ-ಫೈ ಸಿಗ್ನಲ್ ದುರ್ಬಲವಾಗಿದ್ದಾಗ, ಮೊಬೈಲ್‌ಗೆ ಡೇಟಾ ಸಂಪರ್ಕವನ್ನು ಹಸ್ತಾಂತರಿಸುವಲ್ಲಿ ವೈ-ಫೈ ಹೆಚ್ಚು ಆಕ್ರಮಣಕಾರಿಯಾಗಿರುತ್ತದೆ"</string>

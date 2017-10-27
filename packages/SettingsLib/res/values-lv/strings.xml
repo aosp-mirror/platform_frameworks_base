@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth audio LDAC kodeks: atskaņošanas kvalitāte"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Atlasīt Bluetooth audio LDAC kodeku:\natskaņošanas kvalitāte"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Straumēšana: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS, izmantojot TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Ja opcija ir iespējota, tiek mēģināts pieprasīt DNS, izmantojot TLS portā 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Ja opcija ir iespējota un Wi‑Fi signāls ir vājš, datu savienojuma pāreja no Wi-Fi uz mobilo tīklu tiks veikta agresīvāk."</string>

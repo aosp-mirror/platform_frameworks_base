@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏Codec אודיו LDAC ל-Bluetooth: איכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏בחירת Codec אודיו LDAC ל-Bluetooth:‏\nאיכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"‏DNS באמצעות TLS (אבטחת שכבת התעבורה)"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"‏אם האפשרות מופעלת, יש לנסות DNS באמצעות TLS (אבטחת שכבת התעבורה) ביציאה 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"‏כשאפשרות זו מופעלת, Wi-Fi יתנהג בצורה אגרסיבית יותר בעת העברת חיבור הנתונים לרשת הסלולרית כשאות ה-Wi-Fi חלש."</string>

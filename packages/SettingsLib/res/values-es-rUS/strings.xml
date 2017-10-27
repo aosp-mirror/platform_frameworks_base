@@ -163,7 +163,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"Elegir perfil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabajo"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opciones del programador"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opciones para programadores"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Activar opciones para programador"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Establecer opciones para desarrollar aplicaciones"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Las opciones de programador no están disponibles para este usuario."</string>
@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Códec del audio Bluetooth LDAC: calidad de reproducción"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Seleccionar códec del audio Bluetooth LDAC:\nCalidad de reproducción"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmitiendo: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS mediante TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Si esta opción está habilitada, prueba DNS mediante TLS en el puerto 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Si habilitas esta opción, se priorizará el cambio de Wi-Fi a datos móviles cuando la señal de Wi-Fi sea débil"</string>

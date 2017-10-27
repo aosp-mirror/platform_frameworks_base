@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"蓝牙音频 LDAC 编解码器：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"选择蓝牙音频 LDAC 编解码器：\n播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"通过传输层安全协议 (TLS) 执行 DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"如果启用，即可在端口 853 上尝试“通过传输层安全协议 (TLS) 执行 DNS”。"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升WLAN日志记录级别（在WLAN选择器中显示每个SSID的RSSI）"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"开启此设置后，系统会在 WLAN 信号较弱时，主动将网络模式从 WLAN 网络切换到移动数据网络"</string>

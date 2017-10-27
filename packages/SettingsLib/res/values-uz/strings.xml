@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC audiokodeki bilan ijro etish sifati (Bluetooth orqali)"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"LDAC audiokodeki:\nijro sifati"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Translatsiya: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS orqali DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Yoqilgan bo‘lsa, TLS orqali DNS serverini 853-port yordamida sozlab ko‘ring"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Agar ushbu funksiya yoqilsa, Wi-Fi signali past bo‘lganda internetga ulanish majburiy ravishda mobil internetga o‘tkaziladi"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC Audio Bluetooth: Kualitas Pemutaran"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Pilih Codec LDAC Audio Bluetooth:\nKualitas Pemutaran"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS melalui TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Jika diaktifkan, coba DNS melalui TLS pada port 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Jika diaktifkan, Wi-Fi akan menjadi lebih agresif dalam mengalihkan sambungan data ke seluler saat sinyal Wi-Fi lemah"</string>
@@ -277,7 +279,7 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Paksa arah tata letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Paksa perenderan GPU"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Paksa rendering GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Paksa penggunaan GPU untuk gambar 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>

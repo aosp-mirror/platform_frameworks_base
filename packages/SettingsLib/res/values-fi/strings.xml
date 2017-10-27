@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-äänen LDAC-koodekki: Toiston laatu"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Valitse Bluetooth-äänen LDAC-koodekki:\nToiston laatu"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Striimaus: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS ennen TLS:ää"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Jos tämä on käytössä, yritä käyttää DNS:ää mieluummin kuin TLS:ää portin 853 kautta."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Näytä langattoman näytön sertifiointiin liittyvät asetukset"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Lisää Wi‑Fin lokikirjaustasoa, näytä SSID RSSI -kohtaisesti Wi‑Fi-valitsimessa."</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kun asetus on käytössä, datayhteys siirtyy helpommin Wi-Fistä matkapuhelinverkkoon, jos Wi-Fi-signaali on heikko."</string>

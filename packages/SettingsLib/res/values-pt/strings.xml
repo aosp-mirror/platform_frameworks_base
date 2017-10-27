@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec de áudio Bluetooth LDAC: qualidade de reprodução"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Selecionar codec de áudio Bluetooth LDAC:\nqualidade de reprodução"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS por TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Se essa opção estiver ativada, tente o DNS por TLS na porta 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de registro do Wi-Fi; mostrar conforme o RSSI de SSID na Seleção de Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Quando ativada, o Wi-Fi será mais agressivo em passar a conexão de dados para móvel, quando o sinal de Wi-Fi estiver fraco"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-oudio-LDAC-kodek: Speelgehalte"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Kies Bluetooth-oudio-LDAC-kodek:\nSpeelgehalte"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Stroming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS oor TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Indien dit geaktiveer is, probeer DNS oor TLS op poort 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Wanneer dit geaktiveer is, sal Wi-Fi die dataverbinding aggressiewer na mobiel oordra wanneer die Wi-Fi-sein swak is"</string>

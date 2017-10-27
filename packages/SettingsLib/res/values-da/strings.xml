@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-codec for Bluetooth-lyd: Afspilningskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Vælg LDAC-codec for Bluetooth-lyd:\nAfspilningskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamer: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS via TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Prøv DNS via TLS (hvis muligheden er aktiveret) på port 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Når dette er aktiveret, gennemtvinges en overdragelse af dataforbindelsen fra Wi-Fi til mobilnetværk, når Wi-Fi-signalet er svagt"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Zvočni kodek LDAC za Bluetooth: kakovost predvajanja"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Izberi zvočni kodek LDAC za Bluetooth:\nKakovost predvajanja"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Pretočno predvajanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS s šifriranjem TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Če je ta možnost omogočena, poskusi vzpostaviti povezavo DNS s šifriranjem TLS na vratih 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Če je ta možnost omogočena, Wi-Fi odločneje preda podatkovno povezavo mobilnemu omrežju, ko je signal Wi-Fi šibek."</string>

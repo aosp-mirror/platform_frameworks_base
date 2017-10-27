@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Аудио LDAC Кодлогч: Тоглуулагчийн чанар"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth Аудио LDAC Кодлогч сонгох:\nТоглуулагчийн чанар"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Дамжуулж байна: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS дээрх DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Идэвхжүүлсэн тохиолдолд TLS-р DNS-г 853-р портод оролдоно уу."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Идэвхжүүлсэн үед Wi‑Fi холболт сул байх үед дата холболтыг мобайлд шилжүүлэхэд илүү идэвхтэй байх болно"</string>

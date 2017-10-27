@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codecul LDAC audio pentru Bluetooth: calitatea redării"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Selectați codecul LDAC audio pentru Bluetooth:\ncalitatea redării"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmitere în flux: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS prin TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Dacă opțiunea este activată, încercați DNS prin TLS pe portul 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Când este activată, Wi-Fi va fi mai agresivă la predarea conexiunii de date către rețeaua mobilă când semnalul Wi-Fi este slab"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"I-Bluetooth Audio LDAC Codec: Ikhwalithi yokudlala"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Khetha i-Bluetooth Audio LDAC Codec:\nIkhwalithi yokudlala"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Ukusakaza: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"I-DNS nge-TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Uma inikwe amandla, zama i-DNS nge-TLS embobeni 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Bonisa izinketho zokunikeza isitifiketi ukubukeka okungenantambo"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"khuphula izinga lokungena le-Wi-Fi, bonisa nge-SSID RSSI engayodwana kusikhethi se-Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Uma inikwe amandla, i-Wi-Fi izoba namandla kakhulu ekudluliseleni ukuxhumeka kwedatha kuselula, uma isignali ye-Wi-Fi iphansi"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Кодек за LDAC-аудио преку Bluetooth: квалитет на репродукција"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Изберете кодек за LDAC-аудио преку Bluetooth:\nКвалитет на репродукција"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Емитување: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS преку TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Ако е овозможено, обидете се со DNS преку TLS на портата 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Кога е овозможено, Wi-Fi ќе биде поагресивна при предавање на интернет-врската на мобилната мрежа при слаб сигнал на Wi-Fi"</string>

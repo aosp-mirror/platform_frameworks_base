@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth audio kodek LDAC: kvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Izaberite Bluetooth audio kodek LDAC:\nkvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strimovanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS preko TLS-a"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Ako je omogućeno, probajte DNS preko TLS-a na portu 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kad se omogući, Wi‑Fi će biti agresivniji pri prebacivanju mreže za prenos podataka na mobilnu ako je Wi‑Fi signal slab"</string>
