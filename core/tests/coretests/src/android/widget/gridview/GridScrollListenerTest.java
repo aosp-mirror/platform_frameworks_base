@@ -18,14 +18,12 @@ package android.widget.gridview;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase;
+import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.TouchUtils;
 import android.view.KeyEvent;
 import android.widget.AbsListView;
 import android.widget.GridView;
-
-import android.widget.gridview.GridScrollListener;
 
 public class GridScrollListenerTest extends ActivityInstrumentationTestCase<GridScrollListener> implements
         AbsListView.OnScrollListener {
@@ -52,53 +50,61 @@ public class GridScrollListenerTest extends ActivityInstrumentationTestCase<Grid
     public void testPreconditions() {
         assertNotNull(mActivity);
         assertNotNull(mGridView);
-        
+
         assertEquals(0, mFirstVisibleItem);
     }
-    
+
     @LargeTest
     public void testKeyScrolling() {
         Instrumentation inst = getInstrumentation();
-        
+        // focus the gridview
+        mActivity.runOnUiThread(() -> mGridView.requestFocus());
+        inst.waitForIdleSync();
+
         int firstVisibleItem = mFirstVisibleItem;
         for (int i = 0; i < mVisibleItemCount * 2; i++) {
             inst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
         }
         inst.waitForIdleSync();
-        
+
         assertTrue("Arrow scroll did not happen", mFirstVisibleItem > firstVisibleItem);
-        
+
         firstVisibleItem = mFirstVisibleItem;
-        inst.sendCharacterSync(KeyEvent.KEYCODE_SPACE);
+        KeyEvent upDown = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_DPAD_UP, 0, KeyEvent.META_ALT_ON);
+        KeyEvent upUp = new KeyEvent(0, 0, KeyEvent.ACTION_UP,
+                KeyEvent.KEYCODE_DPAD_UP, 0, KeyEvent.META_ALT_ON);
+        inst.sendKeySync(upDown);
+        inst.sendKeySync(upUp);
         inst.waitForIdleSync();
-        
-        assertTrue("Page scroll did not happen", mFirstVisibleItem > firstVisibleItem);
-        
+
+        assertTrue("Page scroll did not happen", mFirstVisibleItem < firstVisibleItem);
+
         firstVisibleItem = mFirstVisibleItem;
-        KeyEvent down = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, 
+        KeyEvent down = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
                 KeyEvent.KEYCODE_DPAD_DOWN, 0, KeyEvent.META_ALT_ON);
-        KeyEvent up = new KeyEvent(0, 0, KeyEvent.ACTION_UP, 
+        KeyEvent up = new KeyEvent(0, 0, KeyEvent.ACTION_UP,
                 KeyEvent.KEYCODE_DPAD_DOWN, 0, KeyEvent.META_ALT_ON);
         inst.sendKeySync(down);
         inst.sendKeySync(up);
         inst.waitForIdleSync();
-        
+
         assertTrue("Full scroll did not happen", mFirstVisibleItem > firstVisibleItem);
-        assertEquals("Full scroll did not happen", mTotalItemCount, 
-                mFirstVisibleItem + mVisibleItemCount);    
+        assertEquals("Full scroll did not happen", mTotalItemCount,
+                mFirstVisibleItem + mVisibleItemCount);
     }
 
     @LargeTest
     public void testTouchScrolling() {
         Instrumentation inst = getInstrumentation();
-        
+
         int firstVisibleItem = mFirstVisibleItem;
         TouchUtils.dragQuarterScreenUp(this);
         TouchUtils.dragQuarterScreenUp(this);
         assertTrue("Touch scroll did not happen", mFirstVisibleItem > firstVisibleItem);
     }
 
-    
+
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         mFirstVisibleItem = firstVisibleItem;
         mVisibleItemCount = visibleItemCount;
