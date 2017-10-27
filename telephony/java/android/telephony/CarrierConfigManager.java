@@ -1600,6 +1600,13 @@ public class CarrierConfigManager {
     public static final String KEY_FEATURE_ACCESS_CODES_STRING_ARRAY =
             "feature_access_codes_string_array";
 
+    /**
+     * Determines if the carrier wants to identify high definition calls in the call log.
+     * @hide
+     */
+    public static final String KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL =
+            "identify_high_definition_calls_in_call_log_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1872,6 +1879,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
     }
 
     /**
