@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Secure;
+import android.provider.Settings.System;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -75,6 +76,29 @@ public final class NightDisplayController {
      * @see #setAutoMode(int)
      */
     public static final int AUTO_MODE_TWILIGHT = 2;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED })
+    public @interface ColorMode {}
+
+    /**
+     * Color mode with natural colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_NATURAL = 0;
+    /**
+     * Color mode with boosted colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_BOOSTED = 1;
+    /**
+     * Color mode with saturated colors.
+     *
+     * @see #setColorMode(int)
+     */
+    public static final int COLOR_MODE_SATURATED = 2;
 
     private final Context mContext;
     private final int mUserId;
@@ -306,6 +330,31 @@ public final class NightDisplayController {
     }
 
     /**
+     * Get the current color mode.
+     */
+    public int getColorMode() {
+        final int colorMode = System.getIntForUser(mContext.getContentResolver(),
+            System.DISPLAY_COLOR_MODE, COLOR_MODE_BOOSTED, mUserId);
+        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+            return COLOR_MODE_BOOSTED;
+        }
+        return colorMode;
+    }
+
+    /**
+     * Set the current color mode.
+     *
+     * @param colorMode the color mode
+     */
+    public void setColorMode(@ColorMode int colorMode) {
+        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+            throw new IllegalArgumentException("Invalid colorMode: " + colorMode);
+        }
+        System.putIntForUser(mContext.getContentResolver(), System.DISPLAY_COLOR_MODE, colorMode,
+                mUserId);
+    }
+
+    /**
      * Returns the minimum allowed color temperature (in Kelvin) to tint the display when activated.
      */
     public int getMinimumColorTemperature() {
@@ -351,6 +400,9 @@ public final class NightDisplayController {
                 case Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE:
                     mCallback.onColorTemperatureChanged(getColorTemperature());
                     break;
+                case System.DISPLAY_COLOR_MODE:
+                    mCallback.onDisplayColorModeChanged(getColorMode());
+                    break;
             }
         }
     }
@@ -379,6 +431,8 @@ public final class NightDisplayController {
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
+                cr.registerContentObserver(System.getUriFor(System.DISPLAY_COLOR_MODE),
+                        false /* notifyForDecendants */, mContentObserver, mUserId);
             }
         }
     }
@@ -425,5 +479,12 @@ public final class NightDisplayController {
          * @param colorTemperature the color temperature to tint the screen
          */
         default void onColorTemperatureChanged(int colorTemperature) {}
+
+        /**
+         * Callback invoked when the color mode changes.
+         *
+         * @param displayColorMode the color mode
+         */
+        default void onDisplayColorModeChanged(int displayColorMode) {}
     }
 }
