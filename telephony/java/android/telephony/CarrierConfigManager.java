@@ -294,10 +294,10 @@ public class CarrierConfigManager {
      * If true all networks are considered as home network a.k.a non-roaming.  When false,
      * the 2 pairs of CMDA and GSM roaming/non-roaming arrays are consulted.
      *
-     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
      */
     public static final String
             KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
@@ -1903,7 +1903,7 @@ public class CarrierConfigManager {
      * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
      * arbitrary thread.
      * </p>
-     * @see #hasCarrierPrivileges
+     * @see TelephonyManager#hasCarrierPrivileges
      */
     public void notifyConfigChangedForSubId(int subId) {
         try {
