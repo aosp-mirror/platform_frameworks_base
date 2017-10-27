@@ -96,7 +96,7 @@ public class ViewClippingUtil {
          * Is it allowed to enable clipping on this view.
          */
         default boolean isClippingEnablingAllowed(View view) {
-            return true;
+            return !MessagingPropertyAnimator.isAnimatingTranslation(view);
         }
 
         /**

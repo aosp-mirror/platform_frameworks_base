@@ -43,7 +43,6 @@
             android:paddingEnd="@dimen/notification_content_margin_end"
             android:minHeight="@dimen/notification_min_content_height"
             android:layout_marginBottom="@dimen/notification_content_margin_bottom"
-            android:clipToPadding="false"
             android:orientation="vertical"
             >
             <include layout="@layout/notification_template_part_line1"

@@ -176,13 +176,22 @@ public class MessagingLinearLayout extends ViewGroup {
         childTop = mPaddingTop;
 
         boolean first = true;
-
+        final boolean shown = isShown();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
-            if (child.getVisibility() == GONE || lp.hide) {
+            if (child.getVisibility() == GONE) {
                 continue;
+            }
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            MessagingChild messagingChild = (MessagingChild) child;
+            if (lp.hide) {
+                if (shown && lp.visibleBefore) {
+                    messagingChild.hideAnimated();
+                }
+                lp.visibleBefore = false;
+                continue;
+            } else {
+                lp.visibleBefore = true;
             }
 
             final int childWidth = child.getMeasuredWidth();
@@ -213,7 +222,10 @@ public class MessagingLinearLayout extends ViewGroup {
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         if (lp.hide) {
-            return true;
+            MessagingChild messagingChild = (MessagingChild) child;
+            if (!messagingChild.isHidingAnimated()) {
+                return true;
+            }
         }
         return super.drawChild(canvas, child, drawingTime);
     }
@@ -254,11 +266,14 @@ public class MessagingLinearLayout extends ViewGroup {
         int getMeasuredType();
         int getConsumedLines();
         void setMaxDisplayedLines(int lines);
+        void hideAnimated();
+        boolean isHidingAnimated();
     }
 
     public static class LayoutParams extends MarginLayoutParams {
 
-        boolean hide = false;
+        public boolean hide = false;
+        public boolean visibleBefore = false;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

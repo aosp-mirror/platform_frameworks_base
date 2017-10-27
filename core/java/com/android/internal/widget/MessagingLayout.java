@@ -26,14 +26,19 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.RemotableViewMethod;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -56,6 +61,11 @@ public class MessagingLayout extends FrameLayout {
     private static final float COLOR_SHIFT_AMOUNT = 60;
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
             = MessagingMessage::removeMessage;
+    public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
+    public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
+    public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    public static final OnLayoutChangeListener MESSAGING_PROPERTY_ANIMATOR
+            = new MessagingPropertyAnimator();
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
@@ -70,6 +80,7 @@ public class MessagingLayout extends FrameLayout {
     private CharSequence mConversationTitle;
     private Icon mLargeIcon;
     private boolean mIsOneToOne;
+    private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -93,6 +104,11 @@ public class MessagingLayout extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
+        // We still want to clip, but only on the top, since views can temporarily out of bounds
+        // during transitions.
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        Rect rect = new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        mMessagingLinearLayout.setClipBounds(rect);
         mTitleView = findViewById(R.id.title);
         mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -281,6 +297,7 @@ public class MessagingLayout extends FrameLayout {
             }
             if (newGroup == null) {
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
+                mAddedGroups.add(newGroup);
             }
             newGroup.setLayoutColor(mLayoutColor);
             newGroup.setSender(senders.get(groupIndex));
@@ -350,6 +367,7 @@ public class MessagingLayout extends FrameLayout {
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
                 message = MessagingMessage.createMessage(this, m);
+                message.addOnLayoutChangeListener(MESSAGING_PROPERTY_ANIMATOR);
             }
             message.setIsHistoric(historic);
             result.add(message);
@@ -384,6 +402,30 @@ public class MessagingLayout extends FrameLayout {
         for (int i = 0; i < mHistoricMessages.size(); i++) {
             MessagingMessage existing = mHistoricMessages.get(i);
             existing.setVisibility(mShowHistoricMessages ? VISIBLE : GONE);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (!mAddedGroups.isEmpty()) {
+            getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    for (MessagingGroup group : mAddedGroups) {
+                        if (!group.isShown()) {
+                            continue;
+                        }
+                        MessagingPropertyAnimator.fadeIn(group.getAvatar());
+                        MessagingPropertyAnimator.fadeIn(group.getSender());
+                        MessagingPropertyAnimator.startLocalTranslationFrom(group,
+                                group.getHeight(), LINEAR_OUT_SLOW_IN);
+                    }
+                    mAddedGroups.clear();
+                    getViewTreeObserver().removeOnPreDrawListener(this);
+                    return true;
+                }
+            });
         }
     }
 

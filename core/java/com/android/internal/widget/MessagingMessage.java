@@ -23,13 +23,11 @@ import android.annotation.StyleRes;
 import android.app.Notification;
 import android.content.Context;
 import android.text.Layout;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Pools;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -48,6 +46,7 @@ public class MessagingMessage extends ImageFloatingTextView implements
     private Notification.MessagingStyle.Message mMessage;
     private MessagingGroup mGroup;
     private boolean mIsHistoric;
+    private boolean mIsHidingAnimated;
 
     public MessagingMessage(@NonNull Context context) {
         super(context);
@@ -104,8 +103,13 @@ public class MessagingMessage extends ImageFloatingTextView implements
 
     public void removeMessage() {
         mGroup.removeMessage(this);
+    }
+
+    public void recycle() {
         mGroup = null;
         mMessage = null;
+        setAlpha(1.0f);
+        setTranslationY(0);
         sInstancePool.release(this);
     }
 
@@ -142,6 +146,26 @@ public class MessagingMessage extends ImageFloatingTextView implements
                 return MEASURED_NORMAL;
             }
         }
+    }
+
+    @Override
+    public void hideAnimated() {
+        setIsHidingAnimated(true);
+        mGroup.performRemoveAnimation(this, () -> setIsHidingAnimated(false));
+    }
+
+    private void setIsHidingAnimated(boolean isHiding) {
+        ViewParent parent = getParent();
+        mIsHidingAnimated = isHiding;
+        invalidate();
+        if (parent instanceof ViewGroup) {
+            ((ViewGroup) parent).invalidate();
+        }
+    }
+
+    @Override
+    public boolean isHidingAnimated() {
+        return mIsHidingAnimated;
     }
 
     @Override

@@ -139,6 +139,18 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_MOVE_WINDOW}. -->
   <item type="id" name="accessibilityActionMoveWindow" />
 
+  <!-- A tag used to save an animator in local y translation -->
+  <item type="id" name="tag_local_translation_y_animator" />
+
+  <!-- A tag used to save the local translation y -->
+  <item type="id" name="tag_local_translation_y" />
+
+  <!-- A tag used to save the original top of a view -->
+  <item type="id" name="tag_layout_top" />
+
+  <!-- A tag used to save an animator in alpha -->
+  <item type="id" name="tag_alpha_animator" />
+
   <!-- A tag used to save the clip children in a tag -->
   <item type="id" name="clip_children_tag" />
 
