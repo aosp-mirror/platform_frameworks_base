@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +73,14 @@ public class MbmsDownloadSession implements AutoCloseable {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String MBMS_DOWNLOAD_SERVICE_ACTION =
             "android.telephony.action.EmbmsDownload";
+
+    /**
+     * Metadata key that specifies the component name of the service to bind to for file-download.
+     * @hide
+     */
+    @TestApi
+    public static final String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA =
+            "mbms-download-service-override";
 
     /**
      * Integer extra that Android will attach to the intent supplied via

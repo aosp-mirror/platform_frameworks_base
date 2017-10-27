@@ -18,6 +18,7 @@ package android.telephony.mbms.vendor;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
@@ -38,6 +39,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
 public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
