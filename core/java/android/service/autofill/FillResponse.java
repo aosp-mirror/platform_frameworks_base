@@ -31,6 +31,8 @@ import android.os.Parcelable;
 import android.view.autofill.AutofillId;
 import android.widget.RemoteViews;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -51,9 +53,16 @@ public final class FillResponse implements Parcelable {
      */
     public static final int FLAG_TRACK_CONTEXT_COMMITED = 0x1;
 
+    /**
+     * Used in conjunction to {@link FillResponse.Builder#disableAutofill(long)} to disable autofill
+     * only for the activiy associated with the {@link FillResponse}, instead of the whole app.
+     */
+    public static final int FLAG_DISABLE_ACTIVITY_ONLY = 0x2;
+
     /** @hide */
     @IntDef(flag = true, value = {
-            FLAG_TRACK_CONTEXT_COMMITED
+            FLAG_TRACK_CONTEXT_COMMITED,
+            FLAG_DISABLE_ACTIVITY_ONLY
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FillResponseFlags {}
@@ -65,6 +74,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable IntentSender mAuthentication;
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
+    private final long mDisableDuration;
     private final int mFlags;
     private int mRequestId;
 
@@ -76,6 +86,7 @@ public final class FillResponse implements Parcelable {
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
+        mDisableDuration = builder.mDisableDuration;
         mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
     }
@@ -116,6 +127,11 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    public long getDisableDuration() {
+        return mDisableDuration;
+    }
+
+    /** @hide */
     public int getFlags() {
         return mFlags;
     }
@@ -150,6 +166,7 @@ public final class FillResponse implements Parcelable {
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
         private AutofillId[] mIgnoredIds;
+        private long mDisableDuration;
         private int mFlags;
         private boolean mDestroyed;
 
@@ -187,7 +204,7 @@ public final class FillResponse implements Parcelable {
          * which is used to visualize visualize the response for triggering the authentication
          * flow.
          *
-         * <p></><strong>Note:</strong> Do not make the provided pending intent
+         * <p><b>Note:</b> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.
          *
@@ -197,13 +214,15 @@ public final class FillResponse implements Parcelable {
          *
          * @return This builder.
          * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
-         * neither {@code authentication} nor {@code presentation} is non-{@code null}.
+         * both {@code authentication} and {@code presentation} are {@code null}, or if
+         * both {@code authentication} and {@code presentation} are non-{@code null}
          *
          * @see android.app.PendingIntent#getIntentSender()
          */
         public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             if (ids == null || ids.length == 0) {
                 throw new IllegalArgumentException("ids cannot be null or empry");
             }
@@ -226,6 +245,7 @@ public final class FillResponse implements Parcelable {
          * text field representing the result of a Captcha challenge.
          */
         public Builder setIgnoredIds(AutofillId...ids) {
+            throwIfDestroyed();
             mIgnoredIds = ids;
             return this;
         }
@@ -246,6 +266,7 @@ public final class FillResponse implements Parcelable {
          */
         public @NonNull Builder addDataset(@Nullable Dataset dataset) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             if (dataset == null) {
                 return this;
             }
@@ -265,6 +286,7 @@ public final class FillResponse implements Parcelable {
          */
         public @NonNull Builder setSaveInfo(@NonNull SaveInfo saveInfo) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             mSaveInfo = saveInfo;
             return this;
         }
@@ -295,30 +317,82 @@ public final class FillResponse implements Parcelable {
         /**
          * Sets flags changing the response behavior.
          *
-         * @param flags {@link #FLAG_TRACK_CONTEXT_COMMITED}, or {@code 0}.
+         * @param flags a combination of {@link #FLAG_TRACK_CONTEXT_COMMITED} and
+         * {@link #FLAG_DISABLE_ACTIVITY_ONLY}, or {@code 0}.
          *
          * @return This builder.
          */
         public Builder setFlags(@FillResponseFlags int flags) {
             throwIfDestroyed();
-            mFlags = flags;
+            mFlags = Preconditions.checkFlagsArgument(flags,
+                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY);
+            return this;
+        }
+
+        /**
+         * Disables autofill for the app or activity.
+         *
+         * <p>This method is useful to optimize performance in cases where the service knows it
+         * can not autofill an app&mdash;for example, when the service has a list of "blacklisted"
+         * apps such as office suites.
+         *
+         * <p>By default, it disables autofill for all activities in the app, unless the response is
+         * {@link #setFlags(int) flagged} with {@link #FLAG_DISABLE_ACTIVITY_ONLY}.
+         *
+         * <p>Autofill for the app or activity is automatically re-enabled after any of the
+         * following conditions:
+         *
+         * <ol>
+         *   <li>{@code duration} milliseconds have passed.
+         *   <li>The autofill service for the user has changed.
+         *   <li>The device has rebooted.
+         * </ol>
+         *
+         * <p><b>Note:</b> Activities that are running when autofill is re-enabled remain
+         * disabled for autofill until they finish and restart.
+         *
+         * @param duration duration to disable autofill, in milliseconds.
+         *
+         * @return this builder
+         *
+         * @throws IllegalArgumentException if {@code duration} is not a positive number.
+         * @throws IllegalStateException if either {@link #addDataset(Dataset)},
+         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)}, or
+         *       {@link #setSaveInfo(SaveInfo)} was already called.
+         */
+        public Builder disableAutofill(long duration) {
+            throwIfDestroyed();
+            if (duration <= 0) {
+                throw new IllegalArgumentException("duration must be greater than 0");
+            }
+            if (mAuthentication != null || mDatasets != null || mSaveInfo != null) {
+                throw new IllegalStateException("disableAutofill() must be the only method called");
+            }
+
+            mDisableDuration = duration;
             return this;
         }
 
         /**
          * Builds a new {@link FillResponse} instance.
          *
-         * <p>You must provide at least one dataset or some savable ids or an authentication with a
-         * presentation view.
+         * @throws IllegalStateException if any of the following conditions occur:
+         * <ol>
+         *   <li>{@link #build()} was already called.
+         *   <li>No call was made to {@link #addDataset(Dataset)},
+         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
+         *       {@link #setSaveInfo(SaveInfo)}, or {@link #disableAutofill(long)}.
+         * </ol>
          *
          * @return A built response.
          */
         public FillResponse build() {
             throwIfDestroyed();
 
-            if (mAuthentication == null && mDatasets == null && mSaveInfo == null) {
-                throw new IllegalArgumentException("need to provide at least one DataSet or a "
-                        + "SaveInfo or an authentication with a presentation");
+            if (mAuthentication == null && mDatasets == null && mSaveInfo == null
+                    && mDisableDuration == 0) {
+                throw new IllegalStateException("need to provide at least one DataSet or a "
+                        + "SaveInfo or an authentication with a presentation or disable autofill");
             }
             mDestroyed = true;
             return new FillResponse(this);
@@ -327,6 +401,12 @@ public final class FillResponse implements Parcelable {
         private void throwIfDestroyed() {
             if (mDestroyed) {
                 throw new IllegalStateException("Already called #build()");
+            }
+        }
+
+        private void throwIfDisableAutofillCalled() {
+            if (mDisableDuration > 0) {
+                throw new IllegalStateException("Already called #disableAutofill()");
             }
         }
     }
@@ -348,6 +428,7 @@ public final class FillResponse implements Parcelable {
                 .append(", hasAuthentication=").append(mAuthentication != null)
                 .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
                 .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
+                .append(", disableDuration=").append(mDisableDuration)
                 .append(", flags=").append(mFlags)
                 .append("]")
                 .toString();
@@ -371,6 +452,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
+        parcel.writeLong(mDisableDuration);
         parcel.writeInt(mFlags);
         parcel.writeInt(mRequestId);
     }
@@ -402,6 +484,10 @@ public final class FillResponse implements Parcelable {
             }
 
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
+            final long disableDuration = parcel.readLong();
+            if (disableDuration > 0) {
+                builder.disableAutofill(disableDuration);
+            }
             builder.setFlags(parcel.readInt());
 
             final FillResponse response = builder.build();

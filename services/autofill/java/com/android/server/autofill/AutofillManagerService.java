@@ -533,12 +533,13 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public int startSession(IBinder activityToken, IBinder appCallback, AutofillId autofillId,
                 Rect bounds, AutofillValue value, int userId, boolean hasCallback, int flags,
-                String packageName) {
+                ComponentName componentName) {
 
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
             autofillId = Preconditions.checkNotNull(autofillId, "autoFillId");
-            packageName = Preconditions.checkNotNull(packageName, "packageName");
+            componentName = Preconditions.checkNotNull(componentName, "componentName");
+            final String packageName = Preconditions.checkNotNull(componentName.getPackageName());
 
             Preconditions.checkArgument(userId == UserHandle.getUserId(getCallingUid()), "userId");
 
@@ -551,7 +552,7 @@ public final class AutofillManagerService extends SystemService {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 return service.startSessionLocked(activityToken, getCallingUid(), appCallback,
-                        autofillId, bounds, value, hasCallback, flags, packageName);
+                        autofillId, bounds, value, hasCallback, flags, componentName);
             }
         }
 
@@ -603,7 +604,8 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public int updateOrRestartSession(IBinder activityToken, IBinder appCallback,
                 AutofillId autoFillId, Rect bounds, AutofillValue value, int userId,
-                boolean hasCallback, int flags, String packageName, int sessionId, int action) {
+                boolean hasCallback, int flags, ComponentName componentName, int sessionId,
+                int action) {
             boolean restart = false;
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
@@ -614,7 +616,7 @@ public final class AutofillManagerService extends SystemService {
             }
             if (restart) {
                 return startSession(activityToken, appCallback, autoFillId, bounds, value, userId,
-                        hasCallback, flags, packageName);
+                        hasCallback, flags, componentName);
             }
 
             // Nothing changed...

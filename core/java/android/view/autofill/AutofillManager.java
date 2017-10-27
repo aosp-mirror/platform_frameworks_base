@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -224,7 +225,7 @@ public final class AutofillManager {
 
     /**
      * State where the autofill context was finished by the server because the autofill
-     * service could not autofill the page.
+     * service could not autofill the activity.
      *
      * <p>In this state, most apps callback (such as {@link #notifyViewEntered(View)}) are ignored,
      * exception {@link #requestAutofill(View)} (and {@link #requestAutofill(View, int, Rect)}).
@@ -240,6 +241,16 @@ public final class AutofillManager {
      * @hide
      */
     public static final int STATE_SHOWING_SAVE_UI = 3;
+
+    /**
+     * State where the autofill is disabled because the service cannot autofill the activity at all.
+     *
+     * <p>In this state, every call is ignored, even {@link #requestAutofill(View)}
+     * (and {@link #requestAutofill(View, int, Rect)}).
+     *
+     * @hide
+     */
+    public static final int STATE_DISABLED_BY_SERVICE = 4;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -398,6 +409,11 @@ public final class AutofillManager {
          * Runs the specified action on the UI thread.
          */
         void runOnUiThread(Runnable action);
+
+        /**
+         * Gets the complete component name of this client.
+         */
+        ComponentName getComponentName();
     }
 
     /**
@@ -506,7 +522,7 @@ public final class AutofillManager {
      * @return whether autofill is enabled for the current user.
      */
     public boolean isEnabled() {
-        if (!hasAutofillFeature()) {
+        if (!hasAutofillFeature() || isDisabledByService()) {
             return false;
         }
         synchronized (mLock) {
@@ -580,19 +596,31 @@ public final class AutofillManager {
         notifyViewEntered(view, 0);
     }
 
+    private boolean shouldIgnoreViewEnteredLocked(@NonNull View view, int flags) {
+        if (isDisabledByService()) {
+            if (sVerbose) {
+                Log.v(TAG, "ignoring notifyViewEntered(flags=" + flags + ", view=" + view
+                        + ") on state " + getStateAsStringLocked());
+            }
+            return true;
+        }
+        if (mState == STATE_FINISHED && (flags & FLAG_MANUAL_REQUEST) == 0) {
+            if (sVerbose) {
+                Log.v(TAG, "ignoring notifyViewEntered(flags=" + flags + ", view=" + view
+                        + ") on state " + getStateAsStringLocked());
+            }
+            return true;
+        }
+        return false;
+    }
+
     private void notifyViewEntered(@NonNull View view, int flags) {
         if (!hasAutofillFeature()) {
             return;
         }
         AutofillCallback callback = null;
         synchronized (mLock) {
-            if (isFinishedLocked() && (flags & FLAG_MANUAL_REQUEST) == 0) {
-                if (sVerbose) {
-                    Log.v(TAG, "notifyViewEntered(flags=" + flags + ", view=" + view
-                            + "): ignored on state " + getStateAsStringLocked());
-                }
-                return;
-            }
+            if (shouldIgnoreViewEnteredLocked(view, flags)) return;
 
             ensureServiceClientAddedIfNeededLocked();
 
@@ -717,14 +745,8 @@ public final class AutofillManager {
         }
         AutofillCallback callback = null;
         synchronized (mLock) {
-            if (isFinishedLocked() && (flags & FLAG_MANUAL_REQUEST) == 0) {
-                if (sVerbose) {
-                    Log.v(TAG, "notifyViewEntered(flags=" + flags + ", view=" + view
-                            + ", virtualId=" + virtualId
-                            + "): ignored on state " + getStateAsStringLocked());
-                }
-                return;
-            }
+            if (shouldIgnoreViewEnteredLocked(view, flags)) return;
+
             ensureServiceClientAddedIfNeededLocked();
 
             if (!mEnabled) {
@@ -1059,13 +1081,13 @@ public final class AutofillManager {
             return;
         }
         try {
+            final AutofillClient client = getClientLocked();
             mSessionId = mService.startSession(mContext.getActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags, mContext.getOpPackageName());
+                    mCallback != null, flags, client.getComponentName());
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
             }
-            final AutofillClient client = getClientLocked();
             if (client != null) {
                 client.autofillCallbackResetableStateAvailable();
             }
@@ -1120,14 +1142,14 @@ public final class AutofillManager {
 
         try {
             if (restartIfNecessary) {
+                final AutofillClient client = getClientLocked();
                 final int newId = mService.updateOrRestartSession(mContext.getActivityToken(),
                         mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                        mCallback != null, flags, mContext.getOpPackageName(), mSessionId, action);
+                        mCallback != null, flags, client.getComponentName(), mSessionId, action);
                 if (newId != mSessionId) {
                     if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
                     mSessionId = newId;
                     mState = (mSessionId == NO_SESSION) ? STATE_UNKNOWN : STATE_ACTIVE;
-                    final AutofillClient client = getClientLocked();
                     if (client != null) {
                         client.autofillCallbackResetableStateAvailable();
                     }
@@ -1437,7 +1459,9 @@ public final class AutofillManager {
      * Marks the state of the session as finished.
      *
      * @param newState {@link #STATE_FINISHED} (because the autofill service returned a {@code null}
-     *  FillResponse) or {@link #STATE_UNKNOWN} (because the session was removed).
+     *  FillResponse), {@link #STATE_UNKNOWN} (because the session was removed), or
+     *  {@link #STATE_DISABLED_BY_SERVICE} (because the autofill service disabled further autofill
+     *  requests for the activity).
      */
     private void setSessionFinished(int newState) {
         synchronized (mLock) {
@@ -1482,10 +1506,10 @@ public final class AutofillManager {
         }
     }
 
-    private void notifyNoFillUi(int sessionId, AutofillId id, boolean sessionFinished) {
+    private void notifyNoFillUi(int sessionId, AutofillId id, int sessionFinishedState) {
         if (sVerbose) {
             Log.v(TAG, "notifyNoFillUi(): sessionId=" + sessionId + ", autofillId=" + id
-                    + ", finished=" + sessionFinished);
+                    + ", sessionFinishedState=" + sessionFinishedState);
         }
         final View anchor = findView(id);
         if (anchor == null) {
@@ -1508,9 +1532,9 @@ public final class AutofillManager {
             }
         }
 
-        if (sessionFinished) {
+        if (sessionFinishedState != 0) {
             // Callback call was "hijacked" to also update the session state.
-            setSessionFinished(STATE_FINISHED);
+            setSessionFinished(sessionFinishedState);
         }
     }
 
@@ -1613,6 +1637,8 @@ public final class AutofillManager {
                 return "STATE_FINISHED";
             case STATE_SHOWING_SAVE_UI:
                 return "STATE_SHOWING_SAVE_UI";
+            case STATE_DISABLED_BY_SERVICE:
+                return "STATE_DISABLED_BY_SERVICE";
             default:
                 return "INVALID:" + mState;
         }
@@ -1622,8 +1648,8 @@ public final class AutofillManager {
         return mState == STATE_ACTIVE;
     }
 
-    private boolean isFinishedLocked() {
-        return mState == STATE_FINISHED;
+    private boolean isDisabledByService() {
+        return mState == STATE_DISABLED_BY_SERVICE;
     }
 
     private void post(Runnable runnable) {
@@ -1957,10 +1983,10 @@ public final class AutofillManager {
         }
 
         @Override
-        public void notifyNoFillUi(int sessionId, AutofillId id, boolean sessionFinished) {
+        public void notifyNoFillUi(int sessionId, AutofillId id, int sessionFinishedState) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinished));
+                afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinishedState));
             }
         }
 

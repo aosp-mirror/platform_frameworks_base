@@ -4709,6 +4709,22 @@ message MetricsEvent {
     // OS: P
     WIFI_CALLING_FOR_SUB = 1230;
 
+    // An autofill service asked to disable autofill for a given application.
+    // Package: Package of app that is being disabled for autofill
+    // Counter: duration (in ms) that autofill will be disabled
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_CLASS_NAME: Name of the Package of service that processed the request
+    AUTOFILL_SERVICE_DISABLED_APP = 1231;
+
+    // An autofill service asked to disable autofill for a given activity.
+    // Package: Package of app whose activity is being disabled for autofill
+    // Counter: duration (in ms) that autofill will be disabled
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is being disabled for autofill
+    AUTOFILL_SERVICE_DISABLED_ACTIVITY = 1232;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
