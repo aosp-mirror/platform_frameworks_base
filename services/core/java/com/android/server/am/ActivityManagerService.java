@@ -10792,6 +10792,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public void updateLockTaskFeatures(int userId, int flags) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
+                    "updateLockTaskFeatures()");
+        }
+        synchronized (this) {
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowing features " + userId + ":0x" +
+                    Integer.toHexString(flags));
+            mLockTaskController.updateLockTaskFeatures(userId, flags);
+        }
+    }
+
     private void startLockTaskModeLocked(@Nullable TaskRecord task, boolean isAppPinning) {
         if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
         if (task == null || task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {

@@ -654,7 +654,10 @@ interface IActivityManager {
     /**
      * Add a bare uid to the background restrictions whitelist.  Only the system uid may call this.
      */
-     void backgroundWhitelistUid(int uid);
+    void backgroundWhitelistUid(int uid);
+
+    // Start of P transactions
+    void updateLockTaskFeatures(int userId, int flags);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.

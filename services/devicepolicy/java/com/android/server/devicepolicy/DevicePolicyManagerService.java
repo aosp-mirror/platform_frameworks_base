@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -224,6 +225,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String TAG_ACCEPTED_CA_CERTIFICATES = "accepted-ca-certificate";
 
     private static final String TAG_LOCK_TASK_COMPONENTS = "lock-task-component";
+
+    private static final String TAG_LOCK_TASK_FEATURES = "lock-task-features";
 
     private static final String TAG_STATUS_BAR = "statusbar";
 
@@ -506,6 +509,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // This is the list of component allowed to start lock task mode.
         List<String> mLockTaskPackages = new ArrayList<>();
+
+        // Bitfield of feature flags to be enabled during LockTask mode.
+        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
 
         boolean mStatusBarDisabled = false;
 
@@ -2628,6 +2634,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_LOCK_TASK_COMPONENTS);
             }
 
+            if (policy.mLockTaskFeatures != DevicePolicyManager.LOCK_TASK_FEATURE_NONE) {
+                out.startTag(null, TAG_LOCK_TASK_FEATURES);
+                out.attribute(null, ATTR_VALUE, Integer.toString(policy.mLockTaskFeatures));
+                out.endTag(null, TAG_LOCK_TASK_FEATURES);
+            }
+
             if (policy.mStatusBarDisabled) {
                 out.startTag(null, TAG_STATUS_BAR);
                 out.attribute(null, ATTR_DISABLED, Boolean.toString(policy.mStatusBarDisabled));
@@ -2868,6 +2880,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mAcceptedCaCertificates.add(parser.getAttributeValue(null, ATTR_NAME));
                 } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
+                } else if (TAG_LOCK_TASK_FEATURES.equals(tag)) {
+                    policy.mLockTaskFeatures = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_STATUS_BAR.equals(tag)) {
                     policy.mStatusBarDisabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_DISABLED));
@@ -2936,6 +2951,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         validatePasswordOwnerLocked(policy);
         updateMaximumTimeToLockLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
+        updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
@@ -2946,6 +2962,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             mInjector.getIActivityManager()
                     .updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
+        } catch (RemoteException e) {
+            // Not gonna happen.
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+    }
+
+    private void updateLockTaskFeaturesLocked(int flags, int userId) {
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            mInjector.getIActivityManager()
+                    .updateLockTaskFeatures(userId, flags);
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -6939,6 +6967,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         policy.mAffiliationIds.clear();
         policy.mLockTaskPackages.clear();
+        policy.mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
         saveSettingsLocked(userId);
 
         try {
@@ -8921,25 +8950,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateLockTaskPackagesLocked(packages, userHandle);
     }
 
-    private void maybeClearLockTaskPackagesLocked() {
-        final long ident = mInjector.binderClearCallingIdentity();
-        try {
-            final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
-            for (int i = 0; i < userInfos.size(); i++) {
-                int userId = userInfos.get(i).id;
-                final List<String> lockTaskPackages = getUserData(userId).mLockTaskPackages;
-                if (!lockTaskPackages.isEmpty() &&
-                        !isUserAffiliatedWithDeviceLocked(userId)) {
-                    Slog.d(LOG_TAG,
-                            "User id " + userId + " not affiliated. Clearing lock task packages");
-                    setLockTaskPackagesLocked(userId, Collections.<String>emptyList());
-                }
-            }
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
-    }
-
     @Override
     public String[] getLockTaskPackages(ComponentName who) {
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -8966,12 +8976,82 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public void setLockTaskFeatures(ComponentName who, int flags) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
+            setLockTaskFeaturesLocked(userHandle, flags);
+        }
+    }
+
+    private void setLockTaskFeaturesLocked(int userHandle, int flags) {
+        DevicePolicyData policy = getUserData(userHandle);
+        policy.mLockTaskFeatures = flags;
+        saveSettingsLocked(userHandle);
+        updateLockTaskFeaturesLocked(flags, userHandle);
+    }
+
+    @Override
+    public int getLockTaskFeatures(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
+            return getUserData(userHandle).mLockTaskFeatures;
+        }
+    }
+
+    private void maybeClearLockTaskPolicyLocked() {
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
+            for (int i = userInfos.size() - 1; i >= 0; i--) {
+                int userId = userInfos.get(i).id;
+                if (isUserAffiliatedWithDeviceLocked(userId)) {
+                    continue;
+                }
+
+                final List<String> lockTaskPackages = getUserData(userId).mLockTaskPackages;
+                if (!lockTaskPackages.isEmpty()) {
+                    Slog.d(LOG_TAG,
+                            "User id " + userId + " not affiliated. Clearing lock task packages");
+                    setLockTaskPackagesLocked(userId, Collections.<String>emptyList());
+                }
+                final int lockTaskFeatures = getUserData(userId).mLockTaskFeatures;
+                if (lockTaskFeatures != DevicePolicyManager.LOCK_TASK_FEATURE_NONE){
+                    Slog.d(LOG_TAG,
+                            "User id " + userId + " not affiliated. Clearing lock task features");
+                    setLockTaskFeaturesLocked(userId, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+                }
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userHandle) {
         if (!isCallerWithSystemUid()) {
             throw new SecurityException("notifyLockTaskModeChanged can only be called by system");
         }
         synchronized (this) {
             final DevicePolicyData policy = getUserData(userHandle);
+
+            if (policy.mStatusBarDisabled) {
+                // Status bar is managed by LockTaskController during LockTask, so we cancel this
+                // policy when LockTask starts, and reapply it when LockTask ends
+                setStatusBarDisabledInternal(!isEnabled, userHandle);
+            }
+
             Bundle adminExtras = new Bundle();
             adminExtras.putString(DeviceAdminReceiver.EXTRA_LOCK_TASK_PACKAGE, pkg);
             for (ActiveAdmin admin : policy.mAdminList) {
@@ -9182,8 +9262,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             DevicePolicyData policy = getUserData(userId);
             if (policy.mStatusBarDisabled != disabled) {
-                if (!setStatusBarDisabledInternal(disabled, userId)) {
-                    return false;
+                boolean isLockTaskMode = false;
+                try {
+                    isLockTaskMode = mInjector.getIActivityManager().getLockTaskModeState()
+                            != LOCK_TASK_MODE_NONE;
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Failed to get LockTask mode");
+                }
+                if (!isLockTaskMode) {
+                    if (!setStatusBarDisabledInternal(disabled, userId)) {
+                        return false;
+                    }
                 }
                 policy.mStatusBarDisabled = disabled;
                 saveSettingsLocked(userId);
@@ -10283,7 +10372,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // but as a result of that other users might become affiliated or un-affiliated.
             maybePauseDeviceWideLoggingLocked();
             maybeResumeDeviceWideLoggingLocked();
-            maybeClearLockTaskPackagesLocked();
+            maybeClearLockTaskPolicyLocked();
         }
     }
 
