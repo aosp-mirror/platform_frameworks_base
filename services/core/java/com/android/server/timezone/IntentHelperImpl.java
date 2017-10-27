@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PatternMatcher;
+import android.os.UserHandle;
 import android.util.Slog;
 
 /**
@@ -76,7 +77,9 @@ final class IntentHelperImpl implements IntentHelper {
         // not expected to need local data.
 
         Receiver packageUpdateReceiver = new Receiver(packageTracker);
-        mContext.registerReceiver(packageUpdateReceiver, packageIntentFilter);
+        mContext.registerReceiverAsUser(
+                packageUpdateReceiver, UserHandle.SYSTEM, packageIntentFilter,
+                null /* broadcastPermission */, null /* default handler */);
     }
 
     /** Sends an intent to trigger an update check. */
