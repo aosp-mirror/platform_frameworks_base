@@ -54,6 +54,7 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
       </View1>)");
 
   doc->file.name = test::ParseNameOrDie("layout/main");
+  doc->file.type = ResourceFile::Type::kProtoXml;
 
   InlineXmlFormatParser parser;
   ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
@@ -80,6 +81,9 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
 
   // Make sure the generated reference is correct.
   EXPECT_THAT(extracted_doc->file.name, Eq(name_ref));
+
+  // Make sure the ResourceFile::Type is the same.
+  EXPECT_THAT(extracted_doc->file.type, Eq(ResourceFile::Type::kProtoXml));
 
   // Verify the structure of the extracted XML.
   el = extracted_doc->root.get();
