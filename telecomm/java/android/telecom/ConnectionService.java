@@ -1449,6 +1449,12 @@ public abstract class ConnectionService extends Service {
      */
     private void notifyCreateConnectionComplete(final String callId) {
         Log.i(this, "notifyCreateConnectionComplete %s", callId);
+        if (callId == null) {
+            // This could happen if the connection fails quickly and is removed from the
+            // ConnectionService before Telecom sends the create connection complete callback.
+            Log.w(this, "notifyCreateConnectionComplete: callId is null.");
+            return;
+        }
         onCreateConnectionComplete(findConnectionForAction(callId,
                 "notifyCreateConnectionComplete"));
     }
@@ -2177,7 +2183,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private Connection findConnectionForAction(String callId, String action) {
-        if (mConnectionById.containsKey(callId)) {
+        if (callId != null && mConnectionById.containsKey(callId)) {
             return mConnectionById.get(callId);
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
