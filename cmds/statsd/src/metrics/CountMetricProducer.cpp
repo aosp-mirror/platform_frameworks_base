@@ -203,6 +203,13 @@ void CountMetricProducer::flushCounterIfNeeded(const uint64_t eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
+size_t CountMetricProducer::byteSize() {
+// TODO: return actual proto size when ProtoOutputStream is ready for use for
+// CountMetricsProducer.
+//    return mProto->size();
+    return 0;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

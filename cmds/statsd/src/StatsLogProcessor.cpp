@@ -46,6 +46,7 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
+        flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
     }
 }
 
@@ -84,41 +85,40 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
         it->second->finish();
         mMetricsManagers.erase(it);
     }
+    auto flushTime = mLastFlushTimes.find(key);
+    if (flushTime != mLastFlushTimes.end()) {
+        mLastFlushTimes.erase(flushTime);
+    }
 }
 
-void StatsLogProcessor::addEventMetricData(const EventMetricData& eventMetricData) {
-    // TODO: Replace this code when MetricsManager.onDumpReport() is ready to
-    // get a list of byte arrays.
-    flushIfNecessary(eventMetricData);
-    const int numBytes = eventMetricData.ByteSize();
-    char buffer[numBytes];
-    eventMetricData.SerializeToArray(&buffer[0], numBytes);
-    string bufferString(buffer, numBytes);
-    mEvents.push_back(bufferString);
-    mBufferSize += eventMetricData.ByteSize();
-}
+void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
+                                         const ConfigKey& key,
+                                         const unique_ptr<MetricsManager>& metricsManager) {
+    auto lastFlushNs = mLastFlushTimes.find(key);
+    if (lastFlushNs != mLastFlushTimes.end()) {
+        if (timestampNs - lastFlushNs->second < kMinFlushPeriod) {
+            return;
+        }
+    }
 
-void StatsLogProcessor::flushIfNecessary(const EventMetricData& eventMetricData) {
-    if (eventMetricData.ByteSize() + mBufferSize > kMaxSerializedBytes) {
-      flush();
+    size_t totalBytes = metricsManager->byteSize();
+    if (totalBytes > kMaxSerializedBytes) {
+        flush();
+        mLastFlushTimes[key] = std::move(timestampNs);
     }
 }
 
 void StatsLogProcessor::flush() {
+    // TODO: Take ConfigKey as an argument and flush metrics related to the
+    // ConfigKey. Also, create a wrapper that holds a repeated field of
+    // StatsLogReport's.
+    /*
     StatsLogReport logReport;
-    for (string eventBuffer : mEvents) {
-        EventMetricData eventFromBuffer;
-        eventFromBuffer.ParseFromString(eventBuffer);
-        EventMetricData* newEntry = logReport.mutable_event_metrics()->add_data();
-        newEntry->CopyFrom(eventFromBuffer);
-    }
-
     const int numBytes = logReport.ByteSize();
     vector<uint8_t> logReportBuffer(numBytes);
     logReport.SerializeToArray(&logReportBuffer[0], numBytes);
     mPushLog(logReportBuffer);
-    mEvents.clear();
-    mBufferSize = 0;
+    */
 }
 
 }  // namespace statsd

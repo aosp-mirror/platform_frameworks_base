@@ -349,6 +349,13 @@ void DurationMetricProducer::flushDurationIfNeeded(const uint64_t eventTime) {
     }
 }
 
+size_t DurationMetricProducer::byteSize() {
+// TODO: return actual proto size when ProtoOutputStream is ready for use for
+// DurationMetricsProducer.
+//    return mProto->size();
+  return 0;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

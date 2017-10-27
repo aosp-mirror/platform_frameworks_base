@@ -51,6 +51,8 @@ public:
 
     void onSlicedConditionMayChange() override;
 
+    size_t byteSize() override;
+
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
 
