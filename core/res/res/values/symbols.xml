@@ -2815,6 +2815,8 @@
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureDefault" />
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureMin" />
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureMax" />
+  <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficients" />
+  <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />

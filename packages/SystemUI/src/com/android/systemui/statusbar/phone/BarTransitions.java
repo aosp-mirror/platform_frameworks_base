@@ -52,7 +52,7 @@ public class BarTransitions {
     public static final int MODE_LIGHTS_OUT_TRANSPARENT = 6;
 
     public static final int LIGHTS_IN_DURATION = 250;
-    public static final int LIGHTS_OUT_DURATION = 750;
+    public static final int LIGHTS_OUT_DURATION = 1500;
     public static final int BACKGROUND_DURATION = 200;
 
     private final String mTag;
@@ -73,6 +73,10 @@ public class BarTransitions {
 
     public int getMode() {
         return mMode;
+    }
+
+    public void setAutoDim(boolean autoDim) {
+        // Default is don't care.
     }
 
     /**
