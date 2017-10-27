@@ -499,8 +499,8 @@ interface IActivityManager {
     void exitFreeformMode(in IBinder token);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
-    boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            in Rect initialBounds);
+    boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
+            boolean animate, in Rect initialBounds);
     /**
      * Dismisses split-screen multi-window mode.
      * {@param toTop} If true the current primary split-screen stack will be placed or left on top.

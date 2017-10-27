@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -210,9 +210,9 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
                         if (mCurrentDimSide != CTRL_NONE) {
                             final int createMode = mCurrentDimSide == CTRL_LEFT
-                                    ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                                    : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-                            mService.mActivityManager.moveTaskToDockedStack(
+                                    ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                                    : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+                            mService.mActivityManager.setTaskWindowingModeSplitScreenPrimary(
                                     mTask.mTaskId, createMode, true /*toTop*/, true /* animate */,
                                     null /* initialBounds */);
                         }

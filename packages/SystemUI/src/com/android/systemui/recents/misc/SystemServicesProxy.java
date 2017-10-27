@@ -291,7 +291,7 @@ public class SystemServicesProxy {
 
         try {
             final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setDockCreateMode(createMode);
+            options.setSplitScreenCreateMode(createMode);
             options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
             mIam.startActivityFromRecents(taskId, options.toBundle());
             return true;
@@ -301,14 +301,15 @@ public class SystemServicesProxy {
         return false;
     }
 
-    /** Docks an already resumed task to the side of the screen. */
-    public boolean moveTaskToDockedStack(int taskId, int createMode, Rect initialBounds) {
+    /** Moves an already resumed task to the side of the screen to initiate split screen. */
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
+            Rect initialBounds) {
         if (mIam == null) {
             return false;
         }
 
         try {
-            return mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */,
+            return mIam.setTaskWindowingModeSplitScreenPrimary(taskId, createMode, true /* onTop */,
                     false /* animate */, initialBounds);
         } catch (RemoteException e) {
             e.printStackTrace();
