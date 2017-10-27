@@ -57,7 +57,7 @@ public:
         for (int i = 0; i < 5; i++) {
             paint.setTextSize(10 + (frameNr % 20) + i * 20);
             canvas->drawText(text.get(), 0, textLength, textLength,
-                    0, 100 * (i + 2), minikin::kBidi_Force_LTR, paint, nullptr);
+                    0, 100 * (i + 2), minikin::Bidi::FORCE_LTR, paint, nullptr);
         }
 
         container->setStagingDisplayList(canvas->finishRecording());
