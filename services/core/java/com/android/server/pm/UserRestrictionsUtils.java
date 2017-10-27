@@ -80,6 +80,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
             UserManager.DISALLOW_DEBUGGING_FEATURES,
             UserManager.DISALLOW_CONFIG_VPN,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
             UserManager.DISALLOW_CONFIG_TETHERING,
             UserManager.DISALLOW_NETWORK_RESET,
             UserManager.DISALLOW_FACTORY_RESET,
@@ -157,6 +158,7 @@ public class UserRestrictionsUtils {
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
             UserManager.DISALLOW_BLUETOOTH_SHARING,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
             UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
