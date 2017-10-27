@@ -337,7 +337,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"“<xliff:g id="APP">%s</xliff:g>” ilovasini ishga tushirib bo‘lmadi."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Xavfsiz rejimda <xliff:g id="APP">%s</xliff:g> ilovasi o‘chirib qo‘yildi."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hammasini tozalash"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranni bo‘lish xususiyatidan foydalanish uchun uchun bu yerga torting"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranni bo‘lish xususiyatidan foydalanish uchun bu yerga torting"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Boshqa usulda bo‘lish"</string>
