@@ -314,6 +314,20 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public void updateOutputConfiguration(OutputConfiguration config)
+            throws CameraAccessException {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "updateOutputConfiguration");
+            }
+
+            mDeviceImpl.updateOutputConfiguration(config);
+        }
+    }
+
+    @Override
     public boolean isReprocessable() {
         return mInput != null;
     }

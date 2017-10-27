@@ -764,6 +764,24 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
+    public void updateOutputConfiguration(OutputConfiguration config)
+            throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            int streamId = -1;
+            for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                if (config.getSurface() == mConfiguredOutputs.valueAt(i).getSurface()) {
+                    streamId = mConfiguredOutputs.keyAt(i);
+                    break;
+                }
+            }
+            if (streamId == -1) {
+                throw new IllegalArgumentException("Invalid output configuration");
+            }
+
+            mRemoteDevice.updateOutputConfiguration(streamId, config);
+        }
+    }
+
     public void tearDown(Surface surface) throws CameraAccessException {
         if (surface == null) throw new IllegalArgumentException("Surface is null");
 
