@@ -3856,6 +3856,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.updates.NetworkWatchlistInstallReceiver"
+                  android:permission="android.permission.UPDATE_CONFIG">
+            <intent-filter>
+                <action android:name="android.intent.action.UPDATE_NETWORK_WATCHLIST" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name="com.android.server.updates.ApnDbInstallReceiver"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>

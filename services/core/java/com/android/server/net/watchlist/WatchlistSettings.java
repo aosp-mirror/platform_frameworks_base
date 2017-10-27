@@ -19,8 +19,10 @@ package com.android.server.net.watchlist;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.HexDump;
@@ -51,10 +53,9 @@ import java.util.zip.CRC32;
 class WatchlistSettings {
     private static final String TAG = "WatchlistSettings";
 
-    // Settings xml will be stored in /data/system/network_watchlist/watchlist_settings.xml
-    static final String SYSTEM_WATCHLIST_DIR = "network_watchlist";
-
-    private static final String WATCHLIST_XML_FILE = "watchlist_settings.xml";
+    // Watchlist config that pushed by ConfigUpdater.
+    private static final String NETWORK_WATCHLIST_DB_PATH =
+            "/data/misc/network_watchlist/network_watchlist.xml";
 
     private static class XmlTags {
         private static final String WATCHLIST_SETTINGS = "watchlist-settings";
@@ -65,86 +66,74 @@ class WatchlistSettings {
         private static final String HASH = "hash";
     }
 
-    private static WatchlistSettings sInstance = new WatchlistSettings();
-    private final AtomicFile mXmlFile;
-    private final Object mLock = new Object();
-    private HarmfulDigests mCrc32DomainDigests = new HarmfulDigests(new ArrayList<>());
-    private HarmfulDigests mSha256DomainDigests = new HarmfulDigests(new ArrayList<>());
-    private HarmfulDigests mCrc32IpDigests = new HarmfulDigests(new ArrayList<>());
-    private HarmfulDigests mSha256IpDigests = new HarmfulDigests(new ArrayList<>());
+    private static class CrcShaDigests {
+        final HarmfulDigests crc32Digests;
+        final HarmfulDigests sha256Digests;
 
-    public static synchronized WatchlistSettings getInstance() {
+        public CrcShaDigests(HarmfulDigests crc32Digests, HarmfulDigests sha256Digests) {
+            this.crc32Digests = crc32Digests;
+            this.sha256Digests = sha256Digests;
+        }
+    }
+
+    private final static WatchlistSettings sInstance = new WatchlistSettings();
+    private final AtomicFile mXmlFile;
+
+    private volatile CrcShaDigests mDomainDigests;
+    private volatile CrcShaDigests mIpDigests;
+
+    public static WatchlistSettings getInstance() {
         return sInstance;
     }
 
     private WatchlistSettings() {
-        this(getSystemWatchlistFile(WATCHLIST_XML_FILE));
+        this(new File(NETWORK_WATCHLIST_DB_PATH));
     }
 
     @VisibleForTesting
     protected WatchlistSettings(File xmlFile) {
         mXmlFile = new AtomicFile(xmlFile);
-        readSettingsLocked();
+        reloadSettings();
     }
 
-    static File getSystemWatchlistFile(String filename) {
-        final File dataSystemDir = Environment.getDataSystemDirectory();
-        final File systemWatchlistDir = new File(dataSystemDir, SYSTEM_WATCHLIST_DIR);
-        systemWatchlistDir.mkdirs();
-        return new File(systemWatchlistDir, filename);
-    }
-
-    private void readSettingsLocked() {
-        synchronized (mLock) {
-            FileInputStream stream;
-            try {
-                stream = mXmlFile.openRead();
-            } catch (FileNotFoundException e) {
-                Log.i(TAG, "No watchlist settings: " + mXmlFile.getBaseFile().getAbsolutePath());
-                return;
-            }
+    public void reloadSettings() {
+        try (FileInputStream stream = mXmlFile.openRead()){
 
             final List<byte[]> crc32DomainList = new ArrayList<>();
             final List<byte[]> sha256DomainList = new ArrayList<>();
             final List<byte[]> crc32IpList = new ArrayList<>();
             final List<byte[]> sha256IpList = new ArrayList<>();
 
-            try {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, StandardCharsets.UTF_8.name());
-                parser.nextTag();
-                parser.require(XmlPullParser.START_TAG, null, XmlTags.WATCHLIST_SETTINGS);
-                while (parser.nextTag() == XmlPullParser.START_TAG) {
-                    String tagName = parser.getName();
-                    switch (tagName) {
-                        case XmlTags.CRC32_DOMAIN:
-                            parseHash(parser, tagName, crc32DomainList);
-                            break;
-                        case XmlTags.CRC32_IP:
-                            parseHash(parser, tagName, crc32IpList);
-                            break;
-                        case XmlTags.SHA256_DOMAIN:
-                            parseHash(parser, tagName, sha256DomainList);
-                            break;
-                        case XmlTags.SHA256_IP:
-                            parseHash(parser, tagName, sha256IpList);
-                            break;
-                        default:
-                            Log.w(TAG, "Unknown element: " + parser.getName());
-                            XmlUtils.skipCurrentTag(parser);
-                    }
-                }
-                parser.require(XmlPullParser.END_TAG, null, XmlTags.WATCHLIST_SETTINGS);
-                writeSettingsToMemory(crc32DomainList, sha256DomainList, crc32IpList, sha256IpList);
-            } catch (IllegalStateException | NullPointerException | NumberFormatException |
-                    XmlPullParserException | IOException | IndexOutOfBoundsException e) {
-                Log.w(TAG, "Failed parsing " + e);
-            } finally {
-                try {
-                    stream.close();
-                } catch (IOException e) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            parser.nextTag();
+            parser.require(XmlPullParser.START_TAG, null, XmlTags.WATCHLIST_SETTINGS);
+            while (parser.nextTag() == XmlPullParser.START_TAG) {
+                String tagName = parser.getName();
+                switch (tagName) {
+                    case XmlTags.CRC32_DOMAIN:
+                        parseHash(parser, tagName, crc32DomainList);
+                        break;
+                    case XmlTags.CRC32_IP:
+                        parseHash(parser, tagName, crc32IpList);
+                        break;
+                    case XmlTags.SHA256_DOMAIN:
+                        parseHash(parser, tagName, sha256DomainList);
+                        break;
+                    case XmlTags.SHA256_IP:
+                        parseHash(parser, tagName, sha256IpList);
+                        break;
+                    default:
+                        Log.w(TAG, "Unknown element: " + parser.getName());
+                        XmlUtils.skipCurrentTag(parser);
                 }
             }
+            parser.require(XmlPullParser.END_TAG, null, XmlTags.WATCHLIST_SETTINGS);
+            writeSettingsToMemory(crc32DomainList, sha256DomainList, crc32IpList, sha256IpList);
+            Log.i(TAG, "Reload watchlist done");
+        } catch (IllegalStateException | NullPointerException | NumberFormatException |
+                XmlPullParserException | IOException | IndexOutOfBoundsException e) {
+            Slog.e(TAG, "Failed parsing xml", e);
         }
     }
 
@@ -161,101 +150,61 @@ class WatchlistSettings {
     }
 
     /**
-     * Write network watchlist settings to disk.
-     * Adb should not use it, should use writeSettingsToMemory directly instead.
-     */
-    public void writeSettingsToDisk(List<byte[]> newCrc32DomainList,
-            List<byte[]> newSha256DomainList,
-            List<byte[]> newCrc32IpList,
-            List<byte[]> newSha256IpList) {
-        synchronized (mLock) {
-            FileOutputStream stream;
-            try {
-                stream = mXmlFile.startWrite();
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to write display settings: " + e);
-                return;
-            }
-
-            try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
-                out.startDocument(null, true);
-                out.startTag(null, XmlTags.WATCHLIST_SETTINGS);
-
-                writeHashSetToXml(out, XmlTags.SHA256_DOMAIN, newSha256DomainList);
-                writeHashSetToXml(out, XmlTags.SHA256_IP, newSha256IpList);
-                writeHashSetToXml(out, XmlTags.CRC32_DOMAIN, newCrc32DomainList);
-                writeHashSetToXml(out, XmlTags.CRC32_IP, newCrc32IpList);
-
-                out.endTag(null, XmlTags.WATCHLIST_SETTINGS);
-                out.endDocument();
-                mXmlFile.finishWrite(stream);
-                writeSettingsToMemory(newCrc32DomainList, newSha256DomainList, newCrc32IpList,
-                        newSha256IpList);
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to write display settings, restoring backup.", e);
-                mXmlFile.failWrite(stream);
-            }
-        }
-    }
-
-    /**
      * Write network watchlist settings to memory.
      */
     public void writeSettingsToMemory(List<byte[]> newCrc32DomainList,
             List<byte[]> newSha256DomainList,
             List<byte[]> newCrc32IpList,
             List<byte[]> newSha256IpList) {
-        synchronized (mLock) {
-            mCrc32DomainDigests = new HarmfulDigests(newCrc32DomainList);
-            mCrc32IpDigests = new HarmfulDigests(newCrc32IpList);
-            mSha256DomainDigests = new HarmfulDigests(newSha256DomainList);
-            mSha256IpDigests = new HarmfulDigests(newSha256IpList);
-        }
-    }
-
-    private static void writeHashSetToXml(XmlSerializer out, String tagName, List<byte[]> hashSet)
-            throws IOException {
-        out.startTag(null, tagName);
-        for (byte[] hash : hashSet) {
-            out.startTag(null, XmlTags.HASH);
-            out.text(HexDump.toHexString(hash));
-            out.endTag(null, XmlTags.HASH);
-        }
-        out.endTag(null, tagName);
+        mDomainDigests = new CrcShaDigests(new HarmfulDigests(newCrc32DomainList),
+                new HarmfulDigests(newSha256DomainList));
+        mIpDigests = new CrcShaDigests(new HarmfulDigests(newCrc32IpList),
+                new HarmfulDigests(newSha256IpList));
     }
 
     public boolean containsDomain(String domain) {
+        final CrcShaDigests domainDigests = mDomainDigests;
+        if (domainDigests == null) {
+            Slog.wtf(TAG, "domainDigests should not be null");
+            return false;
+        }
         // First it does a quick CRC32 check.
         final byte[] crc32 = getCrc32(domain);
-        if (!mCrc32DomainDigests.contains(crc32)) {
+        if (!domainDigests.crc32Digests.contains(crc32)) {
             return false;
         }
         // Now we do a slow SHA256 check.
         final byte[] sha256 = getSha256(domain);
-        return mSha256DomainDigests.contains(sha256);
+        return domainDigests.sha256Digests.contains(sha256);
     }
 
     public boolean containsIp(String ip) {
+        final CrcShaDigests ipDigests = mIpDigests;
+        if (ipDigests == null) {
+            Slog.wtf(TAG, "ipDigests should not be null");
+            return false;
+        }
         // First it does a quick CRC32 check.
         final byte[] crc32 = getCrc32(ip);
-        if (!mCrc32IpDigests.contains(crc32)) {
+        if (!ipDigests.crc32Digests.contains(crc32)) {
             return false;
         }
         // Now we do a slow SHA256 check.
         final byte[] sha256 = getSha256(ip);
-        return mSha256IpDigests.contains(sha256);
+        return ipDigests.sha256Digests.contains(sha256);
     }
 
 
-    /** Get CRC32 of a string */
+    /** Get CRC32 of a string
+     *
+     * TODO: Review if we should use CRC32 or other algorithms
+     */
     private byte[] getCrc32(String str) {
         final CRC32 crc = new CRC32();
         crc.update(str.getBytes());
         final long tmp = crc.getValue();
-        return new byte[]{(byte)(tmp >> 24 & 255), (byte)(tmp >> 16 & 255),
-                (byte)(tmp >> 8 & 255), (byte)(tmp & 255)};
+        return new byte[]{(byte) (tmp >> 24 & 255), (byte) (tmp >> 16 & 255),
+                (byte) (tmp >> 8 & 255), (byte) (tmp & 255)};
     }
 
     /** Get SHA256 of a string */
@@ -273,12 +222,12 @@ class WatchlistSettings {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Domain CRC32 digest list:");
-        mCrc32DomainDigests.dump(fd, pw, args);
+        mDomainDigests.crc32Digests.dump(fd, pw, args);
         pw.println("Domain SHA256 digest list:");
-        mSha256DomainDigests.dump(fd, pw, args);
+        mDomainDigests.sha256Digests.dump(fd, pw, args);
         pw.println("Ip CRC32 digest list:");
-        mCrc32IpDigests.dump(fd, pw, args);
+        mIpDigests.crc32Digests.dump(fd, pw, args);
         pw.println("Ip SHA256 digest list:");
-        mSha256IpDigests.dump(fd, pw, args);
+        mIpDigests.sha256Digests.dump(fd, pw, args);
     }
 }

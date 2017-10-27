@@ -95,41 +95,6 @@ public class WatchlistSettingsTests {
     }
 
     @Test
-    public void testWatchlistSettings_writeSettingsToDisk() throws Exception {
-        copyWatchlistSettingsXml(mContext, TEST_XML_1, mTestXmlFile);
-        WatchlistSettings settings = new WatchlistSettings(mTestXmlFile);
-        settings.writeSettingsToDisk(Arrays.asList(TEST_NEW_CC_DOMAIN_CRC32),
-                Arrays.asList(TEST_NEW_CC_DOMAIN_SHA256), Arrays.asList(TEST_NEW_CC_IP_CRC32),
-                Arrays.asList(TEST_NEW_CC_IP_SHA256));
-        // Ensure old watchlist is not in memory
-        assertFalse(settings.containsDomain(TEST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_NOT_EXIST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NOT_EXIST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_SHA256_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_SHA256_ONLY_IP));
-        assertFalse(settings.containsDomain(TEST_CRC32_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CRC32_ONLY_IP));
-        // Ensure new watchlist is in memory
-        assertTrue(settings.containsDomain(TEST_NEW_CC_DOMAIN));
-        assertTrue(settings.containsIp(TEST_NEW_CC_IP));
-        // Reload settings from disk and test again
-        settings = new WatchlistSettings(mTestXmlFile);
-        // Ensure old watchlist is not in memory
-        assertFalse(settings.containsDomain(TEST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_NOT_EXIST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NOT_EXIST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_SHA256_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_SHA256_ONLY_IP));
-        assertFalse(settings.containsDomain(TEST_CRC32_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CRC32_ONLY_IP));
-        // Ensure new watchlist is in memory
-        assertTrue(settings.containsDomain(TEST_NEW_CC_DOMAIN));
-        assertTrue(settings.containsIp(TEST_NEW_CC_IP));
-    }
-
-    @Test
     public void testWatchlistSettings_writeSettingsToMemory() throws Exception {
         copyWatchlistSettingsXml(mContext, TEST_XML_1, mTestXmlFile);
         WatchlistSettings settings = new WatchlistSettings(mTestXmlFile);

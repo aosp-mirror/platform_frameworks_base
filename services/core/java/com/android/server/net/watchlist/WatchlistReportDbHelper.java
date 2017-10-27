@@ -21,10 +21,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Pair;
 
 import com.android.internal.util.HexDump;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -83,9 +85,12 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
         HashMap<String, String> appDigestCNCList;
     }
 
+    static File getSystemWatchlistDbFile() {
+        return new File(Environment.getDataSystemDirectory(), NAME);
+    }
+
     private WatchlistReportDbHelper(Context context) {
-        super(context, WatchlistSettings.getSystemWatchlistFile(NAME).getAbsolutePath(),
-                null, VERSION);
+        super(context, getSystemWatchlistDbFile().getAbsolutePath(), null, VERSION);
         // Memory optimization - close idle connections after 30s of inactivity
         setIdleConnectionTimeout(IDLE_CONNECTION_TIMEOUT_MS);
     }
