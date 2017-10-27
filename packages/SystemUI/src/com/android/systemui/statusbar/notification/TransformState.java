@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -43,14 +44,34 @@ public class TransformState {
     public static final int TRANSFORM_ALL = TRANSFORM_X | TRANSFORM_Y;
 
     private static final float UNDEFINED = -1f;
-    private static final int CLIP_CLIPPING_SET = R.id.clip_children_set_tag;
-    private static final int CLIP_CHILDREN_TAG = R.id.clip_children_tag;
-    private static final int CLIP_TO_PADDING = R.id.clip_to_padding_tag;
     private static final int TRANSFORMATION_START_X = R.id.transformation_start_x_tag;
     private static final int TRANSFORMATION_START_Y = R.id.transformation_start_y_tag;
     private static final int TRANSFORMATION_START_SCLALE_X = R.id.transformation_start_scale_x_tag;
     private static final int TRANSFORMATION_START_SCLALE_Y = R.id.transformation_start_scale_y_tag;
     private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
+    private static ViewClippingUtil.ClippingParameters CLIPPING_PARAMETERS
+            = new ViewClippingUtil.ClippingParameters() {
+        @Override
+        public boolean shouldFinish(View view) {
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                return !row.isChildInGroup();
+            }
+            return false;
+        }
+
+        @Override
+        public void onClippingStateChanged(View view, boolean isClipping) {
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (isClipping) {
+                    row.setClipToActualHeight(true);
+                } else if (row.isChildInGroup()) {
+                    row.setClipToActualHeight(false);
+                }
+            }
+        }
+    };
 
     protected View mTransformedView;
     private int[] mOwnPosition = new int[2];
@@ -357,59 +378,8 @@ public class TransformState {
         }
     }
 
-    public static void setClippingDeactivated(final View transformedView, boolean deactivated) {
-        if (!(transformedView.getParent() instanceof ViewGroup)) {
-            return;
-        }
-        ViewGroup view = (ViewGroup) transformedView.getParent();
-        while (true) {
-            ArraySet<View> clipSet = (ArraySet<View>) view.getTag(CLIP_CLIPPING_SET);
-            if (clipSet == null) {
-                clipSet = new ArraySet<>();
-                view.setTag(CLIP_CLIPPING_SET, clipSet);
-            }
-            Boolean clipChildren = (Boolean) view.getTag(CLIP_CHILDREN_TAG);
-            if (clipChildren == null) {
-                clipChildren = view.getClipChildren();
-                view.setTag(CLIP_CHILDREN_TAG, clipChildren);
-            }
-            Boolean clipToPadding = (Boolean) view.getTag(CLIP_TO_PADDING);
-            if (clipToPadding == null) {
-                clipToPadding = view.getClipToPadding();
-                view.setTag(CLIP_TO_PADDING, clipToPadding);
-            }
-            ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
-                    ? (ExpandableNotificationRow) view
-                    : null;
-            if (!deactivated) {
-                clipSet.remove(transformedView);
-                if (clipSet.isEmpty()) {
-                    view.setClipChildren(clipChildren);
-                    view.setClipToPadding(clipToPadding);
-                    view.setTag(CLIP_CLIPPING_SET, null);
-                    if (row != null) {
-                        row.setClipToActualHeight(true);
-                    }
-                }
-            } else {
-                clipSet.add(transformedView);
-                view.setClipChildren(false);
-                view.setClipToPadding(false);
-                if (row != null && row.isChildInGroup()) {
-                    // We still want to clip to the parent's height
-                    row.setClipToActualHeight(false);
-                }
-            }
-            if (row != null && !row.isChildInGroup()) {
-                return;
-            }
-            final ViewParent parent = view.getParent();
-            if (parent instanceof ViewGroup) {
-                view = (ViewGroup) parent;
-            } else {
-                return;
-            }
-        }
+    protected void setClippingDeactivated(final View transformedView, boolean deactivated) {
+        ViewClippingUtil.setClippingDeactivated(transformedView, deactivated, CLIPPING_PARAMETERS);
     }
 
     public int[] getLaidOutLocationOnScreen() {
