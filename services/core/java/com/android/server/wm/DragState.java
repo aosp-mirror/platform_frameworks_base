@@ -105,6 +105,11 @@ class DragState {
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
+    /**
+     * Whether if animation is completed. Needs to be volatile to update from the animation thread
+     * without having a WM lock.
+     */
+    volatile boolean mAnimationCompleted = false;
     DisplayContent mDisplayContent;
 
     @Nullable private ValueAnimator mAnimator;
@@ -122,21 +127,79 @@ class DragState {
         mNotifiedWindows = new ArrayList<WindowState>();
     }
 
-    void reset() {
-        if (mAnimator != null) {
+    /**
+     * After calling this, DragDropController#onDragStateClosedLocked is invoked, which causes
+     * DragDropController#mDragState becomes null.
+     */
+    void closeLocked() {
+        // Unregister the input interceptor.
+        if (mInputInterceptor != null) {
+            if (DEBUG_DRAG)
+                Slog.d(TAG_WM, "unregistering drag input channel");
+
+            // Input channel should be disposed on the thread where the input is being handled.
+            mDragDropController.sendHandlerMessage(
+                    MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor);
+            mInputInterceptor = null;
+            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+        }
+
+        // Send drag end broadcast if drag start has been sent.
+        if (mDragInProgress) {
+            final int myPid = Process.myPid();
+
+            if (DEBUG_DRAG) {
+                Slog.d(TAG_WM, "broadcasting DRAG_ENDED");
+            }
+            for (WindowState ws : mNotifiedWindows) {
+                float x = 0;
+                float y = 0;
+                if (!mDragResult && (ws.mSession.mPid == mPid)) {
+                    // Report unconsumed drop location back to the app that started the drag.
+                    x = mCurrentX;
+                    y = mCurrentY;
+                }
+                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
+                        x, y, null, null, null, null, mDragResult);
+                try {
+                    ws.mClient.dispatchDragEvent(evt);
+                } catch (RemoteException e) {
+                    Slog.w(TAG_WM, "Unable to drag-end window " + ws);
+                }
+                // if the current window is in the same process,
+                // the dispatch has already recycled the event
+                if (myPid != ws.mSession.mPid) {
+                    evt.recycle();
+                }
+            }
+            mNotifiedWindows.clear();
+            mDragInProgress = false;
+        }
+
+        // Take the cursor back if it has been changed.
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
+            mTouchSource = 0;
+        }
+
+        // Clear the internal variables.
+        if (mSurfaceControl != null) {
+            mSurfaceControl.destroy();
+            mSurfaceControl = null;
+        }
+        if (mAnimator != null && !mAnimationCompleted) {
             Slog.wtf(TAG_WM,
                     "Unexpectedly destroying mSurfaceControl while animation is running");
         }
-        if (mSurfaceControl != null) {
-            mSurfaceControl.destroy();
-        }
-        mSurfaceControl = null;
         mFlags = 0;
         mLocalWin = null;
         mToken = null;
         mData = null;
         mThumbOffsetX = mThumbOffsetY = 0;
         mNotifiedWindows = null;
+
+        // Notifies the controller that the drag state is closed.
+        mDragDropController.onDragStateClosedLocked(this);
     }
 
     class InputInterceptor {
@@ -231,19 +294,6 @@ class DragState {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
         } else {
             mInputInterceptor = new InputInterceptor(display);
-            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
-        }
-    }
-
-    void unregister() {
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
-        if (mInputInterceptor == null) {
-            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
-        } else {
-            // Input channel should be disposed on the thread where the input is being handled.
-            mDragDropController.sendHandlerMessage(
-                    MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor);
-            mInputInterceptor = null;
             mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         }
     }
@@ -366,46 +416,15 @@ class DragState {
         return false;
     }
 
-    private void broadcastDragEndedLocked() {
-        final int myPid = Process.myPid();
-
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "broadcasting DRAG_ENDED");
-        }
-        for (WindowState ws : mNotifiedWindows) {
-            float x = 0;
-            float y = 0;
-            if (!mDragResult && (ws.mSession.mPid == mPid)) {
-                // Report unconsumed drop location back to the app that started the drag.
-                x = mCurrentX;
-                y = mCurrentY;
-            }
-            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                    x, y, null, null, null, null, mDragResult);
-            try {
-                ws.mClient.dispatchDragEvent(evt);
-            } catch (RemoteException e) {
-                Slog.w(TAG_WM, "Unable to drag-end window " + ws);
-            }
-            // if the current window is in the same process,
-            // the dispatch has already recycled the event
-            if (myPid != ws.mSession.mPid) {
-                evt.recycle();
-            }
-        }
-        mNotifiedWindows.clear();
-        mDragInProgress = false;
-    }
-
     void endDragLocked() {
         if (mAnimator != null) {
             return;
         }
         if (!mDragResult) {
             mAnimator = createReturnAnimationLocked();
-            return;  // Will call cleanUpDragLw when the animation is done.
+            return;  // Will call closeLocked() when the animation is done.
         }
-        cleanUpDragLocked();
+        closeLocked();
     }
 
     void cancelDragLocked() {
@@ -414,31 +433,13 @@ class DragState {
         }
         if (!mDragInProgress) {
             // This can happen if an app invokes Session#cancelDragAndDrop before
-            // Session#performDrag. Reset the drag state:
-            // 1. without sending the end broadcast because the start broadcast has not been sent,
-            // and
-            // 2. without playing the cancel animation because H.DRAG_START_TIMEOUT may be sent to
-            //    WindowManagerService, which will cause DragState#reset() while playing the
-            //    cancel animation.
-            reset();
-            mDragDropController.mDragState = null;
+            // Session#performDrag. Reset the drag state without playing the cancel animation
+            // because H.DRAG_START_TIMEOUT may be sent to WindowManagerService, which will cause
+            // DragState#reset() while playing the cancel animation.
+            closeLocked();
             return;
         }
         mAnimator = createCancelAnimationLocked();
-    }
-
-    private void cleanUpDragLocked() {
-        broadcastDragEndedLocked();
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
-        }
-
-        // stop intercepting input
-        unregister();
-
-        // free our resources and drop all the object references
-        reset();
-        mDragDropController.mDragState = null;
     }
 
     void notifyMoveLocked(float x, float y) {
@@ -567,15 +568,6 @@ class DragState {
         return false;
     }
 
-    void onAnimationEndLocked() {
-        if (mAnimator == null) {
-            Slog.wtf(TAG_WM, "Unexpected null mAnimator");
-            return;
-        }
-        mAnimator = null;
-        cleanUpDragLocked();
-    }
-
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
             ClipDescription description, ClipData data,
@@ -677,6 +669,7 @@ class DragState {
 
         @Override
         public void onAnimationEnd(Animator animator) {
+            mAnimationCompleted = true;
             // Updating mDragState requires the WM lock so continues it on the out of
             // AnimationThread.
             mDragDropController.sendHandlerMessage(MSG_ANIMATION_END, null);

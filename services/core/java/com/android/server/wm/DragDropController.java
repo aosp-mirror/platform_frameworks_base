@@ -49,6 +49,11 @@ class DragDropController {
     static final int MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT = 2;
     static final int MSG_ANIMATION_END = 3;
 
+    /**
+     * Drag state per operation.
+     * The variable is cleared by {@code #onDragStateClosedLocked} which is invoked by DragState
+     * itself, thus the variable can be null after calling DragState's methods.
+     */
     DragState mDragState;
 
     private WindowManagerService mService;
@@ -158,9 +163,7 @@ class DragDropController {
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
                     mDragState.getInputChannel())) {
                 Slog.e(TAG_WM, "Unable to transfer touch focus");
-                mDragState.unregister();
-                mDragState.reset();
-                mDragState = null;
+                mDragState.closeLocked();
                 return false;
             }
 
@@ -282,6 +285,17 @@ class DragDropController {
         mHandler.sendMessageDelayed(msg, DRAG_TIMEOUT_MS);
     }
 
+    /**
+     * Notifies the current drag state is closed.
+     */
+    void onDragStateClosedLocked(DragState dragState) {
+        if (mDragState != dragState) {
+            Slog.wtf(TAG_WM, "Unknown drag state is closed");
+            return;
+        }
+        mDragState = null;
+    }
+
     private class DragHandler extends Handler {
         /**
          * Lock for window manager.
@@ -304,9 +318,7 @@ class DragDropController {
                     synchronized (mService.mWindowMap) {
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
-                            mDragState.unregister();
-                            mDragState.reset();
-                            mDragState = null;
+                            mDragState.closeLocked();
                         }
                     }
                     break;
@@ -346,7 +358,7 @@ class DragDropController {
                                     "plyaing animation");
                             return;
                         }
-                        mDragState.onAnimationEndLocked();
+                        mDragState.closeLocked();
                     }
                     break;
                 }
