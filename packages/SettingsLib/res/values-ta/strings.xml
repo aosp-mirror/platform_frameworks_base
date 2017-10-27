@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"புளூடூத் ஆடியோ LDAC கோடெக்: வீடியோவின் தரம்"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"புளூடூத் ஆடியோ LDAC கோடெக்கைத் தேர்ந்தெடுக்கவும்:\nவீடியோவின் தரம்"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ஸ்ட்ரீமிங்: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS வழியாக DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"இயக்கப்பட்டிருந்தால், போர்ட் 853 இல் TLS வழியாக DNSஐ முயலவும்."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wifi நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"இயக்கப்பட்டதும், வைஃபை சிக்னல் குறையும் போது, வைஃபை முழுமையாக ஒத்துழைக்காமல் இருந்தால் மொபைல் தரவிற்கு மாறும்"</string>

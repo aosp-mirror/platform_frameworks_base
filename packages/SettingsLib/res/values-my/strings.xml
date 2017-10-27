@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ဘလူးတုသ်အသံ LDAC ကိုးဒက်ခ်− နားထောင်ရန် အရည်အသွေး"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ဘလူးတုသ်အသံ LDAC ကိုးဒက်ခ်ကို ရွေးပါ−\nနားထောင်ရန် အရည်အသွေး"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"တိုက်ရိုက်လွှင့်နေသည်− <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS over TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"ဖွင့်ထားပါက DNS over TLS ကို ပို့တ် ၈၅၃ တွင် စမ်းကြည့်ပါ။"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ဖွင့်ထားပါက Wi‑Fi လွှင့်အား နည်းချိန်တွင် Wi‑Fi မှ မိုဘိုင်းသို့ ဒေတာချိတ်ဆက်မှုကို လွှဲပြောင်းရာ၌ ပိုမိုထိရောက်ပါသည်"</string>

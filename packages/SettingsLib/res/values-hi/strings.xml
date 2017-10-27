@@ -209,6 +209,10 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लूटूथ ऑडियो LDAC कोडेक: प्लेबैक क्वालिटी"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ब्लूटूथ ऑडियो LDAC कोडेक चुनें:\nप्लेबैक क्वालिटी"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"चलाया जा रहा है: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <!-- no translation found for dns_tls (6773814174391131955) -->
+    <skip />
+    <!-- no translation found for dns_tls_summary (3692494150251071380) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई प्रवेश स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"इसके सक्षम होने पर, जब वाई-फ़ाई संकेत कमज़ोर हों तो वाई-फ़ाई, डेटा कनेक्शन को मोबाइल पर ज़्यादा तेज़ी से भेजेगा"</string>

@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ব্লুটুথ অডিও LDAC কোডেক: প্লেব্যাক গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ব্লুটুথ অডিও LDAC কোডেক বেছে নিন:\nপ্লেব্যাক গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS এ ডিএনএস"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"যদি সক্ষম করা থাকে তাহলে পোর্ট ৮৫৩ তে TLS এ ডিএনএস এর চেষ্টা করুন।"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"সক্ষম করা থাকলে, ওয়াই ফাই সিগন্যালের মান খারাপ হলে ডেটা সংযোগ মোবাইলের কাছে হস্তান্তর করার জন্য ওয়াই ফাই আরো বেশি তৎপর হবে।"</string>

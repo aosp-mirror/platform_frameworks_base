@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Κωδικοποιητής LDAC ήχου Bluetooth: Ποιότητα αναπαραγωγής"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Επιλογή κωδικοποιητή LDAC ήχου Bluetooth:\nΠοιότητα αναπαραγωγής"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Ροή: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS μέσω TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Εάν ενεργοποιηθεί, γίνεται προσπάθεια DNS μέσω TLS στη θύρα 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Όταν είναι ενεργό, το Wi-Fi θα μεταβιβάζει πιο επιθετικά τη σύνδ.δεδομένων σε δίκτυο κινητής τηλ., όταν το σήμα Wi-Fi είναι χαμηλό"</string>

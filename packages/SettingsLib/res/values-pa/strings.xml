@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ ਚੁਣੋ:\nਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS \'ਤੇ DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"ਚਾਲੂ ਕੀਤੇ ਜਾਣ \'ਤੇ, ਪੋਰਟ 853 \'ਤੇ TLS \'ਤੇ DNS ਵਰਤਣ ਦੀ ਬੇਨਤੀ ਕਰੋ।"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ਜਦੋਂ ਯੋਗ ਬਣਾਇਆ ਹੋਵੇ, ਤਾਂ ਵਾਈ‑ਫਾਈ ਸਿਗਨਲ ਘੱਟ ਹੋਣ \'ਤੇ ਵਾਈ‑ਫਾਈ ਡਾਟਾ ਕਨੈਕਸ਼ਨ ਮੋਬਾਈਲ ਨੂੰ ਹੈਂਡ ਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਆਕਰਮਣਸ਼ੀਲ ਹੋਵੇਗਾ।"</string>

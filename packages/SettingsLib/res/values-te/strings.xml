@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"బ్లూటూత్ ఆడియో LDAC కోడెక్: ప్లేబ్యాక్ నాణ్యత"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"బ్లూటూత్ ఆడియో LDAC కోడెక్‌ని ఎంచుకోండి:\nప్లేబ్యాక్ నాణ్యత"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ప్రసారం చేస్తోంది: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLSపై DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"ప్రారంభించబడితే, పోర్ట్ 853లో TLSపై DNSని ప్రయత్నించండి."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ప్రారంభించబడినప్పుడు, Wi‑Fi సిగ్నల్ బలహీనంగా ఉంటే డేటా కనెక్షన్‌ను మొబైల్‌కి మార్చేలా Wi‑Fi చురుగ్గా వ్యవహరిస్తుంది"</string>
