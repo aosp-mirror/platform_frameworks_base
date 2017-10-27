@@ -61,10 +61,6 @@ public class VersionedBroadcastListener {
         mGenerationNumber = new AtomicInteger(0);
     }
 
-    public int generationNumber() {
-        return mGenerationNumber.get();
-    }
-
     public void startListening() {
         if (DBG) Log.d(mTag, "startListening");
         if (mReceiver != null) return;
