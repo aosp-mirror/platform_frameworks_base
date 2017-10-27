@@ -81,6 +81,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Executor;
 
@@ -184,6 +185,9 @@ public class RemoteViews implements Parcelable, Filter {
      * and the latter disabled when this flag is true.
      */
     private boolean mIsWidgetCollectionChild = false;
+
+    /** Class cookies of the Parcel this instance was read from. */
+    private final Map<Class, Object> mClassCookies;
 
     private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
 
@@ -1505,10 +1509,10 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         ViewGroupActionAdd(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info,
-                int depth) {
+                int depth, Map<Class, Object> classCookies) {
             viewId = parcel.readInt();
             mIndex = parcel.readInt();
-            mNestedViews = new RemoteViews(parcel, bitmapCache, info, depth);
+            mNestedViews = new RemoteViews(parcel, bitmapCache, info, depth, classCookies);
         }
 
         public void writeToParcel(Parcel dest, int flags) {
@@ -2120,6 +2124,7 @@ public class RemoteViews implements Parcelable, Filter {
         mApplication = application;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
+        mClassCookies = null;
     }
 
     private boolean hasLandscapeAndPortraitLayouts() {
@@ -2149,6 +2154,9 @@ public class RemoteViews implements Parcelable, Filter {
         mBitmapCache = new BitmapCache();
         configureRemoteViewsAsChild(landscape);
         configureRemoteViewsAsChild(portrait);
+
+        mClassCookies = (portrait.mClassCookies != null)
+                ? portrait.mClassCookies : landscape.mClassCookies;
     }
 
     /**
@@ -2161,15 +2169,16 @@ public class RemoteViews implements Parcelable, Filter {
         mLayoutId = src.mLayoutId;
         mIsWidgetCollectionChild = src.mIsWidgetCollectionChild;
         mReapplyDisallowed = src.mReapplyDisallowed;
+        mClassCookies = src.mClassCookies;
 
         if (src.hasLandscapeAndPortraitLayouts()) {
             mLandscape = new RemoteViews(src.mLandscape);
             mPortrait = new RemoteViews(src.mPortrait);
-
         }
 
         if (src.mActions != null) {
             Parcel p = Parcel.obtain();
+            p.putClassCookies(mClassCookies);
             src.writeActionsToParcel(p);
             p.setDataPosition(0);
             // Since src is already in memory, we do not care about stack overflow as it has
@@ -2189,10 +2198,11 @@ public class RemoteViews implements Parcelable, Filter {
      * @param parcel
      */
     public RemoteViews(Parcel parcel) {
-        this(parcel, null, null, 0);
+        this(parcel, null, null, 0, null);
     }
 
-    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info, int depth) {
+    private RemoteViews(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info, int depth,
+            Map<Class, Object> classCookies) {
         if (depth > MAX_NESTED_VIEWS
                 && (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)) {
             throw new IllegalArgumentException("Too many nested views.");
@@ -2204,8 +2214,11 @@ public class RemoteViews implements Parcelable, Filter {
         // We only store a bitmap cache in the root of the RemoteViews.
         if (bitmapCache == null) {
             mBitmapCache = new BitmapCache(parcel);
+            // Store the class cookies such that they are available when we clone this RemoteView.
+            mClassCookies = parcel.copyClassCookies();
         } else {
             setBitmapCache(bitmapCache);
+            mClassCookies = classCookies;
             setNotRoot();
         }
 
@@ -2218,8 +2231,9 @@ public class RemoteViews implements Parcelable, Filter {
             readActionsFromParcel(parcel, depth);
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
-            mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth);
-            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication, depth);
+            mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth, mClassCookies);
+            mPortrait = new RemoteViews(parcel, mBitmapCache, mLandscape.mApplication, depth,
+                    mClassCookies);
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
@@ -2246,7 +2260,8 @@ public class RemoteViews implements Parcelable, Filter {
             case REFLECTION_ACTION_TAG:
                 return new ReflectionAction(parcel);
             case VIEW_GROUP_ACTION_ADD_TAG:
-                return new ViewGroupActionAdd(parcel, mBitmapCache, mApplication, depth);
+                return new ViewGroupActionAdd(parcel, mBitmapCache, mApplication, depth,
+                        mClassCookies);
             case VIEW_GROUP_ACTION_REMOVE_TAG:
                 return new ViewGroupActionRemove(parcel);
             case VIEW_CONTENT_NAVIGATION_TAG:

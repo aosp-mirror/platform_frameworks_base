@@ -858,7 +858,7 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    static public IBinder whitelistToken;
+    private IBinder mWhitelistToken;
 
     /**
      * Must be set by a process to start associating tokens with Notification objects
@@ -1876,12 +1876,12 @@ public class Notification implements Parcelable
     {
         int version = parcel.readInt();
 
-        whitelistToken = parcel.readStrongBinder();
-        if (whitelistToken == null) {
-            whitelistToken = processWhitelistToken;
+        mWhitelistToken = parcel.readStrongBinder();
+        if (mWhitelistToken == null) {
+            mWhitelistToken = processWhitelistToken;
         }
         // Propagate this token to all pending intents that are unmarshalled from the parcel.
-        parcel.setClassCookie(PendingIntent.class, whitelistToken);
+        parcel.setClassCookie(PendingIntent.class, mWhitelistToken);
 
         when = parcel.readLong();
         creationTime = parcel.readLong();
@@ -1989,7 +1989,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public void cloneInto(Notification that, boolean heavy) {
-        that.whitelistToken = this.whitelistToken;
+        that.mWhitelistToken = this.mWhitelistToken;
         that.when = this.when;
         that.creationTime = this.creationTime;
         that.mSmallIcon = this.mSmallIcon;
@@ -2219,7 +2219,7 @@ public class Notification implements Parcelable
     private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
-        parcel.writeStrongBinder(whitelistToken);
+        parcel.writeStrongBinder(mWhitelistToken);
         parcel.writeLong(when);
         parcel.writeLong(creationTime);
         if (mSmallIcon == null && icon != 0) {
@@ -4980,6 +4980,8 @@ public class Notification implements Parcelable
             if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
                 mN.flags |= FLAG_SHOW_LIGHTS;
             }
+
+            mN.allPendingIntents = null;
 
             return mN;
         }
