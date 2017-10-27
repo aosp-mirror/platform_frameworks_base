@@ -211,9 +211,9 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Uitschakelen"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Noodgeval"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Foutenrapport"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Foutenrapport genereren"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een foutenrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Bugrapport"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Bugrapport genereren"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Hiermee worden gegevens over de huidige status van je apparaat verzameld en als e-mail verzonden. Wanneer u een bugrapport start, duurt het even voordat het kan worden verzonden. Even geduld alstublieft."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interactief rapport"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Gebruik deze optie in de meeste situaties. Hiermee kun je de voortgang van het rapport bijhouden, meer gegevens over het probleem opgeven en screenshots maken. Mogelijk worden bepaalde minder vaak gebruikte gedeelten weggelaten (waarvoor het lang zou duren om een rapport te genereren)."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Volledig rapport"</string>
@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Tik op Terug en Overzicht en houd deze knoppen vast om dit scherm los te maken"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Deze app kan niet worden losgemaakt"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Scherm vastgezet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Scherm losgemaakt"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vraag pin voor losmaken"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test voor noodberichten"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Beantwoorden"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Simkaart niet toegestaan voor spraak"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Sim niet geregistreerd voor spraak"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Simkaart niet toegestaan voor spraak"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefoon niet toegestaan voor spraak"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop-upvenster"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Voor deze snelkoppeling is de nieuwste app vereist"</string>

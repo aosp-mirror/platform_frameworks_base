@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"दूसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"तीसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"इस स्क्रीन को अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' के बटन को दबाकर रखें"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"इस ऐप्लिकेशन को अनपिन नहीं किया जा सकता"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करने से पहले पिन के लिए पूछें"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"आपातकालीन संदेश परीक्षण"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"जवाब दें"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"सिम से कॉल करने की इजाज़त नहीं है"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"सिम से कॉल करने की इजाज़त नहीं है"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"सिम से कॉल करने की इजाज़त नहीं है"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"फ़ोन से कॉल करने की इजाज़त नहीं है"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"पॉपअप विंडो"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"इस शॉर्टकट वाला ऐप चलाने के लिए इसका नया वर्शन डाउनलोड करें"</string>

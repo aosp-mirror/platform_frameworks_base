@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"দ্বিতীয় কার্যক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"তৃতীয় কার্যক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"এই স্ক্রিনটিকে আনপিন করতে ফিরে যাওয়া এবং এক নজরে বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"এই অ্যাপটি আনপিন করা যাবে না"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"পিন না করা স্ক্রীন"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"আনপিন করার আগে পিন চান"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"বিপদকালীন বার্তাগুলির পরীক্ষা"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"উত্তর দিন"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"এই সিম দিয়ে ভয়েস কল করা যাবে না"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"সিমটি ভয়েস কলের জন্য প্রস্তুত নয়"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"এই সিম দিয়ে ভয়েস কল করা যাবে না"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"এই ফোন দিয়ে ভয়েস কল করা যাবে না"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"পপ-আপ উইন্ডো"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>টি"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"এই শর্টকাটটির জন্য লেটেস্ট অ্যাপ প্রয়োজন"</string>
