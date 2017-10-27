@@ -1345,7 +1345,7 @@
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"‏אין חיבור ל-VPN שפועל כל הזמן"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏שגיאת VPN שמופעל תמיד"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏רוצה לשנות את הגדרות הרשת או הגדרות ה-VPN?"</string>
-    <string name="upload_file" msgid="2897957172366730416">"בחר קובץ"</string>
+    <string name="upload_file" msgid="2897957172366730416">"בחירת קובץ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"לא נבחר קובץ"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
     <string name="submit" msgid="1602335572089911941">"שלח"</string>
@@ -1676,7 +1676,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> שני בעבודה"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> שלישי בעבודה"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"כדי לבטל את ההצמדה של מסך זה, גע בלחצנים \'הקודם\' ו\'סקירה\' והחזק אותם"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"לא ניתן לבטל את ההצמדה של האפליקציה הזו"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"הצמדת המסך בוטלה"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"בקש קוד גישה לפני ביטול הצמדה"</string>
@@ -1852,14 +1851,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"בדיקה של הודעות חירום"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"השב"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"‏כרטיס ה-SIM לא מורשה לזיהוי קולי"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"‏ניהול התצורה של כרטיס ה-SIM לא מתאים לזיהוי קולי"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"‏כרטיס ה-SIM לא מורשה לזיהוי קולי"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"הטלפון לא מורשה לזיהוי קולי"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"חלון קופץ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"קיצור דרך זה דורש את האפליקציה העדכנית ביותר"</string>
