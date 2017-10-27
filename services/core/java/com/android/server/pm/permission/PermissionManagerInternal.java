@@ -146,7 +146,8 @@ public abstract class PermissionManagerInternal {
 
     public abstract int checkPermission(@NonNull String permName, @NonNull String packageName,
             int callingUid, int userId);
-    public abstract int checkUidPermission(String permName, int uid, int callingUid);
+    public abstract int checkUidPermission(@NonNull String permName,
+            @Nullable PackageParser.Package pkg, int uid, int callingUid);
 
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
