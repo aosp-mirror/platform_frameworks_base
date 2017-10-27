@@ -27,6 +27,7 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 
 import libcore.io.IoUtils;
+import libcore.util.NativeAllocationRegistry;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -89,6 +90,20 @@ public class Binder implements IBinder {
      * Global transaction tracker instance for this process.
      */
     private static volatile TransactionTracker sTransactionTracker = null;
+
+    /**
+     * Guestimate of native memory associated with a Binder.
+     */
+    private static final int NATIVE_ALLOCATION_SIZE = 500;
+
+    private static native long getNativeFinalizer();
+
+    // Use a Holder to allow static initialization of Binder in the boot image, and
+    // possibly to avoid some initialization ordering issues.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                Binder.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+    }
 
     // Transaction tracking code.
 
@@ -188,8 +203,11 @@ public class Binder implements IBinder {
         }
     }
 
-    /* mObject is used by native code, do not remove or rename */
-    private long mObject;
+    /**
+     * Raw native pointer to JavaBBinderHolder object. Owned by this Java object. Not null.
+     */
+    private final long mObject;
+
     private IInterface mOwner;
     private String mDescriptor;
 
@@ -360,7 +378,8 @@ public class Binder implements IBinder {
      * Default constructor initializes the object.
      */
     public Binder() {
-        init();
+        mObject = getNativeBBinderHolder();
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mObject);
 
         if (FIND_POTENTIAL_LEAKS) {
             final Class<? extends Binder> klass = getClass();
@@ -643,14 +662,6 @@ public class Binder implements IBinder {
         return true;
     }
 
-    protected void finalize() throws Throwable {
-        try {
-            destroyBinder();
-        } finally {
-            super.finalize();
-        }
-    }
-
     static void checkParcel(IBinder obj, int code, Parcel parcel, String msg) {
         if (CHECK_PARCEL_SIZE && parcel.dataSize() >= 800*1024) {
             // Trying to send > 800k, this is way too much
@@ -674,8 +685,8 @@ public class Binder implements IBinder {
         }
     }
 
-    private native final void init();
-    private native final void destroyBinder();
+    private static native long getNativeBBinderHolder();
+    private static native long getFinalizer();
 
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
@@ -736,10 +747,24 @@ public class Binder implements IBinder {
  */
 final class BinderProxy implements IBinder {
     // See android_util_Binder.cpp for the native half of this.
-    // TODO: Consider using NativeAllocationRegistry instead of finalization.
 
     // Assume the process-wide default value when created
     volatile boolean mWarnOnBlocking = Binder.sWarnOnBlocking;
+
+    /**
+     * Guestimate of native memory associated with a BinderProxy.
+     * This includes the underlying IBinder, associated DeathRecipientList, and KeyedVector
+     * that points back to us. We guess high since it includes a GlobalRef, which
+     * may be in short supply.
+     */
+    private static final int NATIVE_ALLOCATION_SIZE = 1000;
+
+    // Use a Holder to allow static initialization of BinderProxy in the boot image, and
+    // to avoid some initialization ordering issues.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                BinderProxy.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+    }
 
     public native boolean pingBinder();
     public native boolean isBinderAlive();
@@ -776,6 +801,7 @@ final class BinderProxy implements IBinder {
         }
     }
 
+    private static native long getNativeFinalizer();
     public native String getInterfaceDescriptor() throws RemoteException;
     public native boolean transactNative(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException;
@@ -830,20 +856,11 @@ final class BinderProxy implements IBinder {
         }
     }
 
-    BinderProxy() {
+    BinderProxy(long nativeData) {
+        mNativeData = nativeData;
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeData);
         mSelf = new WeakReference(this);
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy();
-        } finally {
-            super.finalize();
-        }
-    }
-
-    private native final void destroy();
 
     private static final void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
@@ -864,11 +881,9 @@ final class BinderProxy implements IBinder {
     // TODO: Consider making the extra native-to-java call to compute this on the fly.
     final private WeakReference mSelf;
 
-    // Native pointer to the wrapped native IBinder object. Counted as strong reference.
-    private long mObject;
-
-    // Native pointer to native DeathRecipientList. Counted as strong reference.
-    // Basically owned by the JavaProxy object. Reference counted only because DeathRecipients
-    // hold a weak reference that can be temporarily promoted.
-    private long mOrgue;
+    /**
+     * C++ pointer to BinderProxyNativeData. That consists of strong pointers to the
+     * native IBinder object, and a DeathRecipientList.
+     */
+    private final long mNativeData;
 }
