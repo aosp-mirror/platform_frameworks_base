@@ -83,8 +83,7 @@ public final class RulesUpdaterContract {
         Intent intent = createUpdaterIntent(updaterAppPackageName);
         intent.putExtra(EXTRA_CHECK_TOKEN, checkTokenBytes);
         context.sendBroadcastAsUser(
-                intent,
-                UserHandle.of(UserHandle.myUserId()),
+                intent, UserHandle.SYSTEM,
                 RulesUpdaterContract.UPDATE_TIME_ZONE_RULES_PERMISSION);
     }
 }
