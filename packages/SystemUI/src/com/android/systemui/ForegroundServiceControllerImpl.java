@@ -34,6 +34,10 @@ import java.util.Arrays;
  */
 public class ForegroundServiceControllerImpl
         implements ForegroundServiceController {
+  
+    // shelf life of foreground services before they go bad
+    public static final long FG_SERVICE_GRACE_MILLIS = 5000;
+
     private static final String TAG = "FgServiceController";
     private static final boolean DBG = false;
 
@@ -72,7 +76,7 @@ public class ForegroundServiceControllerImpl
             if (isDungeonNotification(sbn)) {
                 // if you remove the dungeon entirely, we take that to mean there are
                 // no running services
-                userServices.setRunningServices(null);
+                userServices.setRunningServices(null, 0);
                 return true;
             } else {
                 // this is safe to call on any notification, not just FLAG_FOREGROUND_SERVICE
@@ -94,7 +98,7 @@ public class ForegroundServiceControllerImpl
                 final Bundle extras = sbn.getNotification().extras;
                 if (extras != null) {
                     final String[] svcs = extras.getStringArray(Notification.EXTRA_FOREGROUND_APPS);
-                    userServices.setRunningServices(svcs); // null ok
+                    userServices.setRunningServices(svcs, sbn.getNotification().when);
                 }
             } else {
                 userServices.removeNotification(sbn.getPackageName(), sbn.getKey());
@@ -118,9 +122,11 @@ public class ForegroundServiceControllerImpl
      */
     private static class UserServices {
         private String[] mRunning = null;
+        private long mServiceStartTime = 0;
         private ArrayMap<String, ArraySet<String>> mNotifications = new ArrayMap<>(1);
-        public void setRunningServices(String[] pkgs) {
+        public void setRunningServices(String[] pkgs, long serviceStartTime) {
             mRunning = pkgs != null ? Arrays.copyOf(pkgs, pkgs.length) : null;
+            mServiceStartTime = serviceStartTime;
         }
         public void addNotification(String pkg, String key) {
             if (mNotifications.get(pkg) == null) {
@@ -142,7 +148,9 @@ public class ForegroundServiceControllerImpl
             return found;
         }
         public boolean isDungeonNeeded() {
-            if (mRunning != null) {
+            if (mRunning != null
+                && System.currentTimeMillis() - mServiceStartTime >= FG_SERVICE_GRACE_MILLIS) {
+
                 for (String pkg : mRunning) {
                     final ArraySet<String> set = mNotifications.get(pkg);
                     if (set == null || set.size() == 0) {
