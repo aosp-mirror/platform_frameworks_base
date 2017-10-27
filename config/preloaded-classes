@@ -1865,9 +1865,6 @@ android.os.StrictMode$InstanceCountViolation
 android.os.StrictMode$InstanceTracker
 android.os.StrictMode$LogStackTrace
 android.os.StrictMode$Span
-android.os.StrictMode$StrictModeDiskReadViolation
-android.os.StrictMode$StrictModeDiskWriteViolation
-android.os.StrictMode$StrictModeViolation
 android.os.StrictMode$ThreadPolicy
 android.os.StrictMode$ThreadPolicy$Builder
 android.os.StrictMode$ThreadSpanState

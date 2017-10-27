@@ -27,6 +27,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.os.strictmode.CleartextNetworkViolation;
+import android.os.strictmode.ContentUriWithoutPermissionViolation;
+import android.os.strictmode.CustomViolation;
+import android.os.strictmode.DiskReadViolation;
+import android.os.strictmode.DiskWriteViolation;
+import android.os.strictmode.FileUriExposedViolation;
+import android.os.strictmode.InstanceCountViolation;
+import android.os.strictmode.IntentReceiverLeakedViolation;
+import android.os.strictmode.LeakedClosableViolation;
+import android.os.strictmode.NetworkViolation;
+import android.os.strictmode.ResourceMismatchViolation;
+import android.os.strictmode.ServiceConnectionLeakedViolation;
+import android.os.strictmode.SqliteObjectLeakedViolation;
+import android.os.strictmode.UnbufferedIOViolation;
+import android.os.strictmode.UntaggedSocketViolation;
+import android.os.strictmode.Violation;
+import android.os.strictmode.WebViewMethodCalledOnWrongThreadViolation;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
@@ -156,36 +173,30 @@ public final class StrictMode {
     // Byte 1: Thread-policy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_DISK_WRITE = 0x01; // for ThreadPolicy
+    @TestApi public static final int DETECT_DISK_WRITE = 0x01; // for ThreadPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_DISK_READ = 0x02; // for ThreadPolicy
+    @TestApi public static final int DETECT_DISK_READ = 0x02; // for ThreadPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_NETWORK = 0x04; // for ThreadPolicy
+    @TestApi public static final int DETECT_NETWORK = 0x04; // for ThreadPolicy
 
     /**
      * For StrictMode.noteSlowCall()
      *
      * @hide
      */
-    @TestApi
-    public static final int DETECT_CUSTOM = 0x08; // for ThreadPolicy
+    @TestApi public static final int DETECT_CUSTOM = 0x08; // for ThreadPolicy
 
     /**
      * For StrictMode.noteResourceMismatch()
      *
      * @hide
      */
-    @TestApi
-    public static final int DETECT_RESOURCE_MISMATCH = 0x10; // for ThreadPolicy
+    @TestApi public static final int DETECT_RESOURCE_MISMATCH = 0x10; // for ThreadPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_UNBUFFERED_IO = 0x20; // for ThreadPolicy
+    @TestApi public static final int DETECT_UNBUFFERED_IO = 0x20; // for ThreadPolicy
 
     private static final int ALL_THREAD_DETECT_BITS =
             DETECT_DISK_WRITE
@@ -202,48 +213,40 @@ public final class StrictMode {
      *
      * @hide
      */
-    @TestApi
-    public static final int DETECT_VM_CURSOR_LEAKS = 0x01 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_CURSOR_LEAKS = 0x01 << 8; // for VmPolicy
 
     /**
      * Note, a "VM_" bit, not thread.
      *
      * @hide
      */
-    @TestApi
-    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x02 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_CLOSABLE_LEAKS = 0x02 << 8; // for VmPolicy
 
     /**
      * Note, a "VM_" bit, not thread.
      *
      * @hide
      */
-    @TestApi
-    public static final int DETECT_VM_ACTIVITY_LEAKS = 0x04 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_ACTIVITY_LEAKS = 0x04 << 8; // for VmPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_VM_INSTANCE_LEAKS = 0x08 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_INSTANCE_LEAKS = 0x08 << 8; // for VmPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_VM_REGISTRATION_LEAKS = 0x10 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_REGISTRATION_LEAKS = 0x10 << 8; // for VmPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_VM_FILE_URI_EXPOSURE = 0x20 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_FILE_URI_EXPOSURE = 0x20 << 8; // for VmPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8; // for VmPolicy
+    @TestApi public static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8; // for VmPolicy
 
     /** @hide */
     @TestApi
     public static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 0x80 << 8; // for VmPolicy
 
     /** @hide */
-    @TestApi
-    public static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24; // for VmPolicy
+    @TestApi public static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24; // for VmPolicy
 
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS
@@ -354,11 +357,7 @@ public final class StrictMode {
                 } else {
                     msg = "StrictMode policy violation:";
                 }
-                if (info.hasStackTrace()) {
-                    Log.d(TAG, msg + " " + info.getStackTrace());
-                } else {
-                    Log.d(TAG, msg + " missing stack trace!");
-                }
+                Log.d(TAG, msg + " " + info.getStackTrace());
             };
 
     private static volatile ViolationLogger sLogger = LOGCAT_LOGGER;
@@ -991,55 +990,6 @@ public final class StrictMode {
         CloseGuard.setEnabled(enabled);
     }
 
-    /** @hide */
-    public static class StrictModeViolation extends BlockGuard.BlockGuardPolicyException {
-        public StrictModeViolation(int policyState, int policyViolated, String message) {
-            super(policyState, policyViolated, message);
-        }
-    }
-
-    /** @hide */
-    public static class StrictModeNetworkViolation extends StrictModeViolation {
-        public StrictModeNetworkViolation(int policyMask) {
-            super(policyMask, DETECT_NETWORK, null);
-        }
-    }
-
-    /** @hide */
-    private static class StrictModeDiskReadViolation extends StrictModeViolation {
-        public StrictModeDiskReadViolation(int policyMask) {
-            super(policyMask, DETECT_DISK_READ, null);
-        }
-    }
-
-    /** @hide */
-    private static class StrictModeDiskWriteViolation extends StrictModeViolation {
-        public StrictModeDiskWriteViolation(int policyMask) {
-            super(policyMask, DETECT_DISK_WRITE, null);
-        }
-    }
-
-    /** @hide */
-    private static class StrictModeCustomViolation extends StrictModeViolation {
-        public StrictModeCustomViolation(int policyMask, String name) {
-            super(policyMask, DETECT_CUSTOM, name);
-        }
-    }
-
-    /** @hide */
-    private static class StrictModeResourceMismatchViolation extends StrictModeViolation {
-        public StrictModeResourceMismatchViolation(int policyMask, Object tag) {
-            super(policyMask, DETECT_RESOURCE_MISMATCH, tag != null ? tag.toString() : null);
-        }
-    }
-
-    /** @hide */
-    private static class StrictModeUnbufferedIOViolation extends StrictModeViolation {
-        public StrictModeUnbufferedIOViolation(int policyMask) {
-            super(policyMask, DETECT_UNBUFFERED_IO, null);
-        }
-    }
-
     /**
      * Returns the bitmask of the current thread's policy.
      *
@@ -1308,9 +1258,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e = new StrictModeDiskWriteViolation(mPolicyMask);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new DiskWriteViolation());
         }
 
         // Not part of BlockGuard.Policy; just part of StrictMode:
@@ -1321,10 +1269,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e =
-                    new StrictModeCustomViolation(mPolicyMask, name);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new CustomViolation(name));
         }
 
         // Not part of BlockGuard.Policy; just part of StrictMode:
@@ -1335,13 +1280,10 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e =
-                    new StrictModeResourceMismatchViolation(mPolicyMask, tag);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new ResourceMismatchViolation(tag));
         }
 
-        // Part of BlockGuard.Policy; just part of StrictMode:
+        // Not part of BlockGuard.Policy; just part of StrictMode:
         public void onUnbufferedIO() {
             if ((mPolicyMask & DETECT_UNBUFFERED_IO) == 0) {
                 return;
@@ -1349,10 +1291,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e =
-                    new StrictModeUnbufferedIOViolation(mPolicyMask);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new UnbufferedIOViolation());
         }
 
         // Part of BlockGuard.Policy interface:
@@ -1363,9 +1302,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e = new StrictModeDiskReadViolation(mPolicyMask);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new DiskReadViolation());
         }
 
         // Part of BlockGuard.Policy interface:
@@ -1379,9 +1316,7 @@ public final class StrictMode {
             if (tooManyViolationsThisLoop()) {
                 return;
             }
-            BlockGuard.BlockGuardPolicyException e = new StrictModeNetworkViolation(mPolicyMask);
-            e.fillInStackTrace();
-            startHandlingViolationException(e);
+            startHandlingViolationException(new NetworkViolation());
         }
 
         public void setPolicyMask(int policyMask) {
@@ -1393,8 +1328,8 @@ public final class StrictMode {
         // has yet occurred).  This sees if we're in an event loop
         // thread and, if so, uses it to roughly measure how long the
         // violation took.
-        void startHandlingViolationException(BlockGuard.BlockGuardPolicyException e) {
-            final ViolationInfo info = new ViolationInfo(e, e.getPolicy());
+        void startHandlingViolationException(Violation e) {
+            final ViolationInfo info = new ViolationInfo(e, mPolicyMask);
             info.violationUptimeMillis = SystemClock.uptimeMillis();
             handleViolationWithTimingAttempt(info);
         }
@@ -1423,7 +1358,7 @@ public final class StrictMode {
             //
             // TODO: if in gather mode, ignore Looper.myLooper() and always
             //       go into this immediate mode?
-            if (looper == null || (info.policy & THREAD_PENALTY_MASK) == PENALTY_DEATH) {
+            if (looper == null || (info.mPolicy & THREAD_PENALTY_MASK) == PENALTY_DEATH) {
                 info.durationMillis = -1; // unknown (redundant, already set)
                 handleViolation(info);
                 return;
@@ -1443,7 +1378,7 @@ public final class StrictMode {
             }
 
             final IWindowManager windowManager =
-                    (info.policy & PENALTY_FLASH) != 0 ? sWindowManager.get() : null;
+                    info.penaltyEnabled(PENALTY_FLASH) ? sWindowManager.get() : null;
             if (windowManager != null) {
                 try {
                     windowManager.showStrictModeViolation(true);
@@ -1496,14 +1431,9 @@ public final class StrictMode {
         // to people who push/pop temporary policy in regions of code,
         // hence the policy being passed around.
         void handleViolation(final ViolationInfo info) {
-            if (info == null || !info.hasStackTrace()) {
-                Log.wtf(TAG, "unexpected null stacktrace");
-                return;
-            }
+            if (LOG_V) Log.d(TAG, "handleViolation; policy=" + info.mPolicy);
 
-            if (LOG_V) Log.d(TAG, "handleViolation; policy=" + info.policy);
-
-            if ((info.policy & PENALTY_GATHER) != 0) {
+            if (info.penaltyEnabled(PENALTY_GATHER)) {
                 ArrayList<ViolationInfo> violations = gatheredViolations.get();
                 if (violations == null) {
                     violations = new ArrayList<ViolationInfo>(1);
@@ -1535,7 +1465,7 @@ public final class StrictMode {
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
 
-            if ((info.policy & PENALTY_LOG) != 0
+            if (info.penaltyEnabled(PENALTY_LOG)
                     && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
                 sLogger.log(info);
             }
@@ -1546,12 +1476,12 @@ public final class StrictMode {
             // by the ActivityManagerService remaining set.
             int violationMaskSubset = 0;
 
-            if ((info.policy & PENALTY_DIALOG) != 0
+            if (info.penaltyEnabled(PENALTY_DIALOG)
                     && timeSinceLastViolationMillis > MIN_DIALOG_INTERVAL_MS) {
                 violationMaskSubset |= PENALTY_DIALOG;
             }
 
-            if ((info.policy & PENALTY_DROPBOX) != 0 && lastViolationTime == 0) {
+            if (info.penaltyEnabled(PENALTY_DROPBOX) && lastViolationTime == 0) {
                 violationMaskSubset |= PENALTY_DROPBOX;
             }
 
@@ -1559,7 +1489,7 @@ public final class StrictMode {
                 violationMaskSubset |= info.getViolationBit();
                 final int savedPolicyMask = getThreadPolicyMask();
 
-                final boolean justDropBox = (info.policy & THREAD_PENALTY_MASK) == PENALTY_DROPBOX;
+                final boolean justDropBox = (info.mPolicy & THREAD_PENALTY_MASK) == PENALTY_DROPBOX;
                 if (justDropBox) {
                     // If all we're going to ask the activity manager
                     // to do is dropbox it (the common case during
@@ -1594,14 +1524,14 @@ public final class StrictMode {
                 }
             }
 
-            if ((info.policy & PENALTY_DEATH) != 0) {
+            if ((info.getPolicyMask() & PENALTY_DEATH) != 0) {
                 executeDeathPenalty(info);
             }
         }
     }
 
     private static void executeDeathPenalty(ViolationInfo info) {
-        throw new StrictModeViolation(info.policy, info.getViolationBit(), null);
+        throw new RuntimeException("StrictMode death penalty", info.mViolation);
     }
 
     /**
@@ -1648,7 +1578,7 @@ public final class StrictMode {
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
         public void report(String message, Throwable allocationSite) {
-            onVmPolicyViolation(allocationSite);
+            onVmPolicyViolation(new LeakedClosableViolation(message, allocationSite));
         }
     }
 
@@ -1686,8 +1616,7 @@ public final class StrictMode {
             int limit = policy.classInstanceLimit.get(klass);
             long instances = instanceCounts[i];
             if (instances > limit) {
-                Throwable tr = new InstanceCountViolation(klass, instances, limit);
-                onVmPolicyViolation(tr);
+                onVmPolicyViolation(new InstanceCountViolation(klass, instances, limit));
             }
         }
     }
@@ -1811,24 +1740,22 @@ public final class StrictMode {
 
     /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
-        Throwable t = new Throwable(message);
-        t.setStackTrace(originStack.getStackTrace());
-        onVmPolicyViolation(t);
+        onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
 
     /** @hide */
     public static void onWebViewMethodCalledOnWrongThread(Throwable originStack) {
-        onVmPolicyViolation(originStack);
+        onVmPolicyViolation(new WebViewMethodCalledOnWrongThreadViolation(originStack));
     }
 
     /** @hide */
     public static void onIntentReceiverLeaked(Throwable originStack) {
-        onVmPolicyViolation(originStack);
+        onVmPolicyViolation(new IntentReceiverLeakedViolation(originStack));
     }
 
     /** @hide */
     public static void onServiceConnectionLeaked(Throwable originStack) {
-        onVmPolicyViolation(originStack);
+        onVmPolicyViolation(new ServiceConnectionLeakedViolation(originStack));
     }
 
     /** @hide */
@@ -1837,19 +1764,13 @@ public final class StrictMode {
         if ((sVmPolicy.mask & PENALTY_DEATH_ON_FILE_URI_EXPOSURE) != 0) {
             throw new FileUriExposedException(message);
         } else {
-            onVmPolicyViolation(new Throwable(message));
+            onVmPolicyViolation(new FileUriExposedViolation(message));
         }
     }
 
     /** @hide */
     public static void onContentUriWithoutPermission(Uri uri, String location) {
-        final String message =
-                uri
-                        + " exposed beyond app through "
-                        + location
-                        + " without permission grant flags; did you forget"
-                        + " FLAG_GRANT_READ_URI_PERMISSION?";
-        onVmPolicyViolation(new Throwable(message));
+        onVmPolicyViolation(new ContentUriWithoutPermissionViolation(uri, location));
     }
 
     /** @hide */
@@ -1881,29 +1802,24 @@ public final class StrictMode {
         }
         msg += HexDump.dumpHexString(firstPacket).trim() + " ";
         final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
-        onVmPolicyViolation(new Throwable(msg), forceDeath);
+        onVmPolicyViolation(new CleartextNetworkViolation(msg), forceDeath);
     }
-
-    /** @hide */
-    public static final String UNTAGGED_SOCKET_VIOLATION_MESSAGE =
-            "Untagged socket detected; use"
-                    + " TrafficStats.setThreadSocketTag() to track all network usage";
 
     /** @hide */
     public static void onUntaggedSocket() {
-        onVmPolicyViolation(new Throwable(UNTAGGED_SOCKET_VIOLATION_MESSAGE));
+        onVmPolicyViolation(new UntaggedSocketViolation());
     }
 
     // Map from VM violation fingerprint to uptime millis.
-    private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<Integer, Long>();
+    private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
 
     /** @hide */
-    public static void onVmPolicyViolation(Throwable originStack) {
+    public static void onVmPolicyViolation(Violation originStack) {
         onVmPolicyViolation(originStack, false);
     }
 
     /** @hide */
-    public static void onVmPolicyViolation(Throwable originStack, boolean forceDeath) {
+    public static void onVmPolicyViolation(Violation originStack, boolean forceDeath) {
         final boolean penaltyDropbox = (sVmPolicy.mask & PENALTY_DROPBOX) != 0;
         final boolean penaltyDeath = ((sVmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
         final boolean penaltyLog = (sVmPolicy.mask & PENALTY_LOG) != 0;
@@ -1998,14 +1914,12 @@ public final class StrictMode {
         gatheredViolations.set(null);
     }
 
-    private static class LogStackTrace extends Exception {}
-
     /**
      * Called from Parcel.readException() when the exception is EX_STRICT_MODE_VIOLATIONS, we here
      * read back all the encoded violations.
      */
     /* package */ static void readAndHandleBinderCallViolations(Parcel p) {
-        LogStackTrace localCallSite = new LogStackTrace();
+        Throwable localCallSite = new Throwable();
         final int policyMask = getThreadPolicyMask();
         final boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
@@ -2323,8 +2237,7 @@ public final class StrictMode {
 
         long instances = VMDebug.countInstancesOfClass(klass, false);
         if (instances > limit) {
-            Throwable tr = new InstanceCountViolation(klass, instances, limit);
-            onVmPolicyViolation(tr);
+            onVmPolicyViolation(new InstanceCountViolation(klass, instances, limit));
         }
     }
 
@@ -2337,18 +2250,16 @@ public final class StrictMode {
     @TestApi
     public static final class ViolationInfo implements Parcelable {
         /** Stack and violation details. */
-        @Nullable private final Throwable mThrowable;
+        private final Violation mViolation;
 
         /** Path leading to a violation that occurred across binder. */
         private final Deque<StackTraceElement[]> mBinderStack = new ArrayDeque<>();
 
         /** Memoized stack trace of full violation. */
         @Nullable private String mStackTrace;
-        /** Memoized violation bit. */
-        private int mViolationBit;
 
         /** The strict mode policy mask at the time of violation. */
-        public final int policy;
+        private final int mPolicy;
 
         /** The wall time duration of the violation, when known. -1 when not known. */
         public int durationMillis = -1;
@@ -2378,17 +2289,11 @@ public final class StrictMode {
         /** If this is a instance count violation, the number of instances in memory, else -1. */
         public long numInstances = -1;
 
-        /** Create an uninitialized instance of ViolationInfo */
-        public ViolationInfo() {
-            mThrowable = null;
-            policy = 0;
-        }
-
         /** Create an instance of ViolationInfo initialized from an exception. */
-        public ViolationInfo(Throwable tr, int policy) {
-            this.mThrowable = tr;
+        ViolationInfo(Violation tr, int policy) {
+            this.mViolation = tr;
+            this.mPolicy = policy;
             violationUptimeMillis = SystemClock.uptimeMillis();
-            this.policy = policy;
             this.numAnimationsRunning = ValueAnimator.getCurrentAnimationsCount();
             Intent broadcastIntent = ActivityThread.getIntentBeingBroadcast();
             if (broadcastIntent != null) {
@@ -2396,7 +2301,7 @@ public final class StrictMode {
             }
             ThreadSpanState state = sThisThreadSpanState.get();
             if (tr instanceof InstanceCountViolation) {
-                this.numInstances = ((InstanceCountViolation) tr).mInstances;
+                this.numInstances = ((InstanceCountViolation) tr).getNumberOfInstances();
             }
             synchronized (state) {
                 int spanActiveCount = state.mActiveSize;
@@ -2418,10 +2323,10 @@ public final class StrictMode {
 
         /** Equivalent output to {@link ApplicationErrorReport.CrashInfo#stackTrace}. */
         public String getStackTrace() {
-            if (mThrowable != null && mStackTrace == null) {
+            if (mStackTrace == null) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new FastPrintWriter(sw, false, 256);
-                mThrowable.printStackTrace(pw);
+                mViolation.printStackTrace(pw);
                 for (StackTraceElement[] traces : mBinderStack) {
                     pw.append("# via Binder call with stack:\n");
                     for (StackTraceElement traceElement : traces) {
@@ -2444,20 +2349,21 @@ public final class StrictMode {
          */
         @TestApi
         public String getViolationDetails() {
-            if (mThrowable != null) {
-                return mThrowable.getMessage();
-            } else {
-                return "";
-            }
+            return mViolation.getMessage();
         }
 
         /**
-         * If this violation has a useful stack trace.
+         * Policy mask at time of violation.
          *
          * @hide
          */
-        public boolean hasStackTrace() {
-            return mThrowable != null;
+        @TestApi
+        public int getPolicyMask() {
+            return mPolicy;
+        }
+
+        boolean penaltyEnabled(int p) {
+            return (mPolicy & p) != 0;
         }
 
         /**
@@ -2475,37 +2381,47 @@ public final class StrictMode {
          *
          * @hide
          */
-        int getViolationBit() {
-            if (mThrowable == null || mThrowable.getMessage() == null) {
-                return 0;
+        @TestApi
+        public int getViolationBit() {
+            if (mViolation instanceof DiskWriteViolation) {
+                return DETECT_DISK_WRITE;
+            } else if (mViolation instanceof DiskReadViolation) {
+                return DETECT_DISK_READ;
+            } else if (mViolation instanceof NetworkViolation) {
+                return DETECT_NETWORK;
+            } else if (mViolation instanceof CustomViolation) {
+                return DETECT_CUSTOM;
+            } else if (mViolation instanceof ResourceMismatchViolation) {
+                return DETECT_RESOURCE_MISMATCH;
+            } else if (mViolation instanceof UnbufferedIOViolation) {
+                return DETECT_UNBUFFERED_IO;
+            } else if (mViolation instanceof SqliteObjectLeakedViolation) {
+                return DETECT_VM_CURSOR_LEAKS;
+            } else if (mViolation instanceof LeakedClosableViolation) {
+                return DETECT_VM_CLOSABLE_LEAKS;
+            } else if (mViolation instanceof InstanceCountViolation) {
+                return DETECT_VM_INSTANCE_LEAKS;
+            } else if (mViolation instanceof IntentReceiverLeakedViolation) {
+                return DETECT_VM_REGISTRATION_LEAKS;
+            } else if (mViolation instanceof ServiceConnectionLeakedViolation) {
+                return DETECT_VM_REGISTRATION_LEAKS;
+            } else if (mViolation instanceof FileUriExposedViolation) {
+                return DETECT_VM_FILE_URI_EXPOSURE;
+            } else if (mViolation instanceof CleartextNetworkViolation) {
+                return DETECT_VM_CLEARTEXT_NETWORK;
+            } else if (mViolation instanceof ContentUriWithoutPermissionViolation) {
+                return DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
+            } else if (mViolation instanceof UntaggedSocketViolation) {
+                return DETECT_VM_UNTAGGED_SOCKET;
             }
-            if (mViolationBit != 0) {
-                return mViolationBit;
-            }
-            String message = mThrowable.getMessage();
-            int violationIndex = message.indexOf("violation=");
-            if (violationIndex == -1) {
-                return 0;
-            }
-            int numberStartIndex = violationIndex + "violation=".length();
-            int numberEndIndex = message.indexOf(' ', numberStartIndex);
-            if (numberEndIndex == -1) {
-                numberEndIndex = message.length();
-            }
-            String violationString = message.substring(numberStartIndex, numberEndIndex);
-            try {
-                mViolationBit = Integer.parseInt(violationString);
-                return mViolationBit;
-            } catch (NumberFormatException e) {
-                return 0;
-            }
+            throw new IllegalStateException("missing violation bit");
         }
 
         @Override
         public int hashCode() {
             int result = 17;
-            if (mThrowable != null) {
-                result = 37 * result + mThrowable.hashCode();
+            if (mViolation != null) {
+                result = 37 * result + mViolation.hashCode();
             }
             if (numAnimationsRunning != 0) {
                 result *= 37;
@@ -2533,7 +2449,7 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mThrowable = (Throwable) in.readSerializable();
+            mViolation = (Violation) in.readSerializable();
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
                 StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];
@@ -2550,9 +2466,9 @@ public final class StrictMode {
             }
             int rawPolicy = in.readInt();
             if (unsetGatheringBit) {
-                policy = rawPolicy & ~PENALTY_GATHER;
+                mPolicy = rawPolicy & ~PENALTY_GATHER;
             } else {
-                policy = rawPolicy;
+                mPolicy = rawPolicy;
             }
             durationMillis = in.readInt();
             violationNumThisLoop = in.readInt();
@@ -2566,7 +2482,7 @@ public final class StrictMode {
         /** Save a ViolationInfo instance to a parcel. */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeSerializable(mThrowable);
+            dest.writeSerializable(mViolation);
             dest.writeInt(mBinderStack.size());
             for (StackTraceElement[] traceElements : mBinderStack) {
                 dest.writeInt(traceElements.length);
@@ -2578,7 +2494,7 @@ public final class StrictMode {
                 }
             }
             int start = dest.dataPosition();
-            dest.writeInt(policy);
+            dest.writeInt(mPolicy);
             dest.writeInt(durationMillis);
             dest.writeInt(violationNumThisLoop);
             dest.writeInt(numAnimationsRunning);
@@ -2591,7 +2507,7 @@ public final class StrictMode {
                 Slog.d(
                         TAG,
                         "VIO: policy="
-                                + policy
+                                + mPolicy
                                 + " dur="
                                 + durationMillis
                                 + " numLoop="
@@ -2610,10 +2526,8 @@ public final class StrictMode {
 
         /** Dump a ViolationInfo instance to a Printer. */
         public void dump(Printer pw, String prefix) {
-            if (mThrowable != null) {
-                pw.println(prefix + "stackTrace: " + getStackTrace());
-            }
-            pw.println(prefix + "policy: " + policy);
+            pw.println(prefix + "stackTrace: " + getStackTrace());
+            pw.println(prefix + "policy: " + mPolicy);
             if (durationMillis != -1) {
                 pw.println(prefix + "durationMillis: " + durationMillis);
             }
@@ -2655,27 +2569,6 @@ public final class StrictMode {
                         return new ViolationInfo[size];
                     }
                 };
-    }
-
-    // Dummy throwable, for now, since we don't know when or where the
-    // leaked instances came from.  We might in the future, but for
-    // now we suppress the stack trace because it's useless and/or
-    // misleading.
-    private static class InstanceCountViolation extends Throwable {
-        private final long mInstances;
-        private final int mLimit;
-
-        private static final StackTraceElement[] FAKE_STACK = {
-            new StackTraceElement(
-                    "android.os.StrictMode", "setClassInstanceLimit", "StrictMode.java", 1)
-        };
-
-        public InstanceCountViolation(Class klass, long instances, int limit) {
-            super(klass.toString() + "; instances=" + instances + "; limit=" + limit);
-            setStackTrace(FAKE_STACK);
-            mInstances = instances;
-            mLimit = limit;
-        }
     }
 
     private static final class InstanceTracker {
