@@ -15,14 +15,14 @@
      limitations under the License.
 -->
 <!-- LinearLayout -->
-<android.app.slice.views.RemoteInputView
+<android.app.slice.widget.RemoteInputView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/remote_input"
         android:background="@drawable/slice_remote_input_bg"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
-    <view class="com.android.internal.slice.view.RemoteInputView$RemoteEditText"
+    <view class="com.android.internal.app.slice.widget.RemoteInputView$RemoteEditText"
             android:id="@+id/remote_input_text"
             android:layout_height="match_parent"
             android:layout_width="0dp"
@@ -73,4 +73,4 @@
 
     </FrameLayout>
 
-</android.app.slice.views.RemoteInputView>
+</android.app.slice.widget.RemoteInputView>
