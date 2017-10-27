@@ -134,19 +134,21 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         mCallbackHandler = new Handler(mLooper, this);
 
         while (true) {
+            if (isShuttingDown()) break;
             try {
                 listenToSocket();
             } catch (Exception e) {
                 loge("Error in NativeDaemonConnector: " + e);
-                String shutdownAct = SystemProperties.get(
-                        ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
-                if (shutdownAct != null && shutdownAct.length() > 0) {
-                    // The device is in middle of shutdown.
-                    break;
-                }
+                if (isShuttingDown()) break;
                 SystemClock.sleep(5000);
             }
         }
+    }
+
+    private static boolean isShuttingDown() {
+        String shutdownAct = SystemProperties.get(
+            ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
+        return shutdownAct != null && shutdownAct.length() > 0;
     }
 
     @Override
