@@ -104,6 +104,7 @@ public class MessagingLayout extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
+        mMessagingLinearLayout.setMessagingLayout(this);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -435,5 +436,9 @@ public class MessagingLayout extends FrameLayout {
 
     public MessagingLinearLayout getMessagingLinearLayout() {
         return mMessagingLinearLayout;
+    }
+
+    public ArrayList<MessagingGroup> getMessagingGroups() {
+        return mGroups;
     }
 }

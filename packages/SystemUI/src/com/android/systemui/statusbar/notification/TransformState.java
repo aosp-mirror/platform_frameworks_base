@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.widget.MessagingPropertyAnimator;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -74,13 +75,16 @@ public class TransformState {
     };
 
     protected View mTransformedView;
+    protected TransformInfo mTransformInfo;
     private int[] mOwnPosition = new int[2];
     private boolean mSameAsAny;
     private float mTransformationEndY = UNDEFINED;
     private float mTransformationEndX = UNDEFINED;
+    private Interpolator mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
-    public void initFrom(View view) {
+    public void initFrom(View view, TransformInfo transformInfo) {
         mTransformedView = view;
+        mTransformInfo = transformInfo;
     }
 
     /**
@@ -183,7 +187,7 @@ public class TransformState {
             }
             setClippingDeactivated(transformedView, true);
         }
-        float interpolatedValue = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+        float interpolatedValue = mDefaultInterpolator.getInterpolation(
                 transformationAmount);
         if (transformX) {
             float interpolation = interpolatedValue;
@@ -321,7 +325,7 @@ public class TransformState {
             }
             setClippingDeactivated(transformedView, true);
         }
-        float interpolatedValue = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+        float interpolatedValue = mDefaultInterpolator.getInterpolation(
                 transformationAmount);
         int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
         int[] ownPosition = getLaidOutLocationOnScreen();
@@ -396,6 +400,9 @@ public class TransformState {
         // remove scale
         mOwnPosition[0] -= (1.0f - mTransformedView.getScaleX()) * mTransformedView.getPivotX();
         mOwnPosition[1] -= (1.0f - mTransformedView.getScaleY()) * mTransformedView.getPivotY();
+
+        // Remove local translations
+        mOwnPosition[1] -= MessagingPropertyAnimator.getLocalTranslationY(mTransformedView);
         return mOwnPosition;
     }
 
@@ -417,20 +424,26 @@ public class TransformState {
         CrossFadeHelper.fadeOut(mTransformedView, transformationAmount);
     }
 
-    public static TransformState createFrom(View view) {
+    public static TransformState createFrom(View view,
+            TransformInfo transformInfo) {
         if (view instanceof TextView) {
             TextViewTransformState result = TextViewTransformState.obtain();
-            result.initFrom(view);
+            result.initFrom(view, transformInfo);
             return result;
         }
         if (view.getId() == com.android.internal.R.id.actions_container) {
             ActionListTransformState result = ActionListTransformState.obtain();
-            result.initFrom(view);
+            result.initFrom(view, transformInfo);
+            return result;
+        }
+        if (view.getId() == com.android.internal.R.id.notification_messaging) {
+            MessagingLayoutTransformState result = MessagingLayoutTransformState.obtain();
+            result.initFrom(view, transformInfo);
             return result;
         }
         if (view instanceof ImageView) {
             ImageTransformState result = ImageTransformState.obtain();
-            result.initFrom(view);
+            result.initFrom(view, transformInfo);
             if (view.getId() == com.android.internal.R.id.reply_icon_action) {
                 ((TransformState) result).setIsSameAsAnyView(true);
             }
@@ -438,15 +451,15 @@ public class TransformState {
         }
         if (view instanceof ProgressBar) {
             ProgressTransformState result = ProgressTransformState.obtain();
-            result.initFrom(view);
+            result.initFrom(view, transformInfo);
             return result;
         }
         TransformState result = obtain();
-        result.initFrom(view);
+        result.initFrom(view, transformInfo);
         return result;
     }
 
-    private void setIsSameAsAnyView(boolean sameAsAny) {
+    public void setIsSameAsAnyView(boolean sameAsAny) {
         mSameAsAny = sameAsAny;
     }
 
@@ -506,6 +519,7 @@ public class TransformState {
         mSameAsAny = false;
         mTransformationEndX = UNDEFINED;
         mTransformationEndY = UNDEFINED;
+        mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
     }
 
     public void setVisible(boolean visible, boolean force) {
@@ -550,5 +564,13 @@ public class TransformState {
 
     public View getTransformedView() {
         return mTransformedView;
+    }
+
+    public void setDefaultInterpolator(Interpolator interpolator) {
+        mDefaultInterpolator = interpolator;
+    }
+
+    public interface TransformInfo {
+        boolean isAnimating();
     }
 }

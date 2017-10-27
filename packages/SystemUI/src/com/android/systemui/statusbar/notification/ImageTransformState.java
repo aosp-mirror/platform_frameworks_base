@@ -39,8 +39,8 @@ public class ImageTransformState extends TransformState {
     private Icon mIcon;
 
     @Override
-    public void initFrom(View view) {
-        super.initFrom(view);
+    public void initFrom(View view, TransformInfo transformInfo) {
+        super.initFrom(view, transformInfo);
         if (view instanceof ImageView) {
             mIcon = (Icon) view.getTag(ICON_TAG);
         }

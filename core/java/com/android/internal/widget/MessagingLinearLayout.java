@@ -53,6 +53,7 @@ public class MessagingLinearLayout extends ViewGroup {
      * {@link #NOT_MEASURED_BEFORE} if this is the first layout pass.
      */
     private int mLastMeasuredWidth = NOT_MEASURED_BEFORE;
+    private MessagingLayout mMessagingLayout;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -256,6 +257,14 @@ public class MessagingLinearLayout extends ViewGroup {
     @RemotableViewMethod
     public void setMaxDisplayedLines(int numberLines) {
         mMaxDisplayedLines = numberLines;
+    }
+
+    public void setMessagingLayout(MessagingLayout layout) {
+        mMessagingLayout = layout;
+    }
+
+    public MessagingLayout getMessagingLayout() {
+        return mMessagingLayout;
     }
 
     public interface MessagingChild {

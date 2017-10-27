@@ -36,7 +36,7 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
 
     private final int mMinHeightWithActions;
     private MessagingLayout mMessagingLayout;
-    private View mContractedMessage;
+    private MessagingLinearLayout mMessagingLinearLayout;
 
     protected NotificationMessagingTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -47,8 +47,7 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
     }
 
     private void resolveViews() {
-        mContractedMessage = null;
-        mContractedMessage = mMessagingLayout.getContractedMessage();
+        mMessagingLinearLayout = mMessagingLayout.getMessagingLinearLayout();
     }
 
     @Override
@@ -63,9 +62,9 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
     protected void updateTransformedTypes() {
         // This also clears the existing types
         super.updateTransformedTypes();
-        if (mContractedMessage != null) {
-            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT,
-                    mContractedMessage);
+        if (mMessagingLinearLayout != null) {
+            mTransformationHelper.addTransformedView(mMessagingLinearLayout.getId(),
+                    mMessagingLinearLayout);
         }
     }
 

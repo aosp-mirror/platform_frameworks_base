@@ -27,6 +27,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Pools;
 import android.view.Gravity;
@@ -61,6 +62,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private Icon mAvatarIcon;
     private ColorFilter mMessageBackgroundFilter;
     private int mTextColor;
+    private List<MessagingMessage> mMessages;
     private ArrayList<MessagingMessage> mAddedMessages = new ArrayList<>();
     private boolean mFirstLayout;
     private boolean mIsHidingAnimated;
@@ -323,6 +325,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             }
             message.setTextColor(mTextColor);
         }
+        mMessages = group;
     }
 
     @Override
@@ -351,11 +354,40 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mFirstLayout = false;
     }
 
+    /**
+     * Calculates the group compatibility between this and another group.
+     *
+     * @param otherGroup the other group to compare it with
+     *
+     * @return 0 if the groups are totally incompatible or 1 + the number of matching messages if
+     *         they match.
+     */
+    public int calculateGroupCompatibility(MessagingGroup otherGroup) {
+        if (TextUtils.equals(getSenderName(),otherGroup.getSenderName())) {
+            int result = 1;
+            for (int i = 0; i < mMessages.size() && i < otherGroup.mMessages.size(); i++) {
+                MessagingMessage ownMessage = mMessages.get(mMessages.size() - 1 - i);
+                MessagingMessage otherMessage = otherGroup.mMessages.get(
+                        otherGroup.mMessages.size() - 1 - i);
+                if (!ownMessage.sameAs(otherMessage)) {
+                    return result;
+                }
+                result++;
+            }
+            return result;
+        }
+        return 0;
+    }
+
     public View getSender() {
         return mSenderName;
     }
 
     public View getAvatar() {
         return mAvatarView;
+    }
+
+    public MessagingLinearLayout getMessageContainer() {
+        return mMessageContainer;
     }
 }

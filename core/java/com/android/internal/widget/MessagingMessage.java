@@ -88,6 +88,10 @@ public class MessagingMessage extends ImageFloatingTextView implements
         return true;
     }
 
+    boolean sameAs(MessagingMessage message) {
+        return sameAs(message.getMessage());
+    }
+
     static MessagingMessage createMessage(MessagingLayout layout,
             Notification.MessagingStyle.Message m) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
