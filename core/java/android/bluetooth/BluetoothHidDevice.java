@@ -31,7 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @hide
+ * Provides the public APIs to control the Bluetooth HID Device
+ * profile.
+ *
+ * BluetoothHidDevice is a proxy object for controlling the Bluetooth HID
+ * Device Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
+ * the BluetoothHidDevice proxy object.
+ *
+ * {@hide}
  */
 public final class BluetoothHidDevice implements BluetoothProfile {
 
@@ -62,7 +69,9 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     /**
      * Constants representing device subclass.
      *
-     * @see #registerApp(String, String, String, byte, byte[], BluetoothHidDeviceCallback)
+     * @see #registerApp
+     * (BluetoothHidDeviceAppQosSettings, BluetoothHidDeviceAppQosSettings,
+     * BluetoothHidDeviceAppQosSettings, BluetoothHidDeviceCallback)
      */
     public static final byte SUBCLASS1_NONE = (byte) 0x00;
     public static final byte SUBCLASS1_KEYBOARD = (byte) 0x40;
@@ -80,9 +89,9 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     /**
      * Constants representing report types.
      *
-     * @see BluetoothHidDeviceCallback#onGetReport(byte, byte, int)
-     * @see BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])
-     * @see BluetoothHidDeviceCallback#onIntrData(byte, byte[])
+     * @see BluetoothHidDeviceCallback#onGetReport(BluetoothDevice, byte, byte, int)
+     * @see BluetoothHidDeviceCallback#onSetReport(BluetoothDevice, byte, byte, byte[])
+     * @see BluetoothHidDeviceCallback#onIntrData(BluetoothDevice, byte, byte[])
      */
     public static final byte REPORT_TYPE_INPUT = (byte) 1;
     public static final byte REPORT_TYPE_OUTPUT = (byte) 2;
@@ -91,7 +100,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     /**
      * Constants representing error response for Set Report.
      *
-     * @see BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])
+     * @see BluetoothHidDeviceCallback#onSetReport(BluetoothDevice, byte, byte, byte[])
      */
     public static final byte ERROR_RSP_SUCCESS = (byte) 0;
     public static final byte ERROR_RSP_NOT_READY = (byte) 1;
@@ -104,7 +113,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
      * Constants representing protocol mode used set by host. Default is always
      * {@link #PROTOCOL_REPORT_MODE} unless notified otherwise.
      *
-     * @see BluetoothHidDeviceCallback#onSetProtocol(byte)
+     * @see BluetoothHidDeviceCallback#onSetProtocol(BluetoothDevice, byte)
      */
     public static final byte PROTOCOL_BOOT_MODE = (byte) 0;
     public static final byte PROTOCOL_REPORT_MODE = (byte) 1;
@@ -169,18 +178,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     synchronized (mConnection) {
-                        if (!up) {
-                            Log.d(TAG, "Unbinding service...");
-                            if (mService != null) {
-                                mService = null;
-                                try {
-                                    mContext.unbindService(mConnection);
-                                } catch (IllegalArgumentException e) {
-                                    Log.e(TAG, "onBluetoothStateChange: could not unbind service:",
-                                            e);
-                                }
-                            }
-                        } else {
+                        if (up) {
                             try {
                                 if (mService == null) {
                                     Log.d(TAG, "Binding HID Device service...");
@@ -189,14 +187,15 @@ public final class BluetoothHidDevice implements BluetoothProfile {
                             } catch (IllegalStateException e) {
                                 Log.e(TAG,
                                         "onBluetoothStateChange: could not bind to HID Dev "
-                                                + "service: ",
-                                        e);
+                                                + "service: ", e);
                             } catch (SecurityException e) {
                                 Log.e(TAG,
                                         "onBluetoothStateChange: could not bind to HID Dev "
-                                                + "service: ",
-                                        e);
+                                                + "service: ", e);
                             }
+                        } else {
+                            Log.d(TAG, "Unbinding service...");
+                            doUnbind();
                         }
                     }
                 }
@@ -252,6 +251,18 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         return true;
     }
 
+    void doUnbind() {
+        Log.d(TAG, "Unbinding HidDevService");
+        if (mService != null) {
+            mService = null;
+            try {
+                mContext.unbindService(mConnection);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Unable to unbind HidDevService", e);
+            }
+        }
+    }
+
     void close() {
         Log.v(TAG, "close()");
 
@@ -265,16 +276,8 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         }
 
         synchronized (mConnection) {
-            if (mService != null) {
-                mService = null;
-                try {
-                    mContext.unbindService(mConnection);
-                } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "close: could not unbind HID Dev service: ", e);
-                }
-            }
+            doUnbind();
         }
-
         mServiceListener = null;
     }
 
@@ -388,7 +391,9 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     /**
      * Unregisters application. Active connection will be disconnected and no
      * new connections will be allowed until registered again using
-     * {@link #registerApp(String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
+     * {@link #registerApp
+     * (BluetoothHidDeviceAppQosSettings, BluetoothHidDeviceAppQosSettings,
+     * BluetoothHidDeviceAppQosSettings, BluetoothHidDeviceCallback)}
      *
      * @param config {@link BluetoothHidDeviceAppConfiguration} object as obtained from {@link
      * BluetoothHidDeviceCallback#onAppStatusChanged(BluetoothDevice,
