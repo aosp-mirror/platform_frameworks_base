@@ -5068,8 +5068,16 @@ public class AccountManagerService
                 logStatement.bindLong(4, callingUid);
                 logStatement.bindString(5, tableName);
                 logStatement.bindLong(6, userDebugDbInsertionPoint);
-                logStatement.execute();
-                logStatement.clearBindings();
+                try {
+                    logStatement.execute();
+                } catch (IllegalStateException e) {
+                    // Guard against crash, DB can already be closed
+                    // since this statement is executed on a handler thread
+                    Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
+                            + " action=" + action + " tableName=" + tableName + " Error: " + e);
+                } finally {
+                    logStatement.clearBindings();
+                }
             }
         }
 
