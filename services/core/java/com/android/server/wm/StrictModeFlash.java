@@ -44,8 +44,11 @@ class StrictModeFlash {
     public StrictModeFlash(Display display, SurfaceSession session) {
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl(session, "StrictModeFlash",
-                1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            ctrl = new SurfaceControl.Builder(session)
+                    .setName("StrictModeFlash")
+                    .setSize(1, 1)
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
             ctrl.setLayerStack(display.getLayerStack());
             ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
             ctrl.setPosition(0, 0);

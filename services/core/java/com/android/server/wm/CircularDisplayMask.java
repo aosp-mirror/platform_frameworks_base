@@ -66,8 +66,11 @@ class CircularDisplayMask {
 
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl(session, "CircularDisplayMask", mScreenSize.x,
-                    mScreenSize.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            ctrl = new SurfaceControl.Builder(session)
+                    .setName("CircularDisplayMask")
+                    .setSize(mScreenSize.x, mScreenSize.y) // not a typo
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
 
             ctrl.setLayerStack(display.getLayerStack());
             ctrl.setLayer(zOrder);

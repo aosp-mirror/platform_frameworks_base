@@ -114,8 +114,11 @@ class Watermark {
 
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl(session, "WatermarkSurface",
-                    1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            ctrl = new SurfaceControl.Builder(session)
+                    .setName("WatermarkSurface")
+                    .setSize(1, 1)
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
             ctrl.setLayerStack(mDisplay.getLayerStack());
             ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER*100);
             ctrl.setPosition(0, 0);

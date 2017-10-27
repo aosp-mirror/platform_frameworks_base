@@ -50,8 +50,11 @@ public class BlackFrame {
             int w = r-l;
             int h = b-t;
 
-            surface = new SurfaceControl(session, "BlackSurface",
-                    w, h, OPAQUE, FX_SURFACE_DIM | SurfaceControl.HIDDEN);
+            surface = new SurfaceControl.Builder(session)
+                    .setName("BlackSurface")
+                    .setSize(w, h)
+                    .setColorLayer(true)
+                    .build();
 
             surface.setAlpha(1);
             surface.setLayerStack(layerStack);

@@ -269,14 +269,11 @@ class ScreenRotationAnimation {
 
         try {
             try {
-                int flags = SurfaceControl.HIDDEN;
-                if (isSecure) {
-                    flags |= SurfaceControl.SECURE;
-                }
-
-                mSurfaceControl = new SurfaceControl(session, "ScreenshotSurface",
-                        mWidth, mHeight,
-                        PixelFormat.OPAQUE, flags);
+                mSurfaceControl = new SurfaceControl.Builder(session)
+                        .setName("ScreenshotSurface")
+                        .setSize(mWidth, mHeight)
+                        .setSecure(isSecure)
+                        .build();
 
                 // capture a screenshot into the surface we just created
                 Surface sur = new Surface();

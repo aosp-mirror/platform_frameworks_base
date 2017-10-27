@@ -16,26 +16,21 @@
 
 package android.view;
 
-import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
-
 import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
-import android.graphics.Point;
-import android.graphics.PointF;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
-import android.os.Debug;
 import android.os.IBinder;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
-
 import dalvik.system.CloseGuard;
+import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
-
-import libcore.util.NativeAllocationRegistry;
 
 /**
  * SurfaceControl
@@ -186,7 +181,7 @@ public class SurfaceControl {
 
     /**
      * Surface creation flag: Indicates that the surface must be considered opaque,
-     * even if its pixel format is set to translucent. This can be useful if an
+     * even if its pixel format contains an alpha channel. This can be useful if an
      * application needs full RGBA 8888 support for instance but will
      * still draw every pixel opaque.
      * <p>
@@ -307,6 +302,203 @@ public class SurfaceControl {
     public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
 
     /**
+     * Builder class for {@link SurfaceControl} objects.
+     */
+    public static class Builder {
+        private SurfaceSession mSession;
+        private int mFlags = HIDDEN;
+        private int mWidth;
+        private int mHeight;
+        private int mFormat = PixelFormat.OPAQUE;
+        private String mName;
+        private SurfaceControl mParent;
+        private int mWindowType;
+        private int mOwnerUid;
+
+        /**
+         * Begin building a SurfaceControl with a given {@link SurfaceSession}.
+         *
+         * @param session The {@link SurfaceSession} with which to eventually construct the surface.
+         */
+        public Builder(SurfaceSession session) {
+            mSession = session;
+        }
+
+        /**
+         * Construct a new {@link SurfaceControl} with the set parameters.
+         */
+        public SurfaceControl build() {
+            if (mWidth <= 0 || mHeight <= 0) {
+                throw new IllegalArgumentException(
+                        "width and height must be set");
+            }
+            return new SurfaceControl(mSession, mName, mWidth, mHeight, mFormat,
+                    mFlags, mParent, mWindowType, mOwnerUid);
+        }
+
+        /**
+         * Set a debugging-name for the SurfaceControl.
+         *
+         * @param name A name to identify the Surface in debugging.
+         */
+        public Builder setName(String name) {
+            mName = name;
+            return this;
+        }
+
+        /**
+         * Set the initial size of the controlled surface's buffers in pixels.
+         *
+         * @param width The buffer width in pixels.
+         * @param height The buffer height in pixels.
+         */
+        public Builder setSize(int width, int height) {
+            if (width <= 0 || height <= 0) {
+                throw new IllegalArgumentException(
+                        "width and height must be positive");
+            }
+            mWidth = width;
+            mHeight = height;
+            return this;
+        }
+
+        /**
+         * Set the pixel format of the controlled surface's buffers, using constants from
+         * {@link android.graphics.PixelFormat}.
+         */
+        public Builder setFormat(@PixelFormat.Format int format) {
+            mFormat = format;
+            return this;
+        }
+
+        /**
+         * Specify if the app requires a hardware-protected path to
+         * an external display sync. If protected content is enabled, but
+         * such a path is not available, then the controlled Surface will
+         * not be displayed.
+         *
+         * @param protectedContent Whether to require a protected sink.
+         */
+        public Builder setProtected(boolean protectedContent) {
+            if (protectedContent) {
+                mFlags |= PROTECTED_APP;
+            } else {
+                mFlags &= ~PROTECTED_APP;
+            }
+            return this;
+        }
+
+        /**
+         * Specify whether the Surface contains secure content. If true, the system
+         * will prevent the surfaces content from being copied by another process. In
+         * particular screenshots and VNC servers will be disabled. This is however
+         * not a complete prevention of readback as {@link #setProtected}.
+         */
+        public Builder setSecure(boolean secure) {
+            if (secure) {
+                mFlags |= SECURE;
+            } else {
+                mFlags &= ~SECURE;
+            }
+            return this;
+        }
+
+        /**
+         * Indicates whether the surface must be considered opaque,
+         * even if its pixel format is set to translucent. This can be useful if an
+         * application needs full RGBA 8888 support for instance but will
+         * still draw every pixel opaque.
+         * <p>
+         * This flag only determines whether opacity will be sampled from the alpha channel.
+         * Plane-alpha from calls to setAlpha() can still result in blended composition
+         * regardless of the opaque setting.
+         *
+         * Combined effects are (assuming a buffer format with an alpha channel):
+         * <ul>
+         * <li>OPAQUE + alpha(1.0) == opaque composition
+         * <li>OPAQUE + alpha(0.x) == blended composition
+         * <li>OPAQUE + alpha(0.0) == no composition
+         * <li>!OPAQUE + alpha(1.0) == blended composition
+         * <li>!OPAQUE + alpha(0.x) == blended composition
+         * <li>!OPAQUE + alpha(0.0) == no composition
+         * </ul>
+         * If the underlying buffer lacks an alpha channel, it is as if setOpaque(true)
+         * were set automatically.
+         * @param opaque Whether the Surface is OPAQUE.
+         */
+        public Builder setOpaque(boolean opaque) {
+            if (opaque) {
+                mFlags |= OPAQUE;
+            } else {
+                mFlags &= ~OPAQUE;
+            }
+            return this;
+        }
+
+        /**
+         * Set a parent surface for our new SurfaceControl.
+         *
+         * Child surfaces are constrained to the onscreen region of their parent.
+         * Furthermore they stack relatively in Z order, and inherit the transformation
+         * of the parent.
+         *
+         * @param parent The parent control.
+         */
+        public Builder setParent(SurfaceControl parent) {
+            mParent = parent;
+            return this;
+        }
+
+        /**
+         * Set surface metadata.
+         *
+         * Currently these are window-types as per {@link WindowManager.LayoutParams} and
+         * owner UIDs. Child surfaces inherit their parents
+         * metadata so only the WindowManager needs to set this on root Surfaces.
+         *
+         * @param windowType A window-type
+         * @param ownerUid UID of the window owner.
+         */
+        public Builder setMetadata(int windowType, int ownerUid) {
+            if (UserHandle.getAppId(Process.myUid()) != Process.SYSTEM_UID) {
+                throw new UnsupportedOperationException(
+                        "It only makes sense to set Surface metadata from the WindowManager");
+            }
+            mWindowType = windowType;
+            mOwnerUid = ownerUid;
+            return this;
+        }
+
+        /**
+         * Indicate whether a 'ColorLayer' is to be constructed.
+         *
+         * Color layers will not have an associated BufferQueue and will instead always render a
+         * solid color (that is, solid before plane alpha). Currently that color is black.
+         *
+         * @param isColorLayer Whether to create a color layer.
+         */
+        public Builder setColorLayer(boolean isColorLayer) {
+            if (isColorLayer) {
+                mFlags |= FX_SURFACE_DIM;
+            } else {
+                mFlags &= ~FX_SURFACE_DIM;
+            }
+            return this;
+        }
+
+        /**
+         * Set 'Surface creation flags' such as {@link HIDDEN}, {@link SECURE}.
+         *
+         * TODO: Finish conversion to individual builder methods?
+         * @param flags The combined flags
+         */
+        public Builder setFlags(int flags) {
+            mFlags = flags;
+            return this;
+        }
+    }
+
+    /**
      * Create a surface with a name.
      * <p>
      * The surface creation flags specify what kind of surface to create and
@@ -331,19 +523,7 @@ public class SurfaceControl {
      *
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
-    public SurfaceControl(SurfaceSession session,
-            String name, int w, int h, int format, int flags, int windowType, int ownerUid)
-                    throws OutOfResourcesException {
-        this(session, name, w, h, format, flags, null, windowType, ownerUid);
-    }
-
-    public SurfaceControl(SurfaceSession session,
-            String name, int w, int h, int format, int flags)
-                    throws OutOfResourcesException {
-        this(session, name, w, h, format, flags, null, INVALID_WINDOW_TYPE, Binder.getCallingUid());
-    }
-
-    public SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
+    private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
             SurfaceControl parent, int windowType, int ownerUid)
                     throws OutOfResourcesException {
         if (session == null) {

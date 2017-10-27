@@ -56,8 +56,11 @@ class EmulatorDisplayOverlay {
 
         SurfaceControl ctrl = null;
         try {
-            ctrl = new SurfaceControl(session, "EmulatorDisplayOverlay", mScreenSize.x,
-                    mScreenSize.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
+            ctrl = new SurfaceControl.Builder(session)
+                    .setName("EmulatorDisplayOverlay")
+                    .setSize(mScreenSize.x, mScreenSize.y)
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
             ctrl.setLayerStack(display.getLayerStack());
             ctrl.setLayer(zOrder);
             ctrl.setPosition(0, 0);

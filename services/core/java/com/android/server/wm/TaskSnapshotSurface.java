@@ -304,9 +304,11 @@ class TaskSnapshotSurface implements StartingSurface {
         final SurfaceSession session = new SurfaceSession(mSurface);
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
-        mChildSurfaceControl = new SurfaceControl(session,
-                mTitle + " - task-snapshot-surface",
-                buffer.getWidth(), buffer.getHeight(), buffer.getFormat(), HIDDEN);
+        mChildSurfaceControl = new SurfaceControl.Builder(session)
+                .setName(mTitle + " - task-snapshot-surface")
+                .setSize(buffer.getWidth(), buffer.getHeight())
+                .setFormat(buffer.getFormat())
+                .build();
         Surface surface = new Surface();
         surface.copyFrom(mChildSurfaceControl);
 
