@@ -1469,7 +1469,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
 
-                buildInputMethodListLocked(true /* resetDefaultEnabledIme */);
+                final String defaultImiId = mSettings.getSelectedInputMethod();
+                final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
+                buildInputMethodListLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */);
                 resetDefaultImeLocked(mContext);
                 updateFromSettingsLocked(true);
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
