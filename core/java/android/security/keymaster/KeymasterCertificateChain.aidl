@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable KeymasterCertificateChain;
+parcelable KeymasterCertificateChain cpp_header "keystore/KeymasterCertificateChain.h";

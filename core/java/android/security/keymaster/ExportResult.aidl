@@ -17,4 +17,4 @@
 package android.security.keymaster;
 
 /* @hide */
-parcelable ExportResult;
+parcelable ExportResult cpp_header "keystore/ExportResult.h";
