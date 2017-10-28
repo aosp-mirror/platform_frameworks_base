@@ -100,16 +100,24 @@ final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            @Nullable LocaleList defaultLocales) {
+            @Nullable TextSelection.Options options) {
         validateInput(text, selectionStartIndex, selectionEndIndex);
         try {
             if (text.length() > 0) {
-                final SmartSelection smartSelection = getSmartSelection(defaultLocales);
+                final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
+                final SmartSelection smartSelection = getSmartSelection(locales);
                 final String string = text.toString();
-                final int[] startEnd = smartSelection.suggest(
-                        string, selectionStartIndex, selectionEndIndex);
-                final int start = startEnd[0];
-                final int end = startEnd[1];
+                final int start;
+                final int end;
+                if (getSettings().isDarkLaunch() && !options.isDarkLaunchAllowed()) {
+                    start = selectionStartIndex;
+                    end = selectionEndIndex;
+                } else {
+                    final int[] startEnd = smartSelection.suggest(
+                            string, selectionStartIndex, selectionEndIndex);
+                    start = startEnd[0];
+                    end = startEnd[1];
+                }
                 if (start <= end
                         && start >= 0 && end <= string.length()
                         && start <= selectionStartIndex && end >= selectionEndIndex) {
@@ -139,18 +147,27 @@ final class TextClassifierImpl implements TextClassifier {
         }
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.suggestSelection(
-                text, selectionStartIndex, selectionEndIndex, defaultLocales);
+                text, selectionStartIndex, selectionEndIndex, options);
+    }
+
+    @Override
+    public TextSelection suggestSelection(
+            @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
+            @Nullable LocaleList defaultLocales) {
+        return suggestSelection(text, selectionStartIndex, selectionEndIndex,
+                new TextSelection.Options().setDefaultLocales(defaultLocales));
     }
 
     @Override
     public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
-            @Nullable LocaleList defaultLocales) {
+            @Nullable TextClassification.Options options) {
         validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
                 final String string = text.toString();
-                SmartSelection.ClassificationResult[] results = getSmartSelection(defaultLocales)
+                final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
+                final SmartSelection.ClassificationResult[] results = getSmartSelection(locales)
                         .classifyText(string, startIndex, endIndex,
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
@@ -165,8 +182,15 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting text classification info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.classifyText(
-                text, startIndex, endIndex, defaultLocales);
+        return TextClassifier.NO_OP.classifyText(text, startIndex, endIndex, options);
+    }
+
+    @Override
+    public TextClassification classifyText(
+            @NonNull CharSequence text, int startIndex, int endIndex,
+            @Nullable LocaleList defaultLocales) {
+        return classifyText(text, startIndex, endIndex,
+                new TextClassification.Options().setDefaultLocales(defaultLocales));
     }
 
     @Override
