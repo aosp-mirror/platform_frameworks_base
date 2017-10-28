@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.annotation.BytesLong;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +28,7 @@ import android.os.Parcelable;
  */
 final public class JobWorkItem implements Parcelable {
     final Intent mIntent;
+    final long mNetworkBytes;
     int mDeliveryCount;
     int mWorkId;
     Object mGrants;
@@ -39,6 +41,22 @@ final public class JobWorkItem implements Parcelable {
      */
     public JobWorkItem(Intent intent) {
         mIntent = intent;
+        mNetworkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+    }
+
+    /**
+     * Create a new piece of work, which can be submitted to
+     * {@link JobScheduler#enqueue JobScheduler.enqueue}.
+     *
+     * @param intent The general Intent describing this work.
+     * @param networkBytes The estimated size of network traffic that will be
+     *            performed by this job work item, in bytes. See
+     *            {@link JobInfo.Builder#setEstimatedNetworkBytes(long)} for
+     *            details about how to estimate.
+     */
+    public JobWorkItem(Intent intent, @BytesLong long networkBytes) {
+        mIntent = intent;
+        mNetworkBytes = networkBytes;
     }
 
     /**
@@ -46,6 +64,17 @@ final public class JobWorkItem implements Parcelable {
      */
     public Intent getIntent() {
         return mIntent;
+    }
+
+    /**
+     * Return the estimated size of network traffic that will be performed by
+     * this job work item, in bytes.
+     *
+     * @return estimated size, or {@link JobInfo#NETWORK_BYTES_UNKNOWN} when
+     *         unknown.
+     */
+    public @BytesLong long getEstimatedNetworkBytes() {
+        return mNetworkBytes;
     }
 
     /**
@@ -99,6 +128,10 @@ final public class JobWorkItem implements Parcelable {
         sb.append(mWorkId);
         sb.append(" intent=");
         sb.append(mIntent);
+        if (mNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            sb.append(" networkBytes=");
+            sb.append(mNetworkBytes);
+        }
         if (mDeliveryCount != 0) {
             sb.append(" dcount=");
             sb.append(mDeliveryCount);
@@ -118,6 +151,7 @@ final public class JobWorkItem implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        out.writeLong(mNetworkBytes);
         out.writeInt(mDeliveryCount);
         out.writeInt(mWorkId);
     }
@@ -139,6 +173,7 @@ final public class JobWorkItem implements Parcelable {
         } else {
             mIntent = null;
         }
+        mNetworkBytes = in.readLong();
         mDeliveryCount = in.readInt();
         mWorkId = in.readInt();
     }
