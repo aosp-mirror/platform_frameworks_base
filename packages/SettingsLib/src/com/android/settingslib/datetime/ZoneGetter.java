@@ -43,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import libcore.util.TimeZoneFinder;
 
 /**
  * ZoneGetter is the utility class to get time zone and zone list, and both of them have display
@@ -376,10 +377,9 @@ public class ZoneGetter {
             }
 
             // Create a lookup of local zone IDs.
-            localZoneIds = new HashSet<String>();
-            for (String olsonId : libcore.icu.TimeZoneNames.forLocale(locale)) {
-                localZoneIds.add(olsonId);
-            }
+            List<String> zoneIds =
+                    TimeZoneFinder.getInstance().lookupTimeZoneIdsByCountry(locale.getCountry());
+            localZoneIds = new HashSet<>(zoneIds);
         }
     }
 }
