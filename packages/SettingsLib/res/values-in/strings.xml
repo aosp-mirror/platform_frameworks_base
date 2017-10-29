@@ -279,7 +279,7 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Tampilkan batas klip, margin, dll."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Paksa arah tata letak RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Paksa perenderan GPU"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Paksa rendering GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Paksa penggunaan GPU untuk gambar 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
