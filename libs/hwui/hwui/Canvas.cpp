@@ -158,7 +158,8 @@ private:
 };
 
 void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount,
-        float x, float y, int bidiFlags, const Paint& origPaint, const Typeface* typeface) {
+        float x, float y, minikin::Bidi bidiFlags, const Paint& origPaint,
+        const Typeface* typeface) {
     // minikin may modify the original paint
     Paint paint(origPaint);
 
@@ -206,8 +207,9 @@ private:
     const SkPath& path;
 };
 
-void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
-        float hOffset, float vOffset, const Paint& paint, const Typeface* typeface) {
+void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
+        const SkPath& path, float hOffset, float vOffset, const Paint& paint,
+        const Typeface* typeface) {
     Paint paintCopy(paint);
     minikin::Layout layout = MinikinUtils::doLayout(
             &paintCopy, bidiFlags, typeface, text, 0, count, count);

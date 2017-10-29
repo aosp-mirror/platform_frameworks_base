@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
 import android.app.slice.SliceQuery;
-import android.app.slice.views.LargeSliceAdapter.SliceViewHolder;
+import android.app.slice.widget.LargeSliceAdapter.SliceViewHolder;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -71,7 +71,7 @@ public class LargeSliceAdapter extends RecyclerView.Adapter<SliceViewHolder> {
 
     @Override
     public SliceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = inflateforType(viewType);
+        View v = inflateForType(viewType);
         v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         return new SliceViewHolder(v);
     }
@@ -104,7 +104,7 @@ public class LargeSliceAdapter extends RecyclerView.Adapter<SliceViewHolder> {
         }
     }
 
-    private View inflateforType(int viewType) {
+    private View inflateForType(int viewType) {
         switch (viewType) {
             case TYPE_REMOTE_VIEWS:
                 return new FrameLayout(mContext);

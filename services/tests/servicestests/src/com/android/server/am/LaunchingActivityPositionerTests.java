@@ -49,9 +49,6 @@ import static com.android.server.am.LaunchingBoundsController.LaunchingBoundsPos
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LaunchingActivityPositionerTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private LaunchingActivityPositioner mPositioner;
     private ActivityManagerService mService;
     private ActivityStack mStack;
@@ -73,8 +70,8 @@ public class LaunchingActivityPositionerTests extends ActivityTestsBase {
 
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
-        mActivity = createActivity(mService, testActivityComponent, mTask);
+        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        mActivity = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
 
@@ -82,35 +79,35 @@ public class LaunchingActivityPositionerTests extends ActivityTestsBase {
     public void testSkippedInvocations() throws Exception {
         // No specified activity should be ignored
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                null /*activity*/, null /*options*/, mCurrent, mResult));
+                null /*activity*/, null /*source*/, null /*options*/, mCurrent, mResult));
 
         // No specified activity options should be ignored
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, null /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, null /*options*/, mCurrent, mResult));
 
         // launch bounds specified should be ignored.
         final ActivityOptions options = ActivityOptions.makeBasic();
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         // Non-resizeable records should be ignored
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         assertFalse(mActivity.isResizeable());
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         // make record resizeable
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
         assertTrue(mActivity.isResizeable());
 
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         // Does not support freeform
         mService.mSupportsFreeformWindowManagement = false;
         assertFalse(mService.mStackSupervisor.canUseActivityOptionsLaunchBounds(options));
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         mService.mSupportsFreeformWindowManagement = true;
         options.setLaunchBounds(new Rect());
@@ -118,15 +115,15 @@ public class LaunchingActivityPositionerTests extends ActivityTestsBase {
 
         // Invalid bounds
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
         options.setLaunchBounds(new Rect(0, 0, -1, -1));
         assertEquals(RESULT_SKIP, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         // Valid bounds should cause the positioner to be applied.
         options.setLaunchBounds(new Rect(0, 0, 100, 100));
         assertEquals(RESULT_DONE, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
     }
 
     @Test
@@ -140,7 +137,7 @@ public class LaunchingActivityPositionerTests extends ActivityTestsBase {
         options.setLaunchBounds(proposedBounds);
 
         assertEquals(RESULT_DONE, mPositioner.onCalculateBounds(null /*task*/, null /*layout*/,
-                mActivity, options /*options*/, mCurrent, mResult));
+                mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
         assertEquals(mResult, proposedBounds);
     }
 }

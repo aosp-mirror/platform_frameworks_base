@@ -204,7 +204,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
-    private static final String RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final String ATTR_ID = "id";
     private static final String TAG_INTENT = "intent";
@@ -1058,7 +1057,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
+        } else if (service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
@@ -1562,17 +1561,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return false;
         }
 
-        boolean isVisible = !behindFullscreenActivity || mLaunchTaskBehind;
-
-        if (service.mSupportsLeanbackOnly && isVisible && isActivityTypeRecents()) {
-            // On devices that support leanback only (Android TV), Recents activity can only be
-            // visible if the home stack is the focused stack or we are in split-screen mode.
-            final ActivityDisplay display = getDisplay();
-            boolean hasSplitScreenStack = display != null && display.hasSplitScreenPrimaryStack();
-            isVisible = hasSplitScreenStack || mStackSupervisor.isFocusedStack(getStack());
-        }
-
-        return isVisible;
+        return !behindFullscreenActivity || mLaunchTaskBehind;
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting) {
@@ -2074,7 +2063,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             final File iconFile = new File(TaskPersister.getUserImagesDir(task.userId),
                     iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
-            service.mRecentTasks.saveImage(icon, iconFilePath);
+            service.getRecentTasks().saveImage(icon, iconFilePath);
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;
@@ -2821,7 +2810,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, state.toString());
         proto.write(VISIBLE, visible);

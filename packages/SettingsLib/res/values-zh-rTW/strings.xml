@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"藍牙音訊 LDAC 轉碼器：播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"選取藍牙音訊 LDAC 轉碼器：\n播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"串流中：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"透過傳輸層安全標準 (TLS) 執行 DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"如果啟用這個選項，即可在通訊埠 853 上嘗試透過傳輸層安全標準 (TLS) 執行 DNS。"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"啟用時，Wi-Fi 連線在訊號不穩的情況下會更積極轉換成行動數據連線"</string>

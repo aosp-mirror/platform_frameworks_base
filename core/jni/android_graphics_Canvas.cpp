@@ -480,7 +480,7 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray t
     const Typeface* typeface = paint->getAndroidTypeface();
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
@@ -492,7 +492,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface);
     env->ReleaseStringChars(text, jchars);
 }
 
@@ -502,7 +502,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
 
-    const int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
@@ -515,7 +515,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
 
-    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
@@ -533,8 +533,8 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count,
+            static_cast<minikin::Bidi>(bidiFlags), *path, hOffset, vOffset, *paint, typeface);
 
     env->ReleaseCharArrayElements(text, jchars, 0);
 }
@@ -549,8 +549,8 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags),
+            *path, hOffset, vOffset, *paint, typeface);
 
     env->ReleaseStringChars(text, jchars);
 }

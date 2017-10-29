@@ -50,9 +50,6 @@ import static org.mockito.Mockito.times;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStarterTests extends ActivityTestsBase {
-    private static final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private ActivityManagerService mService;
     private ActivityStarter mStarter;
 
@@ -66,9 +63,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Test
     public void testUpdateLaunchBounds() throws Exception {
         // When in a non-resizeable stack, the task bounds should be updated.
-        final TaskRecord task = createTask(mService.mStackSupervisor, testActivityComponent,
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */));
+        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(mService.mStackSupervisor.getDefaultDisplay().createStack(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
+                .build();
         final Rect bounds = new Rect(10, 10, 100, 100);
 
         mStarter.updateBounds(task, bounds);
@@ -76,9 +74,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertEquals(task.getStack().mBounds, null);
 
         // When in a resizeable stack, the stack bounds should be updated as well.
-        final TaskRecord task2 = createTask(mService.mStackSupervisor, testActivityComponent,
-                mService.mStackSupervisor.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */));
+        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(mService.mStackSupervisor.getDefaultDisplay().createStack(
+                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
+                .build();
         assertTrue(task2.getStack() instanceof PinnedActivityStack);
         mStarter.updateBounds(task2, bounds);
 

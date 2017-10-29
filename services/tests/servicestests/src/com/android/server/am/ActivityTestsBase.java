@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static org.mockito.Mockito.mock;
@@ -76,62 +78,165 @@ public class ActivityTestsBase {
     }
 
     protected ActivityManagerService createActivityManagerService() {
-        final ActivityManagerService service = spy(new TestActivityManagerService(mContext));
+        return setupActivityManagerService(new TestActivityManagerService(mContext));
+    }
+
+    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+        service = spy(service);
         service.mWindowManager = prepareMockWindowManager();
         return service;
     }
 
-    protected static ActivityRecord createActivity(ActivityManagerService service,
-            ComponentName component, TaskRecord task) {
-        return createActivity(service, component, task, 0 /* userId */);
-    }
+    /**
+     * Builder for creating new activities.
+     */
+    protected static class ActivityBuilder {
+        // An id appended to the end of the component name to make it unique
+        private static int sCurrentActivityId = 0;
 
-    protected static ActivityRecord createActivity(ActivityManagerService service,
-            ComponentName component, TaskRecord task, int uid) {
-        Intent intent = new Intent();
-        intent.setComponent(component);
-        final ActivityInfo aInfo = new ActivityInfo();
-        aInfo.applicationInfo = new ApplicationInfo();
-        aInfo.applicationInfo.packageName = component.getPackageName();
-        aInfo.applicationInfo.uid = uid;
-        AttributeCache.init(service.mContext);
-        final ActivityRecord activity = new ActivityRecord(service, null /* caller */,
-                0 /* launchedFromPid */, 0, null, intent, null,
-                aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
-                0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                service.mStackSupervisor, null /* options */, null /* sourceRecord */);
-        activity.mWindowContainerController = mock(AppWindowContainerController.class);
+        // Default package name
+        private static final String DEFAULT_PACKAGE = "com.foo";
 
-        if (task != null) {
-            task.addActivityToTop(activity);
+        // Default base activity name
+        private static final String DEFAULT_BASE_ACTIVITY_NAME = ".BarActivity";
+
+        private final ActivityManagerService mService;
+
+        private ComponentName mComponent;
+        private TaskRecord mTaskRecord;
+        private int mUid;
+        private boolean mCreateTask;
+        private ActivityStack mStack;
+
+        ActivityBuilder(ActivityManagerService service) {
+            mService = service;
         }
 
-        return activity;
+        ActivityBuilder setComponent(ComponentName component) {
+            mComponent = component;
+            return this;
+        }
+
+        ActivityBuilder setTask(TaskRecord task) {
+            mTaskRecord = task;
+            return this;
+        }
+
+        ActivityBuilder setStack(ActivityStack stack) {
+            mStack = stack;
+            return this;
+        }
+
+        ActivityBuilder setCreateTask(boolean createTask) {
+            mCreateTask = createTask;
+            return this;
+        }
+
+        ActivityBuilder setUid(int uid) {
+            mUid = uid;
+            return this;
+        }
+
+        ActivityRecord build() {
+            if (mComponent == null) {
+                final int id = sCurrentActivityId++;
+                mComponent = ComponentName.createRelative(DEFAULT_PACKAGE,
+                        DEFAULT_BASE_ACTIVITY_NAME + id);
+            }
+
+            if (mCreateTask) {
+                mTaskRecord = new TaskBuilder(mService.mStackSupervisor)
+                        .setComponent(mComponent)
+                        .setStack(mStack).build();
+            }
+
+            Intent intent = new Intent();
+            intent.setComponent(mComponent);
+            final ActivityInfo aInfo = new ActivityInfo();
+            aInfo.applicationInfo = new ApplicationInfo();
+            aInfo.applicationInfo.packageName = mComponent.getPackageName();
+            aInfo.applicationInfo.uid = mUid;
+            AttributeCache.init(mService.mContext);
+            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
+                    0 /* launchedFromPid */, 0, null, intent, null,
+                    aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
+                    0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
+                    mService.mStackSupervisor, null /* options */, null /* sourceRecord */);
+            activity.mWindowContainerController = mock(AppWindowContainerController.class);
+
+            if (mTaskRecord != null) {
+                mTaskRecord.addActivityToTop(activity);
+            }
+
+            return activity;
+        }
     }
 
-    protected static TaskRecord createTask(ActivityStackSupervisor supervisor,
-            ComponentName component, ActivityStack stack) {
-        return createTask(supervisor, component, 0 /* flags */, 0 /* taskId */, stack);
-    }
+    /**
+     * Builder for creating new tasks.
+     */
+    protected static class TaskBuilder {
+        private final ActivityStackSupervisor mSupervisor;
 
-    protected static TaskRecord createTask(ActivityStackSupervisor supervisor,
-            ComponentName component, int flags, int taskId, ActivityStack stack) {
-        final ActivityInfo aInfo = new ActivityInfo();
-        aInfo.applicationInfo = new ApplicationInfo();
-        aInfo.applicationInfo.packageName = component.getPackageName();
+        private ComponentName mComponent;
+        private String mPackage;
+        private int mFlags = 0;
+        private int mTaskId = 0;
 
-        Intent intent = new Intent();
-        intent.setComponent(component);
-        intent.setFlags(flags);
+        private ActivityStack mStack;
 
-        final TaskRecord task = new TaskRecord(supervisor.mService, taskId, aInfo,
-                intent /*intent*/, null /*_taskDescription*/);
-        supervisor.setFocusStackUnchecked("test", stack);
-        stack.addTask(task, true, "creating test task");
-        task.setStack(stack);
-        task.setWindowContainerController(mock(TaskWindowContainerController.class));
+        TaskBuilder(ActivityStackSupervisor supervisor) {
+            mSupervisor = supervisor;
+        }
 
-        return task;
+        TaskBuilder setComponent(ComponentName component) {
+            mComponent = component;
+            return this;
+        }
+
+        TaskBuilder setPackage(String packageName) {
+            mPackage = packageName;
+            return this;
+        }
+
+        TaskBuilder setFlags(int flags) {
+            mFlags = flags;
+            return this;
+        }
+
+        TaskBuilder setTaskId(int taskId) {
+            mTaskId = taskId;
+            return this;
+        }
+
+        TaskBuilder setStack(ActivityStack stack) {
+            mStack = stack;
+            return this;
+        }
+
+        TaskRecord build() {
+            if (mStack == null) {
+                mStack = mSupervisor.getDefaultDisplay().createStack(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+            }
+
+            final ActivityInfo aInfo = new ActivityInfo();
+            aInfo.applicationInfo = new ApplicationInfo();
+            aInfo.applicationInfo.packageName = mPackage;
+
+            Intent intent = new Intent();
+            intent.setComponent(mComponent);
+            intent.setFlags(mFlags);
+
+            final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
+                    intent /*intent*/, null /*_taskDescription*/);
+            mSupervisor.setFocusStackUnchecked("test", mStack);
+            mStack.addTask(task, true, "creating test task");
+            task.setStack(mStack);
+            task.setWindowContainerController(mock(TaskWindowContainerController.class));
+
+            return task;
+        }
     }
 
     /**

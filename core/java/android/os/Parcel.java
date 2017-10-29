@@ -561,6 +561,22 @@ public final class Parcel {
         mClassCookies = from.mClassCookies;
     }
 
+    /** @hide */
+    public Map<Class, Object> copyClassCookies() {
+        return new ArrayMap<>(mClassCookies);
+    }
+
+    /** @hide */
+    public void putClassCookies(Map<Class, Object> cookies) {
+        if (cookies == null) {
+            return;
+        }
+        if (mClassCookies == null) {
+            mClassCookies = new ArrayMap<>();
+        }
+        mClassCookies.putAll(cookies);
+    }
+
     /**
      * Report whether the parcel contains any marshalled file descriptors.
      */

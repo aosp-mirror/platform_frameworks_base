@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth ഓഡിയോ LDAC കോഡെക്: പ്ലേബാക്ക് ‌നിലവാരം"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth ഓഡിയോ LDAC കോഡെക് തിരഞ്ഞെടുക്കുക:\nപ്ലേബാക്ക് ‌നിലവാരം"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"സ്ട്രീമിംഗ്: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS വഴിയുള്ള DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"പ്രവർത്തനക്ഷമമാക്കിയിട്ടുണ്ടെങ്കിൽ, പോർട്ട് 853-ലെ TLS വഴി DNS-ന് ശ്രമിക്കുക."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, വൈഫൈ സിഗ്‌നൽ കുറവായിരിക്കുന്ന സമയത്ത് മൊബൈലിലേക്ക് ഡാറ്റ കണക്ഷൻ വഴി കൈമാറുന്നതിൽ വൈഫൈ കൂടുതൽ സക്രിയമായിരിക്കും"</string>

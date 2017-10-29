@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
 import android.app.slice.SliceQuery;
-import android.app.slice.views.SliceView.SliceModeView;
+import android.app.slice.widget.SliceView.SliceModeView;
 import android.content.Context;
 import android.util.TypedValue;
 
@@ -35,11 +35,13 @@ import java.util.List;
  * @hide
  */
 public class LargeTemplateView extends SliceModeView {
+
     private final LargeSliceAdapter mAdapter;
     private final RecyclerView mRecyclerView;
     private final int mDefaultHeight;
     private final int mMaxHeight;
     private Slice mSlice;
+    private boolean mIsScrollable;
 
     public LargeTemplateView(Context context) {
         super(context);
@@ -49,9 +51,6 @@ public class LargeTemplateView extends SliceModeView {
         mAdapter = new LargeSliceAdapter(context);
         mRecyclerView.setAdapter(mAdapter);
         addView(mRecyclerView);
-        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300,
-                getResources().getDisplayMetrics());
-        setLayoutParams(new LayoutParams(width, WRAP_CONTENT));
         mDefaultHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200,
                 getResources().getDisplayMetrics());
         mMaxHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200,
@@ -68,7 +67,7 @@ public class LargeTemplateView extends SliceModeView {
         mRecyclerView.getLayoutParams().height = WRAP_CONTENT;
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (mRecyclerView.getMeasuredHeight() > mMaxHeight
-                || mSlice.hasHint(Slice.HINT_PARTIAL)) {
+                || (mSlice != null && mSlice.hasHint(Slice.HINT_PARTIAL))) {
             mRecyclerView.getLayoutParams().height = mDefaultHeight;
         } else {
             mRecyclerView.getLayoutParams().height = mRecyclerView.getMeasuredHeight();
@@ -111,5 +110,13 @@ public class LargeTemplateView extends SliceModeView {
         List<SliceItem> sliceItems = slice.getItems();
         sliceItems.forEach(i -> i.addHint(Slice.HINT_LIST_ITEM));
         items.addAll(sliceItems);
+    }
+
+    /**
+     * Whether or not the content in this template should be scrollable.
+     */
+    public void setScrollable(boolean isScrollable) {
+        // TODO -- restrict / enable how much this view can show
+        mIsScrollable = isScrollable;
     }
 }

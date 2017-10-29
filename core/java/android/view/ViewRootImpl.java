@@ -2284,18 +2284,36 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mFirst && sAlwaysAssignFocus) {
-            // handle first focus request
-            if (DEBUG_INPUT_RESIZE) Log.v(mTag, "First: mView.hasFocus()="
-                    + mView.hasFocus());
-            if (mView != null) {
-                if (!mView.hasFocus()) {
-                    mView.restoreDefaultFocus();
-                    if (DEBUG_INPUT_RESIZE) Log.v(mTag, "First: requested focused view="
-                            + mView.findFocus());
-                } else {
-                    if (DEBUG_INPUT_RESIZE) Log.v(mTag, "First: existing focused view="
-                            + mView.findFocus());
+        if (mFirst) {
+            if (sAlwaysAssignFocus) {
+                // handle first focus request
+                if (DEBUG_INPUT_RESIZE) {
+                    Log.v(mTag, "First: mView.hasFocus()=" + mView.hasFocus());
+                }
+                if (mView != null) {
+                    if (!mView.hasFocus()) {
+                        mView.restoreDefaultFocus();
+                        if (DEBUG_INPUT_RESIZE) {
+                            Log.v(mTag, "First: requested focused view=" + mView.findFocus());
+                        }
+                    } else {
+                        if (DEBUG_INPUT_RESIZE) {
+                            Log.v(mTag, "First: existing focused view=" + mView.findFocus());
+                        }
+                    }
+                }
+            } else {
+                // Some views (like ScrollView) won't hand focus to descendants that aren't within
+                // their viewport. Before layout, there's a good change these views are size 0
+                // which means no children can get focus. After layout, this view now has size, but
+                // is not guaranteed to hand-off focus to a focusable child (specifically, the edge-
+                // case where the child has a size prior to layout and thus won't trigger
+                // focusableViewAvailable).
+                View focused = mView.findFocus();
+                if (focused instanceof ViewGroup
+                        && ((ViewGroup) focused).getDescendantFocusability()
+                                == ViewGroup.FOCUS_AFTER_DESCENDANTS) {
+                    focused.restoreDefaultFocus();
                 }
             }
         }

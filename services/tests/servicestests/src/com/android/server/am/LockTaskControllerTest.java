@@ -19,6 +19,16 @@ package com.android.server.am;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
+import static android.app.StatusBarManager.DISABLE2_MASK;
+import static android.app.StatusBarManager.DISABLE2_NONE;
+import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
+import static android.app.StatusBarManager.DISABLE_HOME;
+import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
+import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.LockTaskController.STATUS_BAR_MASK_LOCKED;
@@ -29,6 +39,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import android.app.StatusBarManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,6 +53,7 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.util.Pair;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
@@ -139,7 +151,7 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.checkLockedTask(tr));
 
         // THEN lock task mode should be started
-        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
     }
 
     @Test
@@ -159,7 +171,7 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.checkLockedTask(tr2));
 
         // THEN lock task mode should be started
-        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
     }
 
     @Test
@@ -188,7 +200,7 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.checkLockedTask(tr));
 
         // THEN lock task mode should be started
-        verifyLockTaskStarted(STATUS_BAR_MASK_PINNED);
+        verifyLockTaskStarted(STATUS_BAR_MASK_PINNED, DISABLE2_NONE);
         // THEN screen pinning toast should be shown
         verify(mLockTaskNotify).showPinningStartToast();
     }
@@ -291,6 +303,9 @@ public class LockTaskControllerTest {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_TO_APP_EXIT_LOCKED, 1);
 
+        // reset invocation counter
+        reset(mStatusBarService);
+
         // WHEN calling stopLockTask
         mLockTaskController.stopLockTaskMode(true, SYSTEM_UID);
 
@@ -354,7 +369,7 @@ public class LockTaskControllerTest {
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
         assertTrue(mLockTaskController.checkLockedTask(tr1));
         assertTrue(mLockTaskController.checkLockedTask(tr2));
-        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
         // WHEN removing one package from whitelist
         whitelist = new String[] {TEST_PACKAGE_NAME};
@@ -366,7 +381,7 @@ public class LockTaskControllerTest {
         // THEN the other task should remain locked
         assertEquals(LOCK_TASK_MODE_LOCKED, mLockTaskController.getLockTaskModeState());
         assertTrue(mLockTaskController.checkLockedTask(tr1));
-        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED);
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
         // WHEN removing the last package from whitelist
         whitelist = new String[] {};
@@ -377,6 +392,131 @@ public class LockTaskControllerTest {
         assertFalse(mLockTaskController.checkLockedTask(tr1));
         assertEquals(LOCK_TASK_MODE_NONE, mLockTaskController.getLockTaskModeState());
         verifyLockTaskStopped(times(1));
+    }
+
+    @Test
+    public void testUpdateLockTaskFeatures() throws Exception {
+        // GIVEN a locked task
+        TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // THEN lock task mode should be started with default status bar masks
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
+
+        // reset invocation counter
+        reset(mStatusBarService);
+
+        // WHEN home button is enabled for lock task mode
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_HOME);
+
+        // THEN status bar should be updated to reflect this change
+        int expectedFlags = STATUS_BAR_MASK_LOCKED
+                & ~DISABLE_HOME;
+        int expectedFlags2 = DISABLE2_MASK;
+        verify(mStatusBarService).disable(eq(expectedFlags), any(IBinder.class),
+                eq(mContext.getPackageName()));
+        verify(mStatusBarService).disable2(eq(expectedFlags2), any(IBinder.class),
+                eq(mContext.getPackageName()));
+
+        // reset invocation counter
+        reset(mStatusBarService);
+
+        // WHEN notifications are enabled for lock task mode
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_NOTIFICATIONS);
+
+        // THEN status bar should be updated to reflect this change
+        expectedFlags = STATUS_BAR_MASK_LOCKED
+                & ~DISABLE_NOTIFICATION_ICONS
+                & ~DISABLE_NOTIFICATION_ALERTS;
+        expectedFlags2 = DISABLE2_MASK
+                & ~DISABLE2_NOTIFICATION_SHADE;
+        verify(mStatusBarService).disable(eq(expectedFlags), any(IBinder.class),
+                eq(mContext.getPackageName()));
+        verify(mStatusBarService).disable2(eq(expectedFlags2), any(IBinder.class),
+                eq(mContext.getPackageName()));
+    }
+
+    @Test
+    public void testUpdateLockTaskFeatures_differentUser() throws Exception {
+        // GIVEN a locked task
+        TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // THEN lock task mode should be started with default status bar masks
+        verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
+
+        // reset invocation counter
+        reset(mStatusBarService);
+
+        // WHEN home button is enabled for lock task mode for another user
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID + 1, LOCK_TASK_FEATURE_HOME);
+
+        // THEN status bar shouldn't change
+        verify(mStatusBarService, never()).disable(anyInt(), any(IBinder.class),
+                eq(mContext.getPackageName()));
+        verify(mStatusBarService, never()).disable2(anyInt(), any(IBinder.class),
+                eq(mContext.getPackageName()));
+    }
+
+    @Test
+    public void testUpdateLockTaskFeatures_keyguard() throws Exception {
+        // GIVEN a locked task
+        TaskRecord tr = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // THEN keyguard should be disabled
+        verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString());
+
+        // WHEN keyguard is enabled for lock task mode
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_KEYGUARD);
+
+        // THEN keyguard should be enabled
+        verify(mWindowManager).reenableKeyguard(any(IBinder.class));
+
+        // WHEN keyguard is disabled again for lock task mode
+        mLockTaskController.updateLockTaskFeatures(TEST_USER_ID, LOCK_TASK_FEATURE_NONE);
+
+        // THEN keyguard should be disabled
+        verify(mWindowManager, times(2)).disableKeyguard(any(IBinder.class), anyString());
+    }
+
+    @Test
+    public void testGetStatusBarDisableFlags() {
+        // Note that we don't enumerate all StatusBarManager flags, but only choose a subset to test
+
+        // WHEN nothing is enabled
+        Pair<Integer, Integer> flags = mLockTaskController.getStatusBarDisableFlags(
+                LOCK_TASK_FEATURE_NONE);
+        // THEN unsupported feature flags should still be untouched
+        assertTrue((~STATUS_BAR_MASK_LOCKED & flags.first) == 0);
+        // THEN everything else should be disabled
+        assertTrue((StatusBarManager.DISABLE_CLOCK & flags.first) != 0);
+        assertTrue((StatusBarManager.DISABLE2_QUICK_SETTINGS & flags.second) != 0);
+
+        // WHEN only home button is enabled
+        flags = mLockTaskController.getStatusBarDisableFlags(
+                LOCK_TASK_FEATURE_HOME);
+        // THEN unsupported feature flags should still be untouched
+        assertTrue((~STATUS_BAR_MASK_LOCKED & flags.first) == 0);
+        // THEN home button should indeed be enabled
+        assertTrue((StatusBarManager.DISABLE_HOME & flags.first) == 0);
+        // THEN other feature flags should remain disabled
+        assertTrue((StatusBarManager.DISABLE2_NOTIFICATION_SHADE & flags.second) != 0);
+
+        // WHEN only global actions menu and notifications are enabled
+        flags = mLockTaskController.getStatusBarDisableFlags(
+                DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS
+                        | DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS);
+        // THEN unsupported feature flags should still be untouched
+        assertTrue((~STATUS_BAR_MASK_LOCKED & flags.first) == 0);
+        // THEN notifications should be enabled
+        assertTrue((StatusBarManager.DISABLE_NOTIFICATION_ICONS & flags.first) == 0);
+        assertTrue((StatusBarManager.DISABLE_NOTIFICATION_ALERTS & flags.first) == 0);
+        assertTrue((StatusBarManager.DISABLE2_NOTIFICATION_SHADE & flags.second) == 0);
+        // THEN global actions should be enabled
+        assertTrue((StatusBarManager.DISABLE2_GLOBAL_ACTIONS & flags.second) == 0);
+        // THEN quick settings should still be disabled
+        assertTrue((StatusBarManager.DISABLE2_QUICK_SETTINGS & flags.second) != 0);
     }
 
     private TaskRecord getTaskRecord(int lockTaskAuth) {
@@ -411,11 +551,13 @@ public class LockTaskControllerTest {
         return tr;
     }
 
-    private void verifyLockTaskStarted(int statusBarMask) throws Exception {
+    private void verifyLockTaskStarted(int statusBarMask, int statusBarMask2) throws Exception {
         // THEN the keyguard should have been disabled
         verify(mWindowManager).disableKeyguard(any(IBinder.class), anyString());
         // THEN the status bar should have been disabled
         verify(mStatusBarService).disable(eq(statusBarMask), any(IBinder.class),
+                eq(mContext.getPackageName()));
+        verify(mStatusBarService).disable2(eq(statusBarMask2), any(IBinder.class),
                 eq(mContext.getPackageName()));
         // THEN the DO/PO should be informed about the operation
         verify(mDevicePolicyManager).notifyLockTaskModeChanged(true, TEST_PACKAGE_NAME,
@@ -427,6 +569,8 @@ public class LockTaskControllerTest {
         verify(mWindowManager, mode).reenableKeyguard(any(IBinder.class));
         // THEN the status bar should have been disabled
         verify(mStatusBarService, mode).disable(eq(StatusBarManager.DISABLE_NONE),
+                any(IBinder.class), eq(mContext.getPackageName()));
+        verify(mStatusBarService, mode).disable2(eq(StatusBarManager.DISABLE2_NONE),
                 any(IBinder.class), eq(mContext.getPackageName()));
         // THEN the DO/PO should be informed about the operation
         verify(mDevicePolicyManager, mode).notifyLockTaskModeChanged(false, null, TEST_USER_ID);

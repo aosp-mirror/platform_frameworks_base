@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodek LDAC Bluetooth Audio: Kvalita prehrávania"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Vybrať kodek LDAC Bluetooth Audio:\nKvalita prehrávania"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamovanie: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS cez TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Ak túto možnosť aktivujete, zariadenie sa bude pripájať k serverom DNS pomocou protokolu TLS na porte 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Keď túto možnosť zapnete, Wi‑Fi bude agresívnejšie odovzdávať dátové pripojenie na mobilnú sieť vtedy, keď bude slabý signál Wi‑Fi"</string>

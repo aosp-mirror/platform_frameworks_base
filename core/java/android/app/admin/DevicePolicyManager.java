@@ -1542,6 +1542,92 @@ public class DevicePolicyManager {
     public @interface ProvisioningPreCondition {}
 
     /**
+     * Disable all configurable SystemUI features during LockTask mode. This includes,
+     * <ul>
+     *     <li>system info area in the status bar (connectivity icons, clock, etc.)
+     *     <li>notifications (including alerts, icons, and the notification shade)
+     *     <li>Home button
+     *     <li>Recents button and UI
+     *     <li>global actions menu (i.e. power button menu)
+     *     <li>keyguard
+     * </ul>
+     *
+     * This is the default configuration for LockTask.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_NONE = 0;
+
+    /**
+     * Enable the system info area in the status bar during LockTask mode. The system info area
+     * usually occupies the right side of the status bar (although this can differ across OEMs). It
+     * includes all system information indicators, such as date and time, connectivity, battery,
+     * vibration mode, etc.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1;
+
+    /**
+     * Enable notifications during LockTask mode. This includes notification icons on the status
+     * bar, heads-up notifications, and the expandable notification shade. Note that the Quick
+     * Settings panel will still be disabled.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_NOTIFICATIONS = 1 << 1;
+
+    /**
+     * Enable the Home button during LockTask mode. Note that if a custom launcher is used, it has
+     * to be registered as the default launcher with
+     * {@link #addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}, and its
+     * package needs to be whitelisted for LockTask with
+     * {@link #setLockTaskPackages(ComponentName, String[])}.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_HOME = 1 << 2;
+
+    /**
+     * Enable the Recents button and the Recents screen during LockTask mode.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_RECENTS = 1 << 3;
+
+    /**
+     * Enable the global actions dialog during LockTask mode. This is the dialog that shows up when
+     * the user long-presses the power button, for example. Note that the user may not be able to
+     * power off the device if this flag is not set.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_GLOBAL_ACTIONS = 1 << 4;
+
+    /**
+     * Enable the keyguard during LockTask mode. Note that if the keyguard is already disabled with
+     * {@link #setKeyguardDisabled(ComponentName, boolean)}, setting this flag will have no effect.
+     * If this flag is not set, the keyguard will not be shown even if the user has a lock screen
+     * credential.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_KEYGUARD = 1 << 5;
+
+    /**
+     * Flags supplied to {@link #setLockTaskFeatures(ComponentName, int)}.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {LOCK_TASK_FEATURE_NONE, LOCK_TASK_FEATURE_SYSTEM_INFO,
+                    LOCK_TASK_FEATURE_NOTIFICATIONS, LOCK_TASK_FEATURE_HOME,
+                    LOCK_TASK_FEATURE_RECENTS, LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
+                    LOCK_TASK_FEATURE_KEYGUARD})
+    public @interface LockTaskFeature {}
+
+    /**
      * Service action: Action for a service that device owner and profile owner can optionally
      * own.  If a device owner or a profile owner has such a service, the system tries to keep
      * a bound connection to it, in order to keep their process always running.
@@ -6484,6 +6570,61 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Sets which system features to enable for LockTask mode.
+     * <p>
+     * Feature flags set through this method will only take effect for the duration when the device
+     * is in LockTask mode. If this method is not called, none of the features listed here will be
+     * enabled.
+     * <p>
+     * This function can only be called by the device owner or by a profile owner of a user/profile
+     * that is affiliated with the device owner user. See {@link #setAffiliationIds}. Any features
+     * set via this method will be cleared if the user becomes unaffiliated.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param flags Bitfield of feature flags:
+     *              {@link #LOCK_TASK_FEATURE_NONE} (default),
+     *              {@link #LOCK_TASK_FEATURE_SYSTEM_INFO},
+     *              {@link #LOCK_TASK_FEATURE_NOTIFICATIONS},
+     *              {@link #LOCK_TASK_FEATURE_HOME},
+     *              {@link #LOCK_TASK_FEATURE_RECENTS},
+     *              {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS},
+     *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
+     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
+     * an affiliated user or profile.
+     */
+    public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
+        throwIfParentInstance("setLockTaskFeatures");
+        if (mService != null) {
+            try {
+                mService.setLockTaskFeatures(admin, flags);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Gets which system features are enabled for LockTask mode.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return bitfield of flags. See {@link #setLockTaskFeatures(ComponentName, int)} for a list.
+     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
+     * an affiliated user or profile.
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public @LockTaskFeature int getLockTaskFeatures(@NonNull ComponentName admin) {
+        throwIfParentInstance("getLockTaskFeatures");
+        if (mService != null) {
+            try {
+                return mService.getLockTaskFeatures(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Called by device owners to update {@link android.provider.Settings.Global} settings.
      * Validation that the value of the setting is in the correct form for the setting type should
      * be performed by the caller.
@@ -6901,6 +7042,12 @@ public class DevicePolicyManager {
      * Called by device owner to disable the status bar. Disabling the status bar blocks
      * notifications, quick settings and other screen overlays that allow escaping from a single use
      * device.
+     * <p>
+     * <strong>Note:</strong> This method has no effect for LockTask mode. The behavior of the
+     * status bar in LockTask mode can be configured with
+     * {@link #setLockTaskFeatures(ComponentName, int)}. Calls to this method when the device is in
+     * LockTask mode will be registered, but will only take effect when the device leaves LockTask
+     * mode.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the status bar, {@code false} reenables it.

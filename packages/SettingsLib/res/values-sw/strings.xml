@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeki ya LDAC ya Sauti ya Bluetooth: Ubora wa Kucheza"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Chagua Kodeki ya LDAC ya Sauti ya Bluetooth:\nUbora wa Kucheza"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Kutiririsha: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS kupitia TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Ukiwasha mipangilio hii, jaribu kutumia DNS kupitia TLS kwenye mlango wa 853."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Ikiwashwa, Wi-Fi itakabidhi kwa hima muunganisho wa data kwa mtandao wa simu, wakati mtandao wa Wi-Fi si thabiti"</string>

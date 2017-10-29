@@ -20,7 +20,6 @@
 #include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
 #include "packages/UidMap.h"
-#include "storage/DropboxWriter.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
@@ -49,9 +48,6 @@ public:
     void flush();
 
 private:
-    // TODO: use EventMetrics to log the events.
-    DropboxWriter m_dropbox_writer;
-
     std::unordered_map<ConfigKey, std::unique_ptr<MetricsManager>> mMetricsManagers;
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
@@ -75,7 +71,7 @@ private:
     size_t mBufferSize = 0;
 
     /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
-       the logs to dropbox if true. */
+       the logs to callback clients if true. */
     void flushIfNecessary(const EventMetricData& eventMetricData);
 
     /* Append event metric data to StatsLogReport. */

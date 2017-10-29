@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"„Bluetooth“ garso LDAC kodekas: atkūrimo kokybė"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Pasirinkite „Bluetooth“ garso LDAC kodeką:\natkūrimo kokybė"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Srautinis perdavimas: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"DNS naudojant TLS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Jei parinktis įgalinta, bandykite pateikti DNS užklausą naudojant TLS 853 prievadu."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Jei ši parinktis įgalinta, „Wi‑Fi“ agresyviau perduos duomenų ryšiu į mobiliojo ryšio tinklą, kai „Wi‑Fi“ signalas silpnas"</string>

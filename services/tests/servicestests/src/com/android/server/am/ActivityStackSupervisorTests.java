@@ -51,9 +51,6 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private ActivityManagerService mService;
     private ActivityStackSupervisor mSupervisor;
     private ActivityStack mFullscreenStack;
@@ -87,15 +84,14 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testReplacingTaskInPinnedStack() throws Exception {
-        final TaskRecord firstTask = createTask(
-                mSupervisor, testActivityComponent, mFullscreenStack);
-        final ActivityRecord firstActivity = createActivity(mService, testActivityComponent,
-                firstTask);
-        // Create a new task on the full screen stack
-        final TaskRecord secondTask = createTask(
-                mSupervisor, testActivityComponent, mFullscreenStack);
-        final ActivityRecord secondActivity = createActivity(mService, testActivityComponent,
-                secondTask);
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final TaskRecord firstTask = firstActivity.getTask();
+
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final TaskRecord secondTask = secondActivity.getTask();
+
         mSupervisor.setFocusStackUnchecked("testReplacingTaskInPinnedStack", mFullscreenStack);
 
         // Ensure full screen stack has both tasks.
@@ -142,10 +138,8 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      */
     @Test
     public void testStoppingActivityRemovedWhenResumed() throws Exception {
-        final TaskRecord firstTask = createTask(
-                mSupervisor, testActivityComponent, mFullscreenStack);
-        final ActivityRecord firstActivity = createActivity(mService, testActivityComponent,
-            firstTask);
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
         mSupervisor.mStoppingActivities.add(firstActivity);
 
         firstActivity.completeResumeLocked();

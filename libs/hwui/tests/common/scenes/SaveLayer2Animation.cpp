@@ -55,7 +55,7 @@ public:
             std::string offscreen = "offscreen line " + stri;
             std::unique_ptr<uint16_t[]> offtext = TestUtils::asciiToUtf16(offscreen.c_str());
             canvas.drawText(offtext.get(), 0, offscreen.length(), offscreen.length(),
-                    bounds.fLeft, top + padding, minikin::kBidi_Force_LTR, mBluePaint, nullptr);
+                    bounds.fLeft, top + padding, minikin::Bidi::FORCE_LTR, mBluePaint, nullptr);
             canvas.restore();
 
             canvas.drawRect(bounds.fLeft, top + padding, bounds.fRight,
@@ -63,7 +63,7 @@ public:
             std::string onscreen = "onscreen line " + stri;
             std::unique_ptr<uint16_t[]> ontext = TestUtils::asciiToUtf16(onscreen.c_str());
             canvas.drawText(ontext.get(), 0, onscreen.length(), onscreen.length(), bounds.fLeft,
-                    top + smallRectHeight - padding, minikin::kBidi_Force_LTR, mGreenPaint,
+                    top + smallRectHeight - padding, minikin::Bidi::FORCE_LTR, mGreenPaint,
                     nullptr);
         }
     }

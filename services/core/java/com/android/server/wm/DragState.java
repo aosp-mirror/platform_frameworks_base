@@ -430,7 +430,7 @@ class DragState {
             //    WindowManagerService, which will cause DragState#reset() while playing the
             //    cancel animation.
             reset();
-            mService.mDragState = null;
+            mService.mDragDropController.mDragState = null;
             return;
         }
         mAnimator = createCancelAnimationLocked();
@@ -447,7 +447,7 @@ class DragState {
 
         // free our resources and drop all the object references
         reset();
-        mService.mDragState = null;
+        mService.mDragDropController.mDragState = null;
     }
 
     void notifyMoveLw(float x, float y) {
@@ -658,7 +658,7 @@ class DragState {
             switch (msg.what) {
                 case MSG_ANIMATION_END:
                     synchronized (mService.mWindowMap) {
-                        if (mService.mDragState != DragState.this) {
+                        if (mService.mDragDropController.mDragState != DragState.this) {
                             Slog.wtf(TAG_WM, "mDragState is updated unexpectedly while " +
                                     "playing animation");
                             return;

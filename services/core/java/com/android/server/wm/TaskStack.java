@@ -1232,12 +1232,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         proto.write(ID, mStackId);
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).writeToProto(proto, TASKS);
+            mChildren.get(taskNdx).writeToProto(proto, TASKS, trim);
         }
         proto.write(FILLS_PARENT, mFillsParent);
         mBounds.writeToProto(proto, BOUNDS);

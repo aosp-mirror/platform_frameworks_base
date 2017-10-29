@@ -19,7 +19,7 @@ package android.service.autofill;
  * Helper class used to change a child view of a {@link android.widget.RemoteViews presentation
  * template} at runtime, using the values of fields contained in the screen.
  *
- * <p>Typically used by {@link CustomDescription} to provide a customized Save UI affordance.
+ * <p>Typically used by {@link CustomDescription} to provide a customized autofill save UI.
  */
 public interface Transformation {
 }

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import android.app.PendingIntent.CanceledException;
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
 import android.app.slice.SliceQuery;
-import android.app.slice.views.LargeSliceAdapter.SliceListView;
-import android.app.slice.views.SliceView.SliceModeView;
+import android.app.slice.widget.LargeSliceAdapter.SliceListView;
+import android.app.slice.widget.SliceView.SliceModeView;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;

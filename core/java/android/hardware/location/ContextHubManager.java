@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -27,6 +28,8 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * A class that exposes the Context hubs on a device to applications.
  *
@@ -38,7 +41,6 @@ import android.util.Log;
 @SystemApi
 @SystemService(Context.CONTEXTHUB_SERVICE)
 public final class ContextHubManager {
-
     private static final String TAG = "ContextHubManager";
 
     private final Looper mMainLooper;
@@ -256,6 +258,100 @@ public final class ContextHubManager {
     }
 
     /**
+     * Returns the list of context hubs in the system.
+     *
+     * @return the list of context hub informations
+     *
+     * @see ContextHubInfo
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public List<ContextHubInfo> getContextHubs() {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
+     * Loads a nanoapp at the specified Context Hub.
+     *
+     * After the nanoapp binary is successfully loaded at the specified hub, the nanoapp will be in
+     * the enabled state.
+     *
+     * @param hubInfo the hub to load the nanoapp on
+     * @param appBinary The app binary to load
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @see NanoAppBinary
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public ContextHubTransaction<Void> loadNanoApp(
+            ContextHubInfo hubInfo, NanoAppBinary appBinary) {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
+     * Unloads a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to unload the nanoapp from
+     * @param nanoAppId the app to unload
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public ContextHubTransaction<Void> unloadNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
+     * Enables a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to enable the nanoapp on
+     * @param nanoAppId the app to enable
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public ContextHubTransaction<Void> enableNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
+     * Disables a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to disable the nanoapp on
+     * @param nanoAppId the app to disable
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public ContextHubTransaction<Void> disableNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
+     * Requests a query for nanoapps loaded at the specified Context Hub.
+     *
+     * @param hubInfo the hub to query a list of nanoapps from
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    public ContextHubTransaction<List<NanoAppState>> queryNanoApps(ContextHubInfo hubInfo) {
+        throw new UnsupportedOperationException("TODO: Implement this");
+    }
+
+    /**
      * Set a callback to receive messages from the context hub
      *
      * @param callback Callback object
@@ -304,6 +400,29 @@ public final class ContextHubManager {
             mCallbackHandler = handler;
         }
         return 0;
+    }
+
+    /**
+     * Creates and registers a client and its callback with the Context Hub Service.
+     *
+     * A client is registered with the Context Hub Service for a specified Context Hub. When the
+     * registration succeeds, the client can send messages to nanoapps through the returned
+     * {@link ContextHubClient} object, and receive notifications through the provided callback.
+     *
+     * @param callback the notification callback to register
+     * @param hubInfo the hub to attach this client to
+     * @param handler the handler to invoke the callback, if null uses the current thread Looper
+     *
+     * @return the registered client object
+     *
+     * @see ContextHubClientCallback
+     *
+     * @hide
+     */
+    public ContextHubClient createClient(
+            ContextHubClientCallback callback, ContextHubInfo hubInfo, @Nullable Handler handler) {
+        throw new UnsupportedOperationException(
+                "TODO: Implement this, and throw an exception on error");
     }
 
     /**

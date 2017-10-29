@@ -78,7 +78,7 @@ int DrawFrameTask::drawFrame() {
 
 void DrawFrameTask::postAndWait() {
     AutoMutex _lock(mLock);
-    mRenderThread->queue(this);
+    mRenderThread->queue().post([this]() { run(); });
     mSignal.wait(mLock);
 }
 

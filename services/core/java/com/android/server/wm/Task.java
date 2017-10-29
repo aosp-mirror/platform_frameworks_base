@@ -725,13 +725,13 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER);
+        super.writeToProto(proto, WINDOW_CONTAINER, trim);
         proto.write(ID, mTaskId);
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken appWindowToken = mChildren.get(i);
-            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS);
+            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS, trim);
         }
         proto.write(FILLS_PARENT, mFillsParent);
         mBounds.writeToProto(proto, BOUNDS);

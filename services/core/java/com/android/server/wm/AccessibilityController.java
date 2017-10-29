@@ -74,12 +74,12 @@ import java.util.Set;
  */
 final class AccessibilityController {
 
-    private final WindowManagerService mWindowManagerService;
+    private final WindowManagerService mService;
 
     private static final float[] sTempFloats = new float[9];
 
     public AccessibilityController(WindowManagerService service) {
-        mWindowManagerService = service;
+        mService = service;
     }
 
     private DisplayMagnifier mDisplayMagnifier;
@@ -91,7 +91,7 @@ final class AccessibilityController {
             if (mDisplayMagnifier != null) {
                 throw new IllegalStateException("Magnification callbacks already set!");
             }
-            mDisplayMagnifier = new DisplayMagnifier(mWindowManagerService, callbacks);
+            mDisplayMagnifier = new DisplayMagnifier(mService, callbacks);
         } else {
             if  (mDisplayMagnifier == null) {
                 throw new IllegalStateException("Magnification callbacks already cleared!");
@@ -108,7 +108,7 @@ final class AccessibilityController {
                         "Windows for accessibility callback already set!");
             }
             mWindowsForAccessibilityObserver = new WindowsForAccessibilityObserver(
-                    mWindowManagerService, callback);
+                    mService, callback);
         } else {
             if (mWindowsForAccessibilityObserver == null) {
                 throw new IllegalStateException(
@@ -120,7 +120,7 @@ final class AccessibilityController {
 
     public void performComputeChangedWindowsNotLocked() {
         WindowsForAccessibilityObserver observer = null;
-        synchronized (mWindowManagerService) {
+        synchronized (mService) {
             observer = mWindowsForAccessibilityObserver;
         }
         if (observer != null) {
@@ -188,7 +188,7 @@ final class AccessibilityController {
         // Not relevant for the display magnifier.
 
         WindowsForAccessibilityObserver observer = null;
-        synchronized (mWindowManagerService) {
+        synchronized (mService) {
             observer = mWindowsForAccessibilityObserver;
         }
         if (observer != null) {
@@ -268,7 +268,7 @@ final class AccessibilityController {
         private final Region mTempRegion4 = new Region();
 
         private final Context mContext;
-        private final WindowManagerService mWindowManagerService;
+        private final WindowManagerService mService;
         private final MagnifiedViewport mMagnifedViewport;
         private final Handler mHandler;
 
@@ -281,9 +281,9 @@ final class AccessibilityController {
         public DisplayMagnifier(WindowManagerService windowManagerService,
                 MagnificationCallbacks callbacks) {
             mContext = windowManagerService.mContext;
-            mWindowManagerService = windowManagerService;
+            mService = windowManagerService;
             mCallbacks = callbacks;
-            mHandler = new MyHandler(mWindowManagerService.mH.getLooper());
+            mHandler = new MyHandler(mService.mH.getLooper());
             mMagnifedViewport = new MagnifiedViewport();
             mLongAnimationDuration = mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_longAnimTime);
@@ -292,7 +292,7 @@ final class AccessibilityController {
         public void setMagnificationSpecLocked(MagnificationSpec spec) {
             mMagnifedViewport.updateMagnificationSpecLocked(spec);
             mMagnifedViewport.recomputeBoundsLocked();
-            mWindowManagerService.scheduleAnimationLocked();
+            mService.scheduleAnimationLocked();
         }
 
         public void setForceShowMagnifiableBoundsLocked(boolean show) {
@@ -330,7 +330,7 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "Layers changed.");
             }
             mMagnifedViewport.recomputeBoundsLocked();
-            mWindowManagerService.scheduleAnimationLocked();
+            mService.scheduleAnimationLocked();
         }
 
         public void onRotationChangedLocked(DisplayContent displayContent) {
@@ -421,7 +421,7 @@ final class AccessibilityController {
         public MagnificationSpec getMagnificationSpecForWindowLocked(WindowState windowState) {
             MagnificationSpec spec = mMagnifedViewport.getMagnificationSpecLocked();
             if (spec != null && !spec.isNop()) {
-                if (!mWindowManagerService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
+                if (!mService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
                     return null;
                 }
             }
@@ -565,7 +565,7 @@ final class AccessibilityController {
                     portionOfWindowAlreadyAccountedFor.op(nonMagnifiedBounds, Region.Op.UNION);
                     windowBounds.op(portionOfWindowAlreadyAccountedFor, Region.Op.DIFFERENCE);
 
-                    if (mWindowManagerService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
+                    if (mService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
                         mMagnificationRegion.op(windowBounds, Region.Op.UNION);
                         mMagnificationRegion.op(availableBounds, Region.Op.INTERSECT);
                     } else {
@@ -632,7 +632,7 @@ final class AccessibilityController {
                 if (isMagnifyingLocked() || isForceShowingMagnifiableBoundsLocked()) {
                     setMagnifiedRegionBorderShownLocked(false, false);
                     final long delay = (long) (mLongAnimationDuration
-                            * mWindowManagerService.getWindowAnimationScaleLocked());
+                            * mService.getWindowAnimationScaleLocked());
                     Message message = mHandler.obtainMessage(
                             MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED);
                     mHandler.sendMessageDelayed(message, delay);
@@ -675,7 +675,7 @@ final class AccessibilityController {
             }
 
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-                final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+                final DisplayContent dc = mService.getDefaultDisplayContentLocked();
                 dc.forAllWindows((w) -> {
                     if (w.isOnScreen() && w.isVisibleLw()
                             && !w.mWinAnimator.mEnterAnimationPending) {
@@ -705,23 +705,25 @@ final class AccessibilityController {
                     SurfaceControl surfaceControl = null;
                     try {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                        surfaceControl = new SurfaceControl(mWindowManagerService.mFxSession,
-                                SURFACE_TITLE, mTempPoint.x, mTempPoint.y, PixelFormat.TRANSLUCENT,
-                                SurfaceControl.HIDDEN);
+                        surfaceControl = new SurfaceControl.Builder(mService.mFxSession)
+                                .setName(SURFACE_TITLE)
+                                .setSize(mTempPoint.x, mTempPoint.y) // not a typo
+                                .setFormat(PixelFormat.TRANSLUCENT)
+                                .build();
                     } catch (OutOfResourcesException oore) {
                         /* ignore */
                     }
                     mSurfaceControl = surfaceControl;
                     mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay()
                             .getLayerStack());
-                    mSurfaceControl.setLayer(mWindowManagerService.mPolicy.getWindowLayerFromTypeLw(
+                    mSurfaceControl.setLayer(mService.mPolicy.getWindowLayerFromTypeLw(
                             TYPE_MAGNIFICATION_OVERLAY)
                             * WindowManagerService.TYPE_LAYER_MULTIPLIER);
                     mSurfaceControl.setPosition(0, 0);
                     mSurface.copyFrom(mSurfaceControl);
 
                     mAnimationController = new AnimationController(context,
-                            mWindowManagerService.mH.getLooper());
+                            mService.mH.getLooper());
 
                     TypedValue typedValue = new TypedValue();
                     context.getTheme().resolveAttribute(R.attr.colorActivatedHighlight,
@@ -736,7 +738,7 @@ final class AccessibilityController {
                 }
 
                 public void setShown(boolean shown, boolean animate) {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         if (mShown == shown) {
                             return;
                         }
@@ -751,13 +753,13 @@ final class AccessibilityController {
                 @SuppressWarnings("unused")
                 // Called reflectively from an animator.
                 public int getAlpha() {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         return mAlpha;
                     }
                 }
 
                 public void setAlpha(int alpha) {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         if (mAlpha == alpha) {
                             return;
                         }
@@ -770,7 +772,7 @@ final class AccessibilityController {
                 }
 
                 public void setBounds(Region bounds) {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         if (mBounds.equals(bounds)) {
                             return;
                         }
@@ -783,7 +785,7 @@ final class AccessibilityController {
                 }
 
                 public void updateSize() {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
                         mSurfaceControl.setSize(mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
@@ -797,12 +799,12 @@ final class AccessibilityController {
                         mDirtyRect.setEmpty();
                     }
                     mInvalidated = true;
-                    mWindowManagerService.scheduleAnimationLocked();
+                    mService.scheduleAnimationLocked();
                 }
 
                 /** NOTE: This has to be called within a surface transaction. */
                 public void drawIfNeeded() {
-                    synchronized (mWindowManagerService.mWindowMap) {
+                    synchronized (mService.mWindowMap) {
                         if (!mInvalidated) {
                             return;
                         }
@@ -950,11 +952,11 @@ final class AccessibilityController {
                     } break;
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
-                        synchronized (mWindowManagerService.mWindowMap) {
+                        synchronized (mService.mWindowMap) {
                             if (mMagnifedViewport.isMagnifyingLocked()
                                     || isForceShowingMagnifiableBoundsLocked()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShownLocked(true, true);
-                                mWindowManagerService.scheduleAnimationLocked();
+                                mService.scheduleAnimationLocked();
                             }
                         }
                     } break;
@@ -995,7 +997,7 @@ final class AccessibilityController {
 
         private final Context mContext;
 
-        private final WindowManagerService mWindowManagerService;
+        private final WindowManagerService mService;
 
         private final Handler mHandler;
 
@@ -1006,9 +1008,9 @@ final class AccessibilityController {
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 WindowsForAccessibilityCallback callback) {
             mContext = windowManagerService.mContext;
-            mWindowManagerService = windowManagerService;
+            mService = windowManagerService;
             mCallback = callback;
-            mHandler = new MyHandler(mWindowManagerService.mH.getLooper());
+            mHandler = new MyHandler(mService.mH.getLooper());
             mRecurringAccessibilityEventsIntervalMillis = ViewConfiguration
                     .getSendRecurringAccessibilityEventsInterval();
             computeChangedWindows();
@@ -1034,11 +1036,11 @@ final class AccessibilityController {
             boolean windowsChanged = false;
             List<WindowInfo> windows = new ArrayList<WindowInfo>();
 
-            synchronized (mWindowManagerService.mWindowMap) {
+            synchronized (mService.mWindowMap) {
                 // Do not send the windows if there is no current focus as
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
-                if (mWindowManagerService.mCurrentFocus == null) {
+                if (mService.mCurrentFocus == null) {
                     return;
                 }
 
@@ -1320,7 +1322,7 @@ final class AccessibilityController {
         }
 
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
-            final DisplayContent dc = mWindowManagerService.getDefaultDisplayContentLocked();
+            final DisplayContent dc = mService.getDefaultDisplayContentLocked();
             dc.forAllWindows((w) -> {
                 if (w.isVisibleLw()) {
                     outWindows.put(w.mLayer, w);

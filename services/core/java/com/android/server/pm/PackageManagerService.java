@@ -3719,19 +3719,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * <p>
      * Currently, there are three cases in which this can occur:
      * <ol>
-     * <li>The calling application is a "special" process. The special
-     *     processes are {@link Process#SYSTEM_UID}, {@link Process#SHELL_UID}
-     *     and {@code 0}</li>
+     * <li>The calling application is a "special" process. Special processes
+     *     are those with a UID < {@link Process#FIRST_APPLICATION_UID}.</li>
      * <li>The calling application has the permission
-     *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}</li>
+     *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}.</li>
      * <li>The calling application is the default launcher on the
      *     system partition.</li>
      * </ol>
      */
     private boolean canViewInstantApps(int callingUid, int userId) {
-        if (callingUid == Process.SYSTEM_UID
-                || callingUid == Process.SHELL_UID
-                || callingUid == Process.ROOT_UID) {
+        if (callingUid < Process.FIRST_APPLICATION_UID) {
             return true;
         }
         if (mContext.checkCallingOrSelfPermission(

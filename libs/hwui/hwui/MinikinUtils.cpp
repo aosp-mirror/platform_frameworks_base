@@ -51,9 +51,8 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
     return minikinStyle;
 }
 
-minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
-        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
-        size_t bufSize) {
+minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
+        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
     minikin::Layout layout;
@@ -62,8 +61,9 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
     return layout;
 }
 
-float MinikinUtils::measureText(const Paint* paint, int bidiFlags, const Typeface* typeface,
-        const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
+float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
+        const Typeface* typeface, const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        float *advances) {
     minikin::MinikinPaint minikinPaint;
     minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
     const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);

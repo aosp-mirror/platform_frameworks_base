@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
 import android.app.slice.SliceQuery;
-import android.app.slice.views.SliceView.SliceModeView;
+import android.app.slice.widget.SliceView.SliceModeView;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
-import android.view.ViewGroup;
 
 import com.android.internal.R;
 
@@ -46,17 +45,14 @@ public class ShortcutView extends SliceModeView {
 
     public ShortcutView(Context context) {
         super(context);
-        mLargeIconSize = getContext().getResources()
-                .getDimensionPixelSize(R.dimen.slice_shortcut_size);
         mSmallIconSize = getContext().getResources().getDimensionPixelSize(R.dimen.slice_icon_size);
-        setLayoutParams(new ViewGroup.LayoutParams(mLargeIconSize, mLargeIconSize));
     }
 
     @Override
     public void setSlice(Slice slice) {
         removeAllViews();
         SliceItem sliceItem = SliceQuery.find(slice, SliceItem.TYPE_ACTION);
-        SliceItem iconItem = slice.getPrimaryIcon();
+        SliceItem iconItem = SliceQuery.getPrimaryIcon(slice);
         SliceItem textItem = sliceItem != null
                 ? SliceQuery.find(sliceItem, SliceItem.TYPE_TEXT)
                 : SliceQuery.find(slice, SliceItem.TYPE_TEXT);

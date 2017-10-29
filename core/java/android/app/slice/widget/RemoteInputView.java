@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import android.animation.Animator;
 import android.app.Notification;

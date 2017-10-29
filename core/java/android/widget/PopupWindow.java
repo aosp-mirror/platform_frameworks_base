@@ -2461,14 +2461,14 @@ public class PopupWindow {
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
                 enterTransition.addTarget(child);
-                child.setVisibility(View.INVISIBLE);
+                child.setTransitionVisibility(View.INVISIBLE);
             }
 
             TransitionManager.beginDelayedTransition(this, enterTransition);
 
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
-                child.setVisibility(View.VISIBLE);
+                child.setTransitionVisibility(View.VISIBLE);
             }
         }
 

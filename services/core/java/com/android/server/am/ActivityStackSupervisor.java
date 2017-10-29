@@ -110,6 +110,8 @@ import android.app.AppOpsManager;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration.ActivityType;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -279,7 +281,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     final ActivityManagerService mService;
 
+    /** The historial list of recent tasks including inactive tasks */
     RecentTasks mRecentTasks;
+
+    /** Helper class to abstract out logic for fetching the set of currently running tasks */
+    private RunningTasks mRunningTasks;
 
     final ActivityStackSupervisorHandler mHandler;
 
@@ -566,6 +572,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(looper);
+        mRunningTasks = createRunningTasks();
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mKeyguardController = new KeyguardController(service, this);
 
@@ -576,6 +583,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void setRecentTasks(RecentTasks recentTasks) {
         mRecentTasks = recentTasks;
         mRecentTasks.registerCallback(this);
+    }
+
+    @VisibleForTesting
+    RunningTasks createRunningTasks() {
+        return new RunningTasks();
     }
 
     /**
@@ -1152,43 +1164,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return null;
     }
 
-    void getTasksLocked(int maxNum, List<RunningTaskInfo> list, int callingUid, boolean allowed) {
-        // Gather all of the running tasks for each stack into runningTaskLists.
-        ArrayList<ArrayList<RunningTaskInfo>> runningTaskLists = new ArrayList<>();
-        final int numDisplays = mActivityDisplays.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                ArrayList<RunningTaskInfo> stackTaskList = new ArrayList<>();
-                runningTaskLists.add(stackTaskList);
-                stack.getTasksLocked(stackTaskList, callingUid, allowed);
-            }
-        }
-
-        // The lists are already sorted from most recent to oldest. Just pull the most recent off
-        // each list and add it to list. Stop when all lists are empty or maxNum reached.
-        while (maxNum > 0) {
-            long mostRecentActiveTime = Long.MIN_VALUE;
-            ArrayList<RunningTaskInfo> selectedStackList = null;
-            final int numTaskLists = runningTaskLists.size();
-            for (int stackNdx = 0; stackNdx < numTaskLists; ++stackNdx) {
-                ArrayList<RunningTaskInfo> stackTaskList = runningTaskLists.get(stackNdx);
-                if (!stackTaskList.isEmpty()) {
-                    final long lastActiveTime = stackTaskList.get(0).lastActiveTime;
-                    if (lastActiveTime > mostRecentActiveTime) {
-                        mostRecentActiveTime = lastActiveTime;
-                        selectedStackList = stackTaskList;
-                    }
-                }
-            }
-            if (selectedStackList != null) {
-                list.add(selectedStackList.remove(0));
-                --maxNum;
-            } else {
-                break;
-            }
-        }
+    @VisibleForTesting
+    void getRunningTasks(int maxNum, List<RunningTaskInfo> list,
+            @ActivityType int ignoreActivityType, @WindowingMode int ignoreWindowingMode,
+            int callingUid, boolean allowed) {
+        mRunningTasks.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode,
+                mActivityDisplays, callingUid, allowed);
     }
 
     ActivityInfo resolveActivity(Intent intent, ResolveInfo rInfo, int startFlags,
@@ -1584,7 +1565,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
         if (options != null) {
-            if (options.getLaunchTaskId() != INVALID_STACK_ID) {
+            // If a launch task id is specified, then ensure that the caller is the recents
+            // component or has the START_TASKS_FROM_RECENTS permission
+            if (options.getLaunchTaskId() != INVALID_TASK_ID
+                    && !mRecentTasks.isCallerRecents(callingUid)) {
                 final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
                         callingPid, callingUid);
                 if (startInTaskPerm == PERMISSION_DENIED) {
@@ -3692,7 +3676,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     public void writeToProto(ProtoOutputStream proto) {
-        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
             activityDisplay.writeToProto(proto, DISPLAYS);

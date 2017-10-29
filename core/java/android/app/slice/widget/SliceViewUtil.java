@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import android.annotation.ColorInt;
 import android.content.Context;

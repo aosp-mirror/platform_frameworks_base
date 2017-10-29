@@ -677,17 +677,18 @@ a     * Returns whether this child is on top of the window hierarchy.
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
      * {@link com.android.server.wm.proto.WindowContainerProto}.
      *
-     * @param protoOutputStream Stream to write the WindowContainer object to.
-     * @param fieldId           Field Id of the WindowContainer as defined in the parent message.
+     * @param proto     Stream to write the WindowContainer object to.
+     * @param fieldId   Field Id of the WindowContainer as defined in the parent message.
+     * @param trim      If true, reduce the amount of data written.
      * @hide
      */
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        final long token = protoOutputStream.start(fieldId);
-        super.writeToProto(protoOutputStream, CONFIGURATION_CONTAINER);
-        protoOutputStream.write(ORIENTATION, mOrientation);
-        protoOutputStream.end(token);
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+        final long token = proto.start(fieldId);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, trim);
+        proto.write(ORIENTATION, mOrientation);
+        proto.end(token);
     }
 
     private ForAllWindowsConsumerWrapper obtainConsumerWrapper(Consumer<WindowState> consumer) {

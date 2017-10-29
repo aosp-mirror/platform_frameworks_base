@@ -367,12 +367,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // currently has touch focus.
 
         // If there's a drag in flight, provide a pseudo-window to catch drag input
-        final boolean inDrag = (mService.mDragState != null);
+        final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
         if (inDrag) {
             if (DEBUG_DRAG) {
                 Log.d(TAG_WM, "Inserting drag window");
             }
-            final InputWindowHandle dragWindowHandle = mService.mDragState.getInputWindowHandle();
+            final InputWindowHandle dragWindowHandle =
+                    mService.mDragDropController.mDragState.getInputWindowHandle();
             if (dragWindowHandle != null) {
                 addInputWindowHandle(dragWindowHandle);
             } else {
@@ -689,7 +690,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
             if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
-                mService.mDragState.sendDragStartedIfNeededLw(w);
+                mService.mDragDropController.mDragState.sendDragStartedIfNeededLw(w);
             }
 
             addInputWindowHandle(

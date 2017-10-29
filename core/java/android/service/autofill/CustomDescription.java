@@ -32,7 +32,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 
 /**
- * Defines a custom description for the Save UI affordance.
+ * Defines a custom description for the autofill save UI.
  *
  * <p>This is useful when the autofill service needs to show a detailed view of what would be saved;
  * for example, when the screen contains a credit card, it could display a logo of the credit card
@@ -131,7 +131,7 @@ public final class CustomDescription implements Parcelable {
          * <p><b>Note:</b> If any child view of presentation triggers a
          * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent) pending intent
          * on click}, such {@link PendingIntent} must follow the restrictions below, otherwise
-         * it might not be triggered or the Save affordance might not be shown when its activity
+         * it might not be triggered or the autofill save UI might not be shown when its activity
          * is finished:
          * <ul>
          *   <li>It cannot be created with the {@link PendingIntent#FLAG_IMMUTABLE} flag.

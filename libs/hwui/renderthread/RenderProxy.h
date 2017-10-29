@@ -17,22 +17,16 @@
 #ifndef RENDERPROXY_H_
 #define RENDERPROXY_H_
 
-#include "RenderTask.h"
-
 #include <cutils/compiler.h>
-#include <EGL/egl.h>
 #include <SkBitmap.h>
-#include <utils/Condition.h>
 #include <utils/Functor.h>
-#include <utils/Mutex.h>
-#include <utils/Timers.h>
-#include <utils/StrongPointer.h>
+#include <gui/Surface.h>
 
-#include "../Caches.h"
 #include "../FrameMetricsObserver.h"
 #include "../IContextFactory.h"
-#include "CanvasContext.h"
+#include "hwui/Bitmap.h"
 #include "DrawFrameTask.h"
+#include "SwapBehavior.h"
 
 namespace android {
 class GraphicBuffer;
@@ -41,13 +35,11 @@ namespace uirenderer {
 
 class DeferredLayerUpdater;
 class RenderNode;
-class DisplayList;
-class Layer;
 class Rect;
 
 namespace renderthread {
 
-class ErrorChannel;
+class CanvasContext;
 class RenderThread;
 class RenderProxyBridge;
 
@@ -151,15 +143,7 @@ private:
 
     DrawFrameTask mDrawFrameTask;
 
-    Mutex mSyncMutex;
-    Condition mSyncCondition;
-
     void destroyContext();
-
-    void post(RenderTask* task);
-    void* postAndWait(MethodInvokeRenderTask* task);
-
-    static void* staticPostAndWait(MethodInvokeRenderTask* task);
 
     // Friend class to help with bridging
     friend class RenderProxyBridge;

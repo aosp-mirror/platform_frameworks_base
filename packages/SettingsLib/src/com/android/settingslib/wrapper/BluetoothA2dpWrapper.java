@@ -14,48 +14,56 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.bluetooth;
+package com.android.settingslib.wrapper;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
 
-public class BluetoothA2dpWrapperImpl implements BluetoothA2dpWrapper {
-
-    public static class Factory implements BluetoothA2dpWrapper.Factory {
-        @Override
-        public BluetoothA2dpWrapper getInstance(BluetoothA2dp service) {
-            return new BluetoothA2dpWrapperImpl(service);
-        }
-    }
+/**
+ * This class replicates some methods of android.bluetooth.BluetoothA2dp that are new and not
+ * yet available in our current version of Robolectric. It provides a thin wrapper to call the real
+ * methods in production and a mock in tests.
+ */
+public class BluetoothA2dpWrapper {
 
     private BluetoothA2dp mService;
 
-    public BluetoothA2dpWrapperImpl(BluetoothA2dp service) {
+    public BluetoothA2dpWrapper(BluetoothA2dp service) {
         mService = service;
     }
 
-    @Override
+    /**
+     * @return the real {@code BluetoothA2dp} object
+     */
     public BluetoothA2dp getService() {
         return mService;
     }
 
-    @Override
+    /**
+     * Wraps {@code BluetoothA2dp.getCodecStatus}
+     */
     public BluetoothCodecStatus getCodecStatus() {
         return mService.getCodecStatus();
     }
 
-    @Override
+    /**
+     * Wraps {@code BluetoothA2dp.supportsOptionalCodecs}
+     */
     public int supportsOptionalCodecs(BluetoothDevice device) {
         return mService.supportsOptionalCodecs(device);
     }
 
-    @Override
+    /**
+     * Wraps {@code BluetoothA2dp.getOptionalCodecsEnabled}
+     */
     public int getOptionalCodecsEnabled(BluetoothDevice device) {
         return mService.getOptionalCodecsEnabled(device);
     }
 
-    @Override
+    /**
+     * Wraps {@code BluetoothA2dp.setOptionalCodecsEnabled}
+     */
     public void setOptionalCodecsEnabled(BluetoothDevice device, int value) {
         mService.setOptionalCodecsEnabled(device, value);
     }

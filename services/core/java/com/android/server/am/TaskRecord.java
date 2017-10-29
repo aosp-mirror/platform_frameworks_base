@@ -112,6 +112,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
+import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.StackWindowController;
@@ -1058,6 +1059,36 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             }
         }
         return null;
+    }
+
+    /**
+     * Return the number of running activities, and the number of non-finishing/initializing
+     * activities in the provided {@param reportOut} respectively.
+     */
+    void getNumRunningActivities(TaskActivitiesReport reportOut) {
+        reportOut.reset();
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.finishing) {
+                continue;
+            }
+
+            reportOut.base = r;
+
+            // Increment the total number of non-finishing activities
+            reportOut.numActivities++;
+
+            if (reportOut.top == null || (reportOut.top.state == ActivityState.INITIALIZING)) {
+                reportOut.top = r;
+                // Reset the number of running activities until we hit the first non-initializing
+                // activity
+                reportOut.numRunning = 0;
+            }
+            if (r.app != null && r.app.thread != null) {
+                // Increment the number of actually running activities
+                reportOut.numRunning++;
+            }
+        }
     }
 
     boolean okToShowLocked() {
@@ -2205,7 +2236,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER);
+        super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         proto.write(ID, taskId);
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             ActivityRecord activity = mActivities.get(i);
@@ -2230,5 +2261,20 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         proto.write(MIN_WIDTH, mMinWidth);
         proto.write(MIN_HEIGHT, mMinHeight);
         proto.end(token);
+    }
+
+    /**
+     * See {@link #getNumRunningActivities(TaskActivitiesReport)}.
+     */
+    static class TaskActivitiesReport {
+        int numRunning;
+        int numActivities;
+        ActivityRecord top;
+        ActivityRecord base;
+
+        void reset() {
+            numRunning = numActivities = 0;
+            top = base = null;
+        }
     }
 }

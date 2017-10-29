@@ -59,9 +59,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyStore;
-import android.service.fingerprint.FingerprintActionStatsProto;
-import android.service.fingerprint.FingerprintServiceDumpProto;
-import android.service.fingerprint.FingerprintUserStatsProto;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -1374,11 +1371,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             final PerformanceStats normal = mPerformanceMap.get(userId);
             if (normal != null) {
                 final long countsToken = proto.start(FingerprintUserStatsProto.NORMAL);
-                proto.write(FingerprintActionStatsProto.ACCEPT, normal.accept);
-                proto.write(FingerprintActionStatsProto.REJECT, normal.reject);
-                proto.write(FingerprintActionStatsProto.ACQUIRE, normal.acquire);
-                proto.write(FingerprintActionStatsProto.LOCKOUT, normal.lockout);
-                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, normal.permanentLockout);
+                proto.write(PerformanceStatsProto.ACCEPT, normal.accept);
+                proto.write(PerformanceStatsProto.REJECT, normal.reject);
+                proto.write(PerformanceStatsProto.ACQUIRE, normal.acquire);
+                proto.write(PerformanceStatsProto.LOCKOUT, normal.lockout);
+                proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT, normal.permanentLockout);
                 proto.end(countsToken);
             }
 
@@ -1387,11 +1384,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             final PerformanceStats crypto = mCryptoPerformanceMap.get(userId);
             if (crypto != null) {
                 final long countsToken = proto.start(FingerprintUserStatsProto.CRYPTO);
-                proto.write(FingerprintActionStatsProto.ACCEPT, crypto.accept);
-                proto.write(FingerprintActionStatsProto.REJECT, crypto.reject);
-                proto.write(FingerprintActionStatsProto.ACQUIRE, crypto.acquire);
-                proto.write(FingerprintActionStatsProto.LOCKOUT, crypto.lockout);
-                proto.write(FingerprintActionStatsProto.LOCKOUT_PERMANENT, crypto.permanentLockout);
+                proto.write(PerformanceStatsProto.ACCEPT, crypto.accept);
+                proto.write(PerformanceStatsProto.REJECT, crypto.reject);
+                proto.write(PerformanceStatsProto.ACQUIRE, crypto.acquire);
+                proto.write(PerformanceStatsProto.LOCKOUT, crypto.lockout);
+                proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT, crypto.permanentLockout);
                 proto.end(countsToken);
             }
 

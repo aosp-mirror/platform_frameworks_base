@@ -118,10 +118,11 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
 
   size_t name_suffix_counter = 0;
   for (const InlineDeclaration& decl : visitor.GetInlineDeclarations()) {
-    auto new_doc = util::make_unique<xml::XmlResource>();
-    new_doc->file.config = doc->file.config;
-    new_doc->file.source = doc->file.source.WithLine(decl.el->line_number);
-    new_doc->file.name = doc->file.name;
+    // Create a new XmlResource with the same ResourceFile as the base XmlResource.
+    auto new_doc = util::make_unique<xml::XmlResource>(doc->file);
+
+    // Attach the line number.
+    new_doc->file.source.line = decl.el->line_number;
 
     // Modify the new entry name. We need to suffix the entry with a number to
     // avoid local collisions, then mangle it with the empty package, such that it won't show up

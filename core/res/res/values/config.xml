@@ -901,6 +901,18 @@
     <!-- Maximum color temperature, in Kelvin, supported by Night display. -->
     <integer name="config_nightDisplayColorTemperatureMax">4082</integer>
 
+    <string-array name="config_nightDisplayColorTemperatureCoefficientsNative">
+        <!-- R a-coefficient --> <item>0.0</item>
+        <!-- R b-coefficient --> <item>0.0</item>
+        <!-- R y-intercept --> <item>1.0</item>
+        <!-- G a-coefficient --> <item>-0.00000000962353339</item>
+        <!-- G b-coefficient --> <item>0.000153045476</item>
+        <!-- G y-intercept --> <item>0.390782778</item>
+        <!-- B a-coefficient --> <item>-0.0000000189359041</item>
+        <!-- B b-coefficient --> <item>0.000302412211</item>
+        <!-- B y-intercept --> <item>-0.198650895</item>
+    </string-array>
+
     <string-array name="config_nightDisplayColorTemperatureCoefficients">
         <!-- R a-coefficient --> <item>0.0</item>
         <!-- R b-coefficient --> <item>0.0</item>
@@ -2073,6 +2085,9 @@
     <!--  Maximum number of supported users -->
     <integer name="config_multiuserMaximumUsers">1</integer>
 
+    <!-- Maximum number of users we allow to be running at a time -->
+    <integer name="config_multiuserMaxRunningUsers">3</integer>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
@@ -2355,6 +2370,10 @@
     <!-- Determines whether recent tasks are provided to the user. Default device has recents
          property. If this is false, then the following recents config flags are ignored. -->
     <bool name="config_hasRecents">true</bool>
+
+    <!-- Component name for the activity that will be presenting the Recents UI, which will receive
+         special permissions for API related to fetching and presenting recent tasks. -->
+    <string name="config_recentsComponentName" translatable="false">com.android.systemui/.recents.RecentsActivity</string>
 
     <!-- The minimum number of visible recent tasks to be presented to the user through the
          SystemUI. Can be -1 if there is no minimum limit. -->

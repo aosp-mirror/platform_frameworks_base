@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"බ්ලූටූත් ශ්‍රව්‍ය LDAC පසුධාවන ගුණත්වය"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"බ්ලූටූත් ශ්‍රව්‍ය LDAC කොඩෙක් තෝරන්න:\nපසුධාවන ගුණත්වය"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ප්‍රවාහ කරමින්: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS හරහා DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"සබල නම්, 853 තොට මත TLS හරහා DNS උත්සාහ කරන්න."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"සබල විට Wi‑Fi සිග්නලය අඩු විට Wi‑Fi දත්ත සම්බන්ධතාවය ජංගම වෙත භාර දීමට වඩා ආක්‍රමණික වේ"</string>

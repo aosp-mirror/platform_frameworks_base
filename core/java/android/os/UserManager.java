@@ -319,6 +319,23 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
 
     /**
+     * Specifies if date, time and timezone configuring is disallowed.
+     *
+     * <p>When restriction is set by device owners, it applies globally - i.e., it disables date,
+     * time and timezone setting on the entire device and all users will be affected. When it's set
+     * by profile owners, it's only applied to the managed user.
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
+
+    /**
      * Specifies if a user is disallowed from configuring Tethering
      * & portable hotspots. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.

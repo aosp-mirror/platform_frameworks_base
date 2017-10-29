@@ -52,9 +52,6 @@ import static org.junit.Assert.assertEquals;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LaunchingTaskPositionerTests extends ActivityTestsBase {
-    private final ComponentName testActivityComponent =
-            ComponentName.unflattenFromString("com.foo/.BarActivity");
-
     private final static int STACK_WIDTH = 100;
     private final static int STACK_HEIGHT = 200;
 
@@ -81,7 +78,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
 
         // We must create the task after resizing to make sure it does not inherit the stack
         // dimensions on resize.
-        mTask = createTask(mService.mStackSupervisor, testActivityComponent, mStack);
+        mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
 
         mPositioner = new LaunchingTaskPositioner();
 
@@ -108,7 +105,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     @Test
     public void testLaunchNoWindowLayout() throws Exception {
         assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask, null /*layout*/,
-                null /*record*/, null /*options*/, mCurrent, mResult));
+                null /*record*/, null /*source*/, null /*options*/, mCurrent, mResult));
         assertEquals(getDefaultBounds(Gravity.NO_GRAVITY), mResult);
     }
 
@@ -121,7 +118,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     public void testlaunchEmptyWindowLayout() throws Exception {
         assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
                 new WindowLayout(0, 0, 0, 0, Gravity.NO_GRAVITY, 0, 0), null /*activity*/,
-                null /*options*/, mCurrent, mResult));
+                null /*source*/, null /*options*/, mCurrent, mResult));
         assertEquals(mResult, getDefaultBounds(Gravity.NO_GRAVITY));
     }
 
@@ -154,7 +151,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         try {
             assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
                     new WindowLayout(0, 0, 0, 0, gravity, 0, 0), null /*activity*/,
-                    null /*options*/, mCurrent, mResult));
+                    null /*source*/, null /*options*/, mCurrent, mResult));
             assertEquals(mResult, getDefaultBounds(gravity));
         } finally {
             mCurrent.setEmpty();
@@ -193,16 +190,15 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         // wrap with try/finally to ensure cleanup of activity/stack.
         try {
             // empty tasks are ignored in conflicts
-            activity = createActivity(mService, testActivityComponent, mTask);
+            activity = new ActivityBuilder(mService).setTask(mTask).build();
 
             // Create secondary task
-            secondTask = createTask(mService.mStackSupervisor, testActivityComponent,
-                    mStack);
+            secondTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
 
             // layout second task
             assertEquals(RESULT_CONTINUE,
                     mPositioner.onCalculateBounds(secondTask, layout, null /*activity*/,
-                            null /*options*/, mCurrent, mResult));
+                            null /*source*/, null /*options*/, mCurrent, mResult));
 
             if ((gravity & (Gravity.TOP | Gravity.RIGHT)) == (Gravity.TOP | Gravity.RIGHT)
                     || (gravity & (Gravity.BOTTOM | Gravity.RIGHT))

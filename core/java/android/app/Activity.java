@@ -5867,10 +5867,11 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns complete component name of this activity.
+     * Returns the complete component name of this activity.
      *
      * @return Returns the complete component name for this activity
      */
+    @Override
     public ComponentName getComponentName()
     {
         return mComponent;

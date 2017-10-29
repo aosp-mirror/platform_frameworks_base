@@ -278,8 +278,8 @@
     <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
     <string name="permgrouprequest_storage" msgid="7429669910547860218">"Дозволите &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да приступа сликама, медијским датотекама и датотекама на уређају"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Дозволите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима аудио снимке"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима звук"</string>
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Дозволите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снима слике и видео"</string>
     <string name="permgrouprequest_camera" msgid="810824326507258410">"Дозволите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима слике и видео снимке"</string>
@@ -1651,7 +1651,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. пословни <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. пословни имејл <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Да бисте откачили овај екран, додирните и задржите дугмад Назад и Преглед"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Ова апликација не може да се откачи"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екран је закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екран је откачен"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тражи PIN пре откачињања"</string>
@@ -1817,14 +1816,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Тестирање порука у хитним случајевима"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Одговори"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM картица није прилагођена за гласовне услуге"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM картица није подешена за гласовне услуге"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM картица није прилагођена за гласовне услуге"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Телефон није прилагођен за гласовне услуге"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Искачући прозор"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"и још <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Ова пречица захтева најновију апликацију"</string>

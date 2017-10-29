@@ -288,7 +288,18 @@ public class PermissionManagerService {
 
         final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         if (packages != null && packages.length > 0) {
-            final PackageParser.Package pkg = mPackageManagerInt.getPackage(packages[0]);
+            PackageParser.Package pkg = null;
+            for (String packageName : packages) {
+                pkg = mPackageManagerInt.getPackage(packageName);
+                if (pkg != null) {
+                    break;
+                }
+            }
+            if (pkg == null) {
+Slog.e(TAG, "TODD: No package not found; UID: " + uid);
+Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
+                return PackageManager.PERMISSION_DENIED;
+            }
             if (pkg.mSharedUserId != null) {
                 if (isCallerInstantApp) {
                     return PackageManager.PERMISSION_DENIED;
@@ -996,8 +1007,6 @@ public class PermissionManagerService {
         if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivileged()
                 && !platformPackage && platformPermission) {
             if (!hasPrivappWhitelistEntry(perm, pkg)) {
-                Slog.w(TAG, "Privileged permission " + perm + " for package "
-                        + pkg.packageName + " - not in privapp-permissions whitelist");
                 // Only report violations for apps on system image
                 if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
                     // it's only a reportable violation if the permission isn't explicitly denied
@@ -1005,12 +1014,16 @@ public class PermissionManagerService {
                             .getPrivAppDenyPermissions(pkg.packageName);
                     final boolean permissionViolation =
                             deniedPermissions == null || !deniedPermissions.contains(perm);
-                    if (permissionViolation
-                            && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                        if (mPrivappPermissionsViolations == null) {
-                            mPrivappPermissionsViolations = new ArraySet<>();
+                    if (permissionViolation) {
+                        Slog.w(TAG, "Privileged permission " + perm + " for package "
+                                + pkg.packageName + " - not in privapp-permissions whitelist");
+
+                        if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
+                            if (mPrivappPermissionsViolations == null) {
+                                mPrivappPermissionsViolations = new ArraySet<>();
+                            }
+                            mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
                         }
-                        mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
                     } else {
                         return false;
                     }

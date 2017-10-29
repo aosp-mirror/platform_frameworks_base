@@ -3702,16 +3702,16 @@ public final class PowerManagerService extends SystemService
 
             for (int i = 0; i < mUidState.size(); i++) {
                 final UidState state = mUidState.valueAt(i);
-                final long uIDToken = proto.start(PowerManagerServiceDumpProto.UIDS);
+                final long uIDToken = proto.start(PowerManagerServiceDumpProto.UID_STATES);
                 final int uid = mUidState.keyAt(i);
-                proto.write(PowerManagerServiceDumpProto.UidProto.UID, uid);
-                proto.write(PowerManagerServiceDumpProto.UidProto.UID_STRING, UserHandle.formatUid(uid));
-                proto.write(PowerManagerServiceDumpProto.UidProto.IS_ACTIVE, state.mActive);
-                proto.write(PowerManagerServiceDumpProto.UidProto.NUM_WAKE_LOCKS, state.mNumWakeLocks);
+                proto.write(PowerManagerServiceDumpProto.UidStateProto.UID, uid);
+                proto.write(PowerManagerServiceDumpProto.UidStateProto.UID_STRING, UserHandle.formatUid(uid));
+                proto.write(PowerManagerServiceDumpProto.UidStateProto.IS_ACTIVE, state.mActive);
+                proto.write(PowerManagerServiceDumpProto.UidStateProto.NUM_WAKE_LOCKS, state.mNumWakeLocks);
                 if (state.mProcState == ActivityManager.PROCESS_STATE_UNKNOWN) {
-                    proto.write(PowerManagerServiceDumpProto.UidProto.IS_PROCESS_STATE_UNKNOWN, true);
+                    proto.write(PowerManagerServiceDumpProto.UidStateProto.IS_PROCESS_STATE_UNKNOWN, true);
                 } else {
-                    proto.write(PowerManagerServiceDumpProto.UidProto.PROCESS_STATE,
+                    proto.write(PowerManagerServiceDumpProto.UidStateProto.PROCESS_STATE,
                             ActivityManager.processStateAmToProto(state.mProcState));
                 }
                 proto.end(uIDToken);

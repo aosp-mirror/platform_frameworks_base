@@ -117,9 +117,8 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void initialize(Surface* surface);
-    void updateSurface(Surface* surface);
-    bool pauseSurface(Surface* surface);
+    void setSurface(sp<Surface>&& surface);
+    bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
 
@@ -204,8 +203,6 @@ private:
     // TODO: Replace with something better for layer & other GL object
     // lifecycle tracking
     friend class android::uirenderer::RenderState;
-
-    void setSurface(Surface* window);
 
     void freePrefetchedLayers();
 

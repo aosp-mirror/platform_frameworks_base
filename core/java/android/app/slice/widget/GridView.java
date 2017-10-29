@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.app.slice.views;
+package android.app.slice.widget;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
-import android.app.slice.views.LargeSliceAdapter.SliceListView;
+import android.app.slice.widget.LargeSliceAdapter.SliceListView;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;

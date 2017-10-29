@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC аудиокодегі: ойнату сапасы"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth LDAC аудиокодегін таңдау:\nойнату сапасы"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляция: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"TLS бойынша DNS"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"Қосулы болса, 853 портында DNS жүйесін TLS протоколы арқылы қосып көріңіз."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Сымсыз дисплей растау опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi жур. тір. дең. арт., Wi‑Fi желісін таңдағышта әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Wi‑Fi сигналы әлсіз болғанда, деректер байланысы мәжбүрлі түрде мобильдік желіге ауысады"</string>

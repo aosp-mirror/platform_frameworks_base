@@ -1648,7 +1648,7 @@ public final class StrictMode {
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
         public void report(String message, Throwable allocationSite) {
-            onVmPolicyViolation(message, allocationSite);
+            onVmPolicyViolation(allocationSite);
         }
     }
 
@@ -1687,7 +1687,7 @@ public final class StrictMode {
             long instances = instanceCounts[i];
             if (instances > limit) {
                 Throwable tr = new InstanceCountViolation(klass, instances, limit);
-                onVmPolicyViolation(tr.getMessage(), tr);
+                onVmPolicyViolation(tr);
             }
         }
     }
@@ -1811,22 +1811,24 @@ public final class StrictMode {
 
     /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
-        onVmPolicyViolation(message, originStack);
+        Throwable t = new Throwable(message);
+        t.setStackTrace(originStack.getStackTrace());
+        onVmPolicyViolation(t);
     }
 
     /** @hide */
     public static void onWebViewMethodCalledOnWrongThread(Throwable originStack) {
-        onVmPolicyViolation(null, originStack);
+        onVmPolicyViolation(originStack);
     }
 
     /** @hide */
     public static void onIntentReceiverLeaked(Throwable originStack) {
-        onVmPolicyViolation(null, originStack);
+        onVmPolicyViolation(originStack);
     }
 
     /** @hide */
     public static void onServiceConnectionLeaked(Throwable originStack) {
-        onVmPolicyViolation(null, originStack);
+        onVmPolicyViolation(originStack);
     }
 
     /** @hide */
@@ -1835,7 +1837,7 @@ public final class StrictMode {
         if ((sVmPolicy.mask & PENALTY_DEATH_ON_FILE_URI_EXPOSURE) != 0) {
             throw new FileUriExposedException(message);
         } else {
-            onVmPolicyViolation(null, new Throwable(message));
+            onVmPolicyViolation(new Throwable(message));
         }
     }
 
@@ -1847,7 +1849,7 @@ public final class StrictMode {
                         + location
                         + " without permission grant flags; did you forget"
                         + " FLAG_GRANT_READ_URI_PERMISSION?";
-        onVmPolicyViolation(null, new Throwable(message));
+        onVmPolicyViolation(new Throwable(message));
     }
 
     /** @hide */
@@ -1877,10 +1879,9 @@ public final class StrictMode {
             } catch (UnknownHostException ignored) {
             }
         }
-
+        msg += HexDump.dumpHexString(firstPacket).trim() + " ";
         final boolean forceDeath = (sVmPolicy.mask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
-        onVmPolicyViolation(
-                HexDump.dumpHexString(firstPacket).trim(), new Throwable(msg), forceDeath);
+        onVmPolicyViolation(new Throwable(msg), forceDeath);
     }
 
     /** @hide */
@@ -1890,24 +1891,23 @@ public final class StrictMode {
 
     /** @hide */
     public static void onUntaggedSocket() {
-        onVmPolicyViolation(null, new Throwable(UNTAGGED_SOCKET_VIOLATION_MESSAGE));
+        onVmPolicyViolation(new Throwable(UNTAGGED_SOCKET_VIOLATION_MESSAGE));
     }
 
     // Map from VM violation fingerprint to uptime millis.
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<Integer, Long>();
 
     /** @hide */
-    public static void onVmPolicyViolation(String message, Throwable originStack) {
-        onVmPolicyViolation(message, originStack, false);
+    public static void onVmPolicyViolation(Throwable originStack) {
+        onVmPolicyViolation(originStack, false);
     }
 
     /** @hide */
-    public static void onVmPolicyViolation(
-            String message, Throwable originStack, boolean forceDeath) {
+    public static void onVmPolicyViolation(Throwable originStack, boolean forceDeath) {
         final boolean penaltyDropbox = (sVmPolicy.mask & PENALTY_DROPBOX) != 0;
         final boolean penaltyDeath = ((sVmPolicy.mask & PENALTY_DEATH) != 0) || forceDeath;
         final boolean penaltyLog = (sVmPolicy.mask & PENALTY_LOG) != 0;
-        final ViolationInfo info = new ViolationInfo(message, originStack, sVmPolicy.mask);
+        final ViolationInfo info = new ViolationInfo(originStack, sVmPolicy.mask);
 
         // Erase stuff not relevant for process-wide violations
         info.numAnimationsRunning = 0;
@@ -2225,7 +2225,7 @@ public final class StrictMode {
             // StrictMode not enabled.
             return;
         }
-        ((AndroidBlockGuardPolicy) policy).onUnbufferedIO();
+        policy.onUnbufferedIO();
     }
 
     /** @hide */
@@ -2235,7 +2235,7 @@ public final class StrictMode {
             // StrictMode not enabled.
             return;
         }
-        ((AndroidBlockGuardPolicy) policy).onReadFromDisk();
+        policy.onReadFromDisk();
     }
 
     /** @hide */
@@ -2245,7 +2245,7 @@ public final class StrictMode {
             // StrictMode not enabled.
             return;
         }
-        ((AndroidBlockGuardPolicy) policy).onWriteToDisk();
+        policy.onWriteToDisk();
     }
 
     @GuardedBy("StrictMode.class")
@@ -2324,7 +2324,7 @@ public final class StrictMode {
         long instances = VMDebug.countInstancesOfClass(klass, false);
         if (instances > limit) {
             Throwable tr = new InstanceCountViolation(klass, instances, limit);
-            onVmPolicyViolation(tr.getMessage(), tr);
+            onVmPolicyViolation(tr);
         }
     }
 
@@ -2336,9 +2336,6 @@ public final class StrictMode {
      */
     @TestApi
     public static final class ViolationInfo implements Parcelable {
-        /** Some VM violations provide additional information outside the throwable. */
-        @Nullable private final String mMessagePrefix;
-
         /** Stack and violation details. */
         @Nullable private final Throwable mThrowable;
 
@@ -2382,24 +2379,12 @@ public final class StrictMode {
 
         /** Create an uninitialized instance of ViolationInfo */
         public ViolationInfo() {
-            mMessagePrefix = null;
             mThrowable = null;
             policy = 0;
         }
 
-        /** Create an instance of ViolationInfo. */
+        /** Create an instance of ViolationInfo initialized from an exception. */
         public ViolationInfo(Throwable tr, int policy) {
-            this(null, tr, policy);
-        }
-
-        /**
-         * Create an instance of ViolationInfo initialized from an exception with a message prefix.
-         *
-         * @deprecated prefixes belong in the Throwable.
-         */
-        @Deprecated
-        public ViolationInfo(String messagePrefix, Throwable tr, int policy) {
-            this.mMessagePrefix = messagePrefix;
             this.mThrowable = tr;
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
@@ -2462,17 +2447,7 @@ public final class StrictMode {
         }
 
         /**
-         * A handful of VM violations provide extra information that should be presented before
-         * {@link #getViolationDetails()}.
-         *
-         * @hide
-         */
-        @TestApi
-        public String getMessagePrefix() {
-            return mMessagePrefix != null ? mMessagePrefix : "";
-        }
-
-        /** If this violation has a useful stack trace.
+         * If this violation has a useful stack trace.
          *
          * @hide
          */
@@ -2552,7 +2527,6 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mMessagePrefix = in.readString();
             mThrowable = (Throwable) in.readSerializable();
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
@@ -2576,7 +2550,6 @@ public final class StrictMode {
         /** Save a ViolationInfo instance to a parcel. */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mMessagePrefix);
             dest.writeSerializable(mThrowable);
             dest.writeInt(mBinderStack.size());
             for (Throwable t : mBinderStack) {

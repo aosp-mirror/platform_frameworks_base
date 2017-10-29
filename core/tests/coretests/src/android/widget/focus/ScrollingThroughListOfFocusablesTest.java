@@ -54,6 +54,10 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
         mListView.setVerticalFadingEdgeEnabled(true);
         mListView.setFadingEdgeLength(10);
         ensureNotInTouchMode();
+
+        // focus the listview
+        mActivity.runOnUiThread(() -> mListView.requestFocus());
+        getInstrumentation().waitForIdleSync();
     }
 
     @Override

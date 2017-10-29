@@ -22,6 +22,7 @@
 #include "../JankTracker.h"
 #include "CacheManager.h"
 #include "TimeLord.h"
+#include "thread/ThreadBase.h"
 
 #include <GrContext.h>
 #include <cutils/compiler.h>
@@ -31,7 +32,9 @@
 #include <utils/Thread.h>
 
 #include <memory>
+#include <mutex>
 #include <set>
+#include <thread/ThreadBase.h>
 
 namespace android {
 
@@ -47,25 +50,9 @@ class TestUtils;
 namespace renderthread {
 
 class CanvasContext;
-class DispatchFrameCallbacks;
 class EglManager;
 class RenderProxy;
 class VulkanManager;
-
-class TaskQueue {
-public:
-    TaskQueue();
-
-    RenderTask* next();
-    void queue(RenderTask* task);
-    void queueAtFront(RenderTask* task);
-    RenderTask* peek();
-    void remove(RenderTask* task);
-
-private:
-    RenderTask* mHead;
-    RenderTask* mTail;
-};
 
 // Mimics android.view.Choreographer.FrameCallback
 class IFrameCallback {
@@ -76,16 +63,11 @@ protected:
     ~IFrameCallback() {}
 };
 
-class ANDROID_API RenderThread : public Thread {
+class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
 public:
-    // RenderThread takes complete ownership of tasks that are queued
-    // and will delete them after they are run
-    ANDROID_API void queue(RenderTask* task);
-    ANDROID_API void queueAndWait(RenderTask* task);
-    ANDROID_API void queueAtFront(RenderTask* task);
-    void queueAt(RenderTask* task, nsecs_t runAtNs);
-    void remove(RenderTask* task);
+
+    WorkQueue& queue() { return ThreadBase::queue(); }
 
     // Mimics android.view.Choreographer
     void postFrameCallback(IFrameCallback* callback);
@@ -140,17 +122,6 @@ private:
     void dispatchFrameCallbacks();
     void requestVsync();
 
-    // Returns the next task to be run. If this returns NULL nextWakeup is set
-    // to the time to requery for the nextTask to run. mNextWakeup is also
-    // set to this time
-    RenderTask* nextTask(nsecs_t* nextWakeup);
-
-    sp<Looper> mLooper;
-    Mutex mLock;
-
-    nsecs_t mNextWakeup;
-    TaskQueue mQueue;
-
     DisplayInfo mDisplayInfo;
 
     DisplayEventReceiver* mDisplayEventReceiver;
@@ -162,7 +133,6 @@ private:
     // the previous one
     std::set<IFrameCallback*> mPendingRegistrationFrameCallbacks;
     bool mFrameCallbackTaskPending;
-    DispatchFrameCallbacks* mFrameCallbackTask;
 
     TimeLord mTimeLord;
     RenderState* mRenderState;

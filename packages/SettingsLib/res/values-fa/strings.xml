@@ -209,6 +209,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏کدک LDAC صوتی بلوتوث: کیفیت پخش"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏انتخاب کدک LDAC صوتی بلوتوث:\nکیفیت پخش"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"پخش جریانی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="dns_tls" msgid="6773814174391131955">"‏DNS ازطریق امنیت لایه انتقال"</string>
+    <string name="dns_tls_summary" msgid="3692494150251071380">"‏درصورت فعال بودن، DNS ازطریق امنیت لایه انتقال در درگاه ۸۵۳ انجام شود."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"‏زمانی‌که فعال است، درشرایطی که سیگنال Wi-Fi ضعیف باشد، Wi‑Fi برای واگذاری اتصال داده به دستگاه همراه قوی‌تر عمل خواهد کرد."</string>

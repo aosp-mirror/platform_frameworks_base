@@ -585,9 +585,11 @@ final class ColorFade {
                     } else {
                         flags = SurfaceControl.OPAQUE | SurfaceControl.HIDDEN;
                     }
-                    mSurfaceControl = new SurfaceControl(mSurfaceSession,
-                            "ColorFade", mDisplayWidth, mDisplayHeight,
-                            PixelFormat.OPAQUE, flags);
+                    mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                            .setName("ColorFade")
+                            .setSize(mDisplayWidth, mDisplayHeight)
+                            .setFlags(flags)
+                            .build();
                 } catch (OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
                     return false;

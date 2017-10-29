@@ -30,6 +30,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
+import com.android.settingslib.wrapper.BluetoothA2dpWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private Context mContext;
 
     private BluetoothA2dp mService;
-    BluetoothA2dpWrapper.Factory mWrapperFactory;
     private BluetoothA2dpWrapper mServiceWrapper;
     private boolean mIsProfileReady;
 
@@ -67,7 +67,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (V) Log.d(TAG,"Bluetooth service connected");
             mService = (BluetoothA2dp) proxy;
-            mServiceWrapper = mWrapperFactory.getInstance(mService);
+            mServiceWrapper = new BluetoothA2dpWrapper(mService);
             // We just bound to the service, so refresh the UI for any connected A2DP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
             while (!deviceList.isEmpty()) {
@@ -101,14 +101,13 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mWrapperFactory = new BluetoothA2dpWrapperImpl.Factory();
         mLocalAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
     }
 
     @VisibleForTesting
-    void setWrapperFactory(BluetoothA2dpWrapper.Factory factory) {
-        mWrapperFactory = factory;
+    void setBluetoothA2dpWrapper(BluetoothA2dpWrapper wrapper) {
+        mServiceWrapper = wrapper;
     }
 
     public boolean isConnectable() {

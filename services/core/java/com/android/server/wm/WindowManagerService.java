@@ -392,13 +392,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
         @Override
-        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, new String[] {"-a"});
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            doDump(fd, pw, new String[] {"-a"}, asProto);
         }
 
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            doDump(fd, pw, args);
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            doDump(fd, pw, args, asProto);
         }
     };
 
@@ -751,7 +752,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     TaskPositioner mTaskPositioner;
     final DragDropController mDragDropController = new DragDropController();
-    DragState mDragState = null;
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
@@ -788,7 +788,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = false;
             try {
-                if (mDragState == null) {
+                if (mDragDropController.mDragState == null) {
                     // The drag has ended but the clean-up message has not been processed by
                     // window manager. Drop events that occur after this until window manager
                     // has a chance to clean-up the input handle.
@@ -827,12 +827,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + newX + "," + newY);
                             mMuteInput = true;
                             synchronized (mWindowMap) {
-                                endDrag = mDragState.notifyDropLw(newX, newY);
+                                endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
                                 // move the surface and tell the involved window(s) where we are
-                                mDragState.notifyMoveLw(newX, newY);
+                                mDragDropController.mDragState.notifyMoveLw(newX, newY);
                             }
                         }
                     } break;
@@ -842,7 +842,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + newX + "," + newY);
                         mMuteInput = true;
                         synchronized (mWindowMap) {
-                            endDrag = mDragState.notifyDropLw(newX, newY);
+                            endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
                         }
                     } break;
 
@@ -859,7 +859,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         synchronized (mWindowMap) {
                             // endDragLw will post back to looper to dispose the receiver
                             // since we still need the receiver for the last finishInputEvent.
-                            mDragState.endDragLw();
+                            mDragDropController.mDragState.endDragLw();
                         }
                         mStylusButtonDownAtStart = false;
                         mIsStartEvent = true;
@@ -6430,9 +6430,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void writeToProtoLocked(ProtoOutputStream proto) {
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at
+     * {@link com.android.server.wm.proto.WindowManagerServiceProto}.
+     *
+     * @param proto     Stream to write the WindowContainer object to.
+     * @param trim      If true, reduce the amount of data written.
+     */
+    private void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
         mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER);
+        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
         if (mCurrentFocus != null) {
             mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
         }
@@ -6723,10 +6730,9 @@ public class WindowManagerService extends IWindowManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
-    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
-        boolean useProto = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -6737,8 +6743,6 @@ public class WindowManagerService extends IWindowManager.Stub
             opti++;
             if ("-a".equals(opt)) {
                 dumpAll = true;
-            } else if ("--proto".equals(opt)) {
-                useProto = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Window manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");
@@ -6768,7 +6772,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             synchronized (mWindowMap) {
-                writeToProtoLocked(proto);
+                writeToProtoLocked(proto, false /* trim */);
             }
             proto.flush();
             return;
@@ -7166,7 +7170,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            if (mDragState != null) {
+            if (mDragDropController.mDragState != null) {
                 // Drag cursor overrides the app cursor.
                 return;
             }

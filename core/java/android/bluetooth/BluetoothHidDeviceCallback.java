@@ -18,16 +18,24 @@ package android.bluetooth;
 
 import android.util.Log;
 
-/** @hide */
+/**
+ * The template class that applications use to call callback functions on
+ * events from the HID host. Callback functions are wrapped in this class and
+ * registered to the Android system during app registration.
+ *
+ * {@see BluetoothHidDevice}
+ *
+ * {@hide}
+ */
 public abstract class BluetoothHidDeviceCallback {
 
-    private static final String TAG = BluetoothHidDeviceCallback.class.getSimpleName();
+    private static final String TAG = "BluetoothHidDevCallback";
 
     /**
      * Callback called when application registration state changes. Usually it's
      * called due to either
-     * {@link BluetoothHidDevice#registerApp(String, String, String, byte, byte[],
-     * BluetoothHidDeviceCallback)}
+     * {@link BluetoothHidDevice#registerApp
+     * (String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
      * or
      * {@link BluetoothHidDevice#unregisterApp(BluetoothHidDeviceAppConfiguration)}
      * , but can be also unsolicited in case e.g. Bluetooth was turned off in
@@ -79,7 +87,7 @@ public abstract class BluetoothHidDeviceCallback {
     /**
      * Callback called when SET_REPORT is received from remote host. In case
      * received data are invalid, application shall respond with
-     * {@link BluetoothHidDevice#reportError(BluetoothDevice)}.
+     * {@link BluetoothHidDevice#reportError(BluetoothDevice, byte)}.
      *
      * @param type Report Type.
      * @param id Report Id.
