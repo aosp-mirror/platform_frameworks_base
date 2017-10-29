@@ -728,7 +728,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Buruta ili uondoe"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menyu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> iko katika hali ya picha ndani ya picha nyingine"</string>
-    <string name="pip_notification_message" msgid="5619512781514343311">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> itumie kipengele hiki, gonga ili ufungue mipangilio na uizime."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> itumie kipengele hiki, gusa ili ufungue mipangilio na uizime."</string>
     <string name="pip_play" msgid="1417176722760265888">"Cheza"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Sitisha"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Ruka ufikie inayofuata"</string>
