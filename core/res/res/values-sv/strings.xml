@@ -441,7 +441,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och kopplar den till fjärrenheter."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och parkopplar den till fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
@@ -449,7 +449,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter TV:n till och kopplar från TV:n från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"parkoppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på TV:n och godkänner alla anslutningar till kopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
