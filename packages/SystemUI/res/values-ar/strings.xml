@@ -169,7 +169,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> بالمائة."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"إعدادات النظام."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
-    <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطلاع على جميع الإشعارات"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطّلاع على جميع الإشعارات"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"محو الإشعار."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏تم تمكين GPS."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏الحصول على GPS."</string>
@@ -480,7 +480,7 @@
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"الحصول على الإشعارات بشكل أسرع"</string>
-    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطلاع عليها قبل إلغاء القفل"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطّلاع عليها قبل إلغاء القفل"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

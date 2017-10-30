@@ -506,7 +506,7 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tocca per disattivare l\'audio."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s comandi del volume mostrati. Fai scorrere verso l\'alto per ignorare."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Comandi del volume nascosti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Sintetizzatore interfaccia utente di sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Ottimizzatore UI di sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostra percentuale batteria incorporata"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
@@ -529,12 +529,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profilo di lavoro"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Il divertimento riservato a pochi eletti"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Il sintetizzatore interfaccia utente di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="got_it" msgid="2239653834387972602">"OK"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! Il sintetizzatore interfaccia utente di sistema è stato aggiunto alle impostazioni."</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Complimenti! L\'Ottimizzatore UI di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Rimuovi dalle impostazioni"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere il sintetizzatore interfaccia utente di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vuoi rimuovere l\'Ottimizzatore UI di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Applicazione non installata sul dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostra i secondi nell\'orologio"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra i secondi nell\'orologio nella barra di stato. Ciò potrebbe ridurre la durata della carica della batteria."</string>
