@@ -836,7 +836,6 @@ public class Environment {
      *         physically removed.
      */
     public static boolean isExternalStorageRemovable() {
-        if (isStorageDisabled()) return false;
         final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageRemovable(externalDir);
     }
@@ -875,7 +874,6 @@ public class Environment {
      *      boolean)
      */
     public static boolean isExternalStorageEmulated() {
-        if (isStorageDisabled()) return false;
         final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageEmulated(externalDir);
     }
@@ -951,9 +949,6 @@ public class Environment {
         return cur;
     }
 
-    private static boolean isStorageDisabled() {
-        return SystemProperties.getBoolean("config.disable_storage", false);
-    }
 
     /**
      * If the given path exists on emulated external storage, return the

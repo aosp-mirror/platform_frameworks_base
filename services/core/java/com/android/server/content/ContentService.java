@@ -163,10 +163,6 @@ public final class ContentService extends IContentService.Stub {
     };
 
     private SyncManager getSyncManager() {
-        if (SystemProperties.getBoolean("config.disable_network", false)) {
-            return null;
-        }
-
         synchronized(mSyncManagerLock) {
             try {
                 // Try to create the SyncManager, return null if it fails (e.g. the disk is full).
