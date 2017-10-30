@@ -25,13 +25,16 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicyManager;
+import android.net.TrafficStats;
 import android.os.Process;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
@@ -99,18 +102,66 @@ public final class ConnectivityController extends StateController implements
         }
     }
 
+    /**
+     * Test to see if running the given job on the given network is sane.
+     * <p>
+     * For example, if a job is trying to send 10MB over a 128Kbps EDGE
+     * connection, it would take 10.4 minutes, and has no chance of succeeding
+     * before the job times out, so we'd be insane to try running it.
+     */
+    private boolean isSane(JobStatus jobStatus, NetworkCapabilities capabilities) {
+        final long estimatedBytes = jobStatus.getEstimatedNetworkBytes();
+        if (estimatedBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+            // We don't know how large the job is; cross our fingers!
+            return true;
+        }
+        if (capabilities == null) {
+            // We don't know what the network is like; cross our fingers!
+            return true;
+        }
+
+        // We don't ask developers to differentiate between upstream/downstream
+        // in their size estimates, so test against the slowest link direction.
+        final long downstream = capabilities.getLinkDownstreamBandwidthKbps();
+        final long upstream = capabilities.getLinkUpstreamBandwidthKbps();
+        final long slowest;
+        if (downstream > 0 && upstream > 0) {
+            slowest = Math.min(downstream, upstream);
+        } else if (downstream > 0) {
+            slowest = downstream;
+        } else if (upstream > 0) {
+            slowest = upstream;
+        } else {
+            // We don't know what the network is like; cross our fingers!
+            return true;
+        }
+
+        final long estimatedMillis = ((estimatedBytes * DateUtils.SECOND_IN_MILLIS)
+                / (slowest * TrafficStats.KB_IN_BYTES / 8));
+        if (estimatedMillis > JobServiceContext.EXECUTING_TIMESLICE_MILLIS) {
+            // If we'd never finish before the timeout, we'd be insane!
+            Slog.w(TAG, "Estimated " + estimatedBytes + " bytes over " + slowest
+                    + " kbps network would take " + estimatedMillis + "ms; that's insane!");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
         final int jobUid = jobStatus.getSourceUid();
         final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
-        final NetworkInfo info = mConnManager.getActiveNetworkInfoForUid(jobUid, ignoreBlocked);
         final Network network = mConnManager.getActiveNetworkForUid(jobUid, ignoreBlocked);
+        final NetworkInfo info = mConnManager.getNetworkInfoForUid(network, jobUid, ignoreBlocked);
+
         final NetworkCapabilities capabilities = (network != null)
                 ? mConnManager.getNetworkCapabilities(network) : null;
 
+        final boolean connected = (info != null) && info.isConnected();
         final boolean validated = (capabilities != null)
                 && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-        final boolean connected = (info != null) && info.isConnected();
-        final boolean connectionUsable = connected && validated;
+        final boolean sane = isSane(jobStatus, capabilities);
+        final boolean connectionUsable = connected && validated && sane;
 
         final boolean metered = connected && (capabilities != null)
                 && !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);

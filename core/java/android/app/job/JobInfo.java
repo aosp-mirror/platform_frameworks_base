@@ -18,6 +18,7 @@ package android.app.job;
 
 import static android.util.TimeUtils.formatDuration;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,9 @@ public class JobInfo implements Parcelable {
     public static final int NETWORK_TYPE_NOT_ROAMING = 3;
     /** This job requires metered connectivity such as most cellular data networks. */
     public static final int NETWORK_TYPE_METERED = 4;
+
+    /** Sentinel value indicating that bytes are unknown. */
+    public static final int NETWORK_BYTES_UNKNOWN = -1;
 
     /**
      * Amount of backoff a job has initially by default, in milliseconds.
@@ -250,6 +254,7 @@ public class JobInfo implements Parcelable {
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
     private final int networkType;
+    private final long networkBytes;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -384,6 +389,18 @@ public class JobInfo implements Parcelable {
      */
     public @NetworkType int getNetworkType() {
         return networkType;
+    }
+
+    /**
+     * Return the estimated size of network traffic that will be performed by
+     * this job, in bytes.
+     *
+     * @return Estimated size of network traffic, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setEstimatedNetworkBytes(long)
+     */
+    public @BytesLong long getEstimatedNetworkBytes() {
+        return networkBytes;
     }
 
     /**
@@ -524,6 +541,9 @@ public class JobInfo implements Parcelable {
         if (networkType != j.networkType) {
             return false;
         }
+        if (networkBytes != j.networkBytes) {
+            return false;
+        }
         if (minLatencyMillis != j.minLatencyMillis) {
             return false;
         }
@@ -582,6 +602,7 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + Boolean.hashCode(hasEarlyConstraint);
         hashCode = 31 * hashCode + Boolean.hashCode(hasLateConstraint);
         hashCode = 31 * hashCode + networkType;
+        hashCode = 31 * hashCode + Long.hashCode(networkBytes);
         hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
         hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
         hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
@@ -612,6 +633,7 @@ public class JobInfo implements Parcelable {
         triggerContentUpdateDelay = in.readLong();
         triggerContentMaxDelay = in.readLong();
         networkType = in.readInt();
+        networkBytes = in.readLong();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -640,6 +662,7 @@ public class JobInfo implements Parcelable {
         triggerContentUpdateDelay = b.mTriggerContentUpdateDelay;
         triggerContentMaxDelay = b.mTriggerContentMaxDelay;
         networkType = b.mNetworkType;
+        networkBytes = b.mNetworkBytes;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -677,6 +700,7 @@ public class JobInfo implements Parcelable {
         out.writeLong(triggerContentUpdateDelay);
         out.writeLong(triggerContentMaxDelay);
         out.writeInt(networkType);
+        out.writeLong(networkBytes);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -810,6 +834,7 @@ public class JobInfo implements Parcelable {
         // Requirements.
         private int mConstraintFlags;
         private int mNetworkType;
+        private long mNetworkBytes = NETWORK_BYTES_UNKNOWN;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
         private long mTriggerContentMaxDelay = -1;
@@ -927,6 +952,43 @@ public class JobInfo implements Parcelable {
          */
         public Builder setRequiredNetworkType(@NetworkType int networkType) {
             mNetworkType = networkType;
+            return this;
+        }
+
+        /**
+         * Set the estimated size of network traffic that will be performed by
+         * this job, in bytes.
+         * <p>
+         * Apps are encouraged to provide values that are as accurate as
+         * possible, but when the exact size isn't available, an
+         * order-of-magnitude estimate can be provided instead. Here are some
+         * specific examples:
+         * <ul>
+         * <li>A job that is backing up a photo knows the exact size of that
+         * photo, so it should provide that size as the estimate.
+         * <li>A job that refreshes top news stories wouldn't know an exact
+         * size, but if the size is expected to be consistently around 100KB, it
+         * can provide that order-of-magnitude value as the estimate.
+         * <li>A job that synchronizes email could end up using an extreme range
+         * of data, from under 1KB when nothing has changed, to dozens of MB
+         * when there are new emails with attachments. Jobs that cannot provide
+         * reasonable estimates should leave this estimated value undefined.
+         * </ul>
+         * Note that the system may choose to delay jobs with large network
+         * usage estimates when the device has a poor network connection, in
+         * order to save battery.
+         *
+         * @param networkBytes The estimated size of network traffic that will
+         *            be performed by this job, in bytes. This value only
+         *            reflects the traffic that will be performed by the base
+         *            job; if you're using {@link JobWorkItem} then you also
+         *            need to define the network traffic used by each work item
+         *            when constructing them.
+         * @see JobInfo#getEstimatedNetworkBytes()
+         * @see JobWorkItem#JobWorkItem(android.content.Intent, long)
+         */
+        public Builder setEstimatedNetworkBytes(@BytesLong long networkBytes) {
+            mNetworkBytes = networkBytes;
             return this;
         }
 
@@ -1155,6 +1217,11 @@ public class JobInfo implements Parcelable {
                     mTriggerContentUris == null) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
+            }
+            // Check that network estimates require network type
+            if (mNetworkBytes > 0 && mNetworkType == NETWORK_TYPE_NONE) {
+                throw new IllegalArgumentException(
+                        "Can't provide estimated network usage without requiring a network");
             }
             // Check that a deadline was not set on a periodic job.
             if (mIsPeriodic) {

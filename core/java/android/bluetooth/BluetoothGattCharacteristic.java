@@ -120,7 +120,7 @@ public class BluetoothGattCharacteristic implements Parcelable {
     public static final int WRITE_TYPE_DEFAULT = 0x02;
 
     /**
-     * Wrtite characteristic without requiring a response by the remote device
+     * Write characteristic without requiring a response by the remote device
      */
     public static final int WRITE_TYPE_NO_RESPONSE = 0x01;
 
