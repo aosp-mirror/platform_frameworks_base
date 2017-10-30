@@ -4518,7 +4518,7 @@
         <attr name="maxHeight" />
         <!-- Makes the TextView be exactly this many lines tall. -->
         <attr name="lines" format="integer" min="0" />
-        <!-- Makes the TextView be exactly this many pixels tall.
+        <!-- Makes the TextView be exactly this tall.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="height" format="dimension" />
@@ -4535,7 +4535,7 @@
         <attr name="maxWidth" />
         <!-- Makes the TextView be exactly this many ems wide. -->
         <attr name="ems" format="integer" min="0" />
-        <!-- Makes the TextView be exactly this many pixels wide.
+        <!-- Makes the TextView be exactly this wide.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="width" format="dimension" />
