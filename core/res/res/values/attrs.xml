@@ -8673,6 +8673,11 @@
         <!-- The index of the font in the tcc font file. If the font file referenced is not in the
          tcc format, this attribute needs not be specified. -->
         <attr name="ttcIndex" format="integer" />
+        <!-- The variation settings to be applied to the font. The string should be in the following
+         format: "'tag1' value1, 'tag2' value2, ...". If the default variation settings should be
+         used, or the font used does not support variation settings, this attribute needs not be
+         specified. -->
+        <attr name="fontVariationSettings" format="string" />
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a <fontfamily> tag. -->

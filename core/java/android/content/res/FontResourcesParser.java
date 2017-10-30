@@ -80,13 +80,15 @@ public class FontResourcesParser {
         private int mWeight;
         private int mItalic;
         private int mTtcIndex;
+        private String mVariationSettings;
         private int mResourceId;
 
         public FontFileResourceEntry(@NonNull String fileName, int weight, int italic,
-                int ttcIndex) {
+                @Nullable String variationSettings, int ttcIndex) {
             mFileName = fileName;
             mWeight = weight;
             mItalic = italic;
+            mVariationSettings = variationSettings;
             mTtcIndex = ttcIndex;
         }
 
@@ -100,6 +102,10 @@ public class FontResourcesParser {
 
         public int getItalic() {
             return mItalic;
+        }
+
+        public @Nullable String getVariationSettings() {
+            return mVariationSettings;
         }
 
         public int getTtcIndex() {
@@ -211,6 +217,8 @@ public class FontResourcesParser {
                 Typeface.RESOLVE_BY_FONT_TABLE);
         int italic = array.getInt(R.styleable.FontFamilyFont_fontStyle,
                 Typeface.RESOLVE_BY_FONT_TABLE);
+        String variationSettings = array.getString(
+                R.styleable.FontFamilyFont_fontVariationSettings);
         int ttcIndex = array.getInt(R.styleable.FontFamilyFont_ttcIndex, 0);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
         array.recycle();
@@ -220,7 +228,7 @@ public class FontResourcesParser {
         if (filename == null) {
             return null;
         }
-        return new FontFileResourceEntry(filename, weight, italic, ttcIndex);
+        return new FontFileResourceEntry(filename, weight, italic, variationSettings, ttcIndex);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
