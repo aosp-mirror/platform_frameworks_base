@@ -1635,8 +1635,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan sebagian besar data latar belakang. Email, pesan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Data?"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -1231,7 +1231,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"아직 <xliff:g id="NAME">%s</xliff:g> 꺼내는 중…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"삭제하지 마세요."</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"설정"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"꺼내기"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"마운트 해제"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"둘러보기"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>
     <string name="ext_media_missing_message" msgid="5761133583368750174">"기기 다시 삽입"</string>
@@ -1626,7 +1626,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"이 화면을 고정 해제하려면 \'뒤로\' 및 \'최근 사용\'을 길게 터치하세요."</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"이 앱은 고정 해제할 수 없습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
@@ -1782,14 +1781,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"긴급 메시지 테스트"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"답장"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM에서 음성이 허용되지 않음"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM이 음성으로 프로비저닝되지 않음"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM에서 음성이 허용되지 않음"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"휴대전화에서 음성이 허용되지 않음"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"팝업 창"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g>개 더보기"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"바로가기를 사용하려면 최신 앱이 필요합니다"</string>
