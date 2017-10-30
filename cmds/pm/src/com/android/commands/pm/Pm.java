@@ -157,7 +157,8 @@ public final class Pm {
     }
 
     static final class MyShellCallback extends ShellCallback {
-        @Override public ParcelFileDescriptor onOpenOutputFile(String path, String seLinuxContext) {
+        @Override public ParcelFileDescriptor onOpenFile(String path, String seLinuxContext,
+                String mode) {
             File file = new File(path);
             final ParcelFileDescriptor fd;
             try {

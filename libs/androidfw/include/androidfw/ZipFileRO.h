@@ -80,6 +80,12 @@ public:
     static ZipFileRO* open(const char* zipFileName);
 
     /*
+     * Open an archive from an already open file descriptor.
+     */
+    static ZipFileRO* openFd(int fd, const char* debugFileName,
+        bool assume_ownership = true);
+
+    /*
      * Find an entry, by name.  Returns the entry identifier, or NULL if
      * not found.
      */

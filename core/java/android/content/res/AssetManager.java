@@ -28,8 +28,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
-import dalvik.annotation.optimization.FastNative;
-
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -694,7 +693,35 @@ public final class AssetManager implements AutoCloseable {
 
     private native final int addAssetPathNative(String path, boolean appAsLib);
 
-     /**
+    /**
+     * Add an additional set of assets to the asset manager from an already open
+     * FileDescriptor.  Not for use by applications.
+     * This does not give full AssetManager functionality for these assets,
+     * since the origin of the file is not known for purposes of sharing,
+     * overlay resolution, and other features.  However it does allow you
+     * to do simple access to the contents of the given fd as an apk file.
+     * Performs a dup of the underlying fd, so you must take care of still closing
+     * the FileDescriptor yourself (and can do that whenever you want).
+     * Returns the cookie of the added asset, or 0 on failure.
+     * {@hide}
+     */
+    public int addAssetFd(FileDescriptor fd, String debugPathName) {
+        return addAssetFdInternal(fd, debugPathName, false);
+    }
+
+    private int addAssetFdInternal(FileDescriptor fd, String debugPathName,
+            boolean appAsLib) {
+        synchronized (this) {
+            int res = addAssetFdNative(fd, debugPathName, appAsLib);
+            makeStringBlocks(mStringBlocks);
+            return res;
+        }
+    }
+
+    private native int addAssetFdNative(FileDescriptor fd, String debugPathName,
+            boolean appAsLib);
+
+    /**
      * Add a set of assets to overlay an already added set of assets.
      *
      * This is only intended for application resources. System wide resources

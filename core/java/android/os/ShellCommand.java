@@ -226,10 +226,10 @@ public abstract class ShellCommand {
      * Helper for just system services to ask the shell to open an output file.
      * @hide
      */
-    public ParcelFileDescriptor openOutputFileForSystem(String path) {
+    public ParcelFileDescriptor openFileForSystem(String path, String mode) {
         try {
-            ParcelFileDescriptor pfd = getShellCallback().openOutputFile(path,
-                    "u:r:system_server:s0");
+            ParcelFileDescriptor pfd = getShellCallback().openFile(path,
+                    "u:r:system_server:s0", mode);
             if (pfd != null) {
                 return pfd;
             }
