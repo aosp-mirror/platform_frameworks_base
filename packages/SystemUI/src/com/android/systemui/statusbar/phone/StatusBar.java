@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -7091,7 +7092,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
-        return mShowLockscreenNotifications && !mNotificationData.isAmbient(sbn.getKey());
+        return mShowLockscreenNotifications
+                && ((mDisabled2 & DISABLE2_NOTIFICATION_SHADE) == 0)
+                && !mNotificationData.isAmbient(sbn.getKey());
     }
 
     // extended in StatusBar
