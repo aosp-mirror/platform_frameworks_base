@@ -132,7 +132,7 @@ import dalvik.annotation.optimization.FastNative;
  *         <td>translateY</td>
  *     </tr>
  *     <tr>
- *         <td rowspan="8">&lt;path&gt;</td>
+ *         <td rowspan="9">&lt;path&gt;</td>
  *         <td>pathData</td>
  *     </tr>
  *     <tr>
@@ -152,6 +152,9 @@ import dalvik.annotation.optimization.FastNative;
  *     </tr>
  *     <tr>
  *         <td>trimPathStart</td>
+ *     </tr>
+ *     <tr>
+ *         <td>trimPathEnd</td>
  *     </tr>
  *     <tr>
  *         <td>trimPathOffset</td>
