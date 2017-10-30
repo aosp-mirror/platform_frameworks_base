@@ -184,7 +184,6 @@ cc_library_shared {
         "android/opengl/poly_clip.cpp", // TODO: .arm
         "android/opengl/util.cpp",
         "android_server_NetworkManagementSocketTagger.cpp",
-        "android_server_Watchdog.cpp",
         "android_ddm_DdmHandleNativeHeap.cpp",
         "android_backup_BackupDataInput.cpp",
         "android_backup_BackupDataOutput.cpp",
