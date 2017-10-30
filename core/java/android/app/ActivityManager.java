@@ -682,20 +682,21 @@ public class ActivityManager {
     }
 
     /**
-     * Input parameter to {@link android.app.IActivityManager#moveTaskToDockedStack} which
-     * specifies the position of the created docked stack at the top half of the screen if
+     * Parameter to {@link android.app.IActivityManager#setTaskWindowingModeSplitScreenPrimary}
+     * which specifies the position of the created docked stack at the top half of the screen if
      * in portrait mode or at the left half of the screen if in landscape mode.
      * @hide
      */
-    public static final int DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT = 0;
+    public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0;
 
     /**
-     * Input parameter to {@link android.app.IActivityManager#moveTaskToDockedStack} which
+     * Parameter to {@link android.app.IActivityManager#setTaskWindowingModeSplitScreenPrimary}
+     * which
      * specifies the position of the created docked stack at the bottom half of the screen if
      * in portrait mode or at the right half of the screen if in landscape mode.
      * @hide
      */
-    public static final int DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
+    public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
 
     /**
      * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates

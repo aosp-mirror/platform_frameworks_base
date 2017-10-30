@@ -1538,8 +1538,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
+            return mRecents.splitPrimaryTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                    ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
         } else {
             Divider divider = getComponent(Divider.class);
             if (divider != null && divider.isMinimized() && !divider.isHomeStackResizable()) {

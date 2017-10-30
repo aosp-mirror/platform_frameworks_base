@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -450,8 +450,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             // might change after a rotation and the original values will be invalid.
             mService.setDockedStackCreateStateLocked(
                     (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
-                            ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                            : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                            ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                            : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
                     null);
             mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
         }
@@ -708,7 +708,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 dockedStack.getRawBounds(mTmpRect2);
             }
             final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
-                    == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                    == SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(mTmpRect, bounds, mTmpRect2,
                     mDisplayContent.mDividerControllerLocked.getContentWidth(),
                     dockedOnTopOrLeft);

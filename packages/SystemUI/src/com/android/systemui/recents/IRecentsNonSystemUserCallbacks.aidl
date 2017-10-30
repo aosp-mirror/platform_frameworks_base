@@ -31,7 +31,7 @@ oneway interface IRecentsNonSystemUserCallbacks {
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents(int recentsGrowTarget);
     void onConfigurationChanged();
-    void dockTopTask(int topTaskId, int dragMode, int stackCreateMode,
+    void splitPrimaryTask(int topTaskId, int dragMode, int stackCreateMode,
             in Rect initialBounds);
     void onDraggingInRecents(float distanceFromTop);
     void onDraggingInRecentsEnded(float velocity);

@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -382,8 +382,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertSecurityException(expectCallable,
                 () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mService.moveTaskToDockedStack(0, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, true,
-                        true, new Rect()));
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(0,
+                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect()));
         assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
         assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
         assertSecurityException(expectCallable,

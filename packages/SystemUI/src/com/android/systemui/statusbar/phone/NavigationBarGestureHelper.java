@@ -26,7 +26,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.Dependency;
@@ -206,7 +205,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                     && mDivider.getView().getWindowManagerProxy().getDockSide() == DOCKED_INVALID) {
                 Rect initialBounds = null;
                 int dragMode = calculateDragMode();
-                int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                int createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
                 if (dragMode == DRAG_MODE_DIVIDER) {
                     initialBounds = new Rect();
                     mDivider.getView().calculateBoundsForPosition(mIsVertical
@@ -218,10 +217,10 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                             initialBounds);
                 } else if (dragMode == DRAG_MODE_RECENTS && mTouchDownX
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
-                    createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                    createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                boolean docked = mRecentsComponent.dockTopTask(dragMode, createMode, initialBounds,
-                        MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
+                boolean docked = mRecentsComponent.splitPrimaryTask(dragMode, createMode,
+                        initialBounds, MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
                 if (docked) {
                     mDragMode = dragMode;
                     if (mDragMode == DRAG_MODE_DIVIDER) {

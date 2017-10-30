@@ -16,7 +16,7 @@
 
 package android.app;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -203,10 +203,11 @@ public class ActivityOptions {
             "android.activity.taskOverlayCanResume";
 
     /**
-     * Where the docked stack should be positioned.
+     * Where the split-screen-primary stack should be positioned.
      * @hide
      */
-    private static final String KEY_DOCK_CREATE_MODE = "android:activity.dockCreateMode";
+    private static final String KEY_SPLIT_SCREEN_CREATE_MODE =
+            "android:activity.splitScreenCreateMode";
 
     /**
      * Determines whether to disallow the outgoing activity from entering picture-in-picture as the
@@ -292,7 +293,7 @@ public class ActivityOptions {
     @WindowConfiguration.ActivityType
     private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
-    private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
@@ -884,7 +885,8 @@ public class ActivityOptions {
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
-        mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+        mSplitScreenCreateMode = opts.getInt(KEY_SPLIT_SCREEN_CREATE_MODE,
+                SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
@@ -1194,13 +1196,13 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getDockCreateMode() {
-        return mDockCreateMode;
+    public int getSplitScreenCreateMode() {
+        return mSplitScreenCreateMode;
     }
 
     /** @hide */
-    public void setDockCreateMode(int dockCreateMode) {
-        mDockCreateMode = dockCreateMode;
+    public void setSplitScreenCreateMode(int splitScreenCreateMode) {
+        mSplitScreenCreateMode = splitScreenCreateMode;
     }
 
     /** @hide */
@@ -1369,7 +1371,7 @@ public class ActivityOptions {
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
-        b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
+        b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
         b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
                 mDisallowEnterPictureInPictureWhileLaunching);
         if (mAnimSpecs != null) {

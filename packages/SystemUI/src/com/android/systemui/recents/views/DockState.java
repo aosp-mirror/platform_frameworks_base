@@ -16,8 +16,8 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -71,19 +71,19 @@ public class DockState implements DropTarget {
     public static final DockState NONE = new DockState(DOCKED_INVALID, -1, 80, 255, HORIZONTAL,
             null, null, null);
     public static final DockState LEFT = new DockState(DOCKED_LEFT,
-            DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, VERTICAL,
+            SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, VERTICAL,
             new RectF(0, 0, 0.125f, 1), new RectF(0, 0, 0.125f, 1),
             new RectF(0, 0, 0.5f, 1));
     public static final DockState TOP = new DockState(DOCKED_TOP,
-            DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
+            SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
             new RectF(0, 0, 1, 0.125f), new RectF(0, 0, 1, 0.125f),
             new RectF(0, 0, 1, 0.5f));
     public static final DockState RIGHT = new DockState(DOCKED_RIGHT,
-            DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, VERTICAL,
+            SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, VERTICAL,
             new RectF(0.875f, 0, 1, 1), new RectF(0.875f, 0, 1, 1),
             new RectF(0.5f, 0, 1, 1));
     public static final DockState BOTTOM = new DockState(DOCKED_BOTTOM,
-            DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
+            SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA, 0, HORIZONTAL,
             new RectF(0, 0.875f, 1, 1), new RectF(0, 0.875f, 1, 1),
             new RectF(0, 0.5f, 1, 1));
 

@@ -90,7 +90,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void dockTopTask(int topTaskId, int dragMode, int stackCreateMode,
+    public void splitPrimaryTask(int topTaskId, int dragMode, int stackCreateMode,
             Rect initialBounds) throws RemoteException {
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = topTaskId;
@@ -144,7 +144,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
                     break;
                 case MSG_DOCK_TOP_TASK:
                     args = (SomeArgs) msg.obj;
-                    mImpl.dockTopTask(args.argi1, args.argi2, args.argi3 = 0,
+                    mImpl.splitPrimaryTask(args.argi1, args.argi2, args.argi3 = 0,
                             (Rect) args.arg1);
                     break;
                 case MSG_ON_DRAGGING_IN_RECENTS:

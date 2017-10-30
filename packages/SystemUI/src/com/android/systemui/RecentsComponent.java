@@ -28,7 +28,7 @@ public interface RecentsComponent {
     /**
      * Docks the top-most task and opens recents.
      */
-    boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds,
+    boolean splitPrimaryTask(int dragMode, int stackCreateMode, Rect initialBounds,
             int metricsDockAction);
 
     /**
