@@ -30,3 +30,13 @@ message AggStats {
 
     optional int64 max = 3;
 }
+
+/**
+ * Very basic data structure to represent Duration.
+ */
+message Duration {
+
+    optional int64 start_ms = 1;
+
+    optional int64 end_ms = 2;
+}

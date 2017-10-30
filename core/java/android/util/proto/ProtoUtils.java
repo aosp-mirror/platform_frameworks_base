@@ -17,6 +17,7 @@
 package android.util.proto;
 
 import android.util.AggStats;
+import android.util.Duration;
 
 /**
  * This class contains a list of helper functions to write common proto in
@@ -35,5 +36,16 @@ public class ProtoUtils {
         proto.write(AggStats.AVERAGE, average);
         proto.write(AggStats.MAX, max);
         proto.end(aggStatsToken);
+    }
+
+    /**
+     * Dump Duration to ProtoOutputStream
+     * @hide
+     */
+    public static void toDuration(ProtoOutputStream proto, long fieldId, long startMs, long endMs) {
+        final long token = proto.start(fieldId);
+        proto.write(Duration.START_MS, startMs);
+        proto.write(Duration.END_MS, endMs);
+        proto.end(token);
     }
 }

@@ -58,6 +58,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
+import com.android.server.am.proto.ActiveServicesProto;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -85,6 +86,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
 
 public final class ActiveServices {
@@ -633,7 +635,7 @@ public final class ActiveServices {
                         sb.append("Stopping service due to app idle: ");
                         UserHandle.formatUid(sb, service.appInfo.uid);
                         sb.append(" ");
-                        TimeUtils.formatDuration(service.createTime
+                        TimeUtils.formatDuration(service.createRealTime
                                 - SystemClock.elapsedRealtime(), sb);
                         sb.append(" ");
                         sb.append(compName);
@@ -3220,7 +3222,7 @@ public final class ActiveServices {
         info.uid = r.appInfo.uid;
         info.process = r.processName;
         info.foreground = r.isForeground;
-        info.activeSince = r.createTime;
+        info.activeSince = r.createRealTime;
         info.started = r.startRequested;
         info.clientCount = r.connections.size();
         info.crashCount = r.crashCount;
@@ -3574,7 +3576,7 @@ public final class ActiveServices {
                 pw.print("    app=");
                 pw.println(r.app);
                 pw.print("    created=");
-                TimeUtils.formatDuration(r.createTime, nowReal, pw);
+                TimeUtils.formatDuration(r.createRealTime, nowReal, pw);
                 pw.print(" started=");
                 pw.print(r.startRequested);
                 pw.print(" connections=");
@@ -3838,6 +3840,26 @@ public final class ActiveServices {
     ServiceDumper newServiceDumperLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         return new ServiceDumper(fd, pw, args, opti, dumpAll, dumpPackage);
+    }
+
+    protected void writeToProto(ProtoOutputStream proto) {
+        synchronized (mAm) {
+            int[] users = mAm.mUserController.getUsers();
+            for (int user : users) {
+                ServiceMap smap = mServiceMap.get(user);
+                if (smap == null) {
+                    continue;
+                }
+                long token = proto.start(ActiveServicesProto.SERVICES_BY_USERS);
+                proto.write(ActiveServicesProto.ServicesByUser.USER_ID, user);
+                ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByName;
+                for (int i=0; i<alls.size(); i++) {
+                    alls.valueAt(i).writeToProto(proto,
+                            ActiveServicesProto.ServicesByUser.SERVICE_RECORDS);
+                }
+                proto.end(token);
+            }
+        }
     }
 
     /**
