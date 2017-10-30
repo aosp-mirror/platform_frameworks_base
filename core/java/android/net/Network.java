@@ -16,14 +16,14 @@
 
 package android.net;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 
-import libcore.net.http.Dns;
-import libcore.net.http.HttpURLConnectionFactory;
+import com.android.okhttp.internalandroidapi.Dns;
+import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -34,11 +34,12 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.SocketFactory;
 
 /**
