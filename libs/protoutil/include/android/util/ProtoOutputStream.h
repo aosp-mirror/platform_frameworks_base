@@ -66,7 +66,7 @@ public:
     EncodedBuffer::iterator data();
     bool flush(int fd);
 
-    // Please don't use the following functions to dump protos unless you are sure about it.
+    // Please don't use the following functions to dump protos unless you are familiar with protobuf encoding.
     void writeRawVarint(uint64_t varint);
     void writeLengthDelimitedHeader(uint32_t id, size_t size);
     void writeRawByte(uint8_t byte);
@@ -94,6 +94,7 @@ private:
     inline void writeEnumImpl(uint32_t id, int val);
     inline void writeBoolImpl(uint32_t id, bool val);
     inline void writeUtf8StringImpl(uint32_t id, const char* val, size_t size);
+    inline void writeMessageBytesImpl(uint32_t id, const char* val, size_t size);
 
     bool compact();
     size_t editEncodedSize(size_t rawSize);
