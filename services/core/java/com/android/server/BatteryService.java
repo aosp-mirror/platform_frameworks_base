@@ -1163,8 +1163,10 @@ public final class BatteryService extends SystemService {
                 Arrays.asList(INSTANCE_VENDOR, INSTANCE_HEALTHD);
 
         private final IServiceNotification mNotification = new Notification();
+        // These variables are fixed after init.
         private Callback mCallback;
         private IHealthSupplier mHealthSupplier;
+        private String mInstanceName;
 
         private final Object mLastServiceSetLock = new Object();
         // Last IHealth service received.
@@ -1206,19 +1208,21 @@ public final class BatteryService extends SystemService {
 
             IServiceManager manager = managerSupplier.get();
             for (String name : sAllInstances) {
-                if (manager.getTransport(IHealth.kInterfaceName, name) ==
+                if (manager.getTransport(IHealth.kInterfaceName, name) !=
                         IServiceManager.Transport.EMPTY) {
-                    continue;
+                    mInstanceName = name;
+                    break;
                 }
-
-                manager.registerForNotifications(IHealth.kInterfaceName, name, mNotification);
-                Slog.i(TAG, "health: HealthServiceWrapper listening to instance " + name);
-                return;
             }
 
-            throw new NoSuchElementException(String.format(
-                    "No IHealth service instance among %s is available. Perhaps no permission?",
-                    sAllInstances.toString()));
+            if (mInstanceName == null) {
+                throw new NoSuchElementException(String.format(
+                        "No IHealth service instance among %s is available. Perhaps no permission?",
+                        sAllInstances.toString()));
+            }
+
+            manager.registerForNotifications(IHealth.kInterfaceName, mInstanceName, mNotification);
+            Slog.i(TAG, "health: HealthServiceWrapper listening to instance " + mInstanceName);
         }
 
         interface Callback {
@@ -1258,7 +1262,7 @@ public final class BatteryService extends SystemService {
             public final void onRegistration(String interfaceName, String instanceName,
                     boolean preexisting) {
                 if (!IHealth.kInterfaceName.equals(interfaceName)) return;
-                if (!sAllInstances.contains(instanceName)) return;
+                if (!mInstanceName.equals(instanceName)) return;
                 try {
                     // ensures the order of multiple onRegistration on different threads.
                     synchronized (mLastServiceSetLock) {
