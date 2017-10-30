@@ -373,7 +373,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 Log.d(TAG_WM, "Inserting drag window");
             }
             final InputWindowHandle dragWindowHandle =
-                    mService.mDragDropController.mDragState.getInputWindowHandle();
+                    mService.mDragDropController.getInputWindowHandleLocked();
             if (dragWindowHandle != null) {
                 addInputWindowHandle(dragWindowHandle);
             } else {
@@ -690,7 +690,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
             if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
-                mService.mDragDropController.mDragState.sendDragStartedIfNeededLocked(w);
+                mService.mDragDropController.sendDragStartedIfNeededLocked(w);
             }
 
             addInputWindowHandle(

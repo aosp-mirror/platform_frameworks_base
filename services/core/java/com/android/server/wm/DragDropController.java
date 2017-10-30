@@ -35,6 +35,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import com.android.server.input.InputWindowHandle;
 
 /**
  * Managing drag and drop operations initiated by View#startDragAndDrop.
@@ -54,7 +55,7 @@ class DragDropController {
      * The variable is cleared by {@code #onDragStateClosedLocked} which is invoked by DragState
      * itself, thus the variable can be null after calling DragState's methods.
      */
-    DragState mDragState;
+    private DragState mDragState;
 
     private WindowManagerService mService;
     private final Handler mHandler;
@@ -63,9 +64,17 @@ class DragDropController {
         return mDragState != null;
     }
 
+    InputWindowHandle getInputWindowHandleLocked() {
+        return mDragState.getInputWindowHandle();
+    }
+
     DragDropController(WindowManagerService service, Looper looper) {
         mService = service;
         mHandler = new DragHandler(service, looper);
+    }
+
+    void sendDragStartedIfNeededLocked(WindowState window) {
+        mDragState.sendDragStartedIfNeededLocked(window);
     }
 
     IBinder prepareDrag(SurfaceSession session, int callerPid,
@@ -254,6 +263,30 @@ class DragDropController {
 
             mDragState.mDragResult = false;
             mDragState.cancelDragLocked();
+        }
+    }
+
+    /**
+     * Handles motion events.
+     * @param keepHandling Whether if the drag operation is continuing or this is the last motion
+     *          event.
+     * @param newX X coordinate value in dp in the screen coordinate
+     * @param newY Y coordinate value in dp in the screen coordinate
+     */
+    void handleMotionEvent(boolean keepHandling, float newX, float newY) {
+        synchronized (mService.mWindowMap) {
+            if (!dragDropActiveLocked()) {
+                // The drag has ended but the clean-up message has not been processed by
+                // window manager. Drop events that occur after this until window manager
+                // has a chance to clean-up the input handle.
+                return;
+            }
+
+            if (keepHandling) {
+                mDragState.notifyMoveLocked(newX, newY);
+            } else {
+                mDragState.notifyDropLocked(newX, newY);
+            }
         }
     }
 

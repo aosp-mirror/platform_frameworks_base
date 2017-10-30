@@ -214,7 +214,7 @@ class DragState {
             mClientChannel = channels[1];
             mService.mInputManager.registerInputChannel(mServerChannel, null);
             mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
-                    mService.mH.getLooper(), mDragDropController, mService);
+                    mService.mH.getLooper(), mDragDropController);
 
             mDragApplicationHandle = new InputApplicationHandle(null);
             mDragApplicationHandle.name = "drag";
@@ -508,34 +508,33 @@ class DragState {
         mTargetWindow = touchedWin;
     }
 
-    // Find the drop target and tell it about the data.  Returns 'true' if we can immediately
-    // dispatch the global drag-ended message, 'false' if we need to wait for a
-    // result from the recipient.
-    boolean notifyDropLocked(float x, float y) {
+    /**
+     * Finds the drop target and tells it about the data. If the drop event is not sent to the
+     * target, invokes {@code endDragLocked} immediately.
+     */
+    void notifyDropLocked(float x, float y) {
         if (mAnimator != null) {
-            return false;
+            return;
         }
         mCurrentX = x;
         mCurrentY = y;
 
-        WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
+        final WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
 
         if (!isWindowNotified(touchedWin)) {
             // "drop" outside a valid window -- no recipient to apply a
             // timeout to, and we can send the drag-ended message immediately.
             mDragResult = false;
-            return true;
+            endDragLocked();
+            return;
         }
 
-        if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "sending DROP to " + touchedWin);
-        }
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "sending DROP to " + touchedWin);
 
         final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
 
-        DragAndDropPermissionsHandler dragAndDropPermissions = null;
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
-                (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
+        final DragAndDropPermissionsHandler dragAndDropPermissions;
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 && (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
             dragAndDropPermissions = new DragAndDropPermissionsHandler(
                     mData,
                     mUid,
@@ -543,13 +542,15 @@ class DragState {
                     mFlags & DRAG_FLAGS_URI_PERMISSIONS,
                     mSourceUserId,
                     targetUserId);
+        } else {
+            dragAndDropPermissions = null;
         }
         if (mSourceUserId != targetUserId){
             mData.fixUris(mSourceUserId);
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
-        DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
+        final DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
                 null, null, mData, dragAndDropPermissions, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
@@ -558,14 +559,13 @@ class DragState {
             mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, token);
         } catch (RemoteException e) {
             Slog.w(TAG_WM, "can't send drop notification to win " + touchedWin);
-            return true;
+            endDragLocked();
         } finally {
             if (myPid != touchedWin.mSession.mPid) {
                 evt.recycle();
             }
         }
         mToken = token;
-        return false;
     }
 
     private static DragEvent obtainDragEvent(WindowState win, int action,
