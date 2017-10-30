@@ -36,7 +36,7 @@ import java.util.List;
  */
 public abstract class RangingResultCallback {
     /** @hide */
-    @IntDef({STATUS_CODE_FAIL})
+    @IntDef({STATUS_CODE_FAIL, STATUS_CODE_FAIL_RTT_NOT_AVAILABLE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RangingOperationStatus {
     }
@@ -45,6 +45,14 @@ public abstract class RangingResultCallback {
      * A failure code for the whole ranging request operation. Indicates a failure.
      */
     public static final int STATUS_CODE_FAIL = 1;
+
+    /**
+     * A failure code for the whole ranging request operation. Indicates that the request failed due
+     * to RTT not being available - e.g. Wi-Fi was disabled. Use the
+     * {@link WifiRttManager#isAvailable()} and {@link WifiRttManager#ACTION_WIFI_RTT_STATE_CHANGED}
+     * to track RTT availability.
+     */
+    public static final int STATUS_CODE_FAIL_RTT_NOT_AVAILABLE = 2;
 
     /**
      * Called when a ranging operation failed in whole - i.e. no ranging operation to any of the

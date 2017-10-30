@@ -24,6 +24,7 @@ import android.net.wifi.rtt.RangingRequest;
  */
 interface IWifiRttManager
 {
+    boolean isAvailable();
     void startRanging(in IBinder binder, in String callingPackage, in RangingRequest request,
             in IRttCallback callback);
 }
