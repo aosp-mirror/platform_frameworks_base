@@ -63,6 +63,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.service.voice.IVoiceInteractionSession;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -453,7 +454,7 @@ interface IActivityManager {
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
     int createStackOnDisplay(int displayId);
     void setTaskResizeable(int taskId, int resizeableMode);
-    boolean requestAssistContextExtras(int requestType, in IResultReceiver receiver,
+    boolean requestAssistContextExtras(int requestType, in IAssistDataReceiver receiver,
             in Bundle receiverExtras, in IBinder activityToken,
             boolean focused, boolean newSessionId);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
@@ -617,7 +618,7 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
-    boolean requestAutofillData(in IResultReceiver receiver, in Bundle receiverExtras,
+    boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
                                 in IBinder activityToken, int flags);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
     int restartUserInBackground(int userId);
