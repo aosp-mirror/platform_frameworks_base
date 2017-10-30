@@ -30,6 +30,12 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -38,6 +44,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
@@ -332,7 +339,6 @@ import android.provider.Downloads;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
-import android.service.voice.VoiceInteractionSession;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -815,8 +821,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final ArrayList<PendingAssistExtras> mPendingAssistExtras
-            = new ArrayList<PendingAssistExtras>();
+    final ArrayList<PendingAssistExtras> mPendingAssistExtras = new ArrayList<>();
 
     /**
      * Process management.
@@ -3064,7 +3069,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void batterySendBroadcast(Intent intent) {
         synchronized (this) {
             broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                    AppOpsManager.OP_NONE, null, false, false,
+                    OP_NONE, null, false, false,
                     -1, SYSTEM_UID, UserHandle.USER_ALL);
         }
     }
@@ -4086,7 +4091,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord app = getProcessRecordLocked(aInfo.processName,
                     aInfo.applicationInfo.uid, true);
             if (app == null || app.instr == null) {
-                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setFlags(intent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
                 final int resolvedUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
                 // For ANR debugging to verify if the user activity is the one that actually
                 // launched.
@@ -4158,7 +4163,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String lastVers = Settings.Secure.getString(
                         resolver, Settings.Secure.LAST_SETUP_SHOWN);
                 if (vers != null && !vers.equals(lastVers)) {
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mActivityStarter.startActivityLocked(null, intent, null /*ephemeralIntent*/,
@@ -4705,6 +4710,49 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public int startRecentsActivity(IAssistDataReceiver assistDataReceiver, Bundle bOptions,
+            int userId) {
+        if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
+            String msg = "Permission Denial: startRecentsActivity() from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " not recent tasks package";
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        final int recentsUid = mRecentTasks.getRecentsComponentUid();
+        final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
+        final String recentsPackage = recentsComponent.getPackageName();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                // If provided, kick off the request for the assist data in the background before
+                // starting the activity
+                if (assistDataReceiver != null) {
+                    final AppOpsManager appOpsManager = (AppOpsManager)
+                            mContext.getSystemService(Context.APP_OPS_SERVICE);
+                    final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
+                            assistDataReceiver, recentsPackage);
+                    final AssistDataRequester requester = new AssistDataRequester(mContext, this,
+                            mWindowManager, appOpsManager, proxy, this,
+                            OP_ASSIST_STRUCTURE, OP_NONE);
+                    requester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
+                            true, false /* fetchScreenshots */, recentsUid, recentsPackage);
+                }
+
+                final Intent intent = new Intent();
+                intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.setComponent(recentsComponent);
+                return mActivityStarter.startActivityMayWait(null, recentsUid, recentsPackage,
+                        intent, null, null, null, null, null, 0, 0, null, null, null, bOptions,
+                        false, userId, null, "startRecentsActivity");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options)
             throws RemoteException {
         Slog.i(TAG, "Activity tried to startVoiceInteraction");
@@ -4850,7 +4898,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Intent.FLAG_ACTIVITY_FORWARD_RESULT|
                     Intent.FLAG_ACTIVITY_CLEAR_TOP|
                     Intent.FLAG_ACTIVITY_MULTIPLE_TASK|
-                    Intent.FLAG_ACTIVITY_NEW_TASK));
+                    FLAG_ACTIVITY_NEW_TASK));
 
             // Okay now we need to start the new activity, replacing the
             // currently running activity.  This is a little tricky because
@@ -6279,7 +6327,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mStackSupervisor.closeSystemDialogsLocked();
 
         broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                AppOpsManager.OP_NONE, null, false, false,
+                OP_NONE, null, false, false,
                 -1, SYSTEM_UID, UserHandle.USER_ALL);
     }
 
@@ -6381,7 +6429,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         intent.putExtra(Intent.EXTRA_UID, uid);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(uid));
         broadcastIntentLocked(null, null, intent,
-                null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                null, null, 0, null, null, null, OP_NONE,
                 null, false, false, MY_PID, SYSTEM_UID, UserHandle.getUserId(uid));
     }
 
@@ -11616,7 +11664,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.addFlags(FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, cpi.packageName);
 
@@ -13018,8 +13066,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Caller wants result sent back to them.
             Bundle sendBundle = new Bundle();
             // At least return the receiver extras
-            sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
-                    pae.receiverExtras);
+            sendBundle.putBundle(ASSIST_KEY_RECEIVER_EXTRAS, pae.receiverExtras);
             try {
                 pae.receiver.onHandleAssistData(sendBundle);
             } catch (RemoteException e) {
@@ -13072,11 +13119,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if ((sendReceiver=pae.receiver) != null) {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();
-                sendBundle.putBundle(VoiceInteractionSession.KEY_DATA, pae.extras);
-                sendBundle.putParcelable(VoiceInteractionSession.KEY_STRUCTURE, pae.structure);
-                sendBundle.putParcelable(VoiceInteractionSession.KEY_CONTENT, pae.content);
-                sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
-                        pae.receiverExtras);
+                sendBundle.putBundle(ASSIST_KEY_DATA, pae.extras);
+                sendBundle.putParcelable(ASSIST_KEY_STRUCTURE, pae.structure);
+                sendBundle.putParcelable(ASSIST_KEY_CONTENT, pae.content);
+                sendBundle.putBundle(ASSIST_KEY_RECEIVER_EXTRAS, pae.receiverExtras);
             }
         }
         if (sendReceiver != null) {
@@ -13095,7 +13141,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.startServiceAsUser(pae.intent, new UserHandle(pae.userHandle));
             } else {
                 pae.intent.replaceExtras(pae.extras);
-                pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_SINGLE_TOP
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 closeSystemDialogs("assist");
@@ -13862,7 +13908,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .setPackage("android")
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             broadcastIntent(null, intent, null, null, 0, null, null, null,
-                    android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
+                    OP_NONE, null, true, false, UserHandle.USER_ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -14116,7 +14162,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
                 broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                        null, null, 0, null, null, null, OP_NONE,
                         null, false, false, MY_PID, SYSTEM_UID,
                         currentUserId);
                 intent = new Intent(Intent.ACTION_USER_STARTING);
@@ -14130,7 +14176,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     throws RemoteException {
                             }
                         }, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
+                        new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
                         null, true, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
             } catch (Throwable t) {
                 Slog.wtf(TAG, "Failed sending first user broadcasts", t);
@@ -18803,7 +18849,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Intent intent = allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, -1, -1, false, null, null, AppOpsManager.OP_NONE, null, receivers,
+                            null, -1, -1, false, null, null, OP_NONE, null, receivers,
                             null, 0, null, null, false, true, true, -1);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
@@ -19799,7 +19845,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     : new String[] {requiredPermission};
             int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
                     resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, AppOpsManager.OP_NONE, bOptions, serialized,
+                    requiredPermissions, OP_NONE, bOptions, serialized,
                     sticky, -1, uid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
@@ -20422,7 +20468,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
         broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
                 UserHandle.USER_ALL);
         if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
             intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
@@ -20433,7 +20479,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
             broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                    AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
                     UserHandle.USER_ALL);
         }
 

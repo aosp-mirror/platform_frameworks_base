@@ -17,9 +17,9 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.ASSIST_CONTEXT_FULL;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
 
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -285,7 +285,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     private void dispatchAssistDataReceived(Bundle data) {
         int activityIndex = 0;
         int activityCount = 0;
-        final Bundle receiverExtras = data != null ? data.getBundle(KEY_RECEIVER_EXTRAS) : null;
+        final Bundle receiverExtras = data != null
+                ? data.getBundle(ASSIST_KEY_RECEIVER_EXTRAS) : null;
         if (receiverExtras != null) {
             activityIndex = receiverExtras.getInt(KEY_RECEIVER_EXTRA_INDEX);
             activityCount = receiverExtras.getInt(KEY_RECEIVER_EXTRA_COUNT);

@@ -422,6 +422,9 @@ interface IActivityManager {
             in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
             in Intent intent, in String resolvedType, in Bundle options, int userId);
+    int startRecentsActivity(in IAssistDataReceiver assistDataReceiver, in Bundle options,
+            int userId);
+    int startActivityFromRecents(int taskId, in Bundle options);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);
     void startSystemLockTaskMode(int taskId);
@@ -429,7 +432,6 @@ interface IActivityManager {
     void finishVoiceTask(in IVoiceInteractionSession session);
     boolean isTopOfTask(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
-    int startActivityFromRecents(int taskId, in Bundle options);
     void notifyEnterAnimationComplete(in IBinder token);
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
