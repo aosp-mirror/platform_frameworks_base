@@ -234,8 +234,8 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar possibles comportaments perillosos"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Es mostraran els dispositius Bluetooth sense el nom (només l\'adreça MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva la funció de volum absolut de Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permet que els sons de trucada del telèfon es reprodueixin en auriculars amb Bluetooth"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva la funció de volum absolut del Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permet que els sons de trucada del telèfon es reprodueixin en auriculars Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprovació HDCP"</string>
