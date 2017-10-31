@@ -321,7 +321,7 @@ public class DockedStackDividerController implements DimLayerUser {
         if (mWindow == null) {
             return;
         }
-        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
 
         // If the stack is invisible, we policy force hide it in WindowAnimator.shouldForceHide
         final boolean visible = stack != null;
@@ -361,7 +361,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     void positionDockedStackedDivider(Rect frame) {
-        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackStack();
+        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStack();
         if (stack == null) {
             // Unfortunately we might end up with still having a divider, even though the underlying
             // stack was already removed. This is because we are on AM thread and the removal of the
@@ -458,7 +458,7 @@ public class DockedStackDividerController implements DimLayerUser {
         long animDuration = 0;
         if (animate) {
             final TaskStack stack =
-                    mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+                    mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final long transitionDuration = isAnimationMaximizing()
                     ? mService.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
@@ -513,7 +513,7 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());
         notifyDockedStackExistsChanged(
-                mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility() != null);
+                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() != null);
         notifyDockedStackMinimizedChanged(mMinimizedDock, false /* animate */,
                 isHomeStackResizable());
         notifyAdjustedForImeChanged(mAdjustedForIme, 0 /* animDuration */);
@@ -531,7 +531,7 @@ public class DockedStackDividerController implements DimLayerUser {
         final TaskStack stack = targetWindowingMode != WINDOWING_MODE_UNDEFINED
                 ? mDisplayContent.getStack(targetWindowingMode)
                 : null;
-        final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStackStack();
+        final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
         if (visibleAndValid) {
             stack.getDimBounds(mTmpRect);
@@ -616,7 +616,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void checkMinimizeChanged(boolean animate) {
-        if (mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility() == null) {
+        if (mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() == null) {
             return;
         }
         final TaskStack homeStack = mDisplayContent.getHomeStack();
@@ -778,7 +778,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean setMinimizedDockedStack(boolean minimized) {
-        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         notifyDockedStackMinimizedChanged(minimized, false /* animate */, isHomeStackResizable());
         return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }
@@ -829,7 +829,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;

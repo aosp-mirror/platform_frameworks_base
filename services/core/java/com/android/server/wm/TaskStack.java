@@ -294,7 +294,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (mFillsParent
                 || !inSplitScreenSecondaryWindowingMode()
                 || mDisplayContent == null
-                || mDisplayContent.getSplitScreenPrimaryStackStack() != null) {
+                || mDisplayContent.getSplitScreenPrimaryStack() != null) {
             return true;
         }
         return false;
@@ -693,7 +693,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 "animation background stackId=" + mStackId);
 
         Rect bounds = null;
-        final TaskStack dockedStack = dc.getSplitScreenPrimaryStackStackIgnoringVisibility();
+        final TaskStack dockedStack = dc.getSplitScreenPrimaryStackIgnoringVisibility();
         if (inSplitScreenPrimaryWindowingMode()
                 || (dockedStack != null && inSplitScreenSecondaryWindowingMode()
                         && !dockedStack.fillsParent())) {
@@ -773,7 +773,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         final TaskStack dockedStack =
-                mDisplayContent.getSplitScreenPrimaryStackStackIgnoringVisibility();
+                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         if (dockedStack == null) {
             // Not sure why you are calling this method when there is no docked stack...
             throw new IllegalStateException(
