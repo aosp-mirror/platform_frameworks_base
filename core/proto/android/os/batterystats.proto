@@ -395,6 +395,12 @@ message SystemProto {
   };
   repeated WakeupReason wakeup_reason = 22;
 
+  message WifiMulticastWakelockTotal {
+    optional int64 duration_ms = 1;
+    optional int32 count = 2;
+  }
+  optional WifiMulticastWakelockTotal wifi_multicast_wakelock_total = 23;
+
   message WifiSignalStrength {
     enum Name {
       NONE = 0;
@@ -406,7 +412,7 @@ message SystemProto {
     optional Name name = 1;
     optional TimerProto total = 2;
   };
-  repeated WifiSignalStrength wifi_signal_strength = 23;
+  repeated WifiSignalStrength wifi_signal_strength = 24;
 
   message WifiState {
     enum Name {
@@ -422,7 +428,7 @@ message SystemProto {
     optional Name name = 1;
     optional TimerProto total = 2;
   };
-  repeated WifiState wifi_state = 24;
+  repeated WifiState wifi_state = 25;
 
   message WifiSupplicantState {
     enum Name {
@@ -443,7 +449,7 @@ message SystemProto {
     optional Name name = 1;
     optional TimerProto total = 2;
   };
-  repeated WifiSupplicantState wifi_supplicant_state = 25;
+  repeated WifiSupplicantState wifi_supplicant_state = 26;
 }
 
 message TimerProto {
@@ -775,4 +781,12 @@ message UidProto {
     optional TimerProto background_scan = 4;
   };
   optional Wifi wifi = 27;
+
+  // WiFi Multicast Wakelock
+  // This timer tracks the duration and count for the app to request the
+  // wakelock for wifi multicast traffic.
+  // This wakelock disables the filtering of multicast packets to reach the host
+  // processor, and results in a power penalty.
+  // It is useful to monitor the applications resulting in that
+  optional TimerProto wifi_multicast_wakelock = 28;
 }
