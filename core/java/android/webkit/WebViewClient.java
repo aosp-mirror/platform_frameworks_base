@@ -129,7 +129,7 @@ public class WebViewClient {
      * <p>This method is called when the body of the HTTP response has started loading, is reflected
      * in the DOM, and will be visible in subsequent draws. This callback occurs early in the
      * document loading process, and as such you should expect that linked resources (for example,
-     * css and images) may not be available.
+     * CSS and images) may not be available.
      *
      * <p>For more fine-grained notification of visual state updates, see {@link
      * WebView#postVisualStateCallback}.
@@ -245,7 +245,7 @@ public class WebViewClient {
     public static final int ERROR_FILE_NOT_FOUND = -14;
     /** Too many requests during this load */
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
-    /** Resource load was cancelled by Safe Browsing */
+    /** Resource load was canceled by Safe Browsing */
     public static final int ERROR_UNSAFE_RESOURCE = -16;
 
     /** @hide */
@@ -269,8 +269,8 @@ public class WebViewClient {
 
     /**
      * Report an error to the host application. These errors are unrecoverable
-     * (i.e. the main resource is unavailable). The errorCode parameter
-     * corresponds to one of the ERROR_* constants.
+     * (i.e. the main resource is unavailable). The {@code errorCode} parameter
+     * corresponds to one of the {@code ERROR_*} constants.
      * @param view The WebView that is initiating the callback.
      * @param errorCode The error code corresponding to an ERROR_* value.
      * @param description A String describing the error.
@@ -286,11 +286,11 @@ public class WebViewClient {
     /**
      * Report web resource loading error to the host application. These errors usually indicate
      * inability to connect to the server. Note that unlike the deprecated version of the callback,
-     * the new version will be called for any resource (iframe, image, etc), not just for the main
+     * the new version will be called for any resource (iframe, image, etc.), not just for the main
      * page. Thus, it is recommended to perform minimum required work in this callback.
      * @param view The WebView that is initiating the callback.
      * @param request The originating request.
-     * @param error Information about the error occured.
+     * @param error Information about the error occurred.
      */
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         if (request.isForMainFrame()) {
@@ -303,12 +303,12 @@ public class WebViewClient {
     /**
      * Notify the host application that an HTTP error has been received from the server while
      * loading a resource.  HTTP errors have status codes &gt;= 400.  This callback will be called
-     * for any resource (iframe, image, etc), not just for the main page. Thus, it is recommended to
-     * perform minimum required work in this callback. Note that the content of the server
-     * response may not be provided within the <b>errorResponse</b> parameter.
+     * for any resource (iframe, image, etc.), not just for the main page. Thus, it is recommended
+     * to perform minimum required work in this callback. Note that the content of the server
+     * response may not be provided within the {@code errorResponse} parameter.
      * @param view The WebView that is initiating the callback.
      * @param request The originating request.
-     * @param errorResponse Information about the error occured.
+     * @param errorResponse Information about the error occurred.
      */
     public void onReceivedHttpError(
             WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
@@ -362,7 +362,7 @@ public class WebViewClient {
      * if desired and providing the keys. There are three ways to
      * respond: proceed(), cancel() or ignore(). Webview stores the response
      * in memory (for the life of the application) if proceed() or cancel() is
-     * called and does not call onReceivedClientCertRequest() again for the
+     * called and does not call {@code onReceivedClientCertRequest()} again for the
      * same host and port pair. Webview does not store the response if ignore()
      * is called. Note that, multiple layers in chromium network stack might be
      * caching the responses, so the behavior for ignore is only a best case
@@ -429,7 +429,7 @@ public class WebViewClient {
     /**
      * Notify the host application that a key was not handled by the WebView.
      * Except system keys, WebView always consumes the keys in the normal flow
-     * or if shouldOverrideKeyEvent returns {@code true}. This is called asynchronously
+     * or if {@link #shouldOverrideKeyEvent} returns {@code true}. This is called asynchronously
      * from where the key is dispatched. It gives the host application a chance
      * to handle the unhandled key events.
      *
@@ -443,7 +443,7 @@ public class WebViewClient {
     /**
      * Notify the host application that a input event was not handled by the WebView.
      * Except system keys, WebView always consumes input events in the normal flow
-     * or if shouldOverrideKeyEvent returns {@code true}. This is called asynchronously
+     * or if {@link #shouldOverrideKeyEvent} returns {@code true}. This is called asynchronously
      * from where the event is dispatched. It gives the host application a chance
      * to handle the unhandled input events.
      *
@@ -500,7 +500,7 @@ public class WebViewClient {
     }
 
     /**
-     * Notify host application that the given webview's render process has exited.
+     * Notify host application that the given WebView's render process has exited.
      *
      * Multiple WebView instances may be associated with a single render process;
      * onRenderProcessGone will be called for each WebView that was affected.
@@ -510,10 +510,10 @@ public class WebViewClient {
      *
      * The given WebView can't be used, and should be removed from the view hierarchy,
      * all references to it should be cleaned up, e.g any references in the Activity
-     * or other classes saved using findViewById and similar calls, etc
+     * or other classes saved using {@link android.view.View#findViewById} and similar calls, etc.
      *
      * To cause an render process crash for test purpose, the application can
-     * call loadUrl("chrome://crash") on the WebView. Note that multiple WebView
+     * call {@code loadUrl("chrome://crash")} on the WebView. Note that multiple WebView
      * instances may be affected if they share a render process, not just the
      * specific WebView which loaded chrome://crash.
      *
@@ -534,12 +534,13 @@ public class WebViewClient {
      * behavior is to show an interstitial to the user, with the reporting checkbox visible.
      *
      * If the application needs to show its own custom interstitial UI, the callback can be invoked
-     * asynchronously with backToSafety() or proceed(), depending on user response.
+     * asynchronously with {@link SafeBrowsingResponse#backToSafety} or {@link
+     * SafeBrowsingResponse#proceed}, depending on user response.
      *
      * @param view The WebView that hit the malicious resource.
      * @param request Object containing the details of the request.
      * @param threatType The reason the resource was caught by Safe Browsing, corresponding to a
-     *                   SAFE_BROWSING_THREAT_* value.
+     *                   {@code SAFE_BROWSING_THREAT_*} value.
      * @param callback Applications must invoke one of the callback methods.
      */
     public void onSafeBrowsingHit(WebView view, WebResourceRequest request,
