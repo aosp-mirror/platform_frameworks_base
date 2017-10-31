@@ -8687,6 +8687,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkg.applicationInfo.primaryCpuAbi = updatedPkg.primaryCpuAbiString;
                 pkg.applicationInfo.secondaryCpuAbi = updatedPkg.secondaryCpuAbiString;
             }
+            pkg.mExtras = updatedPkg;
 
             throw new PackageManagerException(Log.WARN, "Package " + ps.name + " at "
                     + scanFile + " ignored: updated version " + ps.versionCode
