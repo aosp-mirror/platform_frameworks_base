@@ -6137,9 +6137,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void createInputConsumer(String name, InputChannel inputChannel) {
+    public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            mInputMonitor.createInputConsumer(name, inputChannel);
+            mInputMonitor.createInputConsumer(token, name, inputChannel, Binder.getCallingPid(),
+                    Binder.getCallingUserHandle());
         }
     }
 
