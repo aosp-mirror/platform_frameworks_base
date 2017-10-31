@@ -213,27 +213,6 @@ public class DefaultContainerService extends IntentService {
         }
 
         @Override
-        public long calculateDirectorySize(String path) throws RemoteException {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            final File dir = Environment.maybeTranslateEmulatedPathToInternal(new File(path));
-            if (dir.exists() && dir.isDirectory()) {
-                final String targetPath = dir.getAbsolutePath();
-                return MeasurementUtils.measureDirectory(targetPath);
-            } else {
-                return 0L;
-            }
-        }
-
-        @Override
-        public long[] getFileSystemStats(String path) {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-            final File file = new File(path);
-            return new long[] { file.getTotalSpace(), file.getUsableSpace() };
-        }
-
-        @Override
         public void clearDirectory(String path) throws RemoteException {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
