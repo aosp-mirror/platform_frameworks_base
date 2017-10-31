@@ -27,19 +27,23 @@ namespace statsd {
 // Held by MetricProducer, to query a condition state with input defined in EventConditionLink.
 class ConditionWizard : public virtual android::RefBase {
 public:
+    ConditionWizard(){};  // for testing
     ConditionWizard(std::vector<sp<ConditionTracker>>& conditionTrackers)
         : mAllConditions(conditionTrackers){};
+
+    virtual ~ConditionWizard(){};
 
     // Query condition state, for a ConditionTracker at [conditionIndex], with [conditionParameters]
     // [conditionParameters] mapping from condition name to the HashableDimensionKey to query the
     //                       condition.
     // The ConditionTracker at [conditionIndex] can be a CombinationConditionTracker. In this case,
     // the conditionParameters contains the parameters for it's children SimpleConditionTrackers.
-    ConditionState query(const int conditionIndex,
-                         const std::map<std::string, HashableDimensionKey>& conditionParameters);
+    virtual ConditionState query(
+            const int conditionIndex,
+            const std::map<std::string, HashableDimensionKey>& conditionParameters);
 
 private:
-    std::vector<sp<ConditionTracker>>& mAllConditions;
+    std::vector<sp<ConditionTracker>> mAllConditions;
 };
 
 }  // namespace statsd

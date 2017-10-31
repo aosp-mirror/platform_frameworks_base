@@ -16,7 +16,6 @@
 
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
-
 #include "CombinationConditionTracker.h"
 
 #include <log/logprint.h>

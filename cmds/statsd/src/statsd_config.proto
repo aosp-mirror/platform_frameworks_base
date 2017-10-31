@@ -82,6 +82,8 @@ message SimpleCondition {
   optional bool count_nesting = 3 [default = true];
 
   optional string stop_all = 4;
+
+  repeated KeyMatcher dimension = 5;
 }
 
 message Condition {
@@ -148,29 +150,24 @@ message CountMetric {
 message DurationMetric {
   optional int64 metric_id = 1;
 
-  optional string start = 2;
-
-  optional string stop = 3;
-
-  optional string stop_all = 4;
+  optional string what = 2;
 
   enum AggregationType {
     DURATION_SUM = 1;
 
     DURATION_MAX_SPARSE = 2;
-    DURATION_MIN_SPARSE = 3;
   }
-  optional AggregationType type = 5;
+  optional AggregationType type = 3;
 
-  optional string predicate = 6;
+  optional string predicate = 4;
 
-  repeated KeyMatcher dimension = 7;
+  repeated KeyMatcher dimension = 5;
 
-  optional Bucket bucket = 8;
+  optional Bucket bucket = 6;
 
-  repeated Alert alerts = 9;
+  repeated Alert alerts = 7;
 
-  repeated EventConditionLink links = 10;
+  repeated EventConditionLink links = 8;
 
 }
 

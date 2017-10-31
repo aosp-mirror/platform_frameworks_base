@@ -42,6 +42,8 @@ statsd_common_src := \
     src/metrics/EventMetricProducer.cpp \
     src/metrics/CountMetricProducer.cpp \
     src/metrics/DurationMetricProducer.cpp \
+    src/metrics/duration_helper/OringDurationTracker.cpp \
+    src/metrics/duration_helper/MaxDurationTracker.cpp \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \
@@ -142,7 +144,9 @@ LOCAL_SRC_FILES := \
     tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \
     tests/MetricsManager_test.cpp \
-    tests/UidMap_test.cpp
+    tests/UidMap_test.cpp \
+    tests/OringDurationTracker_test.cpp \
+    tests/MaxDurationTracker_test.cpp
 
 
 LOCAL_STATIC_LIBRARIES := \

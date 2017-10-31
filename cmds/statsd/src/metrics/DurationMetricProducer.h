@@ -22,6 +22,9 @@
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
+#include "duration_helper/DurationTracker.h"
+#include "duration_helper/MaxDurationTracker.h"
+#include "duration_helper/OringDurationTracker.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
@@ -32,42 +35,22 @@ namespace android {
 namespace os {
 namespace statsd {
 
-enum DurationState {
-    kStopped = 0,  // The event is stopped.
-    kStarted = 1,  // The event is on going.
-    kPaused = 2,   // The event is started, but condition is false, clock is paused. When condition
-                   // turns to true, kPaused will become kStarted.
-};
-
-// Hold duration information for current on-going bucket.
-struct DurationInfo {
-    DurationState state;
-    // most recent start time.
-    int64_t lastStartTime;
-    // existing duration in current bucket. Eventually, the duration will be aggregated in
-    // the way specified in AggregateType (Sum, Max, or Min).
-    int64_t lastDuration;
-    // cache the HashableDimensionKeys we need to query the condition for this duration event.
-    std::map<string, HashableDimensionKey> conditionKeys;
-
-    DurationInfo() : state(kStopped), lastStartTime(0), lastDuration(0){};
-};
-
 class DurationMetricProducer : public MetricProducer {
 public:
     DurationMetricProducer(const DurationMetric& durationMetric, const int conditionIndex,
                            const size_t startIndex, const size_t stopIndex,
-                           const size_t stopAllIndex, const sp<ConditionWizard>& wizard);
+                           const size_t stopAllIndex, const sp<ConditionWizard>& wizard,
+                           const vector<KeyMatcher>& internalDimension);
 
     virtual ~DurationMetricProducer();
 
-    void onConditionChanged(const bool conditionMet) override;
+    void onConditionChanged(const bool conditionMet, const uint64_t eventTime) override;
 
     void finish() override;
 
     StatsLogReport onDumpReport() override;
 
-    void onSlicedConditionMayChange() override;
+    void onSlicedConditionMayChange(const uint64_t eventTime) override;
 
     size_t byteSize() override;
 
@@ -91,26 +74,21 @@ private:
     // Index of the SimpleLogEntryMatcher which defines the stop all for all dimensions.
     const size_t mStopAllIndex;
 
+    // The dimension from the atom predicate. e.g., uid, wakelock name.
+    const vector<KeyMatcher> mInternalDimension;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     std::unordered_map<HashableDimensionKey, std::vector<DurationBucketInfo>> mPastBuckets;
 
     // The current bucket.
-    std::unordered_map<HashableDimensionKey, DurationInfo> mCurrentSlicedDuration;
+    std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
+            mCurrentSlicedDuration;
 
     void flushDurationIfNeeded(const uint64_t newEventTime);
 
-    void noteStart(const HashableDimensionKey& key, const bool conditionMet,
-                   const uint64_t eventTime);
+    std::unique_ptr<DurationTracker> createDurationTracker(std::vector<DurationBucketInfo>& bucket);
 
-    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime);
-
-    void noteStopAll(const uint64_t eventTime);
-
-    static int64_t updateDuration(const int64_t lastDuration, const int64_t durationTime,
-                                  const DurationMetric_AggregationType type);
-
-    void noteConditionChanged(const HashableDimensionKey& key, const bool conditionMet,
-                              const uint64_t eventTime);
+    void flushIfNeeded(uint64_t timestamp);
 };
 
 }  // namespace statsd

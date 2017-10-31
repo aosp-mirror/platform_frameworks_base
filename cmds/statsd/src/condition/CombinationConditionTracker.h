@@ -46,8 +46,6 @@ public:
                         const std::vector<sp<ConditionTracker>>& allConditions,
                         std::vector<ConditionState>& conditionCache) override;
 
-    void addDimensions(const std::vector<KeyMatcher>& keyMatchers) override{};
-
 private:
     LogicalOperation mLogicalOperation;
     // Store index of the children Conditions.

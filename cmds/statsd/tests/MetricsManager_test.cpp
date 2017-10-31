@@ -124,6 +124,39 @@ StatsdConfig buildMissingMatchers() {
     return config;
 }
 
+StatsdConfig buildDimensionMetricsWithMultiTags() {
+    StatsdConfig config;
+    config.set_config_id(12345L);
+
+    LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("BATTERY_VERY_LOW");
+    SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(2);
+
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("BATTERY_VERY_VERY_LOW");
+    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
+    simpleLogEntryMatcher->set_tag(3);
+
+    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher->set_name("BATTERY_LOW");
+
+    LogEntryMatcher_Combination* combination = eventMatcher->mutable_combination();
+    combination->set_operation(LogicalOperation::OR);
+    combination->add_matcher("BATTERY_VERY_LOW");
+    combination->add_matcher("BATTERY_VERY_VERY_LOW");
+
+    // Count process state changes, slice by uid, while SCREEN_IS_OFF
+    CountMetric* metric = config.add_count_metric();
+    metric->set_metric_id(3);
+    metric->set_what("BATTERY_LOW");
+    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    KeyMatcher* keyMatcher = metric->add_dimension();
+    keyMatcher->set_key(1);
+
+    return config;
+}
+
 StatsdConfig buildCircleConditions() {
     StatsdConfig config;
     config.set_config_id(12345L);
@@ -178,6 +211,21 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     EXPECT_TRUE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
                                  trackerToConditionMap));
+}
+
+TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
+    StatsdConfig config = buildDimensionMetricsWithMultiTags();
+    set<int> allTagIds;
+    vector<sp<LogMatchingTracker>> allLogEntryMatchers;
+    vector<sp<ConditionTracker>> allConditionTrackers;
+    vector<sp<MetricProducer>> allMetricProducers;
+    unordered_map<int, std::vector<int>> conditionToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToConditionMap;
+
+    EXPECT_FALSE(initStatsdConfig(config, allTagIds, allLogEntryMatchers, allConditionTrackers,
+                                  allMetricProducers, conditionToMetricMap, trackerToMetricMap,
+                                  trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {

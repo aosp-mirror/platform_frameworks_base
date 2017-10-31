@@ -74,6 +74,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 
     int tagId = event.GetTagId();
+    uint64_t eventTime = event.GetTimestampNs();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
@@ -124,13 +125,14 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 // metric cares about non sliced condition, and it's changed.
                 // Push the new condition to it directly.
                 if (!mAllMetricProducers[metricIndex]->isConditionSliced() && changedCache[i]) {
-                    mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i]);
+                    mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i],
+                                                                         eventTime);
                     // metric cares about sliced conditions, and it may have changed. Send
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
                 } else if (mAllMetricProducers[metricIndex]->isConditionSliced() &&
                            slicedChangedCache[i]) {
-                    mAllMetricProducers[metricIndex]->onSlicedConditionMayChange();
+                    mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(eventTime);
                 }
             }
         }

@@ -33,12 +33,20 @@ namespace os {
 namespace statsd {
 
 bool handleMetricWithLogTrackers(const string what, const int metricIndex,
+                                 const bool usedForDimension,
+                                 const vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                                  const unordered_map<string, int>& logTrackerMap,
                                  unordered_map<int, std::vector<int>>& trackerToMetricMap,
                                  int& logTrackerIndex) {
     auto logTrackerIt = logTrackerMap.find(what);
     if (logTrackerIt == logTrackerMap.end()) {
         ALOGW("cannot find the LogEntryMatcher %s in config", what.c_str());
+        return false;
+    }
+    if (usedForDimension && allLogEntryMatchers[logTrackerIt->second]->getTagIds().size() > 1) {
+        ALOGE("LogEntryMatcher %s has more than one tag ids. When a metric has dimension, the "
+              "\"what\" can only about one atom type.",
+              what.c_str());
         return false;
     }
     logTrackerIndex = logTrackerIt->second;
@@ -68,8 +76,7 @@ bool handleMetricWithConditions(
         }
         allConditionTrackers[condition_it->second]->setSliced(true);
         allConditionTrackers[it->second]->setSliced(true);
-        allConditionTrackers[it->second]->addDimensions(
-                vector<KeyMatcher>(link.key_in_condition().begin(), link.key_in_condition().end()));
+        // TODO: We need to verify the link is valid.
     }
     conditionIndex = condition_it->second;
 
@@ -176,6 +183,7 @@ bool initConditions(const StatsdConfig& config, const unordered_map<string, int>
 
 bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& logTrackerMap,
                  const unordered_map<string, int>& conditionTrackerMap,
+                 const vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
@@ -196,8 +204,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
 
         int metricIndex = allMetricProducers.size();
         int trackerIndex;
-        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, logTrackerMap,
-                                         trackerToMetricMap, trackerIndex)) {
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
+                                         allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
+                                         trackerIndex)) {
             return false;
         }
 
@@ -215,25 +224,48 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
     for (int i = 0; i < config.duration_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const DurationMetric& metric = config.duration_metric(i);
+
+        auto what_it = conditionTrackerMap.find(metric.what());
+        if (what_it == conditionTrackerMap.end()) {
+            ALOGE("DurationMetric's \"what\" is invalid");
+            return false;
+        }
+
+        const Condition& durationWhat = config.condition(what_it->second);
+
+        if (durationWhat.contents_case() != Condition::ContentsCase::kSimpleCondition) {
+            ALOGE("DurationMetric's \"what\" must be a simple condition");
+            return false;
+        }
+
+        const auto& simpleCondition = durationWhat.simple_condition();
+
         int trackerIndices[3] = {-1, -1, -1};
-        if (!metric.has_start() ||
-            !handleMetricWithLogTrackers(metric.start(), metricIndex, logTrackerMap,
-                                         trackerToMetricMap, trackerIndices[0])) {
+        if (!simpleCondition.has_start() ||
+            !handleMetricWithLogTrackers(simpleCondition.start(), metricIndex,
+                                         metric.dimension_size() > 0, allLogEntryMatchers,
+                                         logTrackerMap, trackerToMetricMap, trackerIndices[0])) {
             ALOGE("Duration metrics must specify a valid the start event matcher");
             return false;
         }
 
-        if (metric.has_stop() &&
-            !handleMetricWithLogTrackers(metric.stop(), metricIndex, logTrackerMap,
-                                         trackerToMetricMap, trackerIndices[1])) {
+        if (simpleCondition.has_stop() &&
+            !handleMetricWithLogTrackers(simpleCondition.stop(), metricIndex,
+                                         metric.dimension_size() > 0, allLogEntryMatchers,
+                                         logTrackerMap, trackerToMetricMap, trackerIndices[1])) {
             return false;
         }
 
-        if (metric.has_stop_all() &&
-            !handleMetricWithLogTrackers(metric.stop_all(), metricIndex, logTrackerMap,
-                                         trackerToMetricMap, trackerIndices[2])) {
+        if (simpleCondition.has_stop_all() &&
+            !handleMetricWithLogTrackers(simpleCondition.stop_all(), metricIndex,
+                                         metric.dimension_size() > 0, allLogEntryMatchers,
+                                         logTrackerMap, trackerToMetricMap, trackerIndices[2])) {
             return false;
         }
+
+        vector<KeyMatcher> internalDimension;
+        internalDimension.insert(internalDimension.begin(), simpleCondition.dimension().begin(),
+                                 simpleCondition.dimension().end());
 
         int conditionIndex = -1;
 
@@ -243,9 +275,9 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                                        conditionToMetricMap);
         }
 
-        sp<MetricProducer> durationMetric =
-                new DurationMetricProducer(metric, conditionIndex, trackerIndices[0],
-                                           trackerIndices[1], trackerIndices[2], wizard);
+        sp<MetricProducer> durationMetric = new DurationMetricProducer(
+                metric, conditionIndex, trackerIndices[0], trackerIndices[1], trackerIndices[2],
+                wizard, internalDimension);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -258,8 +290,8 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             return false;
         }
         int trackerIndex;
-        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, logTrackerMap,
-                                         trackerToMetricMap, trackerIndex)) {
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, false, allLogEntryMatchers,
+                                         logTrackerMap, trackerToMetricMap, trackerIndex)) {
             return false;
         }
 
@@ -299,8 +331,9 @@ bool initStatsdConfig(const StatsdConfig& config, set<int>& allTagIds,
         return false;
     }
 
-    if (!initMetrics(config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
-                     allMetricProducers, conditionToMetricMap, trackerToMetricMap)) {
+    if (!initMetrics(config, logTrackerMap, conditionTrackerMap, allLogEntryMatchers,
+                     allConditionTrackers, allMetricProducers, conditionToMetricMap,
+                     trackerToMetricMap)) {
         ALOGE("initMetricProducers failed");
         return false;
     }
