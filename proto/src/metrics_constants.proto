@@ -4750,6 +4750,10 @@ message MetricsEvent {
     // OS: P
     ANOMALY_TYPE_UNOPTIMIZED_BT = 1237;
 
+    // Open: Settings > Dev options > Oem unlock > lock it > warning dialog.
+    // OS: P
+    DIALOG_OEM_LOCK_INFO = 1238;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
