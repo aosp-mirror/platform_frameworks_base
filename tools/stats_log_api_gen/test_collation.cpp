@@ -24,6 +24,7 @@
 namespace android {
 namespace stats_log_api_gen {
 
+using std::map;
 using std::set;
 using std::vector;
 
@@ -53,6 +54,29 @@ set_contains_vector(const set<vector<java_type_t>>& s, int count, ...)
         int count = sizeof((int[]){__VA_ARGS__})/sizeof(int); \
         EXPECT_TRUE(set_contains_vector(s, count, __VA_ARGS__)); \
     } while(0)
+
+/** Expects that the provided atom has no enum values for any field. */
+#define EXPECT_NO_ENUM_FIELD(atom) \
+    do { \
+        for (vector<AtomField>::const_iterator field = atom->fields.begin(); \
+             field != atom->fields.end(); field++) { \
+            EXPECT_TRUE(field->enumValues.empty()); \
+        } \
+    } while(0)
+
+/** Expects that exactly one specific field has expected enum values. */ 
+#define EXPECT_HAS_ENUM_FIELD(atom, field_name, values)        \
+    do { \
+        for (vector<AtomField>::const_iterator field = atom->fields.begin(); \
+             field != atom->fields.end(); field++) { \
+            if (field->name == field_name) { \
+                EXPECT_EQ(field->enumValues, values); \
+            } else { \
+                EXPECT_TRUE(field->enumValues.empty()); \
+            } \
+        } \
+    } while(0)
+
 
 /**
  * Test a correct collation, with all the types.
@@ -94,21 +118,28 @@ TEST(CollationTest, CollateStats) {
     EXPECT_EQ(1, atom->code);
     EXPECT_EQ("int_atom", atom->name);
     EXPECT_EQ("IntAtom", atom->message);
+    EXPECT_NO_ENUM_FIELD(atom);
     atom++;
 
     EXPECT_EQ(2, atom->code);
     EXPECT_EQ("out_of_order_atom", atom->name);
     EXPECT_EQ("OutOfOrderAtom", atom->message);
+    EXPECT_NO_ENUM_FIELD(atom);
     atom++;
 
     EXPECT_EQ(3, atom->code);
     EXPECT_EQ("another_int_atom", atom->name);
     EXPECT_EQ("AnotherIntAtom", atom->message);
+    EXPECT_NO_ENUM_FIELD(atom);
     atom++;
 
     EXPECT_EQ(4, atom->code);
     EXPECT_EQ("all_types_atom", atom->name);
     EXPECT_EQ("AllTypesAtom", atom->message);
+    map<int, string> enumValues;
+    enumValues[0] = "VALUE0";
+    enumValues[1] = "VALUE1";
+    EXPECT_HAS_ENUM_FIELD(atom, "enum_field", enumValues);
     atom++;
 
     EXPECT_TRUE(atom == atoms.decls.end());
@@ -125,7 +156,7 @@ TEST(CollationTest, NonMessageTypeFails) {
 }
 
 /**
- * Test that atoms that have non-primitve types are rejected.
+ * Test that atoms that have non-primitive types are rejected.
  */
 TEST(CollationTest, FailOnBadTypes) {
     Atoms atoms;
@@ -165,7 +196,5 @@ TEST(CollationTest, FailBadWorkSourcePosition) {
     EXPECT_EQ(1, errorCount);
 }
 
-
 }  // namespace stats_log_api_gen
 }  // namespace android
-
