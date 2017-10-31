@@ -961,7 +961,8 @@ framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 	$(framework_res_source_path)/android/R.java \
 	$(framework_res_source_path)/android/Manifest.java \
-	$(framework_res_source_path)/com/android/internal/R.java
+	$(framework_res_source_path)/com/android/internal/R.java \
+	$(patsubst $(TARGET_OUT_COMMON_INTERMEDIATES)/%,%,$(libcore_to_document_generated))
 
 framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	core-oj \
@@ -1032,7 +1033,7 @@ framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 
 framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt \
-    libcore/Docs.mk
+    $(libcore_to_document_generated)
 
 samples_dir := development/samples/browseable
 
