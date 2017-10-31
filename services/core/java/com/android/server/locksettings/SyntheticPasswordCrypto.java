@@ -112,7 +112,7 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] applicationId) {
+    public static byte[] decryptBlobV1(String keyAlias, byte[] blob, byte[] applicationId) {
         try {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
@@ -120,6 +120,20 @@ public class SyntheticPasswordCrypto {
             SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
             byte[] intermediate = decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, blob);
             return decrypt(decryptionKey, intermediate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to decrypt blob", e);
+        }
+    }
+
+    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] applicationId) {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+
+            SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            byte[] intermediate = decrypt(decryptionKey, blob);
+            return decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
@@ -150,9 +164,8 @@ public class SyntheticPasswordCrypto {
             keyStore.setEntry(keyAlias,
                     new KeyStore.SecretKeyEntry(secretKey),
                     builder.build());
-            byte[] intermediate = encrypt(secretKey, data);
-            return encrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
-
+            byte[] intermediate = encrypt(applicationId, APPLICATION_ID_PERSONALIZATION, data);
+            return encrypt(secretKey, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
