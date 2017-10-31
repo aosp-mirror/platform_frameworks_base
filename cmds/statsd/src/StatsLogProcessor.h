@@ -50,6 +50,8 @@ public:
 private:
     std::unordered_map<ConfigKey, std::unique_ptr<MetricsManager>> mMetricsManagers;
 
+    std::unordered_map<ConfigKey, long> mLastFlushTimes;
+
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
     /* Max *serialized* size of the logs kept in memory before flushing through binder call.
@@ -59,25 +61,17 @@ private:
      */
     static const size_t kMaxSerializedBytes = 16 * 1024;
 
-    /* List of data that was captured for a single metric over a given interval of time. */
-    vector<string> mEvents;
-
-    /* Current *serialized* size of the logs kept in memory.
-       To save computation, we will not calculate the size of the StatsLogReport every time when a
-       new entry is added, which would recursively call ByteSize() on every log entry. Instead, we
-       keep the sum of all individual stats log entry sizes. The size of a proto is approximately
-       the sum of the size of all member protos.
-     */
-    size_t mBufferSize = 0;
-
     /* Check if the buffer size exceeds the max buffer size when the new entry is added, and flush
        the logs to callback clients if true. */
-    void flushIfNecessary(const EventMetricData& eventMetricData);
-
-    /* Append event metric data to StatsLogReport. */
-    void addEventMetricData(const EventMetricData& eventMetricData);
+    void flushIfNecessary(uint64_t timestampNs,
+                          const ConfigKey& key,
+                          const unique_ptr<MetricsManager>& metricsManager);
 
     std::function<void(const vector<uint8_t>&)> mPushLog;
+
+    /* Minimum period between two flushes in nanoseconds. Currently set to 10
+     * minutes. */
+    static const unsigned long long kMinFlushPeriod = 600 * NS_PER_SEC;
 };
 
 }  // namespace statsd
