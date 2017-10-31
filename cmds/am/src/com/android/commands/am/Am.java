@@ -160,7 +160,11 @@ public class Am extends BaseCommand {
             } else if (opt.equals("-r")) {
                 instrument.rawMode = true;
             } else if (opt.equals("-m")) {
-                instrument.proto = true;
+                instrument.protoStd = true;
+            } else if (opt.equals("-f")) {
+                instrument.protoFile = true;
+                if (peekNextArg() != null && !peekNextArg().startsWith("-"))
+                    instrument.logPath = nextArg();
             } else if (opt.equals("-e")) {
                 final String argKey = nextArgRequired();
                 final String argValue = nextArgRequired();
