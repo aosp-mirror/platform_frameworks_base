@@ -313,7 +313,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long ident = Binder.clearCallingIdentity();
         try {
             return mDragDropController.prepareDrag(
-                    mService, mSurfaceSession, callerPid, callerUid, window, flags, width, height,
+                    mSurfaceSession, callerPid, callerUid, window, flags, width, height,
                     outSurface);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -324,7 +324,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public boolean performDrag(IWindow window, IBinder dragToken,
             int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data) {
-        return mDragDropController.performDrag(mService, window, dragToken, touchSource,
+        return mDragDropController.performDrag(window, dragToken, touchSource,
                 touchX, touchY, thumbCenterX, thumbCenterY, data);
     }
 
@@ -332,7 +332,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void reportDropResult(IWindow window, boolean consumed) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDragDropController.reportDropResult(mService, window, consumed);
+            mDragDropController.reportDropResult(window, consumed);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -342,7 +342,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void cancelDragAndDrop(IBinder dragToken) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDragDropController.cancelDragAndDrop(mService, dragToken);
+            mDragDropController.cancelDragAndDrop(dragToken);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
