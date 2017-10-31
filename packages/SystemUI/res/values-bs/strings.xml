@@ -701,7 +701,7 @@
     <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Gore 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Gore 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Gore 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Dole cijeli ekran"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Donji ekran kao cijeli ekran"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dvaput dodirnite za uređivanje."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> Dvaput dodirnite za dodavanje."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>. Dvaput dodirnite za odabir."</string>
