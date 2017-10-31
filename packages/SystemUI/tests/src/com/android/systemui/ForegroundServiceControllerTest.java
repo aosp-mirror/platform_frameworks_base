@@ -287,6 +287,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         final Bundle extras = new Bundle();
         if (pkgs != null) extras.putStringArray(Notification.EXTRA_FOREGROUND_APPS, pkgs);
         n.extras = extras;
+        n.when = System.currentTimeMillis() - 10000; // ten seconds ago
         final StatusBarNotification sbn = makeMockSBN(userid, "android",
                 SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES,
                 null, n);
