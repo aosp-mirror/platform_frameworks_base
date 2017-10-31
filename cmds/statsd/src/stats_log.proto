@@ -69,6 +69,34 @@ message DurationMetricData {
   repeated DurationBucketInfo bucket_info = 2;
 }
 
+message ValueBucketInfo {
+  optional int64 start_bucket_nanos = 1;
+
+  optional int64 end_bucket_nanos = 2;
+
+  optional int64 value = 3;
+}
+
+message ValueMetricData {
+  repeated KeyValuePair dimension = 1;
+
+  repeated ValueBucketInfo bucket_info = 2;
+}
+
+message GaugeBucketInfo {
+  optional int64 start_bucket_nanos = 1;
+
+  optional int64 end_bucket_nanos = 2;
+
+  optional int64 gauge = 3;
+}
+
+message GaugeMetricData {
+  repeated KeyValuePair dimension = 1;
+
+  repeated GaugeBucketInfo bucket_info = 2;
+}
+
 message UidMapping {
   message AppInfo {
     optional string app = 1;
@@ -83,7 +111,7 @@ message UidMapping {
   message Change {
     optional bool deletion = 1;
 
-    optional int64 timestamp = 2;
+    optional int64 timestamp_nanos = 2;
     optional string app = 3;
     optional int32 uid = 4;
 
@@ -108,9 +136,29 @@ message StatsLogReport {
   message DurationMetricDataWrapper {
     repeated DurationMetricData data = 1;
   }
+  message ValueMetricDataWrapper {
+    repeated ValueMetricData data = 1;
+  }
+  message GaugeMetricDataWrapper {
+    repeated GaugeMetricData data = 1;
+  }
   oneof data {
     EventMetricDataWrapper event_metrics = 4;
     CountMetricDataWrapper count_metrics = 5;
     DurationMetricDataWrapper duration_metrics = 6;
+    ValueMetricDataWrapper value_metrics = 7;
+    GaugeMetricDataWrapper gauge_metrics = 8;
   }
+}
+
+message ConfigMetricsReport {
+  message ConfigKey {
+    optional int32 uid = 1;
+    optional string name = 2;
+  }
+  optional ConfigKey config_key = 1;
+
+  repeated StatsLogReport metrics = 2;
+
+  optional UidMapping uid_map = 3;
 }
