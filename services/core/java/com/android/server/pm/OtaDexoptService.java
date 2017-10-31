@@ -321,6 +321,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName),
                 true /* bootComplete */);
 
+        mPackageManagerService.getDexManager().dexoptSecondaryDex(pkg.packageName,
+                getCompilerFilterForReason(compilationReason),
+                false /* force */,
+                false /* compileOnlySharedDex */);
         return commands;
     }
 
