@@ -36,11 +36,11 @@ namespace statsd {
 
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard)
+                                         const sp<ConditionWizard>& wizard, const int pullTagId)
     : MetricProducer((time(nullptr) / 600 * 600 * NANO_SECONDS_IN_A_SECOND), conditionIndex,
                      wizard),
       mMetric(metric),
-      mPullCode(mStatsPullerManager.GetPullCode(mMetric.what())) {
+      mPullTagId(pullTagId) {
   // TODO: valuemetric for pushed events may need unlimited bucket length
   mBucketSizeNs = mMetric.bucket().bucket_size_millis() * 1000 * 1000;
 
@@ -52,8 +52,8 @@ ValueMetricProducer::ValueMetricProducer(const ValueMetric& metric, const int co
     mConditionSliced = true;
   }
 
-  if (!metric.has_condition() && mPullCode != -1) {
-    mStatsPullerManager.RegisterReceiver(mPullCode, this, metric.bucket().bucket_size_millis());
+  if (!metric.has_condition() && mPullTagId != -1) {
+    mStatsPullerManager.RegisterReceiver(mPullTagId, this, metric.bucket().bucket_size_millis());
   }
 
   VLOG("value metric %lld created. bucket size %lld start_time: %lld", metric.metric_id(),
@@ -120,27 +120,27 @@ StatsLogReport ValueMetricProducer::onDumpReport() {
 void ValueMetricProducer::onConditionChanged(const bool condition, const uint64_t eventTime) {
     mCondition = condition;
 
-    if (mPullCode != -1) {
-        vector<shared_ptr<LogEvent>> allData = mStatsPullerManager.Pull(mPullCode, eventTime);
+    if (mPullTagId != -1) {
         if (mCondition == true) {
-            mStatsPullerManager.RegisterReceiver(mPullCode, this,
+            mStatsPullerManager.RegisterReceiver(mPullTagId, this,
                                                  mMetric.bucket().bucket_size_millis());
         } else if (mCondition == ConditionState::kFalse) {
-            mStatsPullerManager.UnRegisterReceiver(mPullCode, this);
+            mStatsPullerManager.UnRegisterReceiver(mPullTagId, this);
         }
-        if (allData.size() == 0) {
-            return;
+
+        vector<shared_ptr<LogEvent>> allData;
+        if (mStatsPullerManager.Pull(mPullTagId, &allData)) {
+            if (allData.size() == 0) {
+                return;
+            }
+            AutoMutex _l(mLock);
+            for (const auto& data : allData) {
+                onMatchedLogEvent(0, *data, false);
+            }
+            flush_if_needed(eventTime);
         }
-        AutoMutex _l(mLock);
-        if (allData.size() == 0) {
-            return;
-        }
-        for (const auto& data : allData) {
-            onMatchedLogEvent(0, *data, false);
-        }
-        flush_if_needed(eventTime);
+        return;
     }
-    return;
 }
 
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
@@ -188,7 +188,7 @@ void ValueMetricProducer::onMatchedLogEventInternal(
       }
     }
   }
-  if (mPullCode == -1) {
+  if (mPullTagId == -1) {
       flush_if_needed(eventTimeNs);
   }
 }

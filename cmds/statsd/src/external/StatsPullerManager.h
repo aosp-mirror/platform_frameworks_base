@@ -37,44 +37,42 @@ class StatsPullerManager : public virtual RefBase {
 public:
     static StatsPullerManager& GetInstance();
 
-    void RegisterReceiver(int pullCode, sp<PullDataReceiver> receiver, long intervalMs);
+    void RegisterReceiver(int tagId, sp<PullDataReceiver> receiver, long intervalMs);
 
-    void UnRegisterReceiver(int pullCode, sp<PullDataReceiver> receiver);
+    void UnRegisterReceiver(int tagId, sp<PullDataReceiver> receiver);
 
-    // We return a vector of shared_ptr since LogEvent's copy constructor is not available.
-    vector<std::shared_ptr<LogEvent>> Pull(const int pullCode, const uint64_t timestampSec);
-
-    // Translate metric name to pullCodes.
-    // return -1 if no valid pullCode is found
-    int GetPullCode(std::string metricName);
+    // Verify if we know how to pull for this matcher
+    bool PullerForMatcherExists(int tagId);
 
     void OnAlarmFired();
+
+    bool Pull(const int pullCode, vector<std::shared_ptr<LogEvent>>* data);
 
 private:
     StatsPullerManager();
 
+    // use this to update alarm
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     sp<IStatsCompanionService> get_stats_companion_service();
 
-    std::unordered_map<int, std::unique_ptr<StatsPuller>> mPullers;
+    // mapping from simple matcher tagId to puller
+    std::map<int, std::shared_ptr<StatsPuller>> mPullers;
 
-
-
-      // internal state of a bucket.
       typedef struct {
         // pull_interval_sec : last_pull_time_sec
         std::pair<uint64_t, uint64_t> timeInfo;
         sp<PullDataReceiver> receiver;
       } ReceiverInfo;
 
+    // mapping from simple matcher tagId to receivers
     std::map<int, std::vector<ReceiverInfo>> mReceivers;
 
     Mutex mReceiversLock;
 
     long mCurrentPullingInterval;
 
-    // for value metrics, it is important for the buckets to be aligned to multiple of smallest
+    // for pulled metrics, it is important for the buckets to be aligned to multiple of smallest
     // bucket size. All pulled metrics start pulling based on this time, so that they can be
     // correctly attributed to the correct buckets. Pulled data attach a timestamp which is the
     // request time.
@@ -83,8 +81,6 @@ private:
     long get_pull_start_time_ms();
 
     LogEvent parse_pulled_data(String16 data);
-
-    static const std::unordered_map<std::string, int> kPullCodes;
 };
 
 }  // namespace statsd

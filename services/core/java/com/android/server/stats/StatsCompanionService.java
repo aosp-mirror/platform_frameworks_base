@@ -286,10 +286,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
       }
     }
 
-    // These values must be kept in sync with cmd/statsd/StatsPullerManager.h.
-    // TODO: pull the constant from stats_events.proto instead
-    private static final int PULL_CODE_KERNEL_WAKELOCKS = 20;
-
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
@@ -347,12 +343,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     @Override // Binder call
-    public StatsLogEventWrapper[] pullData(int pullCode) {
+    public StatsLogEventWrapper[] pullData(int tagId) {
         enforceCallingPermission();
         if (DEBUG)
-            Slog.d(TAG, "Pulling " + pullCode);
+            Slog.d(TAG, "Pulling " + tagId);
 
-        switch (pullCode) {
+        switch (tagId) {
             case StatsLog.WIFI_BYTES_TRANSFERRED: {
                 long token = Binder.clearCallingIdentity();
                 try {
@@ -366,7 +362,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     // Combine all the metrics per Uid into one record.
                     NetworkStats stats = nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
                             NetworkStats.TAG_NONE, null).groupedByUid();
-                    return addNetworkStats(pullCode, stats, false);
+                    return addNetworkStats(tagId, stats, false);
                 } catch (java.io.IOException e) {
                     Slog.e(TAG, "Pulling netstats for wifi bytes has error", e);
                 } finally {
@@ -386,7 +382,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     // Combine all the metrics per Uid into one record.
                     NetworkStats stats = nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
                         NetworkStats.TAG_NONE, null).groupedByUid();
-                    return addNetworkStats(pullCode, stats, false);
+                    return addNetworkStats(tagId, stats, false);
                 } catch (java.io.IOException e) {
                     Slog.e(TAG, "Pulling netstats for mobile bytes has error", e);
                 } finally {
@@ -406,7 +402,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     NetworkStats stats = rollupNetworkStatsByFGBG(
                             nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
                             NetworkStats.TAG_NONE, null));
-                    return addNetworkStats(pullCode, stats, true);
+                    return addNetworkStats(tagId, stats, true);
                 } catch (java.io.IOException e) {
                     Slog.e(TAG, "Pulling netstats for wifi bytes w/ fg/bg has error", e);
                 } finally {
@@ -426,7 +422,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     NetworkStats stats = rollupNetworkStatsByFGBG(
                             nsf.readNetworkStatsDetail(NetworkStats.UID_ALL, ifaces,
                             NetworkStats.TAG_NONE, null));
-                    return addNetworkStats(pullCode, stats, true);
+                    return addNetworkStats(tagId, stats, true);
                 } catch (java.io.IOException e) {
                     Slog.e(TAG, "Pulling netstats for mobile bytes w/ fg/bg has error", e);
                 } finally {
@@ -434,14 +430,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.KERNEL_WAKELOCKS_REPORTED: {
+            case StatsLog.KERNEL_WAKELOCK_PULLED: {
                 final KernelWakelockStats wakelockStats =
                         mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
                     String name = ent.getKey();
                     KernelWakelockStats.Entry kws = ent.getValue();
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(pullCode, 4);
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 4);
                     e.writeString(name);
                     e.writeInt(kws.mCount);
                     e.writeInt(kws.mVersion);
@@ -451,7 +447,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }
             default:
-                Slog.w(TAG, "No such pollable data as " + pullCode);
+                Slog.w(TAG, "No such tagId data as " + tagId);
                 return null;
         }
         return null;

@@ -192,12 +192,12 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
                  unordered_map<int, std::vector<int>>& trackerToMetricMap) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     const int allMetricsCount =
-            config.count_metric_size() + config.duration_metric_size() + config.event_metric_size();
+            config.count_metric_size() + config.duration_metric_size() + config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager& statsPullerManager = StatsPullerManager::GetInstance();
 
     // Build MetricProducers for each metric defined in config.
-    // (1) build CountMetricProducer
+    // build CountMetricProducer
     for (int i = 0; i < config.count_metric_size(); i++) {
         const CountMetric& metric = config.count_metric(i);
         if (!metric.has_what()) {
@@ -224,6 +224,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         allMetricProducers.push_back(countProducer);
     }
 
+    // build DurationMetricProducer
     for (int i = 0; i < config.duration_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const DurationMetric& metric = config.duration_metric(i);
@@ -285,6 +286,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         allMetricProducers.push_back(durationMetric);
     }
 
+    // build EventMetricProducer
     for (int i = 0; i < config.event_metric_size(); i++) {
         int metricIndex = allMetricProducers.size();
         const EventMetric& metric = config.event_metric(i);
@@ -310,7 +312,7 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
         allMetricProducers.push_back(eventMetric);
     }
 
-    // value metrics
+    // build ValueMetricProducer
     for (int i = 0; i < config.value_metric_size(); i++) {
         const ValueMetric& metric = config.value_metric(i);
         if (!metric.has_what()) {
@@ -318,24 +320,35 @@ bool initMetrics(const StatsdConfig& config, const unordered_map<string, int>& l
             return false;
         }
 
-        int pullCode = statsPullerManager.GetPullCode(metric.what());
-        if (pullCode == -1) {
-            ALOGW("cannot find %s in pulled metrics", metric.what().c_str());
-            return false;
-        }
-
-        sp<MetricProducer> valueProducer;
-        auto condition_it = conditionTrackerMap.find(metric.condition());
-        if (condition_it == conditionTrackerMap.end()) {
-            ALOGW("cannot find the Condition %s in the config", metric.condition().c_str());
-            return false;
-        }
         int metricIndex = allMetricProducers.size();
-        valueProducer = new ValueMetricProducer(metric, condition_it->second, wizard);
-        // will create new vector if not exist before.
-        auto& metricList = conditionToMetricMap[condition_it->second];
-        metricList.push_back(metricIndex);
+        int trackerIndex;
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.dimension_size() > 0,
+                                         allLogEntryMatchers, logTrackerMap, trackerToMetricMap,
+                                         trackerIndex)) {
+            return false;
+        }
 
+        sp<LogMatchingTracker> atomMatcher = allLogEntryMatchers.at(trackerIndex);
+        // If it is pulled atom, it should be simple matcher with one tagId.
+        int pullTagId = -1;
+        for (int tagId : atomMatcher->getTagIds()) {
+            if (statsPullerManager.PullerForMatcherExists(tagId)) {
+                if (atomMatcher->getTagIds().size() != 1) {
+                    return false;
+                }
+                pullTagId = tagId;
+            }
+        }
+
+        int conditionIndex = -1;
+        if (metric.has_condition()) {
+            handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                       metric.links(), allConditionTrackers, conditionIndex,
+                                       conditionToMetricMap);
+        }
+
+        sp<MetricProducer> valueProducer =
+                new ValueMetricProducer(metric, conditionIndex, wizard, pullTagId);
         allMetricProducers.push_back(valueProducer);
     }
     return true;

@@ -29,7 +29,8 @@ statsd_common_src := \
     src/config/ConfigKey.cpp \
     src/config/ConfigListener.cpp \
     src/config/ConfigManager.cpp \
-    src/external/KernelWakelockPuller.cpp \
+    src/external/StatsCompanionServicePuller.cpp \
+    src/external/ResourcePowerManagerPuller.cpp \
     src/external/StatsPullerManager.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
@@ -71,7 +72,15 @@ statsd_common_shared_libraries := \
     libutils \
     libservices \
     libandroidfw \
-    libprotoutil
+    libprotoutil \
+    libstatslog \
+    libhardware \
+    libhardware_legacy \
+    libhidlbase \
+    libhidltransport \
+    libhwbinder \
+    android.hardware.power@1.0 \
+    android.hardware.power@1.1
 
 # =========
 # statsd

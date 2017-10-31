@@ -20,37 +20,49 @@
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IPCThreadState.h>
 #include <private/android_filesystem_config.h>
-#include "KernelWakelockPuller.h"
+#include "StatsCompanionServicePuller.h"
 #include "StatsService.h"
 
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
-using namespace std;
+using std::make_shared;
+using std::shared_ptr;
+using std::vector;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-const int KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS = 1004;
+const int kLogMsgHeaderSize = 28;
 
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
-vector<StatsLogEventWrapper> KernelWakelockPuller::Pull() {
+bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEvent> >* data) {
     sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
     vector<StatsLogEventWrapper> returned_value;
     if (statsCompanion != NULL) {
-        Status status = statsCompanion->pullData(KernelWakelockPuller::PULL_CODE_KERNEL_WAKELOCKS,
-                                                 &returned_value);
+        Status status = statsCompanion->pullData(tagId, &returned_value);
         if (!status.isOk()) {
             ALOGW("error pulling kernel wakelock");
+            return false;
+        }
+        data->clear();
+        for (const StatsLogEventWrapper& it : returned_value) {
+            log_msg tmp;
+            tmp.entry_v1.len = it.bytes.size();
+            // Manually set the header size to 28 bytes to match the pushed log events.
+            tmp.entry.hdr_size = kLogMsgHeaderSize;
+            // And set the received bytes starting after the 28 bytes reserved for header.
+            std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
+            data->push_back(make_shared<LogEvent>(tmp));
         }
         ALOGD("KernelWakelockPuller::pull succeeded!");
-        return returned_value;
+        return true;
     } else {
         ALOGW("statsCompanion not found!");
-        return returned_value;
+        return false;
     }
 }
 

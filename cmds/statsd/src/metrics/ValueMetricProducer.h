@@ -33,7 +33,7 @@ namespace statsd {
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ValueMetric& valueMetric, const int conditionIndex,
-                        const sp<ConditionWizard>& wizard);
+                        const sp<ConditionWizard>& wizard, const int pullTagId);
 
     virtual ~ValueMetricProducer();
 
@@ -67,7 +67,8 @@ private:
 
     Mutex mLock;
 
-    const int mPullCode;
+    // tagId for pulled data. -1 if this is not pulled
+    const int mPullTagId;
 
     // internal state of a bucket.
     typedef struct {
