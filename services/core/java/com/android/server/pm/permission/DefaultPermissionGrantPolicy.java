@@ -383,6 +383,7 @@ public final class DefaultPermissionGrantPolicy {
                 MediaStore.AUTHORITY, userId);
         if (mediaStorePackage != null) {
             grantRuntimePermissions(mediaStorePackage, STORAGE_PERMISSIONS, true, userId);
+            grantRuntimePermissions(mediaStorePackage, PHONE_PERMISSIONS, true, userId);
         }
 
         // Downloads provider
