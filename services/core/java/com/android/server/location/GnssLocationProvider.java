@@ -803,18 +803,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         };
         mGnssMetrics = new GnssMetrics();
-
-        /*
-        * A cycle of native_init() and native_cleanup() is needed so that callbacks are registered
-        * after bootup even when location is disabled. This will allow Emergency SUPL to work even
-        * when location is disabled before device restart.
-        * */
-        boolean isInitialized = native_init();
-        if(!isInitialized) {
-            Log.d(TAG, "Failed to initialize at bootup");
-        } else {
-            native_cleanup();
-        }
     }
 
     /**
@@ -2272,6 +2260,19 @@ public class GnssLocationProvider implements LocationProviderInterface {
          * this handler.
          */
         private void handleInitialize() {
+            /*
+             * A cycle of native_init() and native_cleanup() is needed so that callbacks are
+             * registered after bootup even when location is disabled.
+             * This will allow Emergency SUPL to work even when location is disabled before device
+             * restart.
+             */
+            boolean isInitialized = native_init();
+            if(!isInitialized) {
+                Log.w(TAG, "Native initialization failed at bootup");
+            } else {
+                native_cleanup();
+            }
+
             // load default GPS configuration
             // (this configuration might change in the future based on SIM changes)
             reloadGpsProperties(mContext, mProperties);
