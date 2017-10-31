@@ -36,6 +36,10 @@ public final class DragHandleUtils {
 
     private DragHandleUtils() {}
 
+    /**
+     * @deprecated Negative assertions are taking too long to timeout in Espresso.
+     */
+    @Deprecated
     public static void assertNoSelectionHandles() {
         try {
             onView(isAssignableFrom(Editor.SelectionHandleView.class))

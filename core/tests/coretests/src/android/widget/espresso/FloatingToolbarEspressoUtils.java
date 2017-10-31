@@ -87,7 +87,9 @@ public class FloatingToolbarEspressoUtils {
      * Asserts that the floating toolbar is not displayed on screen.
      *
      * @throws AssertionError if the assertion fails
+     * @deprecated Negative assertions are taking too long to timeout in Espresso.
      */
+    @Deprecated
     public static void assertFloatingToolbarIsNotDisplayed() {
         try {
             onFloatingToolBar().check(matches(isDisplayed()));
@@ -173,12 +175,31 @@ public class FloatingToolbarEspressoUtils {
      * @throws AssertionError if the assertion fails
      */
     public static void assertFloatingToolbarDoesNotContainItem(String itemLabel) {
-        try{
-            assertFloatingToolbarContainsItem(itemLabel);
-        } catch (AssertionError e) {
-            return;
-        }
-        throw new AssertionError("Floating toolbar contains " + itemLabel);
+        onFloatingToolBar().check(matches(new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View view) {
+                return doesNotContainItem(view);
+            }
+
+            @Override
+            public void describeTo(Description description) {}
+
+            private boolean doesNotContainItem(View view) {
+                if (view.getTag() instanceof MenuItem) {
+                    if (itemLabel.equals(((MenuItem) view.getTag()).getTitle().toString())) {
+                        return false;
+                    }
+                } else if (view instanceof ViewGroup) {
+                    ViewGroup viewGroup = (ViewGroup) view;
+                    for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                        if (doesNotContainItem(viewGroup.getChildAt(i))) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+        }));
     }
 
     /**
