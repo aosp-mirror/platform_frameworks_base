@@ -304,14 +304,14 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.BATTERY_SERVICE, BatteryManager.class,
-                new StaticServiceFetcher<BatteryManager>() {
+                new CachedServiceFetcher<BatteryManager>() {
             @Override
-            public BatteryManager createService() throws ServiceNotFoundException {
+            public BatteryManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBatteryStats stats = IBatteryStats.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME));
                 IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub
                         .asInterface(ServiceManager.getServiceOrThrow("batteryproperties"));
-                return new BatteryManager(stats, registrar);
+                return new BatteryManager(ctx, stats, registrar);
             }});
 
         registerService(Context.NFC_SERVICE, NfcManager.class,
