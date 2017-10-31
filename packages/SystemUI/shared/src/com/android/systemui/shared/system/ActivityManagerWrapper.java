@@ -50,11 +50,13 @@ public class ActivityManagerWrapper {
 
     private final PackageManager mPackageManager;
     private final IconDrawableFactory mDrawableFactory;
+    private final BackgroundExecutor mBackgroundExecutor;
 
     private ActivityManagerWrapper() {
         final Context context = AppGlobals.getInitialApplication();
         mPackageManager = context.getPackageManager();
         mDrawableFactory = IconDrawableFactory.newInstance(context);
+        mBackgroundExecutor = BackgroundExecutor.get();
     }
 
     public static ActivityManagerWrapper getInstance() {
@@ -197,5 +199,53 @@ public class ActivityManagerWrapper {
             label = mPackageManager.getUserBadgedLabel(label, new UserHandle(userId)).toString();
         }
         return label;
+    }
+
+    /**
+     * Requests that the system close any open system windows (including other SystemUI).
+     */
+    public void closeSystemWindows(String reason) {
+        mBackgroundExecutor.submit(() -> {
+            try {
+                ActivityManager.getService().closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to close system windows", e);
+            }
+        });
+    }
+
+    /**
+     * Removes a task by id.
+     */
+    public void removeTask(int taskId) {
+        mBackgroundExecutor.submit(() -> {
+            try {
+                ActivityManager.getService().removeTask(taskId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to remove task=" + taskId, e);
+            }
+        });
+    }
+
+    /**
+     * Cancels the current window transtion to/from Recents for the given task id.
+     */
+    public void cancelWindowTransition(int taskId) {
+        try {
+            ActivityManager.getService().cancelTaskWindowTransition(taskId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
+        }
+    }
+
+    /**
+     * Cancels the current thumbnail transtion to/from Recents for the given task id.
+     */
+    public void cancelThumbnailTransition(int taskId) {
+        try {
+            ActivityManager.getService().cancelTaskThumbnailTransition(taskId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
+        }
     }
 }

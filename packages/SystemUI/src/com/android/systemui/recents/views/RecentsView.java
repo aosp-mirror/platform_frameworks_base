@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY;
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -90,6 +91,7 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -1012,7 +1014,7 @@ public class RecentsView extends FrameLayout {
             startTaskActivity(stack, task, taskView, opts, transitionFuture, windowingMode,
                     activityType);
         }
-        Recents.getSystemServices().sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+        ActivityManagerWrapper.getInstance().closeSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
     }
 
     /**

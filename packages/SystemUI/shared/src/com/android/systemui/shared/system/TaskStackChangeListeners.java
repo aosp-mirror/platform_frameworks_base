@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.misc;
+package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.IActivityManager;

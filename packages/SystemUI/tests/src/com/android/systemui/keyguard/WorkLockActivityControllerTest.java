@@ -20,7 +20,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
@@ -41,10 +40,8 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.keyguard.WorkLockActivity;
-import com.android.systemui.keyguard.WorkLockActivityController;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.TaskStackChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +65,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
     private @Mock IActivityManager mIActivityManager;
 
     private WorkLockActivityController mController;
-    private TaskStackChangeListener mTaskStackListener;
+    private SysUiTaskStackChangeListener mTaskStackListener;
 
     @Before
     public void setUp() throws Exception {
@@ -78,8 +75,8 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         doReturn("com.example.test").when(mContext).getPackageName();
 
         // Construct controller. Save the TaskStackListener for injecting events.
-        final ArgumentCaptor<TaskStackChangeListener> listenerCaptor =
-                ArgumentCaptor.forClass(TaskStackChangeListener.class);
+        final ArgumentCaptor<SysUiTaskStackChangeListener> listenerCaptor =
+                ArgumentCaptor.forClass(SysUiTaskStackChangeListener.class);
         mController =
                 new WorkLockActivityController(mContext, mSystemServicesProxy, mIActivityManager);
 
@@ -97,7 +94,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
 
         // The overlay should start and the task the activity started in should not be removed.
         verifyStartActivity(TASK_ID, true /*taskOverlay*/);
-        verify(mSystemServicesProxy, never()).removeTask(anyInt() /*taskId*/);
+        verify(mIActivityManager, never()).removeTask(anyInt() /*taskId*/);
     }
 
     @Test
@@ -111,7 +108,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         // The task the activity started in should be removed to prevent the locked task from
         // being shown.
         verifyStartActivity(TASK_ID, true /*taskOverlay*/);
-        verify(mSystemServicesProxy).removeTask(TASK_ID);
+        verify(mIActivityManager).removeTask(TASK_ID);
     }
 
     // End of tests, start of helpers

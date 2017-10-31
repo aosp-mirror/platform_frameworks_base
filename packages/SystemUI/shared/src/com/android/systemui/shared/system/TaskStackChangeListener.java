@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.misc;
+package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.TaskSnapshot;
-import android.content.Context;
 import android.os.UserHandle;
 import android.util.Log;
 
 /**
- * An abstract class to track task stack changes.
- * Classes should implement this instead of {@link android.app.ITaskStackListener}
- * to reduce IPC calls from system services. These callbacks will be called on the main thread.
+ * An interface to track task stack changes. Classes should implement this instead of
+ * {@link android.app.ITaskStackListener} to reduce IPC calls from system services.
  */
 public abstract class TaskStackChangeListener {
 
-    /**
-     * NOTE: This call is made of the thread that the binder call comes in on.
-     */
+    // Binder thread callbacks
     public void onTaskStackChangedBackground() { }
+
+    // Main thread callbacks
     public void onTaskStackChanged() { }
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
@@ -45,17 +43,16 @@ public abstract class TaskStackChangeListener {
     public void onTaskProfileLocked(int taskId, int userId) { }
 
     /**
-     * Checks that the current user matches the user's SystemUI process. Since
+     * Checks that the current user matches the process. Since
      * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
-     * TaskStackChangeListener should make this call to verify that we don't act on events from other
-     * user's processes.
+     * {@link TaskStackChangeListener} should make this call to verify that we don't act on events
+     * originating from another user's interactions.
      */
-    protected final boolean checkCurrentUserId(Context context, boolean debug) {
+    protected final boolean checkCurrentUserId(int currentUserId, boolean debug) {
         int processUserId = UserHandle.myUserId();
-        int currentUserId = SystemServicesProxy.getInstance(context).getCurrentUser();
         if (processUserId != currentUserId) {
             if (debug) {
-                Log.d(SystemServicesProxy.TAG, "UID mismatch. SystemUI is running uid=" + processUserId
+                Log.d("TaskStackChangeListener", "UID mismatch. Process is uid=" + processUserId
                         + " and the current user is uid=" + currentUserId);
             }
             return false;
