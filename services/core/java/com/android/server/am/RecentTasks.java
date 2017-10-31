@@ -264,6 +264,20 @@ class RecentTasks {
         return cn.equals(mRecentsComponent) && UserHandle.isSameApp(uid, mRecentsUid);
     }
 
+    /**
+     * @return the recents component.
+     */
+    ComponentName getRecentsComponent() {
+        return mRecentsComponent;
+    }
+
+    /**
+     * @return the uid for the recents component.
+     */
+    int getRecentsComponentUid() {
+        return mRecentsUid;
+    }
+
     void registerCallback(Callbacks callback) {
         mCallbacks.add(callback);
     }

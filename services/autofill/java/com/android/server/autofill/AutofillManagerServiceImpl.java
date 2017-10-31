@@ -813,7 +813,23 @@ final class AutofillManagerServiceImpl {
                     synchronized (mLock) {
                         resetSession = resetClient || isClientSessionDestroyedLocked(client);
                     }
-                    client.setState(isEnabled(), resetSession, resetClient);
+                    int flags = 0;
+                    if (isEnabled()) {
+                        flags |= AutofillManager.SET_STATE_FLAG_ENABLED;
+                    }
+                    if (resetSession) {
+                        flags |= AutofillManager.SET_STATE_FLAG_RESET_SESSION;
+                    }
+                    if (resetClient) {
+                        flags |= AutofillManager.SET_STATE_FLAG_RESET_CLIENT;
+                    }
+                    if (sDebug) {
+                        flags |= AutofillManager.SET_STATE_FLAG_DEBUG;
+                    }
+                    if (sVerbose) {
+                        flags |= AutofillManager.SET_STATE_FLAG_VERBOSE;
+                    }
+                    client.setState(flags);
                 } catch (RemoteException re) {
                     /* ignore */
                 }

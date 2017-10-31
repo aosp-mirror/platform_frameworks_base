@@ -641,13 +641,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         showRelativeAffiliatedTask(false);
     }
 
-    public void dockTopTask(int topTaskId, int dragMode,
-            int stackCreateMode, Rect initialBounds) {
+    public void splitPrimaryTask(int taskId, int dragMode, int stackCreateMode,
+            Rect initialBounds) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Make sure we inform DividerView before we actually start the activity so we can change
         // the resize mode already.
-        if (ssp.moveTaskToDockedStack(topTaskId, stackCreateMode, initialBounds)) {
+        if (ssp.setTaskWindowingModeSplitScreenPrimary(taskId, stackCreateMode, initialBounds)) {
             EventBus.getDefault().send(new DockedTopTaskEvent(dragMode, initialBounds));
             showRecents(
                     false /* triggeredFromAltTab */,

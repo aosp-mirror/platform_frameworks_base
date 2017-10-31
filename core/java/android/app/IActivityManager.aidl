@@ -63,6 +63,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.service.voice.IVoiceInteractionSession;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -82,7 +83,7 @@ interface IActivityManager {
     // below block of transactions.
 
     // Since these transactions are also called from native code, these must be kept in sync with
-    // the ones in frameworks/native/include/binder/IActivityManager.h
+    // the ones in frameworks/native/libs/binder/include/binder/IActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
     // =============== End of transactions used on native side as well ============================
@@ -421,6 +422,9 @@ interface IActivityManager {
             in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
             in Intent intent, in String resolvedType, in Bundle options, int userId);
+    int startRecentsActivity(in IAssistDataReceiver assistDataReceiver, in Bundle options,
+            int userId);
+    int startActivityFromRecents(int taskId, in Bundle options);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);
     void startSystemLockTaskMode(int taskId);
@@ -428,7 +432,6 @@ interface IActivityManager {
     void finishVoiceTask(in IVoiceInteractionSession session);
     boolean isTopOfTask(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
-    int startActivityFromRecents(int taskId, in Bundle options);
     void notifyEnterAnimationComplete(in IBinder token);
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
@@ -453,7 +456,7 @@ interface IActivityManager {
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
     int createStackOnDisplay(int displayId);
     void setTaskResizeable(int taskId, int resizeableMode);
-    boolean requestAssistContextExtras(int requestType, in IResultReceiver receiver,
+    boolean requestAssistContextExtras(int requestType, in IAssistDataReceiver receiver,
             in Bundle receiverExtras, in IBinder activityToken,
             boolean focused, boolean newSessionId);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
@@ -499,8 +502,8 @@ interface IActivityManager {
     void exitFreeformMode(in IBinder token);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
-    boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            in Rect initialBounds);
+    boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
+            boolean animate, in Rect initialBounds);
     /**
      * Dismisses split-screen multi-window mode.
      * {@param toTop} If true the current primary split-screen stack will be placed or left on top.
@@ -617,7 +620,7 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
-    boolean requestAutofillData(in IResultReceiver receiver, in Bundle receiverExtras,
+    boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
                                 in IBinder activityToken, int flags);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
     int restartUserInBackground(int userId);

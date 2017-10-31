@@ -690,7 +690,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
             if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
-                mService.mDragDropController.mDragState.sendDragStartedIfNeededLw(w);
+                mService.mDragDropController.mDragState.sendDragStartedIfNeededLocked(w);
             }
 
             addInputWindowHandle(

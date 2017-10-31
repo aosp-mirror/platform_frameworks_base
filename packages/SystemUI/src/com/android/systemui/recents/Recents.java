@@ -394,7 +394,7 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds,
+    public boolean splitPrimaryTask(int dragMode, int stackCreateMode, Rect initialBounds,
             int metricsDockAction) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
@@ -426,15 +426,16 @@ public class Recents extends SystemUI
                             runningTask.topActivity.flattenToShortString());
                 }
                 if (sSystemServicesProxy.isSystemUser(currentUser)) {
-                    mImpl.dockTopTask(runningTask.id, dragMode, stackCreateMode, initialBounds);
+                    mImpl.splitPrimaryTask(runningTask.id, dragMode, stackCreateMode,
+                            initialBounds);
                 } else {
                     if (mSystemToUserCallbacks != null) {
                         IRecentsNonSystemUserCallbacks callbacks =
                                 mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                         if (callbacks != null) {
                             try {
-                                callbacks.dockTopTask(runningTask.id, dragMode, stackCreateMode,
-                                        initialBounds);
+                                callbacks.splitPrimaryTask(runningTask.id, dragMode,
+                                        stackCreateMode, initialBounds);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Callback failed", e);
                             }

@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.DragDropController.MSG_ANIMATION_END;
+import static com.android.server.wm.DragDropController.MSG_DRAG_END_TIMEOUT;
+import static com.android.server.wm.DragDropController.MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -29,14 +32,10 @@ import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -50,19 +49,14 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
-import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.Transformation;
-
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
-import com.android.server.wm.WindowManagerService.H;
 
 import com.android.internal.view.IDragAndDropPermissions;
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
 
 import java.util.ArrayList;
 
@@ -86,10 +80,8 @@ class DragState {
     private static final String ANIMATED_PROPERTY_ALPHA = "alpha";
     private static final String ANIMATED_PROPERTY_SCALE = "scale";
 
-    // Messages for Handler.
-    private static final int MSG_ANIMATION_END = 0;
-
     final WindowManagerService mService;
+    final DragDropController mDragDropController;
     IBinder mToken;
     /**
      * Do not use the variable from the out of animation thread while mAnimator is not null.
@@ -118,17 +110,16 @@ class DragState {
     @Nullable private ValueAnimator mAnimator;
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
     private Point mDisplaySize = new Point();
-    private final Handler mHandler;
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
         mService = service;
+        mDragDropController = service.mDragDropController;
         mToken = token;
         mSurfaceControl = surface;
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
-        mHandler = new DragStateHandler(service.mH.getLooper());
     }
 
     void reset() {
@@ -159,8 +150,8 @@ class DragState {
             mServerChannel = channels[0];
             mClientChannel = channels[1];
             mService.mInputManager.registerInputChannel(mServerChannel, null);
-            mInputEventReceiver = mService.new DragInputEventReceiver(mClientChannel,
-                    mService.mH.getLooper());
+            mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
+                    mService.mH.getLooper(), mDragDropController, mService);
 
             mDragApplicationHandle = new InputApplicationHandle(null);
             mDragApplicationHandle.name = "drag";
@@ -171,7 +162,7 @@ class DragState {
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;
-            mDragWindowHandle.layer = getDragLayerLw();
+            mDragWindowHandle.layer = getDragLayerLocked();
             mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutNanos =
@@ -250,14 +241,14 @@ class DragState {
             Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
         } else {
             // Input channel should be disposed on the thread where the input is being handled.
-            mService.mH.obtainMessage(
-                    H.TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor).sendToTarget();
+            mDragDropController.sendHandlerMessage(
+                    MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor);
             mInputInterceptor = null;
             mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         }
     }
 
-    int getDragLayerLw() {
+    int getDragLayerLocked() {
         return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_DRAG)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
@@ -265,7 +256,7 @@ class DragState {
 
     /* call out to each visible window/session informing it about the drag
      */
-    void broadcastDragStartedLw(final float touchX, final float touchY) {
+    void broadcastDragStartedLocked(final float touchX, final float touchY) {
         mOriginalX = mCurrentX = touchX;
         mOriginalY = mCurrentY = touchY;
 
@@ -292,7 +283,7 @@ class DragState {
         }
 
         mDisplayContent.forAllWindows(w -> {
-            sendDragStartedLw(w, touchX, touchY, mDataDescription);
+            sendDragStartedLocked(w, touchX, touchY, mDataDescription);
         }, false /* traverseTopToBottom */ );
     }
 
@@ -304,7 +295,7 @@ class DragState {
      * This method clones the 'event' parameter if it's being delivered to the same
      * process, so it's safe for the caller to call recycle() on the event afterwards.
      */
-    private void sendDragStartedLw(WindowState newWin, float touchX, float touchY,
+    private void sendDragStartedLocked(WindowState newWin, float touchX, float touchY,
             ClipDescription desc) {
         if (mDragInProgress && isValidDropTarget(newWin)) {
             DragEvent event = obtainDragEvent(newWin, DragEvent.ACTION_DRAG_STARTED,
@@ -353,7 +344,7 @@ class DragState {
      * previously been notified, i.e. it became visible after the drag operation
      * was begun.  This is a rare case.
      */
-    void sendDragStartedIfNeededLw(WindowState newWin) {
+    void sendDragStartedIfNeededLocked(WindowState newWin) {
         if (mDragInProgress) {
             // If we have sent the drag-started, we needn't do so again
             if (isWindowNotified(newWin)) {
@@ -362,7 +353,7 @@ class DragState {
             if (DEBUG_DRAG) {
                 Slog.d(TAG_WM, "need to send DRAG_STARTED to new window " + newWin);
             }
-            sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
+            sendDragStartedLocked(newWin, mCurrentX, mCurrentY, mDataDescription);
         }
     }
 
@@ -375,7 +366,7 @@ class DragState {
         return false;
     }
 
-    private void broadcastDragEndedLw() {
+    private void broadcastDragEndedLocked() {
         final int myPid = Process.myPid();
 
         if (DEBUG_DRAG) {
@@ -406,7 +397,7 @@ class DragState {
         mDragInProgress = false;
     }
 
-    void endDragLw() {
+    void endDragLocked() {
         if (mAnimator != null) {
             return;
         }
@@ -414,10 +405,10 @@ class DragState {
             mAnimator = createReturnAnimationLocked();
             return;  // Will call cleanUpDragLw when the animation is done.
         }
-        cleanUpDragLw();
+        cleanUpDragLocked();
     }
 
-    void cancelDragLw() {
+    void cancelDragLocked() {
         if (mAnimator != null) {
             return;
         }
@@ -430,14 +421,14 @@ class DragState {
             //    WindowManagerService, which will cause DragState#reset() while playing the
             //    cancel animation.
             reset();
-            mService.mDragDropController.mDragState = null;
+            mDragDropController.mDragState = null;
             return;
         }
         mAnimator = createCancelAnimationLocked();
     }
 
-    private void cleanUpDragLw() {
-        broadcastDragEndedLw();
+    private void cleanUpDragLocked() {
+        broadcastDragEndedLocked();
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
             mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
         }
@@ -447,10 +438,10 @@ class DragState {
 
         // free our resources and drop all the object references
         reset();
-        mService.mDragDropController.mDragState = null;
+        mDragDropController.mDragState = null;
     }
 
-    void notifyMoveLw(float x, float y) {
+    void notifyMoveLocked(float x, float y) {
         if (mAnimator != null) {
             return;
         }
@@ -459,7 +450,7 @@ class DragState {
 
         // Move the surface to the given touch
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                TAG_WM, ">>> OPEN TRANSACTION notifyMoveLw");
+                TAG_WM, ">>> OPEN TRANSACTION notifyMoveLocked");
         mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
@@ -469,12 +460,12 @@ class DragState {
         } finally {
             mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                    TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLw");
+                    TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLocked");
         }
-        notifyLocationLw(x, y);
+        notifyLocationLocked(x, y);
     }
 
-    void notifyLocationLw(float x, float y) {
+    void notifyLocationLocked(float x, float y) {
         // Tell the affected window
         WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
         if (touchedWin != null && !isWindowNotified(touchedWin)) {
@@ -519,7 +510,7 @@ class DragState {
     // Find the drop target and tell it about the data.  Returns 'true' if we can immediately
     // dispatch the global drag-ended message, 'false' if we need to wait for a
     // result from the recipient.
-    boolean notifyDropLw(float x, float y) {
+    boolean notifyDropLocked(float x, float y) {
         if (mAnimator != null) {
             return false;
         }
@@ -563,9 +554,7 @@ class DragState {
             touchedWin.mClient.dispatchDragEvent(evt);
 
             // 5 second timeout for this window to respond to the drop
-            mService.mH.removeMessages(H.DRAG_END_TIMEOUT, token);
-            Message msg = mService.mH.obtainMessage(H.DRAG_END_TIMEOUT, token);
-            mService.mH.sendMessageDelayed(msg, 5000);
+            mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, token);
         } catch (RemoteException e) {
             Slog.w(TAG_WM, "can't send drop notification to win " + touchedWin);
             return true;
@@ -576,6 +565,15 @@ class DragState {
         }
         mToken = token;
         return false;
+    }
+
+    void onAnimationEndLocked() {
+        if (mAnimator == null) {
+            Slog.wtf(TAG_WM, "Unexpected null mAnimator");
+            return;
+        }
+        mAnimator = null;
+        cleanUpDragLocked();
     }
 
     private static DragEvent obtainDragEvent(WindowState win, int action,
@@ -641,37 +639,10 @@ class DragState {
         return (mTouchSource & source) == source;
     }
 
-    void overridePointerIconLw(int touchSource) {
+    void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
             InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
-        }
-    }
-
-    private class DragStateHandler extends Handler {
-        DragStateHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_ANIMATION_END:
-                    synchronized (mService.mWindowMap) {
-                        if (mService.mDragDropController.mDragState != DragState.this) {
-                            Slog.wtf(TAG_WM, "mDragState is updated unexpectedly while " +
-                                    "playing animation");
-                            return;
-                        }
-                        if (mAnimator == null) {
-                            Slog.wtf(TAG_WM, "Unexpected null mAnimator");
-                            return;
-                        }
-                        mAnimator = null;
-                        cleanUpDragLw();
-                    }
-                    break;
-            }
         }
     }
 
@@ -708,7 +679,7 @@ class DragState {
         public void onAnimationEnd(Animator animator) {
             // Updating mDragState requires the WM lock so continues it on the out of
             // AnimationThread.
-            mHandler.sendEmptyMessage(MSG_ANIMATION_END);
+            mDragDropController.sendHandlerMessage(MSG_ANIMATION_END, null);
         }
     }
 }

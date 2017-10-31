@@ -2339,7 +2339,8 @@ public final class StrictMode {
         /** Stack and violation details. */
         @Nullable private final Throwable mThrowable;
 
-        private final Deque<Throwable> mBinderStack = new ArrayDeque<>();
+        /** Path leading to a violation that occurred across binder. */
+        private final Deque<StackTraceElement[]> mBinderStack = new ArrayDeque<>();
 
         /** Memoized stack trace of full violation. */
         @Nullable private String mStackTrace;
@@ -2421,9 +2422,13 @@ public final class StrictMode {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new FastPrintWriter(sw, false, 256);
                 mThrowable.printStackTrace(pw);
-                for (Throwable t : mBinderStack) {
+                for (StackTraceElement[] traces : mBinderStack) {
                     pw.append("# via Binder call with stack:\n");
-                    t.printStackTrace(pw);
+                    for (StackTraceElement traceElement : traces) {
+                        pw.append("\tat ");
+                        pw.append(traceElement.toString());
+                        pw.append('\n');
+                    }
                 }
                 pw.flush();
                 pw.close();
@@ -2456,12 +2461,13 @@ public final class StrictMode {
         }
 
         /**
-         * Add a {@link Throwable} from the current process that caused the underlying violation.
+         * Add a {@link Throwable} from the current process that caused the underlying violation. We
+         * only preserve the stack trace elements.
          *
          * @hide
          */
         void addLocalStack(Throwable t) {
-            mBinderStack.addFirst(t);
+            mBinderStack.addFirst(t.getStackTrace());
         }
 
         /**
@@ -2530,7 +2536,17 @@ public final class StrictMode {
             mThrowable = (Throwable) in.readSerializable();
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
-                mBinderStack.add((Throwable) in.readSerializable());
+                StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];
+                for (int j = 0; j < traceElements.length; j++) {
+                    StackTraceElement element =
+                            new StackTraceElement(
+                                    in.readString(),
+                                    in.readString(),
+                                    in.readString(),
+                                    in.readInt());
+                    traceElements[j] = element;
+                }
+                mBinderStack.add(traceElements);
             }
             int rawPolicy = in.readInt();
             if (unsetGatheringBit) {
@@ -2552,8 +2568,14 @@ public final class StrictMode {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeSerializable(mThrowable);
             dest.writeInt(mBinderStack.size());
-            for (Throwable t : mBinderStack) {
-                dest.writeSerializable(t);
+            for (StackTraceElement[] traceElements : mBinderStack) {
+                dest.writeInt(traceElements.length);
+                for (StackTraceElement element : traceElements) {
+                    dest.writeString(element.getClassName());
+                    dest.writeString(element.getMethodName());
+                    dest.writeString(element.getFileName());
+                    dest.writeInt(element.getLineNumber());
+                }
             }
             int start = dest.dataPosition();
             dest.writeInt(policy);

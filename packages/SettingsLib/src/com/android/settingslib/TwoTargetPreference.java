@@ -21,41 +21,56 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class TwoTargetPreference extends Preference {
+
+    private boolean mUseSmallIcon;
+    private int mSmallIconSize;
 
     public TwoTargetPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context);
     }
 
     public TwoTargetPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
 
     public TwoTargetPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public TwoTargetPreference(Context context) {
         super(context);
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         setLayoutResource(R.layout.preference_two_target);
+        mSmallIconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.two_target_pref_small_icon_size);
         final int secondTargetResId = getSecondTargetResId();
         if (secondTargetResId != 0) {
             setWidgetLayoutResource(secondTargetResId);
         }
     }
 
+    public void setUseSmallIcon(boolean useSmallIcon) {
+        mUseSmallIcon = useSmallIcon;
+    }
+
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        if (mUseSmallIcon) {
+            ImageView icon = holder.itemView.findViewById(android.R.id.icon);
+            icon.setLayoutParams(new LinearLayout.LayoutParams(mSmallIconSize, mSmallIconSize));
+        }
         final View divider = holder.findViewById(R.id.two_target_divider);
         final View widgetFrame = holder.findViewById(android.R.id.widget_frame);
         final boolean shouldHideSecondTarget = shouldHideSecondTarget();

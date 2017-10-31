@@ -52,7 +52,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-import com.android.server.vr.VrManagerService;
 
 /**
  *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
@@ -148,11 +147,26 @@ public class ImmersiveModeConfirmation {
                     && userSetupComplete
                     && !mVrModeEnabled
                     && !navBarEmpty
+                    && !isLockTaskModeLocked()
                     && !UserManager.isDeviceInDemoMode(mContext)) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
             mHandler.sendEmptyMessage(H.HIDE);
+        }
+    }
+
+    /**
+     * @return {@code true} if and only if the device is currently in LockTask mode managed by
+     * {@link android.app.admin.DevicePolicyManager}. Note that this differs from the screen pinning
+     * mode which is initiated by the user.
+     */
+    private boolean isLockTaskModeLocked() {
+        try {
+            return ActivityManager.getService().getLockTaskModeState()
+                    == ActivityManager.LOCK_TASK_MODE_LOCKED;
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

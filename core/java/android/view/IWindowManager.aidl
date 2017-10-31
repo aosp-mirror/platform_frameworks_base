@@ -16,7 +16,7 @@
 
 package android.view;
 
-import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -272,7 +272,7 @@ interface IWindowManager
     /**
      * Used only for assist -- request a screenshot of the current application.
      */
-    boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
+    boolean requestAssistScreenshot(IAssistDataReceiver receiver);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.

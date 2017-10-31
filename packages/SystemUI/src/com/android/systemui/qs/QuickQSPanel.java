@@ -25,7 +25,7 @@ import android.widget.Space;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.*;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -43,6 +43,7 @@ public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
 
+    private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
@@ -149,6 +150,30 @@ public class QuickQSPanel extends QSPanel {
 
     public static int getNumQuickTiles(Context context) {
         return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
+    }
+
+    void setDisabledByPolicy(boolean disabled) {
+        if (disabled != mDisabledByPolicy) {
+            mDisabledByPolicy = disabled;
+            setVisibility(disabled ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    /**
+     * Sets the visibility of this {@link QuickQSPanel}. This method has no effect when this panel
+     * is disabled by policy through {@link #setDisabledByPolicy(boolean)}, and in this case the
+     * visibility will always be {@link View#GONE}. This method is called externally by
+     * {@link QSAnimator} only.
+     */
+    @Override
+    public void setVisibility(int visibility) {
+        if (mDisabledByPolicy) {
+            if (getVisibility() == View.GONE) {
+                return;
+            }
+            visibility = View.GONE;
+        }
+        super.setVisibility(visibility);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {

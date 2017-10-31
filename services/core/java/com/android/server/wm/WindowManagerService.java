@@ -20,7 +20,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -137,7 +137,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -210,7 +209,6 @@ import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
-import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -226,7 +224,7 @@ import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
-import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -560,7 +558,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // The root of the device window hierarchy.
     RootWindowContainer mRoot;
 
-    int mDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
     private final SparseIntArray mTmpTaskIds = new SparseIntArray();
@@ -751,7 +749,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mAllowTheaterModeWakeFromLayout;
 
     TaskPositioner mTaskPositioner;
-    final DragDropController mDragDropController = new DragDropController();
+    final DragDropController mDragDropController;
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
@@ -770,110 +768,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private final PointerEventDispatcher mPointerEventDispatcher;
 
     private WindowContentFrameStats mTempWindowRenderStats;
-
-    final class DragInputEventReceiver extends InputEventReceiver {
-        // Set, if stylus button was down at the start of the drag.
-        private boolean mStylusButtonDownAtStart;
-        // Indicates the first event to check for button state.
-        private boolean mIsStartEvent = true;
-        // Set to true to ignore input events after the drag gesture is complete but the drag events
-        // are still being dispatched.
-        private boolean mMuteInput = false;
-
-        public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper);
-        }
-
-        @Override
-        public void onInputEvent(InputEvent event, int displayId) {
-            boolean handled = false;
-            try {
-                if (mDragDropController.mDragState == null) {
-                    // The drag has ended but the clean-up message has not been processed by
-                    // window manager. Drop events that occur after this until window manager
-                    // has a chance to clean-up the input handle.
-                    handled = true;
-                    return;
-                }
-                if (event instanceof MotionEvent
-                        && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
-                        && !mMuteInput) {
-                    final MotionEvent motionEvent = (MotionEvent)event;
-                    boolean endDrag = false;
-                    final float newX = motionEvent.getRawX();
-                    final float newY = motionEvent.getRawY();
-                    final boolean isStylusButtonDown =
-                            (motionEvent.getButtonState() & MotionEvent.BUTTON_STYLUS_PRIMARY) != 0;
-
-                    if (mIsStartEvent) {
-                        if (isStylusButtonDown) {
-                            // First event and the button was down, check for the button being
-                            // lifted in the future, if that happens we'll drop the item.
-                            mStylusButtonDownAtStart = true;
-                        }
-                        mIsStartEvent = false;
-                    }
-
-                    switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        if (DEBUG_DRAG) {
-                            Slog.w(TAG_WM, "Unexpected ACTION_DOWN in drag layer");
-                        }
-                    } break;
-
-                    case MotionEvent.ACTION_MOVE: {
-                        if (mStylusButtonDownAtStart && !isStylusButtonDown) {
-                            if (DEBUG_DRAG) Slog.d(TAG_WM, "Button no longer pressed; dropping at "
-                                    + newX + "," + newY);
-                            mMuteInput = true;
-                            synchronized (mWindowMap) {
-                                endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
-                            }
-                        } else {
-                            synchronized (mWindowMap) {
-                                // move the surface and tell the involved window(s) where we are
-                                mDragDropController.mDragState.notifyMoveLw(newX, newY);
-                            }
-                        }
-                    } break;
-
-                    case MotionEvent.ACTION_UP: {
-                        if (DEBUG_DRAG) Slog.d(TAG_WM, "Got UP on move channel; dropping at "
-                                + newX + "," + newY);
-                        mMuteInput = true;
-                        synchronized (mWindowMap) {
-                            endDrag = mDragDropController.mDragState.notifyDropLw(newX, newY);
-                        }
-                    } break;
-
-                    case MotionEvent.ACTION_CANCEL: {
-                        if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag cancelled!");
-                        mMuteInput = true;
-                        endDrag = true;
-                    } break;
-                    }
-
-                    if (endDrag) {
-                        if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag ended; tearing down state");
-                        // tell all the windows that the drag has ended
-                        synchronized (mWindowMap) {
-                            // endDragLw will post back to looper to dispose the receiver
-                            // since we still need the receiver for the last finishInputEvent.
-                            mDragDropController.mDragState.endDragLw();
-                        }
-                        mStylusButtonDownAtStart = false;
-                        mIsStartEvent = true;
-                    }
-
-                    handled = true;
-                }
-            } catch (Exception e) {
-                Slog.e(TAG_WM, "Exception caught by drag handleMotion", e);
-            } finally {
-                finishInputEvent(event, handled);
-            }
-        }
-    }
 
     /**
      * Whether the UI is currently running in touch mode (not showing
@@ -1164,6 +1058,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
+        mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         initPolicy();
@@ -3783,7 +3678,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * of the target image.
      */
     @Override
-    public boolean requestAssistScreenshot(final IAssistScreenshotReceiver receiver) {
+    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
         if (!checkCallingPermission(READ_FRAME_BUFFER,
                 "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
@@ -3795,7 +3690,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
                     false /* includeDecor */);
             try {
-                receiver.send(bm);
+                receiver.onHandleAssistScreenshot(bm);
             } catch (RemoteException e) {
             }
         });
@@ -4796,8 +4691,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int APP_FREEZE_TIMEOUT = 17;
         public static final int SEND_NEW_CONFIGURATION = 18;
         public static final int REPORT_WINDOWS_CHANGE = 19;
-        public static final int DRAG_START_TIMEOUT = 20;
-        public static final int DRAG_END_TIMEOUT = 21;
 
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
@@ -4823,8 +4716,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int FINISH_TASK_POSITIONING = 40;
 
         public static final int UPDATE_DOCKED_STACK_DIVIDER = 41;
-
-        public static final int TEAR_DOWN_DRAG_AND_DROP_INPUT = 44;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
@@ -5050,13 +4941,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         notifyWindowsChanged();
                     }
-                    break;
-                }
-
-                case DRAG_START_TIMEOUT:
-                case DRAG_END_TIMEOUT:
-                case TEAR_DOWN_DRAG_AND_DROP_INPUT: {
-                    mDragDropController.handleMessage(WindowManagerService.this, msg);
                     break;
                 }
 

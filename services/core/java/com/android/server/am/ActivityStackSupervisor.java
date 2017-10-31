@@ -4465,7 +4465,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         try {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 mWindowManager.setDockedStackCreateState(
-                        activityOptions.getDockCreateMode(), null /* initialBounds */);
+                        activityOptions.getSplitScreenCreateMode(), null /* initialBounds */);
 
                 // Defer updating the stack in which recents is until the app transition is done, to
                 // not run into issues where we still need to draw the task in recents but the

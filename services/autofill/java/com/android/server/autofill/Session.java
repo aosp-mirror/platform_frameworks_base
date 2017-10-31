@@ -16,10 +16,10 @@
 
 package com.android.server.autofill;
 
+import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
-import static android.service.voice.VoiceInteractionSession.KEY_RECEIVER_EXTRAS;
-import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -74,11 +75,11 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.R;
+import com.android.internal.app.IAssistDataReceiver;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
@@ -203,16 +204,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Receiver of assist data from the app's {@link Activity}.
      */
-    private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
+    private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
         @Override
-        public void send(int resultCode, Bundle resultData) throws RemoteException {
-            final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
+        public void onHandleAssistData(Bundle resultData) throws RemoteException {
+            final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
                 return;
             }
 
-            final Bundle receiverExtras = resultData.getBundle(KEY_RECEIVER_EXTRAS);
+            final Bundle receiverExtras = resultData.getBundle(ASSIST_KEY_RECEIVER_EXTRAS);
             if (receiverExtras == null) {
                 Slog.e(TAG, "No receiver extras - app might have crashed providing it");
                 return;
@@ -260,6 +261,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             mRemoteFillService.onFillRequest(request);
+        }
+
+        @Override
+        public void onHandleAssistScreenshot(Bitmap screenshot) {
+            // Do nothing
         }
     };
 

@@ -447,7 +447,6 @@ public final class AutofillManagerService extends SystemService {
         android.view.autofill.Helper.sDebug = debug;
     }
 
-
     private void setVerboseLocked(boolean verbose) {
         com.android.server.autofill.Helper.sVerbose = verbose;
         android.view.autofill.Helper.sVerbose = verbose;
