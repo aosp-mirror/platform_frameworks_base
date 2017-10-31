@@ -3,16 +3,19 @@ package android.net.wifi.rtt;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.CHANGE_WIFI_STATE;
+import static android.Manifest.permission.LOCATION_HARDWARE;
 
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 
 import java.util.List;
@@ -94,16 +97,58 @@ public class WifiRttManager {
     @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE})
     public void startRanging(RangingRequest request, RangingResultCallback callback,
             @Nullable Handler handler) {
+        startRanging(null, request, callback, handler);
+    }
+
+    /**
+     * Initiate a request to range to a set of devices specified in the {@link RangingRequest}.
+     * Results will be returned in the {@link RangingResultCallback} set of callbacks.
+     *
+     * @param workSource A mechanism to specify an alternative work-source for the request.
+     * @param request  A request specifying a set of devices whose distance measurements are
+     *                 requested.
+     * @param callback A callback for the result of the ranging request.
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code
+     *                 callback} object. If a null is provided then the application's main thread
+     *                 will be used.
+     *
+     * @hide (@SystemApi)
+     */
+    @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE,
+            ACCESS_WIFI_STATE})
+    public void startRanging(@Nullable WorkSource workSource, RangingRequest request,
+            RangingResultCallback callback, @Nullable Handler handler) {
         if (VDBG) {
-            Log.v(TAG, "startRanging: request=" + request + ", callback=" + callback + ", handler="
-                    + handler);
+            Log.v(TAG, "startRanging: workSource=" + workSource + ", request=" + request
+                    + ", callback=" + callback + ", handler=" + handler);
         }
 
         Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
-            mService.startRanging(binder, mContext.getOpPackageName(), request,
+            mService.startRanging(binder, mContext.getOpPackageName(), workSource, request,
                     new RttCallbackProxy(looper, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Cancel all ranging requests for the specified work sources. The requests have been requested
+     * using {@link #startRanging(WorkSource, RangingRequest, RangingResultCallback, Handler)}.
+     *
+     * @param workSource The work-sources of the requesters.
+     *
+     * @hide (@SystemApi)
+     */
+    @RequiresPermission(allOf = {LOCATION_HARDWARE})
+    public void cancelRanging(WorkSource workSource) {
+        if (VDBG) {
+            Log.v(TAG, "cancelRanging: workSource=" + workSource);
+        }
+
+        try {
+            mService.cancelRanging(workSource);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
